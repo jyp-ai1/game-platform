@@ -1,5 +1,5 @@
 {
-  "name": "@game-platform/game-brick-puzzle",
+  "name": "@game-platform/game-2048",
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
@@ -8,9 +8,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@game-platform/game-sdk": "*"
+    "@game-platform/ui": "*"
+  },
+  "peerDependencies": {
+    "react": "^19"
   },
   "devDependencies": {
+    "@types/react": "^19",
     "typescript": "^5"
   }
 }

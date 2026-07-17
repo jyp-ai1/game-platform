@@ -11,6 +11,9 @@ export interface Game {
   difficulty: Difficulty;
   status: GameStatus;
   sortOrder: number;
+  categoryId: string | null;
+  category: Pick<Category, "name" | "slug"> | null;
+  isFeatured: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -12,12 +12,15 @@ interface GameRow {
   difficulty: Difficulty;
   status: GameStatus;
   sort_order: number;
+  category_id: string | null;
+  is_featured: boolean;
+  categories: { name: string; slug: string } | null;
   created_at: string;
   updated_at: string;
 }
 
 const GAME_COLUMNS =
-  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, created_at, updated_at";
+  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, created_at, updated_at, categories(name, slug)";
 
 function mapGameRow(row: GameRow): Game {
   return {
@@ -29,6 +32,9 @@ function mapGameRow(row: GameRow): Game {
     difficulty: row.difficulty,
     status: row.status,
     sortOrder: row.sort_order,
+    categoryId: row.category_id,
+    category: row.categories,
+    isFeatured: row.is_featured,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -47,7 +53,7 @@ export const getGameBySlug = cache(async (slug: string): Promise<Game | null> =>
     throw new Error(`Failed to fetch game "${slug}": ${error.message}`);
   }
 
-  return data ? mapGameRow(data) : null;
+  return data ? mapGameRow(data as unknown as GameRow) : null;
 });
 
 export async function getGames({
@@ -67,5 +73,8 @@ export async function getGames({
     throw new Error(`Failed to fetch games: ${error.message}`);
   }
 
-  return (data ?? []).map(mapGameRow);
+  // Without a generated Database type, supabase-js infers embedded resources
+  // (categories) as arrays even though category_id makes this a to-one join
+  // that returns a single object at runtime.
+  return (data ?? []).map((row) => mapGameRow(row as unknown as GameRow));
 }

@@ -4,6 +4,7 @@ import { Gamepad2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { FavoriteButton } from "@/components/favorite-button";
 import { difficultyVariant } from "@/lib/difficulty";
 
 export function GameCard({ game }: { game: Game }) {
@@ -24,6 +25,8 @@ export function GameCard({ game }: { game: Game }) {
             <Gamepad2 className="size-10 text-muted-foreground" />
           </div>
         )}
+
+        <FavoriteButton slug={game.slug} className="absolute left-2 top-2" />
 
         {isComingSoon ? (
           <Badge className="absolute right-2 top-2">Coming Soon</Badge>
