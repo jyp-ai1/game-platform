@@ -1,23 +1,14 @@
-import type { Difficulty } from "@game-platform/shared";
 import { Badge, Button, Container } from "@game-platform/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { difficultyVariant } from "@/lib/difficulty";
 import { getGameBySlug } from "@/lib/supabase/games";
 
 interface GamePageProps {
   params: Promise<{ slug: string }>;
 }
-
-const difficultyVariant: Record<
-  Difficulty,
-  "secondary" | "outline" | "destructive"
-> = {
-  EASY: "secondary",
-  MEDIUM: "outline",
-  HARD: "destructive",
-};
 
 export async function generateMetadata({
   params,

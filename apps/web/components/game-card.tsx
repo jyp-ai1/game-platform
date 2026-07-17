@@ -1,17 +1,10 @@
-import type { Difficulty, Game } from "@game-platform/shared";
+import type { Game } from "@game-platform/shared";
 import { Badge, Button } from "@game-platform/ui";
 import { Gamepad2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-const difficultyVariant: Record<
-  Difficulty,
-  "secondary" | "outline" | "destructive"
-> = {
-  EASY: "secondary",
-  MEDIUM: "outline",
-  HARD: "destructive",
-};
+import { difficultyVariant } from "@/lib/difficulty";
 
 export function GameCard({ game }: { game: Game }) {
   const isComingSoon = game.status === "COMING_SOON";
