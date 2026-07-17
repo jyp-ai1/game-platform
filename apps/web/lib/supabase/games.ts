@@ -1,4 +1,5 @@
 import type { Difficulty, Game, GameStatus } from "@game-platform/shared";
+import { cache } from "react";
 
 import { supabase } from "./client";
 
@@ -15,6 +16,9 @@ interface GameRow {
   updated_at: string;
 }
 
+const GAME_COLUMNS =
+  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, created_at, updated_at";
+
 function mapGameRow(row: GameRow): Game {
   return {
     id: row.id,
@@ -30,6 +34,22 @@ function mapGameRow(row: GameRow): Game {
   };
 }
 
+// Cached per-request so generateMetadata and the page component (which both
+// look up the same slug) only hit Supabase once.
+export const getGameBySlug = cache(async (slug: string): Promise<Game | null> => {
+  const { data, error } = await supabase
+    .from("games")
+    .select(GAME_COLUMNS)
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch game "${slug}": ${error.message}`);
+  }
+
+  return data ? mapGameRow(data) : null;
+});
+
 export async function getGames({
   includeComingSoon = true,
 }: { includeComingSoon?: boolean } = {}): Promise<Game[]> {
@@ -39,9 +59,7 @@ export async function getGames({
 
   const { data, error } = await supabase
     .from("games")
-    .select(
-      "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, created_at, updated_at"
-    )
+    .select(GAME_COLUMNS)
     .in("status", visibleStatuses)
     .order("sort_order", { ascending: true });
 

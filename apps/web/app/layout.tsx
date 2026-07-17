@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { siteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,12 +16,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description = "Play Anytime. Play Anywhere. Play29.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Play29",
     template: "%s | Play29",
   },
-  description: "Play Anytime. Play Anywhere. Play29.",
+  description,
+  openGraph: {
+    title: "Play29",
+    description,
+    siteName: "Play29",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Play29",
+    description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
