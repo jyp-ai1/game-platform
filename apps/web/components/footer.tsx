@@ -12,7 +12,7 @@ export function Footer() {
   return (
     <footer className="border-t">
       <Container className="flex flex-col items-center gap-3 py-8 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-        <p>&copy; {new Date().getFullYear()} Game Platform. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Play29. All rights reserved.</p>
         <nav className="flex items-center gap-4">
           {links.map((link) => (
             <Link

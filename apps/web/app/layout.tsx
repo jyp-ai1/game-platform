@@ -17,10 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Game Platform",
-    template: "%s | Game Platform",
+    default: "Play29",
+    template: "%s | Play29",
   },
-  description: "Play instantly in your browser. No install, play anywhere.",
+  description: "Play Anytime. Play Anywhere. Play29.",
 };
 
 export default function RootLayout({

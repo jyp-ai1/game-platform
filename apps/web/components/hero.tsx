@@ -14,7 +14,11 @@ export function Hero() {
     <section className="border-b py-20 sm:py-28">
       <Container className="flex flex-col items-center text-center">
         <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-          설치 없이, 브라우저에서 바로 즐기는 게임
+          Play Anytime.
+          <br />
+          Play Anywhere.
+          <br />
+          <span className="text-primary">Play29.</span>
         </h1>
         <p className="mt-4 max-w-xl text-muted-foreground sm:text-lg">
           다운로드도, 설치도 필요 없습니다. 링크만 열면 어디서든 바로 플레이할 수
