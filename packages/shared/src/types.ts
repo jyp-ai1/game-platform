@@ -14,6 +14,8 @@ export interface Game {
   categoryId: string | null;
   category: Pick<Category, "name" | "slug"> | null;
   isFeatured: boolean;
+  tags: string[];
+  howToPlay: string | null;
   createdAt: string;
   updatedAt: string;
 }

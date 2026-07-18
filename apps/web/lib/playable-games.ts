@@ -2,7 +2,13 @@
 // plain (non-"use client") module so Server Components can check "is this
 // slug playable?" without pulling in next/dynamic's client-only loader
 // (see components/game-player.tsx).
-export const PLAYABLE_SLUGS = ["2048"] as const;
+export const PLAYABLE_SLUGS = [
+  "2048",
+  "snake",
+  "breakout",
+  "memory",
+  "minesweeper",
+] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];
 

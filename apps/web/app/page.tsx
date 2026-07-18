@@ -1,3 +1,4 @@
+import { CategoryLinks } from "@/components/category-links";
 import { FavoritesSection } from "@/components/favorites-section";
 import { GameSection } from "@/components/game-section";
 import { Hero } from "@/components/hero";
@@ -20,6 +21,7 @@ export default async function Home() {
   return (
     <main className="flex flex-1 flex-col">
       <Hero />
+      <CategoryLinks />
 
       <GameSection
         title="Featured Games"
@@ -37,8 +39,8 @@ export default async function Home() {
       />
 
       <GameSection
-        title="Popular"
-        description="지금 많이 즐기는 게임입니다. (임시 순위 — 실제 인기도 지표는 Sprint 3에서 추가됩니다)"
+        title="Trending"
+        description="지금 많이 즐기는 게임입니다. (임시 순위 — 실제 인기도 지표는 추후 추가됩니다)"
         games={selectPopular(games)}
       />
 

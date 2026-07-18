@@ -14,13 +14,15 @@ interface GameRow {
   sort_order: number;
   category_id: string | null;
   is_featured: boolean;
+  tags: string[];
+  how_to_play: string | null;
   categories: { name: string; slug: string } | null;
   created_at: string;
   updated_at: string;
 }
 
 const GAME_COLUMNS =
-  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, created_at, updated_at, categories(name, slug)";
+  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, created_at, updated_at, categories(name, slug)";
 
 function mapGameRow(row: GameRow): Game {
   return {
@@ -35,6 +37,8 @@ function mapGameRow(row: GameRow): Game {
     categoryId: row.category_id,
     category: row.categories,
     isFeatured: row.is_featured,
+    tags: row.tags,
+    howToPlay: row.how_to_play,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

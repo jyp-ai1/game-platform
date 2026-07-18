@@ -1,5 +1,6 @@
 import { Badge, Button, Container, SectionTitle } from "@game-platform/ui";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -7,6 +8,7 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { GamePlayer } from "@/components/game-player";
 import { GameSection } from "@/components/game-section";
 import { Leaderboard } from "@/components/leaderboard";
+import { MyBestScore } from "@/components/my-best-score";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
 import { difficultyVariant } from "@/lib/difficulty";
 import { selectRelated } from "@/lib/game-sections";
@@ -60,17 +62,36 @@ export default async function GamePage({ params }: GamePageProps) {
   }
 
   const related = selectRelated(allGames, game);
+  const isPlayable = game.status === "ACTIVE" && isPlayableSlug(slug);
 
   return (
     <main className="flex flex-1 flex-col">
+      <div className="relative h-48 w-full overflow-hidden bg-muted sm:h-64">
+        {game.thumbnailUrl ? (
+          <Image
+            src={game.thumbnailUrl}
+            alt={game.title}
+            fill
+            priority
+            className="object-cover"
+          />
+        ) : null}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+      </div>
+
       <Container className="flex flex-1 flex-col py-16">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-semibold tracking-tight">
             {game.title}
           </h1>
           <Badge variant={difficultyVariant[game.difficulty]}>
             {game.difficulty}
           </Badge>
+          {game.category ? (
+            <Link href={`/categories/${game.category.slug}`}>
+              <Badge variant="secondary">{game.category.name}</Badge>
+            </Link>
+          ) : null}
           <FavoriteButton slug={game.slug} />
         </div>
 
@@ -78,7 +99,16 @@ export default async function GamePage({ params }: GamePageProps) {
           {game.description}
         </p>
 
-        {game.status === "ACTIVE" && isPlayableSlug(slug) ? (
+        {isPlayable ? <MyBestScore gameSlug={slug} /> : null}
+
+        {game.howToPlay ? (
+          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">플레이 방법 · </span>
+            {game.howToPlay}
+          </p>
+        ) : null}
+
+        {isPlayable ? (
           <div className="mt-8">
             <RecentlyPlayedRecorder slug={slug} />
             <GamePlayer slug={slug} />

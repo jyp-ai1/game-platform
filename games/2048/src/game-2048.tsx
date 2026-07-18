@@ -1,7 +1,7 @@
 "use client";
 
 import { getBestScore, useGameSDK } from "@game-platform/game-sdk";
-import { Button } from "@game-platform/ui";
+import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -179,31 +179,16 @@ export function Game2048() {
         ))}
 
         {state.status !== "playing" ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-background/80 backdrop-blur">
-            <p className="text-xl font-semibold">
-              {state.status === "won" ? "You Win!" : "Game Over"}
-            </p>
-            <Button onClick={() => dispatch({ type: "restart" })}>
-              다시 시작
-            </Button>
-          </div>
+          <GameOverOverlay
+            message={state.status === "won" ? "You Win!" : "Game Over"}
+            onRestart={() => dispatch({ type: "restart" })}
+          />
         ) : null}
       </div>
 
       <p className="text-xs text-muted-foreground">
         방향키 또는 스와이프로 타일을 움직여 같은 숫자를 합치세요.
       </p>
-    </div>
-  );
-}
-
-function ScoreBox({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
-      <div className="text-[10px] font-medium uppercase text-muted-foreground">
-        {label}
-      </div>
-      <div className="text-lg font-bold tabular-nums">{value}</div>
     </div>
   );
 }

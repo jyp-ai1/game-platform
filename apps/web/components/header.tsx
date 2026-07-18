@@ -1,6 +1,6 @@
+import { Badge, Button, Container } from "@game-platform/ui";
+import { Search } from "lucide-react";
 import Link from "next/link";
-
-import { Badge, Container } from "@game-platform/ui";
 
 import { MobileNav } from "./mobile-nav";
 
@@ -46,7 +46,20 @@ export function Header() {
           )}
         </nav>
 
-        <MobileNav navItems={navItems} />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="검색"
+            nativeButton={false}
+            render={
+              <Link href="/search">
+                <Search />
+              </Link>
+            }
+          />
+          <MobileNav navItems={navItems} />
+        </div>
       </Container>
     </header>
   );

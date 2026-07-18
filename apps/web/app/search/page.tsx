@@ -1,0 +1,53 @@
+import { Button, Container, SectionTitle } from "@game-platform/ui";
+import type { Metadata } from "next";
+
+import { GameGrid } from "@/components/game-grid";
+import { searchGames } from "@/lib/search";
+import { getGames } from "@/lib/supabase/games";
+
+export const metadata: Metadata = {
+  title: "검색",
+};
+
+export const revalidate = 60;
+
+interface SearchPageProps {
+  searchParams: Promise<{ q?: string }>;
+}
+
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const { q } = await searchParams;
+  const games = await getGames();
+  const results = searchGames(games, q ?? "");
+
+  return (
+    <main className="flex flex-1 flex-col py-16">
+      <Container>
+        <SectionTitle
+          title="게임 검색"
+          description="게임명, 태그, 카테고리로 검색하세요."
+        />
+
+        <form action="/search" className="mt-6 flex max-w-md gap-2">
+          <input
+            type="search"
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="게임 검색..."
+            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+          />
+          <Button type="submit">검색</Button>
+        </form>
+
+        <div className="mt-8">
+          {q ? (
+            <p className="mb-4 text-sm text-muted-foreground">
+              &ldquo;{q}&rdquo; 검색 결과 {results.length}개
+            </p>
+          ) : null}
+          <GameGrid games={results} />
+        </div>
+      </Container>
+    </main>
+  );
+}
