@@ -1,4 +1,4 @@
-import { Badge, Button, Container } from "@game-platform/ui";
+import { Badge, Button, Container, SectionTitle } from "@game-platform/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GamePlayer } from "@/components/game-player";
 import { GameSection } from "@/components/game-section";
+import { Leaderboard } from "@/components/leaderboard";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
 import { difficultyVariant } from "@/lib/difficulty";
 import { selectRelated } from "@/lib/game-sections";
@@ -15,6 +16,10 @@ import { getGameBySlug, getGames } from "@/lib/supabase/games";
 interface GamePageProps {
   params: Promise<{ slug: string }>;
 }
+
+// Revalidate periodically so newly-submitted scores show up in the
+// leaderboard without requiring a redeploy (same reasoning as the home page).
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -77,6 +82,13 @@ export default async function GamePage({ params }: GamePageProps) {
           <div className="mt-8">
             <RecentlyPlayedRecorder slug={slug} />
             <GamePlayer slug={slug} />
+
+            <div className="mt-12 max-w-sm">
+              <SectionTitle title="랭킹" />
+              <div className="mt-4">
+                <Leaderboard gameSlug={slug} />
+              </div>
+            </div>
           </div>
         ) : (
           <>

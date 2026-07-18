@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["esnext"],
-    "jsx": "preserve"
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx"
   },
   "include": ["src"]
 }

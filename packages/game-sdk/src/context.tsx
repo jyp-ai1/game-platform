@@ -1,0 +1,83 @@
+"use client";
+
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+
+import {
+  getBestScore,
+  getDeviceId,
+  getLastNickname,
+  setBestScore,
+  setLastNickname,
+} from "./local-storage";
+import { NicknameModal } from "./nickname-modal";
+
+// The one thing that's genuinely platform-specific (the actual network
+// call). Everything else — "is this a new personal best?", the nickname
+// prompt, remembering the last nickname — is generic and lives in this
+// package so every game gets it for free.
+export interface GameSDKAdapter {
+  submitScore: (
+    gameSlug: string,
+    nickname: string,
+    score: number,
+    deviceId: string
+  ) => Promise<void>;
+}
+
+export interface GameSDKApi {
+  reportScore: (gameSlug: string, score: number) => void;
+}
+
+const GameSDKContext = createContext<GameSDKApi | null>(null);
+
+export function GameSDKProvider({
+  sdk,
+  children,
+}: {
+  sdk: GameSDKAdapter;
+  children: ReactNode;
+}) {
+  const [pending, setPending] = useState<{
+    gameSlug: string;
+    score: number;
+  } | null>(null);
+
+  const reportScore = useCallback((gameSlug: string, score: number) => {
+    if (score > getBestScore(gameSlug)) {
+      setBestScore(gameSlug, score);
+      setPending({ gameSlug, score });
+    }
+  }, []);
+
+  async function handleSubmit(nickname: string) {
+    const trimmed = nickname.trim();
+    if (!pending || !trimmed) {
+      return;
+    }
+    setLastNickname(trimmed);
+    await sdk.submitScore(pending.gameSlug, trimmed, pending.score, getDeviceId());
+    setPending(null);
+  }
+
+  return (
+    <GameSDKContext.Provider value={{ reportScore }}>
+      {children}
+      {pending ? (
+        <NicknameModal
+          score={pending.score}
+          defaultNickname={getLastNickname()}
+          onSubmit={handleSubmit}
+          onDismiss={() => setPending(null)}
+        />
+      ) : null}
+    </GameSDKContext.Provider>
+  );
+}
+
+export function useGameSDK(): GameSDKApi {
+  const sdk = useContext(GameSDKContext);
+  if (!sdk) {
+    throw new Error("useGameSDK must be used within a GameSDKProvider");
+  }
+  return sdk;
+}

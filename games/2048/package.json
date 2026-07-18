@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@game-platform/game-sdk": "*",
     "@game-platform/ui": "*"
   },
   "peerDependencies": {

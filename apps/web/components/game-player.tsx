@@ -1,9 +1,11 @@
 "use client";
 
+import { GameSDKProvider } from "@game-platform/game-sdk";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 
 import type { PlayableSlug } from "@/lib/playable-games";
+import { submitScore } from "@/lib/supabase/scores";
 
 // ssr:false is required here (games use browser-only APIs like localStorage/
 // keyboard events) and is only allowed inside a Client Component.
@@ -21,5 +23,9 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
 
 export function GamePlayer({ slug }: { slug: PlayableSlug }) {
   const Component = gameComponents[slug];
-  return <Component />;
+  return (
+    <GameSDKProvider sdk={{ submitScore }}>
+      <Component />
+    </GameSDKProvider>
+  );
 }

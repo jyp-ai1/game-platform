@@ -1,5 +1,6 @@
 "use client";
 
+import { getBestScore, useGameSDK } from "@game-platform/game-sdk";
 import { Button } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
@@ -15,7 +16,7 @@ import {
   type Grid,
 } from "./engine";
 
-const BEST_SCORE_KEY = "play29:2048:best";
+const GAME_SLUG = "2048";
 const SWIPE_THRESHOLD = 24;
 
 type Status = "playing" | "won" | "over";
@@ -29,25 +30,11 @@ interface State {
 
 type Action = { type: "move"; direction: Direction } | { type: "restart" };
 
-function readBestScore(): number {
-  if (typeof window === "undefined") {
-    return 0;
-  }
-  const raw = window.localStorage.getItem(BEST_SCORE_KEY);
-  return raw ? Number(raw) : 0;
-}
-
-function writeBestScore(value: number): void {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(BEST_SCORE_KEY, String(value));
-  }
-}
-
 function createInitialState(): State {
   return {
     grid: createInitialGrid(),
     score: 0,
-    best: readBestScore(),
+    best: getBestScore(GAME_SLUG),
     status: "playing",
   };
 }
@@ -68,10 +55,9 @@ function reducer(state: State, action: Action): State {
 
       const grid = addRandomTile(result.grid);
       const score = state.score + result.scoreGained;
+      // Live display only — the SDK persists the real record on game end
+      // (see the reportScore effect below), so this reducer stays pure.
       const best = Math.max(state.best, score);
-      if (best !== state.best) {
-        writeBestScore(best);
-      }
 
       let status: Status = state.status;
       if (status === "playing" && hasWon(grid)) {
@@ -98,6 +84,18 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 export function Game2048() {
   const [state, dispatch] = useReducer(reducer, null, createInitialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const { reportScore } = useGameSDK();
+
+  useEffect(() => {
+    // Reports the session's score once the game ends (or won). Depends on
+    // score too, not just status, in case the score still changes after
+    // "won" (2048 allows continuing to play after reaching the win tile).
+    // reportScore itself only acts (persists + prompts for a nickname) when
+    // this beats the existing local best, so calling it repeatedly is safe.
+    if (state.status !== "playing") {
+      reportScore(GAME_SLUG, state.score);
+    }
+  }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {

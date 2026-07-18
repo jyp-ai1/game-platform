@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@game-platform/ui",
     "@game-platform/shared",
+    "@game-platform/game-sdk",
     "@game-platform/game-2048",
   ],
   turbopack: {
