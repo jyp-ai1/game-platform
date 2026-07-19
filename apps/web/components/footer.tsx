@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Container } from "@game-platform/ui";
 
+import { siteConfig } from "@/lib/site-config";
+
 const links = [
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
@@ -12,7 +14,10 @@ export function Footer() {
   return (
     <footer className="border-t">
       <Container className="flex flex-col items-center gap-3 py-8 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-        <p>&copy; {new Date().getFullYear()} Play29. All rights reserved.</p>
+        <p>
+          &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
+          reserved.
+        </p>
         <nav className="flex items-center gap-4">
           {links.map((link) => (
             <Link

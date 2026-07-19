@@ -1,7 +1,10 @@
-import { Button, Container, SectionTitle } from "@game-platform/ui";
+import { Container, SectionTitle } from "@game-platform/ui";
+import { SearchX } from "lucide-react";
 import type { Metadata } from "next";
 
+import { EmptyState } from "@/components/empty-state";
 import { GameGrid } from "@/components/game-grid";
+import { SearchBox } from "@/components/search-box";
 import { searchGames } from "@/lib/search";
 import { getGames } from "@/lib/supabase/games";
 
@@ -28,16 +31,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           description="게임명, 태그, 카테고리로 검색하세요."
         />
 
-        <form action="/search" className="mt-6 flex max-w-md gap-2">
-          <input
-            type="search"
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder="게임 검색..."
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          />
-          <Button type="submit">검색</Button>
-        </form>
+        <div className="mt-6">
+          <SearchBox games={games} defaultValue={q ?? ""} />
+        </div>
 
         <div className="mt-8">
           {q ? (
@@ -45,7 +41,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               &ldquo;{q}&rdquo; 검색 결과 {results.length}개
             </p>
           ) : null}
-          <GameGrid games={results} />
+          {q && results.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              message={`"${q}"에 대한 검색 결과가 없습니다. 다른 검색어를 시도해보세요.`}
+            />
+          ) : (
+            <GameGrid games={results} />
+          )}
         </div>
       </Container>
     </main>

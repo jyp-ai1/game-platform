@@ -1,14 +1,11 @@
 import type { Game } from "@game-platform/shared";
 
+import { EmptyState } from "./empty-state";
 import { GameCard } from "./game-card";
 
 export function GameGrid({ games }: { games: Game[] }) {
   if (games.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        아직 등록된 게임이 없습니다.
-      </p>
-    );
+    return <EmptyState message="아직 등록된 게임이 없습니다." />;
   }
 
   return (

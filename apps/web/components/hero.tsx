@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { Button, Container } from "@game-platform/ui";
 
+import { siteConfig } from "@/lib/site-config";
+
 const features = [
   { icon: Zap, label: "Play Instantly" },
   { icon: MonitorX, label: "No Install" },
@@ -13,16 +15,17 @@ export function Hero() {
   return (
     <section className="border-b py-20 sm:py-28">
       <Container className="flex flex-col items-center text-center">
-        <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-          Play Anytime.
+        <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-6xl">
+          {siteConfig.name}
           <br />
-          Play Anywhere.
+          <span className="text-primary">Play Again.</span>
           <br />
-          <span className="text-primary">Play29.</span>
+          <span className="text-primary">Feel Again.</span>
         </h1>
         <p className="mt-4 max-w-xl text-muted-foreground sm:text-lg">
-          다운로드도, 설치도 필요 없습니다. 링크만 열면 어디서든 바로 플레이할 수
-          있습니다.
+          1990년대부터 2010년대까지,
+          <br />
+          우리가 사랑했던 게임들을 다시 만나다.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-foreground/80">
@@ -38,7 +41,7 @@ export function Hero() {
           size="lg"
           className="mt-10"
           nativeButton={false}
-          render={<Link href="#games">게임 둘러보기</Link>}
+          render={<Link href="#games">Play Now</Link>}
         />
       </Container>
     </section>

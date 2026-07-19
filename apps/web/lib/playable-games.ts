@@ -8,6 +8,16 @@ export const PLAYABLE_SLUGS = [
   "breakout",
   "memory",
   "minesweeper",
+  "maze-runner",
+  "tank-battle",
+  "galaxy-defender",
+  "space-defender",
+  "bubble-pop",
+  "sudoku",
+  "tic-tac-toe",
+  "simon",
+  "hangman",
+  "color-match",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

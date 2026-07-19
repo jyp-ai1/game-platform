@@ -1,0 +1,1 @@
+export { ColorMatchGame } from "./ColorMatch";

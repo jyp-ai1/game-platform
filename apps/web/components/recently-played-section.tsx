@@ -9,7 +9,7 @@ import {
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
 
-import { GameSection } from "./game-section";
+import { GameCarousel } from "./game-carousel";
 
 export function RecentlyPlayedSection({ games }: { games: Game[] }) {
   const slugs = useSyncExternalStore(
@@ -24,8 +24,8 @@ export function RecentlyPlayedSection({ games }: { games: Game[] }) {
     .filter((game): game is Game => game !== undefined);
 
   return (
-    <GameSection
-      title="최근 플레이"
+    <GameCarousel
+      title="❤️ Continue Playing"
       description="최근에 플레이한 게임입니다."
       games={recentGames}
     />

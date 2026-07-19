@@ -9,7 +9,7 @@ import {
   subscribeFavorites,
 } from "@/lib/local-storage";
 
-import { GameSection } from "./game-section";
+import { GameCarousel } from "./game-carousel";
 
 export function FavoritesSection({ games }: { games: Game[] }) {
   const slugs = useSyncExternalStore(
@@ -24,7 +24,7 @@ export function FavoritesSection({ games }: { games: Game[] }) {
     .filter((game): game is Game => game !== undefined);
 
   return (
-    <GameSection
+    <GameCarousel
       title="즐겨찾기"
       description="즐겨찾기한 게임입니다."
       games={favoriteGames}

@@ -21,8 +21,12 @@ interface GameRow {
   updated_at: string;
 }
 
+// categories!category_id disambiguates the embed: since categories now also
+// has a featured_game_id FK pointing back at games, there are two possible
+// relationship paths between the two tables, and PostgREST needs to be told
+// explicitly which FK column to embed through.
 const GAME_COLUMNS =
-  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, created_at, updated_at, categories(name, slug)";
+  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, created_at, updated_at, categories!category_id(name, slug)";
 
 function mapGameRow(row: GameRow): Game {
   return {

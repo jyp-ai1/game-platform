@@ -1,0 +1,1 @@
+export { TankBattleGame } from "./TankBattle";

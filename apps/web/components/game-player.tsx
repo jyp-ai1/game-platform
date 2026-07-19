@@ -1,6 +1,7 @@
 "use client";
 
 import { GameSDKProvider } from "@game-platform/game-sdk";
+import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 
@@ -9,7 +10,10 @@ import { submitScore } from "@/lib/supabase/scores";
 
 function Loading() {
   return (
-    <p className="text-sm text-muted-foreground">게임을 불러오는 중...</p>
+    <div className="flex aspect-square w-full max-w-sm animate-pulse flex-col items-center justify-center gap-3 rounded-xl bg-muted">
+      <Loader2 className="size-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">게임을 불러오는 중...</p>
+    </div>
   );
 }
 
@@ -41,6 +45,65 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
     () =>
       import("@game-platform/game-minesweeper").then(
         (mod) => mod.MinesweeperGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "maze-runner": dynamic(
+    () =>
+      import("@game-platform/game-maze-runner").then(
+        (mod) => mod.MazeRunnerGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "tank-battle": dynamic(
+    () =>
+      import("@game-platform/game-tank-battle").then(
+        (mod) => mod.TankBattleGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "galaxy-defender": dynamic(
+    () =>
+      import("@game-platform/game-galaxy-defender").then(
+        (mod) => mod.GalaxyDefenderGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "space-defender": dynamic(
+    () =>
+      import("@game-platform/game-space-defender").then(
+        (mod) => mod.SpaceDefenderGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "bubble-pop": dynamic(
+    () =>
+      import("@game-platform/game-bubble-pop").then((mod) => mod.BubblePopGame),
+    { ssr: false, loading: Loading }
+  ),
+  sudoku: dynamic(
+    () => import("@game-platform/game-sudoku").then((mod) => mod.SudokuGame),
+    { ssr: false, loading: Loading }
+  ),
+  "tic-tac-toe": dynamic(
+    () =>
+      import("@game-platform/game-tic-tac-toe").then(
+        (mod) => mod.TicTacToeGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  simon: dynamic(
+    () => import("@game-platform/game-simon").then((mod) => mod.SimonGame),
+    { ssr: false, loading: Loading }
+  ),
+  hangman: dynamic(
+    () => import("@game-platform/game-hangman").then((mod) => mod.HangmanGame),
+    { ssr: false, loading: Loading }
+  ),
+  "color-match": dynamic(
+    () =>
+      import("@game-platform/game-color-match").then(
+        (mod) => mod.ColorMatchGame
       ),
     { ssr: false, loading: Loading }
   ),

@@ -35,3 +35,20 @@ export function selectRelated(games: Game[], current: Game, limit = 4): Game[] {
     )
     .slice(0, limit);
 }
+
+// Powers the homepage's narrative curation rows ("90s-2000s", "arcade-
+// classic", "quick-play", etc.) purely from the existing tags column — no
+// dedicated schema needed for curation.
+export function selectByTag(games: Game[], tag: string, limit = 8): Game[] {
+  return games.filter((game) => game.tags.includes(tag)).slice(0, limit);
+}
+
+export function selectByCategorySlug(
+  games: Game[],
+  categorySlug: string,
+  limit = 8
+): Game[] {
+  return games
+    .filter((game) => game.category?.slug === categorySlug)
+    .slice(0, limit);
+}

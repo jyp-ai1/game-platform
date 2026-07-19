@@ -1,0 +1,1 @@
+export { MazeRunnerGame } from "./MazeRunner";

@@ -25,6 +25,9 @@ export interface Category {
   name: string;
   slug: string;
   sortOrder: number;
+  bannerUrl: string | null;
+  description: string | null;
+  featuredGameId: string | null;
 }
 
 export interface Setting {

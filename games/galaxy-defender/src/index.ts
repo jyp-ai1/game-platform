@@ -1,0 +1,1 @@
+export { GalaxyDefenderGame } from "./GalaxyDefender";

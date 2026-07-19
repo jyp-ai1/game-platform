@@ -7,9 +7,13 @@ interface CategoryRow {
   name: string;
   slug: string;
   sort_order: number;
+  banner_url: string | null;
+  description: string | null;
+  featured_game_id: string | null;
 }
 
-const CATEGORY_COLUMNS = "id, name, slug, sort_order";
+const CATEGORY_COLUMNS =
+  "id, name, slug, sort_order, banner_url, description, featured_game_id";
 
 function mapCategoryRow(row: CategoryRow): Category {
   return {
@@ -17,6 +21,9 @@ function mapCategoryRow(row: CategoryRow): Category {
     name: row.name,
     slug: row.slug,
     sortOrder: row.sort_order,
+    bannerUrl: row.banner_url,
+    description: row.description,
+    featuredGameId: row.featured_game_id,
   };
 }
 

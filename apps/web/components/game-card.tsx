@@ -11,14 +11,14 @@ export function GameCard({ game }: { game: Game }) {
   const isComingSoon = game.status === "COMING_SOON";
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border">
-      <div className="relative aspect-video bg-muted">
+    <div className="group flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
+      <div className="relative aspect-video overflow-hidden bg-muted">
         {game.thumbnailUrl ? (
           <Image
             src={game.thumbnailUrl}
             alt={game.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center">

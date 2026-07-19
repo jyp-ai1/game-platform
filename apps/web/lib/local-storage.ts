@@ -1,3 +1,6 @@
+// "play29:" prefix kept unchanged post-rebrand — see the same note in
+// packages/game-sdk/src/local-storage.ts (internal storage key, not brand
+// text; renaming would orphan existing visitors' saved data).
 const FAVORITES_KEY = "play29:favorites";
 const RECENTLY_PLAYED_KEY = "play29:recently-played";
 const RECENTLY_PLAYED_LIMIT = 10;

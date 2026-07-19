@@ -1,6 +1,13 @@
-// Pure browser localStorage helpers — no backend dependency. Play29 has no
+// Pure browser localStorage helpers — no backend dependency. The site has no
 // login (see Sprint 3 decision: identity is a per-browser device_id, not an
 // account), so "personal best" and "last nickname used" both live here.
+//
+// The "play29:" key prefix predates the Re:Play rebrand and is kept as-is —
+// it's an internal storage format identifier, not user-facing brand text.
+// Renaming it would orphan every existing visitor's best scores/nickname/
+// device_id (the latter is tied to rows in the server-side `scores` table,
+// so losing it would make a returning player's leaderboard entry
+// unreachable from their browser).
 const BEST_SCORE_PREFIX = "play29:best-score:";
 const NICKNAME_KEY = "play29:nickname";
 const DEVICE_ID_KEY = "play29:device-id";

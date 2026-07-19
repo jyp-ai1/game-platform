@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { siteConfig } from "@/lib/site-config";
 import { siteUrl } from "@/lib/site";
 
 const geistSans = Geist({
@@ -16,24 +17,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const description = "Play Anytime. Play Anywhere. Play29.";
+const description = `${siteConfig.tagline} ${siteConfig.subTagline}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Play29",
-    template: "%s | Play29",
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
   },
   description,
+  keywords: [...siteConfig.keywords],
   openGraph: {
-    title: "Play29",
+    title: siteConfig.name,
     description,
-    siteName: "Play29",
+    siteName: siteConfig.name,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Play29",
+    title: siteConfig.name,
     description,
   },
   robots: {
@@ -50,7 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Header />

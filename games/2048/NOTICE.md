@@ -4,7 +4,7 @@ The tile-merge game logic in this package (`src/engine.ts`) is adapted from the
 well-known move/merge algorithm in [gabrielecirulli/2048](https://github.com/gabrielecirulli/2048),
 licensed under the MIT License. No files from that project were copied; the
 algorithm was reimplemented in TypeScript. All UI code (`src/game-2048.tsx`) is
-original, built with the Play29 design system rather than the source project's
+original, built with the Re:Play design system rather than the source project's
 visual style.
 
 ## MIT License (gabrielecirulli/2048)

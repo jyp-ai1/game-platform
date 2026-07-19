@@ -10,6 +10,7 @@ import { GameSection } from "@/components/game-section";
 import { Leaderboard } from "@/components/leaderboard";
 import { MyBestScore } from "@/components/my-best-score";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
+import { ScreenshotGallery } from "@/components/screenshot-gallery";
 import { difficultyVariant } from "@/lib/difficulty";
 import { selectRelated } from "@/lib/game-sections";
 import { isPlayableSlug } from "@/lib/playable-games";
@@ -107,6 +108,10 @@ export default async function GamePage({ params }: GamePageProps) {
             {game.howToPlay}
           </p>
         ) : null}
+
+        <div className="mt-6 max-w-3xl">
+          <ScreenshotGallery slug={game.slug} title={game.title} />
+        </div>
 
         {isPlayable ? (
           <div className="mt-8">

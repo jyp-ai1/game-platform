@@ -1,0 +1,1 @@
+export { HangmanGame } from "./Hangman";

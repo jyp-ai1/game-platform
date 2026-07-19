@@ -2,6 +2,8 @@ import { Badge, Button, Container } from "@game-platform/ui";
 import { Search } from "lucide-react";
 import Link from "next/link";
 
+import { siteConfig } from "@/lib/site-config";
+
 import { MobileNav } from "./mobile-nav";
 
 interface NavItem {
@@ -21,7 +23,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
       <Container className="relative flex h-14 items-center justify-between">
         <Link href="/" className="text-lg font-semibold tracking-tight">
-          Play29
+          {siteConfig.name}
         </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">
