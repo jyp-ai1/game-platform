@@ -11,6 +11,7 @@
 const BEST_SCORE_PREFIX = "play29:best-score:";
 const NICKNAME_KEY = "play29:nickname";
 const DEVICE_ID_KEY = "play29:device-id";
+const SOUND_ENABLED_KEY = "play29:sound-enabled";
 
 export function getBestScore(gameSlug: string): number {
   if (typeof window === "undefined") {
@@ -36,6 +37,46 @@ export function getLastNickname(): string {
 export function setLastNickname(nickname: string): void {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(NICKNAME_KEY, nickname);
+  }
+}
+
+// Sound is opt-in (default off) — most visitors browsing at work/in public
+// won't expect a game site to make noise unprompted.
+//
+// Exposed with a subscribe/notify pair (rather than a plain getter) so the
+// Header toggle can use useSyncExternalStore instead of setState-in-effect —
+// this project's ESLint config (react-hooks/set-state-in-effect) forbids the
+// latter.
+function readSoundEnabled(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return window.localStorage.getItem(SOUND_ENABLED_KEY) === "true";
+}
+
+let soundEnabledCache = readSoundEnabled();
+const soundEnabledListeners = new Set<() => void>();
+
+export function isSoundEnabled(): boolean {
+  return soundEnabledCache;
+}
+
+export function getServerSoundEnabledSnapshot(): boolean {
+  return false;
+}
+
+export function subscribeSoundEnabled(listener: () => void): () => void {
+  soundEnabledListeners.add(listener);
+  return () => soundEnabledListeners.delete(listener);
+}
+
+export function setSoundEnabled(enabled: boolean): void {
+  soundEnabledCache = enabled;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(SOUND_ENABLED_KEY, String(enabled));
+  }
+  for (const listener of soundEnabledListeners) {
+    listener();
   }
 }
 

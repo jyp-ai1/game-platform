@@ -1,8 +1,8 @@
 import { Globe, MonitorX, Zap } from "lucide-react";
-import Link from "next/link";
 
-import { Button, Container } from "@game-platform/ui";
+import { Container } from "@game-platform/ui";
 
+import { HeroCtaButton } from "@/components/hero-cta-button";
 import { siteConfig } from "@/lib/site-config";
 
 const features = [
@@ -43,12 +43,7 @@ export function Hero() {
           ))}
         </div>
 
-        <Button
-          size="lg"
-          className="animate-in fade-in zoom-in-95 mt-10 delay-500 duration-700"
-          nativeButton={false}
-          render={<Link href="#collections">게임 시작하기</Link>}
-        />
+        <HeroCtaButton className="animate-in fade-in zoom-in-95 mt-10 delay-500 duration-700" />
       </Container>
     </section>
   );

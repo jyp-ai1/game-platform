@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { CardBestScore } from "@/components/card-best-score";
 import { FavoriteButton } from "@/components/favorite-button";
+import { GameCardPlayLink } from "@/components/game-card-play-link";
 import { difficultyVariant } from "@/lib/difficulty";
 import { isRecentlyCreated } from "@/lib/game-sections";
 
@@ -39,7 +40,7 @@ export function GameCard({
             so this full-cover overlay never intercepts their clicks even
             though it's invisible-but-hit-testable at opacity-0. */}
         {!isComingSoon ? (
-          <Link
+          <GameCardPlayLink
             href={`/games/${game.slug}`}
             aria-label={`${game.title} 플레이`}
             className={cn(
@@ -50,7 +51,7 @@ export function GameCard({
             <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
               <Play className="size-6 fill-current" />
             </span>
-          </Link>
+          </GameCardPlayLink>
         ) : null}
 
         <FavoriteButton
@@ -87,15 +88,23 @@ export function GameCard({
           {game.description}
         </p>
 
-        <Button
-          className="mt-2"
-          nativeButton={false}
-          render={
-            <Link href={`/games/${game.slug}`}>
-              {isComingSoon ? "Coming Soon" : "Play"}
-            </Link>
-          }
-        />
+        <div className="relative mt-2">
+          <Button
+            nativeButton={false}
+            render={
+              isComingSoon ? (
+                <Link href={`/games/${game.slug}`}>Coming Soon</Link>
+              ) : (
+                <GameCardPlayLink
+                  href={`/games/${game.slug}`}
+                  indicatorClassName="rounded-lg"
+                >
+                  Play
+                </GameCardPlayLink>
+              )
+            }
+          />
+        </div>
       </div>
     </div>
   );

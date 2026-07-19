@@ -5,6 +5,7 @@ import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
 
 import { MobileNav } from "./mobile-nav";
+import { SoundToggle } from "./sound-toggle";
 
 interface NavItem {
   label: string;
@@ -50,6 +51,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <SoundToggle />
           <Button
             variant="ghost"
             size="icon"

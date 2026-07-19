@@ -284,6 +284,53 @@ function iconColorMatch(accent) {
     </g>`;
 }
 
+// Striped big-top tent silhouette + a small ball balanced on the peak —
+// generic circus-tent motif, no copied character art.
+function iconCircus(accent) {
+  const stripes = [];
+  for (let i = 0; i < 5; i++) {
+    stripes.push(
+      `<path d="M${20 + i * 52},240 L${140},40 L${140 + 26},40 L${72 + i * 52},240 Z" fill="${i % 2 === 0 ? accent : FG}" opacity="${i % 2 === 0 ? 0.9 : 0.15}"/>`
+    );
+  }
+  return `
+    <g transform="translate(352,20)">
+      <clipPath id="circus-tent"><path d="M0,240 L140,20 L280,240 Z"/></clipPath>
+      <g clip-path="url(#circus-tent)">${stripes.join("\n")}</g>
+      <path d="M0,240 L140,20 L280,240 Z" fill="none" stroke="${FG}" stroke-width="4" opacity="0.4"/>
+      <circle cx="140" cy="10" r="14" fill="${BRAND_AMBER}"/>
+      <rect x="0" y="240" width="280" height="14" rx="4" fill="${CARD}"/>
+    </g>`;
+}
+
+// Three-step podium blocks (gold/silver/bronze) + a curved track lane —
+// generic "athletic competition" motif, no trademarked Olympic rings.
+function iconOlympic(accent) {
+  return `
+    <g transform="translate(352,40)">
+      <path d="M0,220 Q140,150 280,220" stroke="${accent}" stroke-width="10" fill="none" opacity="0.35"/>
+      <rect x="20" y="120" width="70" height="90" rx="6" fill="#94a3b8"/>
+      <rect x="105" y="90" width="70" height="120" rx="6" fill="${BRAND_AMBER}"/>
+      <rect x="190" y="140" width="70" height="70" rx="6" fill="#c2703d"/>
+      <text x="140" y="150" font-size="30" font-weight="700" fill="${BG}" text-anchor="middle" font-family="Arial, sans-serif">1</text>
+    </g>`;
+}
+
+// Curved sword silhouette resting across two stone platform blocks — generic
+// "adventure platformer" motif, no copied character silhouette.
+function iconPrinceOfPersia(accent) {
+  return `
+    <g transform="translate(352,30)">
+      <rect x="0" y="180" width="90" height="50" rx="6" fill="${CARD}" stroke="${accent}" stroke-width="3"/>
+      <rect x="190" y="140" width="90" height="90" rx="6" fill="${CARD}" stroke="${accent}" stroke-width="3"/>
+      <g transform="translate(70,60) rotate(35)">
+        <rect x="-8" y="0" width="16" height="130" rx="6" fill="${FG}"/>
+        <rect x="-30" y="120" width="60" height="16" rx="6" fill="${accent}"/>
+        <rect x="-10" y="130" width="20" height="34" rx="6" fill="${BRAND_AMBER}"/>
+      </g>
+    </g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -301,6 +348,9 @@ const games = [
   { slug: "hangman", title: "Hangman", accent: "#a855f7", icon: iconHangman },
   { slug: "color-match", title: "Color Match", accent: "#ef4444", icon: iconColorMatch },
   { slug: "air-hockey", title: "Air Hockey", accent: "#0ea5e9", icon: iconAirHockey },
+  { slug: "circus", title: "Circus", accent: "#ef4444", icon: iconCircus },
+  { slug: "olympic", title: "Olympic", accent: BRAND_AMBER, icon: iconOlympic },
+  { slug: "prince-of-persia", title: "Prince of Persia", accent: "#a855f7", icon: iconPrinceOfPersia },
 ];
 
 function buildSvg({ title, accent, icon }) {
