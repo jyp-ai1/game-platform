@@ -21,7 +21,7 @@ export function Hero() {
       <div className="hero-scanlines pointer-events-none absolute inset-0 -z-10" />
 
       <Container className="relative flex flex-col items-center text-center">
-        <h1 className="animate-in fade-in zoom-in-95 max-w-2xl text-4xl font-bold tracking-tight duration-700 sm:text-6xl">
+        <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-6xl">
           {siteConfig.name}
           <br />
           <span className="text-primary">Play Again.</span>
