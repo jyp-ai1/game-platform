@@ -18,6 +18,7 @@ export const PLAYABLE_SLUGS = [
   "simon",
   "hangman",
   "color-match",
+  "air-hockey",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

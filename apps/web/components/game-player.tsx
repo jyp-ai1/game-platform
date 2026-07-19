@@ -107,6 +107,13 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       ),
     { ssr: false, loading: Loading }
   ),
+  "air-hockey": dynamic(
+    () =>
+      import("@game-platform/game-air-hockey").then(
+        (mod) => mod.AirHockeyGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({ slug }: { slug: PlayableSlug }) {

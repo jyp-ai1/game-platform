@@ -11,7 +11,7 @@ export async function CategoryLinks() {
   }
 
   return (
-    <section className="border-b py-8">
+    <section id="collections" className="scroll-mt-14 border-b py-8">
       <Container className="flex flex-wrap items-center justify-center gap-2">
         {categories.map((category) => (
           <Link

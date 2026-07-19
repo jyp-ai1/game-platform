@@ -15,10 +15,24 @@ export function selectNew(games: Game[], limit = 4): Game[] {
   return games.filter((game) => isRecentlyCreated(game.createdAt)).slice(0, limit);
 }
 
-// Placeholder until Sprint 3 adds real play-count/analytics-based ranking:
-// reuses the existing sort_order as a stand-in for "popular".
+// Real popularity ranking based on play_count (incremented once per page
+// view of a playable game — see recently-played-recorder.tsx). Ties (e.g.
+// all-zero on a fresh deploy) fall back to the incoming sort_order via
+// Array.prototype.sort's stability.
 export function selectPopular(games: Game[], limit = 4): Game[] {
-  return games.slice(0, limit);
+  return [...games].sort((a, b) => b.playCount - a.playCount).slice(0, limit);
+}
+
+// Games that are both genuinely popular (play_count > 0, so a fresh deploy
+// with no play data doesn't mark arbitrary games "HOT") and in the current
+// top tier by play count.
+export function selectHotSlugs(games: Game[], limit = 3): Set<string> {
+  return new Set(
+    selectPopular(
+      games.filter((game) => game.playCount > 0),
+      limit
+    ).map((game) => game.slug)
+  );
 }
 
 export function selectComingSoon(games: Game[], limit = 4): Game[] {

@@ -16,6 +16,8 @@ export interface Game {
   isFeatured: boolean;
   tags: string[];
   howToPlay: string | null;
+  playCount: number;
+  nostalgiaNote: string | null;
   createdAt: string;
   updatedAt: string;
 }

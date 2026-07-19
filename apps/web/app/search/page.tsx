@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/empty-state";
 import { GameGrid } from "@/components/game-grid";
 import { SearchBox } from "@/components/search-box";
+import { selectHotSlugs } from "@/lib/game-sections";
 import { searchGames } from "@/lib/search";
 import { getGames } from "@/lib/supabase/games";
 
@@ -22,6 +23,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q } = await searchParams;
   const games = await getGames();
   const results = searchGames(games, q ?? "");
+  const hotSlugs = selectHotSlugs(games);
 
   return (
     <main className="flex flex-1 flex-col py-16">
@@ -47,7 +49,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               message={`"${q}"에 대한 검색 결과가 없습니다. 다른 검색어를 시도해보세요.`}
             />
           ) : (
-            <GameGrid games={results} />
+            <GameGrid games={results} hotSlugs={hotSlugs} />
           )}
         </div>
       </Container>

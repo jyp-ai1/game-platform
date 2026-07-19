@@ -16,6 +16,8 @@ interface GameRow {
   is_featured: boolean;
   tags: string[];
   how_to_play: string | null;
+  play_count: number;
+  nostalgia_note: string | null;
   categories: { name: string; slug: string } | null;
   created_at: string;
   updated_at: string;
@@ -26,7 +28,7 @@ interface GameRow {
 // relationship paths between the two tables, and PostgREST needs to be told
 // explicitly which FK column to embed through.
 const GAME_COLUMNS =
-  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, created_at, updated_at, categories!category_id(name, slug)";
+  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, play_count, nostalgia_note, created_at, updated_at, categories!category_id(name, slug)";
 
 function mapGameRow(row: GameRow): Game {
   return {
@@ -43,6 +45,8 @@ function mapGameRow(row: GameRow): Game {
     isFeatured: row.is_featured,
     tags: row.tags,
     howToPlay: row.how_to_play,
+    playCount: row.play_count,
+    nostalgiaNote: row.nostalgia_note,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

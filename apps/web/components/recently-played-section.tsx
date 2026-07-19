@@ -11,7 +11,13 @@ import {
 
 import { GameCarousel } from "./game-carousel";
 
-export function RecentlyPlayedSection({ games }: { games: Game[] }) {
+export function RecentlyPlayedSection({
+  games,
+  hotSlugs,
+}: {
+  games: Game[];
+  hotSlugs?: Set<string>;
+}) {
   const slugs = useSyncExternalStore(
     subscribeRecentlyPlayed,
     getRecentlyPlayedSnapshot,
@@ -28,6 +34,7 @@ export function RecentlyPlayedSection({ games }: { games: Game[] }) {
       title="❤️ Continue Playing"
       description="최근에 플레이한 게임입니다."
       games={recentGames}
+      hotSlugs={hotSlugs}
     />
   );
 }

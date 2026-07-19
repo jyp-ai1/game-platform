@@ -213,6 +213,20 @@ function iconSudoku(accent) {
     </g>`;
 }
 
+// Two paddles + a puck between them on a table split by a center line —
+// mirrors the visual language of iconBreakout's composition (simple
+// geometric shapes, no character/branding references).
+function iconAirHockey(accent) {
+  return `
+    <g transform="translate(362,30)">
+      <rect x="0" y="0" width="300" height="240" rx="16" fill="${CARD}"/>
+      <line x1="0" y1="120" x2="300" y2="120" stroke="${FG}" stroke-width="4" stroke-dasharray="10 8" opacity="0.4"/>
+      <circle cx="150" cy="55" r="26" fill="#ef4444" opacity="0.85"/>
+      <circle cx="150" cy="120" r="14" fill="${FG}"/>
+      <circle cx="150" cy="185" r="26" fill="${accent}"/>
+    </g>`;
+}
+
 function iconTicTacToe(accent) {
   return `
     <g transform="translate(392,40)">
@@ -286,6 +300,7 @@ const games = [
   { slug: "simon", title: "Simon", accent: BRAND_PRIMARY, icon: iconSimon },
   { slug: "hangman", title: "Hangman", accent: "#a855f7", icon: iconHangman },
   { slug: "color-match", title: "Color Match", accent: "#ef4444", icon: iconColorMatch },
+  { slug: "air-hockey", title: "Air Hockey", accent: "#0ea5e9", icon: iconAirHockey },
 ];
 
 function buildSvg({ title, accent, icon }) {

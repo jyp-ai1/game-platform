@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@game-platform/game-2048": "*",
+    "@game-platform/game-air-hockey": "*",
     "@game-platform/game-breakout": "*",
     "@game-platform/game-bubble-pop": "*",
     "@game-platform/game-color-match": "*",

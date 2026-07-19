@@ -9,10 +9,11 @@ import { GamePlayer } from "@/components/game-player";
 import { GameSection } from "@/components/game-section";
 import { Leaderboard } from "@/components/leaderboard";
 import { MyBestScore } from "@/components/my-best-score";
+import { NostalgiaNote } from "@/components/nostalgia-note";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
 import { ScreenshotGallery } from "@/components/screenshot-gallery";
 import { difficultyVariant } from "@/lib/difficulty";
-import { selectRelated } from "@/lib/game-sections";
+import { selectHotSlugs, selectRelated } from "@/lib/game-sections";
 import { isPlayableSlug } from "@/lib/playable-games";
 import { getGameBySlug, getGames } from "@/lib/supabase/games";
 
@@ -34,22 +35,19 @@ export async function generateMetadata({
     return { title: "Game Not Found" };
   }
 
-  const images = game.thumbnailUrl ? [game.thumbnailUrl] : undefined;
-
   return {
     title: game.title,
     description: game.description,
+    keywords: game.tags,
     openGraph: {
       title: game.title,
       description: game.description,
       type: "website",
-      ...(images ? { images } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: game.title,
       description: game.description,
-      ...(images ? { images } : {}),
     },
   };
 }
@@ -63,10 +61,26 @@ export default async function GamePage({ params }: GamePageProps) {
   }
 
   const related = selectRelated(allGames, game);
+  const hotSlugs = selectHotSlugs(allGames);
   const isPlayable = game.status === "ACTIVE" && isPlayableSlug(slug);
 
   return (
     <main className="flex flex-1 flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "VideoGame",
+            name: game.title,
+            description: game.description,
+            genre: game.category?.name,
+            applicationCategory: "Game",
+            ...(game.thumbnailUrl ? { image: game.thumbnailUrl } : {}),
+          }),
+        }}
+      />
+
       <div className="relative h-48 w-full overflow-hidden bg-muted sm:h-64">
         {game.thumbnailUrl ? (
           <Image
@@ -100,15 +114,6 @@ export default async function GamePage({ params }: GamePageProps) {
           {game.description}
         </p>
 
-        {isPlayable ? <MyBestScore gameSlug={slug} /> : null}
-
-        {game.howToPlay ? (
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">플레이 방법 · </span>
-            {game.howToPlay}
-          </p>
-        ) : null}
-
         <div className="mt-6 max-w-3xl">
           <ScreenshotGallery slug={game.slug} title={game.title} />
         </div>
@@ -118,15 +123,42 @@ export default async function GamePage({ params }: GamePageProps) {
             <RecentlyPlayedRecorder slug={slug} />
             <GamePlayer slug={slug} />
 
+            {game.howToPlay ? (
+              <p className="mt-6 max-w-xl text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  플레이 방법 ·{" "}
+                </span>
+                {game.howToPlay}
+              </p>
+            ) : null}
+
+            <div className="mt-4">
+              <MyBestScore gameSlug={slug} />
+            </div>
+
             <div className="mt-12 max-w-sm">
               <SectionTitle title="랭킹" />
               <div className="mt-4">
                 <Leaderboard gameSlug={slug} />
               </div>
             </div>
+
+            {game.nostalgiaNote ? (
+              <div className="mt-12">
+                <NostalgiaNote note={game.nostalgiaNote} />
+              </div>
+            ) : null}
           </div>
         ) : (
           <>
+            {game.howToPlay ? (
+              <p className="mt-6 max-w-xl text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  플레이 방법 ·{" "}
+                </span>
+                {game.howToPlay}
+              </p>
+            ) : null}
             <p className="mt-6 text-sm font-medium text-muted-foreground">
               이 게임은 아직 플레이할 수 없습니다. 곧 만나보실 수 있습니다.
             </p>
@@ -134,13 +166,13 @@ export default async function GamePage({ params }: GamePageProps) {
               variant="outline"
               className="mt-8 w-fit"
               nativeButton={false}
-              render={<Link href="/#games">다른 게임 둘러보기</Link>}
+              render={<Link href="/games">다른 게임 둘러보기</Link>}
             />
           </>
         )}
       </Container>
 
-      <GameSection title="관련 게임" games={related} />
+      <GameSection title="비슷한 게임" games={related} hotSlugs={hotSlugs} />
     </main>
   );
 }

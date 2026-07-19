@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { GameCard } from "@/components/game-card";
 import { GameSection } from "@/components/game-section";
+import { selectHotSlugs } from "@/lib/game-sections";
 import { getCategoryBySlug } from "@/lib/supabase/categories";
 import { getGames } from "@/lib/supabase/games";
 
@@ -40,6 +41,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const rest = featuredGame
     ? filtered.filter((game) => game.id !== featuredGame.id)
     : filtered;
+  const hotSlugs = selectHotSlugs(games);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -74,13 +76,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               대표 게임
             </p>
             <div className="max-w-sm">
-              <GameCard game={featuredGame} />
+              <GameCard game={featuredGame} isHot={hotSlugs.has(featuredGame.slug)} />
             </div>
           </Container>
         ) : null}
 
         <div className="mt-12">
-          <GameSection title="전체 게임" games={rest} />
+          <GameSection title="전체 게임" games={rest} hotSlugs={hotSlugs} />
         </div>
       </div>
     </main>

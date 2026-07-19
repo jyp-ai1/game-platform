@@ -8,9 +8,16 @@ interface GameSectionProps {
   title: string;
   description?: string;
   games: Game[];
+  hotSlugs?: Set<string>;
 }
 
-export function GameSection({ id, title, description, games }: GameSectionProps) {
+export function GameSection({
+  id,
+  title,
+  description,
+  games,
+  hotSlugs,
+}: GameSectionProps) {
   if (games.length === 0) {
     return null;
   }
@@ -20,7 +27,7 @@ export function GameSection({ id, title, description, games }: GameSectionProps)
       <Container>
         <SectionTitle title={title} description={description} />
         <div className="mt-8">
-          <GameGrid games={games} />
+          <GameGrid games={games} hotSlugs={hotSlugs} />
         </div>
       </Container>
     </section>
