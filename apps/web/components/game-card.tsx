@@ -39,8 +39,13 @@ export function GameCard({
         {/* Painted before the favorite button/badges below (DOM order),
             so this full-cover overlay never intercepts their clicks even
             though it's invisible-but-hit-testable at opacity-0. */}
+        {/* Plain Link (no sound/pending-indicator client wrapper) — this
+            overlay is a secondary, purely decorative hover affordance; the
+            bottom "Play" button below is the primary interaction and is
+            the only one wired up, to keep hydration cost from doubling
+            across every card on a page with dozens of them. */}
         {!isComingSoon ? (
-          <GameCardPlayLink
+          <Link
             href={`/games/${game.slug}`}
             aria-label={`${game.title} 플레이`}
             className={cn(
@@ -51,7 +56,7 @@ export function GameCard({
             <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
               <Play className="size-6 fill-current" />
             </span>
-          </GameCardPlayLink>
+          </Link>
         ) : null}
 
         <FavoriteButton
