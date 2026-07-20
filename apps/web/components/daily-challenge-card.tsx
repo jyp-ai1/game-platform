@@ -92,7 +92,13 @@ export function DailyChallengeCard() {
                       </span>
                     )}
                   </div>
-                  {!done ? <Progress value={percent} className="mt-2" /> : null}
+                  {!done ? (
+                    <Progress
+                      value={percent}
+                      label={`${definition.title} 진행률`}
+                      className="mt-2"
+                    />
+                  ) : null}
                 </div>
 
                 {!done ? (
