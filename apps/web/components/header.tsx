@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { siteConfig } from "@/lib/site-config";
 
+import { HeaderLevelBadge } from "./header-level-badge";
 import { MobileNav } from "./mobile-nav";
 import { SoundToggle } from "./sound-toggle";
 
@@ -51,6 +52,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <HeaderLevelBadge />
           <SoundToggle />
           <Button
             variant="ghost"

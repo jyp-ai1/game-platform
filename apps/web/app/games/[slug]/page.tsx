@@ -120,7 +120,10 @@ export default async function GamePage({ params }: GamePageProps) {
 
         {isPlayable ? (
           <div className="mt-8">
-            <RecentlyPlayedRecorder slug={slug} />
+            <RecentlyPlayedRecorder
+              slug={slug}
+              categorySlug={game.category?.slug ?? null}
+            />
             <GamePlayer slug={slug} />
 
             {game.howToPlay ? (

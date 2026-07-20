@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { ToastHost } from "@/components/toast/toast-host";
 import { siteConfig } from "@/lib/site-config";
 import { siteUrl } from "@/lib/site";
 
@@ -55,6 +56,13 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Mounted before {children} so its event subscription is registered
+            before any page content's mount effects can emit an event (React
+            fires mount effects in tree order — a component declared after
+            {children} would subscribe too late to catch an event emitted
+            during the very same initial commit, e.g. the "첫 게임 플레이"
+            achievement on a hard-loaded game page). */}
+        <ToastHost />
         <Header />
         {children}
         <Footer />

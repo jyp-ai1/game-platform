@@ -3,6 +3,11 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 import {
+  recordNewBest,
+  recordRankingSubmitted,
+  recordScoreReport,
+} from "./engagement";
+import {
   getBestScore,
   getDeviceId,
   getLastNickname,
@@ -43,8 +48,14 @@ export function GameSDKProvider({
   } | null>(null);
 
   const reportScore = useCallback((gameSlug: string, score: number) => {
+    // Engagement side effects (XP, achievement checks) run on every round,
+    // not just personal bests — the best-score gate below only controls
+    // "is this worth a nickname prompt + leaderboard submission?".
+    recordScoreReport(gameSlug, score);
+
     if (score > getBestScore(gameSlug)) {
       setBestScore(gameSlug, score);
+      recordNewBest(gameSlug, score);
       setPending({ gameSlug, score });
     }
   }, []);
@@ -56,6 +67,7 @@ export function GameSDKProvider({
     }
     setLastNickname(trimmed);
     await sdk.submitScore(pending.gameSlug, trimmed, pending.score, getDeviceId());
+    recordRankingSubmitted();
     setPending(null);
   }
 
