@@ -14,6 +14,7 @@ import {
   setBestScore,
   setLastNickname,
 } from "./local-storage";
+import { recordMissionScoreReport } from "./missions";
 import { NicknameModal } from "./nickname-modal";
 
 // The one thing that's genuinely platform-specific (the actual network
@@ -52,6 +53,7 @@ export function GameSDKProvider({
     // not just personal bests — the best-score gate below only controls
     // "is this worth a nickname prompt + leaderboard submission?".
     recordScoreReport(gameSlug, score);
+    recordMissionScoreReport(gameSlug, score);
 
     if (score > getBestScore(gameSlug)) {
       setBestScore(gameSlug, score);

@@ -28,6 +28,12 @@ function toastContent(event: EngagementEvent): {
         title: "신기록 달성!",
         subtitle: `${event.score.toLocaleString()}점 · +15 XP`,
       };
+    case "mission-completed":
+      return {
+        emoji: "✅",
+        title: "미션 완료!",
+        subtitle: `${event.title} · +${event.xp} XP`,
+      };
   }
 }
 

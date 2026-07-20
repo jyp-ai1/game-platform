@@ -1,6 +1,9 @@
 "use client";
 
-import { recordSessionStart } from "@game-platform/game-sdk";
+import {
+  recordMissionSessionStart,
+  recordSessionStart,
+} from "@game-platform/game-sdk";
 import { useEffect } from "react";
 
 import { recordPlayed } from "@/lib/local-storage";
@@ -16,6 +19,7 @@ export function RecentlyPlayedRecorder({
   useEffect(() => {
     recordPlayed(slug);
     recordSessionStart(slug, categorySlug);
+    recordMissionSessionStart(slug, categorySlug);
     // Best-effort — a failed play-count increment should never break the page.
     incrementPlayCount(slug).catch(() => {});
   }, [slug, categorySlug]);

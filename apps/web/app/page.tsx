@@ -1,4 +1,5 @@
 import { CategoryLinks } from "@/components/category-links";
+import { DailyChallengeCard } from "@/components/daily-challenge-card";
 import { GameCarousel } from "@/components/game-carousel";
 import { Hero } from "@/components/hero";
 import { RecentlyPlayedSection } from "@/components/recently-played-section";
@@ -24,6 +25,8 @@ export default async function Home() {
       <CategoryLinks />
 
       <RecentlyPlayedSection games={games} hotSlugs={hotSlugs} />
+
+      <DailyChallengeCard />
 
       <GameCarousel
         title="🕹️ 추억의 오락실"

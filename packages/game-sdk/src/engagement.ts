@@ -6,7 +6,10 @@
 //
 // LocalStorage-only for now (no login yet) — schema is kept flat/serializable
 // so it can be synced to Supabase later without a redesign.
-import { emitEngagementEvent } from "./engagement-events";
+import {
+  emitEngagementEvent,
+  subscribeEngagementEvents,
+} from "./engagement-events";
 
 const XP_KEY = "play29:xp";
 const ACHIEVEMENTS_KEY = "play29:achievements";
@@ -196,6 +199,16 @@ function addXP(amount: number): void {
   }
   notifyEngagement();
 }
+
+// XP is only ever owned/mutated here. missions.ts (and any future Season
+// Event / Weekly Mission system) never calls an XP function directly — it
+// just emits "a mission completed" and this module reacts. That keeps XP
+// bookkeeping in one place no matter how many features eventually award it.
+subscribeEngagementEvents((event) => {
+  if (event.type === "mission-completed") {
+    addXP(event.xp);
+  }
+});
 
 function unlockAchievement(id: AchievementId): void {
   if (isAchievementUnlocked(id)) {

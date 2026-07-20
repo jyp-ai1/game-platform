@@ -42,3 +42,20 @@ export {
   subscribeEngagementEvents,
   type EngagementEvent,
 } from "./engagement-events";
+export {
+  getDailyMission,
+  getMissionDefinition,
+  getMissionTierForLevel,
+  getServerDailyMissionSnapshot,
+  isDailyChallengeComplete,
+  recordMissionScoreReport,
+  recordMissionSessionStart,
+  subscribeMissions,
+  type DailyMissionState,
+  type MissionCheckContext,
+  type MissionDefinition,
+  type MissionHook,
+  type MissionProgress,
+  type MissionTier,
+  type MissionType,
+} from "./missions";
