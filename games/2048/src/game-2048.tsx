@@ -1,6 +1,14 @@
 "use client";
 
-import { getBestScore, useGameSDK } from "@game-platform/game-sdk";
+import {
+  clearSave,
+  getBestScore,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useResumableGame,
+} from "@game-platform/game-sdk";
 import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
@@ -82,9 +90,20 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 };
 
 export function Game2048() {
-  const [state, dispatch] = useReducer(reducer, null, createInitialState);
+  const { phase, initialState, phaseRef, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const { reportScore } = useGameSDK();
+
+  // "won" isn't terminal for 2048 (play continues past the 2048 tile), so
+  // only "over" clears the save — clearing on "won" would discard progress
+  // a player who keeps playing still wants to resume.
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "over" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     // Reports the session's score once the game ends (or won). Depends on
@@ -95,10 +114,16 @@ export function Game2048() {
     if (state.status !== "playing") {
       reportScore(GAME_SLUG, state.score);
     }
+    if (state.status === "over") {
+      clearSave(GAME_SLUG);
+    }
   }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (phaseRef.current !== "ready") {
+        return;
+      }
       const direction = DIRECTION_KEYS[event.key];
       if (!direction) {
         return;
@@ -109,7 +134,7 @@ export function Game2048() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [phaseRef]);
 
   const handleTouchStart = useCallback((event: TouchEvent) => {
     const touch = event.touches[0];
@@ -119,35 +144,42 @@ export function Game2048() {
     touchStart.current = { x: touch.clientX, y: touch.clientY };
   }, []);
 
-  const handleTouchEnd = useCallback((event: TouchEvent) => {
-    const start = touchStart.current;
-    touchStart.current = null;
-    const touch = event.changedTouches[0];
-    if (!start || !touch) {
-      return;
-    }
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      const start = touchStart.current;
+      touchStart.current = null;
+      if (phaseRef.current !== "ready") {
+        return;
+      }
+      const touch = event.changedTouches[0];
+      if (!start || !touch) {
+        return;
+      }
 
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
+      const dx = touch.clientX - start.x;
+      const dy = touch.clientY - start.y;
 
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) {
-      return;
-    }
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) {
+        return;
+      }
 
-    const direction: Direction =
-      Math.abs(dx) > Math.abs(dy)
-        ? dx > 0
-          ? "right"
-          : "left"
-        : dy > 0
-          ? "down"
-          : "up";
+      const direction: Direction =
+        Math.abs(dx) > Math.abs(dy)
+          ? dx > 0
+            ? "right"
+            : "left"
+          : dy > 0
+            ? "down"
+            : "up";
 
-    dispatch({ type: "move", direction });
-  }, []);
+      dispatch({ type: "move", direction });
+    },
+    [phaseRef]
+  );
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -182,6 +214,14 @@ export function Game2048() {
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             onRestart={() => dispatch({ type: "restart" })}
+          />
+        ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="2048"
+            onResume={onResume}
+            onNewGame={onNewGame}
           />
         ) : null}
       </div>

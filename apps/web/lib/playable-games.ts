@@ -19,6 +19,9 @@ export const PLAYABLE_SLUGS = [
   "hangman",
   "color-match",
   "air-hockey",
+  "tetris",
+  "gold-miner",
+  "space-impact",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

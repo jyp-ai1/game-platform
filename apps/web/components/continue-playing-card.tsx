@@ -1,18 +1,31 @@
+"use client";
+
+import { getServerHasSaveSnapshot, hasSave, subscribeSave } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
 import { Gamepad2 } from "lucide-react";
 import Image from "next/image";
+import { useCallback, useSyncExternalStore } from "react";
 
 import { GameCardPlayLink } from "@/components/game-card-play-link";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 import { getLastPlayedAt } from "@/lib/local-storage";
 
 // Deliberately separate from GameCard: this shows a "last played" timestamp
-// and a Continue button that is just a plain link back to the game page
-// (real save/resume is Sprint 9) — logic that shouldn't leak into the
-// widely-reused GameCard.
+// and a button whose label honestly reflects whether a real save exists —
+// "이어하기" only appears once Sprint 9's Save SDK actually has progress to
+// restore; otherwise it reads "플레이" rather than falsely promising Continue.
 export function ContinuePlayingCard({ game }: { game: Game }) {
   const lastPlayedAt = getLastPlayedAt(game.slug);
+  const subscribe = useCallback(
+    (listener: () => void) => subscribeSave(game.slug, listener),
+    [game.slug]
+  );
+  const saved = useSyncExternalStore(
+    subscribe,
+    () => hasSave(game.slug),
+    getServerHasSaveSnapshot
+  );
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border">
@@ -42,7 +55,7 @@ export function ContinuePlayingCard({ game }: { game: Game }) {
             nativeButton={false}
             render={
               <GameCardPlayLink href={`/games/${game.slug}`}>
-                ▶ Continue
+                {saved ? "▶ 이어하기" : "▶ 플레이"}
               </GameCardPlayLink>
             }
           />

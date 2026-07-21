@@ -331,6 +331,57 @@ function iconPrinceOfPersia(accent) {
     </g>`;
 }
 
+// Falling tetromino cluster (L, square, line) stacked on a partial board —
+// generic block shapes, no copied branding.
+function iconTetris(accent) {
+  const colors = [accent, BRAND_AMBER, "#22c55e", "#ef4444"];
+  return `
+    <g transform="translate(362,20)">
+      <rect x="0" y="180" width="280" height="60" rx="6" fill="${CARD}"/>
+      <rect x="20" y="196" width="24" height="24" rx="3" fill="${colors[0]}"/>
+      <rect x="44" y="196" width="24" height="24" rx="3" fill="${colors[0]}"/>
+      <rect x="68" y="196" width="24" height="24" rx="3" fill="${colors[0]}"/>
+      <rect x="120" y="196" width="24" height="24" rx="3" fill="${colors[2]}"/>
+      <rect x="144" y="196" width="24" height="24" rx="3" fill="${colors[2]}"/>
+      <rect x="200" y="0" width="30" height="30" rx="4" fill="${colors[1]}"/>
+      <rect x="230" y="0" width="30" height="30" rx="4" fill="${colors[1]}"/>
+      <rect x="200" y="30" width="30" height="30" rx="4" fill="${colors[1]}"/>
+      <rect x="230" y="30" width="30" height="30" rx="4" fill="${colors[1]}"/>
+      <rect x="40" y="60" width="28" height="28" rx="4" fill="${colors[3]}"/>
+      <rect x="40" y="88" width="28" height="28" rx="4" fill="${colors[3]}"/>
+      <rect x="40" y="116" width="28" height="28" rx="4" fill="${colors[3]}"/>
+      <rect x="68" y="116" width="28" height="28" rx="4" fill="${colors[3]}"/>
+    </g>`;
+}
+
+// A pivot at the top with a taut rope down to a gold nugget — generic
+// claw-machine motif, no copied character/branding.
+function iconGoldMiner(accent) {
+  return `
+    <g transform="translate(362,20)">
+      <circle cx="140" cy="10" r="14" fill="${FG}"/>
+      <line x1="140" y1="10" x2="70" y2="190" stroke="#a8a29e" stroke-width="5"/>
+      <circle cx="70" cy="190" r="9" fill="${accent}"/>
+      <circle cx="70" cy="205" r="30" fill="${BRAND_AMBER}"/>
+      <circle cx="180" cy="220" r="20" fill="#78716c"/>
+      <circle cx="230" cy="180" r="16" fill="#67e8f9"/>
+    </g>`;
+}
+
+// Small ship on the left with a horizontal bullet trail toward enemies
+// entering from the right — explicitly side-scrolling to differentiate from
+// the vertical Galaxy/Space Defender shooters.
+function iconSpaceImpact(accent) {
+  return `
+    <g transform="translate(352,60)">
+      <path d="M0,60 l40,-24 l0,16 l40,0 l0,16 l-40,0 l0,16 Z" fill="${accent}"/>
+      <line x1="90" y1="60" x2="180" y2="60" stroke="${FG}" stroke-width="4" stroke-dasharray="10 8" opacity="0.6"/>
+      <rect x="200" y="20" width="26" height="26" rx="4" fill="#ef4444"/>
+      <rect x="240" y="70" width="26" height="26" rx="4" fill="#ef4444" opacity="0.8"/>
+      <rect x="200" y="90" width="20" height="20" rx="4" fill="#ef4444" opacity="0.6"/>
+    </g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -351,6 +402,9 @@ const games = [
   { slug: "circus", title: "Circus", accent: "#ef4444", icon: iconCircus },
   { slug: "olympic", title: "Olympic", accent: BRAND_AMBER, icon: iconOlympic },
   { slug: "prince-of-persia", title: "Prince of Persia", accent: "#a855f7", icon: iconPrinceOfPersia },
+  { slug: "tetris", title: "Tetris", accent: BRAND_PRIMARY, icon: iconTetris },
+  { slug: "gold-miner", title: "Gold Miner", accent: BRAND_AMBER, icon: iconGoldMiner },
+  { slug: "space-impact", title: "Space Impact", accent: "#22c55e", icon: iconSpaceImpact },
 ];
 
 function buildSvg({ title, accent, icon }) {

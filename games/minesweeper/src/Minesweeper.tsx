@@ -1,6 +1,13 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
+import {
+  clearSave,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useResumableGame,
+} from "@game-platform/game-sdk";
 import { Button, cn, GameOverOverlay } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
 import type { MouseEvent } from "react";
@@ -99,9 +106,21 @@ const NUMBER_COLORS: Record<number, string> = {
 };
 
 export function MinesweeperGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, phaseRef, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const [elapsed, setElapsed] = useState(0);
+
+  // "waiting" (before the first click places mines) is indistinguishable
+  // from "no save" — skip saving until there's actually progress worth
+  // resuming, so the Resume Dialog never shows for a board equivalent to a
+  // brand-new game.
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "waiting" || state.status !== "playing" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     if (state.status !== "playing" || state.startedAt === null) {
@@ -119,6 +138,9 @@ export function MinesweeperGame() {
       const score = Math.max(MIN_SCORE, MAX_SCORE - elapsed * SCORE_PER_SECOND);
       reportScore(GAME_SLUG, score);
     }
+    if (state.status === "won" || state.status === "lost") {
+      clearSave(GAME_SLUG);
+    }
   }, [state.status, elapsed, reportScore]);
 
   useEffect(() => {
@@ -128,6 +150,9 @@ export function MinesweeperGame() {
   }, [state.status]);
 
   function handleClick(row: number, col: number) {
+    if (phaseRef.current !== "ready") {
+      return;
+    }
     dispatch(
       state.flagMode
         ? { type: "toggleFlag", row, col }
@@ -137,11 +162,15 @@ export function MinesweeperGame() {
 
   function handleContextMenu(event: MouseEvent, row: number, col: number) {
     event.preventDefault();
+    if (phaseRef.current !== "ready") {
+      return;
+    }
     dispatch({ type: "toggleFlag", row, col });
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
           <div className="text-[10px] font-medium uppercase text-muted-foreground">
@@ -204,6 +233,14 @@ export function MinesweeperGame() {
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             onRestart={() => dispatch({ type: "restart" })}
+          />
+        ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Minesweeper"
+            onResume={onResume}
+            onNewGame={onNewGame}
           />
         ) : null}
       </div>

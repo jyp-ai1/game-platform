@@ -43,9 +43,23 @@ export default async function Home() {
       />
 
       <GameCarousel
+        title="👾 레트로 게임"
+        description="90년대~2000년대 감성을 그대로 담은 레트로 게임."
+        games={selectByCategorySlug(games, "retro")}
+        hotSlugs={hotSlugs}
+      />
+
+      <GameCarousel
         title="🧠 두뇌 게임"
         description="기억력과 순발력을 겨루는 두뇌 게임."
         games={selectByCategorySlug(games, "brain")}
+        hotSlugs={hotSlugs}
+      />
+
+      <GameCarousel
+        title="🏅 스포츠 게임"
+        description="스포츠 감성의 캐주얼 게임."
+        games={selectByCategorySlug(games, "sports")}
         hotSlugs={hotSlugs}
       />
 

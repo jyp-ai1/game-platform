@@ -72,3 +72,21 @@ export {
   type MissionTier,
   type MissionType,
 } from "./missions";
+export {
+  clearSave,
+  getServerHasSaveSnapshot,
+  hasSave,
+  loadGame,
+  saveGame,
+  SAVE_VERSION,
+  subscribeSave,
+  type SaveEnvelope,
+} from "./save";
+export { useAutoSave, type SaveIndicatorStatus } from "./use-auto-save";
+export {
+  useResumableGame,
+  type ResumePhase,
+  type UseResumableGameResult,
+} from "./use-resumable-game";
+export { ResumeDialog } from "./resume-dialog";
+export { SaveIndicator } from "./save-indicator";

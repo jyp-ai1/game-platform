@@ -114,6 +114,24 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       ),
     { ssr: false, loading: Loading }
   ),
+  tetris: dynamic(
+    () => import("@game-platform/game-tetris").then((mod) => mod.TetrisGame),
+    { ssr: false, loading: Loading }
+  ),
+  "gold-miner": dynamic(
+    () =>
+      import("@game-platform/game-gold-miner").then(
+        (mod) => mod.GoldMinerGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "space-impact": dynamic(
+    () =>
+      import("@game-platform/game-space-impact").then(
+        (mod) => mod.SpaceImpactGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({ slug }: { slug: PlayableSlug }) {

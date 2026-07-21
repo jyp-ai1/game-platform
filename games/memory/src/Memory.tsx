@@ -1,6 +1,13 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
+import {
+  clearSave,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useResumableGame,
+} from "@game-platform/game-sdk";
 import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer, useRef } from "react";
@@ -74,9 +81,17 @@ function reducer(state: State, action: Action): State {
 }
 
 export function MemoryGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, phaseRef, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "won" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     if (state.flipped.length !== 2) {
@@ -95,11 +110,20 @@ export function MemoryGame() {
   useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.moves));
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.moves, reportScore]);
 
+  function handleFlip(index: number) {
+    if (phaseRef.current !== "ready") {
+      return;
+    }
+    dispatch({ type: "flip", index });
+  }
+
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Moves" value={state.moves} />
         <Button
@@ -119,7 +143,7 @@ export function MemoryGame() {
             <button
               key={index}
               type="button"
-              onClick={() => dispatch({ type: "flip", index })}
+              onClick={() => handleFlip(index)}
               disabled={isFaceUp}
               aria-label={isFaceUp ? card.symbol : "카드 뒤집기"}
               className={cn(
@@ -136,6 +160,14 @@ export function MemoryGame() {
           <GameOverOverlay
             message="Complete!"
             onRestart={() => dispatch({ type: "restart" })}
+          />
+        ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Memory"
+            onResume={onResume}
+            onNewGame={onNewGame}
           />
         ) : null}
       </div>

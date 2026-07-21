@@ -1,0 +1,1 @@
+export { GoldMinerGame } from "./GoldMiner";
