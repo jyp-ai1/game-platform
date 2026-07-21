@@ -27,16 +27,39 @@ export function setBestScore(gameSlug: string, score: number): void {
   }
 }
 
-export function getLastNickname(): string {
+// Exposed with a subscribe/notify pair (like isSoundEnabled below) so the
+// Profile page's editable nickname field can use useSyncExternalStore
+// instead of setState-in-effect.
+function readNickname(): string {
   if (typeof window === "undefined") {
     return "";
   }
   return window.localStorage.getItem(NICKNAME_KEY) ?? "";
 }
 
+let nicknameCache = readNickname();
+const nicknameListeners = new Set<() => void>();
+
+export function getLastNickname(): string {
+  return nicknameCache;
+}
+
+export function getServerNicknameSnapshot(): string {
+  return "";
+}
+
+export function subscribeNickname(listener: () => void): () => void {
+  nicknameListeners.add(listener);
+  return () => nicknameListeners.delete(listener);
+}
+
 export function setLastNickname(nickname: string): void {
+  nicknameCache = nickname;
   if (typeof window !== "undefined") {
     window.localStorage.setItem(NICKNAME_KEY, nickname);
+  }
+  for (const listener of nicknameListeners) {
+    listener();
   }
 }
 

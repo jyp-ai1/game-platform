@@ -24,7 +24,7 @@ export default async function Home() {
       <Hero />
       <CategoryLinks />
 
-      <RecentlyPlayedSection games={games} hotSlugs={hotSlugs} />
+      <RecentlyPlayedSection games={games} />
 
       <DailyChallengeCard />
 

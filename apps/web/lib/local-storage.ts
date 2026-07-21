@@ -4,6 +4,7 @@
 const FAVORITES_KEY = "play29:favorites";
 const RECENTLY_PLAYED_KEY = "play29:recently-played";
 const RECENTLY_PLAYED_LIMIT = 10;
+const LAST_PLAYED_AT_KEY = "play29:last-played-at";
 
 type Listener = () => void;
 
@@ -26,10 +27,30 @@ function writeList(key: string, list: string[]): void {
   window.localStorage.setItem(key, JSON.stringify(list));
 }
 
+function readMap(key: string): Record<string, string> {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeMap(key: string, map: Record<string, string>): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.setItem(key, JSON.stringify(map));
+}
+
 // Cached module-level snapshots so useSyncExternalStore gets a stable
 // reference between renders (it only changes when we explicitly notify).
 let favoritesCache = readList(FAVORITES_KEY);
 let recentlyPlayedCache = readList(RECENTLY_PLAYED_KEY);
+let lastPlayedAtCache = readMap(LAST_PLAYED_AT_KEY);
 
 const favoritesListeners = new Set<Listener>();
 const recentlyPlayedListeners = new Set<Listener>();
@@ -88,5 +109,13 @@ export function recordPlayed(slug: string): void {
     ...recentlyPlayedCache.filter((s) => s !== slug),
   ].slice(0, RECENTLY_PLAYED_LIMIT);
   writeList(RECENTLY_PLAYED_KEY, recentlyPlayedCache);
+
+  lastPlayedAtCache = { ...lastPlayedAtCache, [slug]: new Date().toISOString() };
+  writeMap(LAST_PLAYED_AT_KEY, lastPlayedAtCache);
+
   notify(recentlyPlayedListeners);
+}
+
+export function getLastPlayedAt(slug: string): string | null {
+  return lastPlayedAtCache[slug] ?? null;
 }

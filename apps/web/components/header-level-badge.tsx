@@ -1,23 +1,37 @@
 "use client";
 
 import {
-  getLevel,
-  getServerLevelSnapshot,
+  getLevelProgress,
+  getServerLevelProgressSnapshot,
   subscribeEngagement,
 } from "@game-platform/game-sdk";
-import { Badge } from "@game-platform/ui";
+import { Progress } from "@game-platform/ui";
+import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
+import { useCountUp } from "@/lib/use-count-up";
+
 export function HeaderLevelBadge() {
-  const level = useSyncExternalStore(
+  const levelProgress = useSyncExternalStore(
     subscribeEngagement,
-    getLevel,
-    getServerLevelSnapshot
+    getLevelProgress,
+    getServerLevelProgressSnapshot
   );
+  const animatedXp = useCountUp(levelProgress.xpIntoLevel);
 
   return (
-    <Badge variant="outline" className="mr-1 hidden sm:inline-flex">
-      Lv.{level}
-    </Badge>
+    <Link
+      href="/profile"
+      title={`레벨 ${levelProgress.level} · ${levelProgress.xpIntoLevel} / ${levelProgress.xpNeededForLevel} XP`}
+      className="mr-1 hidden w-24 flex-col gap-0.5 text-xs sm:flex"
+    >
+      <span className="font-medium tabular-nums">
+        Lv.{levelProgress.level} · {animatedXp} / {levelProgress.xpNeededForLevel} XP
+      </span>
+      <Progress
+        value={levelProgress.percent}
+        label={`레벨 ${levelProgress.level} 진행률`}
+      />
+    </Link>
   );
 }

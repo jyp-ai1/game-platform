@@ -6,22 +6,34 @@ export {
 } from "./context";
 export {
   getBestScore,
+  getLastNickname,
+  getServerNicknameSnapshot,
   getServerSoundEnabledSnapshot,
   isSoundEnabled,
+  setLastNickname,
   setSoundEnabled,
+  subscribeNickname,
   subscribeSoundEnabled,
 } from "./local-storage";
 export { playClickSound, playHoverSound, playStartSound } from "./sound";
 export {
   ACHIEVEMENTS,
+  getAchievementRate,
   getAchievements,
   getCategoryPlayCounts,
   getDailyStreak,
+  getGamePlayCounts,
   getLevel,
+  getLevelProgress,
+  getMostPlayedGameSlug,
   getServerAchievementsSnapshot,
+  getServerDailyStreakSnapshot,
+  getServerLevelProgressSnapshot,
   getServerLevelSnapshot,
+  getServerTodayPlayCountSnapshot,
   getServerTotalPlayCountSnapshot,
   getServerXPSnapshot,
+  getTodayPlayCount,
   getTotalPlayCount,
   getXP,
   isAchievementUnlocked,
@@ -36,6 +48,7 @@ export {
   type AchievementId,
   type AchievementsState,
   type DailyStreakState,
+  type LevelProgress,
 } from "./engagement";
 export {
   emitEngagementEvent,

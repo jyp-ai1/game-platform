@@ -16,6 +16,8 @@ const ACHIEVEMENTS_KEY = "play29:achievements";
 const DAILY_STREAK_KEY = "play29:daily-streak";
 const CATEGORY_PLAY_COUNTS_KEY = "play29:category-play-counts";
 const TOTAL_PLAY_COUNT_KEY = "play29:total-play-count";
+const GAME_PLAY_COUNTS_KEY = "play29:game-play-counts";
+const TODAY_PLAY_COUNT_KEY = "play29:today-play-count";
 
 export const PLAY_XP = 5;
 export const SCORE_REPORT_XP = 10;
@@ -83,6 +85,18 @@ export interface DailyStreakState {
   longestStreak: number;
 }
 
+interface TodayPlayCountState {
+  date: string;
+  count: number;
+}
+
+export interface LevelProgress {
+  level: number;
+  xpIntoLevel: number;
+  xpNeededForLevel: number;
+  percent: number;
+}
+
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") {
     return fallback;
@@ -130,6 +144,14 @@ let categoryPlayCountsCache = readJson<Record<string, number>>(
   {}
 );
 let totalPlayCountCache = readNumber(TOTAL_PLAY_COUNT_KEY);
+let gamePlayCountsCache = readJson<Record<string, number>>(
+  GAME_PLAY_COUNTS_KEY,
+  {}
+);
+let todayPlayCountCache = readJson<TodayPlayCountState>(TODAY_PLAY_COUNT_KEY, {
+  date: "",
+  count: 0,
+});
 
 const engagementListeners = new Set<() => void>();
 function notifyEngagement(): void {
@@ -164,11 +186,23 @@ export function getServerLevelSnapshot(): number {
   return 1;
 }
 
+// useSyncExternalStore requires a referentially stable snapshot from
+// getServerSnapshot (a fresh object/array literal every call triggers React's
+// "getServerSnapshot should be cached" infinite-loop warning/error), so
+// server-side placeholders are hoisted to module-level constants rather than
+// returned as inline literals.
+const EMPTY_ACHIEVEMENTS_STATE: AchievementsState = {};
+const EMPTY_DAILY_STREAK_STATE: DailyStreakState = {
+  lastPlayedDate: null,
+  currentStreak: 0,
+  longestStreak: 0,
+};
+
 export function getAchievements(): AchievementsState {
   return achievementsCache;
 }
 export function getServerAchievementsSnapshot(): AchievementsState {
-  return {};
+  return EMPTY_ACHIEVEMENTS_STATE;
 }
 export function isAchievementUnlocked(id: AchievementId): boolean {
   return achievementsCache[id] !== undefined;
@@ -176,6 +210,9 @@ export function isAchievementUnlocked(id: AchievementId): boolean {
 
 export function getDailyStreak(): DailyStreakState {
   return dailyStreakCache;
+}
+export function getServerDailyStreakSnapshot(): DailyStreakState {
+  return EMPTY_DAILY_STREAK_STATE;
 }
 
 export function getCategoryPlayCounts(): Record<string, number> {
@@ -187,6 +224,77 @@ export function getTotalPlayCount(): number {
 }
 export function getServerTotalPlayCountSnapshot(): number {
   return 0;
+}
+
+export function getGamePlayCounts(): Record<string, number> {
+  return gamePlayCountsCache;
+}
+
+export function getMostPlayedGameSlug(): string | null {
+  const entries = Object.entries(gamePlayCountsCache);
+  if (entries.length === 0) {
+    return null;
+  }
+  return entries.reduce((max, entry) => (entry[1] > max[1] ? entry : max))[0];
+}
+
+function ensureFreshTodayPlayCount(): TodayPlayCountState {
+  const today = todayLocalDateString();
+  if (todayPlayCountCache.date !== today) {
+    todayPlayCountCache = { date: today, count: 0 };
+  }
+  return todayPlayCountCache;
+}
+
+export function getTodayPlayCount(): number {
+  return ensureFreshTodayPlayCount().count;
+}
+export function getServerTodayPlayCountSnapshot(): number {
+  return 0;
+}
+
+export function getAchievementRate(): number {
+  const total = Object.keys(ACHIEVEMENTS).length;
+  return total === 0 ? 0 : Object.keys(achievementsCache).length / total;
+}
+
+function computeLevelProgress(xp: number): LevelProgress {
+  const level = levelForXp(xp);
+  const levelBaseXp = xpForLevel(level);
+  const nextLevelXp = xpForLevel(level + 1);
+  const xpIntoLevel = xp - levelBaseXp;
+  const xpNeededForLevel = nextLevelXp - levelBaseXp;
+  return {
+    level,
+    xpIntoLevel,
+    xpNeededForLevel,
+    percent:
+      xpNeededForLevel === 0 ? 100 : (xpIntoLevel / xpNeededForLevel) * 100,
+  };
+}
+
+// Cached and only recomputed when xpCache actually changes — useSyncExternalStore
+// re-invokes getSnapshot on every render, and a fresh object reference each
+// time (even with identical field values) makes React think the store
+// changed, causing an infinite re-render loop.
+let levelProgressCacheXp = xpCache;
+let levelProgressCache = computeLevelProgress(xpCache);
+
+export function getLevelProgress(): LevelProgress {
+  if (levelProgressCacheXp !== xpCache) {
+    levelProgressCacheXp = xpCache;
+    levelProgressCache = computeLevelProgress(xpCache);
+  }
+  return levelProgressCache;
+}
+const SERVER_LEVEL_PROGRESS_SNAPSHOT: LevelProgress = {
+  level: 1,
+  xpIntoLevel: 0,
+  xpNeededForLevel: xpForLevel(2) - xpForLevel(1),
+  percent: 0,
+};
+export function getServerLevelProgressSnapshot(): LevelProgress {
+  return SERVER_LEVEL_PROGRESS_SNAPSHOT;
 }
 
 function addXP(amount: number): void {
@@ -258,6 +366,16 @@ export function recordSessionStart(
 ): void {
   totalPlayCountCache += 1;
   writeNumber(TOTAL_PLAY_COUNT_KEY, totalPlayCountCache);
+
+  gamePlayCountsCache = {
+    ...gamePlayCountsCache,
+    [gameSlug]: (gamePlayCountsCache[gameSlug] ?? 0) + 1,
+  };
+  writeJson(GAME_PLAY_COUNTS_KEY, gamePlayCountsCache);
+
+  const freshToday = ensureFreshTodayPlayCount();
+  todayPlayCountCache = { date: freshToday.date, count: freshToday.count + 1 };
+  writeJson(TODAY_PLAY_COUNT_KEY, todayPlayCountCache);
 
   if (categorySlug) {
     categoryPlayCountsCache = {
