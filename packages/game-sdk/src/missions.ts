@@ -39,8 +39,10 @@ export interface MissionDefinition {
 }
 
 // Type-specific factories — adding a new mission is one call to one of
-// these, never a new branch in the engine below.
-function playCountMission(
+// these, never a new branch in the engine below. Exported so
+// weekly-missions.ts can build its own mission pool from the same factories
+// instead of redefining this shape.
+export function playCountMission(
   id: string,
   title: string,
   gameSlug: string,
@@ -60,7 +62,7 @@ function playCountMission(
   };
 }
 
-function categoryPlayMission(
+export function categoryPlayMission(
   id: string,
   title: string,
   categorySlug: string,
@@ -80,7 +82,7 @@ function categoryPlayMission(
   };
 }
 
-function anyPlayMission(
+export function anyPlayMission(
   id: string,
   title: string,
   target: number,
@@ -98,7 +100,7 @@ function anyPlayMission(
   };
 }
 
-function scoreMission(
+export function scoreMission(
   id: string,
   title: string,
   gameSlug: string,
@@ -121,7 +123,7 @@ function scoreMission(
 // For games that only call reportScore on an actual win (e.g. Memory), the
 // score-report itself is the "clear" signal — no separate win/loss flag
 // needed.
-function clearMission(
+export function clearMission(
   id: string,
   title: string,
   gameSlug: string,
@@ -189,7 +191,9 @@ export function getMissionDefinition(id: string): MissionDefinition | undefined 
 
 // Deterministic per (date, tier) — same seed always picks the same 3
 // missions, so a reload or a second tab never shows a different set.
-function seedFromDate(dateStr: string): number {
+// Exported so weekly-missions.ts can seed from an ISO week string instead
+// of a date string using the exact same hash/PRNG/shuffle.
+export function seedFromDate(dateStr: string): number {
   let h = 0;
   for (let i = 0; i < dateStr.length; i++) {
     h = (h * 31 + dateStr.charCodeAt(i)) >>> 0;
@@ -197,7 +201,7 @@ function seedFromDate(dateStr: string): number {
   return h;
 }
 
-function mulberry32(seed: number): () => number {
+export function mulberry32(seed: number): () => number {
   let state = seed;
   return () => {
     state |= 0;
@@ -208,7 +212,7 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function pickThree(pool: MissionDefinition[], rng: () => number): string[] {
+export function pickThree(pool: MissionDefinition[], rng: () => number): string[] {
   const ids = pool.map((m) => m.id);
   for (let i = ids.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
@@ -217,7 +221,9 @@ function pickThree(pool: MissionDefinition[], rng: () => number): string[] {
   return ids.slice(0, 3);
 }
 
-function todayLocalDateString(): string {
+// Exported — weekly-missions.ts's "has the ISO week rolled over" check needs
+// the same local-date notion "today" uses, just compared at week grain.
+export function todayLocalDateString(): string {
   return new Date().toLocaleDateString("en-CA");
 }
 

@@ -313,7 +313,11 @@ function addXP(amount: number): void {
 // just emits "a mission completed" and this module reacts. That keeps XP
 // bookkeeping in one place no matter how many features eventually award it.
 subscribeEngagementEvents((event) => {
-  if (event.type === "mission-completed") {
+  if (
+    event.type === "mission-completed" ||
+    event.type === "weekly-mission-completed" ||
+    event.type === "daily-reward-claimed"
+  ) {
     addXP(event.xp);
   }
 });

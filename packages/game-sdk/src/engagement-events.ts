@@ -7,7 +7,9 @@ export type EngagementEvent =
   | { type: "achievement-unlocked"; achievementId: string; nameKo: string }
   | { type: "level-up"; newLevel: number }
   | { type: "new-record"; gameSlug: string; score: number }
-  | { type: "mission-completed"; missionId: string; title: string; xp: number };
+  | { type: "mission-completed"; missionId: string; title: string; xp: number }
+  | { type: "weekly-mission-completed"; missionId: string; title: string; xp: number }
+  | { type: "daily-reward-claimed"; xp: number; streakDay: number };
 
 type Listener = (event: EngagementEvent) => void;
 

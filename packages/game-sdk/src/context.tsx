@@ -16,6 +16,8 @@ import {
 } from "./local-storage";
 import { recordMissionScoreReport } from "./missions";
 import { NicknameModal } from "./nickname-modal";
+import { recordSeasonNewBest, recordSeasonScoreReport } from "./season";
+import { recordWeeklyMissionScoreReport } from "./weekly-missions";
 
 // The one thing that's genuinely platform-specific (the actual network
 // call). Everything else — "is this a new personal best?", the nickname
@@ -54,10 +56,13 @@ export function GameSDKProvider({
     // "is this worth a nickname prompt + leaderboard submission?".
     recordScoreReport(gameSlug, score);
     recordMissionScoreReport(gameSlug, score);
+    recordWeeklyMissionScoreReport(gameSlug, score);
+    recordSeasonScoreReport();
 
     if (score > getBestScore(gameSlug)) {
       setBestScore(gameSlug, score);
       recordNewBest(gameSlug, score);
+      recordSeasonNewBest();
       setPending({ gameSlug, score });
     }
   }, []);

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { CategoryLeaderboard } from "@/components/category-leaderboard";
 import { GameCard } from "@/components/game-card";
 import { GameSection } from "@/components/game-section";
 import { selectHotSlugs } from "@/lib/game-sections";
@@ -84,6 +85,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="mt-12">
           <GameSection title="전체 게임" games={rest} hotSlugs={hotSlugs} />
         </div>
+
+        <CategoryLeaderboard
+          games={filtered
+            .filter((game) => game.status === "ACTIVE")
+            .map((game) => ({ slug: game.slug, title: game.title }))}
+        />
       </div>
     </main>
   );

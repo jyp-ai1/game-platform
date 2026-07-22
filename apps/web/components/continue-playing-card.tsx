@@ -1,6 +1,12 @@
 "use client";
 
-import { getServerHasSaveSnapshot, hasSave, subscribeSave } from "@game-platform/game-sdk";
+import {
+  getBestScore,
+  getLevel,
+  getServerHasSaveSnapshot,
+  hasSave,
+  subscribeSave,
+} from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
 import { Gamepad2 } from "lucide-react";
@@ -47,6 +53,11 @@ export function ContinuePlayingCard({ game }: { game: Game }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="font-semibold">{game.title}</h3>
         <p className="text-xs text-muted-foreground">
+          Lv.{getLevel()}
+          {getBestScore(game.slug) > 0
+            ? ` · 최고 ${getBestScore(game.slug).toLocaleString()}점`
+            : ""}
+          {" · "}
           {formatRelativeTime(lastPlayedAt)}
         </p>
 

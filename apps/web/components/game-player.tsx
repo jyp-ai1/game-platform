@@ -37,6 +37,13 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       import("@game-platform/game-breakout").then((mod) => mod.BreakoutGame),
     { ssr: false, loading: Loading }
   ),
+  "arkanoid-dx": dynamic(
+    () =>
+      import("@game-platform/game-arkanoid-dx").then(
+        (mod) => mod.ArkanoidDxGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
   memory: dynamic(
     () => import("@game-platform/game-memory").then((mod) => mod.MemoryGame),
     { ssr: false, loading: Loading }
@@ -46,6 +53,11 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       import("@game-platform/game-minesweeper").then(
         (mod) => mod.MinesweeperGame
       ),
+    { ssr: false, loading: Loading }
+  ),
+  samegame: dynamic(
+    () =>
+      import("@game-platform/game-samegame").then((mod) => mod.SameGameGame),
     { ssr: false, loading: Loading }
   ),
   "maze-runner": dynamic(

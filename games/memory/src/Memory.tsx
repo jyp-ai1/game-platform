@@ -123,7 +123,7 @@ export function MemoryGame() {
 
   return (
     <div className="relative flex flex-col items-center gap-4">
-      <SaveIndicator status={saveStatus} />
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Moves" value={state.moves} />
         <Button

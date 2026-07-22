@@ -2,7 +2,10 @@ import { CategoryLinks } from "@/components/category-links";
 import { DailyChallengeCard } from "@/components/daily-challenge-card";
 import { GameCarousel } from "@/components/game-carousel";
 import { Hero } from "@/components/hero";
+import { PlayerRankCard } from "@/components/player-rank-card";
 import { RecentlyPlayedSection } from "@/components/recently-played-section";
+import { SeasonCard } from "@/components/season-card";
+import { WeeklyMissionCard } from "@/components/weekly-mission-card";
 import {
   selectByCategorySlug,
   selectHotSlugs,
@@ -27,6 +30,9 @@ export default async function Home() {
       <RecentlyPlayedSection games={games} />
 
       <DailyChallengeCard />
+      <WeeklyMissionCard />
+      <SeasonCard />
+      <PlayerRankCard games={games} />
 
       <GameCarousel
         title="🕹️ 추억의 오락실"

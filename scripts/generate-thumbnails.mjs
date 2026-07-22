@@ -382,6 +382,57 @@ function iconSpaceImpact(accent) {
     </g>`;
 }
 
+// A cluster of colored square tiles with one group of same-color tiles
+// highlighted mid-clear (fading opacity + a couple already-cleared gaps) --
+// visually distinct from Bubble Pop's circles and Color Match's swatch row.
+function iconSameGame(accent) {
+  const colors = [accent, "#ef4444", BRAND_AMBER, "#22c55e"];
+  const grid = [
+    [0, 0, 1, 2], [0, 1, 1, 2], [3, 1, 1, null], [3, 3, 2, 2],
+  ];
+  const tiles = [];
+  const size = 56;
+  const gap = 6;
+  grid.forEach((row, r) => {
+    row.forEach((colorIndex, c) => {
+      if (colorIndex === null) {
+        return;
+      }
+      const fading = r === 1 && (c === 1 || c === 2);
+      tiles.push(
+        `<rect x="${c * (size + gap)}" y="${r * (size + gap)}" width="${size}" height="${size}" rx="8" fill="${colors[colorIndex]}" opacity="${fading ? 0.35 : 1}"/>`
+      );
+    });
+  });
+  return `
+    <g transform="translate(362,30)">
+      ${tiles.join("\n")}
+    </g>`;
+}
+
+// Same bricks/ball/paddle composition as iconBreakout but with a falling
+// power-up capsule ("W") -- the one visual element Breakout's icon doesn't
+// have, mirroring the one real gameplay differentiator (power-ups + stages)
+// this game adds over Breakout.
+function iconArkanoidDx(accent) {
+  const bricks = [];
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 5; col++) {
+      bricks.push(
+        `<rect x="${col * 58}" y="${row * 32}" width="50" height="22" rx="4" fill="${accent}" opacity="${1 - row * 0.25}"/>`
+      );
+    }
+  }
+  return `
+    <g transform="translate(362,50)">
+      ${bricks.join("\n")}
+      <circle cx="145" cy="190" r="12" fill="${FG}"/>
+      <rect x="95" y="225" width="100" height="16" rx="8" fill="${accent}"/>
+      <circle cx="255" cy="130" r="16" fill="#3b82f6"/>
+      <text x="255" y="136" font-size="16" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial, sans-serif">W</text>
+    </g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -405,6 +456,8 @@ const games = [
   { slug: "tetris", title: "Tetris", accent: BRAND_PRIMARY, icon: iconTetris },
   { slug: "gold-miner", title: "Gold Miner", accent: BRAND_AMBER, icon: iconGoldMiner },
   { slug: "space-impact", title: "Space Impact", accent: "#22c55e", icon: iconSpaceImpact },
+  { slug: "samegame", title: "SameGame", accent: "#a855f7", icon: iconSameGame },
+  { slug: "arkanoid-dx", title: "Arkanoid DX", accent: BRAND_AMBER, icon: iconArkanoidDx },
 ];
 
 function buildSvg({ title, accent, icon }) {

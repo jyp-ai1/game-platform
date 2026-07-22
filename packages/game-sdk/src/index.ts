@@ -6,6 +6,7 @@ export {
 } from "./context";
 export {
   getBestScore,
+  getDeviceId,
   getLastNickname,
   getServerNicknameSnapshot,
   getServerSoundEnabledSnapshot,
@@ -74,6 +75,7 @@ export {
 } from "./missions";
 export {
   clearSave,
+  getSaveUpdatedAt,
   getServerHasSaveSnapshot,
   hasSave,
   loadGame,
@@ -90,3 +92,30 @@ export {
 } from "./use-resumable-game";
 export { ResumeDialog } from "./resume-dialog";
 export { SaveIndicator } from "./save-indicator";
+export {
+  CURRENT_SEASON,
+  getSeasonBadge,
+  getSeasonLevel,
+  getSeasonProgress,
+  getSeasonXP,
+  getServerSeasonLevelSnapshot,
+  getServerSeasonProgressSnapshot,
+  getServerSeasonXPSnapshot,
+  recordSeasonNewBest,
+  recordSeasonScoreReport,
+  recordSeasonSessionStart,
+  subscribeSeason,
+  type SeasonBadgeTier,
+} from "./season";
+export { claimDailyReward, hasClaimedTodayReward } from "./daily-reward";
+export {
+  getServerWeeklyMissionSnapshot,
+  getWeeklyMission,
+  getWeeklyMissionDefinition,
+  isWeeklyMissionComplete,
+  isoWeekString,
+  recordWeeklyMissionScoreReport,
+  recordWeeklyMissionSessionStart,
+  subscribeWeeklyMission,
+  type WeeklyMissionState,
+} from "./weekly-missions";

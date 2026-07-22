@@ -179,7 +179,7 @@ export function SnakeGame() {
 
   return (
     <div className="relative flex flex-col items-center gap-4">
-      <SaveIndicator status={saveStatus} />
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
         <Button

@@ -1,13 +1,21 @@
 "use client";
 
+import { getDeviceId } from "@game-platform/game-sdk";
 import { cn } from "@game-platform/ui";
 import { useEffect, useState } from "react";
 
 import {
   getLeaderboard,
+  getMyRank,
   type LeaderboardEntry,
   type LeaderboardPeriod,
 } from "@/lib/supabase/scores";
+
+const PERIOD_LABEL: Record<LeaderboardPeriod, string> = {
+  today: "오늘",
+  weekly: "주간",
+  all: "전체",
+};
 
 // entries: null while loading. Keyed by gameSlug+period from the parent so
 // changing the tab remounts this with a fresh `null` instead of needing an
@@ -20,6 +28,7 @@ function LeaderboardList({
   period: LeaderboardPeriod;
 }) {
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
+  const [myRank, setMyRank] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -28,6 +37,15 @@ function LeaderboardList({
         setEntries(data);
       }
     });
+    // Best-effort -- a failed rank lookup should never break the leaderboard
+    // itself (e.g. get_my_rank not deployed yet in a given environment).
+    getMyRank(gameSlug, getDeviceId(), period)
+      .then((rank) => {
+        if (active) {
+          setMyRank(rank);
+        }
+      })
+      .catch(() => {});
     return () => {
       active = false;
     };
@@ -46,20 +64,27 @@ function LeaderboardList({
   }
 
   return (
-    <ol className="max-h-80 divide-y overflow-y-auto rounded-lg border">
-      {entries.map((entry, index) => (
-        <li
-          key={`${entry.nickname}-${index}`}
-          className="flex items-center justify-between px-4 py-2 text-sm"
-        >
-          <span className="flex items-center gap-3">
-            <span className="w-5 text-muted-foreground">{index + 1}</span>
-            {entry.nickname}
-          </span>
-          <span className="font-semibold tabular-nums">{entry.score}</span>
-        </li>
-      ))}
-    </ol>
+    <>
+      <ol className="max-h-80 divide-y overflow-y-auto rounded-lg border">
+        {entries.map((entry, index) => (
+          <li
+            key={`${entry.nickname}-${index}`}
+            className="flex items-center justify-between px-4 py-2 text-sm"
+          >
+            <span className="flex items-center gap-3">
+              <span className="w-5 text-muted-foreground">{index + 1}</span>
+              {entry.nickname}
+            </span>
+            <span className="font-semibold tabular-nums">{entry.score}</span>
+          </li>
+        ))}
+      </ol>
+      {myRank !== null ? (
+        <p className="mt-2 text-sm font-medium text-primary">
+          내 순위: #{myRank}
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -69,7 +94,7 @@ export function Leaderboard({ gameSlug }: { gameSlug: string }) {
   return (
     <div>
       <div className="flex gap-1 rounded-lg bg-muted p-1">
-        {(["today", "all"] as const).map((tab) => (
+        {(["today", "weekly", "all"] as const).map((tab) => (
           <button
             key={tab}
             type="button"
@@ -78,10 +103,10 @@ export function Leaderboard({ gameSlug }: { gameSlug: string }) {
               "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               period === tab
                 ? "bg-background shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-slate-300 hover:text-foreground"
             )}
           >
-            {tab === "today" ? "오늘" : "전체"}
+            {PERIOD_LABEL[tab]}
           </button>
         ))}
       </div>

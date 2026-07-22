@@ -1,0 +1,1 @@
+export { ArkanoidDxGame } from "./ArkanoidDx";

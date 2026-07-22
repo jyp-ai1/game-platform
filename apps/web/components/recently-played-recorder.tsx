@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  claimDailyReward,
   recordMissionSessionStart,
+  recordSeasonSessionStart,
   recordSessionStart,
+  recordWeeklyMissionSessionStart,
 } from "@game-platform/game-sdk";
 import { useEffect } from "react";
 
@@ -19,7 +22,10 @@ export function RecentlyPlayedRecorder({
   useEffect(() => {
     recordPlayed(slug);
     recordSessionStart(slug, categorySlug);
+    claimDailyReward();
     recordMissionSessionStart(slug, categorySlug);
+    recordWeeklyMissionSessionStart(slug, categorySlug);
+    recordSeasonSessionStart();
     // Best-effort — a failed play-count increment should never break the page.
     incrementPlayCount(slug).catch(() => {});
   }, [slug, categorySlug]);

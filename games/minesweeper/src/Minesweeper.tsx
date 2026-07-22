@@ -170,7 +170,7 @@ export function MinesweeperGame() {
 
   return (
     <div className="relative flex flex-col items-center gap-4">
-      <SaveIndicator status={saveStatus} />
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
           <div className="text-[10px] font-medium uppercase text-muted-foreground">

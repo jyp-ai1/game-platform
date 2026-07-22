@@ -34,6 +34,19 @@ function toastContent(event: EngagementEvent): {
         title: "미션 완료!",
         subtitle: `${event.title} · +${event.xp} XP`,
       };
+    case "weekly-mission-completed":
+      return {
+        emoji: "🗓️",
+        title: "주간 미션 완료!",
+        subtitle: `${event.title} · +${event.xp} XP`,
+      };
+    case "daily-reward-claimed":
+      return {
+        emoji: "🎁",
+        title:
+          event.streakDay >= 7 ? "7일 연속 출석 보너스!" : "출석 보상 획득!",
+        subtitle: `${event.streakDay}일차 · +${event.xp} XP`,
+      };
   }
 }
 

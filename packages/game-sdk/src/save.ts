@@ -2,13 +2,18 @@
 // through this module (never touching localStorage directly). Each game
 // owns its own serializable reducer state; this module owns persistence,
 // versioning, and per-slug reactivity.
+import { getDeviceId } from "./local-storage";
+
 const SAVE_KEY_PREFIX = "play29:save:";
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export interface SaveEnvelope<T = unknown> {
   version: number;
   updatedAt: string;
+  /** Which device wrote this save — Cloud Save (Sprint 11) needs this to
+   * resolve multi-device conflicts; added in v2. */
+  deviceId: string;
   state: T;
 }
 
@@ -34,10 +39,13 @@ function writeEnvelope(slug: string, envelope: SaveEnvelope): void {
   }
 }
 
-// Migrations keyed by "version to migrate FROM". Empty today — only v1
-// exists — but this shape is load-bearing: a future version bump adds an
-// entry here (e.g. `1: migrateV1ToV2`) without touching loadGame's call site.
-const MIGRATIONS: Record<number, (envelope: SaveEnvelope) => SaveEnvelope> = {};
+// Migrations keyed by "version to migrate FROM". v1 envelopes predate the
+// deviceId field — backfill it from this device's id (the only reasonable
+// value: a v1 save was, by definition, written by whichever device is
+// loading it now, since Sprint 9 had no cross-device sync).
+const MIGRATIONS: Record<number, (envelope: SaveEnvelope) => SaveEnvelope> = {
+  1: (envelope) => ({ ...envelope, version: 2, deviceId: getDeviceId() }),
+};
 
 function migrate(envelope: SaveEnvelope): SaveEnvelope | null {
   let current = envelope;
@@ -81,6 +89,7 @@ export function saveGame<T>(slug: string, state: T): void {
   const envelope: SaveEnvelope<T> = {
     version: SAVE_VERSION,
     updatedAt: new Date().toISOString(),
+    deviceId: getDeviceId(),
     state,
   };
   saveCache.set(slug, envelope);
@@ -99,6 +108,12 @@ export function loadGame<T>(slug: string): T | null {
     return null;
   }
   return migrated.state as T;
+}
+
+/** For the Save Indicator's "저장됨 · n초 전" display — null if no save exists. */
+export function getSaveUpdatedAt(slug: string): string | null {
+  const envelope = getCachedEnvelope(slug);
+  return envelope ? envelope.updatedAt : null;
 }
 
 export function clearSave(slug: string): void {
