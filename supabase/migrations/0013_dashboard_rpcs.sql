@@ -72,8 +72,9 @@ as $$
     ),
     'returning_users', (
       select count(distinct ae.device_id)
-      from public.analytics_events ae, since
-      join public.players p on p.device_id = ae.device_id
+      from since
+      cross join public.analytics_events ae
+      inner join public.players p on p.device_id = ae.device_id
       where ae.created_at >= since.t
         and ae.device_id is not null
         and p.first_seen < since.t
