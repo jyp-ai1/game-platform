@@ -1,4 +1,87 @@
 -- Sprint 11-5 T6: Extended operational dashboard KPIs.
+-- Includes _period_since + get_dashboard_kpis so this file runs without 0013.
+-- (0013 still recommended for funnel / cohort / heatmap RPCs.)
+
+create or replace function public._period_since(p_period text)
+returns timestamptz
+language sql
+immutable
+as $$
+  select case p_period
+    when 'today' then date_trunc('day', now())
+    when 'week' then date_trunc('week', now())
+    when 'month' then date_trunc('month', now())
+    else '1970-01-01'::timestamptz
+  end;
+$$;
+
+create or replace function public.get_dashboard_kpis(p_period text default 'today')
+returns json
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  with since as (select public._period_since(p_period) as t)
+  select json_build_object(
+    'dau', (
+      select count(distinct device_id)
+      from public.analytics_events, since
+      where device_id is not null
+        and created_at >= date_trunc('day', now())
+    ),
+    'wau', (
+      select count(distinct device_id)
+      from public.analytics_events
+      where device_id is not null
+        and created_at >= date_trunc('week', now())
+    ),
+    'mau', (
+      select count(distinct device_id)
+      from public.analytics_events
+      where device_id is not null
+        and created_at >= date_trunc('month', now())
+    ),
+    'session_starts', (
+      select count(*)
+      from public.analytics_events, since
+      where event_type = 'session_start'
+        and created_at >= since.t
+    ),
+    'game_starts', (
+      select count(*)
+      from public.analytics_events, since
+      where event_type = 'game_start'
+        and created_at >= since.t
+    ),
+    'ranking_submits', (
+      select count(*)
+      from public.analytics_events, since
+      where event_type = 'ranking_submit'
+        and created_at >= since.t
+    ),
+    'errors', (
+      select count(*)
+      from public.analytics_events, since
+      where event_type = 'error'
+        and created_at >= since.t
+    ),
+    'new_users', (
+      select count(*)
+      from public.players, since
+      where first_seen >= since.t
+    ),
+    'returning_users', (
+      select count(distinct ae.device_id)
+      from public.analytics_events ae, since
+      join public.players p on p.device_id = ae.device_id
+      where ae.created_at >= since.t
+        and ae.device_id is not null
+        and p.first_seen < since.t
+    )
+  )
+  from since;
+$$;
 
 create or replace function public.get_dashboard_kpis_extended(p_period text default 'today')
 returns json
