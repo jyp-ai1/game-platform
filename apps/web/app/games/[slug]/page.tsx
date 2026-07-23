@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { JsonLdScript } from "@/components/json-ld-script";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GamePlayer } from "@/components/game-player";
 import { GameSection } from "@/components/game-section";
@@ -16,6 +17,12 @@ import { ScreenshotGallery } from "@/components/screenshot-gallery";
 import { difficultyVariant } from "@/lib/difficulty";
 import { selectHotSlugs, selectRelated } from "@/lib/game-sections";
 import { isPlayableSlug } from "@/lib/playable-games";
+import {
+  breadcrumbJsonLd,
+  buildGameMetadata,
+  gameJsonLd,
+  softwareApplicationJsonLd,
+} from "@/lib/seo";
 import { getGameBySlug, getGames } from "@/lib/supabase/games";
 
 interface GamePageProps {
@@ -33,24 +40,10 @@ export async function generateMetadata({
   const game = await getGameBySlug(slug);
 
   if (!game) {
-    return { title: "Game Not Found" };
+    return { title: "Game Not Found", robots: { index: false, follow: false } };
   }
 
-  return {
-    title: game.title,
-    description: game.description,
-    keywords: game.tags,
-    openGraph: {
-      title: game.title,
-      description: game.description,
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: game.title,
-      description: game.description,
-    },
-  };
+  return buildGameMetadata(game);
 }
 
 export default async function GamePage({ params }: GamePageProps) {
@@ -71,19 +64,16 @@ export default async function GamePage({ params }: GamePageProps) {
 
   return (
     <main className="flex flex-1 flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "VideoGame",
-            name: game.title,
-            description: game.description,
-            genre: game.category?.name,
-            applicationCategory: "Game",
-            ...(game.thumbnailUrl ? { image: game.thumbnailUrl } : {}),
-          }),
-        }}
+      <JsonLdScript
+        data={[
+          gameJsonLd(game),
+          softwareApplicationJsonLd(game),
+          breadcrumbJsonLd([
+            { name: "홈", path: "/" },
+            { name: "게임", path: "/games" },
+            { name: game.title, path: `/games/${game.slug}` },
+          ]),
+        ]}
       />
 
       <div className="relative h-48 w-full overflow-hidden bg-muted sm:h-64">

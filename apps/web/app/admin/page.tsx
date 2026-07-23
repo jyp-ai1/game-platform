@@ -10,7 +10,7 @@ import { FunnelChart, type FunnelData } from "@/components/admin/funnel-chart";
 import {
   fetchActivityHeatmap,
   fetchCohortRetention,
-  fetchDashboardKpis,
+  fetchDashboardKpisExtended,
   fetchDailyStats,
   fetchPlayerFunnel,
   fetchTodayStats,
@@ -48,7 +48,7 @@ export default async function AdminDashboardPage({
   const period = parsePeriod(periodParam);
 
   const [kpis, funnel, cohort, heatmap, topGames, daily, live] = await Promise.all([
-    fetchDashboardKpis(period),
+    fetchDashboardKpisExtended(period),
     fetchPlayerFunnel(period),
     fetchCohortRetention(14),
     fetchActivityHeatmap(30),
@@ -83,7 +83,7 @@ export default async function AdminDashboardPage({
 
       {!kpis ? (
         <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
-          SUPABASE_SECRET_KEY 또는 0010/0012/0013 마이그레이션을 확인하세요.
+          SUPABASE_SECRET_KEY 또는 0010/0012/0013/0016 마이그레이션을 확인하세요.
         </p>
       ) : (
         <>
@@ -97,6 +97,18 @@ export default async function AdminDashboardPage({
             <StatCard label="랭킹 등록" value={kpis.ranking_submits} />
             <StatCard label="오류" value={kpis.errors} />
           </section>
+
+          {"stickiness" in kpis ? (
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+              <StatCard label="Stickiness (DAU/MAU %)" value={`${kpis.stickiness}%`} />
+              <StatCard label="Avg Session Events" value={kpis.avg_session_events} />
+              <StatCard label="Avg Play Time (sec)" value={kpis.avg_play_time_sec} />
+              <StatCard label="Avg Score" value={kpis.avg_score} />
+              <StatCard label="Game Completions" value={kpis.game_completions} />
+              <StatCard label="Save → Resume %" value={`${kpis.resume_rate}%`} />
+              <StatCard label="Saves / Resumes" value={`${kpis.save_count} / ${kpis.resume_count}`} />
+            </section>
+          ) : null}
         </>
       )}
 

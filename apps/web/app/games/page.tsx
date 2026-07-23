@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 
 import { GameSection } from "@/components/game-section";
 import { selectHotSlugs } from "@/lib/game-sections";
+import { buildGamesListMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 import { getGames } from "@/lib/supabase/games";
 
-export const metadata: Metadata = {
-  title: "전체 게임",
-};
+export const metadata: Metadata = buildGamesListMetadata();
 
 export const revalidate = 60;
 

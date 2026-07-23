@@ -6,7 +6,13 @@ import { notFound } from "next/navigation";
 import { CategoryLeaderboard } from "@/components/category-leaderboard";
 import { GameCard } from "@/components/game-card";
 import { GameSection } from "@/components/game-section";
+import { JsonLdScript } from "@/components/json-ld-script";
 import { selectHotSlugs } from "@/lib/game-sections";
+import {
+  breadcrumbJsonLd,
+  buildCategoryMetadata,
+  categoryJsonLd,
+} from "@/lib/seo";
 import { getCategoryBySlug } from "@/lib/supabase/categories";
 import { getGames } from "@/lib/supabase/games";
 
@@ -21,7 +27,10 @@ export async function generateMetadata({
 }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
-  return { title: category ? `${category.name} 게임` : "카테고리" };
+  if (!category) {
+    return { title: "카테고리" };
+  }
+  return buildCategoryMetadata(category);
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -46,6 +55,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <main className="flex flex-1 flex-col">
+      <JsonLdScript
+        data={[
+          categoryJsonLd(category),
+          breadcrumbJsonLd([
+            { name: "홈", path: "/" },
+            { name: category.name, path: `/categories/${category.slug}` },
+          ]),
+        ]}
+      />
       <div className="relative h-40 w-full overflow-hidden bg-muted sm:h-56">
         {category.bannerUrl ? (
           <Image

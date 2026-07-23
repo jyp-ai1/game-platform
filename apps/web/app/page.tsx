@@ -17,6 +17,9 @@ import {
 } from "@/lib/game-sections";
 import { fetchActiveBanners, fetchActiveFeatured, fetchActiveNotices } from "@/lib/supabase/cms";
 import { getGames } from "@/lib/supabase/games";
+import { buildHomeMetadata } from "@/lib/seo";
+
+export const metadata = buildHomeMetadata();
 
 // Revalidate periodically so games added/edited in Supabase show up
 // without requiring a new deploy.

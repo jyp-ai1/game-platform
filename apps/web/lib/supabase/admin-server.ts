@@ -88,6 +88,17 @@ export type DashboardKpis = {
   returning_users: number;
 };
 
+export type DashboardKpisExtended = DashboardKpis & {
+  stickiness: number;
+  avg_session_events: number;
+  avg_play_time_sec: number;
+  avg_score: number;
+  game_completions: number;
+  save_count: number;
+  resume_count: number;
+  resume_rate: number;
+};
+
 export type DashboardPeriod = "today" | "week" | "month" | "all";
 
 export async function fetchDashboardKpis(
@@ -105,6 +116,55 @@ export async function fetchDashboardKpis(
   }
 
   return data as DashboardKpis;
+}
+
+export async function fetchDashboardKpisExtended(
+  period: DashboardPeriod = "today"
+): Promise<DashboardKpisExtended | null> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("get_dashboard_kpis_extended", {
+    p_period: period,
+  });
+  if (error) {
+    console.error("get_dashboard_kpis_extended:", error.message);
+    return fetchDashboardKpis(period) as Promise<DashboardKpisExtended | null>;
+  }
+
+  return data as DashboardKpisExtended;
+}
+
+export type SeoAuditStats = {
+  sitemap_pages: number;
+  indexable_games: number;
+  indexable_categories: number;
+  meta_missing: number;
+  og_missing: number;
+  hidden_games: number;
+  maintenance_games: number;
+  verification: Record<string, string> | null;
+  last_lighthouse: {
+    url: string;
+    performance: number;
+    accessibility: number;
+    best_practices: number;
+    seo: number;
+    created_at: string;
+  } | null;
+};
+
+export async function fetchSeoAuditStats(): Promise<SeoAuditStats | null> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("get_seo_audit_stats");
+  if (error) {
+    console.error("get_seo_audit_stats:", error.message);
+    return null;
+  }
+
+  return data as SeoAuditStats;
 }
 
 export async function fetchPlayerFunnel(
