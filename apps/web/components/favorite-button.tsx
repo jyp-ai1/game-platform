@@ -1,5 +1,6 @@
 "use client";
 
+import { getDeviceId } from "@game-platform/game-sdk";
 import { Button, cn } from "@game-platform/ui";
 import { Heart } from "lucide-react";
 import { useSyncExternalStore } from "react";
@@ -10,6 +11,7 @@ import {
   subscribeFavorites,
   toggleFavorite,
 } from "@/lib/local-storage";
+import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
 
 export function FavoriteButton({
   slug,
@@ -34,7 +36,14 @@ export function FavoriteButton({
       aria-pressed={favorite}
       onClick={(event) => {
         event.preventDefault();
+        const adding = !favorite;
         toggleFavorite(slug);
+        if (adding) {
+          trackAnalyticsEvent("favorite", {
+            gameSlug: slug,
+            deviceId: getDeviceId(),
+          }).catch(() => {});
+        }
       }}
     >
       <Heart className={cn(favorite && "fill-current text-destructive")} />

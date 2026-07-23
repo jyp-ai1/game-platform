@@ -4,15 +4,25 @@ export type AnalyticsEventType =
   | "session_start"
   | "game_start"
   | "game_end"
+  | "game_pause"
+  | "game_resume"
   | "game_over"
   | "score_submit"
+  | "ranking_submit"
   | "achievement_unlock"
   | "mission_complete"
+  | "weekly_mission_complete"
+  | "daily_reward"
   | "daily_reward_claim"
   | "save_created"
   | "resume"
+  | "favorite"
+  | "profile_open"
   | "error"
-  | "share";
+  | "share"
+  | "invite"
+  | "purchase"
+  | "ad_view";
 
 // Best-effort — analytics must never break gameplay.
 export async function trackAnalyticsEvent(

@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { ToastHost } from "@/components/toast/toast-host";
 import { siteConfig } from "@/lib/site-config";
 import { siteUrl } from "@/lib/site";
@@ -63,6 +64,7 @@ export default function RootLayout({
             during the very same initial commit, e.g. the "첫 게임 플레이"
             achievement on a hard-loaded game page). */}
         <ToastHost />
+        <AnalyticsBridge />
         <Header />
         {children}
         <Footer />

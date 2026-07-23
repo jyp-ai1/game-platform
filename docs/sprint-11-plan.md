@@ -39,7 +39,59 @@ Production (Cursor)         main push → Vercel → Smoke Test → PM Report
 
 ---
 
-## Epic 구조 (PM 확정)
+## Epic 구조 (PM 확정 v2 — 운영 플랫폼)
+
+| Epic | 이름 | 핵심 |
+|---|---|---|
+| **Epic 1** | Analytics Platform | analytics_events + 전 이벤트 SDK (진행 중) |
+| **Epic 2** | **CMS** | 추천게임 · 배너 · 공지 · 이벤트 · 노출관리 |
+| **Epic 3** | SEO & PWA | metadata · OG · JSON-LD · manifest · apple-touch-icon |
+| **Epic 4** | Performance | Lighthouse 95+ · CLS · Hydration |
+| **Epic 5** | Growth (Home) | Trending · Editor's Pick · Weekly Popular |
+| **Epic 6** | Game Operation | Hidden · Coming Soon · Featured · Maintenance |
+| **Epic 7** | QA | Lighthouse · Rich Results · 375/768/1440 |
+
+### Admin 확장 경로
+
+```
+/admin              Dashboard (Funnel · Cohort · Heatmap)
+/admin/analytics    Game Analytics
+/admin/games        Game Operation + /admin/game/[slug]
+/admin/players      Players (device_id)
+/admin/contents     CMS
+/admin/seo          SEO & PWA
+/admin/settings     Settings
+```
+
+---
+
+## T0~T8 (PM 우선순위 v2)
+
+| Task | 내용 | 상태 |
+|---|---|---|
+| **T0** | Analytics SDK + Admin 게이트 | 🟡 이벤트 대부분 연결 |
+| **T1** | Analytics SDK 완료 (game_start/end, ranking, achievement, mission, favorite, profile) | 🟡 game_pause/resume ⬜ |
+| **T2** | Admin Layout (좌측 메뉴 7개) | ✅ |
+| **T3** | Dashboard — DAU/WAU/MAU · Funnel · Cohort · Heatmap | ⬜ |
+| **T4** | Game Analytics `/admin/game/[slug]` | ⬜ |
+| **T5** | CMS (배너 · 공지 · 이벤트 · 추천 · 순서) | ⬜ |
+| **T6** | SEO & PWA 전면 | 🟡 manifest/lang |
+| **T7** | Performance | ⬜ |
+| **T8** | QA → Production | 🟡 |
+
+### Player Funnel (T3 Dashboard)
+
+```
+Session → Game Start → Game Complete → Ranking → Favorite
+```
+
+### Cohort Retention (T3)
+
+Day1/D7/D30 + 가입일별 Heatmap (players.first_seen 기준)
+
+---
+
+## Epic 구조 (PM 확정 v1 — archived)
 
 | Epic | 이름 | 핵심 산출물 |
 |---|---|---|

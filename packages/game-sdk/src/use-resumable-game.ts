@@ -3,6 +3,7 @@
 import { useRef, useState, type MutableRefObject } from "react";
 
 import { clearSave, hasSave, loadGame } from "./save";
+import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 
 export type ResumePhase = "resume-prompt" | "ready";
 
@@ -43,6 +44,7 @@ export function useResumableGame<State>(
   phaseRef.current = phase;
 
   function onResume(): void {
+    emitPlatformAnalyticsEvent({ type: "save-resumed", gameSlug: slug });
     setPhase("ready");
   }
 

@@ -1,12 +1,27 @@
 "use client";
 
-import { GameSDKProvider } from "@game-platform/game-sdk";
+import { GameSDKProvider, getDeviceId } from "@game-platform/game-sdk";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 
 import type { PlayableSlug } from "@/lib/playable-games";
-import { submitScore } from "@/lib/supabase/scores";
+import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
+import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
+
+async function submitScore(
+  gameSlug: string,
+  nickname: string,
+  score: number,
+  deviceId: string
+): Promise<void> {
+  await submitScoreRpc(gameSlug, nickname, score, deviceId);
+  trackAnalyticsEvent("ranking_submit", {
+    gameSlug,
+    deviceId,
+    metadata: { score, nickname },
+  }).catch(() => {});
+}
 
 function Loading() {
   return (

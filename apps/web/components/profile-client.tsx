@@ -3,6 +3,7 @@
 import {
   getLastNickname,
   getLevelProgress,
+  getDeviceId,
   getServerLevelProgressSnapshot,
   getServerNicknameSnapshot,
   setLastNickname,
@@ -11,13 +12,18 @@ import {
 } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button, Progress } from "@game-platform/ui";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
+import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
 import { useCountUp } from "@/lib/use-count-up";
 
 export function ProfileClient({ games }: { games: Game[] }) {
+  useEffect(() => {
+    trackAnalyticsEvent("profile_open", { deviceId: getDeviceId() }).catch(() => {});
+  }, []);
+
   const nickname = useSyncExternalStore(
     subscribeNickname,
     getLastNickname,

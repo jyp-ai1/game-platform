@@ -16,6 +16,7 @@ import {
 } from "./local-storage";
 import { recordMissionScoreReport } from "./missions";
 import { NicknameModal } from "./nickname-modal";
+import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 import { recordSeasonNewBest, recordSeasonScoreReport } from "./season";
 import { recordWeeklyMissionScoreReport } from "./weekly-missions";
 
@@ -51,6 +52,7 @@ export function GameSDKProvider({
   } | null>(null);
 
   const reportScore = useCallback((gameSlug: string, score: number) => {
+    emitPlatformAnalyticsEvent({ type: "game-end", gameSlug, score });
     // Engagement side effects (XP, achievement checks) run on every round,
     // not just personal bests — the best-score gate below only controls
     // "is this worth a nickname prompt + leaderboard submission?".

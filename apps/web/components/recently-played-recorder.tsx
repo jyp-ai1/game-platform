@@ -34,6 +34,10 @@ export function RecentlyPlayedRecorder({
       gameSlug: slug,
       deviceId: getDeviceId(),
     }).catch(() => {});
+    trackAnalyticsEvent("game_start", {
+      gameSlug: slug,
+      deviceId: getDeviceId(),
+    }).catch(() => {});
   }, [slug, categorySlug]);
 
   return null;

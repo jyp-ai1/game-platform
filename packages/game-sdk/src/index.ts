@@ -109,6 +109,11 @@ export {
 } from "./season";
 export { claimDailyReward, hasClaimedTodayReward } from "./daily-reward";
 export {
+  emitPlatformAnalyticsEvent,
+  subscribePlatformAnalyticsEvents,
+  type PlatformAnalyticsEvent,
+} from "./platform-analytics";
+export {
   getServerWeeklyMissionSnapshot,
   getWeeklyMission,
   getWeeklyMissionDefinition,

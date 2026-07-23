@@ -1,15 +1,10 @@
-import { AdminLoginForm } from "@/components/admin-login-form";
 import {
   fetchDailyStats,
   fetchTodayStats,
   fetchTopGames,
 } from "@/lib/supabase/admin-server";
-import { isAdminAuthenticated, isAdminConfigured } from "@/lib/admin-auth";
 
-export const metadata = {
-  title: "Admin",
-  robots: { index: false, follow: false },
-};
+export const metadata = { title: "Dashboard" };
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -25,26 +20,7 @@ function maskDeviceId(deviceId: string): string {
   return `${deviceId.slice(0, 4)}…${deviceId.slice(-4)}`;
 }
 
-export default async function AdminPage() {
-  if (!isAdminConfigured()) {
-    return (
-      <main className="container mx-auto px-4 py-8">
-        <p className="text-muted-foreground">
-          ADMIN_SECRET 환경변수가 설정되지 않았습니다.
-        </p>
-      </main>
-    );
-  }
-
-  const authed = await isAdminAuthenticated();
-  if (!authed) {
-    return (
-      <main className="container mx-auto px-4">
-        <AdminLoginForm />
-      </main>
-    );
-  }
-
+export default async function AdminDashboardPage() {
   const [today, daily, topGames] = await Promise.all([
     fetchTodayStats(),
     fetchDailyStats(14),
@@ -54,18 +30,17 @@ export default async function AdminPage() {
   const maxPlayCount = topGames[0]?.play_count ?? 1;
 
   return (
-    <main className="container mx-auto space-y-8 px-4 py-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Operations Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Re:Play Sprint 11 Admin</p>
-        </div>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">
+          DAU · 플레이 · Funnel · Heatmap (T3에서 확장)
+        </p>
       </div>
 
       {!today ? (
         <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
-          SUPABASE_SECRET_KEY가 없거나 0010 마이그레이션이 미적용입니다. Today
-          카드는 service role + analytics_events 테이블이 필요합니다.
+          SUPABASE_SECRET_KEY가 없거나 0010/0012 마이그레이션이 미적용입니다.
         </p>
       ) : (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -79,7 +54,7 @@ export default async function AdminPage() {
 
       <section className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-xl border bg-card p-4">
-          <h2 className="mb-4 font-semibold">인기 게임 (play_count)</h2>
+          <h2 className="mb-4 font-semibold">인기 게임 TOP10</h2>
           <ul className="space-y-3">
             {topGames.map((game) => (
               <li key={game.slug}>
@@ -103,7 +78,7 @@ export default async function AdminPage() {
         </div>
 
         <div className="rounded-xl border bg-card p-4">
-          <h2 className="mb-4 font-semibold">최근 플레이 (Live)</h2>
+          <h2 className="mb-4 font-semibold">최근 플레이</h2>
           {today?.recent_plays?.length ? (
             <ul className="divide-y text-sm">
               {today.recent_plays.map((play, i) => (
@@ -120,14 +95,14 @@ export default async function AdminPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">아직 session_start 이벤트 없음</p>
+            <p className="text-sm text-muted-foreground">아직 session_start 없음</p>
           )}
         </div>
       </section>
 
       {daily.length > 0 ? (
         <section className="rounded-xl border bg-card p-4">
-          <h2 className="mb-4 font-semibold">Growth (최근 14일)</h2>
+          <h2 className="mb-4 font-semibold">Growth (14일)</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -154,6 +129,13 @@ export default async function AdminPage() {
           </div>
         </section>
       ) : null}
-    </main>
+
+      <section className="rounded-xl border border-dashed bg-card/50 p-6 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">T3 예정: Player Funnel · Cohort Retention · Heatmap</p>
+        <p className="mt-2">
+          Session → Game Start → Game Complete → Ranking → Favorite
+        </p>
+      </section>
+    </div>
   );
 }
