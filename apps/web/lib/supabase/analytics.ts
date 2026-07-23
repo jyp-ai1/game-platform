@@ -2,8 +2,13 @@ import { supabase } from "./client";
 
 export type AnalyticsEventType =
   | "session_start"
+  | "game_start"
+  | "game_end"
   | "game_over"
   | "score_submit"
+  | "achievement_unlock"
+  | "mission_complete"
+  | "daily_reward_claim"
   | "save_created"
   | "resume"
   | "error"
