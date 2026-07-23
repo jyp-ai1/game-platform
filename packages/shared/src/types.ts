@@ -1,6 +1,6 @@
 export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
-export type GameStatus = "ACTIVE" | "COMING_SOON" | "HIDDEN";
+export type GameStatus = "ACTIVE" | "COMING_SOON" | "HIDDEN" | "MAINTENANCE";
 
 export interface Game {
   id: string;

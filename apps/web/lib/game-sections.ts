@@ -66,3 +66,11 @@ export function selectByCategorySlug(
     .filter((game) => game.category?.slug === categorySlug)
     .slice(0, limit);
 }
+
+export function selectBySlugs(games: Game[], slugs: string[], limit = 8): Game[] {
+  const order = new Map(slugs.map((slug, i) => [slug, i]));
+  return games
+    .filter((game) => order.has(game.slug))
+    .sort((a, b) => (order.get(a.slug)! - order.get(b.slug)!))
+    .slice(0, limit);
+}

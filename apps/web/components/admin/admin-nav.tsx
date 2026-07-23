@@ -3,11 +3,11 @@ import Link from "next/link";
 const NAV: Array<{ href: string; label: string; exact?: boolean }> = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/cms", label: "CMS" },
   { href: "/admin/games", label: "Games" },
   { href: "/admin/players", label: "Players" },
-  { href: "/admin/contents", label: "Contents" },
   { href: "/admin/seo", label: "SEO" },
-  { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/system", label: "System" },
 ];
 
 export function AdminNav({ pathname }: { pathname: string }) {
