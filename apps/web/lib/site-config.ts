@@ -6,9 +6,14 @@ export const siteConfig = {
   keywords: [
     "Retro",
     "Nostalgia",
-    "Simple",
+    "Browser Game",
+    "No Download",
     "Instant Play",
     "No Install",
-    "Browser Game",
+    "Online Game",
+    "Free Game",
+    "Mobile Friendly",
+    "Puzzle Game",
+    "Arcade Game",
   ],
 } as const;
