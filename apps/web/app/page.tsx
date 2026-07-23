@@ -59,6 +59,42 @@ export default async function Home() {
       <Hero />
       <CmsNoticeBar notices={notices} />
       <CmsBannerStrip banners={banners} />
+
+      <GameCarousel
+        title={`${SLOT_META.weekly_pick.emoji} ${SLOT_META.weekly_pick.title}`}
+        description={SLOT_META.weekly_pick.description}
+        games={gamesForSlot("weekly_pick", () => selectPopular(games))}
+        hotSlugs={hotSlugs}
+      />
+
+      <GameCarousel
+        title={`${SLOT_META.editors_pick.emoji} ${SLOT_META.editors_pick.title}`}
+        description={SLOT_META.editors_pick.description}
+        games={gamesForSlot("editors_pick", () => selectPopular(games, 4))}
+        hotSlugs={hotSlugs}
+      />
+
+      <GameCarousel
+        title={`${SLOT_META.trending.emoji} ${SLOT_META.trending.title}`}
+        description={SLOT_META.trending.description}
+        games={gamesForSlot("trending", () => selectPopular(games))}
+        hotSlugs={hotSlugs}
+      />
+
+      <GameCarousel
+        title={`${SLOT_META.popular.emoji} ${SLOT_META.popular.title}`}
+        description={SLOT_META.popular.description}
+        games={gamesForSlot("popular", () => selectPopular(games))}
+        hotSlugs={hotSlugs}
+      />
+
+      <GameCarousel
+        title={`${SLOT_META.new_games.emoji} ${SLOT_META.new_games.title}`}
+        description={SLOT_META.new_games.description}
+        games={gamesForSlot("new_games", () => selectNew(games))}
+        hotSlugs={hotSlugs}
+      />
+
       <CategoryLinks />
 
       <RecentlyPlayedSection games={games} />
@@ -100,41 +136,6 @@ export default async function Home() {
         title="🏅 스포츠 게임"
         description="스포츠 감성의 캐주얼 게임."
         games={selectByCategorySlug(games, "sports")}
-        hotSlugs={hotSlugs}
-      />
-
-      <GameCarousel
-        title={`${SLOT_META.weekly_pick.emoji} ${SLOT_META.weekly_pick.title}`}
-        description={SLOT_META.weekly_pick.description}
-        games={gamesForSlot("weekly_pick", () => selectPopular(games))}
-        hotSlugs={hotSlugs}
-      />
-
-      <GameCarousel
-        title={`${SLOT_META.editors_pick.emoji} ${SLOT_META.editors_pick.title}`}
-        description={SLOT_META.editors_pick.description}
-        games={gamesForSlot("editors_pick", () => selectPopular(games, 4))}
-        hotSlugs={hotSlugs}
-      />
-
-      <GameCarousel
-        title={`${SLOT_META.trending.emoji} ${SLOT_META.trending.title}`}
-        description={SLOT_META.trending.description}
-        games={gamesForSlot("trending", () => selectPopular(games))}
-        hotSlugs={hotSlugs}
-      />
-
-      <GameCarousel
-        title={`${SLOT_META.popular.emoji} ${SLOT_META.popular.title}`}
-        description={SLOT_META.popular.description}
-        games={gamesForSlot("popular", () => selectPopular(games))}
-        hotSlugs={hotSlugs}
-      />
-
-      <GameCarousel
-        title={`${SLOT_META.new_games.emoji} ${SLOT_META.new_games.title}`}
-        description={SLOT_META.new_games.description}
-        games={gamesForSlot("new_games", () => selectNew(games))}
         hotSlugs={hotSlugs}
       />
     </main>
