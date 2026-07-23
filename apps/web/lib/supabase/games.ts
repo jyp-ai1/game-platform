@@ -72,7 +72,7 @@ export async function getGames({
   includeComingSoon = true,
 }: { includeComingSoon?: boolean } = {}): Promise<Game[]> {
   const visibleStatuses: GameStatus[] = includeComingSoon
-    ? ["ACTIVE", "COMING_SOON"]
+    ? ["ACTIVE", "COMING_SOON", "MAINTENANCE"]
     : ["ACTIVE"];
 
   const { data, error } = await supabase

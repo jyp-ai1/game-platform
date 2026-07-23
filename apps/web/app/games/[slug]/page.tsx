@@ -1,4 +1,4 @@
-import { Badge, Button, Container, SectionTitle } from "@game-platform/ui";
+import { Badge, Container, SectionTitle } from "@game-platform/ui";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GamePlayer } from "@/components/game-player";
 import { GameSection } from "@/components/game-section";
+import { GameStatusBlock } from "@/components/game-status-block";
 import { Leaderboard } from "@/components/leaderboard";
 import { MyBestScore } from "@/components/my-best-score";
 import { NostalgiaNote } from "@/components/nostalgia-note";
@@ -57,6 +58,10 @@ export default async function GamePage({ params }: GamePageProps) {
   const [game, allGames] = await Promise.all([getGameBySlug(slug), getGames()]);
 
   if (!game) {
+    notFound();
+  }
+
+  if (game.status === "HIDDEN") {
     notFound();
   }
 
@@ -152,7 +157,7 @@ export default async function GamePage({ params }: GamePageProps) {
               </div>
             ) : null}
           </div>
-        ) : (
+        ) : game.status !== "ACTIVE" ? (
           <>
             {game.howToPlay ? (
               <p className="mt-6 max-w-xl text-sm text-muted-foreground">
@@ -162,16 +167,12 @@ export default async function GamePage({ params }: GamePageProps) {
                 {game.howToPlay}
               </p>
             ) : null}
-            <p className="mt-6 text-sm font-medium text-muted-foreground">
-              이 게임은 아직 플레이할 수 없습니다. 곧 만나보실 수 있습니다.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-8 w-fit"
-              nativeButton={false}
-              render={<Link href="/games">다른 게임 둘러보기</Link>}
-            />
+            <GameStatusBlock status={game.status} />
           </>
+        ) : (
+          <p className="mt-6 text-sm text-muted-foreground">
+            이 게임은 현재 플레이할 수 없습니다.
+          </p>
         )}
       </Container>
 

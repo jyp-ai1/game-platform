@@ -18,7 +18,8 @@ export function GameCard({
   isHot?: boolean;
 }) {
   const isComingSoon = game.status === "COMING_SOON";
-  const isNew = !isComingSoon && isRecentlyCreated(game.createdAt);
+  const isMaintenance = game.status === "MAINTENANCE";
+  const isNew = !isComingSoon && !isMaintenance && isRecentlyCreated(game.createdAt);
 
   return (
     <div className="animate-in fade-in group flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
@@ -44,7 +45,7 @@ export function GameCard({
             bottom "Play" button below is the primary interaction and is
             the only one wired up, to keep hydration cost from doubling
             across every card on a page with dozens of them. */}
-        {!isComingSoon ? (
+        {!isComingSoon && !isMaintenance ? (
           <Link
             href={`/games/${game.slug}`}
             aria-label={`${game.title} 플레이`}
@@ -66,6 +67,7 @@ export function GameCard({
 
         <div className="absolute right-2 top-2 z-10 flex flex-col items-end gap-1">
           {isComingSoon ? <Badge>Coming Soon</Badge> : null}
+          {isMaintenance ? <Badge variant="secondary">Maintenance</Badge> : null}
           {isNew ? (
             <Badge className="bg-brand-amber text-background">NEW</Badge>
           ) : null}
@@ -97,8 +99,10 @@ export function GameCard({
           <Button
             nativeButton={false}
             render={
-              isComingSoon ? (
-                <Link href={`/games/${game.slug}`}>Coming Soon</Link>
+              isComingSoon || isMaintenance ? (
+                <Link href={`/games/${game.slug}`}>
+                  {isMaintenance ? "점검 중" : "Coming Soon"}
+                </Link>
               ) : (
                 <GameCardPlayLink
                   href={`/games/${game.slug}`}
