@@ -39,6 +39,17 @@ Production (Cursor)         main push → Vercel → Smoke Test → PM Report
 
 ---
 
+### Sprint 11-2 (PM 승인 — Operation Platform)
+
+**우선순위 변경:** Analytics SDK 수집 → **Dashboard/CMS/SEO** 운영 중심.
+
+1. **T3 Dashboard** (최우선) — Executive KPI · Funnel · Cohort · Heatmap
+2. **T5 CMS** — 배너 · 공지 · 이벤트 · 추천 · 게임 ON/OFF
+3. **T6 SEO & PWA** — 게임별 metadata · JSON-LD · manifest · apple-touch-icon
+4. T4 Game Analytics · T7 운영 기능 · T8 QA
+
+---
+
 ## Epic 구조 (PM 확정 v2 — 운영 플랫폼)
 
 | Epic | 이름 | 핵심 |
@@ -72,7 +83,7 @@ Production (Cursor)         main push → Vercel → Smoke Test → PM Report
 | **T0** | Analytics SDK + Admin 게이트 | 🟡 이벤트 대부분 연결 |
 | **T1** | Analytics SDK 완료 (game_start/end, ranking, achievement, mission, favorite, profile) | 🟡 game_pause/resume ⬜ |
 | **T2** | Admin Layout (좌측 메뉴 7개) | ✅ |
-| **T3** | Dashboard — DAU/WAU/MAU · Funnel · Cohort · Heatmap | ⬜ |
+| **T3** | Dashboard — DAU/WAU/MAU · Funnel · Cohort · Heatmap | 🟡 **진행 중 (Sprint 11-2)** |
 | **T4** | Game Analytics `/admin/game/[slug]` | ⬜ |
 | **T5** | CMS (배너 · 공지 · 이벤트 · 추천 · 순서) | ⬜ |
 | **T6** | SEO & PWA 전면 | 🟡 manifest/lang |

@@ -76,6 +76,115 @@ export type GamePlayRow = {
   play_count: number;
 };
 
+export type DashboardKpis = {
+  dau: number;
+  wau: number;
+  mau: number;
+  session_starts: number;
+  game_starts: number;
+  ranking_submits: number;
+  errors: number;
+  new_users: number;
+  returning_users: number;
+};
+
+export type DashboardPeriod = "today" | "week" | "month" | "all";
+
+export async function fetchDashboardKpis(
+  period: DashboardPeriod = "today"
+): Promise<DashboardKpis | null> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("get_dashboard_kpis", {
+    p_period: period,
+  });
+  if (error) {
+    console.error("get_dashboard_kpis:", error.message);
+    return null;
+  }
+
+  return data as DashboardKpis;
+}
+
+export async function fetchPlayerFunnel(
+  period: DashboardPeriod = "today"
+): Promise<Record<string, number> | null> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("get_player_funnel", {
+    p_period: period,
+  });
+  if (error) {
+    console.error("get_player_funnel:", error.message);
+    return null;
+  }
+
+  return data as Record<string, number>;
+}
+
+export type CohortRow = {
+  cohort_date: string;
+  cohort_size: number;
+  d1_pct: number;
+  d7_pct: number;
+  d30_pct: number;
+};
+
+export async function fetchCohortRetention(days = 14): Promise<CohortRow[]> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("get_cohort_retention", {
+    p_days: days,
+  });
+  if (error) {
+    console.error("get_cohort_retention:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as CohortRow[];
+}
+
+export type HeatmapCell = { dow: number; hour: number; count: number };
+
+export async function fetchActivityHeatmap(days = 30): Promise<HeatmapCell[]> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("get_activity_heatmap", {
+    p_days: days,
+  });
+  if (error) {
+    console.error("get_activity_heatmap:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as HeatmapCell[];
+}
+
+export async function fetchTopGamesAnalytics(
+  period: DashboardPeriod = "today",
+  limit = 10
+): Promise<Array<{ slug: string; title: string; plays: number }>> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("get_top_games_analytics", {
+    p_period: period,
+    p_limit: limit,
+  });
+  if (error) {
+    console.error("get_top_games_analytics:", error.message);
+    return fetchTopGames(limit).then((rows) =>
+      rows.map((g) => ({ slug: g.slug, title: g.title, plays: g.play_count }))
+    );
+  }
+
+  return (data ?? []) as Array<{ slug: string; title: string; plays: number }>;
+}
+
 export async function fetchTopGames(limit = 10): Promise<GamePlayRow[]> {
   const supabase = getAdminSupabase();
   if (!supabase) return [];
