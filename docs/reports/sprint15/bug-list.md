@@ -13,7 +13,7 @@
 |----|----------|-------|-------|------------------|----------------|
 | OB-001 | Operational Blocker | Vercel Preview Deployment Protection (SSO) | **Operator** | **None** | Blocks Product QA execution |
 
-**Resolution:** Disable Deployment Protection or issue QA Bypass Token on `game29` Preview.
+**Next action:** Operator OP-1 (Preview SSO) → Senior QA Session 3 resumes at Phase A-1
 
 ---
 

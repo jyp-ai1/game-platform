@@ -1,10 +1,10 @@
-# Sprint 15 Epic 2 — RC1 Certification & Closed Beta Readiness
+# Sprint 15 Epic 2 — RC1 Master QA Plan
 
-**Updated:** 2026-07-24 (Senior QA Report — Epic 2 RC1)  
-**Branch:** `content-factory` @ `4d8f37f`  
+**Updated:** 2026-07-24 (Master Plan — Session 2)  
+**Branch:** `content-factory` @ `242d416`  
 **Preview:** https://game29-git-content-factory-jyp-ai1s-projects.vercel.app  
-**Developer:** **HOLD** — P0/P1 bug fixes only from QA results  
-**Product QA:** **HOLD** — Preview SSO blocks all official phases
+**Developer:** **HOLD** — P0/P1 code defects only  
+**Senior QA:** **BLOCKED** at Phase A-1 (Operational)
 
 ---
 
@@ -18,294 +18,302 @@ Current blocker is operational (Preview Deployment Protection).
 
 ---
 
-## Senior QA Report (2026-07-24)
+## Release path
 
-| Task | Scope | Result | Notes |
-|------|-------|--------|-------|
-| **QA-1** | Preview Access | **FAIL** | Redirects to `vercel.com/login` (Deployment Protection) |
-| **QA-2** | Phase 1 Functional (50 games) | **BLOCKED** | Requires Preview PASS |
-| **QA-3** | Regression QA | **BLOCKED** | Requires Preview PASS |
-| **QA-4** | Responsive QA | **BLOCKED** | Requires Preview PASS |
-| **QA-5** | Accessibility QA | **BLOCKED** | Requires Preview PASS |
-| **QA-6** | Lighthouse QA | **BLOCKED** | Requires Preview PASS |
-| **QA-7** | Final Report | **DONE** | This document |
+```
+Epic 2 RC1
+    ↓ Product QA PASS (Phases A–F)
+    ↓ DevOps PASS (Phase H)
+    ↓ PM Release Approval (Phase I)
+    ↓ RC1 Closed → release/sprint15-rc1
+```
 
-### Local smoke (non-official — RC1 gate invalid)
+---
 
-| Page | localhost:3010 | Console | Notes |
-|------|----------------|---------|-------|
-| Home `/` | PASS | not audited | Renders game carousel |
-| Profile `/profile` | PASS | not audited | Stats, achievements |
-| Game `/games/2048` | PASS | not audited | CMS meta loads; game chunk loading |
-| Preview URL | **FAIL** | — | Vercel SSO login wall |
+## Master Plan — Phase Status
 
-> **PM note:** Local smoke does **not** satisfy Product QA gate. Official RC1 certification requires Preview access.
+| Phase | Name | Official Status | Notes |
+|-------|------|-----------------|-------|
+| **A** | Preview Environment | **BLOCKED** | A-1 FAIL — SSO |
+| **B** | Functional Certification | **BLOCKED** | Requires Preview |
+| **C** | Regression Certification | **BLOCKED** | Requires Preview |
+| **D** | Responsive Certification | **BLOCKED** | Requires Preview |
+| **E** | Accessibility Certification | **BLOCKED** | Requires Preview |
+| **F** | Performance Certification | **BLOCKED** | Requires Preview |
+| **G** | Release Candidate Audit | **IN PROGRESS** | Docs only |
+| **H** | DevOps Verification | **WAIT** | After Product QA |
+| **I** | PM Release Review | **HOLD** | After all PASS |
 
-### Phase summary (PM Release Gate)
-
-| Phase | Status |
-|-------|--------|
-| Phase 1 Functional | **BLOCKED** |
-| Phase 2 Analytics | **BLOCKED** |
-| Phase 3 Operator/CMS | **BLOCKED** |
-| Phase 4 RC1 Audit | **BLOCKED** |
-
-### Known Issues (escalation)
-
-| ID | Category | Issue | Owner |
-|----|----------|-------|-------|
-| OB-001 | Operational Blocker | Preview Deployment Protection (SSO) | **Operator** |
-
-### PM Product QA verdict
-
-**HOLD** — Product QA has not started. Developer remains **HOLD**.
+> **Local prep (non-official):** Phase A-3 route smoke on `localhost:3010` — 15/15 routes + 50/50 game pages HTTP 200. Does **not** satisfy RC1 gate.
 
 ---
 
 ## PM Gate matrix
 
-| Gate | Status | Owner | Notes |
-|------|--------|-------|-------|
-| Developer | **PASS** | ✓ | Epic 1-A~D + P2-005 complete |
-| Senior Developer | **PASS** | ✓ | Code certification complete |
-| Senior QA | **BLOCKED** | QA | Operational — Preview SSO |
-| DevOps | **WAIT** | DevOps | After Product QA PASS |
-| Preview Deploy | **PASS** | ✓ | `content-factory` deployed |
-| Code Quality | **PASS** | ✓ | Hydration, ESLint, Typecheck |
-| Operator (Migration) | **PASS** | Operator | 0023, 0024, 0025 applied (PM 2026-07-24) |
-| Independent QA | **BLOCKED** | QA | Preview SSO — **Product QA HOLD** |
-| Analytics (live DB) | **HOLD** | Operator + QA | Phase 2 after QA traffic |
-| Operator (CMS live) | **HOLD** | Operator | Phase 3 |
-| PM Release | **HOLD** | PM | Product QA not started |
-| main merge | **⛔ FORBIDDEN** | PM | |
-| Production Promote | **⛔ FORBIDDEN** | PM | |
+| Gate | Status | Owner |
+|------|--------|-------|
+| Developer | **PASS** | ✓ |
+| Senior Developer | **PASS** | ✓ |
+| Senior QA | **BLOCKED** | Operational — OB-001 |
+| DevOps | **WAIT** | After Product QA |
+| PM Release | **HOLD** | PM |
+| main merge / Production | **⛔ FORBIDDEN** | PM |
 
 ---
 
-## Epic 2 path
+## Execution Log
 
-```
-Developer PASS ✓
-    ↓
-Independent QA PASS (Phase 1 — 50/50)
-    ↓
-Analytics PASS (Phase 2)
-    ↓
-Operator PASS (Phase 3)
-    ↓
-Release Candidate Audit (Phase 4)
-    ↓
-Bug Triage — Developer P0/P1 only (Phase 5)
-    ↓
-PM RC1 → release/sprint15-rc1
-    ↓
-Closed Beta (10–30 users)
-```
+| Date | Session | Action | Result |
+|------|---------|--------|--------|
+| 2026-07-24 | 1 | QA-1 Preview access | **FAIL** — Vercel SSO |
+| 2026-07-24 | 1 | Local smoke (home, profile, 2048) | PASS (non-official) |
+| 2026-07-24 | 1 | Docs: qa-signoff + bug-list OB-001 | Committed `242d416` |
+| 2026-07-24 | 2 | Master Plan structure | This document |
+| 2026-07-24 | 2 | A-3 localhost route smoke | 15 routes 200, 50 games 200 |
+| 2026-07-24 | 2 | A-1 Preview re-check | **FAIL** — still SSO |
+
+**Next session (after OP-1):** A-1 PASS → A-2 → A-3 on Preview → Phase B start
 
 ---
 
-## Phase 1 — Independent QA (4~5h)
+# Phase A — Preview Environment Certification
 
-**URL:** https://game29-git-content-factory-jyp-ai1s-projects.vercel.app
+## A-1 Preview Access
 
-### Operator prerequisite (remaining)
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Preview URL loads | **FAIL** | Redirect to `vercel.com/login` |
+| No login redirect | **FAIL** | Deployment Protection active |
+| QA Bypass Token | **N/A** | Not issued |
 
-- [ ] Vercel Deployment Protection 해제 **또는** QA Bypass Token 발급
-- [x] Supabase Migration 0023, 0024, 0025 적용
+**Owner:** Operator (OB-001)  
+**Gate:** Preview **FAIL** — blocks Phases B–F
 
-### Per-game checklist (15 items)
+---
 
-| # | Check |
-|---|-------|
-| 1 | 게임 시작 |
-| 2 | 정상 플레이 |
-| 3 | 게임 종료 |
-| 4 | 점수 계산 |
-| 5 | Ranking 저장 |
-| 6 | Save |
-| 7 | Resume |
-| 8 | Retry |
-| 9 | Favorite |
-| 10 | Refresh 후 Resume |
-| 11 | Mobile 375px |
-| 12 | Chrome |
-| 13 | Edge |
-| 14 | Console Error = 0 |
-| 15 | Network 500 = 0 |
+## A-2 Environment Verification
 
-**Result per game:** `PASS` | `FAIL` | `BLOCKED`
+| Check | Preview | Localhost (prep) |
+|-------|---------|------------------|
+| Env vars / build | BLOCKED | PASS (build OK) |
+| CMS games in DB | BLOCKED | PASS (50 game pages 200) |
+| Analytics API | BLOCKED | not tested |
+| OAuth (public) | N/A | N/A — device_id only |
+| API / RPC | BLOCKED | partial (pages load) |
+| Assets / thumbnails | BLOCKED | PASS (images referenced) |
+| Fonts / Image loader | BLOCKED | not audited |
 
-### 50-game matrix (QA fill-in)
+**Official:** BLOCKED until A-1 PASS
+
+---
+
+## A-3 Smoke Test (Routing)
+
+### Platform routes
+
+| Route | Preview | Localhost | Notes |
+|-------|---------|-----------|-------|
+| `/` | BLOCKED | **200** | |
+| `/games` | BLOCKED | **200** | |
+| `/games/[slug]` (50) | BLOCKED | **200 ×50** | All slugs |
+| `/leaderboard` | N/A | N/A | Embedded in `/games/[slug]` |
+| `/profile` | BLOCKED | **200** | |
+| `/favorites` | BLOCKED | **200** | |
+| `/privacy` | BLOCKED | **200** | |
+| `/terms` | BLOCKED | **200** | |
+| `/about` | BLOCKED | **200** | |
+| `/contact` | BLOCKED | **200** | |
+| `/search` | BLOCKED | **200** | |
+| `/categories/puzzle` | BLOCKED | **200** | |
+| `/sitemap.xml` | BLOCKED | **200** | |
+| `/robots.txt` | BLOCKED | **200** | |
+| `/manifest.webmanifest` | BLOCKED | **200** | |
+
+Console / Hydration / Network 500: **pending** (browser audit on Preview)
+
+---
+
+# Phase B — Functional Certification
+
+**Status:** BLOCKED (Preview)
+
+## B-1 — 50 Game Certification
+
+Per game: Open · Loading · Input · Pause · Retry · Game Over · Score · Ranking · Exit · Save · Resume
 
 | # | Slug | Result | Tester | Notes |
 |---|------|--------|--------|-------|
-| 1 | 2048 | | | |
-| 2 | snake | | | |
-| 3 | breakout | | | |
-| 4 | arkanoid-dx | | | |
-| 5 | memory | | | |
-| 6 | minesweeper | | | |
-| 7 | samegame | | | |
-| 8 | maze-runner | | | |
-| 9 | tank-battle | | | |
-| 10 | galaxy-defender | | | |
-| 11 | space-defender | | | |
-| 12 | bubble-pop | | | |
-| 13 | sudoku | | | |
-| 14 | tic-tac-toe | | | |
-| 15 | simon | | | |
-| 16 | hangman | | | |
-| 17 | color-match | | | |
-| 18 | air-hockey | | | |
-| 19 | tetris | | | |
-| 20 | gold-miner | | | |
-| 21 | space-impact | | | |
-| 22 | stack-tower | | | |
-| 23 | ball-sort | | | |
-| 24 | color-sort | | | |
-| 25 | penalty-shootout | | | |
-| 26 | darts | | | |
-| 27 | bubble-shooter | | | |
-| 28 | merge-blocks | | | |
-| 29 | connect4 | | | |
-| 30 | reversi | | | |
-| 31 | gomoku | | | |
-| 32 | bowling | | | |
-| 33 | archery | | | |
-| 34 | sliding-puzzle | | | |
-| 35 | whack-a-mole | | | |
-| 36 | chess | | | |
-| 37 | checkers | | | |
-| 38 | jigsaw | | | |
-| 39 | mancala | | | |
-| 40 | mini-golf | | | |
-| 41 | billiards | | | |
-| 42 | basketball | | | |
-| 43 | table-tennis | | | |
-| 44 | domino | | | |
-| 45 | crossword | | | |
-| 46 | chess960 | | | |
-| 47 | shuffleboard | | | |
-| 48 | kakuro | | | |
-| 49 | nonogram | | | |
-| 50 | word-search | | | |
+| 1 | 2048 | BLOCKED | | |
+| 2 | snake | BLOCKED | | |
+| 3 | breakout | BLOCKED | | |
+| 4 | arkanoid-dx | BLOCKED | | |
+| 5 | memory | BLOCKED | | |
+| 6 | minesweeper | BLOCKED | | |
+| 7 | samegame | BLOCKED | | |
+| 8 | maze-runner | BLOCKED | | |
+| 9 | tank-battle | BLOCKED | | |
+| 10 | galaxy-defender | BLOCKED | | |
+| 11 | space-defender | BLOCKED | | |
+| 12 | bubble-pop | BLOCKED | | |
+| 13 | sudoku | BLOCKED | | |
+| 14 | tic-tac-toe | BLOCKED | | |
+| 15 | simon | BLOCKED | | |
+| 16 | hangman | BLOCKED | | |
+| 17 | color-match | BLOCKED | | |
+| 18 | air-hockey | BLOCKED | | |
+| 19 | tetris | BLOCKED | | |
+| 20 | gold-miner | BLOCKED | | |
+| 21 | space-impact | BLOCKED | | |
+| 22 | stack-tower | BLOCKED | | |
+| 23 | ball-sort | BLOCKED | | |
+| 24 | color-sort | BLOCKED | | |
+| 25 | penalty-shootout | BLOCKED | | |
+| 26 | darts | BLOCKED | | |
+| 27 | bubble-shooter | BLOCKED | | |
+| 28 | merge-blocks | BLOCKED | | |
+| 29 | connect4 | BLOCKED | | |
+| 30 | reversi | BLOCKED | | |
+| 31 | gomoku | BLOCKED | | |
+| 32 | bowling | BLOCKED | | |
+| 33 | archery | BLOCKED | | |
+| 34 | sliding-puzzle | BLOCKED | | |
+| 35 | whack-a-mole | BLOCKED | | |
+| 36 | chess | BLOCKED | | |
+| 37 | checkers | BLOCKED | | |
+| 38 | jigsaw | BLOCKED | | |
+| 39 | mancala | BLOCKED | | |
+| 40 | mini-golf | BLOCKED | | |
+| 41 | billiards | BLOCKED | | |
+| 42 | basketball | BLOCKED | | |
+| 43 | table-tennis | BLOCKED | | |
+| 44 | domino | BLOCKED | | |
+| 45 | crossword | BLOCKED | | |
+| 46 | chess960 | BLOCKED | | |
+| 47 | shuffleboard | BLOCKED | | |
+| 48 | kakuro | BLOCKED | | |
+| 49 | nonogram | BLOCKED | | |
+| 50 | word-search | BLOCKED | | |
 
-**Regression priority (must PASS):** 2048, Snake, Tetris, Chess, Sudoku
+**Regression priority:** 2048, snake, tetris, chess, sudoku
 
-**Phase 1 exit:** 50/50 PASS, Console Error = 0, Network 500 = 0
+## B-2 — Leaderboard
 
----
+Submit · Nickname · Duplicate · Sorting · Best Score · Pagination · Update — **BLOCKED**
 
-## Phase 2 — Analytics Certification (1~2h)
+## B-3 — Player Hub
 
-**Table:** `analytics_events`
+Profile · Statistics · Achievements · Continue · Favorites · Header XP · Mission · Resume — **BLOCKED**
 
-| Event | Sample games | DB rows | Admin match |
-|-------|--------------|---------|-------------|
-| play (`game_start`) | all 15 new + 5 regression | | |
-| finish (`game_end`) | | | |
-| retry (`game_start` + retry) | | | |
-| favorite | | | |
-| ranking_submit | | | |
-| resume | | | |
+## B-4 — CMS (game pages)
 
-**New 15 (Sprint 14):** chess, checkers, jigsaw, mancala, mini-golf, billiards, basketball, table-tennis, domino, crossword, chess960, shuffleboard, kakuro, nonogram, word-search
+Meta · OG · Description · Tags · Category · Thumbnail · Related Games — **BLOCKED**
 
-**Regression 5:** 2048, snake, tetris, chess, sudoku
+## B-5 — Search
 
-**Phase 2 exit:** 100% event coverage on sample set
+Search · Filter · Category · Tag · No Result · Performance — **BLOCKED**
 
 ---
 
-## Phase 3 — Operator Certification (1h)
+# Phase C — Regression Certification
 
-| CMS item | Modify | Reflect ≤5min |
-|----------|--------|---------------|
-| Banner | | |
-| Notice | | |
-| Featured | | |
-| Weekly Pick | | |
-| NEW Badge | | |
-| Launch Event | | |
+**Status:** BLOCKED (Preview)
 
-| Ops item | Verified |
-|----------|----------|
-| Maintenance mode | |
-| Visibility (Hidden/Coming Soon) | |
-| Category sort | |
-| Featured slot | |
-| Event slot | |
+> Re:Play scope mapping (consulting-platform items → platform equivalent)
 
-**Phase 3 exit:** Operator PASS
-
----
-
-## Phase 4 — Release Candidate Audit (1h)
-
-| Item | Status |
-|------|--------|
-| Playable 50/50 (code) | ✓ Developer |
-| Playable 50/50 (QA) | pending |
-| Migration 0023 | ✓ Operator |
-| Migration 0024 | ✓ Operator |
-| Migration 0025 | ✓ Operator |
-| SEO / metadata | pending QA |
-| Sitemap | pending QA |
-| Analytics live | pending Phase 2 |
-| Ranking RPC | pending QA |
-| CMS live | pending Phase 3 |
-| Featured / Search / Filter / Favorite / Continue | pending QA |
+| Area | Re:Play scope | Status |
+|------|---------------|--------|
+| OAuth (Google/GitHub) | **N/A** — no public OAuth | N/A |
+| Admin Dashboard | `/admin` | BLOCKED |
+| Landing | `/` | BLOCKED |
+| Analytics | `/admin/analytics` | BLOCKED |
+| CMS | `/admin/cms` | BLOCKED |
+| Content Factory | `tools/content-factory` | code only |
+| Export | `/admin/reports/export` | BLOCKED |
+| Memory (game) | `/games/memory` | BLOCKED |
+| Language | `lang=ko` fixed | BLOCKED |
+| Theme | system + sound toggle | BLOCKED |
+| Sprint 6–15 Player Hub | profile, missions, save | BLOCKED |
 
 ---
 
-## Phase 5 — Bug Triage (Developer)
+# Phase D — Responsive Certification
 
-**Trigger:** QA FAIL results only
+**Status:** BLOCKED
 
-| Priority | Scope | SLA |
-|----------|-------|-----|
-| P0 | Crash, Freeze, Ranking/Save/Resume fail | Immediate fix + re-QA |
-| P1 | UI, Hydration, Mobile, Difficulty, Analytics | Before RC1 |
-| P2 | Polish | Sprint 16 / Closed Beta data |
-
-Log bugs in `bug-list.md`. No refactoring outside fix scope.
+Viewports: 390 · 430 · 768 · 1024 · 1440 · 1920  
+Pages: Home · Game Detail · Profile · Favorites · Search
 
 ---
 
-## RC1 approval conditions
+# Phase E — Accessibility Certification
 
-| # | Condition | Status |
-|---|-----------|--------|
-| 1 | Developer PASS | ✓ |
-| 2 | QA PASS (50/50) | pending |
-| 3 | Operator PASS | partial (migration ✓, CMS pending) |
-| 4 | Analytics PASS | pending |
-| 5 | P0 = 0 | pending |
-| 6 | P1 = 0 | pending |
-| 7 | Playable 50 | pending QA |
-| 8 | Migration applied | ✓ |
+**Status:** BLOCKED
 
-**On all PASS:** create `release/sprint15-rc1` from `content-factory` → request PM RC1.
+Keyboard · Focus · ARIA · Contrast · Reduced Motion · Lighthouse A11y 100
 
 ---
 
-## Closed Beta readiness (post-RC1)
+# Phase F — Performance Certification
 
-| KPI | Target |
-|-----|--------|
-| P0 bugs | 0 |
-| P1 bugs | 0 |
-| Finish Rate | ≥ 70% |
-| Retry Rate | ≥ 40% |
-| Favorite Rate | ≥ 15% |
-| Ranking Submit | ≥ 30% |
-| Avg play time | ≥ 5 min |
-| Console Error | 0 |
-| Network 500 | 0 |
+**Status:** BLOCKED
+
+Lighthouse: `/` · `/games` · `/profile` · representative game  
+Targets: Perf ≥90 · A11y 100 · BP 100 · SEO 100 · CLS/LCP/INP
 
 ---
 
-## PM rules (Epic 2)
+# Phase G — Release Candidate Audit
 
-**Allowed:** QA bug fixes, analytics/operator verification, RC1 prep  
-**Forbidden:** new games, new features, Sprint 16, main merge, Production promote, perf refactors
+**Status:** IN PROGRESS (documentation)
+
+| Doc | Exists | Current |
+|-----|--------|---------|
+| `qa-signoff.md` | ✓ | This file |
+| `bug-list.md` | ✓ | OB-001 open |
+| `game-certification.md` | ✓ | Developer 50/50 |
+| `release-note.md` | ✗ | Post-RC1 |
+| `known-issues.md` | ✗ | Use bug-list |
+| `deployment.md` | ✗ | Post-RC1 |
+
+Bug classes: P0 · P1 · P2 · Operational — see `bug-list.md`
+
+---
+
+# Phase H — DevOps Verification
+
+**Status:** WAIT
+
+Branch `content-factory` @ `242d416` · Preview deploy OK · Production **not promoted**
+
+---
+
+# Phase I — PM Release Review
+
+**Status:** HOLD
+
+Checklist: Developer ✓ · Senior QA ✗ · Regression ✗ · Responsive ✗ · A11y ✗ · Perf ✗ · DevOps ✗ · P0 code=0 ✓ · P1 code=0 ✓ · Operational open
+
+---
+
+# Release approval conditions
+
+- [ ] Preview Access (A-1 PASS)
+- [ ] Functional QA (Phase B)
+- [ ] Regression QA (Phase C)
+- [ ] Responsive QA (Phase D)
+- [ ] Accessibility QA (Phase E)
+- [ ] Lighthouse QA (Phase F)
+- [ ] DevOps QA (Phase H)
+- [ ] Production Smoke
+- [ ] P0 = 0 (code)
+- [ ] P1 = 0 (code)
+- [ ] QA Signoff Complete
+
+**Operational:** OB-001 must close before Product QA counts as started.
+
+---
+
+# PM rules
+
+**Allowed:** QA execution, bug documentation, P0/P1 fixes from QA  
+**Forbidden:** new features, new games, refactoring, main merge, Production promote
