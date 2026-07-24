@@ -1,11 +1,23 @@
-# Sprint 15 — Bug List (Epic 1 + 1-B/C/D)
+# Sprint 15 — Bug List (Epic 1 + 1-B/C/D + Epic 2 QA)
 
-**Updated:** 2026-07-24  
-**Status:** Developer stage **COMPLETE** (Epic 1-D); Independent QA blocked (Preview SSO)
+**Updated:** 2026-07-24 (Senior QA — Product QA HOLD)  
+**Status:** Developer **HOLD** — no code defects; operational blocker only
 
 ---
 
-## P0 — Fixed
+## Operational Blockers (Release)
+
+> Not code bugs. These block Product QA / Release gate.
+
+| ID | Category | Issue | Owner | Developer Action | Release Impact |
+|----|----------|-------|-------|------------------|----------------|
+| OB-001 | Operational Blocker | Vercel Preview Deployment Protection (SSO) | **Operator** | **None** | Blocks Product QA execution |
+
+**Resolution:** Disable Deployment Protection or issue QA Bypass Token on `game29` Preview.
+
+---
+
+## P0 — Fixed (Code)
 
 | ID | Scope | Issue | Fix |
 |----|-------|-------|-----|
@@ -15,6 +27,8 @@
 | P0-004 | all 50 | Inconsistent finish UX | Unified `GameOverOverlay` |
 | P0-005 | all 50 | Retry not in analytics | `emitGameRetry` bridge |
 | P0-006 | UI package | `asChild` TS error | `buttonVariants` anchor |
+
+**Code P0 open:** 0
 
 ---
 
@@ -40,29 +54,30 @@
 | P1-010 | ESLint | Admin realtime panel sync effect | Derive stats from prop |
 | P1-011 | Lint hygiene | 3 unused imports in web app | Removed |
 
----
-
-## P1 — Open (Operator)
-
-| ID | Area | Issue | Owner |
-|----|------|-------|-------|
-| P1-003 | Preview QA | Vercel Deployment Protection (SSO) | **Operator** — unblock for Independent QA |
+**Code P1 open:** 0 (awaiting Product QA findings)
 
 ---
 
-## P2 — Open
+## P2 — Open (post-QA)
 
 | ID | Area | Issue | Owner |
-|----|------|-------|-------|
-| P2-001 | Mobile | Touch/canvas per-game QA | QA (after unblock) |
+|----|------|-------|-----|
+| P2-001 | Mobile | Touch/canvas per-game QA | QA (after Preview unblock) |
 | P2-002 | Analytics | Live `analytics_events` SQL | Operator |
 | P2-003 | Game feel | Particles/shake polish | Sprint 16 |
-| P2-004 | hangman | `game_end` missing on loss | **FIXED** — `reportScore(0)` on lost |
-| P2-005 | Games (37) | Unused `canPlay` destructure | **FIXED** — removed where only `canPlayRef` used |
 
 ---
 
-## P2 — Backlog (post-QA, data-driven)
+## P2 — Fixed
+
+| ID | Area | Issue | Fix |
+|----|------|-------|-----|
+| P2-004 | hangman | `game_end` missing on loss | `reportScore(0)` on lost |
+| P2-005 | Games (37) | Unused `canPlay` destructure | Removed where only `canPlayRef` used |
+
+---
+
+## P2 — Backlog (post-RC1)
 
 | ID | Area | Notes |
 |----|------|-------|
@@ -72,24 +87,25 @@
 
 ---
 
-## Counts
+## QA-7 Classification Summary
 
-| Severity | Open | Fixed |
-|----------|-----:|------:|
-| P0 | 0 | 6 |
-| P1 | 1 | 10 |
-| P2 | 3 | 2 |
+| Class | Open | Fixed | Notes |
+|-------|-----:|------:|-------|
+| **Operational** | 1 | 0 | OB-001 — Preview SSO |
+| **P0 (code)** | 0 | 6 | Developer PASS |
+| **P1 (code)** | 0 | 10 | Await Product QA |
+| **P2** | 3 | 2 | Sprint 16 / post-QA |
 
 ---
 
-## RC1 readiness (Developer)
+## RC1 readiness
 
 | Check | Status |
 |-------|--------|
-| P0 = 0 | **PASS** |
-| P1 code issues = 0 | **PASS** |
-| P1-003 Operator unblock | **OPEN** |
+| Code P0 = 0 | **PASS** |
+| Code P1 = 0 | **PASS** (pre-QA) |
+| Operational blockers | **OPEN** — OB-001 |
 | 50/50 SDK wiring | **PASS** |
-| Hydration (known) | **PASS** (code) |
-| ESLint / Build / Type | **PASS** (Epic 1-D) |
-| Developer stage | **COMPLETE** — no further dev until QA |
+| ESLint / Build / Type | **PASS** |
+| Product QA | **BLOCKED** — OB-001 |
+| Developer | **HOLD** — no action until QA P0/P1 |
