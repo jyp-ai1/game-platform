@@ -1,0 +1,131 @@
+{
+  "slug": "space-defender",
+  "title": "Space Defender",
+  "generatedAt": "2026-07-24T11:57:27.868Z",
+  "checklist": [
+    {
+      "id": 1,
+      "item": "Game",
+      "status": "PASS",
+      "note": "games/{slug} + wiring"
+    },
+    {
+      "id": 2,
+      "item": "Thumbnail",
+      "status": "PENDING",
+      "note": "generate-thumbnails.mjs or factory hook"
+    },
+    {
+      "id": 3,
+      "item": "SEO",
+      "status": "PASS",
+      "note": "seo.json — DB metadata from migration"
+    },
+    {
+      "id": 4,
+      "item": "OG",
+      "status": "PASS",
+      "note": "opengraph-image.tsx auto per slug"
+    },
+    {
+      "id": 5,
+      "item": "Leaderboard",
+      "status": "PASS",
+      "note": "reportScore + ranking_submit"
+    },
+    {
+      "id": 6,
+      "item": "Mission",
+      "status": "PARTIAL",
+      "note": "category auto; slug-specific optional"
+    },
+    {
+      "id": 7,
+      "item": "XP",
+      "status": "PARTIAL",
+      "note": "session hooks"
+    },
+    {
+      "id": 8,
+      "item": "Save",
+      "status": "PASS",
+      "note": "useAutoSave"
+    },
+    {
+      "id": 9,
+      "item": "Resume",
+      "status": "PASS",
+      "note": "useResumableGame"
+    },
+    {
+      "id": 10,
+      "item": "Category",
+      "status": "PASS",
+      "note": "migration.sql"
+    },
+    {
+      "id": 11,
+      "item": "Featured",
+      "status": "PASS",
+      "note": "cms.sql new_games"
+    },
+    {
+      "id": 12,
+      "item": "Launch Event",
+      "status": "PASS",
+      "note": "cms.sql events"
+    },
+    {
+      "id": 13,
+      "item": "Analytics",
+      "status": "PENDING",
+      "note": "QA + analytics_events verify"
+    },
+    {
+      "id": 14,
+      "item": "CMS visibility",
+      "status": "PASS",
+      "note": "cms.sql"
+    },
+    {
+      "id": 15,
+      "item": "NEW Badge",
+      "status": "PASS",
+      "note": "released_at 7-day window"
+    },
+    {
+      "id": 16,
+      "item": "Review Card",
+      "status": "PENDING",
+      "note": "D+7 placeholder"
+    },
+    {
+      "id": 17,
+      "item": "Operation guide",
+      "status": "PASS",
+      "note": "operation-guide.md"
+    },
+    {
+      "id": 18,
+      "item": "QA PASS",
+      "status": "PENDING",
+      "note": "operator sign-off"
+    },
+    {
+      "id": 19,
+      "item": "Mobile / Console 0",
+      "status": "PENDING",
+      "note": "QA"
+    }
+  ],
+  "passCount": 12,
+  "pendingCount": 5,
+  "developerPassCount": 15,
+  "developerMax": 19,
+  "thumbnail": "PASS",
+  "qaPending": [
+    "QA PASS",
+    "Mobile / Console 0",
+    "Analytics KPI verify"
+  ]
+}

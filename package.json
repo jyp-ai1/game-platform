@@ -14,6 +14,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "factory:generate": "node tools/content-factory/cli.mjs generate",
     "factory:scaffold": "node tools/content-factory/cli.mjs scaffold",
-    "factory:batch": "node tools/content-factory/cli.mjs batch"
+    "factory:batch": "node tools/content-factory/cli.mjs batch",
+    "factory:sync-rc1": "node tools/content-factory/scripts/extract-game-metadata.mjs && node tools/content-factory/scripts/sync-rc1-packages.mjs",
+    "analytics:validate": "node tools/analytics/generate-validation-report.mjs"
   }
 }

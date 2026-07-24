@@ -2,50 +2,13 @@
 
 **Slug:** `ball-sort`  
 **Launch:** 2026-07-24  
-**Review due:** D+7 (2026-07-31)  
 **Status:** PLACEHOLDER — D+7 데이터 입력
-
----
-
-## Summary
-
-| 항목 | 값 |
-| --- | --- |
-| 난이도 | ★★★☆☆ |
-| 평균 플레이 | TBD |
-| PM 추천 | ★★★★☆ |
-| Retry | TBD % |
-| Favorite | TBD % |
-| Finish Rate | TBD % |
-| 7일 생존율 | TBD % |
-| PM 평가 | **PENDING** |
-
----
-
-## Analytics (from `/admin/analytics` → Sprint 13 KPI)
 
 | KPI | D+0 | D+7 |
 | --- | --- | --- |
 | Play | | |
 | Finish Rate | | |
-| Ranking Submit | | |
+| Retry | | |
 | Favorite | | |
-| Avg Score | | |
 
----
-
-## Bugs
-
-| Severity | Count | Notes |
-| --- | --- | --- |
-| P0 | 0 | |
-| P1 | 0 | |
-| P2 | 0 | |
-
----
-
-## PM Sign-off (D+7)
-
-- [ ] KPI 목표 충족
-- [ ] P0/P1 = 0
-- [ ] **PASS / HOLD**
+**PM Sign-off:** PENDING

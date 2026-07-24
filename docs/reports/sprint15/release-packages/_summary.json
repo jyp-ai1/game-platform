@@ -1,0 +1,770 @@
+{
+  "generatedAt": "2026-07-24T11:57:28.047Z",
+  "total": 50,
+  "avgDeveloperPass": 15,
+  "thumbnails": 50,
+  "operationGuides": 50,
+  "reviewCards": 50,
+  "games": [
+    {
+      "slug": "2048",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "snake",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "breakout",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "arkanoid-dx",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "memory",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "minesweeper",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "samegame",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "maze-runner",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "tank-battle",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "galaxy-defender",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "space-defender",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "bubble-pop",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "sudoku",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "tic-tac-toe",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "simon",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "hangman",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "color-match",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "air-hockey",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "tetris",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "gold-miner",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "space-impact",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "stack-tower",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "ball-sort",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "color-sort",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "penalty-shootout",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "darts",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "bubble-shooter",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "merge-blocks",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "connect4",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "reversi",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "gomoku",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "bowling",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "archery",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "sliding-puzzle",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "whack-a-mole",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "chess",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "checkers",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "jigsaw",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "mancala",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "mini-golf",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "billiards",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "basketball",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "table-tennis",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "domino",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "crossword",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "chess960",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "shuffleboard",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "kakuro",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "nonogram",
+      "devPass": 15,
+      "hasThumb": true
+    },
+    {
+      "slug": "word-search",
+      "devPass": 15,
+      "hasThumb": true
+    }
+  ],
+  "batchSummary": {
+    "label": "RC1 — All 50 playable games",
+    "generatedAt": "2026-07-24T11:57:27.812Z",
+    "total": 50,
+    "existing": 50,
+    "scaffolded": 0,
+    "avgPass": 12,
+    "games": [
+      {
+        "slug": "2048",
+        "title": "2048",
+        "category": "casual",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "snake",
+        "title": "Snake",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "breakout",
+        "title": "Breakout",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "arkanoid-dx",
+        "title": "Arkanoid DX",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "memory",
+        "title": "Memory",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "minesweeper",
+        "title": "Minesweeper",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "samegame",
+        "title": "SameGame",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "maze-runner",
+        "title": "Maze Runner",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "tank-battle",
+        "title": "Tank Battle",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "galaxy-defender",
+        "title": "Galaxy Defender",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "space-defender",
+        "title": "Space Defender",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "bubble-pop",
+        "title": "Bubble Pop",
+        "category": "casual",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "sudoku",
+        "title": "Sudoku",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "tic-tac-toe",
+        "title": "Tic Tac Toe",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "simon",
+        "title": "Simon",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "hangman",
+        "title": "Hangman",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "color-match",
+        "title": "Color Match",
+        "category": "casual",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "air-hockey",
+        "title": "Air Hockey",
+        "category": "casual",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "tetris",
+        "title": "Tetris",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "gold-miner",
+        "title": "Gold Miner",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "space-impact",
+        "title": "Space Impact",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "stack-tower",
+        "title": "Stack Tower",
+        "category": "casual",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "ball-sort",
+        "title": "Ball Sort",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "color-sort",
+        "title": "Color Sort",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "penalty-shootout",
+        "title": "Penalty Shootout",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "darts",
+        "title": "Darts",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "bubble-shooter",
+        "title": "Bubble Shooter",
+        "category": "casual",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "merge-blocks",
+        "title": "Merge Blocks",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "connect4",
+        "title": "Connect 4",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "reversi",
+        "title": "Reversi",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "gomoku",
+        "title": "Gomoku",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "bowling",
+        "title": "Bowling",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "archery",
+        "title": "Archery",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "sliding-puzzle",
+        "title": "Sliding Puzzle",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "whack-a-mole",
+        "title": "Whack-a-Mole",
+        "category": "arcade",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "chess",
+        "title": "Chess",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "checkers",
+        "title": "Checkers",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "jigsaw",
+        "title": "Jigsaw",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "mancala",
+        "title": "Mancala",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "mini-golf",
+        "title": "Mini Golf",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "billiards",
+        "title": "Billiards",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "basketball",
+        "title": "Basketball",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "table-tennis",
+        "title": "Table Tennis",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "domino",
+        "title": "Domino",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "crossword",
+        "title": "Crossword",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "chess960",
+        "title": "Chess960",
+        "category": "board",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "shuffleboard",
+        "title": "Shuffleboard",
+        "category": "sports",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "kakuro",
+        "title": "Kakuro",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "nonogram",
+        "title": "Nonogram",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      },
+      {
+        "slug": "word-search",
+        "title": "Word Search",
+        "category": "puzzle",
+        "codeExists": true,
+        "scaffolded": false,
+        "passCount": 12,
+        "pendingCount": 5,
+        "thumbnail": null
+      }
+    ]
+  }
+}

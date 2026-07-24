@@ -1,0 +1,948 @@
+{
+  "label": "RC1 — All 50 playable games",
+  "sortOrderBase": 1,
+  "games": [
+    {
+      "slug": "2048",
+      "title": "2048",
+      "category": "casual",
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "howToPlay": "방향키(또는 스와이프)로 타일을 밀어서 같은 숫자를 합치세요. 2048 타일을 만들면 승리합니다.",
+      "tags": [
+        "puzzle",
+        "numbers",
+        "merge"
+      ],
+      "sortOrder": 1
+    },
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "category": "arcade",
+      "description": "먹이를 먹고 몸을 늘려가며 벽과 자기 몸을 피하는 클래식 아케이드 게임.",
+      "howToPlay": "방향키(또는 스와이프)로 뱀의 방향을 조종하세요. 먹이를 먹으면 길어지고 점수가 오릅니다. 벽이나 자기 몸에 부딪히면 게임이 끝납니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "arcade",
+        "classic",
+        "reflex"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 2
+    },
+    {
+      "slug": "breakout",
+      "title": "Breakout",
+      "category": "arcade",
+      "description": "패들로 공을 튕겨 벽돌을 모두 깨는 아케이드 게임.",
+      "howToPlay": "방향키 또는 드래그로 패들을 움직여 공을 받아치세요. 공으로 벽돌을 모두 깨면 승리, 공을 놓치면 라이프가 줄어듭니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "arcade",
+        "reflex"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 3
+    },
+    {
+      "slug": "arkanoid-dx",
+      "title": "Arkanoid DX",
+      "category": "arcade",
+      "description": "패들로 공을 튕겨 벽돌을 깨는 클래식에 스테이지와 파워업을 더한 강화판.",
+      "howToPlay": "방향키 또는 드래그로 패들을 움직여 공을 받아치세요. 파란 캡슐은 패들을 넓히고, 주황 캡슐은 공을 3개로 늘립니다. 3개 스테이지를 모두 깨면 클리어!",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "arcade",
+        "action",
+        "power-up"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 4
+    },
+    {
+      "slug": "memory",
+      "title": "Memory",
+      "category": "puzzle",
+      "description": "카드를 뒤집어 같은 그림을 맞추는 두뇌 게임.",
+      "howToPlay": "카드를 두 장씩 뒤집어 같은 그림을 찾으세요. 모든 카드를 짝지으면 완료됩니다. 적은 시도로 끝낼수록 점수가 높습니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "brain",
+        "memory",
+        "cards"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 5
+    },
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "category": "puzzle",
+      "description": "숫자 힌트를 보고 지뢰를 피해 모든 칸을 여는 퍼즐 게임.",
+      "howToPlay": "칸을 클릭해 열고, 지뢰로 의심되는 칸은 깃발 모드로 표시하세요. 지뢰가 아닌 모든 칸을 열면 승리, 지뢰를 클릭하면 게임이 끝납니다.",
+      "difficulty": "HARD",
+      "tags": [
+        "puzzle",
+        "logic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 6
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "category": "puzzle",
+      "description": "같은 색 타일을 모아 터뜨리는 클릭 한 방 퍼즐.",
+      "howToPlay": "같은 색 타일이 2개 이상 인접하면 클릭해 제거하세요. 큰 그룹을 한 번에 지울수록 점수가 크게 오릅니다. 더 이상 지울 수 있는 그룹이 없으면 게임이 끝납니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "puzzle",
+        "casual",
+        "click"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 7
+    },
+    {
+      "slug": "maze-runner",
+      "title": "Maze Runner",
+      "category": "arcade",
+      "description": "미로를 누비며 긴장감 넘치는 추격전을 즐겨보세요.",
+      "howToPlay": "방향키(또는 스와이프)로 이동하며 도트를 모으세요. 파워펠렛을 먹으면 잠시 추격자를 역으로 공격할 수 있습니다. 추격자에게 닿으면 목숨을 잃고, 도트를 모두 모으면 승리합니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "arcade",
+        "maze",
+        "90s-2000s",
+        "arcade-classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 8
+    },
+    {
+      "slug": "tank-battle",
+      "title": "Tank Battle",
+      "category": "arcade",
+      "description": "친구와 번갈아 플레이하던 탱크 전투의 재미를 웹에서 다시 만나보세요.",
+      "howToPlay": "방향키로 이동, 스페이스바(또는 발사 버튼)로 발사하세요. 벽돌 지형은 파괴할 수 있습니다. 적 탱크 5대를 모두 격파하면 승리합니다.",
+      "difficulty": "HARD",
+      "tags": [
+        "action",
+        "shooter",
+        "90s-2000s",
+        "arcade-classic",
+        "quick-play"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 9
+    },
+    {
+      "slug": "galaxy-defender",
+      "title": "Galaxy Defender",
+      "category": "arcade",
+      "description": "우주를 지키던 오락실 슈팅 게임의 감성을 현대적으로 재해석했습니다.",
+      "howToPlay": "좌우로 이동해 적의 다이빙 공격을 피하세요. 우주선은 자동으로 발사되며, 편대를 모두 격파하면 다음 웨이브로 넘어갑니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "arcade",
+        "shooter",
+        "90s-2000s",
+        "arcade-classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 10
+    },
+    {
+      "slug": "space-defender",
+      "title": "Space Defender",
+      "category": "arcade",
+      "description": "줄지어 다가오는 침략자를 막아내는 클래식 슈팅 게임. 남은 적이 줄어들수록 진격 속도가 빨라집니다.",
+      "howToPlay": "좌우로 이동한 뒤 스페이스바로 발사해 침략자 그리드를 격파하세요. 방어막 뒤에 숨어 적의 총알을 피할 수 있습니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "arcade",
+        "shooter",
+        "90s-2000s",
+        "arcade-classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 11
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "category": "casual",
+      "description": "같은 색 버블을 맞춰 터뜨리는 상쾌한 버블 슈팅 게임.",
+      "howToPlay": "조준한 뒤 클릭이나 스페이스바로 버블을 발사하세요. 같은 색 3개 이상을 모으면 터집니다. 버블이 바닥에 닿으면 게임이 끝나고, 모든 버블을 없애면 승리합니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "casual",
+        "puzzle",
+        "arcade-classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 12
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "category": "puzzle",
+      "description": "숫자 논리 퍼즐의 정석. 머리를 식히며 즐기는 스도쿠.",
+      "howToPlay": "빈 칸을 선택하고 숫자를 입력하세요. 같은 행, 열, 3x3 박스 안에 중복된 숫자가 없어야 합니다. 3번 틀리면 게임이 끝납니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "puzzle",
+        "logic",
+        "numbers"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 13
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "category": "arcade",
+      "description": "누구나 아는 그 게임, 간단하지만 중독성 있는 틱택토.",
+      "howToPlay": "빈 칸을 클릭해 표시하세요. 가로, 세로, 대각선 중 하나로 먼저 3개를 맞추면 승리합니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "classic",
+        "strategy",
+        "quick-play"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 14
+    },
+    {
+      "slug": "simon",
+      "title": "Simon",
+      "category": "puzzle",
+      "description": "점점 길어지는 색상 패턴을 기억하고 따라해보세요.",
+      "howToPlay": "재생되는 색상 순서를 잘 보고, 같은 순서로 패드를 눌러 따라하세요. 순서를 놓치면 게임이 끝납니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "brain",
+        "memory",
+        "quick-play"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 15
+    },
+    {
+      "slug": "hangman",
+      "title": "Hangman",
+      "category": "puzzle",
+      "description": "한 글자씩 추측하며 단어를 완성하는 클래식 단어 게임.",
+      "howToPlay": "화면의 키보드나 실제 키보드로 알파벳을 추측해 단어를 완성하세요. 6번 틀리면 게임이 끝납니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "brain",
+        "word",
+        "quick-play"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 16
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "category": "casual",
+      "description": "제한시간 안에 정확한 색을 맞추는 반사신경 게임.",
+      "howToPlay": "제한시간 안에 목표 색과 같은 색 버튼을 누르세요. 틀리거나 시간이 초과되면 목숨이 줄어들고, 목숨을 모두 잃으면 게임이 끝납니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "casual",
+        "reflex",
+        "quick-play"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 17
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "category": "casual",
+      "description": "퍽을 쳐내며 상대보다 먼저 득점하는 실시간 에어하키.",
+      "howToPlay": "드래그(또는 방향키)로 패들을 움직여 퍽을 쳐내세요. 자신의 골대(하단)에 퍽이 들어가면 실점하고, 상대 골대(상단)에 넣으면 득점합니다. 7점을 먼저 획득하면 승리합니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "casual",
+        "arcade-classic",
+        "quick-play"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 18
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "category": "arcade",
+      "description": "떨어지는 블록을 맞춰 줄을 채우는 클래식 퍼즐의 정석.",
+      "howToPlay": "방향키(또는 스와이프)로 블록을 이동, 위쪽 화살표(또는 탭)로 회전, 스페이스바로 즉시 낙하시키세요. 가로 한 줄을 가득 채우면 사라지고 점수를 얻습니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "retro",
+        "puzzle",
+        "90s-2000s",
+        "arcade-classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 19
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "category": "arcade",
+      "description": "흔들리는 훅을 발사해 금과 보석을 캐내는 추억의 미니게임.",
+      "howToPlay": "스페이스바(또는 탭)로 훅을 발사하세요. 무거운 광물일수록 천천히 끌어올려집니다. 제한 시간 안에 최대한 많은 점수를 모으세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "retro",
+        "casual",
+        "90s-2000s"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 20
+    },
+    {
+      "slug": "space-impact",
+      "title": "Space Impact",
+      "category": "arcade",
+      "description": "피처폰 시절 즐겨하던 옆으로 스크롤되는 슈팅 게임.",
+      "howToPlay": "방향키(또는 드래그)로 상하 이동, 스페이스바(또는 탭)로 발사하세요. 적과 부딪히면 목숨을 잃습니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "retro",
+        "shooter",
+        "90s-2000s",
+        "arcade-classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 21
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "category": "casual",
+      "description": "움직이는 블록을 타이밍 맞춰 쌓아 올리는 원터치 스택 게임.",
+      "howToPlay": "화면을 탭해 움직이는 블록을 정확히 쌓으세요. 삐뚤어지면 잘려 나가고, 블록이 너무 작아지면 게임 오버입니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "casual",
+        "timing",
+        "one-touch"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 22
+    },
+    {
+      "slug": "ball-sort",
+      "title": "Ball Sort",
+      "category": "puzzle",
+      "description": "같은 색 공을 튜브별로 정리하는 볼 소트 퍼즐.",
+      "howToPlay": "튜브를 탭해 공을 옮기세요. 같은 색만 위에 쌓을 수 있고, 모든 튜브를 색별로 정리하면 클리어입니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "sort",
+        "casual"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 23
+    },
+    {
+      "slug": "color-sort",
+      "title": "Color Sort",
+      "category": "puzzle",
+      "description": "액체를 색깔별로 나누는 컬러 소트 퍼즐.",
+      "howToPlay": "튜브를 탭해 위쪽 액체를 옮기세요. 같은 색만 합칠 수 있습니다. 모든 색을 분리하면 승리!",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "sort",
+        "logic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 24
+    },
+    {
+      "slug": "penalty-shootout",
+      "title": "Penalty Shootout",
+      "category": "sports",
+      "description": "골키퍼를 피해 페널티킥을 넣는 스포츠 미니게임.",
+      "howToPlay": "골대를 탭해 킥 방향을 정하세요. 5번의 기회 안에 최대한 많은 골을 넣으세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "soccer",
+        "timing"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 25
+    },
+    {
+      "slug": "darts",
+      "title": "Darts",
+      "category": "sports",
+      "description": "다트판을 조준해 10번 던지는 스포츠 캐주얼.",
+      "howToPlay": "다트판을 탭해 던질 위치를 고르세요. 중앙에 가까울수록 높은 점수, 10번 던진 합계가 기록됩니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "aiming",
+        "casual"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 26
+    },
+    {
+      "slug": "bubble-shooter",
+      "title": "Bubble Shooter",
+      "category": "casual",
+      "description": "열을 골라 버블을 쏘고 3개 이상 연결해 터뜨리는 슈터.",
+      "howToPlay": "열을 탭해 버블을 쏘세요. 같은 색 3개 이상이 연결되면 터집니다. 바닥까지 내려오면 게임 오버!",
+      "difficulty": "EASY",
+      "tags": [
+        "casual",
+        "match",
+        "shooter"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 27
+    },
+    {
+      "slug": "merge-blocks",
+      "title": "Merge Blocks",
+      "category": "puzzle",
+      "description": "열에 블록을 떨어뜨려 같은 숫자를 합치는 머지 퍼즐.",
+      "howToPlay": "열을 탭해 블록을 떨어뜨리세요. 같은 숫자가 맞닿으면 합쳐집니다. 칸이 가득 차면 끝!",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "merge",
+        "2048"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 28
+    },
+    {
+      "slug": "connect4",
+      "title": "Connect 4",
+      "category": "board",
+      "description": "열에 디스크를 떨어뜨려 4개를 먼저 연결하는 보드 클래식.",
+      "howToPlay": "열 상단 ▼ 버튼을 탭해 디스크를 떨어뜨리세요. 가로·세로·대각선으로 4개를 먼저 연결하면 승리!",
+      "difficulty": "EASY",
+      "tags": [
+        "board",
+        "strategy",
+        "cpu"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 29
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "category": "board",
+      "description": "돌을 놓아 상대 색을 뒤집는 오셀로 퍼즐.",
+      "howToPlay": "흑(당신)으로 빈 칸을 탭해 돌을 놓으세요. 상대 돌을 양쪽에서 감싸면 뒤집힙니다. 더 많은 돌을 가진 쪽이 승리.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "board",
+        "strategy",
+        "reversi"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 30
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "category": "board",
+      "description": "9×9 바둑판에서 5목을 먼저 완성하는 전략 보드.",
+      "howToPlay": "교차점을 탭해 돌을 놓으세요. 가로·세로·대각선으로 5개를 먼저 연결하면 승리!",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "board",
+        "strategy",
+        "five-in-a-row"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 31
+    },
+    {
+      "slug": "bowling",
+      "title": "Bowling",
+      "category": "sports",
+      "description": "파워 게이지 타이밍에 맞춰 핀을 쓰러뜨리는 스포츠.",
+      "howToPlay": "움직이는 파워 바가 최적 구간일 때 Roll! 버튼을 탭하세요. 5프레임 동안 최대 점수를 노리세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "timing",
+        "casual"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 32
+    },
+    {
+      "slug": "archery",
+      "title": "Archery",
+      "category": "sports",
+      "description": "과녁을 조준해 8발로 점수를 모으는 양궁.",
+      "howToPlay": "과녁을 탭해 화살을 쏘세요. 중심에 가까울수록 높은 점수, 8발 합계가 기록됩니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "aiming",
+        "archery"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 33
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "category": "puzzle",
+      "description": "4×4 타일을 밀어 숫자 순서를 맞추는 클래식 퍼즐.",
+      "howToPlay": "빈 칸과 인접한 타일을 탭해 이동하세요. 1부터 15까지 순서대로 배열하면 클리어!",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "puzzle",
+        "logic",
+        "sliding"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 34
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "category": "arcade",
+      "description": "30초 동안 튀어나오는 두더지를 빠르게 탭하는 아케이드.",
+      "howToPlay": "갈색으로 튀어나온 구멍을 빠르게 탭하세요. 30초 안에 최대한 많은 점수를 모으세요!",
+      "difficulty": "EASY",
+      "tags": [
+        "arcade",
+        "reaction",
+        "casual"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 35
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "category": "board",
+      "description": "클래식 체스 — CPU와 대국하는 전략 보드 게임.",
+      "howToPlay": "말을 선택해 이동하세요. 상대 킹을 체크메이트하면 승리합니다.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "board",
+        "strategy",
+        "classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 36
+    },
+    {
+      "slug": "checkers",
+      "title": "Checkers",
+      "category": "board",
+      "description": "체커(드aughts) — CPU와 대각선 전략 대결.",
+      "howToPlay": "말을 선택하고 이동하세요. 점프로 상대 말을 제거하고 킹으로 승급하세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "board",
+        "classic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 37
+    },
+    {
+      "slug": "jigsaw",
+      "title": "Jigsaw",
+      "category": "puzzle",
+      "description": "색 조각을 맞춰 그림을 완성하는 3×3 직소 퍼즐.",
+      "howToPlay": "조각을 탭해 빈 칸과 맞바꾸세요. 모든 조각을 올바른 순서로 배치하면 클리어입니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "casual"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 38
+    },
+    {
+      "slug": "mancala",
+      "title": "Mancala",
+      "category": "board",
+      "description": "만칼라 — 구슬을 옮겨 상대보다 많은 구슬을 모으세요.",
+      "howToPlay": "아래 구덩이를 탭해 구슬을 분배하세요. 상대 구덩이의 구슬을 포획할 수 있습니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "board",
+        "strategy"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 39
+    },
+    {
+      "slug": "mini-golf",
+      "title": "Mini Golf",
+      "category": "sports",
+      "description": "미니 골프 — 파워와 각도를 맞춰 홀인원을 노리세요.",
+      "howToPlay": "Putt! 버튼으로 파워가 맞을 때 공을 치세요. 최소 타수로 홀에 넣으세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "casual",
+        "timing"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 40
+    },
+    {
+      "slug": "billiards",
+      "title": "Billiards",
+      "category": "sports",
+      "description": "심플 3구 — 큐볼로 색 공을 포켓에 넣으세요.",
+      "howToPlay": "각도와 파워를 맞춰 Shoot! 공을 pocket 근처로 보내 점수를 얻으세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "arcade"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 41
+    },
+    {
+      "slug": "basketball",
+      "title": "Basketball",
+      "category": "sports",
+      "description": "타이밍 파워 바로 슛 — 10번의 프리 스로우로 점수를 모으세요.",
+      "howToPlay": "파워 바가 sweet spot에 올 때 Shoot! 버튼을 눌러 골대에 넣으세요. 10슛 종료 후 점수가 기록됩니다.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "timing"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 42
+    },
+    {
+      "slug": "table-tennis",
+      "title": "Table Tennis",
+      "category": "sports",
+      "description": "CPU와 맞붙는 미니 탁구 — 먼저 5점을 따는 쪽이 승리.",
+      "howToPlay": "코트를 드래그해 패들을 움직이세요. 공을 상대 코트로 넘겨 먼저 5점을 얻으세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "arcade"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 43
+    },
+    {
+      "slug": "domino",
+      "title": "Domino",
+      "category": "board",
+      "description": "드로우 & 매치 도미노 — CPU와 번호를 맞춰 체인을 이어가세요.",
+      "howToPlay": "손패 타일을 탭해 체인 양 끝 숫자와 맞추세요. 둘 다 없으면 Draw tile.",
+      "difficulty": "EASY",
+      "tags": [
+        "board",
+        "casual"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 44
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "category": "puzzle",
+      "description": "미니 5×5 크로스워드 — 3개 단서로 격자를 채우세요.",
+      "howToPlay": "단서를 보고 칸을 탭한 뒤 알파벳 버튼으로 답을 입력하세요.",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "word"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 45
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "category": "board",
+      "description": "Fischer Random 체스 — 매 게임 랜덤 백랭크로 CPU와 대국.",
+      "howToPlay": "말을 선택해 이동하세요. Chess960 규칙으로 CPU를 이기면 승리.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "board",
+        "strategy",
+        "chess"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 46
+    },
+    {
+      "slug": "shuffleboard",
+      "title": "Shuffleboard",
+      "category": "sports",
+      "description": "디스크를 밀어 점수 구역에 정확히 멈추는 셔플보드.",
+      "howToPlay": "파워를 맞춰 Slide! 디스크가 1~4점 구역에 멈추도록 하세요. 8라운드 합산 점수.",
+      "difficulty": "EASY",
+      "tags": [
+        "sports",
+        "timing"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 47
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "category": "puzzle",
+      "description": "미니 4×4 카쿠로 — 합계 힌트에 맞는 숫자를 채우세요.",
+      "howToPlay": "흰 칸을 탭하고 1~9 숫자로 합계 단서를 만족시키세요.",
+      "difficulty": "MEDIUM",
+      "tags": [
+        "puzzle",
+        "logic",
+        "numbers"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 48
+    },
+    {
+      "slug": "nonogram",
+      "title": "Nonogram",
+      "category": "puzzle",
+      "description": "5×5 픽ross — 행·열 힌트로 그림을 완성하세요.",
+      "howToPlay": "칸을 탭해 채우고, 우클릭으로 빈 칸(×)을 표시하세요. 힌트와 일치하면 완성.",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "logic"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 49
+    },
+    {
+      "slug": "word-search",
+      "title": "Word Search",
+      "category": "puzzle",
+      "description": "8×8 워드서치 — 4개 단어를 직선으로 찾아 선택하세요.",
+      "howToPlay": "시작 칸과 끝 칸을 탭해 단어를 직선으로 선택하세요. 4개 모두 찾으면 클리어.",
+      "difficulty": "EASY",
+      "tags": [
+        "puzzle",
+        "word"
+      ],
+      "features": {
+        "save": true,
+        "ranking": true
+      },
+      "skipScaffold": true,
+      "sortOrder": 50
+    }
+  ]
+}
