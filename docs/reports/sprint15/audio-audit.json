@@ -1,0 +1,411 @@
+{
+  "generatedAt": "2026-07-24T23:47:44.075Z",
+  "note": "Games use optional WebAudio via game-sdk; missing per-game audio is not a failure",
+  "passCount": 50,
+  "total": 50,
+  "withSdkSound": 0,
+  "withAssets": 0,
+  "games": [
+    {
+      "slug": "2048",
+      "title": "2048",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "breakout",
+      "title": "Breakout",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "title": "Arkanoid DX",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "memory",
+      "title": "Memory",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "maze-runner",
+      "title": "Maze Runner",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "tank-battle",
+      "title": "Tank Battle",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "galaxy-defender",
+      "title": "Galaxy Defender",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "space-defender",
+      "title": "Space Defender",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "simon",
+      "title": "Simon",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "hangman",
+      "title": "Hangman",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "space-impact",
+      "title": "Space Impact",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "ball-sort",
+      "title": "Ball Sort",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "color-sort",
+      "title": "Color Sort",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "penalty-shootout",
+      "title": "Penalty Shootout",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "darts",
+      "title": "Darts",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "bubble-shooter",
+      "title": "Bubble Shooter",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "merge-blocks",
+      "title": "Merge Blocks",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "connect4",
+      "title": "Connect 4",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "bowling",
+      "title": "Bowling",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "archery",
+      "title": "Archery",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "checkers",
+      "title": "Checkers",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "jigsaw",
+      "title": "Jigsaw",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "mancala",
+      "title": "Mancala",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "mini-golf",
+      "title": "Mini Golf",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "billiards",
+      "title": "Billiards",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "basketball",
+      "title": "Basketball",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "table-tennis",
+      "title": "Table Tennis",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "domino",
+      "title": "Domino",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "shuffleboard",
+      "title": "Shuffleboard",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "nonogram",
+      "title": "Nonogram",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    },
+    {
+      "slug": "word-search",
+      "title": "Word Search",
+      "usesSdkSound": false,
+      "audioAssetCount": 0,
+      "note": "No dedicated audio — platform uses optional SDK sounds only",
+      "status": "PASS"
+    }
+  ],
+  "overall": "PASS"
+}

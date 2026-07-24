@@ -1,0 +1,408 @@
+{
+  "generatedAt": "2026-07-24T23:47:43.961Z",
+  "passCount": 50,
+  "total": 50,
+  "games": [
+    {
+      "slug": "2048",
+      "title": "2048",
+      "path": "apps\\web\\public\\images\\games\\2048.png",
+      "bytes": 25314,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "path": "apps\\web\\public\\images\\games\\snake.png",
+      "bytes": 21365,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "breakout",
+      "title": "Breakout",
+      "path": "apps\\web\\public\\images\\games\\breakout.png",
+      "bytes": 21119,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "title": "Arkanoid DX",
+      "path": "apps\\web\\public\\images\\games\\arkanoid-dx.png",
+      "bytes": 23234,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "memory",
+      "title": "Memory",
+      "path": "apps\\web\\public\\images\\games\\memory.png",
+      "bytes": 24033,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "path": "apps\\web\\public\\images\\games\\minesweeper.png",
+      "bytes": 24357,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "path": "apps\\web\\public\\images\\games\\samegame.png",
+      "bytes": 25064,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "maze-runner",
+      "title": "Maze Runner",
+      "path": "apps\\web\\public\\images\\games\\maze-runner.png",
+      "bytes": 25854,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "tank-battle",
+      "title": "Tank Battle",
+      "path": "apps\\web\\public\\images\\games\\tank-battle.png",
+      "bytes": 21535,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "galaxy-defender",
+      "title": "Galaxy Defender",
+      "path": "apps\\web\\public\\images\\games\\galaxy-defender.png",
+      "bytes": 25308,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "space-defender",
+      "title": "Space Defender",
+      "path": "apps\\web\\public\\images\\games\\space-defender.png",
+      "bytes": 23544,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "path": "apps\\web\\public\\images\\games\\bubble-pop.png",
+      "bytes": 25610,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "path": "apps\\web\\public\\images\\games\\sudoku.png",
+      "bytes": 23708,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "path": "apps\\web\\public\\images\\games\\tic-tac-toe.png",
+      "bytes": 22944,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "simon",
+      "title": "Simon",
+      "path": "apps\\web\\public\\images\\games\\simon.png",
+      "bytes": 24637,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "hangman",
+      "title": "Hangman",
+      "path": "apps\\web\\public\\images\\games\\hangman.png",
+      "bytes": 21675,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "path": "apps\\web\\public\\images\\games\\color-match.png",
+      "bytes": 24887,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "path": "apps\\web\\public\\images\\games\\air-hockey.png",
+      "bytes": 23859,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "path": "apps\\web\\public\\images\\games\\tetris.png",
+      "bytes": 19448,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "path": "apps\\web\\public\\images\\games\\gold-miner.png",
+      "bytes": 25442,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "space-impact",
+      "title": "Space Impact",
+      "path": "apps\\web\\public\\images\\games\\space-impact.png",
+      "bytes": 22311,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "path": "apps\\web\\public\\images\\games\\stack-tower.png",
+      "bytes": 22106,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "ball-sort",
+      "title": "Ball Sort",
+      "path": "apps\\web\\public\\images\\games\\ball-sort.png",
+      "bytes": 21527,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "color-sort",
+      "title": "Color Sort",
+      "path": "apps\\web\\public\\images\\games\\color-sort.png",
+      "bytes": 22321,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "penalty-shootout",
+      "title": "Penalty Shootout",
+      "path": "apps\\web\\public\\images\\games\\penalty-shootout.png",
+      "bytes": 25127,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "darts",
+      "title": "Darts",
+      "path": "apps\\web\\public\\images\\games\\darts.png",
+      "bytes": 30520,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "bubble-shooter",
+      "title": "Bubble Shooter",
+      "path": "apps\\web\\public\\images\\games\\bubble-shooter.png",
+      "bytes": 26957,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "merge-blocks",
+      "title": "Merge Blocks",
+      "path": "apps\\web\\public\\images\\games\\merge-blocks.png",
+      "bytes": 24959,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "connect4",
+      "title": "Connect 4",
+      "path": "apps\\web\\public\\images\\games\\connect4.png",
+      "bytes": 23935,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "path": "apps\\web\\public\\images\\games\\reversi.png",
+      "bytes": 24406,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "path": "apps\\web\\public\\images\\games\\gomoku.png",
+      "bytes": 21310,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "bowling",
+      "title": "Bowling",
+      "path": "apps\\web\\public\\images\\games\\bowling.png",
+      "bytes": 20148,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "archery",
+      "title": "Archery",
+      "path": "apps\\web\\public\\images\\games\\archery.png",
+      "bytes": 30031,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "path": "apps\\web\\public\\images\\games\\sliding-puzzle.png",
+      "bytes": 25091,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "path": "apps\\web\\public\\images\\games\\whack-a-mole.png",
+      "bytes": 23403,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "path": "apps\\web\\public\\images\\games\\chess.png",
+      "bytes": 22124,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "checkers",
+      "title": "Checkers",
+      "path": "apps\\web\\public\\images\\games\\checkers.png",
+      "bytes": 21924,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "jigsaw",
+      "title": "Jigsaw",
+      "path": "apps\\web\\public\\images\\games\\jigsaw.png",
+      "bytes": 21416,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "mancala",
+      "title": "Mancala",
+      "path": "apps\\web\\public\\images\\games\\mancala.png",
+      "bytes": 19540,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "mini-golf",
+      "title": "Mini Golf",
+      "path": "apps\\web\\public\\images\\games\\mini-golf.png",
+      "bytes": 19360,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "billiards",
+      "title": "Billiards",
+      "path": "apps\\web\\public\\images\\games\\billiards.png",
+      "bytes": 20871,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "basketball",
+      "title": "Basketball",
+      "path": "apps\\web\\public\\images\\games\\basketball.png",
+      "bytes": 21691,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "table-tennis",
+      "title": "Table Tennis",
+      "path": "apps\\web\\public\\images\\games\\table-tennis.png",
+      "bytes": 20817,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "domino",
+      "title": "Domino",
+      "path": "apps\\web\\public\\images\\games\\domino.png",
+      "bytes": 20235,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "path": "apps\\web\\public\\images\\games\\crossword.png",
+      "bytes": 21964,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "path": "apps\\web\\public\\images\\games\\chess960.png",
+      "bytes": 25051,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "shuffleboard",
+      "title": "Shuffleboard",
+      "path": "apps\\web\\public\\images\\games\\shuffleboard.png",
+      "bytes": 22244,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "path": "apps\\web\\public\\images\\games\\kakuro.png",
+      "bytes": 19149,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "nonogram",
+      "title": "Nonogram",
+      "path": "apps\\web\\public\\images\\games\\nonogram.png",
+      "bytes": 20235,
+      "quality": "PASS",
+      "status": "PASS"
+    },
+    {
+      "slug": "word-search",
+      "title": "Word Search",
+      "path": "apps\\web\\public\\images\\games\\word-search.png",
+      "bytes": 24054,
+      "quality": "PASS",
+      "status": "PASS"
+    }
+  ],
+  "overall": "PASS"
+}

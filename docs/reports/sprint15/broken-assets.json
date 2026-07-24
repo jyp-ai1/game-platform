@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-07-24T23:47:44.733Z",
+  "overall": "SKIP",
+  "pagesChecked": 0,
+  "broken404": 0,
+  "brokenImages": 0,
+  "brokenLinks": 0,
+  "note": "Server audit skipped — run QA_SKIP_SERVER=0 with live server"
+}
