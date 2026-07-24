@@ -4,56 +4,18 @@ import { fetchDailyStatsForExport, fetchMonthlyOpsReport } from "@/lib/supabase/
 
 export const metadata = { title: "Reports" };
 
-function toCsv(rows: Record<string, unknown>[]): string {
-  if (!rows.length) return "";
-  const headers = Object.keys(rows[0]!);
-  const lines = [
-    headers.join(","),
-    ...rows.map((row) =>
-      headers
-        .map((h) => {
-          const val = row[h];
-          const str = val == null ? "" : String(val);
-          return str.includes(",") ? `"${str.replace(/"/g, '""')}"` : str;
-        })
-        .join(",")
-    ),
-  ];
-  return lines.join("\n");
-}
-
 export default async function AdminReportsPage() {
   const [monthly, daily] = await Promise.all([
     fetchMonthlyOpsReport(),
     fetchDailyStatsForExport(30),
   ]);
 
-  const dailyCsv = toCsv(daily as Record<string, unknown>[]);
-  const monthlyCsv = monthly
-    ? toCsv([
-        {
-          month: monthly.month,
-          dau_avg: monthly.dau_avg,
-          total_plays: monthly.total_plays,
-          total_scores: monthly.total_scores,
-          new_players: monthly.new_players,
-          errors: monthly.errors,
-        },
-        ...monthly.top_games.map((g) => ({
-          month: monthly.month,
-          game_slug: g.game_slug,
-          plays: g.plays,
-          row_type: "top_game",
-        })),
-      ])
-    : "";
-
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Report Center</h1>
         <p className="text-sm text-muted-foreground">
-          CSV 내보내기 · 월간 운영 보고서
+          CSV · Excel · PDF(인쇄) · 월간 운영 보고서
         </p>
       </div>
 
@@ -90,30 +52,60 @@ export default async function AdminReportsPage() {
             </ul>
           </section>
 
-          <section className="grid gap-4 sm:grid-cols-2">
-            <a
-              href={`data:text/csv;charset=utf-8,${encodeURIComponent(dailyCsv)}`}
-              download="replay-daily-stats.csv"
-              className="rounded-xl border bg-card p-4 hover:bg-muted/50"
-            >
-              <p className="font-medium">Daily Stats CSV</p>
-              <p className="mt-1 text-sm text-muted-foreground">최근 30일 DAU · Plays · Scores</p>
-            </a>
-            <a
-              href={`data:text/csv;charset=utf-8,${encodeURIComponent(monthlyCsv)}`}
-              download="replay-monthly-report.csv"
-              className="rounded-xl border bg-card p-4 hover:bg-muted/50"
-            >
-              <p className="font-medium">Monthly Report CSV</p>
-              <p className="mt-1 text-sm text-muted-foreground">이번 달 운영 KPI</p>
-            </a>
+          <section>
+            <h2 className="mb-4 font-semibold">Daily Stats (30일)</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <a
+                href="/admin/reports/export?type=daily&format=csv"
+                className="rounded-xl border bg-card p-4 hover:bg-muted/50"
+              >
+                <p className="font-medium">CSV</p>
+                <p className="mt-1 text-sm text-muted-foreground">DAU · Plays · Scores</p>
+              </a>
+              <a
+                href="/admin/reports/export?type=daily&format=excel"
+                className="rounded-xl border bg-card p-4 hover:bg-muted/50"
+              >
+                <p className="font-medium">Excel (.xls)</p>
+                <p className="mt-1 text-sm text-muted-foreground">Excel 2003 XML 형식</p>
+              </a>
+            </div>
           </section>
+
+          <section>
+            <h2 className="mb-4 font-semibold">Monthly Report</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <a
+                href="/admin/reports/export?type=monthly&format=csv"
+                className="rounded-xl border bg-card p-4 hover:bg-muted/50"
+              >
+                <p className="font-medium">CSV</p>
+                <p className="mt-1 text-sm text-muted-foreground">KPI + Top Games</p>
+              </a>
+              <a
+                href="/admin/reports/export?type=monthly&format=excel"
+                className="rounded-xl border bg-card p-4 hover:bg-muted/50"
+              >
+                <p className="font-medium">Excel (.xls)</p>
+                <p className="mt-1 text-sm text-muted-foreground">Summary + TopGames 시트</p>
+              </a>
+              <Link
+                href="/admin/reports/print"
+                className="rounded-xl border bg-card p-4 hover:bg-muted/50"
+              >
+                <p className="font-medium">Print / PDF</p>
+                <p className="mt-1 text-sm text-muted-foreground">인쇄 미리보기 → PDF 저장</p>
+              </Link>
+            </div>
+          </section>
+
+          {daily.length > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Daily rows: {daily.length} · Monthly games: {monthly.top_games.length}
+            </p>
+          ) : null}
         </>
       )}
-
-      <p className="text-xs text-muted-foreground">
-        Excel/PDF 자동 생성은 Sprint 12 후반(T5)에서 확장 예정.
-      </p>
     </div>
   );
 }

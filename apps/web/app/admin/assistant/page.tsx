@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { OpsAssistantPanel } from "@/components/admin/ops-assistant-panel";
 import { fetchDashboardKpisExtended } from "@/lib/supabase/admin-server";
+import { isAiAssistantConfigured } from "@/lib/ops/assistant-generate";
 import { fetchOpsErrorSummary, fetchOpsRealtimeStats } from "@/lib/supabase/ops-server";
 
 export const metadata = { title: "AI Assistant" };
@@ -10,10 +12,11 @@ function insight(text: string, severity: "info" | "warn" = "info") {
 }
 
 export default async function AdminAssistantPage() {
-  const [realtime, errors, kpis] = await Promise.all([
+  const [realtime, errors, kpis, aiConfigured] = await Promise.all([
     fetchOpsRealtimeStats(),
     fetchOpsErrorSummary(24),
     fetchDashboardKpisExtended("today"),
+    Promise.resolve(isAiAssistantConfigured()),
   ]);
 
   const insights: Array<{ text: string; severity: "info" | "warn" }> = [];
@@ -65,16 +68,16 @@ export default async function AdminAssistantPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
         <h1 className="text-2xl font-bold">AI Operation Assistant</h1>
         <p className="text-sm text-muted-foreground">
-          운영 데이터 기반 인사이트 (규칙 엔진 v1 — LLM 연동은 T6 후반)
+          운영 데이터 기반 인사이트 · 공지/배너/이벤트 초안 생성
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">오늘의 Ops Summary</h2>
+        <h2 className="font-semibold">자동 감지 (Rules)</h2>
         {insights.map((item, i) => (
           <div
             key={i}
@@ -89,7 +92,12 @@ export default async function AdminAssistantPage() {
         ))}
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section>
+        <h2 className="mb-4 font-semibold">AI 생성 도구</h2>
+        <OpsAssistantPanel aiConfigured={aiConfigured} />
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-3 print:hidden">
         <Link href="/admin/monitoring" className="rounded-xl border bg-card p-4 hover:bg-muted/50">
           Monitoring →
         </Link>

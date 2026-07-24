@@ -12,7 +12,13 @@ const PERIODS = [
 
 export type DashboardPeriod = (typeof PERIODS)[number]["id"];
 
-export function DashboardPeriodTabs({ current }: { current: DashboardPeriod }) {
+export function DashboardPeriodTabs({
+  current,
+  basePath = "/admin",
+}: {
+  current: DashboardPeriod;
+  basePath?: string;
+}) {
   const searchParams = useSearchParams();
 
   return (
@@ -24,7 +30,7 @@ export function DashboardPeriodTabs({ current }: { current: DashboardPeriod }) {
         return (
           <Link
             key={p.id}
-            href={`/admin?${params.toString()}`}
+            href={`${basePath}?${params.toString()}`}
             className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               active
                 ? "bg-background shadow-sm text-foreground"
