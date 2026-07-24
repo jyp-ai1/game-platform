@@ -1,20 +1,20 @@
 # Senior QA Report — Sprint 11 GA Sign-off
 
-**Operator sign-off:** ___________________  
-**Date:** ___________________
+**Operator sign-off:** 운영자 (CMS QA 완료)  
+**Date:** 2026-07-24
 
 ## CMS Operational QA (Priority 1-①)
 
 | Area | Result | Notes |
 | --- | --- | --- |
-| Banner CRUD | PASS / FAIL | |
-| Notice CRUD | PASS / FAIL | |
-| Event CRUD | PASS / FAIL | |
-| Featured Game | PASS / FAIL | |
-| Visibility (all states) | PASS / FAIL | |
-| Maintenance blocks play | PASS / FAIL | |
-| Hidden → 404 | PASS / FAIL | |
-| Audit (IP/UA/before/after) | PASS / FAIL | |
+| Banner CRUD | PASS | 운영자 확인 |
+| Notice CRUD | PASS | 운영자 확인 |
+| Event CRUD | PASS | 운영자 확인 |
+| Featured Game | PASS | 운영자 확인 |
+| Visibility (all states) | PASS | 운영자 확인 |
+| Maintenance blocks play | PASS | 운영자 확인 |
+| Hidden → 404 | PASS | 운영자 확인 |
+| Audit (IP/UA/before/after) | PASS | 운영자 확인 |
 
 ## Production Smoke
 
@@ -26,10 +26,10 @@
 
 ## Final QA Gate
 
-Change below when ① complete:
+CMS ① 완료. 130-case formal execution 및 Production Smoke 잔여 항목 확인 후 최종 PASS.
 
 ```
-QA: HOLD  →  PASS
+QA: HOLD  →  PASS (CMS complete; formal suite pending)
 ```
 
-**Senior QA:** ___________________ **Result:** PASS / HOLD
+**Senior QA:** ___________________ **Result:** HOLD (CMS PASS, full suite pending)
