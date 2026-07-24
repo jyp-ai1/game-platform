@@ -77,10 +77,30 @@ group by game_slug;
 
 ---
 
+## Code instrumentation audit (Epic 1-B — Developer PASS)
+
+| Event | Implementation | Games |
+|-------|----------------|------:|
+| play | `RecentlyPlayedRecorder` → `session_start` + `game_start` | Platform |
+| finish | `reportScore` → `game_end` | **50/50** |
+| retry | `emitGameRetry` → `game_start { retry: true }` | **50/50** |
+| favorite | `FavoriteButton` → `favorite` | Platform |
+| resume | `onResume` → `resume` | **50/50** |
+| ranking | `submitScore` RPC → `ranking_submit` | Platform |
+
+**Epic1-B fix:** hangman emits `game_end` on loss (score 0).
+
+---
+
 ## Result
 
-| Check | Developer | Operator |
-|-------|-----------|----------|
-| Wiring complete | **PASS** | — |
-| Live `analytics_events` data | — | **HOLD** |
-| Analytics Gate | — | **HOLD** |
+| Check | Developer | Operator | Independent QA |
+|-------|-----------|----------|----------------|
+| Wiring complete | **PASS** | — | — |
+| Preview deploy | **PASS** | — | — |
+| Preview accessible | — | **HOLD** (SSO) | **HOLD** |
+| Migration 0023–0025 | — | **HOLD** | — |
+| Live `analytics_events` | — | **HOLD** | — |
+| Analytics Gate | — | **HOLD** | — |
+
+**Epic1-A Phase4:** SQL templates ready — execute after QA session generates traffic on Preview.

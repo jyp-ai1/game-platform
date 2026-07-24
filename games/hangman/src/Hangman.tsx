@@ -60,6 +60,8 @@ export function HangmanGame() {
   useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.wrongGuesses));
+    } else if (state.status === "lost") {
+      reportScore(GAME_SLUG, 0);
     }
     if (state.status !== "playing") {
       clearSave(GAME_SLUG);

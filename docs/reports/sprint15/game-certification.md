@@ -1,9 +1,9 @@
-# Sprint 15 Epic 1 — 50 Game Certification
+# Sprint 15 — Developer Report & Certification
 
-**Date:** 2026-07-24  
+**Updated:** 2026-07-24 (Epic 1-B)  
 **Branch:** `content-factory`  
-**Environment (target):** https://game29.vercel.app (post-deploy)  
-**Executor:** Developer (code certification + fixes)
+**Preview:** https://game29-git-content-factory-jyp-ai1s-projects.vercel.app  
+**Executor:** Developer (RC1 readiness — code scope only)
 
 ---
 
@@ -16,6 +16,7 @@
 | Ready countdown (3-2-1-GO) | 0/50 | **50/50** |
 | Unified finish overlay | partial | **50/50** |
 | Retry analytics | none | **50/50** |
+| Hydration fixes (Epic1-B) | 1 known | **3 fixed** |
 | Typecheck | PASS | PASS |
 | Build | PASS | PASS |
 
@@ -95,11 +96,71 @@ All slugs in `apps/web/lib/playable-games.ts`:
 
 ---
 
+## Release Package Audit (code + assets, 50/50)
+
+Developer-scope minimum **8/8** per game (RC uses full 19/19 after QA):
+
+| Item | Code/Asset check | Result |
+|------|------------------|--------|
+| Playable | `playable-games.ts` + `game-player.tsx` | **50/50** |
+| Thumbnail | `apps/web/public/images/games/{slug}.png` | **50/50** |
+| SEO | `generateMetadata` + JSON-LD on game pages | **PASS** (platform) |
+| Ranking | `reportScore` → `game_end` + RPC submit | **50/50** |
+| Save | `useAutoSave` | **50/50** |
+| Resume | `useResumableGame` + `ResumeDialog` | **50/50** |
+| Analytics (code) | see Analytics Instrumentation below | **50/50** |
+| Category + CMS | SQL in migrations 0023–0025 (+ prior) | **READY** — Operator apply |
+| Featured slot | `cms_featured_games` in 0023–0025 | **READY** — Operator apply |
+
+**Operator dependency:** Epic4 games invisible until `0023`, `0024`, `0025` applied.
+
+---
+
+## Analytics Instrumentation Audit (code, 50/50)
+
+| Event | Mechanism | Coverage |
+|-------|-----------|----------|
+| play | `RecentlyPlayedRecorder` → `game_start` | Platform (all game pages) |
+| finish | `reportScore` → `game_end` | **50/50** games |
+| retry | `emitGameRetry` on GameOverOverlay | **50/50** games |
+| favorite | `favorite-button.tsx` → `favorite` | Platform |
+| resume | `useResumableGame.onResume` → `resume` | **50/50** games |
+| ranking | `submitScore` RPC → `ranking_submit` | Platform (nickname submit) |
+
+**Epic1-B fix:** hangman now emits `game_end` on **lost** (score 0), not only on win.
+
+**SQL validation:** HOLD — Operator runs templates in `analytics-validation.md` after QA traffic.
+
+---
+
+## Epic 1-B Hydration fixes
+
+| Component | Issue | Fix |
+|-----------|-------|-----|
+| `header-level-badge.tsx` | XP localStorage vs SSR | `useMounted()` gate |
+| `season-card.tsx` | Season XP count-up mismatch | `useMounted()` gate |
+| `sound-toggle.tsx` | Icon mismatch when sound enabled | `useMounted()` gate |
+| `use-mounted.ts` | Shared hook | Added |
+
+---
+
 ## Gate status
 
 | Gate | Status |
 |------|--------|
 | Developer Certification | **PASS** |
-| Independent QA (browser) | **HOLD** — deploy + manual 50-game pass required |
-| Console Error = 0 | **HOLD** — pending QA |
-| Network 500 = 0 | **HOLD** — pending QA |
+| Preview Deploy | **PASS** (`content-factory` @ `2cbdc6c`) |
+| Independent QA (browser) | **HOLD** — Vercel Deployment Protection |
+| Operator (migration 0023–0025) | **HOLD** |
+| Console Error = 0 | **HOLD** — QA blocked |
+| Network 500 = 0 | **HOLD** — QA blocked |
+
+---
+
+## Developer Report summary
+
+- **Playable:** 50/50 registered in `playable-games.ts`
+- **SDK 8/8:** 50/50 (save/resume/countdown/finish/retry analytics)
+- **Build:** typecheck PASS, Vercel Preview build PASS (after `2cbdc6c` deps fix)
+- **Commits:** `2036207` (Epic4 + Certification), `2cbdc6c` (Vercel deps)
+- **Next:** Independent QA on Preview after Operator unblocks SSO + applies migrations

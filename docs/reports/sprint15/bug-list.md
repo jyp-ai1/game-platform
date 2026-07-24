@@ -1,42 +1,60 @@
-# Sprint 15 — Bug List (Epic 1)
+# Sprint 15 — Bug List (Epic 1 + 1-B)
 
 **Updated:** 2026-07-24  
-**Status:** Developer fixes applied; Independent QA verification pending
+**Status:** Developer RC1-ready; Independent QA blocked (Preview SSO)
 
 ---
 
 ## P0 — Fixed
 
-| ID | Game | Issue | Fix |
-|----|------|-------|-----|
-| P0-001 | 11 legacy games | No Save/Resume stack | Added `useResumableGame`, `useAutoSave`, `SaveIndicator`, `ResumeDialog` |
-| P0-002 | maze-runner, tank-battle, galaxy-defender, space-defender, bubble-pop | `reportScore` fired on any non-playing state | Gated to terminal states only + `clearSave` |
-| P0-003 | all 50 | No unified start countdown | `ReadyCountdown` + `useReadyCountdown` on all games |
-| P0-004 | all 50 | Finish UX inconsistent | Enhanced `GameOverOverlay` (Complete / Retry / Ranking / Next Game) |
-| P0-005 | all 50 | Retry not tracked in analytics | `emitGameRetry` → `game_start` with `retry: true` metadata |
-| P0-006 | GameOverOverlay | TypeScript error (`asChild` unsupported) | Use `buttonVariants` on anchor for Next Game |
-
-### P0 legacy games remediated
-
-`sudoku`, `tic-tac-toe`, `simon`, `hangman`, `color-match`, `air-hockey`, `maze-runner`, `tank-battle`, `galaxy-defender`, `space-defender`, `bubble-pop`
+| ID | Scope | Issue | Fix |
+|----|-------|-------|-----|
+| P0-001 | 11 legacy games | No Save/Resume stack | Full SDK stack added |
+| P0-002 | 5 arcade games | `reportScore` on wrong state | Terminal-state gate + `clearSave` |
+| P0-003 | all 50 | No Ready countdown | `useReadyCountdown` + `ReadyCountdown` |
+| P0-004 | all 50 | Inconsistent finish UX | Unified `GameOverOverlay` |
+| P0-005 | all 50 | Retry not in analytics | `emitGameRetry` bridge |
+| P0-006 | UI package | `asChild` TS error | `buttonVariants` anchor |
 
 ---
 
-## P1 — Fixed
+## P1 — Fixed (Epic 1-B)
 
-| ID | Game | Issue | Fix |
+| ID | Area | Issue | Fix |
 |----|------|-------|-----|
-| P1-001 | Finish overlay | Ranking button had no scroll target | Added `id="leaderboard"` on game detail page |
+| P1-001 | Game detail | Ranking scroll target | `#leaderboard` anchor |
+| P1-002 | Header | XP badge hydration mismatch | `useMounted()` in `header-level-badge` |
+| P1-004 | Season card | Season XP hydration mismatch | `useMounted()` in `season-card` |
+| P1-005 | Sound toggle | Icon hydration when sound on | `useMounted()` in `sound-toggle` |
 
 ---
 
-## P2 — Open (post-QA)
+## P1 — Open (Operator)
 
 | ID | Area | Issue | Owner |
 |----|------|-------|-------|
-| P2-001 | Mobile | Per-game touch/canvas QA not yet executed | QA |
-| P2-002 | Analytics | `analytics_events` SQL validation pending real traffic | Operator |
-| P2-003 | Game feel | Particles/shake not added (MVP scope trimmed) | Sprint 16 |
+| P1-003 | Preview QA | Vercel Deployment Protection (SSO) | **Operator** — unblock for Independent QA |
+
+---
+
+## P2 — Open
+
+| ID | Area | Issue | Owner |
+|----|------|-------|-------|
+| P2-001 | Mobile | Touch/canvas per-game QA | QA (after unblock) |
+| P2-002 | Analytics | Live `analytics_events` SQL | Operator |
+| P2-003 | Game feel | Particles/shake polish | Sprint 16 |
+| P2-004 | hangman | `game_end` missing on loss | **FIXED** — `reportScore(0)` on lost |
+
+---
+
+## P2 — Backlog (post-QA, data-driven)
+
+| ID | Area | Notes |
+|----|------|-------|
+| P2-010 | Difficulty | Tune Bottom10 from Closed Beta KPI |
+| P2-011 | Animation | Finish effects, score popup polish |
+| P2-012 | Mobile UI | Spacing/touch targets from QA matrix |
 
 ---
 
@@ -45,5 +63,18 @@
 | Severity | Open | Fixed |
 |----------|-----:|------:|
 | P0 | 0 | 6 |
-| P1 | 0 | 1 |
-| P2 | 3 | 0 |
+| P1 | 1 | 4 |
+| P2 | 3 | 1 |
+
+---
+
+## RC1 readiness (Developer)
+
+| Check | Status |
+|-------|--------|
+| P0 = 0 | **PASS** |
+| P1 code issues = 0 | **PASS** |
+| P1-003 Operator unblock | **OPEN** |
+| 50/50 SDK wiring | **PASS** |
+| Hydration (known) | **PASS** (code) |
+| Independent QA | **BLOCKED** |
