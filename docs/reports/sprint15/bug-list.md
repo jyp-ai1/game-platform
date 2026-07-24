@@ -58,7 +58,7 @@
 | P2-002 | Analytics | Live `analytics_events` SQL | Operator |
 | P2-003 | Game feel | Particles/shake polish | Sprint 16 |
 | P2-004 | hangman | `game_end` missing on loss | **FIXED** — `reportScore(0)` on lost |
-| P2-005 | Games (~35) | Unused `canPlay` destructure | Sprint 16 hygiene (non-blocking) |
+| P2-005 | Games (37) | Unused `canPlay` destructure | **FIXED** — removed where only `canPlayRef` used |
 
 ---
 
@@ -78,7 +78,7 @@
 |----------|-----:|------:|
 | P0 | 0 | 6 |
 | P1 | 1 | 10 |
-| P2 | 4 | 1 |
+| P2 | 3 | 2 |
 
 ---
 

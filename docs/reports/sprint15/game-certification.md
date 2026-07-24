@@ -205,7 +205,7 @@ Production Lighthouse snapshots (local files, production URL @ 2026-07-24):
 | SEO (platform) | **PASS** |
 | CMS row (DB) | **HOLD** — Operator 0023–0025 |
 
-**Hygiene note (P2, no action pre-RC1):** ~35 games destructure unused `canPlay` from `useReadyCountdown` (gate via `canPlayRef` instead). Not a lint error; defer to Sprint 16.
+**Hygiene note (P2-005 FIXED):** Removed unused `canPlay` destructure from 37 games that gate via `canPlayRef` only. 9 games retain `canPlay` (used in effects/UI).
 
 ---
 

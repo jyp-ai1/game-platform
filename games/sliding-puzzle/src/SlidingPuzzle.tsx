@@ -28,7 +28,7 @@ function reducer(state: SlidingPuzzleState, action: Action): SlidingPuzzleState 
 export function SlidingPuzzleGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "won" ? null : state), [state]);
