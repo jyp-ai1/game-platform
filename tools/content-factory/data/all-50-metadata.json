@@ -6,6 +6,8 @@
       "slug": "2048",
       "title": "2048",
       "category": "casual",
+      "description": "같은 숫자 타일을 합쳐 2048을 만드는 숫자 퍼즐. 간단한 조작으로 중독성 있는 전략 게임.",
+      "difficulty": "EASY",
       "features": {
         "save": true,
         "ranking": true

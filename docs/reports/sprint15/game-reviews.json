@@ -1,0 +1,852 @@
+{
+  "generatedAt": "2026-07-24T23:47:43.767Z",
+  "method": "static heuristic (SDK + source patterns + metadata)",
+  "averageScore": 89,
+  "top5": [
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "scores": {
+        "fun": 89,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 97,
+      "grade": "A"
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 95,
+      "grade": "A"
+    },
+    {
+      "slug": "breakout",
+      "title": "Breakout",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "title": "Arkanoid DX",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "maze-runner",
+      "title": "Maze Runner",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    }
+  ],
+  "bottom5": [
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    }
+  ],
+  "games": [
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "scores": {
+        "fun": 89,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 97,
+      "grade": "A"
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 95,
+      "grade": "A"
+    },
+    {
+      "slug": "breakout",
+      "title": "Breakout",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "title": "Arkanoid DX",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "maze-runner",
+      "title": "Maze Runner",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "tank-battle",
+      "title": "Tank Battle",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "galaxy-defender",
+      "title": "Galaxy Defender",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "space-defender",
+      "title": "Space Defender",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "space-impact",
+      "title": "Space Impact",
+      "scores": {
+        "fun": 79,
+        "controls": 100,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 94,
+      "grade": "A"
+    },
+    {
+      "slug": "2048",
+      "title": "2048",
+      "scores": {
+        "fun": 75,
+        "controls": 100,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 93,
+      "grade": "A"
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "scores": {
+        "fun": 75,
+        "controls": 100,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 93,
+      "grade": "A"
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "scores": {
+        "fun": 87,
+        "controls": 75,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 92,
+      "grade": "A"
+    },
+    {
+      "slug": "hangman",
+      "title": "Hangman",
+      "scores": {
+        "fun": 63,
+        "controls": 100,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 91,
+      "grade": "A"
+    },
+    {
+      "slug": "archery",
+      "title": "Archery",
+      "scores": {
+        "fun": 63,
+        "controls": 100,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 91,
+      "grade": "A"
+    },
+    {
+      "slug": "domino",
+      "title": "Domino",
+      "scores": {
+        "fun": 63,
+        "controls": 100,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 91,
+      "grade": "A"
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "scores": {
+        "fun": 77,
+        "controls": 75,
+        "addiction": 95,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 90,
+      "grade": "A"
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "scores": {
+        "fun": 72,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 88,
+      "grade": "A"
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "scores": {
+        "fun": 72,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 88,
+      "grade": "A"
+    },
+    {
+      "slug": "bubble-shooter",
+      "title": "Bubble Shooter",
+      "scores": {
+        "fun": 72,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 88,
+      "grade": "A"
+    },
+    {
+      "slug": "checkers",
+      "title": "Checkers",
+      "scores": {
+        "fun": 70,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 88,
+      "grade": "A"
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "scores": {
+        "fun": 72,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 87,
+      "grade": "A"
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "scores": {
+        "fun": 70,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 87,
+      "grade": "A"
+    },
+    {
+      "slug": "memory",
+      "title": "Memory",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "simon",
+      "title": "Simon",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "ball-sort",
+      "title": "Ball Sort",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "color-sort",
+      "title": "Color Sort",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "penalty-shootout",
+      "title": "Penalty Shootout",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "darts",
+      "title": "Darts",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "merge-blocks",
+      "title": "Merge Blocks",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "connect4",
+      "title": "Connect 4",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "bowling",
+      "title": "Bowling",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "jigsaw",
+      "title": "Jigsaw",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "mancala",
+      "title": "Mancala",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "mini-golf",
+      "title": "Mini Golf",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "billiards",
+      "title": "Billiards",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "basketball",
+      "title": "Basketball",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "table-tennis",
+      "title": "Table Tennis",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "shuffleboard",
+      "title": "Shuffleboard",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "nonogram",
+      "title": "Nonogram",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "word-search",
+      "title": "Word Search",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 100
+      },
+      "overall": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "scores": {
+        "fun": 60,
+        "controls": 75,
+        "addiction": 85,
+        "polish": 100,
+        "ux": 95,
+        "replay": 95
+      },
+      "overall": 85,
+      "grade": "A"
+    }
+  ],
+  "overall": "PASS"
+}

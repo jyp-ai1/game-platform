@@ -1,0 +1,170 @@
+{
+  "generatedAt": "2026-07-24T23:47:43.642Z",
+  "method": "code-heuristic (difficulty, category, SDK, thumbnail, classics)",
+  "note": "Replace with live analytics Top/Bottom after Operator applies migrations",
+  "top10": [
+    {
+      "slug": "2048",
+      "title": "2048",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "category": "arcade",
+      "difficulty": "MEDIUM",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 98,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 95,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 95,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "category": "casual",
+      "difficulty": "MEDIUM",
+      "predictedScore": 94,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 93,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 93,
+      "hasThumbnail": true
+    }
+  ],
+  "bottom10": [
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "category": "puzzle",
+      "difficulty": "HARD",
+      "predictedScore": 73,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 76,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "category": "puzzle",
+      "difficulty": "EASY",
+      "predictedScore": 80,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 82,
+      "hasThumbnail": true
+    }
+  ],
+  "overall": "PASS"
+}

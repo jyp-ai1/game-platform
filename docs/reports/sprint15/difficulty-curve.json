@@ -1,0 +1,423 @@
+{
+  "generatedAt": "2026-07-24T23:47:43.512Z",
+  "total": 50,
+  "counts": {
+    "EASY": 32,
+    "MEDIUM": 16,
+    "HARD": 2,
+    "UNKNOWN": 0
+  },
+  "curve": {
+    "easyPct": 64,
+    "normalPct": 32,
+    "hardPct": 4
+  },
+  "targetMix": {
+    "easy": "40%",
+    "normal": "40%",
+    "hard": "20%"
+  },
+  "rows": [
+    {
+      "slug": "2048",
+      "title": "2048",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "casual",
+      "playTime": null
+    },
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "breakout",
+      "title": "Breakout",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "arkanoid-dx",
+      "title": "Arkanoid DX",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "memory",
+      "title": "Memory",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "difficulty": "HARD",
+      "label": "Hard",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "maze-runner",
+      "title": "Maze Runner",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "tank-battle",
+      "title": "Tank Battle",
+      "difficulty": "HARD",
+      "label": "Hard",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "galaxy-defender",
+      "title": "Galaxy Defender",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "space-defender",
+      "title": "Space Defender",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "casual",
+      "playTime": null
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "simon",
+      "title": "Simon",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "hangman",
+      "title": "Hangman",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "casual",
+      "playTime": null
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "casual",
+      "playTime": null
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "space-impact",
+      "title": "Space Impact",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "casual",
+      "playTime": null
+    },
+    {
+      "slug": "ball-sort",
+      "title": "Ball Sort",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "color-sort",
+      "title": "Color Sort",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "penalty-shootout",
+      "title": "Penalty Shootout",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "darts",
+      "title": "Darts",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "bubble-shooter",
+      "title": "Bubble Shooter",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "casual",
+      "playTime": null
+    },
+    {
+      "slug": "merge-blocks",
+      "title": "Merge Blocks",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "connect4",
+      "title": "Connect 4",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "bowling",
+      "title": "Bowling",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "archery",
+      "title": "Archery",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "arcade",
+      "playTime": null
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "checkers",
+      "title": "Checkers",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "jigsaw",
+      "title": "Jigsaw",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "mancala",
+      "title": "Mancala",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "mini-golf",
+      "title": "Mini Golf",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "billiards",
+      "title": "Billiards",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "basketball",
+      "title": "Basketball",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "table-tennis",
+      "title": "Table Tennis",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "domino",
+      "title": "Domino",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "board",
+      "playTime": null
+    },
+    {
+      "slug": "shuffleboard",
+      "title": "Shuffleboard",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "sports",
+      "playTime": null
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "difficulty": "MEDIUM",
+      "label": "Normal",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "nonogram",
+      "title": "Nonogram",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    },
+    {
+      "slug": "word-search",
+      "title": "Word Search",
+      "difficulty": "EASY",
+      "label": "Easy",
+      "category": "puzzle",
+      "playTime": null
+    }
+  ],
+  "overall": "PASS"
+}
