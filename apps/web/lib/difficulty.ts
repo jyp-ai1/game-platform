@@ -8,3 +8,14 @@ export const difficultyVariant: Record<
   MEDIUM: "outline",
   HARD: "destructive",
 };
+
+/** Normalized display labels (Easy · Normal · Hard). */
+export const difficultyLabel: Record<Difficulty, string> = {
+  EASY: "Easy",
+  MEDIUM: "Normal",
+  HARD: "Hard",
+};
+
+export function formatDifficulty(difficulty: Difficulty): string {
+  return difficultyLabel[difficulty];
+}

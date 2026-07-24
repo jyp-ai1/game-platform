@@ -14,7 +14,8 @@ import { MyBestScore } from "@/components/my-best-score";
 import { NostalgiaNote } from "@/components/nostalgia-note";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
 import { ScreenshotGallery } from "@/components/screenshot-gallery";
-import { difficultyVariant } from "@/lib/difficulty";
+import { difficultyVariant, formatDifficulty } from "@/lib/difficulty";
+import { formatClearTime, getGameBalanceMeta } from "@/lib/game-balance";
 import type { PlayableSlug } from "@/lib/playable-games";
 
 export function GameDetailTemplate({
@@ -76,8 +77,20 @@ export function GameDetailTemplate({
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Badge variant={difficultyVariant[game.difficulty]}>
-                    {game.difficulty}
+                    {formatDifficulty(game.difficulty)}
                   </Badge>
+                  {(() => {
+                    const balance = getGameBalanceMeta(game.slug, game.difficulty);
+                    return (
+                      <>
+                        <Badge variant="outline">{balance.playTimeLabel}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          Clear ~{formatClearTime(balance.clearTimeSec)} · Target{" "}
+                          {balance.recommendedScore.toLocaleString()} pts
+                        </span>
+                      </>
+                    );
+                  })()}
                   {game.category ? (
                     <Link href={`/categories/${game.category.slug}`}>
                       <Badge variant="secondary">{game.category.name}</Badge>

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CardBestScore } from "@/components/card-best-score";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GameCardPlayLink } from "@/components/game-card-play-link";
-import { difficultyVariant } from "@/lib/difficulty";
+import { difficultyVariant, formatDifficulty } from "@/lib/difficulty";
 import { isRecentlyCreated } from "@/lib/game-sections";
 
 export function GameCard({
@@ -79,7 +79,7 @@ export function GameCard({
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-semibold">{game.title}</h3>
           <Badge variant={difficultyVariant[game.difficulty]}>
-            {game.difficulty}
+            {formatDifficulty(game.difficulty)}
           </Badge>
         </div>
 
