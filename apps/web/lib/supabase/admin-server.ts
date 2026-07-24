@@ -320,3 +320,34 @@ export async function fetchAllGamesByPlays(
 ): Promise<Array<{ slug: string; title: string; plays: number }>> {
   return fetchTopGamesAnalytics(period, limit);
 }
+
+export type Sprint13GameKpiRow = {
+  slug: string;
+  title: string;
+  plays: number;
+  finishes: number;
+  favorites: number;
+  resumes: number;
+  ranking_submits: number;
+  avg_score: number;
+  finish_rate_pct: number;
+};
+
+export async function fetchSprint13GameKpis(
+  slugs: readonly string[],
+  period: DashboardPeriod = "week"
+): Promise<Sprint13GameKpiRow[]> {
+  const supabase = getAdminSupabase();
+  if (!supabase || slugs.length === 0) return [];
+
+  const { data, error } = await supabase.rpc("get_game_kpis_batch", {
+    p_period: period,
+    p_slugs: [...slugs],
+  });
+  if (error) {
+    console.error("get_game_kpis_batch:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as Sprint13GameKpiRow[];
+}

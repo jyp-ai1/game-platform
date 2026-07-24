@@ -1,6 +1,13 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
+import {
+  clearSave,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useResumableGame,
+} from "@game-platform/game-sdk";
 import { Button, cn, GameOverOverlay } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
@@ -35,8 +42,16 @@ function reducer(state: Connect4State, action: Action): Connect4State {
 }
 
 export function Connect4Game() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, phaseRef, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.winner !== null ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     if (state.winner !== null || state.current !== 2) return;
@@ -45,10 +60,14 @@ export function Connect4Game() {
   }, [state.current, state.winner]);
 
   useEffect(() => {
-    if (state.winner !== null) reportScore(GAME_SLUG, computeScore(state));
+    if (state.winner !== null) {
+      reportScore(GAME_SLUG, computeScore(state));
+      clearSave(GAME_SLUG);
+    }
   }, [state.winner, reportScore]);
 
-  const humanTurn = state.current === 1 && state.winner === null;
+  const humanTurn =
+    phaseRef.current === "ready" && state.current === 1 && state.winner === null;
   const msg =
     state.winner === 1
       ? "You Win!"
@@ -61,7 +80,8 @@ export function Connect4Game() {
             : "CPU 차례...";
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">{msg}</p>
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
@@ -102,6 +122,9 @@ export function Connect4Game() {
       </div>
       {state.winner !== null ? (
         <GameOverOverlay message={msg} onRestart={() => dispatch({ type: "restart" })} />
+      ) : null}
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Connect 4" onResume={onResume} onNewGame={onNewGame} />
       ) : null}
     </div>
   );

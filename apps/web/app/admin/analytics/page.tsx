@@ -18,9 +18,12 @@ import {
   fetchDashboardKpisExtended,
   fetchEventCount,
   fetchPlayerFunnel,
+  fetchSprint13GameKpis,
   fetchTopGamesAnalytics,
   type DashboardPeriod as ServerPeriod,
 } from "@/lib/supabase/admin-server";
+import { SPRINT_13_NEW_GAME_SLUGS } from "@/lib/sprint-13-games";
+import { Sprint13GameKpiPanel } from "@/components/admin/sprint13-game-kpi-panel";
 
 export const metadata = { title: "Analytics" };
 
@@ -37,7 +40,7 @@ export default async function AdminAnalyticsPage({
   const { period: periodParam } = await searchParams;
   const period = parsePeriod(periodParam);
 
-  const [funnel, heatmap, topGames, allGames, kpis, missionCount] =
+  const [funnel, heatmap, topGames, allGames, kpis, missionCount, sprint13Kpis] =
     await Promise.all([
       fetchPlayerFunnel(period),
       fetchActivityHeatmap(30),
@@ -45,6 +48,7 @@ export default async function AdminAnalyticsPage({
       fetchAllGamesByPlays(period, 50),
       fetchDashboardKpisExtended(period),
       fetchEventCount("mission_complete", period),
+      fetchSprint13GameKpis(SPRINT_13_NEW_GAME_SLUGS, period),
     ]);
 
   const funnelData: FunnelData = {
@@ -87,6 +91,8 @@ export default async function AdminAnalyticsPage({
       </div>
 
       <SoftLaunchKpiCards dau={kpis?.dau ?? 0} rates={rates} />
+
+      <Sprint13GameKpiPanel rows={sprint13Kpis} />
 
       <GameRankingsPanel topGames={top5} bottomGames={bottom5} />
 

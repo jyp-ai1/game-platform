@@ -1,6 +1,13 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
+import {
+  clearSave,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useResumableGame,
+} from "@game-platform/game-sdk";
 import { Button, cn, GameOverOverlay } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
@@ -25,9 +32,18 @@ function reducer(state: GomokuState, action: Action): GomokuState {
 }
 
 export function GomokuGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, phaseRef, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
-  const humanTurn = state.current === 1 && state.winner === null;
+  const humanTurn =
+    phaseRef.current === "ready" && state.current === 1 && state.winner === null;
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.winner !== null ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     if (state.winner !== null || state.current !== 2) return;
@@ -36,13 +52,17 @@ export function GomokuGame() {
   }, [state.current, state.winner, state.board]);
 
   useEffect(() => {
-    if (state.winner === 1) reportScore(GAME_SLUG, computeScore(state));
+    if (state.winner === 1) {
+      reportScore(GAME_SLUG, computeScore(state));
+      clearSave(GAME_SLUG);
+    }
   }, [state.winner, reportScore]);
 
   const msg = state.winner === 1 ? "You Win!" : state.winner === 2 ? "CPU Wins!" : humanTurn ? "돌을 놓으세요 (5목)" : "CPU...";
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm text-muted-foreground">{msg}</p>
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
@@ -71,6 +91,9 @@ export function GomokuGame() {
         )}
       </div>
       {state.winner !== null ? <GameOverOverlay message={msg} onRestart={() => dispatch({ type: "restart" })} /> : null}
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Gomoku" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
     </div>
   );
 }

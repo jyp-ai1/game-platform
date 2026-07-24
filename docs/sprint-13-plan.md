@@ -1,9 +1,11 @@
 # Sprint 13 — Content Expansion MVP
 
-**Status:** 🟢 Active  
-**Goal:** **21 → 35** playable · **launch-ready** games  
-**Platform:** Maintenance Only — `games/*` only  
+**Status:** 🟡 Finalization (35 games ✅ · Release Package in progress)  
+**Goal:** **21 → 35** playable · **launch-ready** games ✅ count  
+**Platform:** Maintenance Only — finalization + `games/*` docs  
 **Soft Launch:** Sprint 15 (after **50 launch-ready** games)
+
+Exit gate: [`sprint-13-exit-gate.md`](./sprint-13-exit-gate.md) · Sprint 14: [`sprint-14-plan.md`](./sprint-14-plan.md) (**구현 금지**)
 
 Full strategy: [`content-expansion-mvp.md`](./content-expansion-mvp.md)
 
