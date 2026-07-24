@@ -1,0 +1,19 @@
+{
+  "slug": "chess",
+  "title": "Chess",
+  "category": "board",
+  "description": "클래식 체스 — AI와 대국하거나 친구와 두-player 모드.",
+  "howToPlay": "말을 선택해 이동하세요. 상대 킹을 잡으면 승리합니다.",
+  "difficulty": "MEDIUM",
+  "sortOrder": 40,
+  "tags": ["board", "strategy", "classic"],
+  "playTime": "5~15분",
+  "componentExport": "ChessGame",
+  "features": { "save": true, "ranking": false, "multiplayer": false },
+  "releasedAt": "2026-08-01",
+  "thumbnailAccent": "#FFB800",
+  "missionHints": {
+    "dailyTemplate": "보드 게임 {n}판",
+    "weeklyTemplate": "체스 {n}승 달성"
+  }
+}

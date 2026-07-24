@@ -1,0 +1,19 @@
+{
+  "slug": "stack-tower",
+  "title": "Stack Tower",
+  "category": "casual",
+  "description": "움직이는 블록을 타이밍 맞춰 쌓아 올리는 원터치 스택 게임.",
+  "howToPlay": "화면을 탭해 움직이는 블록을 정확히 쌓으세요. 삐뚤어지면 잘려 나가고, 블록이 너무 작아지면 게임 오버입니다.",
+  "difficulty": "EASY",
+  "sortOrder": 25,
+  "tags": ["casual", "timing", "one-touch"],
+  "playTime": "1~3분",
+  "componentExport": "StackTowerGame",
+  "features": { "save": true, "ranking": true },
+  "releasedAt": "2026-07-24",
+  "thumbnailAccent": "#5B5BD6",
+  "missionHints": {
+    "dailyTemplate": "{category} 게임 {n}판 플레이",
+    "weeklyTemplate": "이번 주 {title} {n}판 완료"
+  }
+}

@@ -11,6 +11,9 @@
     "dev": "npm run dev --workspace=@game-platform/web",
     "build": "npm run build --workspace=@game-platform/web",
     "lint": "npm run lint --workspace=@game-platform/web",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "factory:generate": "node tools/content-factory/cli.mjs generate",
+    "factory:scaffold": "node tools/content-factory/cli.mjs scaffold",
+    "factory:batch": "node tools/content-factory/cli.mjs batch"
   }
 }

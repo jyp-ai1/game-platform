@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://game-platform.local/schema/game-manifest.json",
+  "title": "GameManifest",
+  "type": "object",
+  "required": [
+    "slug",
+    "title",
+    "category",
+    "description",
+    "howToPlay",
+    "difficulty",
+    "componentExport",
+    "features"
+  ],
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "title": { "type": "string", "minLength": 1 },
+    "category": {
+      "type": "string",
+      "enum": ["arcade", "puzzle", "board", "casual", "sports"]
+    },
+    "description": { "type": "string" },
+    "howToPlay": { "type": "string" },
+    "difficulty": { "type": "string", "enum": ["EASY", "MEDIUM", "HARD"] },
+    "sortOrder": { "type": "integer", "minimum": 1 },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "playTime": { "type": "string" },
+    "componentExport": { "type": "string" },
+    "packageName": { "type": "string" },
+    "features": {
+      "type": "object",
+      "required": ["save", "ranking"],
+      "properties": {
+        "save": { "type": "boolean" },
+        "ranking": { "type": "boolean" },
+        "multiplayer": { "type": "boolean" }
+      }
+    },
+    "releasedAt": { "type": "string", "format": "date" },
+    "thumbnailAccent": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "missionHints": {
+      "type": "object",
+      "properties": {
+        "dailyTemplate": { "type": "string" },
+        "weeklyTemplate": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

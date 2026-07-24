@@ -20,3 +20,6 @@ npm-debug.log*
 
 # vercel
 .vercel
+
+# content factory generated output (content-factory branch)
+tools/content-factory/output/
