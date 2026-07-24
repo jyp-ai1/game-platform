@@ -1,8 +1,8 @@
 # Sprint 15 — Developer RC1 Package
 
-**Generated:** 2026-07-24 (Continuous Batch Sessions)  
+**Generated:** 2026-07-25 (Extended Batch — RC1 hardening)  
 **Branch:** `content-factory`  
-**Developer scope:** **100%** · QA/Operator: pending OB-001
+**Developer scope:** **100%** · QA/Operator: pending human validation
 
 ---
 
@@ -11,12 +11,13 @@
 | Area | Status | Artifact |
 |------|--------|----------|
 | Release Package 50/50 | ✅ | `docs/games/*-operation-guide.md` · `docs/reports/game-reviews/*` |
-| Release Package audit | ✅ ~15/19 dev avg | `docs/reports/sprint15/release-packages/` |
-| SEO (FAQ schema, tips, meta) | ✅ | `lib/seo/`, `game-tips-section.tsx` |
-| Discovery UX | ✅ | `selectRecommended`, personalized picks, search |
+| Game Quality Sweep | ✅ 50/50 | `npm run qa:verify-games` · `game-quality-sweep.md` |
+| Balance metadata | ✅ 50/50 | `lib/game-balance.ts` · `/admin/games` · `0027` migration |
+| Discovery UX | ✅ | Presets + search + sort + category |
+| Admin analytics (50) | ✅ | `/admin/analytics` · Top/Bottom 10 |
 | Analytics code validation | ✅ 50/50 | `analytics-matrix.md` |
-| Build / Lint / Typecheck | ✅ | Session verify |
-| Preview Product QA | ⏳ | OB-001 (Operator) |
+| Build / Lint / Typecheck | ✅ | Extended batch verify |
+| Preview Product QA | ⏳ | OB-001 waived · human QA tomorrow |
 
 ---
 
@@ -49,11 +50,37 @@ Regenerate: `npm run factory:sync-rc1`
 
 | Feature | Location |
 |---------|----------|
+| Discover presets | Popular · Trending · New · Recommended · Quick Play · Long Play |
 | Similar games (tag+category score) | `selectRelated()` |
 | 오늘의 추천 | `PersonalizedPicksSection` on home |
 | 추천순 sort | `/games` discovery browser |
 | Search slug/howToPlay | `searchGames()` |
 | Recently played / favorites views | existing |
+
+---
+
+## Game Quality Sweep
+
+- **Script:** `npm run qa:verify-games`
+- **Report:** `docs/reports/sprint15/game-quality-sweep.md`
+- **Runtime monitor:** `GameErrorMonitor` on game pages (onerror + unhandledrejection → analytics)
+
+---
+
+## Balance Metadata
+
+- **Lib:** `apps/web/lib/game-balance.ts` — play time, recommended score, clear time, session type
+- **Labels:** Easy / Normal / Hard (`lib/difficulty.ts`)
+- **Admin:** `/admin/games` — 50-game balance table
+- **Migration:** `0027_sprint15_balance_metadata.sql`
+
+---
+
+## Admin Analytics (50 games)
+
+- **Panel:** `AllGamesKpiPanel` — Play, Finish, Retry, Favorite, Avg Time, Avg Score
+- **Rankings:** Top 10 / Bottom 10 by plays (+ finish rate)
+- **RPC:** `get_game_kpis_batch` extended with retries + avg_play_time_sec (0027)
 
 ---
 
@@ -72,7 +99,7 @@ Regenerate: `npm run factory:sync-rc1`
 | Preview SSO OB-001 | Operator |
 | Product QA Sessions 4–7 | Senior QA |
 | Live analytics_events SQL | Operator |
-| Migrations 0023–0026 apply | Operator |
+| Migrations 0023–0027 apply | Operator |
 | Production promote | DevOps + PM |
 
 ---

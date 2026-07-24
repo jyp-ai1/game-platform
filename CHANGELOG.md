@@ -1,16 +1,23 @@
 # Changelog
 
-## [RC1 Candidate] — 2026-07-25
+## [RC1 Candidate — Extended Batch] — 2026-07-25
 
-**Branch:** `content-factory` @ `7fb81f2` · **Tag:** `rc1-candidate`
+**Branch:** `content-factory` · **Tag:** `rc1-candidate` (re-tag after push)
 
-### Added
+### Sprint 15 Extended Batch (quality)
+
+- **Game Quality Sweep:** `npm run qa:verify-games` — 50/50 static SDK PASS + `GameErrorMonitor` (onerror / unhandledrejection)
+- **Balance metadata:** Easy/Normal/Hard labels, play time, recommended score, clear time — Admin `/admin/games`
+- **Discovery:** Popular, Trending, New, Recommended, Quick Play, Long Play presets
+- **Admin analytics:** 50-game KPI table (Play/Finish/Retry/Favorite/Avg Time/Avg Score) + Top/Bottom 10
+- **Migration:** `0027_sprint15_balance_metadata.sql` (Operator)
+
+### Added (prior RC1 Candidate)
 
 - Release Package 50/50 (operation guides, review cards, audit JSON)
 - SEO: FAQ JSON-LD, game tips section, enhanced metadata
 - Discovery: personalized picks, improved related games + search
 - Analytics validation matrix (50/50 code PASS)
-- Sprint 16 kickoff handoff document
 
 ### Quality (Sprint 15 Epic 1)
 
