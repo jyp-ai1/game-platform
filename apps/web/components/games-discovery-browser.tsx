@@ -32,6 +32,7 @@ export function GamesDiscoveryBrowser({
 }) {
   const [category, setCategory] = useState<GameCategoryFilter>("all");
   const [sort, setSort] = useState<GameSortOption>("popular");
+  const [query, setQuery] = useState("");
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,
@@ -45,14 +46,28 @@ export function GamesDiscoveryBrowser({
   );
 
   const visible = useMemo(
-    () => discoverGames(games, category, sort, favorites, recentlyPlayed),
-    [games, category, sort, favorites, recentlyPlayed]
+    () => discoverGames(games, category, sort, favorites, recentlyPlayed, query),
+    [games, category, sort, favorites, recentlyPlayed, query]
   );
 
   const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="games-search" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Search
+        </label>
+        <input
+          id="games-search"
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="게임명 · 태그 검색..."
+          className="w-full max-w-md rounded-md border bg-background px-3 py-2 text-sm"
+        />
+      </div>
+
       <div className="flex flex-col gap-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Category

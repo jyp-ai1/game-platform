@@ -1,6 +1,7 @@
 import type { Game } from "@game-platform/shared";
 
 import { isRecentlyCreated } from "@/lib/game-sections";
+import { searchGames } from "@/lib/search";
 
 export type GameCategoryFilter =
   | "all"
@@ -94,12 +95,10 @@ export function discoverGames(
   filter: GameCategoryFilter,
   sort: GameSortOption,
   favorites: string[],
-  recentlyPlayed: string[]
+  recentlyPlayed: string[],
+  query = ""
 ): Game[] {
-  return sortGames(
-    filterGamesByCategory(games, filter),
-    sort,
-    favorites,
-    recentlyPlayed
-  );
+  const filtered = filterGamesByCategory(games, filter);
+  const searched = searchGames(filtered, query);
+  return sortGames(searched, sort, favorites, recentlyPlayed);
 }
