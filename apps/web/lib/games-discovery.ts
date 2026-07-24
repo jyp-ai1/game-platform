@@ -1,7 +1,25 @@
 import type { Game } from "@game-platform/shared";
 
+import { getGameBalanceMeta } from "@/lib/game-balance";
 import { isRecentlyCreated, selectRecommended } from "@/lib/game-sections";
 import { searchGames } from "@/lib/search";
+
+export type DiscoveryPreset =
+  | "popular"
+  | "trending"
+  | "new"
+  | "recommended"
+  | "quick-play"
+  | "long-play";
+
+export const DISCOVERY_PRESETS: Array<{ value: DiscoveryPreset; label: string }> = [
+  { value: "popular", label: "Popular" },
+  { value: "trending", label: "Trending" },
+  { value: "new", label: "New" },
+  { value: "recommended", label: "Recommended" },
+  { value: "quick-play", label: "Quick Play" },
+  { value: "long-play", label: "Long Play" },
+];
 
 export type GameCategoryFilter =
   | "all"
@@ -128,6 +146,49 @@ export function sortGames(
   }
 }
 
+export function filterGamesByPreset(
+  games: Game[],
+  preset: DiscoveryPreset,
+  hotSlugs: Set<string>
+): Game[] {
+  switch (preset) {
+    case "popular":
+      return games;
+    case "trending": {
+      const counts = games.map((g) => g.playCount).sort((a, b) => a - b);
+      const median = counts[Math.floor(counts.length / 2)] ?? 0;
+      return games.filter((g) => hotSlugs.has(g.slug) || g.playCount >= median);
+    }
+    case "new":
+      return filterGamesByCategory(games, "new");
+    case "recommended":
+      return games;
+    case "quick-play":
+      return games.filter(
+        (g) => getGameBalanceMeta(g.slug, g.difficulty).sessionType === "quick"
+      );
+    case "long-play":
+      return games.filter(
+        (g) => getGameBalanceMeta(g.slug, g.difficulty).sessionType === "long"
+      );
+    default:
+      return games;
+  }
+}
+
+export function presetDefaultSort(preset: DiscoveryPreset): GameSortOption {
+  switch (preset) {
+    case "new":
+      return "newest";
+    case "recommended":
+      return "recommended";
+    case "trending":
+    case "popular":
+    default:
+      return "popular";
+  }
+}
+
 export function discoverGames(
   games: Game[],
   filter: GameCategoryFilter,
@@ -135,10 +196,14 @@ export function discoverGames(
   favorites: string[],
   recentlyPlayed: string[],
   query = "",
-  view: GameViewFilter = "all"
+  view: GameViewFilter = "all",
+  preset?: DiscoveryPreset | null,
+  hotSlugs?: Set<string>
 ): Game[] {
   const byView = filterGamesByView(games, view, favorites, recentlyPlayed);
-  const filtered = filterGamesByCategory(byView, filter);
+  const byPreset =
+    preset && hotSlugs ? filterGamesByPreset(byView, preset, hotSlugs) : byView;
+  const filtered = filterGamesByCategory(byPreset, filter);
   const searched = searchGames(filtered, query);
   return sortGames(searched, sort, favorites, recentlyPlayed);
 }

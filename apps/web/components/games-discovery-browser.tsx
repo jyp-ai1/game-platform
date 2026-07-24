@@ -8,9 +8,12 @@ import { EmptyState } from "@/components/empty-state";
 import { GameGrid } from "@/components/game-grid";
 import {
   discoverGames,
+  DISCOVERY_PRESETS,
   GAME_CATEGORY_FILTERS,
   GAME_SORT_OPTIONS,
   GAME_VIEW_FILTERS,
+  presetDefaultSort,
+  type DiscoveryPreset,
   type GameCategoryFilter,
   type GameSortOption,
   type GameViewFilter,
@@ -35,6 +38,7 @@ export function GamesDiscoveryBrowser({
   const [category, setCategory] = useState<GameCategoryFilter>("all");
   const [view, setView] = useState<GameViewFilter>("all");
   const [sort, setSort] = useState<GameSortOption>("popular");
+  const [preset, setPreset] = useState<DiscoveryPreset | null>(null);
   const [query, setQuery] = useState("");
 
   const favorites = useSyncExternalStore(
@@ -48,13 +52,33 @@ export function GamesDiscoveryBrowser({
     getServerRecentlyPlayedSnapshot
   );
 
+  const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
+
   const visible = useMemo(
     () =>
-      discoverGames(games, category, sort, favorites, recentlyPlayed, query, view),
-    [games, category, sort, favorites, recentlyPlayed, query, view]
+      discoverGames(
+        games,
+        category,
+        sort,
+        favorites,
+        recentlyPlayed,
+        query,
+        view,
+        preset,
+        resolvedHotSlugs
+      ),
+    [games, category, sort, favorites, recentlyPlayed, query, view, preset, resolvedHotSlugs]
   );
 
-  const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
+  function selectPreset(next: DiscoveryPreset) {
+    setPreset(next);
+    setSort(presetDefaultSort(next));
+    if (next === "new") {
+      setCategory("new");
+    } else if (category === "new") {
+      setCategory("all");
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -70,6 +94,39 @@ export function GamesDiscoveryBrowser({
           placeholder="게임명 · 태그 검색..."
           className="w-full max-w-md rounded-md border bg-background px-3 py-2 text-sm"
         />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Discover
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {DISCOVERY_PRESETS.map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              size="sm"
+              variant={preset === item.value ? "default" : "outline"}
+              onClick={() => selectPreset(item.value)}
+            >
+              {item.label}
+            </Button>
+          ))}
+          {preset ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setPreset(null);
+                setCategory("all");
+                setSort("popular");
+              }}
+            >
+              Clear preset
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
