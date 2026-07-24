@@ -1,18 +1,22 @@
 export function GameRankingsPanel({
   topGames,
   bottomGames,
+  topLabel = "Top 10 Games",
+  bottomLabel = "Bottom 10 Games",
 }: {
-  topGames: Array<{ slug: string; title: string; plays: number }>;
-  bottomGames: Array<{ slug: string; title: string; plays: number }>;
+  topGames: Array<{ slug: string; title: string; plays: number; finish_rate_pct?: number }>;
+  bottomGames: Array<{ slug: string; title: string; plays: number; finish_rate_pct?: number }>;
+  topLabel?: string;
+  bottomLabel?: string;
 }) {
   return (
     <section className="grid gap-8 xl:grid-cols-2">
       <div className="rounded-xl border bg-card p-4">
-        <h2 className="mb-4 font-semibold">Top 5 Games</h2>
+        <h2 className="mb-4 font-semibold">{topLabel}</h2>
         <GameList games={topGames} />
       </div>
       <div className="rounded-xl border bg-card p-4">
-        <h2 className="mb-4 font-semibold">Bottom 5 Games</h2>
+        <h2 className="mb-4 font-semibold">{bottomLabel}</h2>
         <GameList games={bottomGames} emptyLabel="데이터 수집 중" />
       </div>
     </section>
@@ -23,7 +27,7 @@ function GameList({
   games,
   emptyLabel = "없음",
 }: {
-  games: Array<{ slug: string; title: string; plays: number }>;
+  games: Array<{ slug: string; title: string; plays: number; finish_rate_pct?: number }>;
   emptyLabel?: string;
 }) {
   if (!games.length) {
@@ -42,6 +46,7 @@ function GameList({
             </span>
             <span className="tabular-nums text-muted-foreground">
               {game.plays.toLocaleString()}
+              {game.finish_rate_pct != null ? ` · ${game.finish_rate_pct}%` : ""}
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-muted">

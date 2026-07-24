@@ -328,12 +328,22 @@ export type Sprint13GameKpiRow = {
   finishes: number;
   favorites: number;
   resumes: number;
+  retries: number;
   ranking_submits: number;
   avg_score: number;
+  avg_play_time_sec: number;
   finish_rate_pct: number;
 };
 
+/** @deprecated Use fetchGameKpis — kept for Sprint 13 call sites */
 export async function fetchSprint13GameKpis(
+  slugs: readonly string[],
+  period: DashboardPeriod = "week"
+): Promise<Sprint13GameKpiRow[]> {
+  return fetchGameKpis(slugs, period);
+}
+
+export async function fetchGameKpis(
   slugs: readonly string[],
   period: DashboardPeriod = "week"
 ): Promise<Sprint13GameKpiRow[]> {

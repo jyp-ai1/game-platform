@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { ActivityHeatmap } from "@/components/admin/activity-heatmap";
+import { AllGamesKpiPanel } from "@/components/admin/all-games-kpi-panel";
 import { GameRankingsPanel } from "@/components/admin/game-rankings-panel";
 import { FunnelChart, type FunnelData } from "@/components/admin/funnel-chart";
 import {
@@ -12,18 +13,16 @@ import {
   SoftLaunchOpsLinks,
 } from "@/components/admin/soft-launch-panel";
 import { computeSoftLaunchRates } from "@/lib/admin/soft-launch-metrics";
+import { PLAYABLE_SLUGS } from "@/lib/playable-games";
 import {
   fetchActivityHeatmap,
-  fetchAllGamesByPlays,
   fetchDashboardKpisExtended,
   fetchEventCount,
+  fetchGameKpis,
   fetchPlayerFunnel,
-  fetchSprint13GameKpis,
   fetchTopGamesAnalytics,
   type DashboardPeriod as ServerPeriod,
 } from "@/lib/supabase/admin-server";
-import { SPRINT_13_NEW_GAME_SLUGS } from "@/lib/sprint-13-games";
-import { Sprint13GameKpiPanel } from "@/components/admin/sprint13-game-kpi-panel";
 
 export const metadata = { title: "Analytics" };
 
@@ -40,15 +39,14 @@ export default async function AdminAnalyticsPage({
   const { period: periodParam } = await searchParams;
   const period = parsePeriod(periodParam);
 
-  const [funnel, heatmap, topGames, allGames, kpis, missionCount, sprint13Kpis] =
+  const [funnel, heatmap, topGames, kpis, missionCount, gameKpis] =
     await Promise.all([
       fetchPlayerFunnel(period),
       fetchActivityHeatmap(30),
       fetchTopGamesAnalytics(period, 15),
-      fetchAllGamesByPlays(period, 50),
       fetchDashboardKpisExtended(period),
       fetchEventCount("mission_complete", period),
-      fetchSprint13GameKpis(SPRINT_13_NEW_GAME_SLUGS, period),
+      fetchGameKpis(PLAYABLE_SLUGS, period),
     ]);
 
   const funnelData: FunnelData = {
@@ -66,10 +64,23 @@ export default async function AdminAnalyticsPage({
     missionCount
   );
 
-  const top5 = allGames.slice(0, 5);
-  const bottom5 = [...allGames]
+  const kpiRanked = [...gameKpis].sort((a, b) => b.plays - a.plays);
+  const top10 = kpiRanked.slice(0, 10).map((g) => ({
+    slug: g.slug,
+    title: g.title,
+    plays: g.plays,
+    finish_rate_pct: g.finish_rate_pct,
+  }));
+  const bottom10 = [...gameKpis]
+    .filter((g) => g.plays >= 0)
     .sort((a, b) => a.plays - b.plays)
-    .slice(0, 5);
+    .slice(0, 10)
+    .map((g) => ({
+      slug: g.slug,
+      title: g.title,
+      plays: g.plays,
+      finish_rate_pct: g.finish_rate_pct,
+    }));
 
   const maxPlays = topGames[0]?.plays ?? 1;
 
@@ -79,7 +90,7 @@ export default async function AdminAnalyticsPage({
         <div>
           <h1 className="text-2xl font-bold">Game Analytics</h1>
           <p className="text-sm text-muted-foreground">
-            Soft Launch KPI · Funnel · Top/Bottom 5
+            50-game KPI · Funnel · Top/Bottom 10
           </p>
         </div>
         <Suspense fallback={<div className="h-9 w-48 animate-pulse rounded-lg bg-muted" />}>
@@ -92,9 +103,9 @@ export default async function AdminAnalyticsPage({
 
       <SoftLaunchKpiCards dau={kpis?.dau ?? 0} rates={rates} />
 
-      <Sprint13GameKpiPanel rows={sprint13Kpis} />
+      <AllGamesKpiPanel rows={gameKpis} />
 
-      <GameRankingsPanel topGames={top5} bottomGames={bottom5} />
+      <GameRankingsPanel topGames={top10} bottomGames={bottom10} />
 
       <SoftLaunchOpsLinks />
 
