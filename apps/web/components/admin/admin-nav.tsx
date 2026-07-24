@@ -9,6 +9,7 @@ const NAV: Array<{ href: string; label: string; exact?: boolean }> = [
   { href: "/admin/errors", label: "Errors" },
   { href: "/admin/notifications", label: "Notifications" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/release-dashboard", label: "Release RC1" },
   { href: "/admin/cms", label: "CMS" },
   { href: "/admin/games", label: "Games" },
   { href: "/admin/seo", label: "SEO" },

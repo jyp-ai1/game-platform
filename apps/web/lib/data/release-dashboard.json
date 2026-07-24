@@ -1,0 +1,677 @@
+{
+  "generatedAt": "2026-07-24T23:47:44.810Z",
+  "branch": "content-factory",
+  "playable": 50,
+  "rc1Score": 93,
+  "gates": {
+    "regression": {
+      "status": "PASS",
+      "detail": "50/50"
+    },
+    "analytics": {
+      "status": "PASS",
+      "detail": "50/50"
+    },
+    "performance": {
+      "status": "SKIP",
+      "detail": "needs server (QA_SKIP_SERVER=0)"
+    },
+    "accessibility": {
+      "status": "SKIP",
+      "detail": "needs E2E server"
+    },
+    "brokenLinks": {
+      "status": "SKIP",
+      "count": 0
+    },
+    "brokenImages": {
+      "status": "SKIP",
+      "count": 0
+    },
+    "notFound": {
+      "status": "SKIP",
+      "count": 0
+    },
+    "bundle": {
+      "status": "PASS"
+    },
+    "metadata": {
+      "status": "PASS",
+      "detail": "50/50"
+    },
+    "thumbnails": {
+      "status": "PASS",
+      "detail": "50/50"
+    },
+    "gameReviews": {
+      "status": "PASS",
+      "avg": 89
+    },
+    "qaAutomation": {
+      "status": "PASS",
+      "detail": "PASS"
+    }
+  },
+  "predictedTop10": [
+    {
+      "slug": "2048",
+      "title": "2048",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "snake",
+      "title": "Snake",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "tic-tac-toe",
+      "title": "Tic Tac Toe",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "tetris",
+      "title": "Tetris",
+      "category": "arcade",
+      "difficulty": "MEDIUM",
+      "predictedScore": 100,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "color-match",
+      "title": "Color Match",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 98,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "gold-miner",
+      "title": "Gold Miner",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 95,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "whack-a-mole",
+      "title": "Whack-a-Mole",
+      "category": "arcade",
+      "difficulty": "EASY",
+      "predictedScore": 95,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "air-hockey",
+      "title": "Air Hockey",
+      "category": "casual",
+      "difficulty": "MEDIUM",
+      "predictedScore": 94,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 93,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "stack-tower",
+      "title": "Stack Tower",
+      "category": "casual",
+      "difficulty": "EASY",
+      "predictedScore": 93,
+      "hasThumbnail": true
+    }
+  ],
+  "predictedBottom10": [
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "category": "puzzle",
+      "difficulty": "HARD",
+      "predictedScore": 73,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "sudoku",
+      "title": "Sudoku",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 76,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "crossword",
+      "title": "Crossword",
+      "category": "puzzle",
+      "difficulty": "EASY",
+      "predictedScore": 80,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "kakuro",
+      "title": "Kakuro",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "chess960",
+      "title": "Chess960",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "sliding-puzzle",
+      "title": "Sliding Puzzle",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "gomoku",
+      "title": "Gomoku",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "reversi",
+      "title": "Reversi",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "samegame",
+      "title": "SameGame",
+      "category": "puzzle",
+      "difficulty": "MEDIUM",
+      "predictedScore": 81,
+      "hasThumbnail": true
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "category": "board",
+      "difficulty": "MEDIUM",
+      "predictedScore": 82,
+      "hasThumbnail": true
+    }
+  ],
+  "difficultyCurve": {
+    "easyPct": 64,
+    "normalPct": 32,
+    "hardPct": 4
+  },
+  "games": [
+    {
+      "slug": "2048",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 93,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "air-hockey",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 87,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "archery",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 91,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "ball-sort",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "basketball",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "billiards",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "bowling",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "breakout",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "bubble-pop",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 93,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "bubble-shooter",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 88,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "checkers",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 88,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "chess",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 87,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "chess960",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "color-match",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 88,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "color-sort",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "connect4",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "crossword",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "darts",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "domino",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 91,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "galaxy-defender",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "gold-miner",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 95,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "gomoku",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "hangman",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 91,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "jigsaw",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "kakuro",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "mancala",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "maze-runner",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "memory",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "merge-blocks",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "minesweeper",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "mini-golf",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "nonogram",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "penalty-shootout",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "reversi",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "samegame",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "shuffleboard",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "simon",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "snake",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 97,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "space-defender",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "space-impact",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "stack-tower",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 88,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "sudoku",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 85,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "table-tennis",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "tank-battle",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "tetris",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 94,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "tic-tac-toe",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 92,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "whack-a-mole",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 90,
+      "grade": "A",
+      "thumbnail": "PASS"
+    },
+    {
+      "slug": "word-search",
+      "status": "PASS",
+      "metadata": "PASS",
+      "missing": [],
+      "reviewScore": 86,
+      "grade": "A",
+      "thumbnail": "PASS"
+    }
+  ],
+  "overall": "WARN"
+}
