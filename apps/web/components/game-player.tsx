@@ -247,6 +247,20 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
     () => import("@game-platform/game-jigsaw").then((mod) => mod.JigsawGame),
     { ssr: false, loading: Loading }
   ),
+  mancala: dynamic(
+    () => import("@game-platform/game-mancala").then((mod) => mod.MancalaGame),
+    { ssr: false, loading: Loading }
+  ),
+  "mini-golf": dynamic(
+    () =>
+      import("@game-platform/game-mini-golf").then((mod) => mod.MiniGolfGame),
+    { ssr: false, loading: Loading }
+  ),
+  billiards: dynamic(
+    () =>
+      import("@game-platform/game-billiards").then((mod) => mod.BilliardsGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

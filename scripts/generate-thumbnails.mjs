@@ -611,6 +611,33 @@ function iconJigsaw(accent) {
   return `<g transform="translate(382,50)">${tiles.join("\n")}</g>`;
 }
 
+function iconMancala(accent) {
+  const pits = [];
+  for (let i = 0; i < 6; i++) {
+    pits.push(`<ellipse cx="${i * 28 + 14}" cy="40" rx="12" ry="8" fill="${accent}" opacity="0.8"/>`);
+  }
+  return `<g transform="translate(382,50)">${pits.join("\n")}</g>`;
+}
+
+function iconMiniGolf(accent) {
+  return `
+    <g transform="translate(362,60)">
+      <circle cx="40" cy="120" r="14" fill="${FG}"/>
+      <circle cx="200" cy="120" r="18" fill="#111"/>
+      <rect x="0" y="130" width="240" height="8" rx="4" fill="${accent}"/>
+    </g>`;
+}
+
+function iconBilliards(accent) {
+  return `
+    <g transform="translate(362,70)">
+      <rect width="240" height="120" rx="12" fill="${accent}" opacity="0.3"/>
+      <circle cx="60" cy="60" r="14" fill="${FG}"/>
+      <circle cx="160" cy="50" r="12" fill="#ef4444"/>
+      <circle cx="180" cy="70" r="12" fill="#0ea5e9"/>
+    </g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -653,6 +680,9 @@ const games = [
   { slug: "chess", title: "Chess", accent: "#FFB800", icon: iconChess },
   { slug: "checkers", title: "Checkers", accent: "#ef4444", icon: iconCheckers },
   { slug: "jigsaw", title: "Jigsaw", accent: "#a855f7", icon: iconJigsaw },
+  { slug: "mancala", title: "Mancala", accent: "#5B5BD6", icon: iconMancala },
+  { slug: "mini-golf", title: "Mini Golf", accent: "#22c55e", icon: iconMiniGolf },
+  { slug: "billiards", title: "Billiards", accent: "#FFB800", icon: iconBilliards },
 ];
 
 function buildSvg({ title, accent, icon }) {
