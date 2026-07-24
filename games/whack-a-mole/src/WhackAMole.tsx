@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -34,6 +36,7 @@ function reducer(state: WhackAMoleState, action: Action): WhackAMoleState {
 export function WhackAMoleGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
@@ -67,7 +70,7 @@ export function WhackAMoleGame() {
             key={i}
             type="button"
             onClick={() => {
-              if (phaseRef.current === "ready") dispatch({ type: "whack", index: i });
+              if (canPlayRef.current) dispatch({ type: "whack", index: i });
             }}
             className={cn(
               "aspect-square rounded-xl border-2 border-amber-900/30 bg-amber-100/20",
@@ -78,8 +81,15 @@ export function WhackAMoleGame() {
         ))}
       </div>
       {state.status === "over" ? (
-        <GameOverOverlay message={`Score ${state.score}`} onRestart={() => dispatch({ type: "restart" })} />
+        <GameOverOverlay
+          message={`Score ${state.score}`}
+          score={state.score}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
+          onRestart={() => dispatch({ type: "restart" })}
+        />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Whack-a-Mole" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

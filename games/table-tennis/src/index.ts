@@ -1,0 +1,1 @@
+export { TableTennisGame } from "./TableTennisGame";

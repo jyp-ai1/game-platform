@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -40,6 +42,7 @@ function reducer(state: MancalaState, action: Action): MancalaState {
 export function MancalaGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -63,7 +66,7 @@ export function MancalaGame() {
   }, [state.winner, reportScore, state.pits]);
 
   const humanTurn =
-    phaseRef.current === "ready" && state.current === 1 && state.winner === null;
+    canPlayRef.current && state.current === 1 && state.winner === null;
 
   const msg =
     state.winner === 1
@@ -119,8 +122,15 @@ export function MancalaGame() {
         </div>
       </div>
       {state.winner !== null ? (
-        <GameOverOverlay message={msg} onRestart={() => dispatch({ type: "restart" })} />
+        <GameOverOverlay
+          message={msg}
+          score={computeScore(state)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
+          onRestart={() => dispatch({ type: "restart" })}
+        />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Mancala" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

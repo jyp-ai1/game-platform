@@ -10,8 +10,10 @@ import {
   discoverGames,
   GAME_CATEGORY_FILTERS,
   GAME_SORT_OPTIONS,
+  GAME_VIEW_FILTERS,
   type GameCategoryFilter,
   type GameSortOption,
+  type GameViewFilter,
 } from "@/lib/games-discovery";
 import { selectHotSlugs } from "@/lib/game-sections";
 import {
@@ -31,6 +33,7 @@ export function GamesDiscoveryBrowser({
   hotSlugs?: Set<string>;
 }) {
   const [category, setCategory] = useState<GameCategoryFilter>("all");
+  const [view, setView] = useState<GameViewFilter>("all");
   const [sort, setSort] = useState<GameSortOption>("popular");
   const [query, setQuery] = useState("");
 
@@ -46,8 +49,9 @@ export function GamesDiscoveryBrowser({
   );
 
   const visible = useMemo(
-    () => discoverGames(games, category, sort, favorites, recentlyPlayed, query),
-    [games, category, sort, favorites, recentlyPlayed, query]
+    () =>
+      discoverGames(games, category, sort, favorites, recentlyPlayed, query, view),
+    [games, category, sort, favorites, recentlyPlayed, query, view]
   );
 
   const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
@@ -66,6 +70,25 @@ export function GamesDiscoveryBrowser({
           placeholder="게임명 · 태그 검색..."
           className="w-full max-w-md rounded-md border bg-background px-3 py-2 text-sm"
         />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          View
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {GAME_VIEW_FILTERS.map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              size="sm"
+              variant={view === item.value ? "default" : "outline"}
+              onClick={() => setView(item.value)}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">

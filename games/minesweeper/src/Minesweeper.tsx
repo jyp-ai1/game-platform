@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
 import type { MouseEvent } from "react";
 import { useEffect, useReducer, useState } from "react";
@@ -108,6 +110,7 @@ const NUMBER_COLORS: Record<number, string> = {
 export function MinesweeperGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const [elapsed, setElapsed] = useState(0);
@@ -150,7 +153,7 @@ export function MinesweeperGame() {
   }, [state.status]);
 
   function handleClick(row: number, col: number) {
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     dispatch(
@@ -162,7 +165,7 @@ export function MinesweeperGame() {
 
   function handleContextMenu(event: MouseEvent, row: number, col: number) {
     event.preventDefault();
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     dispatch({ type: "toggleFlag", row, col });
@@ -232,9 +235,14 @@ export function MinesweeperGame() {
         {state.status === "won" || state.status === "lost" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.status === "won" ? Math.max(MIN_SCORE, MAX_SCORE - elapsed * SCORE_PER_SECOND) : undefined}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

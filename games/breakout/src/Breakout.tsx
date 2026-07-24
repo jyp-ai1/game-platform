@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -64,6 +66,7 @@ function toPercentRect(rect: Rect): CSSProperties {
 export function BreakoutGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const keysRef = useRef<Set<string>>(new Set());
@@ -90,7 +93,7 @@ export function BreakoutGame() {
       // Keep the rAF chain alive while gated (Resume Dialog showing) so
       // ticking resumes immediately once it's dismissed, without dispatching
       // in the meantime.
-      if (phaseRef.current === "ready" && stateRef.current.status === "playing") {
+      if (canPlayRef.current && stateRef.current.status === "playing") {
         let dx = 0;
         if (keysRef.current.has("ArrowLeft")) {
           dx -= 1;
@@ -116,7 +119,7 @@ export function BreakoutGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   useEffect(() => {
     if (state.status !== "playing") {
@@ -145,7 +148,7 @@ export function BreakoutGame() {
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       const field = fieldRef.current;
@@ -157,7 +160,7 @@ export function BreakoutGame() {
         ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
       dispatch({ type: "setPaddleX", x: relativeX - PADDLE_WIDTH / 2 });
     },
-    [phaseRef]
+    [canPlayRef]
   );
 
   return (
@@ -217,9 +220,14 @@ export function BreakoutGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

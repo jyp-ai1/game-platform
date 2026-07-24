@@ -1,9 +1,18 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer } from "react";
 
 import {
   createInitialState,
@@ -53,24 +62,40 @@ const COLOR_LABELS: Record<ColorName, string> = {
 };
 
 export function ColorMatchGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } = useResumableGame(
+    GAME_SLUG,
+    createInitialState
+  );
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "playing" ? state : null),
+    [state]
+  );
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status !== "playing" || !canPlay) {
       return;
     }
     const id = setInterval(() => {
-      dispatch({ type: "tick", dt: TICK_MS / 1000 });
+      if (canPlayRef.current) {
+        dispatch({ type: "tick", dt: TICK_MS / 1000 });
+      }
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
+
+  const interactive = canPlay && state.status === "playing";
 
   const progress = Math.max(
     0,
@@ -78,7 +103,8 @@ export function ColorMatchGame() {
   );
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -119,7 +145,7 @@ export function ColorMatchGame() {
             <button
               key={`${color}-${index}`}
               type="button"
-              disabled={state.status !== "playing"}
+              disabled={!interactive}
               onClick={() => dispatch({ type: "select", color })}
               aria-label={COLOR_LABELS[color]}
               className={cn(
@@ -133,10 +159,18 @@ export function ColorMatchGame() {
         {state.status === "over" ? (
           <GameOverOverlay
             message={`Game Over — Score ${state.score} (Round ${state.round})`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Color Match" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         위에 표시된 색상과 같은 색을 시간 안에 선택하세요.

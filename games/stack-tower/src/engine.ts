@@ -11,7 +11,7 @@ export interface StackTowerState {
 }
 
 const BOARD = 100;
-const SPEED = 2.5;
+const SPEED = 2.2;
 const INITIAL_WIDTH = 40;
 
 export function createInitialState(): StackTowerState {

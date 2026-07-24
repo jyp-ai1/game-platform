@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -30,10 +39,6 @@ import {
 const GAME_SLUG = "space-defender";
 const PLAYER_KEY_SPEED = 240;
 const MAX_DT = 0.05;
-
-// Controls: arrow keys and pointer-drag both move the player along the
-// x-axis (y is fixed). Firing is spacebar-triggered (not auto-fire) to keep
-// the classic "one shot on screen at a time" tension of the mechanic.
 
 type Action =
   | { type: "step"; dt: number }
@@ -66,14 +71,23 @@ function toPercentRect(x: number, y: number, width: number, height: number): CSS
 }
 
 export function SpaceDefenderGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const keysRef = useRef<Set<string>>(new Set());
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status !== "playing" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     function loop(time: number) {
@@ -83,7 +97,7 @@ export function SpaceDefenderGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (stateRef.current.status === "playing") {
+      if (stateRef.current.status === "playing" && canPlayRef.current) {
         let dx = 0;
         if (keysRef.current.has("ArrowLeft")) {
           dx -= 1;
@@ -112,16 +126,20 @@ export function SpaceDefenderGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
+  }, [canPlayRef]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current) {
+        return;
+      }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === " ") {
         event.preventDefault();
         keysRef.current.add(event.key);
@@ -136,24 +154,34 @@ export function SpaceDefenderGame() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [canPlayRef]);
 
-  const handlePointerMove = useCallback((event: PointerEvent) => {
-    const field = fieldRef.current;
-    if (!field) {
-      return;
-    }
-    const rect = field.getBoundingClientRect();
-    const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
-    dispatch({ type: "setPlayerX", x: relativeX - PLAYER_WIDTH / 2 });
-  }, []);
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      if (!canPlayRef.current) {
+        return;
+      }
+      const field = fieldRef.current;
+      if (!field) {
+        return;
+      }
+      const rect = field.getBoundingClientRect();
+      const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
+      dispatch({ type: "setPlayerX", x: relativeX - PLAYER_WIDTH / 2 });
+    },
+    [canPlayRef]
+  );
 
   const handlePointerDown = useCallback(() => {
+    if (!canPlayRef.current) {
+      return;
+    }
     dispatch({ type: "fire" });
-  }, []);
+  }, [canPlayRef]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -176,10 +204,6 @@ export function SpaceDefenderGame() {
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
       >
-        {/* Invader grid: rendered as a tight rectangular block with a
-            subtle bottom-edge glow that intensifies as the formation
-            descends, distinguishing it from Galaxy Defender's looser,
-            swaying formation motif. */}
         {state.invaders.alive.map((row, rowIndex) =>
           row.map((isAlive, colIndex) => {
             if (!isAlive) {
@@ -201,8 +225,6 @@ export function SpaceDefenderGame() {
           })
         )}
 
-        {/* Shields: chunky destructible blocks that shrink in opacity as hp
-            decreases (unique to this game). */}
         {state.shields.map((shield, index) => (
           <div
             key={index}
@@ -214,7 +236,6 @@ export function SpaceDefenderGame() {
           />
         ))}
 
-        {/* Bullets, colored by owner. */}
         {state.bullets.map((bullet, index) => (
           <div
             key={index}
@@ -232,7 +253,6 @@ export function SpaceDefenderGame() {
           />
         ))}
 
-        {/* Player ship. */}
         <div
           className="absolute rounded-sm bg-sky-400"
           style={toPercentRect(state.playerX, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)}
@@ -241,9 +261,22 @@ export function SpaceDefenderGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Space Defender"
+            onResume={onResume}
+            onNewGame={onNewGame}
+          />
+        ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

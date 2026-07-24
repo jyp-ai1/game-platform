@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -32,6 +34,7 @@ function reducer(state: PenaltyState, action: Action): PenaltyState {
 export function PenaltyShootoutGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -49,7 +52,7 @@ export function PenaltyShootoutGame() {
   }, [state.status, state.score, reportScore]);
 
   function handleShoot(dir: Direction) {
-    if (phaseRef.current !== "ready" || state.status !== "playing") return;
+    if (!canPlayRef.current || state.status !== "playing") return;
     dispatch({ type: "shoot", dir });
   }
 
@@ -82,7 +85,7 @@ export function PenaltyShootoutGame() {
             <Button
               key={dir}
               variant="secondary"
-              disabled={state.status !== "playing" || phaseRef.current !== "ready"}
+              disabled={state.status !== "playing" || !canPlayRef.current}
               onClick={() => handleShoot(dir)}
               className={cn(state.lastResult && "opacity-80")}
             >
@@ -94,9 +97,13 @@ export function PenaltyShootoutGame() {
       {state.status === "over" ? (
         <GameOverOverlay
           message={`${state.score} goals!`}
+          score={computeRankingScore(state)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Penalty Shootout" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

@@ -261,6 +261,49 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       import("@game-platform/game-billiards").then((mod) => mod.BilliardsGame),
     { ssr: false, loading: Loading }
   ),
+  basketball: dynamic(
+    () =>
+      import("@game-platform/game-basketball").then((mod) => mod.BasketballGame),
+    { ssr: false, loading: Loading }
+  ),
+  "table-tennis": dynamic(
+    () =>
+      import("@game-platform/game-table-tennis").then((mod) => mod.TableTennisGame),
+    { ssr: false, loading: Loading }
+  ),
+  domino: dynamic(
+    () => import("@game-platform/game-domino").then((mod) => mod.DominoGame),
+    { ssr: false, loading: Loading }
+  ),
+  crossword: dynamic(
+    () =>
+      import("@game-platform/game-crossword").then((mod) => mod.CrosswordGame),
+    { ssr: false, loading: Loading }
+  ),
+  chess960: dynamic(
+    () =>
+      import("@game-platform/game-chess960").then((mod) => mod.Chess960Game),
+    { ssr: false, loading: Loading }
+  ),
+  shuffleboard: dynamic(
+    () =>
+      import("@game-platform/game-shuffleboard").then((mod) => mod.ShuffleboardGame),
+    { ssr: false, loading: Loading }
+  ),
+  kakuro: dynamic(
+    () => import("@game-platform/game-kakuro").then((mod) => mod.KakuroGame),
+    { ssr: false, loading: Loading }
+  ),
+  nonogram: dynamic(
+    () =>
+      import("@game-platform/game-nonogram").then((mod) => mod.NonogramGame),
+    { ssr: false, loading: Loading }
+  ),
+  "word-search": dynamic(
+    () =>
+      import("@game-platform/game-word-search").then((mod) => mod.WordSearchGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

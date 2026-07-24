@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
 import { useEffect, useReducer, useRef } from "react";
@@ -80,6 +82,7 @@ function reducer(state: TetrisState, action: Action): TetrisState {
 export function TetrisGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -91,7 +94,7 @@ export function TetrisGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "playing" || phase !== "ready") {
+    if (state.status !== "playing" || !canPlay) {
       return;
     }
     const id = setInterval(
@@ -99,7 +102,7 @@ export function TetrisGame() {
       gravityIntervalMs(state.level)
     );
     return () => clearInterval(id);
-  }, [state.status, state.level, phase]);
+  }, [state.status, state.level, canPlay]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -110,7 +113,7 @@ export function TetrisGame() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       switch (event.key) {
@@ -140,7 +143,7 @@ export function TetrisGame() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   function handleTouchStart(event: TouchEvent) {
     const touch = event.touches[0];
@@ -153,7 +156,7 @@ export function TetrisGame() {
   function handleTouchEnd(event: TouchEvent) {
     const start = touchStart.current;
     touchStart.current = null;
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     const touch = event.changedTouches[0];
@@ -229,9 +232,14 @@ export function TetrisGame() {
         {state.status === "over" ? (
           <GameOverOverlay
             message="Game Over"
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

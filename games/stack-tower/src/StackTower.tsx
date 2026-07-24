@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -35,6 +37,7 @@ function reducer(state: StackTowerState, action: Action): StackTowerState {
 export function StackTowerGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -71,7 +74,7 @@ export function StackTowerGame() {
         type="button"
         className="relative h-72 w-full max-w-sm overflow-hidden rounded-xl bg-muted"
         onClick={() => {
-          if (phaseRef.current === "ready" && state.status === "playing") {
+          if (canPlayRef.current && state.status === "playing") {
             dispatch({ type: "place" });
           }
         }}
@@ -103,9 +106,13 @@ export function StackTowerGame() {
       {state.status === "over" ? (
         <GameOverOverlay
           message={`${state.stack.length} blocks!`}
+          score={state.score}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Stack Tower" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

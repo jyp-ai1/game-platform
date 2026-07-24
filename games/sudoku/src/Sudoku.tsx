@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { Eraser, RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -43,17 +52,34 @@ function computeScore(mistakes: number): number {
 }
 
 export function SudokuGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, () => createInitialState());
+  const { phase, initialState, onResume, onNewGame } = useResumableGame(
+    GAME_SLUG,
+    createInitialState
+  );
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "playing" ? state : null),
+    [state]
+  );
 
   useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.mistakes));
     }
+    if (state.status !== "playing") {
+      clearSave(GAME_SLUG);
+    }
   }, [state.status, reportScore, state.mistakes]);
 
+  const interactive = canPlay && state.status === "playing";
+
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Mistakes" value={state.mistakes} />
         <div className="flex items-center gap-1">
@@ -95,6 +121,7 @@ export function SudokuGame() {
               <button
                 key={`${row}-${col}`}
                 type="button"
+                disabled={!interactive}
                 onClick={() => dispatch({ type: "select", row, col })}
                 className={cn(
                   "flex aspect-square items-center justify-center text-sm font-semibold sm:text-base",
@@ -114,9 +141,13 @@ export function SudokuGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.status === "won" ? computeScore(state.mistakes) : undefined}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
 
       <div className="grid w-full max-w-sm grid-cols-5 gap-2">
@@ -124,6 +155,7 @@ export function SudokuGame() {
           <Button
             key={digit}
             variant="outline"
+            disabled={!interactive}
             onClick={() => dispatch({ type: "enter", value: digit })}
           >
             {digit}
@@ -133,11 +165,16 @@ export function SudokuGame() {
           variant="outline"
           size="icon"
           aria-label="지우기"
+          disabled={!interactive}
           onClick={() => dispatch({ type: "enter", value: null })}
         >
           <Eraser />
         </Button>
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Sudoku" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         빈 칸을 선택하고 숫자를 입력해 스도쿠를 완성하세요.

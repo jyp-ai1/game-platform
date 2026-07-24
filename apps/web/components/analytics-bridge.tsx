@@ -60,6 +60,9 @@ function onPlatform(event: PlatformAnalyticsEvent) {
     case "game-end":
       track("game_end", { score: event.score }, event.gameSlug);
       break;
+    case "game-retry":
+      track("game_start", { retry: true }, event.gameSlug);
+      break;
     case "save-created":
       if (!isSaveEnabled()) break;
       track("save_created", {}, event.gameSlug);

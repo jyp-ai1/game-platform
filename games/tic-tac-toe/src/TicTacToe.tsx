@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -14,8 +23,6 @@ import {
 
 const GAME_SLUG = "tic-tac-toe";
 const CPU_MOVE_DELAY_MS = 500;
-// There's no natural numeric score in tic-tac-toe, so we report a flat
-// fixed value when the human wins (and don't report on draw or CPU win).
 const WIN_SCORE = 100;
 
 type Action =
@@ -44,30 +51,43 @@ function statusMessage(state: TicTacToeState): string {
 }
 
 export function TicTacToeGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } = useResumableGame(
+    GAME_SLUG,
+    createInitialState
+  );
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
-  // React to the turn changing to the CPU: schedule its move after a short,
-  // natural-feeling pause. This is a legitimate effect (reacting to a state
-  // transition caused by the player's move), not a synchronous state set.
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.winner !== null ? null : state),
+    [state]
+  );
+
   useEffect(() => {
-    if (state.winner !== null || state.currentPlayer !== "O") {
+    if (!canPlayRef.current || state.winner !== null || state.currentPlayer !== "O") {
       return;
     }
     const id = setTimeout(() => dispatch({ type: "cpuMove" }), CPU_MOVE_DELAY_MS);
     return () => clearTimeout(id);
-  }, [state.currentPlayer, state.winner]);
+  }, [state.currentPlayer, state.winner, canPlay]);
 
   useEffect(() => {
     if (state.winner === "X") {
       reportScore(GAME_SLUG, WIN_SCORE);
     }
+    if (state.winner !== null) {
+      clearSave(GAME_SLUG);
+    }
   }, [state.winner, reportScore]);
 
-  const isHumanTurn = state.currentPlayer === "X" && state.winner === null;
+  const isHumanTurn =
+    canPlay && state.currentPlayer === "X" && state.winner === null;
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">
           {statusMessage(state)}
@@ -108,10 +128,18 @@ export function TicTacToeGame() {
         {state.winner !== null ? (
           <GameOverOverlay
             message={statusMessage(state)}
+            score={state.winner === "X" ? WIN_SCORE : undefined}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Tic Tac Toe" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         당신은 X입니다. CPU를 상대로 승리해보세요.

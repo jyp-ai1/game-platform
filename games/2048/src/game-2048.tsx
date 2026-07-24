@@ -7,9 +7,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -92,6 +94,7 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 export function Game2048() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const { reportScore } = useGameSDK();
@@ -121,7 +124,7 @@ export function Game2048() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       const direction = DIRECTION_KEYS[event.key];
@@ -134,7 +137,7 @@ export function Game2048() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   const handleTouchStart = useCallback((event: TouchEvent) => {
     const touch = event.touches[0];
@@ -148,7 +151,7 @@ export function Game2048() {
     (event: TouchEvent) => {
       const start = touchStart.current;
       touchStart.current = null;
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       const touch = event.changedTouches[0];
@@ -174,7 +177,7 @@ export function Game2048() {
 
       dispatch({ type: "move", direction });
     },
-    [phaseRef]
+    [canPlayRef]
   );
 
   return (
@@ -213,9 +216,14 @@ export function Game2048() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

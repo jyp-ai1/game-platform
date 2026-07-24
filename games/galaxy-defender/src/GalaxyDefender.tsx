@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -28,10 +37,6 @@ const PLAYER_KEY_SPEED = 300;
 const MAX_DT = 0.05;
 const BULLET_WIDTH = 4;
 const BULLET_HEIGHT = 8;
-
-// Design choice: auto-fire. The player ship fires continuously whenever its
-// cooldown allows, rather than requiring a spacebar press per shot — this
-// suits the swoop-and-fire pacing of the genre better than manual fire.
 
 type Action =
   | { type: "step"; dt: number }
@@ -84,14 +89,23 @@ function bulletClassName(bullet: Bullet): string {
 }
 
 export function GalaxyDefenderGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const keysRef = useRef<Set<string>>(new Set());
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status !== "playing" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     function loop(time: number) {
@@ -101,7 +115,7 @@ export function GalaxyDefenderGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (stateRef.current.status === "playing") {
+      if (stateRef.current.status === "playing" && canPlayRef.current) {
         let dx = 0;
         if (keysRef.current.has("ArrowLeft")) {
           dx -= 1;
@@ -127,16 +141,20 @@ export function GalaxyDefenderGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
+  }, [canPlayRef]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current) {
+        return;
+      }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
         keysRef.current.add(event.key);
@@ -151,20 +169,27 @@ export function GalaxyDefenderGame() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [canPlayRef]);
 
-  const handlePointerMove = useCallback((event: PointerEvent) => {
-    const field = fieldRef.current;
-    if (!field) {
-      return;
-    }
-    const rect = field.getBoundingClientRect();
-    const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
-    dispatch({ type: "setPlayerX", x: relativeX });
-  }, []);
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      if (!canPlayRef.current) {
+        return;
+      }
+      const field = fieldRef.current;
+      if (!field) {
+        return;
+      }
+      const rect = field.getBoundingClientRect();
+      const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
+      dispatch({ type: "setPlayerX", x: relativeX });
+    },
+    [canPlayRef]
+  );
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -211,9 +236,22 @@ export function GalaxyDefenderGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Galaxy Defender"
+            onResume={onResume}
+            onNewGame={onNewGame}
+          />
+        ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

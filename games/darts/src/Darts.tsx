@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -34,6 +36,7 @@ function reducer(state: DartsState, action: Action): DartsState {
 export function DartsGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -51,7 +54,7 @@ export function DartsGame() {
   }, [state.status, state.score, reportScore]);
 
   function handleBoardClick(e: React.MouseEvent<HTMLButtonElement>) {
-    if (phaseRef.current !== "ready" || state.status !== "playing") return;
+    if (!canPlayRef.current || state.status !== "playing") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const xPct = ((e.clientX - rect.left) / rect.width) * 100;
     const yPct = ((e.clientY - rect.top) / rect.height) * 100;
@@ -78,7 +81,7 @@ export function DartsGame() {
       <button
         type="button"
         onClick={handleBoardClick}
-        disabled={state.status !== "playing" || phaseRef.current !== "ready"}
+        disabled={state.status !== "playing" || !canPlayRef.current}
         aria-label="다트판 — 클릭하여 던지기"
         className="relative aspect-square w-full max-w-sm rounded-full border-4 border-primary/30 bg-muted"
       >
@@ -104,9 +107,13 @@ export function DartsGame() {
       {state.status === "over" ? (
         <GameOverOverlay
           message={`Finished! ${state.score} pts`}
+          score={state.score}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Darts" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

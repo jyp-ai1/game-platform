@@ -93,6 +93,8 @@ export {
   type SaveEnvelope,
 } from "./save";
 export { useAutoSave, type SaveIndicatorStatus } from "./use-auto-save";
+export { useReadyCountdown, type UseReadyCountdownResult } from "./use-ready-countdown";
+export { emitGameRetry } from "./game-retry";
 export {
   useResumableGame,
   type ResumePhase,

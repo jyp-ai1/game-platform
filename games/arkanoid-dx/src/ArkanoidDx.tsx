@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -65,6 +67,7 @@ function toPercentRect(rect: Rect): CSSProperties {
 export function ArkanoidDxGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const keysRef = useRef<Set<string>>(new Set());
@@ -88,7 +91,7 @@ export function ArkanoidDxGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (phaseRef.current === "ready" && stateRef.current.status === "playing") {
+      if (canPlayRef.current && stateRef.current.status === "playing") {
         let dx = 0;
         if (keysRef.current.has("ArrowLeft")) {
           dx -= 1;
@@ -114,7 +117,7 @@ export function ArkanoidDxGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   useEffect(() => {
     if (state.status !== "playing") {
@@ -143,7 +146,7 @@ export function ArkanoidDxGame() {
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       const field = fieldRef.current;
@@ -240,9 +243,14 @@ export function ArkanoidDxGame() {
                 ? `Clear! (${STAGE_COUNT} Stages)`
                 : "Game Over"
             }
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

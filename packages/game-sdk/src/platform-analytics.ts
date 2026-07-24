@@ -3,6 +3,7 @@
 
 export type PlatformAnalyticsEvent =
   | { type: "game-end"; gameSlug: string; score: number }
+  | { type: "game-retry"; gameSlug: string }
   | { type: "save-created"; gameSlug: string }
   | { type: "save-resumed"; gameSlug: string };
 

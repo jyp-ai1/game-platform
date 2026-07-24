@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -34,17 +43,34 @@ function reducer(state: HangmanState, action: Action): HangmanState {
 }
 
 export function HangmanGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } = useResumableGame(
+    GAME_SLUG,
+    createInitialState
+  );
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "playing" ? state : null),
+    [state]
+  );
 
   useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.wrongGuesses));
     }
+    if (state.status !== "playing") {
+      clearSave(GAME_SLUG);
+    }
   }, [state.status, state.wrongGuesses, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current || state.status !== "playing") {
+        return;
+      }
       if (event.key.length !== 1 || !/^[a-zA-Z]$/.test(event.key)) {
         return;
       }
@@ -52,12 +78,14 @@ export function HangmanGame() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [state.status, canPlay]);
 
   const livesLeft = state.maxWrongGuesses - state.wrongGuesses;
+  const interactive = canPlay && state.status === "playing";
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Lives" value={livesLeft} />
         <Button
@@ -97,7 +125,7 @@ export function HangmanGame() {
                   <button
                     key={letter}
                     type="button"
-                    disabled={guessed || state.status !== "playing"}
+                    disabled={guessed || !interactive}
                     onClick={() => dispatch({ type: "guess", letter })}
                     aria-label={`${letter} 추측`}
                     className={cn(
@@ -122,10 +150,18 @@ export function HangmanGame() {
                 ? "You Win!"
                 : `Game Over — ${state.word}`
             }
+            score={state.status === "won" ? computeScore(state.wrongGuesses) : undefined}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Hangman" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         키보드 또는 화면의 글자를 눌러 단어를 맞혀보세요.

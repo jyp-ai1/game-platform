@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -70,6 +72,7 @@ function toPercentRect(
 export function SpaceImpactGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const keysRef = useRef<Set<string>>(new Set());
@@ -93,7 +96,7 @@ export function SpaceImpactGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (phaseRef.current === "ready" && stateRef.current.status === "playing") {
+      if (canPlayRef.current && stateRef.current.status === "playing") {
         let dy = 0;
         if (keysRef.current.has("ArrowUp")) {
           dy -= 1;
@@ -121,7 +124,7 @@ export function SpaceImpactGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   useEffect(() => {
     if (state.status !== "playing") {
@@ -150,7 +153,7 @@ export function SpaceImpactGame() {
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       const field = fieldRef.current;
@@ -161,15 +164,15 @@ export function SpaceImpactGame() {
       const relativeY = ((event.clientY - rect.top) / rect.height) * FIELD_HEIGHT;
       dispatch({ type: "setPlayerY", y: relativeY - PLAYER_SIZE / 2 });
     },
-    [phaseRef]
+    [canPlayRef]
   );
 
   const handlePointerDown = useCallback(() => {
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     dispatch({ type: "fire" });
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   return (
     <div className="relative flex flex-col items-center gap-4">
@@ -225,9 +228,14 @@ export function SpaceImpactGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message="Game Over"
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

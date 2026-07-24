@@ -158,7 +158,7 @@ function PlayableLayout({
           </div>
 
           {rankingEnabled ? (
-            <div className="rounded-2xl border bg-card p-4 shadow-sm lg:p-5">
+            <div id="leaderboard" className="rounded-2xl border bg-card p-4 shadow-sm lg:p-5">
               <h2 className="mb-4 text-lg font-semibold">랭킹</h2>
               <Leaderboard gameSlug={slug} />
             </div>

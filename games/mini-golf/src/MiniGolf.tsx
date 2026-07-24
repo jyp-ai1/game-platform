@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -45,6 +47,7 @@ function reducer(state: MiniGolfState, action: Action): MiniGolfState {
 export function MiniGolfGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -118,7 +121,7 @@ export function MiniGolfGame() {
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
       </div>
       <Button
-        disabled={state.status !== "aiming" || phaseRef.current !== "ready"}
+        disabled={state.status !== "aiming" || !canPlayRef.current}
         onClick={() => dispatch({ type: "putt" })}
       >
         Putt!
@@ -126,9 +129,13 @@ export function MiniGolfGame() {
       {state.status === "over" ? (
         <GameOverOverlay
           message={inHole ? `Hole in ${state.strokes}!` : `${state.strokes} strokes`}
+          score={computeScore(state)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Mini Golf" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

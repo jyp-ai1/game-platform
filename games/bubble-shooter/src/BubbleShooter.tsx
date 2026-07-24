@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -37,6 +39,7 @@ function reducer(state: BubbleShooterState, action: Action): BubbleShooterState 
 export function BubbleShooterGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -71,7 +74,7 @@ export function BubbleShooterGame() {
                 key={`${ri}-${ci}`}
                 type="button"
                 onClick={() => {
-                  if (phaseRef.current === "ready" && state.status === "playing") {
+                  if (canPlayRef.current && state.status === "playing") {
                     dispatch({ type: "shoot", col: ci });
                   }
                 }}
@@ -95,9 +98,13 @@ export function BubbleShooterGame() {
               ? `Clear! ${computeScore(state.score, state.status)} pts`
               : `Score ${state.score}`
           }
+          score={computeScore(state.score, state.status)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Bubble Shooter" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

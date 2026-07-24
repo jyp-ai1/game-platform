@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -48,51 +57,56 @@ function reducer(state: SimonState, action: Action): SimonState {
 }
 
 export function SimonGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } = useResumableGame(
+    GAME_SLUG,
+    createInitialState
+  );
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
-  // Very first mount (and immediately after a restart): kick off round 1
-  // after a brief pause.
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.phase !== "over" ? state : null),
+    [state]
+  );
+
   useEffect(() => {
-    if (state.phase !== "idle" || state.round !== 0) {
+    if (!canPlayRef.current || state.phase !== "idle" || state.round !== 0) {
       return;
     }
     const timeout = setTimeout(() => {
       dispatch({ type: "startRound" });
     }, ROUND_START_DELAY_MS);
     return () => clearTimeout(timeout);
-    // Only re-run when we transition back into the "very first" idle state,
-    // i.e. right after a restart.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.phase, state.round]);
+  }, [state.phase, state.round, canPlay]);
 
-  // A round was just completed successfully (idle with round > 0): advance
-  // to the next round after a short pause.
   useEffect(() => {
-    if (state.phase !== "idle" || state.round === 0) {
+    if (!canPlayRef.current || state.phase !== "idle" || state.round === 0) {
       return;
     }
     const timeout = setTimeout(() => {
       dispatch({ type: "startRound" });
     }, NEXT_ROUND_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [state.phase, state.round]);
+  }, [state.phase, state.round, canPlay]);
 
-  // Drive playback: while showing the sequence, tick through it on an
-  // interval owned entirely by this effect.
   useEffect(() => {
-    if (state.phase !== "playback") {
+    if (!canPlayRef.current || state.phase !== "playback") {
       return;
     }
     const interval = setInterval(() => {
-      dispatch({ type: "advancePlayback" });
+      if (canPlayRef.current) {
+        dispatch({ type: "advancePlayback" });
+      }
     }, PLAYBACK_STEP_MS);
     return () => clearInterval(interval);
-  }, [state.phase]);
+  }, [state.phase, canPlay]);
 
   useEffect(() => {
     if (state.phase === "over") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.phase, state.score, reportScore]);
 
@@ -100,7 +114,8 @@ export function SimonGame() {
     state.phase === "playback" ? state.sequence[state.playbackIndex] : null;
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Round" value={state.round} />
@@ -120,7 +135,7 @@ export function SimonGame() {
       <div className="relative grid w-full max-w-sm grid-cols-2 gap-2">
         {PADS.map((pad) => {
           const isActive = highlightedColor === pad.color;
-          const disabled = state.phase !== "input";
+          const disabled = !canPlay || state.phase !== "input";
           return (
             <button
               key={pad.color}
@@ -141,10 +156,18 @@ export function SimonGame() {
         {state.phase === "over" ? (
           <GameOverOverlay
             message={`Game Over — Round ${state.round}`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Simon" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         점점 길어지는 색상 순서를 기억했다가 그대로 따라 눌러보세요.

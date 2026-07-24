@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
 import { useEffect, useReducer, useRef } from "react";
@@ -48,26 +57,39 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 const CHASER_COLORS = ["bg-destructive", "bg-secondary-foreground", "bg-accent-foreground"];
 
 export function MazeRunnerGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status !== "playing" ? null : state),
+    [state]
+  );
+
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status !== "playing" || !canPlay) {
       return;
     }
     const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current) {
+        return;
+      }
       const direction = DIRECTION_KEYS[event.key];
       if (!direction) {
         return;
@@ -77,7 +99,7 @@ export function MazeRunnerGame() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [canPlayRef]);
 
   function handleTouchStart(event: TouchEvent) {
     const touch = event.touches[0];
@@ -90,6 +112,9 @@ export function MazeRunnerGame() {
   function handleTouchEnd(event: TouchEvent) {
     const start = touchStart.current;
     touchStart.current = null;
+    if (!canPlayRef.current) {
+      return;
+    }
     const touch = event.changedTouches[0];
     if (!start || !touch) {
       return;
@@ -111,7 +136,8 @@ export function MazeRunnerGame() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -172,9 +198,22 @@ export function MazeRunnerGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Maze Runner"
+            onResume={onResume}
+            onNewGame={onNewGame}
+          />
+        ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer, useRef } from "react";
 
@@ -63,6 +65,7 @@ function toPercent(x: number, y: number): { left: string; top: string } {
 export function GoldMinerGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const lastTimeRef = useRef<number | null>(null);
@@ -84,7 +87,7 @@ export function GoldMinerGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (phaseRef.current === "ready" && stateRef.current.status === "playing") {
+      if (canPlayRef.current && stateRef.current.status === "playing") {
         dispatch({ type: "step", dt });
       }
 
@@ -96,7 +99,7 @@ export function GoldMinerGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -107,7 +110,7 @@ export function GoldMinerGame() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       if (event.key === " ") {
@@ -117,10 +120,10 @@ export function GoldMinerGame() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   function handleFire() {
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     dispatch({ type: "fire" });
@@ -193,9 +196,14 @@ export function GoldMinerGame() {
         {state.status === "over" ? (
           <GameOverOverlay
             message="Time's Up!"
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

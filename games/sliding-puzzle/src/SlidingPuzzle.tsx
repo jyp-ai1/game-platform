@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -26,6 +28,7 @@ function reducer(state: SlidingPuzzleState, action: Action): SlidingPuzzleState 
 export function SlidingPuzzleGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "won" ? null : state), [state]);
@@ -53,7 +56,7 @@ export function SlidingPuzzleGame() {
             type="button"
             disabled={tile === 0}
             onClick={() => {
-              if (phaseRef.current === "ready") dispatch({ type: "tap", index: i });
+              if (canPlayRef.current) dispatch({ type: "tap", index: i });
             }}
             className={cn(
               "flex aspect-square items-center justify-center rounded-lg text-lg font-bold",
@@ -67,9 +70,13 @@ export function SlidingPuzzleGame() {
       {state.status === "won" ? (
         <GameOverOverlay
           message={`Clear! ${computeScore(state.moves)} pts (${state.moves} moves)`}
+          score={computeScore(state.moves)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Sliding Puzzle" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

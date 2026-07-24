@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -33,6 +35,7 @@ function reducer(state: BallSortState, action: Action): BallSortState {
 export function BallSortGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -64,7 +67,7 @@ export function BallSortGame() {
             key={ti}
             type="button"
             onClick={() => {
-              if (phaseRef.current === "ready") dispatch({ type: "tap", index: ti });
+              if (canPlayRef.current) dispatch({ type: "tap", index: ti });
             }}
             className={cn(
               "flex h-36 w-12 flex-col-reverse items-center rounded-b-full border-2 border-foreground/20 bg-muted/30",
@@ -80,8 +83,15 @@ export function BallSortGame() {
         ))}
       </div>
       {state.status === "won" ? (
-        <GameOverOverlay message="Complete!" onRestart={() => dispatch({ type: "restart" })} />
+        <GameOverOverlay
+          message="Complete!"
+          score={computeScore(state.moves)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
+          onRestart={() => dispatch({ type: "restart" })}
+        />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Ball Sort" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

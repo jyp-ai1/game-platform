@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -48,13 +57,24 @@ function toPercent(x: number, y: number, radius: number): CSSProperties {
 }
 
 export function AirHockeyGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } = useResumableGame(
+    GAME_SLUG,
+    createInitialState
+  );
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status === "playing" ? state : null),
+    [state]
+  );
 
   useEffect(() => {
     function loop(time: number) {
@@ -64,7 +84,7 @@ export function AirHockeyGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (stateRef.current.status === "playing") {
+      if (stateRef.current.status === "playing" && canPlayRef.current) {
         dispatch({ type: "step", dt });
       }
 
@@ -81,28 +101,33 @@ export function AirHockeyGame() {
 
   useEffect(() => {
     if (state.status !== "playing") {
-      // Reported regardless of win/loss — "most goals scored in a match" is
-      // a meaningful leaderboard metric even for a losing game, matching
-      // how Breakout reports its final score independent of outcome.
       reportScore(GAME_SLUG, state.playerScore);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.playerScore, reportScore]);
 
-  const handlePointerMove = useCallback((event: PointerEvent) => {
-    const field = fieldRef.current;
-    if (!field) {
-      return;
-    }
-    const rect = field.getBoundingClientRect();
-    const target = {
-      x: ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH,
-      y: ((event.clientY - rect.top) / rect.height) * FIELD_HEIGHT,
-    };
-    dispatch({ type: "movePlayer", target });
-  }, []);
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      if (!canPlayRef.current || stateRef.current.status !== "playing") {
+        return;
+      }
+      const field = fieldRef.current;
+      if (!field) {
+        return;
+      }
+      const rect = field.getBoundingClientRect();
+      const target = {
+        x: ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH,
+        y: ((event.clientY - rect.top) / rect.height) * FIELD_HEIGHT,
+      };
+      dispatch({ type: "movePlayer", target });
+    },
+    []
+  );
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="You" value={state.playerScore} />
@@ -124,9 +149,7 @@ export function AirHockeyGame() {
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
       >
-        {/* Center line */}
         <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/20" />
-        {/* Goal mouths */}
         <div
           className="absolute top-0 h-1 -translate-x-1/2 bg-destructive"
           style={{ left: "50%", width: `${(140 / FIELD_WIDTH) * 100}%` }}
@@ -156,10 +179,18 @@ export function AirHockeyGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.winner === "player" ? "You Win!" : "Game Over"}
+            score={state.playerScore}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog gameTitle="Air Hockey" onResume={onResume} onNewGame={onNewGame} />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         드래그(또는 터치)로 패들을 움직여 퍽을 쳐내세요. 7점을 먼저 획득하면

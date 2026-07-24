@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
 import { useEffect, useReducer, useRef } from "react";
@@ -24,7 +26,7 @@ import {
 } from "./engine";
 
 const GAME_SLUG = "snake";
-const TICK_MS = 150;
+const TICK_MS = 165;
 const SWIPE_THRESHOLD = 24;
 const POINTS_PER_FOOD = 10;
 
@@ -99,6 +101,7 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 export function SnakeGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -110,12 +113,12 @@ export function SnakeGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "playing" || phase !== "ready") {
+    if (state.status !== "playing" || !canPlay) {
       return;
     }
     const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
     return () => clearInterval(id);
-  }, [state.status, phase]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status !== "playing") {
@@ -126,7 +129,7 @@ export function SnakeGame() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (phaseRef.current !== "ready") {
+      if (!canPlayRef.current) {
         return;
       }
       const direction = DIRECTION_KEYS[event.key];
@@ -138,7 +141,7 @@ export function SnakeGame() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [phaseRef]);
+  }, [canPlayRef]);
 
   function handleTouchStart(event: TouchEvent) {
     const touch = event.touches[0];
@@ -151,7 +154,7 @@ export function SnakeGame() {
   function handleTouchEnd(event: TouchEvent) {
     const start = touchStart.current;
     touchStart.current = null;
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     const touch = event.changedTouches[0];
@@ -220,9 +223,14 @@ export function SnakeGame() {
         {state.status === "over" ? (
           <GameOverOverlay
             message="Game Over"
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

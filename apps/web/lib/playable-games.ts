@@ -44,6 +44,15 @@ export const PLAYABLE_SLUGS = [
   "mancala",
   "mini-golf",
   "billiards",
+  "basketball",
+  "table-tennis",
+  "domino",
+  "crossword",
+  "chess960",
+  "shuffleboard",
+  "kakuro",
+  "nonogram",
+  "word-search",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

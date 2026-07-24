@@ -12,6 +12,8 @@ export type GameCategoryFilter =
   | "sports"
   | "casual";
 
+export type GameViewFilter = "all" | "favorites" | "recent";
+
 export type GameSortOption = "popular" | "newest" | "favorites" | "played";
 
 export const GAME_CATEGORY_FILTERS: Array<{
@@ -33,6 +35,30 @@ export const GAME_SORT_OPTIONS: Array<{ value: GameSortOption; label: string }> 
   { value: "favorites", label: "즐겨찾기순" },
   { value: "played", label: "플레이순" },
 ];
+
+export const GAME_VIEW_FILTERS: Array<{ value: GameViewFilter; label: string }> = [
+  { value: "all", label: "전체" },
+  { value: "favorites", label: "즐겨찾기" },
+  { value: "recent", label: "최근 플레이" },
+];
+
+export function filterGamesByView(
+  games: Game[],
+  view: GameViewFilter,
+  favorites: string[],
+  recentlyPlayed: string[]
+): Game[] {
+  if (view === "favorites") {
+    return games.filter((g) => favorites.includes(g.slug));
+  }
+  if (view === "recent") {
+    const order = new Map(recentlyPlayed.map((slug, i) => [slug, i]));
+    return games
+      .filter((g) => order.has(g.slug))
+      .sort((a, b) => order.get(a.slug)! - order.get(b.slug)!);
+  }
+  return games;
+}
 
 export function filterGamesByCategory(
   games: Game[],
@@ -96,9 +122,11 @@ export function discoverGames(
   sort: GameSortOption,
   favorites: string[],
   recentlyPlayed: string[],
-  query = ""
+  query = "",
+  view: GameViewFilter = "all"
 ): Game[] {
-  const filtered = filterGamesByCategory(games, filter);
+  const byView = filterGamesByView(games, view, favorites, recentlyPlayed);
+  const filtered = filterGamesByCategory(byView, filter);
   const searched = searchGames(filtered, query);
   return sortGames(searched, sort, favorites, recentlyPlayed);
 }

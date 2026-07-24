@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 
@@ -44,6 +46,7 @@ function reducer(state: CheckersState, action: Action): CheckersState {
 export function CheckersGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const { reportScore } = useGameSDK();
@@ -69,7 +72,7 @@ export function CheckersGame() {
   }, [state.winner, reportScore]);
 
   const humanTurn =
-    phaseRef.current === "ready" && state.current === 1 && state.winner === null;
+    canPlayRef.current && state.current === 1 && state.winner === null;
   const legal = humanTurn ? getLegalMoves(state, 1) : [];
 
   function onCell(r: number, c: number) {
@@ -178,12 +181,16 @@ export function CheckersGame() {
       {state.winner !== null ? (
         <GameOverOverlay
           message={msg}
+          score={computeScore(state)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => {
             dispatch({ type: "restart" });
             setSelected(null);
           }}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Checkers" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

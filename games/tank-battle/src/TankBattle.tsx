@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useEffect, useReducer, useRef } from "react";
@@ -75,12 +84,21 @@ function BarrelIndicator({ facing }: { facing: Facing }) {
 }
 
 export function TankBattleGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status !== "playing" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     function loop(time: number) {
@@ -90,7 +108,7 @@ export function TankBattleGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (stateRef.current.status === "playing") {
+      if (stateRef.current.status === "playing" && canPlayRef.current) {
         dispatch({ type: "step", dt });
       }
 
@@ -103,16 +121,20 @@ export function TankBattleGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
+  }, [canPlayRef]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current) {
+        return;
+      }
       const dir = DIRECTION_KEYS[event.key];
       if (dir) {
         event.preventDefault();
@@ -126,10 +148,11 @@ export function TankBattleGame() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [canPlayRef]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -206,14 +229,28 @@ export function TankBattleGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Tank Battle"
+            onResume={onResume}
+            onNewGame={onNewGame}
+          />
+        ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
 
       <Button
         variant="secondary"
         className="w-full max-w-sm"
+        disabled={!canPlay}
         onClick={() => dispatch({ type: "fire" })}
       >
         발사 (Space)

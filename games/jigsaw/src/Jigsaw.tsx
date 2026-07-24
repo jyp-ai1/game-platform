@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -33,6 +35,7 @@ function reducer(state: JigsawState, action: Action): JigsawState {
 export function JigsawGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const saveStatus = useAutoSave(
@@ -76,7 +79,7 @@ export function JigsawGame() {
             type="button"
             disabled={tile === 0}
             onClick={() => {
-              if (phaseRef.current === "ready") dispatch({ type: "tap", index: i });
+              if (canPlayRef.current) dispatch({ type: "tap", index: i });
             }}
             className={cn(
               "flex aspect-square items-center justify-center rounded-lg border-2 border-white/20 text-lg font-bold text-white shadow-inner",
@@ -91,9 +94,13 @@ export function JigsawGame() {
       {state.status === "won" ? (
         <GameOverOverlay
           message={`Complete! ${computeScore(state.moves)} pts`}
+          score={computeScore(state.moves)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Jigsaw" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

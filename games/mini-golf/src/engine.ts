@@ -13,7 +13,7 @@ export interface MiniGolfState {
 
 const W = 100;
 const H = 100;
-const HOLE_R = 4;
+const HOLE_R = 5.5;
 const BALL_R = 2;
 
 export function createInitialState(): MiniGolfState {

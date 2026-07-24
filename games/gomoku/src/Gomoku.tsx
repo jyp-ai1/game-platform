@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -34,10 +36,11 @@ function reducer(state: GomokuState, action: Action): GomokuState {
 export function GomokuGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const humanTurn =
-    phaseRef.current === "ready" && state.current === 1 && state.winner === null;
+    canPlayRef.current && state.current === 1 && state.winner === null;
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -90,7 +93,16 @@ export function GomokuGame() {
           })
         )}
       </div>
-      {state.winner !== null ? <GameOverOverlay message={msg} onRestart={() => dispatch({ type: "restart" })} /> : null}
+      {state.winner !== null ? (
+        <GameOverOverlay
+          message={msg}
+          score={computeScore(state)}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
+          onRestart={() => dispatch({ type: "restart" })}
+        />
+      ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Gomoku" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

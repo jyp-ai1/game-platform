@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -26,6 +28,7 @@ function reducer(state: MergeBlocksState, action: Action): MergeBlocksState {
 export function MergeBlocksGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
 
@@ -59,7 +62,7 @@ export function MergeBlocksGame() {
               key={`${ri}-${ci}`}
               type="button"
               onClick={() => {
-                if (phaseRef.current === "ready" && state.status === "playing") {
+                if (canPlayRef.current && state.status === "playing") {
                   dispatch({ type: "drop", col: ci });
                 }
               }}
@@ -74,8 +77,15 @@ export function MergeBlocksGame() {
         )}
       </div>
       {state.status === "over" ? (
-        <GameOverOverlay message={`Score ${state.score}`} onRestart={() => dispatch({ type: "restart" })} />
+        <GameOverOverlay
+          message={`Score ${state.score}`}
+          score={state.score}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
+          onRestart={() => dispatch({ type: "restart" })}
+        />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Merge Blocks" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer, useRef } from "react";
 
@@ -83,6 +85,7 @@ function reducer(state: State, action: Action): State {
 export function MemoryGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -115,7 +118,7 @@ export function MemoryGame() {
   }, [state.status, state.moves, reportScore]);
 
   function handleFlip(index: number) {
-    if (phaseRef.current !== "ready") {
+    if (!canPlayRef.current) {
       return;
     }
     dispatch({ type: "flip", index });
@@ -159,9 +162,14 @@ export function MemoryGame() {
         {state.status === "won" ? (
           <GameOverOverlay
             message="Complete!"
+            score={computeScore(state.moves)}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

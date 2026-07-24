@@ -6,9 +6,11 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  emitGameRetry,
+  useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -25,6 +27,7 @@ function reducer(state: ArcheryState, action: Action): ArcheryState {
 
 export function ArcheryGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } = useResumableGame(GAME_SLUG, createInitialState);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
@@ -37,7 +40,7 @@ export function ArcheryGame() {
   }, [state.status, state.score, reportScore]);
 
   function onTargetClick(e: React.MouseEvent<HTMLButtonElement>) {
-    if (phaseRef.current !== "ready" || state.status !== "playing") return;
+    if (!canPlayRef.current || state.status !== "playing") return;
     const rect = e.currentTarget.getBoundingClientRect();
     dispatch({
       type: "shoot",
@@ -73,8 +76,15 @@ export function ArcheryGame() {
       </button>
       {state.lastPoints !== null ? <p className="text-sm font-bold">+{state.lastPoints}</p> : null}
       {state.status === "over" ? (
-        <GameOverOverlay message={`Score ${state.score}`} onRestart={() => dispatch({ type: "restart" })} />
+        <GameOverOverlay
+          message={`Score ${state.score}`}
+          score={state.score}
+          gameSlug={GAME_SLUG}
+          onRetry={() => emitGameRetry(GAME_SLUG)}
+          onRestart={() => dispatch({ type: "restart" })}
+        />
       ) : null}
+      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Archery" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

@@ -10,7 +10,7 @@ export const BRICK_WIDTH = 50;
 export const BRICK_HEIGHT = 16;
 export const BRICK_GAP = 6;
 export const BRICK_TOP_OFFSET = 30;
-export const BALL_SPEED = 220;
+export const BALL_SPEED = 200;
 export const POINTS_PER_BRICK = 10;
 export const STARTING_LIVES = 3;
 

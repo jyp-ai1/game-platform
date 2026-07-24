@@ -1,7 +1,16 @@
 "use client";
 
-import { useGameSDK } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ScoreBox } from "@game-platform/ui";
+import {
+  clearSave,
+  emitGameRetry,
+  ResumeDialog,
+  SaveIndicator,
+  useAutoSave,
+  useGameSDK,
+  useReadyCountdown,
+  useResumableGame,
+} from "@game-platform/game-sdk";
+import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -72,13 +81,22 @@ function bubbleStyle(row: number, col: number): CSSProperties {
 }
 
 export function BubblePopGame() {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { phase, initialState, onResume, onNewGame } =
+    useResumableGame(GAME_SLUG, createInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const saveStatus = useAutoSave(
+    GAME_SLUG,
+    () => (state.status !== "playing" ? null : state),
+    [state]
+  );
 
   useEffect(() => {
     function loop(time: number) {
@@ -88,7 +106,7 @@ export function BubblePopGame() {
       const dt = Math.min(MAX_DT, (time - lastTimeRef.current) / 1000);
       lastTimeRef.current = time;
 
-      if (stateRef.current.status === "playing") {
+      if (stateRef.current.status === "playing" && canPlayRef.current) {
         dispatch({ type: "step", dt });
       }
 
@@ -101,16 +119,20 @@ export function BubblePopGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
+  }, [canPlayRef]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
+      clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current) {
+        return;
+      }
       if (event.code === "Space") {
         event.preventDefault();
         dispatch({ type: "fire" });
@@ -120,29 +142,39 @@ export function BubblePopGame() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [canPlayRef]);
 
-  const handlePointerMove = useCallback((event: PointerEvent) => {
-    const field = fieldRef.current;
-    if (!field) {
-      return;
-    }
-    const rect = field.getBoundingClientRect();
-    const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
-    const relativeY = ((event.clientY - rect.top) / rect.height) * FIELD_HEIGHT;
-    const angle = Math.atan2(relativeX - SHOOTER_X, SHOOTER_Y - relativeY);
-    dispatch({ type: "setAngle", angle });
-  }, []);
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      if (!canPlayRef.current) {
+        return;
+      }
+      const field = fieldRef.current;
+      if (!field) {
+        return;
+      }
+      const rect = field.getBoundingClientRect();
+      const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
+      const relativeY = ((event.clientY - rect.top) / rect.height) * FIELD_HEIGHT;
+      const angle = Math.atan2(relativeX - SHOOTER_X, SHOOTER_Y - relativeY);
+      dispatch({ type: "setAngle", angle });
+    },
+    [canPlayRef]
+  );
 
   const handlePointerDown = useCallback(() => {
+    if (!canPlayRef.current) {
+      return;
+    }
     dispatch({ type: "fire" });
-  }, []);
+  }, [canPlayRef]);
 
   const aimX2 = SHOOTER_X + Math.sin(state.shooterAngle) * AIM_LINE_LENGTH;
   const aimY2 = SHOOTER_Y - Math.cos(state.shooterAngle) * AIM_LINE_LENGTH;
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative flex flex-col items-center gap-4">
+      <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex items-center gap-2">
           <ScoreBox label="Score" value={state.score} />
@@ -175,7 +207,6 @@ export function BubblePopGame() {
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
       >
-        {/* bottom danger line */}
         <div
           className="absolute inset-x-0 border-t-2 border-dashed border-destructive/60"
           style={{ top: toPercent((ROWS - 1) * BUBBLE_SIZE, FIELD_HEIGHT) }}
@@ -211,7 +242,6 @@ export function BubblePopGame() {
           />
         ) : null}
 
-        {/* aim line */}
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full"
           viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`}
@@ -229,7 +259,6 @@ export function BubblePopGame() {
           />
         </svg>
 
-        {/* shooter bubble */}
         <div
           className={cn(
             "absolute rounded-full ring-2 ring-foreground/40",
@@ -246,9 +275,22 @@ export function BubblePopGame() {
         {state.status !== "playing" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
+
+        {phase === "resume-prompt" ? (
+          <ResumeDialog
+            gameTitle="Bubble Pop"
+            onResume={onResume}
+            onNewGame={onNewGame}
+          />
+        ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

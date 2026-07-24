@@ -638,6 +638,99 @@ function iconBilliards(accent) {
     </g>`;
 }
 
+function iconBasketball(accent) {
+  return `
+    <g transform="translate(362,60)">
+      <rect x="80" y="0" width="80" height="50" rx="4" fill="none" stroke="${accent}" stroke-width="4"/>
+      <circle cx="120" cy="130" r="28" fill="${accent}"/>
+      <path d="M92,130 L148,130 M120,102 L120,158" stroke="${BG}" stroke-width="3"/>
+    </g>`;
+}
+
+function iconTableTennis(accent) {
+  return `
+    <g transform="translate(362,80)">
+      <rect width="240" height="100" rx="8" fill="${accent}" opacity="0.25"/>
+      <rect x="10" y="30" width="8" height="40" rx="4" fill="${FG}"/>
+      <rect x="222" y="30" width="8" height="40" rx="4" fill="${FG}"/>
+      <circle cx="120" cy="50" r="10" fill="${accent}"/>
+    </g>`;
+}
+
+function iconDomino(accent) {
+  return `
+    <g transform="translate(382,70)">
+      <rect x="0" y="20" width="50" height="80" rx="8" fill="${FG}"/>
+      <text x="25" y="55" font-size="22" fill="${accent}" text-anchor="middle" font-family="Arial">3</text>
+      <text x="25" y="85" font-size="22" fill="${accent}" text-anchor="middle" font-family="Arial">5</text>
+      <rect x="60" y="20" width="50" height="80" rx="8" fill="${FG}"/>
+      <text x="85" y="55" font-size="22" fill="${accent}" text-anchor="middle" font-family="Arial">5</text>
+      <text x="85" y="85" font-size="22" fill="${accent}" text-anchor="middle" font-family="Arial">2</text>
+    </g>`;
+}
+
+function iconCrossword(accent) {
+  const cells = [];
+  for (let i = 0; i < 9; i++) {
+    const x = (i % 3) * 36;
+    const y = Math.floor(i / 3) * 36;
+    cells.push(`<rect x="${x}" y="${y}" width="32" height="32" rx="4" fill="${i % 2 ? accent : FG}" opacity="${i % 2 ? 0.7 : 0.9}"/>`);
+  }
+  return `<g transform="translate(392,70)">${cells.join("\n")}</g>`;
+}
+
+function iconChess960(accent) {
+  return `
+    <g transform="translate(382,60)">
+      <rect width="160" height="160" rx="8" fill="${accent}" opacity="0.2"/>
+      <text x="80" y="95" font-size="72" fill="${FG}" text-anchor="middle" font-family="Arial">♞</text>
+      <text x="140" y="40" font-size="20" fill="${accent}" font-family="Arial">960</text>
+    </g>`;
+}
+
+function iconShuffleboard(accent) {
+  return `
+    <g transform="translate(362,90)">
+      <rect width="240" height="40" rx="20" fill="${accent}" opacity="0.35"/>
+      <circle cx="180" cy="20" r="16" fill="${FG}"/>
+      <rect x="60" y="16" width="40" height="8" rx="4" fill="${accent}"/>
+    </g>`;
+}
+
+function iconKakuro(accent) {
+  return `
+    <g transform="translate(392,70)">
+      <rect width="36" height="36" fill="#111"/>
+      <rect x="40" width="36" height="36" fill="${accent}" opacity="0.5"/>
+      <rect x="80" width="36" height="36" fill="${FG}"/>
+      <rect y="40" width="36" height="36" fill="${accent}" opacity="0.5"/>
+      <rect x="40" y="40" width="36" height="36" fill="${FG}"/>
+      <rect x="80" y="40" width="36" height="36" fill="${FG}"/>
+    </g>`;
+}
+
+function iconNonogram(accent) {
+  const cells = [];
+  for (let i = 0; i < 25; i++) {
+    const filled = [6, 7, 8, 9, 10, 11, 12, 13, 16, 17, 18].includes(i);
+    cells.push(
+      `<rect x="${(i % 5) * 14}" y="${Math.floor(i / 5) * 14}" width="12" height="12" fill="${filled ? accent : CARD}"/>`
+    );
+  }
+  return `<g transform="translate(392,70)">${cells.join("\n")}</g>`;
+}
+
+function iconWordSearch(accent) {
+  const letters = "GAMEPLAYFUNWINZX";
+  const cells = [];
+  for (let i = 0; i < 16; i++) {
+    cells.push(
+      `<text x="${(i % 4) * 22 + 8}" y="${Math.floor(i / 4) * 22 + 14}" font-size="12" fill="${i < 8 ? accent : FG}" text-anchor="middle" font-family="monospace">${letters[i]}</text>`
+    );
+  }
+  return `<g transform="translate(392,70)">${cells.join("\n")}</g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -683,6 +776,15 @@ const games = [
   { slug: "mancala", title: "Mancala", accent: "#5B5BD6", icon: iconMancala },
   { slug: "mini-golf", title: "Mini Golf", accent: "#22c55e", icon: iconMiniGolf },
   { slug: "billiards", title: "Billiards", accent: "#FFB800", icon: iconBilliards },
+  { slug: "basketball", title: "Basketball", accent: "#ef4444", icon: iconBasketball },
+  { slug: "table-tennis", title: "Table Tennis", accent: "#22c55e", icon: iconTableTennis },
+  { slug: "domino", title: "Domino", accent: "#FFB800", icon: iconDomino },
+  { slug: "crossword", title: "Crossword", accent: "#5B5BD6", icon: iconCrossword },
+  { slug: "chess960", title: "Chess960", accent: "#FFB800", icon: iconChess960 },
+  { slug: "shuffleboard", title: "Shuffleboard", accent: "#0ea5e9", icon: iconShuffleboard },
+  { slug: "kakuro", title: "Kakuro", accent: "#a855f7", icon: iconKakuro },
+  { slug: "nonogram", title: "Nonogram", accent: "#5B5BD6", icon: iconNonogram },
+  { slug: "word-search", title: "Word Search", accent: "#22c55e", icon: iconWordSearch },
 ];
 
 function buildSvg({ title, accent, icon }) {
