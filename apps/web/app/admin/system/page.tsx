@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { fetchSystemHealth } from "@/lib/supabase/admin-server";
 
 export const metadata = { title: "System" };
@@ -16,11 +18,16 @@ export default async function AdminSystemPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">System</h1>
-        <p className="text-sm text-muted-foreground">
-          Health · Monitoring · Feature flags (Sprint 12)
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">System</h1>
+          <p className="text-sm text-muted-foreground">
+            Health · Monitoring · Feature flags
+          </p>
+        </div>
+        <Link href="/admin/flags" className="text-sm font-medium text-primary hover:underline">
+          Feature Flags →
+        </Link>
       </div>
       {!health ? (
         <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm">

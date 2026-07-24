@@ -6,6 +6,7 @@ import { JsonLdScript } from "@/components/json-ld-script";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
+import { MonitoringProvider } from "@/components/monitoring-provider";
 import { ToastHost } from "@/components/toast/toast-host";
 import { siteConfig } from "@/lib/site-config";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo";
@@ -83,6 +84,7 @@ export default function RootLayout({
             achievement on a hard-loaded game page). */}
         <ToastHost />
         <AnalyticsBridge />
+        <MonitoringProvider />
         <JsonLdScript data={[organizationJsonLd(), webSiteJsonLd()]} />
         <Header />
         {children}

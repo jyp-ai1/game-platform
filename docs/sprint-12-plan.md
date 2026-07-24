@@ -1,6 +1,6 @@
 # Sprint 12 — Operations Platform 2.0
 
-**Status:** DRAFT — **Sprint 11 PM PASS + `v1.11.0` 이후 착수**  
+**Status:** IN PROGRESS (Phase 1 — T0~T6 foundation)  
 **Governance:** v2.0  
 **Theme:** 운영 자동화 + AI 기반 운영 도구
 
@@ -8,7 +8,7 @@
 
 ## Sprint 11 선행 조건 (Release Gate)
 
-Sprint 12 시작 전 Sprint 11 **RC1 → GA** 완료:
+Sprint 12는 PM 부재 중 **Phase 1 개발 착수** (2026-07-24). GA 게이트는 Sprint 11 완료 후 병행 처리.
 
 | Gate | Required |
 | --- | --- |
@@ -16,7 +16,22 @@ Sprint 12 시작 전 Sprint 11 **RC1 → GA** 완료:
 | Senior DevOps | PASS — Rollback drill 실측, `v1.11.0` tag, GitHub Release |
 | PM Release | PASS |
 
-현재: Developer PASS · QA/DevOps/PM **HOLD**
+---
+
+## Phase 1 구현 현황 (Developer)
+
+| Task | Status | Notes |
+| --- | --- | --- |
+| **T0** Monitoring SDK | DONE | `lib/monitoring`, `MonitoringProvider` |
+| **T1** Real-time Dashboard | DONE | `/admin/monitoring` |
+| **T2** Player CRM | DONE | `/admin/players`, detail, suspend, memo |
+| **T3** Notification Center | DONE | `/admin/notifications` CMS hub |
+| **T4** Feature Flag | DONE | `/admin/flags`, `0018` migration |
+| **T5** Report Center | PARTIAL | CSV export; Excel/PDF later |
+| **T6** AI Assistant | STUB | Rule-based `/admin/assistant`; LLM T6b |
+| **T7–T10** QA/DevOps/PM | PENDING | Governance gates |
+
+**Migration:** `supabase/migrations/0018_sprint12.sql` — Supabase SQL Editor 수동 실행 필요
 
 ---
 
