@@ -24,11 +24,13 @@ where slug in (
 on conflict (game_slug) do update set visibility = excluded.visibility;
 
 -- Launch events (7-day window, NEW badge period)
-insert into public.cms_events (title, description, link_url, starts_at, ends_at, is_active)
+-- cms_events schema: game_slug (not link_url) — see 0014_cms_tables.sql
+insert into public.cms_events (title, description, game_slug, reward_text, starts_at, ends_at, is_active)
 select
   g.title || ' 출시!',
   '신규 게임 ' || g.title || ' — 지금 플레이하고 첫 판 XP 보너스를 받아보세요.',
-  '/games/' || g.slug,
+  g.slug,
+  '첫 플레이 XP 2× (7일)',
   coalesce(g.released_at, now()),
   coalesce(g.released_at, now()) + interval '7 days',
   true
@@ -40,7 +42,7 @@ where g.slug in (
 )
 and not exists (
   select 1 from public.cms_events e
-  where e.link_url = '/games/' || g.slug
+  where e.game_slug = g.slug
     and e.starts_at >= coalesce(g.released_at, now()) - interval '1 day'
 );
 
