@@ -91,10 +91,12 @@
 
 | Class | Open | Fixed | Notes |
 |-------|-----:|------:|-------|
-| **Operational** | 1 | 0 | OB-001 — Preview SSO |
+| **Operational** | 1 | 0 | OB-001 — blocks Preview execution only |
 | **P0 (code)** | 0 | 6 | Developer PASS |
-| **P1 (code)** | 0 | 10 | Await Product QA |
+| **P1 (code)** | 0 | 10 | Await Product QA findings |
 | **P2** | 3 | 2 | Sprint 16 / post-QA |
+
+**Senior QA status:** IN PROGRESS (Preparation ~85%) — not BLOCKED
 
 ---
 
