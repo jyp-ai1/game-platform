@@ -18,8 +18,10 @@ import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
 import { useCountUp } from "@/lib/use-count-up";
+import { useMounted } from "@/lib/use-mounted";
 
 export function ProfileClient({ games }: { games: Game[] }) {
+  const mounted = useMounted();
   useEffect(() => {
     trackAnalyticsEvent("profile_open", { deviceId: getDeviceId() }).catch(() => {});
   }, []);
@@ -105,18 +107,30 @@ export function ProfileClient({ games }: { games: Game[] }) {
           </div>
 
           <div className="min-w-48 flex-1 sm:flex-none">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Lv.{levelProgress.level}</span>
-              <span className="tabular-nums">
-                {animatedXp.toLocaleString()} /{" "}
-                {levelProgress.xpNeededForLevel.toLocaleString()} XP
-              </span>
-            </div>
-            <Progress
-              value={levelProgress.percent}
-              label={`레벨 ${levelProgress.level} 진행률`}
-              className="mt-1.5"
-            />
+            {mounted ? (
+              <>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Lv.{levelProgress.level}</span>
+                  <span className="tabular-nums">
+                    {animatedXp.toLocaleString()} /{" "}
+                    {levelProgress.xpNeededForLevel.toLocaleString()} XP
+                  </span>
+                </div>
+                <Progress
+                  value={levelProgress.percent}
+                  label={`레벨 ${levelProgress.level} 진행률`}
+                  className="mt-1.5"
+                />
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Lv.1</span>
+                  <span className="tabular-nums opacity-0">0 / 100 XP</span>
+                </div>
+                <Progress value={0} label="레벨 진행률" className="mt-1.5" />
+              </>
+            )}
           </div>
         </div>
       </section>

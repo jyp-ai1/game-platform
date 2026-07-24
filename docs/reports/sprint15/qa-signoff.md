@@ -1,6 +1,6 @@
 # Sprint 15 Epic1-A/B — QA Signoff & RC1 Readiness
 
-**Updated:** 2026-07-24 (Epic 1-B complete — Developer scope)
+**Updated:** 2026-07-24 (Epic 1-B/C complete — Developer scope)
 
 ---
 
@@ -23,7 +23,7 @@
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| Phase1 Hydration | Header, Season, Sound | **DONE** |
+| Phase1 Hydration | Header, Season, Sound, Profile, Continue, Stats | **DONE** |
 | Phase2 Release Package | 50-game code audit | **DONE** — 8/8 code |
 | Phase3 Analytics code | SDK instrumentation | **DONE** — 50/50 |
 | Phase4 Bug backlog | P0/P1/P2 classified | **DONE** |

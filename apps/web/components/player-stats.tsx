@@ -4,7 +4,7 @@ import {
   ACHIEVEMENTS,
   getAchievements,
   getDailyStreak,
-  getMostPlayedGameSlug,
+  getGamePlayCounts,
   getServerAchievementsSnapshot,
   getServerDailyStreakSnapshot,
   getServerTodayPlayCountSnapshot,
@@ -23,6 +23,19 @@ import {
   getServerFavoritesSnapshot,
   subscribeFavorites,
 } from "@/lib/local-storage";
+
+const EMPTY_PLAY_COUNTS: Record<string, number> = {};
+function getServerGamePlayCountsSnapshot(): Record<string, number> {
+  return EMPTY_PLAY_COUNTS;
+}
+
+function topPlayedSlug(counts: Record<string, number>): string | null {
+  const entries = Object.entries(counts);
+  if (entries.length === 0) {
+    return null;
+  }
+  return entries.reduce((max, entry) => (entry[1] > max[1] ? entry : max))[0];
+}
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
@@ -64,8 +77,13 @@ export function PlayerStats({ games }: { games: Game[] }) {
     getFavoritesSnapshot,
     getServerFavoritesSnapshot
   );
+  const gamePlayCounts = useSyncExternalStore(
+    subscribeEngagement,
+    getGamePlayCounts,
+    getServerGamePlayCountsSnapshot
+  );
 
-  const mostPlayedSlug = getMostPlayedGameSlug();
+  const mostPlayedSlug = topPlayedSlug(gamePlayCounts);
   const mostPlayedTitle = mostPlayedSlug
     ? (games.find((game) => game.slug === mostPlayedSlug)?.title ?? "-")
     : "-";

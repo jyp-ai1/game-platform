@@ -16,7 +16,7 @@
 | Ready countdown (3-2-1-GO) | 0/50 | **50/50** |
 | Unified finish overlay | partial | **50/50** |
 | Retry analytics | none | **50/50** |
-| Hydration fixes (Epic1-B) | 1 known | **3 fixed** |
+| Hydration fixes (Epic1-B/C) | 1 known | **6 fixed** |
 | Typecheck | PASS | PASS |
 | Build | PASS | PASS |
 
@@ -133,14 +133,19 @@ Developer-scope minimum **8/8** per game (RC uses full 19/19 after QA):
 
 ---
 
-## Epic 1-B Hydration fixes
+## Epic 1-B/C Hydration fixes
 
 | Component | Issue | Fix |
 |-----------|-------|-----|
 | `header-level-badge.tsx` | XP localStorage vs SSR | `useMounted()` gate |
 | `season-card.tsx` | Season XP count-up mismatch | `useMounted()` gate |
 | `sound-toggle.tsx` | Icon mismatch when sound enabled | `useMounted()` gate |
+| `profile-client.tsx` | Profile XP bar mismatch | `useMounted()` gate |
+| `continue-playing-card.tsx` | Score/level/time read in SSR render | `useMounted()` gate |
+| `player-stats.tsx` | Most-played bypasses SSR snapshot | `useSyncExternalStore` play counts |
 | `use-mounted.ts` | Shared hook | Added |
+
+**Local smoke (Epic 1-C):** Home + Profile load OK on `localhost:3010`. Game detail pages 404 locally without Supabase CMS rows (Operator migration dependency — expected).
 
 ---
 
@@ -149,7 +154,7 @@ Developer-scope minimum **8/8** per game (RC uses full 19/19 after QA):
 | Gate | Status |
 |------|--------|
 | Developer Certification | **PASS** |
-| Preview Deploy | **PASS** (`content-factory` @ `2cbdc6c`) |
+| Preview Deploy | **PASS** (`content-factory` @ `d1d1083` + Epic 1-C pending) |
 | Independent QA (browser) | **HOLD** — Vercel Deployment Protection |
 | Operator (migration 0023–0025) | **HOLD** |
 | Console Error = 0 | **HOLD** — QA blocked |

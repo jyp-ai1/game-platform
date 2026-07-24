@@ -26,6 +26,9 @@
 | P1-002 | Header | XP badge hydration mismatch | `useMounted()` in `header-level-badge` |
 | P1-004 | Season card | Season XP hydration mismatch | `useMounted()` in `season-card` |
 | P1-005 | Sound toggle | Icon hydration when sound on | `useMounted()` in `sound-toggle` |
+| P1-006 | Profile | XP bar hydration mismatch | `useMounted()` in `profile-client` |
+| P1-007 | Continue Playing | localStorage stats in SSR render | `useMounted()` in `continue-playing-card` |
+| P1-008 | Player stats | `getMostPlayedGameSlug` bypasses SSR snapshot | `useSyncExternalStore` for play counts |
 
 ---
 
@@ -63,7 +66,7 @@
 | Severity | Open | Fixed |
 |----------|-----:|------:|
 | P0 | 0 | 6 |
-| P1 | 1 | 4 |
+| P1 | 1 | 7 |
 | P2 | 3 | 1 |
 
 ---

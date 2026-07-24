@@ -16,12 +16,14 @@ import { useCallback, useSyncExternalStore } from "react";
 import { GameCardPlayLink } from "@/components/game-card-play-link";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 import { getLastPlayedAt } from "@/lib/local-storage";
+import { useMounted } from "@/lib/use-mounted";
 
 // Deliberately separate from GameCard: this shows a "last played" timestamp
 // and a button whose label honestly reflects whether a real save exists —
 // "이어하기" only appears once Sprint 9's Save SDK actually has progress to
 // restore; otherwise it reads "플레이" rather than falsely promising Continue.
 export function ContinuePlayingCard({ game }: { game: Game }) {
+  const mounted = useMounted();
   const lastPlayedAt = getLastPlayedAt(game.slug);
   const subscribe = useCallback(
     (listener: () => void) => subscribeSave(game.slug, listener),
@@ -53,12 +55,18 @@ export function ContinuePlayingCard({ game }: { game: Game }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="font-semibold">{game.title}</h3>
         <p className="text-xs text-muted-foreground">
-          Lv.{getLevel()}
-          {getBestScore(game.slug) > 0
-            ? ` · 최고 ${getBestScore(game.slug).toLocaleString()}점`
-            : ""}
-          {" · "}
-          {formatRelativeTime(lastPlayedAt)}
+          {mounted ? (
+            <>
+              Lv.{getLevel()}
+              {getBestScore(game.slug) > 0
+                ? ` · 최고 ${getBestScore(game.slug).toLocaleString()}점`
+                : ""}
+              {" · "}
+              {formatRelativeTime(lastPlayedAt)}
+            </>
+          ) : (
+            <>Lv.1 · 방금</>
+          )}
         </p>
 
         <div className="mt-2">
