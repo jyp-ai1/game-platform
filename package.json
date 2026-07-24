@@ -18,6 +18,7 @@
     "factory:sync-rc1": "node tools/content-factory/scripts/extract-game-metadata.mjs && node tools/content-factory/scripts/sync-rc1-packages.mjs",
     "analytics:validate": "node tools/analytics/generate-validation-report.mjs",
     "qa:localhost": "node tools/qa/run-localhost-qa.mjs",
-    "qa:verify-games": "node tools/qa/verify-50-games.mjs"
+    "qa:verify-games": "node tools/qa/verify-50-games.mjs",
+    "qa:preflight": "node tools/qa/run-rc1-preflight.mjs"
   }
 }

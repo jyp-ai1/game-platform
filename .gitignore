@@ -23,3 +23,9 @@ npm-debug.log*
 
 # content factory generated output (content-factory branch)
 tools/content-factory/output/
+
+# local QA artifacts
+/lighthouse-*.json
+docs/reports/sprint15/lighthouse-*.json
+
+.vercel

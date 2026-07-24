@@ -4,27 +4,38 @@ import { useEffect } from "react";
 
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
 
+function reportGameError(
+  gameSlug: string,
+  type: string,
+  message: string,
+  extra: Record<string, unknown> = {}
+) {
+  trackAnalyticsEvent("error", {
+    gameSlug,
+    metadata: { type, message: message.slice(0, 500), ...extra },
+  }).catch(() => {});
+}
+
 /**
- * Captures window.onerror and unhandledrejection on game pages.
+ * Captures window.onerror, unhandledrejection, and console.error on game pages.
  * Sends to analytics_events as `error` for QA/monitoring.
  */
 export function GameErrorMonitor({ gameSlug }: { gameSlug: string }) {
   useEffect(() => {
-    function onError(message: string | Event, source?: string, lineno?: number, colno?: number, error?: Error) {
+    function onError(
+      message: string | Event,
+      source?: string,
+      lineno?: number,
+      colno?: number,
+      error?: Error
+    ) {
       const msg =
-        typeof message === "string"
-          ? message
-          : error?.message ?? "Unknown error";
-      trackAnalyticsEvent("error", {
-        gameSlug,
-        metadata: {
-          type: "window.onerror",
-          message: msg.slice(0, 500),
-          source: source ?? "",
-          line: lineno ?? 0,
-          col: colno ?? 0,
-        },
-      }).catch(() => {});
+        typeof message === "string" ? message : error?.message ?? "Unknown error";
+      reportGameError(gameSlug, "window.onerror", msg, {
+        source: source ?? "",
+        line: lineno ?? 0,
+        col: colno ?? 0,
+      });
     }
 
     function onRejection(ev: PromiseRejectionEvent) {
@@ -35,10 +46,7 @@ export function GameErrorMonitor({ gameSlug }: { gameSlug: string }) {
           : typeof reason === "string"
             ? reason
             : "Unhandled promise rejection";
-      trackAnalyticsEvent("error", {
-        gameSlug,
-        metadata: { type: "unhandledrejection", message: msg.slice(0, 500) },
-      }).catch(() => {});
+      reportGameError(gameSlug, "unhandledrejection", msg);
     }
 
     const prevOnError = window.onerror;
@@ -50,9 +58,29 @@ export function GameErrorMonitor({ gameSlug }: { gameSlug: string }) {
       return false;
     };
 
+    const prevConsoleError = console.error;
+    console.error = (...args: unknown[]) => {
+      const msg = args
+        .map((a) => {
+          if (a instanceof Error) return a.message;
+          if (typeof a === "string") return a;
+          try {
+            return JSON.stringify(a);
+          } catch {
+            return String(a);
+          }
+        })
+        .join(" ");
+      if (msg) {
+        reportGameError(gameSlug, "console.error", msg);
+      }
+      prevConsoleError.apply(console, args);
+    };
+
     window.addEventListener("unhandledrejection", onRejection);
     return () => {
       window.onerror = prevOnError;
+      console.error = prevConsoleError;
       window.removeEventListener("unhandledrejection", onRejection);
     };
   }, [gameSlug]);

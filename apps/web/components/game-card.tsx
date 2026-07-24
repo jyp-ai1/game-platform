@@ -8,6 +8,7 @@ import { CardBestScore } from "@/components/card-best-score";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GameCardPlayLink } from "@/components/game-card-play-link";
 import { difficultyVariant, formatDifficulty } from "@/lib/difficulty";
+import { getGameBalanceMeta } from "@/lib/game-balance";
 import { isRecentlyCreated } from "@/lib/game-sections";
 
 export function GameCard({
@@ -20,6 +21,7 @@ export function GameCard({
   const isComingSoon = game.status === "COMING_SOON";
   const isMaintenance = game.status === "MAINTENANCE";
   const isNew = !isComingSoon && !isMaintenance && isRecentlyCreated(game.createdAt);
+  const balance = getGameBalanceMeta(game.slug, game.difficulty);
 
   return (
     <div className="animate-in fade-in group flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
@@ -88,6 +90,7 @@ export function GameCard({
             <Users className="size-3" />
             {game.playCount.toLocaleString()}
           </p>
+          <span className="text-xs text-muted-foreground">{balance.playTimeLabel}</span>
           <CardBestScore slug={game.slug} />
         </div>
 

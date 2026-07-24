@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { searchGames } from "@/lib/search";
+import { getGameBalanceMeta } from "@/lib/game-balance";
+import { formatDifficulty } from "@/lib/difficulty";
 import {
   clearRecentSearches,
   getRecentSearchesSnapshot,
@@ -74,17 +76,24 @@ export function SearchBox({
           {query.trim() ? (
             suggestions.length > 0 ? (
               <ul className="flex flex-col">
-                {suggestions.map((game) => (
+                {suggestions.map((game) => {
+                  const balance = getGameBalanceMeta(game.slug, game.difficulty);
+                  return (
                   <li key={game.id}>
                     <Link
                       href={`/games/${game.slug}`}
                       onClick={() => commitSearch(query)}
                       className="block rounded-sm px-2 py-1.5 text-sm hover:bg-muted"
                     >
-                      {game.title}
+                      <span className="font-medium">{game.title}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {formatDifficulty(game.difficulty)} · {balance.playTimeLabel}
+                        {game.category ? ` · ${game.category.name}` : ""}
+                      </span>
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
               <p className="px-2 py-1.5 text-sm text-muted-foreground">
@@ -124,9 +133,23 @@ export function SearchBox({
               </ul>
             </div>
           ) : (
-            <p className="px-2 py-1.5 text-sm text-muted-foreground">
-              최근 검색어가 없습니다.
-            </p>
+            <div className="px-2 py-1">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
+                추천 검색
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {["Easy", "Quick", "Puzzle", "Arcade", "Board"].map((term) => (
+                  <Link
+                    key={term}
+                    href={`/search?q=${encodeURIComponent(term)}`}
+                    onClick={() => commitSearch(term)}
+                    className="rounded-full border px-2.5 py-0.5 text-xs hover:bg-muted"
+                  >
+                    {term}
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       ) : null}

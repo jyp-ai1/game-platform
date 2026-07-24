@@ -15,6 +15,7 @@
 | O3 | Apply migration 0024 | Operator | ⏳ | mancala, mini-golf, billiards |
 | O4 | Apply migration 0025 | Operator | ⏳ | Epic4 batch (9 games) |
 | O5 | Apply migration 0026 | Operator | ⏳ | nostalgia notes all 50 |
+| O5b | Apply migration 0027 | Operator | ⏳ | balance metadata + KPI retries/avg time |
 | O6 | `NEXT_PUBLIC_SITE_URL` on Preview | Operator | ⏳ | sitemap/robots canonical |
 | O7 | Live analytics SQL | Operator | ⏳ | `analytics-matrix.md` templates |
 | O8 | CMS featured/events verify | Operator | ⏳ | `/admin/cms/*` |
@@ -29,6 +30,7 @@
 0024_sprint14_epic3_batch2.sql
 0025_sprint14_epic4_batch.sql
 0026_sprint15_nostalgia_notes.sql
+0027_sprint15_balance_metadata.sql
 ```
 
 ---

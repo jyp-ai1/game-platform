@@ -30,7 +30,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <Container>
         <SectionTitle
           title="게임 검색"
-          description="게임명, 태그, 카테고리로 검색하세요."
+          description="게임명, 난이도(Easy/Normal/Hard), 플레이 시간, 태그, 카테고리로 검색하세요."
         />
 
         <div className="mt-6">

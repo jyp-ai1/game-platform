@@ -40,6 +40,10 @@ async function fetchOk(url) {
   }
 }
 
+async function fetchBatch(urls) {
+  return Promise.all(urls.map((url) => fetchOk(url)));
+}
+
 async function main() {
   const playable = (
     await readFile(path.join(REPO, "apps/web/lib/playable-games.ts"), "utf8")
@@ -53,18 +57,22 @@ async function main() {
 
   const games = {};
   let gamePass = 0;
-  for (const slug of playable) {
-    const res = await fetchOk(`${BASE}/games/${slug}`);
-    const hasTitle = res.text?.includes(slug.replace(/-/g, " ")) || res.text?.toLowerCase().includes(slug);
-    const hasHowTo = res.text?.includes("플레이") || res.text?.includes("how");
-    const pass = res.ok && (res.text?.includes("Re:Play") ?? false);
-    if (pass) gamePass++;
-    games[slug] = {
-      pass,
-      status: res.status,
-      hasContent: Boolean(res.text && res.text.length > 500),
-      hasHowToHint: hasHowTo,
-    };
+  const BATCH = 8;
+  for (let i = 0; i < playable.length; i += BATCH) {
+    const batch = playable.slice(i, i + BATCH);
+    const results = await fetchBatch(batch.map((slug) => `${BASE}/games/${slug}`));
+    batch.forEach((slug, idx) => {
+      const res = results[idx];
+      const hasHowTo = res.text?.includes("플레이") || res.text?.includes("how");
+      const pass = res.ok && (res.text?.includes("Re:Play") ?? false);
+      if (pass) gamePass++;
+      games[slug] = {
+        pass,
+        status: res.status,
+        hasContent: Boolean(res.text && res.text.length > 500),
+        hasHowToHint: hasHowTo,
+      };
+    });
   }
 
   const home = await fetchOk(`${BASE}/`);
