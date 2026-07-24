@@ -17,8 +17,23 @@
     "factory:batch": "node tools/content-factory/cli.mjs batch",
     "factory:sync-rc1": "node tools/content-factory/scripts/extract-game-metadata.mjs && node tools/content-factory/scripts/sync-rc1-packages.mjs",
     "analytics:validate": "node tools/analytics/generate-validation-report.mjs",
+    "analytics:verify": "node tools/qa/analytics-verify.mjs",
     "qa:localhost": "node tools/qa/run-localhost-qa.mjs",
     "qa:verify-games": "node tools/qa/verify-50-games.mjs",
-    "qa:preflight": "node tools/qa/run-rc1-preflight.mjs"
+    "qa:preflight": "node tools/qa/run-rc1-preflight.mjs",
+    "qa:404": "node tools/qa/check-404.mjs",
+    "qa:bundle": "node tools/qa/bundle-audit.mjs",
+    "qa:dead-code": "node tools/qa/dead-code-scan.mjs",
+    "qa:duplicate-assets": "node tools/qa/duplicate-asset-scan.mjs",
+    "qa:generate-e2e": "node tools/qa/generate-e2e-specs.mjs",
+    "regression": "node tools/qa/run-regression.mjs",
+    "qa:all": "node tools/qa/run-qa-all.mjs",
+    "test:e2e": "playwright test --config tests/e2e/playwright.config.ts",
+    "test:e2e:games": "playwright test tests/e2e/games --config tests/e2e/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.49.1",
+    "typescript": "^5.7.3"
   }
 }

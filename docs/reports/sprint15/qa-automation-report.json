@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-07-24T18:44:22.499Z",
+  "branch": "content-factory",
+  "playable": 50,
+  "regression": "50/50 PASS",
+  "analytics": "50/50 PASS",
+  "results": [
+    {
+      "id": "lint",
+      "pass": true
+    },
+    {
+      "id": "typecheck",
+      "pass": true
+    },
+    {
+      "id": "verify-games",
+      "pass": true
+    },
+    {
+      "id": "analytics",
+      "pass": true
+    },
+    {
+      "id": "bundle-audit",
+      "pass": true
+    },
+    {
+      "id": "dead-code",
+      "pass": true
+    },
+    {
+      "id": "duplicate-assets",
+      "pass": true
+    },
+    {
+      "id": "build",
+      "pass": true
+    },
+    {
+      "id": "e2e",
+      "pass": true,
+      "skipped": true
+    }
+  ],
+  "failed": [],
+  "overall": "PASS"
+}

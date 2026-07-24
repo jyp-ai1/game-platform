@@ -27,5 +27,8 @@ tools/content-factory/output/
 # local QA artifacts
 /lighthouse-*.json
 docs/reports/sprint15/lighthouse-*.json
+tests/e2e/**/*-snapshots/
+playwright-report/
+test-results/
 
 .vercel

@@ -1,0 +1,345 @@
+{
+  "summary": {
+    "generatedAt": "2026-07-24T18:43:57.004Z",
+    "gameCount": 50,
+    "totalSrcKb": 454,
+    "avgKb": 9,
+    "largest": [
+      {
+        "slug": "space-defender",
+        "srcBytes": 19912,
+        "srcFiles": 3,
+        "kb": 19
+      },
+      {
+        "slug": "maze-runner",
+        "srcBytes": 18498,
+        "srcFiles": 3,
+        "kb": 18
+      },
+      {
+        "slug": "galaxy-defender",
+        "srcBytes": 18485,
+        "srcFiles": 3,
+        "kb": 18
+      },
+      {
+        "slug": "bubble-pop",
+        "srcBytes": 18422,
+        "srcFiles": 3,
+        "kb": 18
+      },
+      {
+        "slug": "arkanoid-dx",
+        "srcBytes": 16920,
+        "srcFiles": 3,
+        "kb": 17
+      }
+    ],
+    "oversizedThresholdKb": 80,
+    "oversized": [],
+    "overall": "PASS"
+  },
+  "games": [
+    {
+      "slug": "space-defender",
+      "srcBytes": 19912,
+      "srcFiles": 3,
+      "kb": 19
+    },
+    {
+      "slug": "maze-runner",
+      "srcBytes": 18498,
+      "srcFiles": 3,
+      "kb": 18
+    },
+    {
+      "slug": "galaxy-defender",
+      "srcBytes": 18485,
+      "srcFiles": 3,
+      "kb": 18
+    },
+    {
+      "slug": "bubble-pop",
+      "srcBytes": 18422,
+      "srcFiles": 3,
+      "kb": 18
+    },
+    {
+      "slug": "arkanoid-dx",
+      "srcBytes": 16920,
+      "srcFiles": 3,
+      "kb": 17
+    },
+    {
+      "slug": "tank-battle",
+      "srcBytes": 16607,
+      "srcFiles": 3,
+      "kb": 16
+    },
+    {
+      "slug": "chess960",
+      "srcBytes": 14389,
+      "srcFiles": 3,
+      "kb": 14
+    },
+    {
+      "slug": "tetris",
+      "srcBytes": 13621,
+      "srcFiles": 3,
+      "kb": 13
+    },
+    {
+      "slug": "chess",
+      "srcBytes": 13348,
+      "srcFiles": 3,
+      "kb": 13
+    },
+    {
+      "slug": "air-hockey",
+      "srcBytes": 13214,
+      "srcFiles": 3,
+      "kb": 13
+    },
+    {
+      "slug": "sudoku",
+      "srcBytes": 12260,
+      "srcFiles": 3,
+      "kb": 12
+    },
+    {
+      "slug": "space-impact",
+      "srcBytes": 11681,
+      "srcFiles": 3,
+      "kb": 11
+    },
+    {
+      "slug": "checkers",
+      "srcBytes": 11541,
+      "srcFiles": 3,
+      "kb": 11
+    },
+    {
+      "slug": "gold-miner",
+      "srcBytes": 11408,
+      "srcFiles": 3,
+      "kb": 11
+    },
+    {
+      "slug": "breakout",
+      "srcBytes": 11103,
+      "srcFiles": 3,
+      "kb": 11
+    },
+    {
+      "slug": "2048",
+      "srcBytes": 10866,
+      "srcFiles": 3,
+      "kb": 11
+    },
+    {
+      "slug": "minesweeper",
+      "srcBytes": 10850,
+      "srcFiles": 3,
+      "kb": 11
+    },
+    {
+      "slug": "color-match",
+      "srcBytes": 10751,
+      "srcFiles": 3,
+      "kb": 10
+    },
+    {
+      "slug": "domino",
+      "srcBytes": 9294,
+      "srcFiles": 3,
+      "kb": 9
+    },
+    {
+      "slug": "snake",
+      "srcBytes": 8996,
+      "srcFiles": 3,
+      "kb": 9
+    },
+    {
+      "slug": "table-tennis",
+      "srcBytes": 8233,
+      "srcFiles": 3,
+      "kb": 8
+    },
+    {
+      "slug": "kakuro",
+      "srcBytes": 7972,
+      "srcFiles": 3,
+      "kb": 8
+    },
+    {
+      "slug": "simon",
+      "srcBytes": 7918,
+      "srcFiles": 3,
+      "kb": 8
+    },
+    {
+      "slug": "tic-tac-toe",
+      "srcBytes": 7867,
+      "srcFiles": 3,
+      "kb": 8
+    },
+    {
+      "slug": "mancala",
+      "srcBytes": 7788,
+      "srcFiles": 3,
+      "kb": 8
+    },
+    {
+      "slug": "samegame",
+      "srcBytes": 7758,
+      "srcFiles": 3,
+      "kb": 8
+    },
+    {
+      "slug": "hangman",
+      "srcBytes": 7604,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "reversi",
+      "srcBytes": 7533,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "crossword",
+      "srcBytes": 7456,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "billiards",
+      "srcBytes": 7449,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "connect4",
+      "srcBytes": 7408,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "word-search",
+      "srcBytes": 7269,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "mini-golf",
+      "srcBytes": 6826,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "gomoku",
+      "srcBytes": 6677,
+      "srcFiles": 3,
+      "kb": 7
+    },
+    {
+      "slug": "bubble-shooter",
+      "srcBytes": 6618,
+      "srcFiles": 3,
+      "kb": 6
+    },
+    {
+      "slug": "shuffleboard",
+      "srcBytes": 6355,
+      "srcFiles": 3,
+      "kb": 6
+    },
+    {
+      "slug": "memory",
+      "srcBytes": 6279,
+      "srcFiles": 3,
+      "kb": 6
+    },
+    {
+      "slug": "nonogram",
+      "srcBytes": 6111,
+      "srcFiles": 3,
+      "kb": 6
+    },
+    {
+      "slug": "basketball",
+      "srcBytes": 6064,
+      "srcFiles": 3,
+      "kb": 6
+    },
+    {
+      "slug": "jigsaw",
+      "srcBytes": 5560,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "stack-tower",
+      "srcBytes": 5453,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "darts",
+      "srcBytes": 5332,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "ball-sort",
+      "srcBytes": 5284,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "color-sort",
+      "srcBytes": 5211,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "merge-blocks",
+      "srcBytes": 5116,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "sliding-puzzle",
+      "srcBytes": 5037,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "penalty-shootout",
+      "srcBytes": 5018,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "bowling",
+      "srcBytes": 4780,
+      "srcFiles": 3,
+      "kb": 5
+    },
+    {
+      "slug": "archery",
+      "srcBytes": 4459,
+      "srcFiles": 3,
+      "kb": 4
+    },
+    {
+      "slug": "whack-a-mole",
+      "srcBytes": 4250,
+      "srcFiles": 3,
+      "kb": 4
+    }
+  ]
+}

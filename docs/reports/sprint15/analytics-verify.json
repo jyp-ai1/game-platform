@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-07-24T18:43:56.840Z",
+  "staticScan": "PASS",
+  "passCount": 50,
+  "total": 50,
+  "eventsChecked": [
+    "session_start",
+    "game_start",
+    "game_end",
+    "game_start(retry)",
+    "favorite",
+    "ranking_submit"
+  ],
+  "runtimeNote": "Run `npm run test:e2e -- tests/e2e/analytics.spec.ts` with live server for RPC capture",
+  "overall": "PASS"
+}

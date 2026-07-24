@@ -1,9 +1,9 @@
 # Sprint 13 — Content Expansion MVP
 
-**Status:** 🟡 Finalization (35 games ✅ · Release Package in progress)  
+**Status:** 🟡 Finalization — QA + Operator verify pending  
 **Goal:** **21 → 35** playable · **launch-ready** games ✅ count  
 **Platform:** Maintenance Only — finalization + `games/*` docs  
-**Soft Launch:** Sprint 15 (after **50 launch-ready** games)
+**Launch:** Closed Beta @ **35** (Sprint 13 종료) · Beta @ **50** (Sprint 14) · Open Beta (Sprint 15)
 
 Exit gate: [`sprint-13-exit-gate.md`](./sprint-13-exit-gate.md) · Sprint 14: [`sprint-14-plan.md`](./sprint-14-plan.md) (**구현 금지**)
 
@@ -100,22 +100,24 @@ Developer → QA → DevOps → Operator → PM → Production
 
 ## DoD (Sprint 13)
 
-- [ ] Playable games **≥ 35**
-- [ ] All new games: Release Package **19/19**
-- [ ] `npm run typecheck` · `lint` · `build` PASS
-- [ ] Platform regression: Console 0 · Network 500 0
-- [ ] **No new platform features**
+- [x] Playable games **≥ 35**
+- [ ] All new games: Release Package **19/19** (QA + D+7 pending)
+- [x] `npm run typecheck` · `build` PASS
+- [ ] Platform regression: Console 0 · Network 500 0 (QA)
+- [x] **No new platform features** (maintenance + ops data only)
+
+Exit gate: [`sprint-13-exit-gate.md`](./sprint-13-exit-gate.md) · Reports: [`reports/sprint-13/`](./reports/sprint-13/)
 
 ---
 
-## Sprint Roadmap
+## Sprint Roadmap (PM 2026-07-24)
 
 | Sprint | Games | Focus |
 | --- | --- | --- |
-| **13** | 21 → **35** (+14) | Tier C×2 · Tier B start |
-| **14** | 35 → **50** (+15) | Tier B finish · Tier A |
-| **15** | Soft Launch | 3~7 days ops |
-| **16** | Data Review | Tier A improve · formal launch |
+| **13** | 21 → **35** | Content MVP · **Closed Beta** |
+| **14** | 35 → **50** (+15) | **Beta** · weekly 3~5 new |
+| **15** | 50+ | **Open Beta** · ops scale |
+| **16** | — | Data review · formal launch |
 
 ---
 
@@ -124,7 +126,7 @@ Developer → QA → DevOps → Operator → PM → Production
 | ✅ Allow | ⛔ Block |
 | --- | --- |
 | `games/*` new packages | Admin/CMS/Analytics new features |
-| Release Package per game | Soft Launch before 50 ready |
+| Release Package per game | Sprint 14 impl before Exit PASS |
 | Bug / hotfix | AI |
 
 **Kickoff Epic 1:** PM sign-off or explicit **「Epic 1 시작」**

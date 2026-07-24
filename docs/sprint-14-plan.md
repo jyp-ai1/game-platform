@@ -1,37 +1,57 @@
 # Sprint 14 Plan — Content Expansion (35 → 50)
 
-**Status:** 🔒 Planning only — **구현 금지**  
-**Start:** Sprint 13 Exit Gate PM PASS  
-**Goal:** 35 → 50 playable · Soft Launch Sprint 15
+**Status:** 🔒 **Planning only — 구현 금지**  
+**Start:** Sprint 13 Exit Gate 전체 PASS + PM 「Sprint 14 시작」  
+**Goal:** 35 → **50** playable (**Beta** milestone)
 
 ---
 
-## PM Recommended +15 (adjusted for Sprint 13 overlap)
+## PM 확정 Lineup — 카테고리 균형 (2026-07-24)
 
-1. chess  
-2. checkers  
-3. mancala  
-4. jigsaw  
-5. tangram  
-6. block-puzzle  
-7. number-link  
-8. water-sort  
-9. match3  
-10. fishing  
-11. basketball  
-12. knife-hit  
-13. idle-clicker  
-14. word-search  
-15. nonogram  
+| Board | Puzzle | Sports |
+| --- | --- | --- |
+| Chess | Sudoku | Basketball |
+| Reversi | Jigsaw | Bowling |
+| Checkers | Tangram | Fishing |
+| Gomoku | Number Link | Knife Hit |
+| Mancala | Block Puzzle | Mini Golf |
 
-*Final slugs at Sprint 14 kickoff.*
+**15 games** · Sprint 13 overlap → kickoff 시 net-new 교체 확정
+
+| Already @ 35 | Action @ kickoff |
+| --- | --- |
+| Reversi, Gomoku | Upgrade or swap (e.g. Checkers variant) |
+| Bowling | Swap or DX variant |
+| Sudoku | Upgrade path vs net-new |
+
+---
+
+## Roadmap Context
+
+| Phase | Games | When |
+| --- | --- | --- |
+| MVP Launch (Closed Beta) | **35+** | Sprint 13 종료 |
+| Beta | **50+** | Sprint 14 |
+| Open Beta | 운영 강화 | Sprint 15 |
+
+운영: 매주 **3~5** 신규 게임 추가 이벤트.
+
+---
+
+## Epics (draft)
+
+| Epic | Focus |
+| --- | --- |
+| E1 | Board tier (5) |
+| E2 | Puzzle tier (5) |
+| E3 | Sports tier (5) |
+| E4 | Release Package 15/15 |
+| E5 | Beta readiness |
 
 ---
 
 ## Do NOT Start
 
-- Pinball until PM GA  
-- Soft Launch before 50 games  
+- Pinball (PM GA gate)  
 - New Admin platform features  
-
-**Kickoff:** PM **「Sprint 14 시작」** after Exit Gate PASS
+- Sprint 14 impl before Sprint 13 Exit PASS  

@@ -1,0 +1,208 @@
+{
+  "generatedAt": "2026-07-24T18:43:57.258Z",
+  "scanned": 115,
+  "suspects": 51,
+  "items": [
+    {
+      "file": "components/admin/activity-heatmap.tsx",
+      "export": "activity-heatmap"
+    },
+    {
+      "file": "components/admin/admin-shell.tsx",
+      "export": "admin-shell"
+    },
+    {
+      "file": "components/admin/all-games-kpi-panel.tsx",
+      "export": "all-games-kpi-panel"
+    },
+    {
+      "file": "components/admin/banner-manager.tsx",
+      "export": "banner-manager"
+    },
+    {
+      "file": "components/admin/category-manager.tsx",
+      "export": "category-manager"
+    },
+    {
+      "file": "components/admin/cms-nav.tsx",
+      "export": "cms-nav"
+    },
+    {
+      "file": "components/admin/cohort-grid.tsx",
+      "export": "cohort-grid"
+    },
+    {
+      "file": "components/admin/dashboard-period-tabs.tsx",
+      "export": "dashboard-period-tabs"
+    },
+    {
+      "file": "components/admin/event-manager.tsx",
+      "export": "event-manager"
+    },
+    {
+      "file": "components/admin/feature-flag-list.tsx",
+      "export": "feature-flag-list"
+    },
+    {
+      "file": "components/admin/featured-manager.tsx",
+      "export": "featured-manager"
+    },
+    {
+      "file": "components/admin/funnel-chart.tsx",
+      "export": "funnel-chart"
+    },
+    {
+      "file": "components/admin/game-rankings-panel.tsx",
+      "export": "game-rankings-panel"
+    },
+    {
+      "file": "components/admin/notice-manager.tsx",
+      "export": "notice-manager"
+    },
+    {
+      "file": "components/admin/ops-assistant-panel.tsx",
+      "export": "ops-assistant-panel"
+    },
+    {
+      "file": "components/admin/player-admin-panel.tsx",
+      "export": "player-admin-panel"
+    },
+    {
+      "file": "components/admin/print-report-button.tsx",
+      "export": "print-report-button"
+    },
+    {
+      "file": "components/admin/realtime-monitoring-panel.tsx",
+      "export": "realtime-monitoring-panel"
+    },
+    {
+      "file": "components/admin/seo-nav.tsx",
+      "export": "seo-nav"
+    },
+    {
+      "file": "components/admin/seo-verification-form.tsx",
+      "export": "seo-verification-form"
+    },
+    {
+      "file": "components/admin/soft-launch-panel.tsx",
+      "export": "soft-launch-panel"
+    },
+    {
+      "file": "components/admin/sprint13-game-kpi-panel.tsx",
+      "export": "sprint13-game-kpi-panel"
+    },
+    {
+      "file": "components/admin/url-inspector.tsx",
+      "export": "url-inspector"
+    },
+    {
+      "file": "components/admin/visibility-manager.tsx",
+      "export": "visibility-manager"
+    },
+    {
+      "file": "components/admin-login-form.tsx",
+      "export": "admin-login-form"
+    },
+    {
+      "file": "components/analytics-bridge.tsx",
+      "export": "analytics-bridge"
+    },
+    {
+      "file": "components/category-leaderboard.tsx",
+      "export": "category-leaderboard"
+    },
+    {
+      "file": "components/category-links.tsx",
+      "export": "category-links"
+    },
+    {
+      "file": "components/cms-banner-strip.tsx",
+      "export": "cms-banner-strip"
+    },
+    {
+      "file": "components/cms-notice-bar.tsx",
+      "export": "cms-notice-bar"
+    },
+    {
+      "file": "components/daily-challenge-card.tsx",
+      "export": "daily-challenge-card"
+    },
+    {
+      "file": "components/favorites-section.tsx",
+      "export": "favorites-section"
+    },
+    {
+      "file": "components/footer.tsx",
+      "export": "footer"
+    },
+    {
+      "file": "components/game-detail-template.tsx",
+      "export": "game-detail-template"
+    },
+    {
+      "file": "components/game-grid-skeleton.tsx",
+      "export": "game-grid-skeleton"
+    },
+    {
+      "file": "components/game-section.tsx",
+      "export": "game-section"
+    },
+    {
+      "file": "components/games-discovery-browser.tsx",
+      "export": "games-discovery-browser"
+    },
+    {
+      "file": "components/json-ld-script.tsx",
+      "export": "json-ld-script"
+    },
+    {
+      "file": "components/monitoring-provider.tsx",
+      "export": "monitoring-provider"
+    },
+    {
+      "file": "components/personalized-picks-section.tsx",
+      "export": "personalized-picks-section"
+    },
+    {
+      "file": "components/platform-flags-sync.tsx",
+      "export": "platform-flags-sync"
+    },
+    {
+      "file": "components/player-rank-card.tsx",
+      "export": "player-rank-card"
+    },
+    {
+      "file": "components/profile-client.tsx",
+      "export": "profile-client"
+    },
+    {
+      "file": "components/recently-played-section.tsx",
+      "export": "recently-played-section"
+    },
+    {
+      "file": "components/search-box.tsx",
+      "export": "search-box"
+    },
+    {
+      "file": "components/season-card.tsx",
+      "export": "season-card"
+    },
+    {
+      "file": "components/static-page.tsx",
+      "export": "static-page"
+    },
+    {
+      "file": "components/toast/toast-host.tsx",
+      "export": "toast-host"
+    },
+    {
+      "file": "components/weekly-mission-card.tsx",
+      "export": "weekly-mission-card"
+    },
+    {
+      "file": "lib/sprint-13-games.ts",
+      "export": "sprint-13-games"
+    }
+  ],
+  "overall": "PASS"
+}
