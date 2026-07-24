@@ -2,7 +2,9 @@
 
 **Date:** 2026-07-24  
 **Target version:** v1.11.0  
-**Result:** **HOLD** (aligns with PM assessment)
+**Result:** **HOLD** (aligns with PM RC1 — Release PASS not granted)
+
+Sprint 11 status: **Release Candidate 1 (RC1)**, not GA.
 
 ## Product Goal
 
