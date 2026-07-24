@@ -61,7 +61,9 @@ export function buildHomeMetadata(): Metadata {
 
 export function buildGameMetadata(game: Game): Metadata {
   const title = `${siteConfig.name} | ${game.title} 무료 온라인 게임`;
-  const description = `${game.title}을(를) 무료로 플레이하세요. ${game.description} 랭킹, 시즌, 업적, 저장/이어하기를 지원합니다.`;
+  const description = game.howToPlay
+    ? `${game.title}을(를) 무료로 플레이하세요. ${game.description} ${game.howToPlay.slice(0, 80)}… 랭킹, 시즌, 업적, 저장/이어하기를 지원합니다.`
+    : `${game.title}을(를) 무료로 플레이하세요. ${game.description} 랭킹, 시즌, 업적, 저장/이어하기를 지원합니다.`;
   const url = absoluteUrl(`/games/${game.slug}`);
   const ogImage = absoluteUrl(`/games/${game.slug}/opengraph-image`);
 
@@ -74,8 +76,10 @@ export function buildGameMetadata(game: Game): Metadata {
       game.title,
       `${game.title} 무료`,
       `${game.title} 온라인`,
+      `${game.title} 하는법`,
       game.category?.name ?? "게임",
       ...(game.tags ?? []),
+      "무료 온라인 게임",
     ],
     alternates: { canonical: url },
     openGraph: {

@@ -1,7 +1,8 @@
 # RC1 Lighthouse Template — Phase F / G
 
-**Session:** 3 (2026-07-24)  
-Run on **Preview/Production** (not local dev). Mobile emulation recommended.
+**Session:** 7 (2026-07-24)  
+**Local CLI:** EPERM (temp dir) — could not run on localhost  
+**Official:** Preview **BLOCKED** (OB-001)
 
 ---
 
@@ -45,4 +46,4 @@ Run on **Preview/Production** (not local dev). Mobile emulation recommended.
 - [ ] Accessibility remains 100
 - [ ] No new console errors during Lighthouse run
 
-**Status:** Template ready · Execution pending Preview
+**Status:** Session 7 — Lighthouse **PENDING** on Preview. Local run failed (EPERM). Use Chrome DevTools or CI on Preview after OB-001.

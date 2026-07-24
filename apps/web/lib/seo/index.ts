@@ -2,6 +2,7 @@ export { buildCategoryMetadata, buildGameMetadata, buildGamesListMetadata, build
 export {
   breadcrumbJsonLd,
   categoryJsonLd,
+  gameFaqJsonLd,
   gameJsonLd,
   jsonLdScript,
   organizationJsonLd,

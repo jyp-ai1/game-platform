@@ -1,7 +1,8 @@
 # RC1 Accessibility Checklist — Phase E
 
-**Session:** 3 (2026-07-24)  
-Target: Lighthouse Accessibility **100** on Preview
+**Session:** 7 (2026-07-24)  
+**Staging:** Partial snapshot audit on localhost  
+**Official:** Preview **BLOCKED** (OB-001)
 
 ---
 
@@ -73,4 +74,4 @@ Target: Lighthouse Accessibility **100** on Preview
 | Profile | | 100 |
 | Game (2048) | | 100 |
 
-**Status:** Checklist ready · Execution pending Preview
+**Status:** Session 7 — Preview **PENDING** (OB-001). Staging snapshot (Session 4): Home + 2048 show `aria-label` on favorite toggles, heading hierarchy (h1/h2), breadcrumb nav. Full keyboard/Lighthouse audit requires Preview.

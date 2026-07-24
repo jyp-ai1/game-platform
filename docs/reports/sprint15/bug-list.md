@@ -1,7 +1,7 @@
 # Sprint 15 — Bug List (Epic 1 + 1-B/C/D + Epic 2 QA)
 
-**Updated:** 2026-07-24 (Senior QA — Product QA HOLD)  
-**Status:** Developer **HOLD** — no code defects; operational blocker only
+**Updated:** 2026-07-24 (Sessions 4–8 — RC1 NO GO)  
+**Status:** Developer **HOLD** — no code defects; OB-001 blocks official Product QA
 
 ---
 
@@ -96,7 +96,7 @@
 | **P1 (code)** | 0 | 10 | Await Product QA findings |
 | **P2** | 3 | 2 | Sprint 16 / post-QA |
 
-**Senior QA status:** IN PROGRESS (Preparation ~85%) — not BLOCKED
+**Senior QA status:** Staging QA complete (Sessions 4–6) · Official RC1 **NO GO** (OB-001)
 
 ---
 
@@ -109,5 +109,7 @@
 | Operational blockers | **OPEN** — OB-001 |
 | 50/50 SDK wiring | **PASS** |
 | ESLint / Build / Type | **PASS** |
-| Product QA | **BLOCKED** — OB-001 |
-| Developer | **HOLD** — no action until QA P0/P1 |
+| Staging QA | **PASS** (localhost Sessions 4–6) |
+| Product QA (Preview) | **BLOCKED** — OB-001 |
+| RC1 Recommendation | **NO GO** — [`rc1-release-summary.md`](./rc1-release-summary.md) |
+| Developer | **HOLD** — no action until Preview QA P0/P1 |

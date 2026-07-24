@@ -53,4 +53,5 @@
 | `/profile` | pending | pending | pending |
 
 **Route scan prep:** **PASS** (HTTP 200 on all public routes + 50 games)  
-**Official sign-off:** pending Preview browser audit
+**Session 4 re-verify:** 16 routes + 50 games **PASS** on localhost:3010  
+**Official sign-off:** pending Preview browser audit (OB-001)

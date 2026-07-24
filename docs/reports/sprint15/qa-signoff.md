@@ -1,20 +1,16 @@
 # Sprint 15 Epic 2 — RC1 Master QA Plan
 
-**Updated:** 2026-07-24 (Session 3 — QA Preparation)  
-**Branch:** `content-factory` @ `c08578b`  
+**Updated:** 2026-07-24 (Sessions 4–8 — Staging QA complete · Preview NO GO)  
+**Branch:** `content-factory` @ `4cc1d0c`  
 **Preview:** https://game29-git-content-factory-jyp-ai1s-projects.vercel.app  
 **Developer:** **HOLD**  
-**Senior QA:** **IN PROGRESS** (Preparation Phase — not BLOCKED)
+**Senior QA:** Sessions 4–8 **COMPLETE (staging)** · Official sign-off **NO GO**
 
 ---
 
 ### Developer Assessment
 
-No code defects identified.
-
-Developer remains HOLD pending Product QA execution.
-
-Current blocker is operational (Preview Deployment Protection).
+No code defects identified. Developer remains **HOLD** pending Preview QA findings only.
 
 ---
 
@@ -23,27 +19,31 @@ Current blocker is operational (Preview Deployment Protection).
 | Area | Progress | Status |
 |------|----------|--------|
 | Developer / Code Quality | 100% | ✅ PASS |
-| QA Documentation & Templates | **~85%** | 🟡 IN PROGRESS |
-| Functional QA (browser) | 0% | ⏳ Preview required |
-| Release | 0% | ❌ HOLD |
+| QA Documentation & Templates | **100%** | ✅ PASS |
+| Staging QA (localhost) | **~85%** | ✅ Sessions 4–6 |
+| Preview Product QA | 0% | ❌ OB-001 |
+| Release | 0% | ❌ NO GO |
 
-**Verdict:** Preparation Phase — Preview opens → execute checklists immediately.
+**Verdict:** Staging certification complete. **Official RC1 blocked by OB-001.**
 
 ---
 
-## QA Asset Index (Session 3)
+## QA Asset Index
 
-| Asset | File |
-|-------|------|
-| Environment A-4~A-6 | [`rc1-environment-audit.md`](./rc1-environment-audit.md) |
-| Route audit A-5 | [`rc1-route-audit.md`](./rc1-route-audit.md) |
-| Regression (Sprint 1–15) | [`rc1-regression-matrix.md`](./rc1-regression-matrix.md) |
-| 50-game matrix | [`rc1-game-qa-matrix.md`](./rc1-game-qa-matrix.md) |
-| Accessibility | [`rc1-a11y-checklist.md`](./rc1-a11y-checklist.md) |
-| Responsive | [`rc1-responsive-checklist.md`](./rc1-responsive-checklist.md) |
-| Lighthouse | [`rc1-lighthouse-template.md`](./rc1-lighthouse-template.md) |
-| Document audit | [`rc1-document-audit.md`](./rc1-document-audit.md) |
-| Bugs | [`bug-list.md`](./bug-list.md) |
+| Asset | File | Session |
+|-------|------|---------|
+| **RC1 Release Summary** | [`rc1-release-summary.md`](./rc1-release-summary.md) | 8 |
+| Environment A-1~A-6 | [`rc1-environment-audit.md`](./rc1-environment-audit.md) | 4 |
+| Route audit A-3 | [`rc1-route-audit.md`](./rc1-route-audit.md) | 4 |
+| Regression (Sprint 1–15) | [`rc1-regression-matrix.md`](./rc1-regression-matrix.md) | 6 |
+| 50-game matrix | [`rc1-game-qa-matrix.md`](./rc1-game-qa-matrix.md) | 5 |
+| Accessibility | [`rc1-a11y-checklist.md`](./rc1-a11y-checklist.md) | 7 |
+| Responsive | [`rc1-responsive-checklist.md`](./rc1-responsive-checklist.md) | 7 |
+| Lighthouse | [`rc1-lighthouse-template.md`](./rc1-lighthouse-template.md) | 7 |
+| Document audit | [`rc1-document-audit.md`](./rc1-document-audit.md) | 8 |
+| Release package | [`release-notes-rc1.md`](./release-notes-rc1.md), [`known-issues.md`](./known-issues.md), [`deployment-log.md`](./deployment-log.md), [`release-checklist.md`](./release-checklist.md) | 8 |
+| Sprint 16 kickoff | [`../sprint16/sprint16-kickoff.md`](../sprint16/sprint16-kickoff.md) | 8 |
+| Bugs | [`bug-list.md`](./bug-list.md) | |
 
 ---
 
@@ -54,8 +54,9 @@ Current blocker is operational (Preview Deployment Protection).
 | Developer | **PASS** | ✓ |
 | Senior Developer | **PASS** | ✓ |
 | Code Quality | **PASS** | ✓ |
-| Senior QA | **IN PROGRESS** | Prep ~85%; execution waits OB-001 |
-| DevOps | **WAIT** | After Product QA |
+| Senior QA (staging) | **PASS** | Sessions 4–6 localhost |
+| Senior QA (official) | **NO GO** | OB-001 · Preview pending |
+| DevOps | **WAIT** | After Preview QA GO |
 | PM Release | **HOLD** | PM |
 | main / Production | **⛔ FORBIDDEN** | PM |
 
@@ -69,31 +70,34 @@ Current blocker is operational (Preview Deployment Protection).
 | 2026-07-24 | 1 | Docs + OB-001 | `242d416` |
 | 2026-07-24 | 2 | Master Plan A–I | `c08578b` |
 | 2026-07-24 | 2 | Local route smoke 50/50 | prep PASS |
-| 2026-07-24 | **3** | A-4 sitemap/robots audit | prep PASS |
-| 2026-07-24 | **3** | A-5 route audit (15 + 50 games) | prep PASS |
-| 2026-07-24 | **3** | A-6 metadata code audit | prep PASS |
-| 2026-07-24 | **3** | Regression matrix (52 items) | template ready |
-| 2026-07-24 | **3** | 50-game QA matrix | template ready |
-| 2026-07-24 | **3** | A11y / Responsive / Lighthouse templates | ready |
-| 2026-07-24 | **3** | Document audit Phase G | ~85% prep |
+| 2026-07-24 | 3 | QA prep assets | `4cc1d0c` |
+| 2026-07-24 | **4** | A-1 Preview access | **FAIL** — SSO → vercel.com/login |
+| 2026-07-24 | **4** | A-2 Environment (staging) | PASS — robots/sitemap/canonical |
+| 2026-07-24 | **4** | A-3 Smoke 16 routes + 50 games | **PASS** localhost |
+| 2026-07-24 | **4** | Build / Lint / Typecheck | **PASS** |
+| 2026-07-24 | **5** | Functional QA matrix | Open 50/50 · 5 priority STAGING PASS |
+| 2026-07-24 | **6** | Regression 52 items | STAGING PASS (18 PASS + 34 STAGING) |
+| 2026-07-24 | **7** | Responsive / A11y / Lighthouse | **Preview PENDING** (OB-001) |
+| 2026-07-24 | **8** | RC audit + release summary | **NO GO** recommendation |
+| 2026-07-24 | **8** | Release package (draft) + Sprint 16 kickoff | Prepared |
 
-**Next session:** OB-1 PASS → fill matrices on Preview → Phase B–F execution
+**Next:** Operator OP-1 → Preview QA re-run → DevOps → PM GO
 
 ---
 
-## Phase Status (Extended)
+## Phase Status
 
-| Phase | Name | Prep | Preview Execution |
-|-------|------|:----:|:-----------------:|
-| A | Environment | **85%** | A-1 Preview FAIL (OB-001) |
-| B | Functional (platform) | templates | pending |
-| C | Game QA (50) | matrix ready | pending |
-| D | Regression (S1–15) | 52 items ready | pending |
-| E | Responsive | checklist ready | pending |
-| F | Accessibility | checklist ready | pending |
-| G | Performance / Lighthouse | template ready | pending |
-| H | Document audit | **85%** | release docs post-RC1 |
-| I | DevOps + PM Review | WAIT | HOLD |
+| Phase | Name | Staging | Preview |
+|-------|------|:-------:|:-------:|
+| A | Environment + Smoke | **PASS** | **FAIL** (A-1) |
+| B | Functional (platform) | partial | pending |
+| C | Game QA (50) | Open 50/50 | pending |
+| D | Regression (S1–15) | STAGING | pending |
+| E | Responsive | pending | pending |
+| F | Accessibility | pending | pending |
+| G | Performance / Lighthouse | pending | pending |
+| H | Document audit | **100%** | release docs draft |
+| I | DevOps + PM Review | **WAIT** | HOLD |
 
 ---
 
@@ -105,23 +109,26 @@ Current blocker is operational (Preview Deployment Protection).
 
 ---
 
-## Release approval (unchanged)
+## Release approval
 
 - [ ] Preview Access PASS
-- [ ] Functional QA (50/50 + platform)
-- [ ] Regression QA (52 items)
+- [x] Build / Lint / Typecheck PASS
+- [ ] Functional QA (50/50 interactive on Preview)
+- [ ] Regression QA official PASS on Preview
 - [ ] Responsive QA (6 viewports)
 - [ ] Accessibility QA (Lighthouse 100)
-- [ ] Lighthouse QA (Perf ≥85–90)
+- [ ] Lighthouse QA (Perf ≥90)
 - [ ] DevOps QA
-- [ ] P0 code = 0 · P1 code = 0
+- [x] P0 code = 0 · P1 code = 0
 - [ ] OB-001 closed
+
+**Recommendation:** [`rc1-release-summary.md`](./rc1-release-summary.md) → **NO GO**
 
 ---
 
 ## PM rules
 
-**Allowed:** QA prep, checklist execution on Preview, P0/P1 fixes from QA  
+**Allowed:** QA on Preview, P0/P1 hotfixes from QA, release doc updates  
 **Forbidden:** new features, refactoring, main merge, Production promote
 
-**On Preview open:** Use pre-built matrices — PASS columns only; no replanning.
+**Developer:** HOLD until Preview QA finds P0/P1.

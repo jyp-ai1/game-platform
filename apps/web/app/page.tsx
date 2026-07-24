@@ -4,6 +4,7 @@ import { CmsNoticeBar } from "@/components/cms-notice-bar";
 import { DailyChallengeCard } from "@/components/daily-challenge-card";
 import { GameCarousel } from "@/components/game-carousel";
 import { Hero } from "@/components/hero";
+import { PersonalizedPicksSection } from "@/components/personalized-picks-section";
 import { PlayerRankCard } from "@/components/player-rank-card";
 import { RecentlyPlayedSection } from "@/components/recently-played-section";
 import { SeasonCard } from "@/components/season-card";
@@ -110,6 +111,8 @@ export default async function Home() {
       <CategoryLinks />
 
       <RecentlyPlayedSection games={games} />
+
+      <PersonalizedPicksSection games={games} />
 
       <DailyChallengeCard />
       {weeklyMissionEnabled ? <WeeklyMissionCard /> : null}

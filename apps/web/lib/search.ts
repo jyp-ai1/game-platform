@@ -9,8 +9,11 @@ export function searchGames(games: Game[], query: string): Game[] {
   return games.filter(
     (game) =>
       game.title.toLowerCase().includes(q) ||
+      game.slug.replace(/-/g, " ").includes(q) ||
       game.description.toLowerCase().includes(q) ||
+      (game.howToPlay?.toLowerCase().includes(q) ?? false) ||
       game.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-      (game.category?.name.toLowerCase().includes(q) ?? false)
+      (game.category?.name.toLowerCase().includes(q) ?? false) ||
+      (game.category?.slug.toLowerCase().includes(q) ?? false)
   );
 }

@@ -1,6 +1,6 @@
 import type { Game } from "@game-platform/shared";
 
-import { isRecentlyCreated } from "@/lib/game-sections";
+import { isRecentlyCreated, selectRecommended } from "@/lib/game-sections";
 import { searchGames } from "@/lib/search";
 
 export type GameCategoryFilter =
@@ -14,7 +14,7 @@ export type GameCategoryFilter =
 
 export type GameViewFilter = "all" | "favorites" | "recent";
 
-export type GameSortOption = "popular" | "newest" | "favorites" | "played";
+export type GameSortOption = "popular" | "newest" | "favorites" | "played" | "recommended";
 
 export const GAME_CATEGORY_FILTERS: Array<{
   value: GameCategoryFilter;
@@ -34,6 +34,7 @@ export const GAME_SORT_OPTIONS: Array<{ value: GameSortOption; label: string }> 
   { value: "newest", label: "최신순" },
   { value: "favorites", label: "즐겨찾기순" },
   { value: "played", label: "플레이순" },
+  { value: "recommended", label: "추천순" },
 ];
 
 export const GAME_VIEW_FILTERS: Array<{ value: GameViewFilter; label: string }> = [
@@ -107,6 +108,17 @@ export function sortGames(
         if (aIdx !== bIdx) return aIdx - bIdx;
         return b.playCount - a.playCount;
       });
+    case "recommended": {
+      const slugs = selectRecommended(items, recentlyPlayed, favorites, items.length).map(
+        (g) => g.slug
+      );
+      const order = new Map(slugs.map((s, i) => [s, i]));
+      return items.sort((a, b) => {
+        const ai = order.get(a.slug) ?? Number.MAX_SAFE_INTEGER;
+        const bi = order.get(b.slug) ?? Number.MAX_SAFE_INTEGER;
+        return ai - bi;
+      });
+    }
     case "popular":
     default:
       return items.sort((a, b) => {

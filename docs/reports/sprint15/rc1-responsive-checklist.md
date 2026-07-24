@@ -1,7 +1,7 @@
 # RC1 Responsive Checklist — Phase D
 
-**Session:** 3 (2026-07-24)  
-Viewports: **390 · 430 · 768 · 1024 · 1440 · 1920**
+**Session:** 7 (2026-07-24)  
+**Official:** Preview **BLOCKED** (OB-001)
 
 ---
 
@@ -46,4 +46,4 @@ Mark **PASS / FAIL** per cell (Preview QA).
 - [ ] Continue Playing carousel
 - [ ] Footer
 
-**Status:** Checklist ready · Execution pending Preview
+**Status:** Session 7 — Preview **PENDING** (OB-001). Re-run all viewport × page cells on Preview after OB-001 closed.

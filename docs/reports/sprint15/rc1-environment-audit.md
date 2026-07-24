@@ -67,10 +67,16 @@ Preview browser verification: **pending** (OB-001)
 
 ---
 
-## A-1 Preview Access
+## A-1 Preview Access (Session 4)
 
-| Check | Result |
-|-------|--------|
-| Preview URL | **FAIL** — Vercel SSO (OB-001) |
+| Check | Result | Notes |
+|-------|--------|-------|
+| Preview URL | **FAIL** | OB-001 |
+| HTTP | Redirect | → `vercel.com/login?next=/sso-api...` |
+| SSO | **FAIL** | Deployment Protection |
+| Cache | pending | Preview unreachable |
+| Build ID | pending | Preview unreachable |
 
-**Phase A official gate:** IN PROGRESS (prep complete, Preview pending)
+**Staging smoke (Session 4 A-3):** 16 public routes + 50 game pages **HTTP 200** on localhost:3010
+
+**Phase A official gate:** Staging **PASS** · Preview **FAIL** (OB-001)

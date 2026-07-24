@@ -10,6 +10,7 @@ import { isPlayableSlug } from "@/lib/playable-games";
 import {
   breadcrumbJsonLd,
   buildGameMetadata,
+  gameFaqJsonLd,
   gameJsonLd,
   softwareApplicationJsonLd,
 } from "@/lib/seo";
@@ -56,6 +57,7 @@ export default async function GamePage({ params }: GamePageProps) {
         data={[
           gameJsonLd(game),
           softwareApplicationJsonLd(game),
+          gameFaqJsonLd(game),
           breadcrumbJsonLd([
             { name: "홈", path: "/" },
             { name: "게임", path: "/games" },

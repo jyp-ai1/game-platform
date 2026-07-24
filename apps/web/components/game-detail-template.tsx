@@ -8,6 +8,7 @@ import { GameDetailBreadcrumb } from "@/components/game-detail-breadcrumb";
 import { GameDetailStage } from "@/components/game-detail-stage";
 import { GamePlayer } from "@/components/game-player";
 import { GameStatusBlock } from "@/components/game-status-block";
+import { GameTipsSection } from "@/components/game-tips-section";
 import { Leaderboard } from "@/components/leaderboard";
 import { MyBestScore } from "@/components/my-best-score";
 import { NostalgiaNote } from "@/components/nostalgia-note";
@@ -144,6 +145,8 @@ function PlayableLayout({
               <p className="mt-1 text-sm text-muted-foreground">{game.howToPlay}</p>
             </div>
           ) : null}
+
+          <GameTipsSection game={game} />
 
           {rankingEnabled ? <MyBestScore gameSlug={slug} /> : null}
         </div>

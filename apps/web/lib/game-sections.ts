@@ -41,13 +41,23 @@ export function selectComingSoon(games: Game[], limit = 4): Game[] {
 
 export function selectRelated(games: Game[], current: Game, limit = 4): Game[] {
   return games
-    .filter(
-      (game) =>
-        game.slug !== current.slug &&
-        game.categoryId !== null &&
-        game.categoryId === current.categoryId
-    )
-    .slice(0, limit);
+    .filter((game) => game.slug !== current.slug && game.status === "ACTIVE")
+    .map((game) => {
+      let score = 0;
+      if (game.categoryId && game.categoryId === current.categoryId) score += 3;
+      const sharedTags = game.tags.filter((t) => current.tags.includes(t));
+      score += sharedTags.length * 2;
+      if (game.isFeatured) score += 1;
+      score += Math.min(game.playCount, 1000) / 1000;
+      return { game, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.game.playCount - a.game.playCount;
+    })
+    .slice(0, limit)
+    .map(({ game }) => game);
 }
 
 // Powers the homepage's narrative curation rows ("90s-2000s", "arcade-
@@ -67,10 +77,45 @@ export function selectByCategorySlug(
     .slice(0, limit);
 }
 
+export function selectRecommended(
+  games: Game[],
+  recentlyPlayed: string[],
+  favorites: string[],
+  limit = 8
+): Game[] {
+  const recentSet = new Set(recentlyPlayed);
+  const favSet = new Set(favorites);
+  const recentCategorySlugs = new Map<string, number>();
+  for (const slug of recentlyPlayed) {
+    const g = games.find((x) => x.slug === slug);
+    if (g?.category?.slug) {
+      recentCategorySlugs.set(
+        g.category.slug,
+        (recentCategorySlugs.get(g.category.slug) ?? 0) + 1
+      );
+    }
+  }
+
+  return games
+    .filter((g) => g.status === "ACTIVE" && !recentSet.has(g.slug))
+    .map((g) => {
+      let score = g.playCount;
+      if (favSet.has(g.slug)) score += 50;
+      if (g.category?.slug) {
+        score += (recentCategorySlugs.get(g.category.slug) ?? 0) * 10;
+      }
+      if (g.isFeatured) score += 5;
+      return { game: g, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ game }) => game);
+}
+
 export function selectBySlugs(games: Game[], slugs: string[], limit = 8): Game[] {
   const order = new Map(slugs.map((slug, i) => [slug, i]));
   return games
     .filter((game) => order.has(game.slug))
-    .sort((a, b) => (order.get(a.slug)! - order.get(b.slug)!))
+    .sort((a, b) => order.get(a.slug)! - order.get(b.slug)!)
     .slice(0, limit);
 }

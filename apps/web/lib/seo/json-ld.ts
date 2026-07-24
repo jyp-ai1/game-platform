@@ -97,6 +97,43 @@ export function softwareApplicationJsonLd(game: Game): JsonLd {
   };
 }
 
+export function gameFaqJsonLd(game: Game): JsonLd {
+  const url = absoluteUrl(`/games/${game.slug}`);
+  const items: Array<{ q: string; a: string }> = [
+    {
+      q: `${game.title}은(는) 무료인가요?`,
+      a: "네. Re:Play에서 회원가입 없이 브라우저에서 무료로 플레이할 수 있습니다.",
+    },
+    {
+      q: `${game.title} 난이도는?`,
+      a: `난이도 ${game.difficulty === "EASY" ? "쉬움" : game.difficulty === "MEDIUM" ? "보통" : "어려움"}입니다.`,
+    },
+  ];
+  if (game.howToPlay) {
+    items.push({
+      q: `${game.title} 플레이 방법`,
+      a: game.howToPlay,
+    });
+  }
+  if (game.category) {
+    items.push({
+      q: `${game.title}은(는) 어떤 게임인가요?`,
+      a: `${game.category.name} 카테고리 — ${game.description}`,
+    });
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+    url,
+  };
+}
+
 export function categoryJsonLd(category: {
   name: string;
   slug: string;
