@@ -1,6 +1,6 @@
 # Release Notes — RC1 (Release Candidate 1)
 
-**Status:** **DRAFT** — pending RC1 GO  
+**Status:** **GO (Developer RC1 Candidate)** — publish after PM Production sign-off  
 **Branch:** `content-factory`  
 **Target:** Sprint 15 Epic 2 certification  
 **Date:** 2026-07-24

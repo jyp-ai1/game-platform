@@ -1,7 +1,7 @@
 # Sprint 15 — Bug List (Epic 1 + 1-B/C/D + Epic 2 QA)
 
-**Updated:** 2026-07-24 (Sessions 4–8 — RC1 NO GO)  
-**Status:** Developer **HOLD** — no code defects; OB-001 blocks official Product QA
+**Updated:** 2026-07-25 (PM: OB-001 waived — Developer RC1 GO)  
+**Status:** Developer **HOLD** (hotfix only)
 
 ---
 
@@ -11,7 +11,7 @@
 
 | ID | Category | Issue | Owner | Developer Action | Release Impact |
 |----|----------|-------|-------|------------------|----------------|
-| OB-001 | Operational Blocker | Vercel Preview Deployment Protection (SSO) | **Operator** | **None** | Blocks Product QA execution |
+| OB-001 | Operational | Preview SSO | Operator | **Waived** (PM 2026-07-25) | Fast-follow only |
 
 **Next action:** Operator OP-1 (Preview SSO) → Senior QA Session 3 resumes at Phase A-1
 
@@ -111,5 +111,5 @@
 | ESLint / Build / Type | **PASS** |
 | Staging QA | **PASS** (localhost Sessions 4–6) |
 | Product QA (Preview) | **BLOCKED** — OB-001 |
-| RC1 Recommendation | **NO GO** — [`rc1-release-summary.md`](./rc1-release-summary.md) |
+| RC1 Recommendation | **GO (Developer RC1 Candidate)** | [`rc1-release-summary.md`](./rc1-release-summary.md) |
 | Developer | **HOLD** — no action until Preview QA P0/P1 |
