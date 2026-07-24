@@ -1,64 +1,26 @@
-# Game Review Card — Template
+# Game Review Card — Spec (Sprint 13)
 
-**Sprint:** 13+  
-**Purpose:** Per-game post-launch review — data-driven retention decisions  
-**When:** D+7 after each Game Package GA
-
----
-
-## Template
-
-| 항목 | 내용 |
-| --- | --- |
-| **게임명** | _e.g. Pinball_ |
-| **Slug** | _pinball_ |
-| **출시일** | _YYYY-MM-DD_ |
-| **평균 플레이 시간** | _e.g. 3m 24s_ (Avg Time KPI) |
-| **난이도** | Easy / Normal / Hard |
-| **최초 플레이율** | _Play / Impressions %_ |
-| **재플레이율** | _Retry %_ |
-| **랭킹 참여율** | _Ranking Rate %_ |
-| **CTR** | _%_ |
-| **Finish Rate** | _Finish / Play %_ |
-| **버그** | P0 / P1 / P2 (_list or none_) |
-| **PM 평가** | **PASS / HOLD** |
+**Canonical doc:** [`../../game-review-card.md`](../../game-review-card.md)  
+**Template storage:** `docs/reports/game-reviews/{slug}-{YYYY-MM}.md`
 
 ---
 
-## PM Evaluation Criteria (draft)
+## Admin Display (Sprint 13 T6)
 
-| Result | Condition |
-| --- | --- |
-| **PASS** | Finish ≥40% · Ranking Rate ≥15% · 0 P0 bugs · Avg time 2–5min |
-| **HOLD** | Below thresholds or P0/P1 open |
-
-Adjust thresholds after first 4 games baseline.
-
----
-
-## Storage
+Review Card summary visible in Admin — per-game:
 
 ```
-docs/reports/game-reviews/pinball-2026-XX.md
+Pinball · 난이도 ★★★★ · 평균 3분 · 추천 ★★★★★ · Retry 89%
 ```
 
-One file per game per launch review cycle.
+---
+
+## Fields (sync with canonical)
+
+See [`../../game-review-card.md`](../../game-review-card.md) for full template, KPI definitions, and PM evaluation criteria.
 
 ---
 
-## Example (placeholder)
+## Package Requirement
 
-| 항목 | Pinball |
-| --- | --- |
-| 평균 플레이 시간 | — (pre-launch) |
-| 최초 플레이율 | — |
-| 재플레이율 | — |
-| 랭킹 참여율 | — |
-| 버그 | — |
-| PM 평가 | — |
-
----
-
-## Cumulative Value
-
-Review cards accumulate → quarterly **Game Portfolio Report** (which games drive D1/D7).
+Game Package **19 items** — item #17 Review Card.

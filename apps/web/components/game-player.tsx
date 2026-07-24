@@ -159,6 +159,48 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       ),
     { ssr: false, loading: Loading }
   ),
+  "stack-tower": dynamic(
+    () =>
+      import("@game-platform/game-stack-tower").then(
+        (mod) => mod.StackTowerGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "ball-sort": dynamic(
+    () =>
+      import("@game-platform/game-ball-sort").then((mod) => mod.BallSortGame),
+    { ssr: false, loading: Loading }
+  ),
+  "color-sort": dynamic(
+    () =>
+      import("@game-platform/game-color-sort").then((mod) => mod.ColorSortGame),
+    { ssr: false, loading: Loading }
+  ),
+  "penalty-shootout": dynamic(
+    () =>
+      import("@game-platform/game-penalty-shootout").then(
+        (mod) => mod.PenaltyShootoutGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  darts: dynamic(
+    () => import("@game-platform/game-darts").then((mod) => mod.DartsGame),
+    { ssr: false, loading: Loading }
+  ),
+  "bubble-shooter": dynamic(
+    () =>
+      import("@game-platform/game-bubble-shooter").then(
+        (mod) => mod.BubbleShooterGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "merge-blocks": dynamic(
+    () =>
+      import("@game-platform/game-merge-blocks").then(
+        (mod) => mod.MergeBlocksGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

@@ -433,6 +433,89 @@ function iconArkanoidDx(accent) {
     </g>`;
 }
 
+function iconStackTower(accent) {
+  const blocks = [];
+  for (let i = 0; i < 5; i++) {
+    const w = 120 - i * 12;
+    blocks.push(
+      `<rect x="${(140 - w) / 2}" y="${180 - i * 36}" width="${w}" height="28" rx="6" fill="${accent}" opacity="${1 - i * 0.12}"/>`
+    );
+  }
+  return `<g transform="translate(362,40)">${blocks.join("\n")}</g>`;
+}
+
+function iconBallSort(accent) {
+  const tubes = [];
+  for (let t = 0; t < 3; t++) {
+    const balls = [];
+    for (let b = 0; b < 3; b++) {
+      balls.push(`<circle cx="30" cy="${150 - b * 28}" r="12" fill="${[accent, "#ef4444", BRAND_AMBER][b]}"/>`);
+    }
+    tubes.push(`<g transform="translate(${t * 70},0)"><rect x="0" y="60" width="60" height="120" rx="10" fill="${CARD}" stroke="${accent}" stroke-width="3"/>${balls.join("\n")}</g>`);
+  }
+  return `<g transform="translate(362,30)">${tubes.join("\n")}</g>`;
+}
+
+function iconColorSort(accent) {
+  const tubes = [];
+  for (let t = 0; t < 3; t++) {
+    const fills = [
+      `<rect x="8" y="140" width="44" height="30" rx="4" fill="#ef4444"/>`,
+      `<rect x="8" y="105" width="44" height="30" rx="4" fill="${accent}"/>`,
+      `<rect x="8" y="70" width="44" height="30" rx="4" fill="#22c55e"/>`,
+    ];
+    tubes.push(`<g transform="translate(${t * 72},0)"><rect x="0" y="60" width="60" height="120" rx="10" fill="${CARD}" stroke="${accent}" stroke-width="3"/>${fills[t] ?? fills[0]}</g>`);
+  }
+  return `<g transform="translate(362,30)">${tubes.join("\n")}</g>`;
+}
+
+function iconPenaltyShootout(accent) {
+  return `
+    <g transform="translate(362,40)">
+      <rect x="20" y="80" width="240" height="120" rx="8" fill="none" stroke="${accent}" stroke-width="8"/>
+      <circle cx="140" cy="200" r="22" fill="${FG}"/>
+      <path d="M140,178 L140,120" stroke="${FG}" stroke-width="4" marker-end="url(#arrow)"/>
+      <circle cx="140" cy="110" r="14" fill="${BRAND_AMBER}"/>
+    </g>`;
+}
+
+function iconDarts(accent) {
+  return `
+    <g transform="translate(362,30)">
+      <circle cx="140" cy="140" r="110" fill="${CARD}" stroke="${accent}" stroke-width="6"/>
+      <circle cx="140" cy="140" r="70" fill="none" stroke="${accent}" stroke-width="4" opacity="0.6"/>
+      <circle cx="140" cy="140" r="30" fill="#ef4444"/>
+      <line x1="140" y1="140" x2="220" y2="80" stroke="${FG}" stroke-width="4"/>
+    </g>`;
+}
+
+function iconBubbleShooter(accent) {
+  const colors = [accent, "#ef4444", BRAND_AMBER];
+  const grid = [];
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 5; c++) {
+      grid.push(`<circle cx="${c * 36 + 20}" cy="${r * 32 + 20}" r="14" fill="${colors[(r + c) % 3]}"/>`);
+    }
+  }
+  return `
+    <g transform="translate(362,30)">
+      ${grid.join("\n")}
+      <circle cx="90" cy="210" r="16" fill="${accent}"/>
+      <polygon points="90,190 80,210 100,210" fill="${FG}" opacity="0.5"/>
+    </g>`;
+}
+
+function iconMergeBlocks(accent) {
+  const vals = ["2", "4", "8", "16"];
+  const tiles = [];
+  for (let i = 0; i < 4; i++) {
+    tiles.push(
+      `<rect x="${(i % 2) * 70}" y="${Math.floor(i / 2) * 70}" width="60" height="60" rx="10" fill="${accent}" opacity="${0.5 + i * 0.12}"/><text x="${(i % 2) * 70 + 30}" y="${Math.floor(i / 2) * 70 + 38}" font-size="22" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial, sans-serif">${vals[i]}</text>`
+    );
+  }
+  return `<g transform="translate(382,50)">${tiles.join("\n")}</g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -458,6 +541,13 @@ const games = [
   { slug: "space-impact", title: "Space Impact", accent: "#22c55e", icon: iconSpaceImpact },
   { slug: "samegame", title: "SameGame", accent: "#a855f7", icon: iconSameGame },
   { slug: "arkanoid-dx", title: "Arkanoid DX", accent: BRAND_AMBER, icon: iconArkanoidDx },
+  { slug: "stack-tower", title: "Stack Tower", accent: BRAND_PRIMARY, icon: iconStackTower },
+  { slug: "ball-sort", title: "Ball Sort", accent: "#0ea5e9", icon: iconBallSort },
+  { slug: "color-sort", title: "Color Sort", accent: "#a855f7", icon: iconColorSort },
+  { slug: "penalty-shootout", title: "Penalty Shootout", accent: "#22c55e", icon: iconPenaltyShootout },
+  { slug: "darts", title: "Darts", accent: "#ef4444", icon: iconDarts },
+  { slug: "bubble-shooter", title: "Bubble Shooter", accent: "#22c55e", icon: iconBubbleShooter },
+  { slug: "merge-blocks", title: "Merge Blocks", accent: BRAND_AMBER, icon: iconMergeBlocks },
 ];
 
 function buildSvg({ title, accent, icon }) {

@@ -15,6 +15,7 @@
 | Senior QA | **HOLD** | Automated smoke PASS · full matrix pending |
 | Senior DevOps | **HOLD** | Rollback drill · tag · release pending |
 | Senior AI Engineer | **N/A** | PM: no further AI development |
+| Operator Readiness | **HOLD** | Docs ✅ · operator verify pending |
 | PM Release | **HOLD** | Pending QA + DevOps |
 
 ---
@@ -97,18 +98,28 @@
 | Item | Result |
 | --- | --- |
 | Gate docs committed | **PASS** (PM approved 2026-07-24) |
+| Operation Readiness docs | **PASS** — operator-manual · daily-checklist · game guides |
 | Sprint 13 specs (design only) | **PASS** |
 | Sprint 13 implementation | **HOLD** |
 
-### Operator Actions
+### Operator Readiness (Sprint 13 Kickoff)
 
-1. Complete **T0-2 QA** → `qa-report.md` **PASS**  
-2. Complete **T0-3 DevOps** rollback + `v1.12.0` + GitHub Release  
-3. PM sign **PASS** on this document  
-4. Then only: Sprint 13 branch + kickoff  
+| Item | Result |
+| --- | --- |
+| Operator docs (5) | **PASS** |
+| Operator Production verify | **HOLD** — [`operator-readiness-report.md`](./operator-readiness-report.md) |
+
+### Operator Actions (T0)
+
+1. **T0-1 QA** — Production 검증 → `qa-report.md` **PASS**  
+2. **T0-2 DevOps** — Rollback drill ≤15s → `v1.12.0` tag + GitHub Release → `devops-report.md` **PASS**  
+3. **T0-3 PM** — QA + DevOps PASS 후 이 문서 **PASS** → Sprint 12 **GA**  
+4. **Then only:** Sprint 13 branch + kickoff (설계 완료 · 구현 HOLD)
+
+**Work order:** [`docs/sprint-12-t0-ga-gate.md`](../../sprint-12-t0-ga-gate.md)
 
 ---
 
 **PM Release Gate: HOLD**
 
-**PM Sign-off:** ___________________ **Result:** HOLD (pending T0-2 QA, T0-3 DevOps)
+**PM Sign-off:** ___________________ **Result:** HOLD (pending T0-1 QA, T0-2 DevOps)

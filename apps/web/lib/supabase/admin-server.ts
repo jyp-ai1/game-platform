@@ -276,3 +276,47 @@ export async function fetchTopGames(limit = 10): Promise<GamePlayRow[]> {
 
   return data ?? [];
 }
+
+function periodSinceIso(period: DashboardPeriod): string {
+  const now = new Date();
+  const d = new Date(now);
+  if (period === "today") {
+    d.setUTCHours(0, 0, 0, 0);
+  } else if (period === "week") {
+    d.setUTCDate(d.getUTCDate() - 7);
+  } else if (period === "month") {
+    d.setUTCDate(d.getUTCDate() - 30);
+  } else {
+    d.setUTCFullYear(2020, 0, 1);
+  }
+  return d.toISOString();
+}
+
+export async function fetchEventCount(
+  eventType: string,
+  period: DashboardPeriod = "week"
+): Promise<number> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return 0;
+
+  const since = periodSinceIso(period);
+  const { count, error } = await supabase
+    .from("analytics_events")
+    .select("*", { count: "exact", head: true })
+    .eq("event_type", eventType)
+    .gte("created_at", since);
+
+  if (error) {
+    console.error("fetchEventCount:", error.message);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+export async function fetchAllGamesByPlays(
+  period: DashboardPeriod = "week",
+  limit = 50
+): Promise<Array<{ slug: string; title: string; plays: number }>> {
+  return fetchTopGamesAnalytics(period, limit);
+}

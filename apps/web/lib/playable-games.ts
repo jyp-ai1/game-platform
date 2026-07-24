@@ -24,6 +24,13 @@ export const PLAYABLE_SLUGS = [
   "tetris",
   "gold-miner",
   "space-impact",
+  "stack-tower",
+  "ball-sort",
+  "color-sort",
+  "penalty-shootout",
+  "darts",
+  "bubble-shooter",
+  "merge-blocks",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

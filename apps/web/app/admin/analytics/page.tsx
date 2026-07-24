@@ -1,13 +1,22 @@
 import { Suspense } from "react";
 
 import { ActivityHeatmap } from "@/components/admin/activity-heatmap";
+import { GameRankingsPanel } from "@/components/admin/game-rankings-panel";
 import { FunnelChart, type FunnelData } from "@/components/admin/funnel-chart";
 import {
   DashboardPeriodTabs,
   type DashboardPeriod,
 } from "@/components/admin/dashboard-period-tabs";
 import {
+  SoftLaunchKpiCards,
+  SoftLaunchOpsLinks,
+} from "@/components/admin/soft-launch-panel";
+import { computeSoftLaunchRates } from "@/lib/admin/soft-launch-metrics";
+import {
   fetchActivityHeatmap,
+  fetchAllGamesByPlays,
+  fetchDashboardKpisExtended,
+  fetchEventCount,
   fetchPlayerFunnel,
   fetchTopGamesAnalytics,
   type DashboardPeriod as ServerPeriod,
@@ -28,11 +37,15 @@ export default async function AdminAnalyticsPage({
   const { period: periodParam } = await searchParams;
   const period = parsePeriod(periodParam);
 
-  const [funnel, heatmap, topGames] = await Promise.all([
-    fetchPlayerFunnel(period),
-    fetchActivityHeatmap(30),
-    fetchTopGamesAnalytics(period, 15),
-  ]);
+  const [funnel, heatmap, topGames, allGames, kpis, missionCount] =
+    await Promise.all([
+      fetchPlayerFunnel(period),
+      fetchActivityHeatmap(30),
+      fetchTopGamesAnalytics(period, 15),
+      fetchAllGamesByPlays(period, 50),
+      fetchDashboardKpisExtended(period),
+      fetchEventCount("mission_complete", period),
+    ]);
 
   const funnelData: FunnelData = {
     session: funnel?.session ?? 0,
@@ -43,6 +56,17 @@ export default async function AdminAnalyticsPage({
     favorite: funnel?.favorite ?? 0,
   };
 
+  const rates = computeSoftLaunchRates(
+    funnel,
+    kpis?.dau ?? 0,
+    missionCount
+  );
+
+  const top5 = allGames.slice(0, 5);
+  const bottom5 = [...allGames]
+    .sort((a, b) => a.plays - b.plays)
+    .slice(0, 5);
+
   const maxPlays = topGames[0]?.plays ?? 1;
 
   return (
@@ -51,7 +75,7 @@ export default async function AdminAnalyticsPage({
         <div>
           <h1 className="text-2xl font-bold">Game Analytics</h1>
           <p className="text-sm text-muted-foreground">
-            Funnel · Heatmap · 인기 게임 (기간별)
+            Soft Launch KPI · Funnel · Top/Bottom 5
           </p>
         </div>
         <Suspense fallback={<div className="h-9 w-48 animate-pulse rounded-lg bg-muted" />}>
@@ -61,6 +85,12 @@ export default async function AdminAnalyticsPage({
           />
         </Suspense>
       </div>
+
+      <SoftLaunchKpiCards dau={kpis?.dau ?? 0} rates={rates} />
+
+      <GameRankingsPanel topGames={top5} bottomGames={bottom5} />
+
+      <SoftLaunchOpsLinks />
 
       <section className="grid gap-8 xl:grid-cols-2">
         <div className="rounded-xl border bg-card p-4">

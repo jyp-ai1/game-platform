@@ -56,7 +56,9 @@ Typing · Word Search · Hangman (variant — repo 기존 hangman과 구분)
 - [ ] SEO (metadata · JSON-LD · sitemap)
 - [ ] CMS event / featured (출시 주)
 - [ ] **NEW** 배지 7일 · **첫 플레이 XP 2×**
-- [ ] Game Analytics 6지표 (CTR · Play · Finish · Retry · Time · Ranking%)
+- [ ] Game Analytics (Play · Finish · Retry · Quit · Resume · Favorite)
+- [ ] **Review Card** · **운영 가이드** ([`templates/game-package-template.md`](./templates/game-package-template.md) — **19 items**)
+- [ ] Enhanced QA (3min · 10min · 30 restart · refresh · network)
 - [ ] 모바일 375px QA
 
 ---

@@ -2,6 +2,7 @@
 
 **Status:** Release Candidate — **NOT GA**  
 **Target release:** `v1.12.0`  
+**Work order:** [`docs/sprint-12-t0-ga-gate.md`](./sprint-12-t0-ga-gate.md)  
 **Sprint 13:** **DO NOT START** until all gates PASS + PM kickoff
 
 ---
@@ -10,112 +11,128 @@
 
 | Gate | Current | GA Target |
 | --- | --- | --- |
-| Senior Developer | PASS | PASS |
-| Senior QA | **HOLD** | **PASS** |
-| Senior DevOps | **HOLD** | **PASS** |
+| Senior Developer | ✅ PASS | ✅ PASS |
+| Senior QA | 🟡 **HOLD** | **PASS** |
+| Senior DevOps | 🟡 **HOLD** | **PASS** |
 | Senior AI Engineer | N/A (AI FROZEN) | N/A |
-| PM Release | **HOLD** | **PASS** |
+| Operator Readiness | 🟡 **HOLD** | **PASS** |
+| PM Release | 🟡 **HOLD** | **PASS** |
 
 **GA commit (candidate):** `1820955` — Sprint 12 Phase 3
 
 ---
 
-## T0-1 — Documentation (Developer)
+## T0-1 — QA PASS
 
-| Item | Status |
-| --- | --- |
-| Gate reports committed to `main` | ✅ PM approved |
-| `RELEASE_NOTES_v1.12.0.md` | DRAFT |
-| Gate status = docs aligned | Developer PASS · QA/DevOps/PM HOLD |
-
----
-
-## T0-2 — Operator QA
-
-**Deliverable:** `docs/reports/sprint-12/qa-report.md`
-
-### Operator must execute
+**Deliverable:** `docs/reports/sprint-12/qa-report.md` → **PASS**  
+**Owner:** Operator
 
 | Area | Scope |
 | --- | --- |
-| Public | Home · Categories · Game Detail · Leaderboard · Save/Resume · Missions · Season |
-| Admin | Dashboard · Analytics · CMS · SEO · Reports · Assistant · Monitoring · Flags · Players · Errors · System |
-| CMS | Banner · Notice · Event · Featured · Visibility · Maintenance · Audit |
+| Public | Home · Categories · Game Detail · Missions · Ranking · Save · Resume |
 | Browser | Chrome · Edge · Mobile 375px |
 | Console | JS Error **0** |
-| Network | 500 Error **0** |
+| Network | 500 **0** |
+| Admin | CMS · SEO · Analytics · Reports · Players · System · Feature Flag |
+| Games | 2048 · Snake · Memory · Breakout · Tetris · SameGame · Arkanoid DX (Pinball **제외**) |
 
-**Automated smoke (2026-07-24):** 20 production URLs → **all 200** ✅
+**Automated smoke (2026-07-24):** 36 production URLs → **all 200** ✅
 
-**QA Gate:** HOLD until operator completes full matrix → **PASS**
+- [ ] Operator functional QA complete  
+- [ ] `qa-report.md` → **PASS**
 
 ---
 
-## T0-3 — DevOps
+## T0-2 — DevOps PASS
 
-**Deliverable:** `docs/reports/sprint-12/devops-report.md`
+**Deliverable:** `docs/reports/sprint-12/devops-report.md` → **PASS**  
+**Owner:** Operator
 
-### Rollback Drill (Operator — Vercel)
+### Rollback Drill (Vercel)
 
-1. Vercel → **game29** → Deployments  
-2. **Promote** previous deployment → start timer  
-3. `curl -I https://game29.vercel.app/` → 200  
-4. Stop timer — target **≤ 15s**  
-5. **Promote** latest back to Production  
+1. Promote previous deployment → timer start  
+2. Health check 200  
+3. Target **≤ 15s**  
+4. Restore latest Production  
 
 Record: `docs/reports/sprint-12/devops-rollback-drill.md`
 
-### After QA PASS
-
 ```bash
-git tag -a v1.11.0 <sprint11-ga-sha> -m "Sprint 11 GA"   # if not tagged
 git tag -a v1.12.0 1820955 -m "Sprint 12 GA — Operations Platform 2.0"
 git push origin v1.12.0
 gh release create v1.12.0 --notes-file RELEASE_NOTES_v1.12.0.md
 ```
 
-**DevOps Gate:** HOLD until rollback drill measured + tag + release
+- [ ] Rollback drill ≤15s  
+- [ ] Tag `v1.12.0` pushed  
+- [ ] GitHub Release created  
+- [ ] `devops-report.md` → **PASS**
 
 ---
 
-## T0-4 — PM Release
+## T0-3 — Operator Readiness PASS
 
-**Deliverable:** `docs/reports/sprint-12/pm-release.md`
+**Deliverable:** `docs/reports/sprint-12/operator-readiness-report.md` → **PASS**
 
-| Review | Status |
+---
+
+## T0-4 — Soft Launch (3~7일)
+
+**Deliverables:** [`soft-launch-checklist.md`](./soft-launch-checklist.md) · [`feedback-log.md`](./feedback-log.md) · [`known-issues.md`](./known-issues.md)
+
+- [ ] Daily KPI · CMS 실습 · Major Bug (P0) **0**
+
+---
+
+## T0-5 — Data Review
+
+**Deliverable:** [`reports/soft-launch-summary.md`](./reports/soft-launch-summary.md)
+
+- [ ] DAU · Top/Worst · Bug · Feedback · Retention · Sprint 13 Decision filled
+- [ ] Admin data from `/admin/soft-launch` · Reports
+
+---
+
+## T0-6 — PM GA
+
+```
+QA + DevOps + Operator + Soft Launch + Data Review PASS → PM GA → v1.12.0
+```
+
+- [ ] PM sign-off on `pm-release.md`
+
+---
+
+## Release Deliverables (GA complete)
+
+| Artifact | Status |
 | --- | --- |
-| Product | PASS (pending final sign-off) |
-| Architecture | PASS |
-| QA | HOLD |
-| DevOps | HOLD |
-| Release | HOLD |
+| `v1.12.0` tag | Pending |
+| GitHub Release | Pending |
+| `RELEASE_NOTES_v1.12.0.md` | DRAFT |
+| QA Report | HOLD |
+| DevOps Report | HOLD |
+| Rollback Report | Template |
+| Soft Launch Summary | [`reports/soft-launch-summary.md`](./reports/soft-launch-summary.md) | Template |
+| PM Approval | HOLD |
+| Soft Launch log | [`soft-launch-checklist.md`](./soft-launch-checklist.md) | Active |
+| Feedback / Issues | [`feedback-log.md`](./feedback-log.md) · [`known-issues.md`](./known-issues.md) | Ready |
 
 ---
 
-## Release Conditions (all required)
-
-- [ ] QA PASS  
-- [ ] DevOps PASS (rollback ≤15s · tag · GitHub Release)  
-- [ ] Lighthouse PASS or **waiver documented**  
-- [ ] `RELEASE_NOTES_v1.12.0.md` finalized  
-- [ ] PM PASS  
-
----
-
-## Sprint 13 Kick-off (after GA only)
+## Sprint 13 Kick-off
 
 ```
-QA PASS → DevOps PASS → PM PASS → v1.12.0 → sprint-13 branch → Kickoff
+Soft Launch 7일 · Major Bug 0 → PM GA → Pinball Phase 1 only
 ```
 
-**Sprint 13 implementation: ⏸️ HOLD**  
-Design prep only: [`docs/sprint-13-design-prep.md`](./sprint-13-design-prep.md)
+**4게임 동시 출시 금지** · **Sprint 13 implementation: ⏸️ HOLD**
 
 ---
 
 ## Migrations (Operator confirm)
 
-| File | Sprint 12 |
+| File | Status |
 | --- | --- |
-| 0018_sprint12.sql | ✅ Applied |
-| 0019_player_suspend_enforcement.sql | ✅ Applied |
+| `0018_sprint12.sql` | ✅ Applied |
+| `0019_player_suspend_enforcement.sql` | ✅ Applied |

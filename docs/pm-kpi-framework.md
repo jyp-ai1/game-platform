@@ -1,77 +1,83 @@
 # PM KPI Framework — Re:Play Daily Ops
 
-**확정일:** 2026-07-24 (PM Review 반영)  
+**확정일:** 2026-07-24 (PM Review — Operation Readiness 반영)  
 **적용:** Sprint 12 GA 이후 · 베타 Phase 1
 
 ---
 
 ## 원칙
 
-1. **첫 화면 5초** — `/admin` 상단에서 오늘 상태 즉시 판단 (Epic 5)  
-2. **Drill-down** — 상세는 Monitoring · Analytics · Reports  
-3. **게임 출시 시** — Game Analytics 6지표 필수 (Epic 4)
+1. **배포 가능 ≠ 운영 준비** — Operator Readiness Gate 추가  
+2. **Admin 5초** — 6카드로 오늘 상태 판단  
+3. **게임 출시** — Analytics + Review Card + 운영 가이드
+
+**우선순위:** 게임 품질 → 리텐션 → 운영 데이터 → 신규 게임 → AI
 
 ---
 
-## Admin 첫 화면 6카드 (Sprint 13 T5)
+## Admin 첫 화면 6카드 (Sprint 13 Epic 3)
 
-운영자 **매일 아침** 이것만 보면 됩니다.
+운영자 **5초** — 끝.
 
-| 카드 | 데이터 소스 | 목표 |
-| --- | --- | --- |
-| **DAU** | `get_dashboard_kpis` / today | 오늘 몇 명 왔는가 |
-| **D1** | `get_cohort_retention` (어제 cohort) | 어제 신규의 재방문 |
-| **현재 인기게임** | `get_ops_realtime_stats` active_games[0] | 지금/오늘 TOP1 |
-| **오늘 신규게임** | analytics by slug (Sprint 13 launch slugs) | 출시 게임 uptake |
-| **오늘 오류** | `errors_today` | 장애 여부 |
-| **오늘 이벤트** | CMS active events count | Launch ops 상태 |
-
----
-
-## 핵심 KPI (Daily · Drill-down)
-
-| # | KPI | 정의 | Admin 위치 |
-| --- | --- | --- | --- |
-| 1 | **DAU** | 오늘 unique device_id | `/admin` · Monitoring |
-| 2 | **재방문율** | D1 / D7 / D30 | Cohort Grid |
-| 3 | **게임별 인기** | session_start by slug | Analytics TOP15 |
-| 4 | **평균 플레이 시간** | avg_play_time_sec | Dashboard extended KPI |
-| 5 | **미션 완료율** | mission_complete / DAU | Analytics (T5) |
-| 6 | **랭킹 참여율** | ranking_submit / game_start | Funnel |
-
----
-
-## Game Analytics 6지표 (출시 게임 필수)
-
-| 지표 | 이벤트 / 계산 |
+| 카드 | 데이터 소스 |
 | --- | --- |
-| **CTR** | card_click → game detail (metadata) |
-| **Play** | session_start / game_start |
-| **Finish** | game_end / game_over |
-| **Retry** | same slug 2+ session_start / day |
-| **Average Time** | game_end metadata `duration_sec` |
-| **Ranking Rate** | ranking_submit / game_start |
+| **DAU** | today unique device_id |
+| **Finish** | game_end / game_start (Finish Rate) |
+| **Mission** | mission_complete / DAU |
+| **Ranking** | ranking_submit / game_start |
+| **Top Game** | active_games[0] |
+| **Avg Play Time** | avg_play_time_sec |
 
 ---
 
-## Funnel (랭킹 참여율)
+## Platform KPI (기존)
 
-```
-Play → Score/Finish → Ranking Submit
-```
+| KPI | Admin |
+| --- | --- |
+| DAU | Dashboard |
+| Retention | Dashboard · Cohort |
+| Mission | Mission Rate 카드 |
+| Ranking | Ranking Submit 카드 |
 
 ---
 
-## Phase 1 사이클
+## Game KPI (Sprint 13 추가)
 
-```
-게임 출시 → 미션 → 랭킹 → (Sprint14+) 친구 비교 → 매일 방문
-```
+게임별 D+7 Review Card:
 
-**AI · 신규 Admin Epic · Cloud Save = Phase 1 제외**
+| KPI | 정의 |
+| --- | --- |
+| **7일 생존율** | slug 플레이어 D7 재방문 |
+| **첫 플레이율** | first play / impressions |
+| **재플레이율** | Retry % |
+| **즐겨찾기율** | Favorite % |
+
+→ [`game-review-card.md`](./game-review-card.md)
+
+---
+
+## Game Analytics Events
+
+Play · Finish · Retry · Quit · Resume · Favorite · (Share 추후)
+
+→ [`sprint-13/specs/game-analytics-kpi.md`](./sprint-13/specs/game-analytics-kpi.md)
+
+---
+
+## Operation Readiness
+
+운영자 **5분** 내:
+
+- CMS solo (6 tasks)
+- Analytics 5 sec (6 KPIs)
+- Incident 1 min
+- Feature Flag without dev
+
+→ [`operator-manual.md`](./operator-manual.md)
 
 ---
 
 ## PM Note
 
-6카드 = **판단** · 6 KPI = **분석** · Game Analytics 6 = **게임 품질 검증**
+Sprint 13~16 = **"유저가 얼마나 다시 돌아오는가"**  
+출시 = **19-item Package + 운영 문서** 하나의 결과물.

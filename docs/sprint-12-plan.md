@@ -1,11 +1,11 @@
 # Sprint 12 — Operations Platform 2.0
 
-**Status:** **RC** — T0 Release Gate in progress · **NOT GA**  
+**Status:** **CLOSED (Development)** — Operator GA pending  
 **Governance:** v2.0  
 **Theme:** 운영 자동화 (AI FROZEN)  
-**Sprint 13:** ⏸️ **DO NOT START** — [`docs/sprint-12-ga-checklist.md`](./sprint-12-ga-checklist.md)
+**Sprint 13:** ⏸️ HOLD until Soft Launch + PM GA
 
-> **PM (2026-07-24):** Sprint 12 = RC. Gate PASS 후 `v1.12.0` GA. Sprint 13 구현 금지.
+> **PM (2026-07-24 Final):** Sprint 12 **개발 종료**. HOLD(QA · DevOps · Operator) = **운영자 체크리스트**. Cursor 추가 작업 없음.
 
 ---
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { computeWeeklyCompare } from "@/lib/admin/soft-launch-metrics";
 import { fetchDailyStatsForExport, fetchMonthlyOpsReport } from "@/lib/supabase/ops-server";
 
 export const metadata = { title: "Reports" };
@@ -9,6 +10,8 @@ export default async function AdminReportsPage() {
     fetchMonthlyOpsReport(),
     fetchDailyStatsForExport(30),
   ]);
+
+  const weekly = daily.length >= 7 ? computeWeeklyCompare(daily) : null;
 
   return (
     <div className="space-y-8">
@@ -51,6 +54,28 @@ export default async function AdminReportsPage() {
               ))}
             </ul>
           </section>
+
+          {weekly ? (
+            <section className="rounded-xl border bg-card p-4">
+              <h2 className="mb-4 font-semibold">주간 비교 (Soft Launch)</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">{weekly.thisWeek.label}</p>
+                  <p className="mt-1 text-sm">
+                    Avg DAU {weekly.thisWeek.dau} · Plays {weekly.thisWeek.plays} · Scores{" "}
+                    {weekly.thisWeek.scores}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{weekly.prevWeek.label}</p>
+                  <p className="mt-1 text-sm">
+                    Avg DAU {weekly.prevWeek.dau} · Plays {weekly.prevWeek.plays} · Scores{" "}
+                    {weekly.prevWeek.scores}
+                  </p>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <section>
             <h2 className="mb-4 font-semibold">Daily Stats (30일)</h2>

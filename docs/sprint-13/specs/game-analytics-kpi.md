@@ -1,65 +1,85 @@
-# Game Analytics KPI — Definitions (Sprint 13 Epic 6)
+# Game Analytics KPI — Definitions (Sprint 13)
 
-**Status:** Design only — implementation after Sprint 12 GA
+**Status:** Design only — implementation after Sprint 12 GA  
+**Focus:** **게임 중심** Analytics
 
-Every **Game Package** launch must emit or derive these six metrics.
+Every **Game Package** (19 items) must emit or derive these events.
 
 ---
 
-## KPI Definitions
+## Core Events
 
-| KPI | Definition | Event / Calculation |
+| Event | Definition | Trigger |
 | --- | --- | --- |
-| **CTR** | List/card click → game detail | `game_card_click` / impressions |
-| **Play** | Session started | `session_start` or `game_start` |
-| **Finish** | Round completed | `game_end` or `game_over` |
-| **Retry** | Same-day replay | ≥2 `session_start` same slug + device + UTC day |
-| **Avg Time** | Mean session duration | `game_end.metadata.duration_sec` avg |
-| **Ranking Rate** | Rank submission rate | `ranking_submit` / `session_start` |
+| **Play** | Session started | `session_start` / `game_start` |
+| **Finish** | Round completed | `game_end` / `game_over` |
+| **Retry** | Same-day replay | ≥2 `session_start` same slug + device + day |
+| **Quit** | Exit before finish | `game_quit` |
+| **Resume** | Saved state loaded | `game_resume` |
+| **Favorite** | Bookmark | `favorite_add` |
+| **Mission** | Mission progress/completion | `mission_*` hooks |
+| **Ranking** | Score submit | `ranking_submit` |
+| Share | Social | **추후** |
+
+---
+
+## Operational KPI (Soft Launch + Game)
+
+| KPI | Definition |
+| --- | --- |
+| **7일 Retention** | D7 / D0 cohort |
+| **Replay Rate** | Retry % |
+| **Average Session** | Avg session duration |
+
+---
+
+## Derived KPIs (Review Card · D+7)
+
+| KPI | Calculation |
+| --- | --- |
+| **7일 생존율** | Slug players active on D7 / D0 cohort |
+| **첫 플레이율** | First `session_start` / card impressions |
+| **재플레이율** | Retry % |
+| **즐겨찾기율** | Favorite / unique players |
+| **Avg Score** | `game_end.metadata.score` avg |
+| **Avg Time** | `game_end.metadata.duration_sec` avg |
 
 ---
 
 ## Funnel
 
 ```
-Impression → CTR → Play → Finish → Retry
-                              ↘ Ranking Rate
+Play → Finish → Retry
+  ↘ Quit
+  ↘ Resume (from Save)
+  ↘ Favorite
 ```
 
 ---
 
-## Admin Display (Sprint 13 T5)
+## Admin Display (Sprint 13 T6)
 
-Per-game row on `/admin/analytics/games/[slug]` or table:
+Per-game: `/admin/analytics/games/[slug]`
 
-| slug | CTR | Play | Finish | Retry% | Avg Time | Ranking% |
-| --- | --- | --- | --- | --- | --- | --- |
+| slug | Play | Finish | Quit | Resume | Retry% | Favorite% |
 
-Period tabs: today · week · month · since launch
+Period: today · week · month · since launch
+
+**Review Card:** Admin에서 게임별 Card 표시 — [`../../game-review-card.md`](../../game-review-card.md)
 
 ---
 
-## New Event Types (draft migration 0020)
+## Draft Events (migration 0020)
 
 ```sql
--- Optional Sprint 13
-'game_card_click'  -- metadata: { source: 'home'|'category'|'featured' }
-'game_impression'  -- metadata: { source, position }
-'first_play_boost'
+'game_quit'      -- metadata: { slug, duration_sec, reason }
+'game_resume'    -- metadata: { slug, save_age_sec }
+'favorite_add'   -- metadata: { slug, source }
+'game_end'       -- metadata: { score, duration_sec }
 ```
-
-Until migration: derive CTR from page views + session_start ratio (approximation).
-
----
-
-## Data Quality Rules
-
-- Exclude bot/test device_ids  
-- Finish without Play = data bug → alert  
-- Ranking Rate > 100% = invalid → cap audit  
 
 ---
 
 ## PM Use
 
-Feeds **Game Review Card** at D+7 after each launch.
+Feeds **Game Review Card** at D+7 · Portfolio Report quarterly.

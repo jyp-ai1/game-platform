@@ -1,0 +1,1 @@
+export { MergeBlocksGame } from "./MergeBlocks";
