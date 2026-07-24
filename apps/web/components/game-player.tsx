@@ -1,6 +1,8 @@
 "use client";
 
 import { GameSDKProvider } from "@game-platform/game-sdk";
+
+import { GameErrorMonitor } from "@/components/game-error-monitor";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
@@ -329,6 +331,7 @@ export function GamePlayer({
 
   return (
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
+      <GameErrorMonitor gameSlug={slug} />
       <Component />
     </GameSDKProvider>
   );

@@ -1,0 +1,758 @@
+{
+  "generatedAt": "2026-07-24T18:01:41.609Z",
+  "passCount": 50,
+  "total": 50,
+  "hasErrorMonitor": true,
+  "games": [
+    {
+      "slug": "2048",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "snake",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "breakout",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "arkanoid-dx",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "memory",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "minesweeper",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "samegame",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "maze-runner",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "tank-battle",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "galaxy-defender",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "space-defender",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "bubble-pop",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "sudoku",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "tic-tac-toe",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "simon",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "hangman",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "color-match",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "air-hockey",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "tetris",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "gold-miner",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "space-impact",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "stack-tower",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "ball-sort",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "color-sort",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "penalty-shootout",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "darts",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "bubble-shooter",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "merge-blocks",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "connect4",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "reversi",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "gomoku",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "bowling",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "archery",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "sliding-puzzle",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "whack-a-mole",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "chess",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "checkers",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "jigsaw",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "mancala",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "mini-golf",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "billiards",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "basketball",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "table-tennis",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "domino",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "crossword",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "chess960",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "shuffleboard",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "kakuro",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "nonogram",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    },
+    {
+      "slug": "word-search",
+      "status": "PASS",
+      "missing": [],
+      "guard": "PASS",
+      "checks": {
+        "start": true,
+        "finish": true,
+        "save": true,
+        "resume": true,
+        "restart": true,
+        "ranking": true,
+        "analytics": true
+      }
+    }
+  ]
+}
