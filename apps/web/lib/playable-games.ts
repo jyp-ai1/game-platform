@@ -38,6 +38,9 @@ export const PLAYABLE_SLUGS = [
   "archery",
   "sliding-puzzle",
   "whack-a-mole",
+  "chess",
+  "checkers",
+  "jigsaw",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

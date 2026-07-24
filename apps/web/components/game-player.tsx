@@ -235,6 +235,18 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       ),
     { ssr: false, loading: Loading }
   ),
+  chess: dynamic(
+    () => import("@game-platform/game-chess").then((mod) => mod.ChessGame),
+    { ssr: false, loading: Loading }
+  ),
+  checkers: dynamic(
+    () => import("@game-platform/game-checkers").then((mod) => mod.CheckersGame),
+    { ssr: false, loading: Loading }
+  ),
+  jigsaw: dynamic(
+    () => import("@game-platform/game-jigsaw").then((mod) => mod.JigsawGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

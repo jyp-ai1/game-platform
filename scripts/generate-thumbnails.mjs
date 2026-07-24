@@ -585,6 +585,32 @@ function iconWhackAMole(accent) {
   return `<g transform="translate(382,50)">${holes.join("\n")}</g>`;
 }
 
+function iconChess(accent) {
+  return `
+    <g transform="translate(382,40)">
+      <text x="80" y="100" font-size="72" fill="${FG}" text-anchor="middle" font-family="Arial">♔</text>
+      <text x="80" y="180" font-size="48" fill="${accent}" text-anchor="middle" font-family="Arial">♟</text>
+    </g>`;
+}
+
+function iconCheckers(accent) {
+  return `
+    <g transform="translate(382,50)">
+      ${[0, 1, 2, 3].map((i) => `<circle cx="${(i % 2) * 50 + 25}" cy="${Math.floor(i / 2) * 50 + 25}" r="18" fill="${i % 2 ? accent : '#111'}"/>`).join("")}
+    </g>`;
+}
+
+function iconJigsaw(accent) {
+  const tiles = [];
+  const colors = [accent, "#0ea5e9", "#22c55e", "#FFB800", "#ef4444", "#a855f7", "#14b8a6", "#f97316"];
+  for (let i = 0; i < 8; i++) {
+    tiles.push(
+      `<rect x="${(i % 3) * 54}" y="${Math.floor(i / 3) * 54}" width="48" height="48" rx="6" fill="${colors[i % colors.length]}"/>`
+    );
+  }
+  return `<g transform="translate(382,50)">${tiles.join("\n")}</g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -624,6 +650,9 @@ const games = [
   { slug: "archery", title: "Archery", accent: "#ef4444", icon: iconArchery },
   { slug: "sliding-puzzle", title: "Sliding Puzzle", accent: BRAND_AMBER, icon: iconSlidingPuzzle },
   { slug: "whack-a-mole", title: "Whack-a-Mole", accent: "#22c55e", icon: iconWhackAMole },
+  { slug: "chess", title: "Chess", accent: "#FFB800", icon: iconChess },
+  { slug: "checkers", title: "Checkers", accent: "#ef4444", icon: iconCheckers },
+  { slug: "jigsaw", title: "Jigsaw", accent: "#a855f7", icon: iconJigsaw },
 ];
 
 function buildSvg({ title, accent, icon }) {

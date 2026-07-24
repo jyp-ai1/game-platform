@@ -1,0 +1,1 @@
+export { JigsawGame } from "./Jigsaw";
