@@ -1,4 +1,4 @@
-# 0017 — CMS Audit log enhancement (IP, User-Agent, before/after)
+-- 0017 — CMS Audit log enhancement (IP, User-Agent, before/after)
 
 alter table public.cms_audit_log
   add column if not exists actor_ip text,
