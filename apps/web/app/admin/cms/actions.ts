@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getAuditContext } from "@/lib/audit-context";
 import { getAdminSupabase } from "@/lib/supabase/admin-server";
 
 async function requireAdmin() {
@@ -21,13 +22,19 @@ async function audit(
   action: string,
   entityType: string,
   entityId: string | null,
-  payload: Record<string, unknown> = {}
+  payload: Record<string, unknown> = {},
+  opts?: { before?: Record<string, unknown> | null; after?: Record<string, unknown> | null }
 ) {
+  const { actorIp, userAgent } = await getAuditContext();
   await supabase.from("cms_audit_log").insert({
     action,
     entity_type: entityType,
     entity_id: entityId,
     payload,
+    actor_ip: actorIp,
+    user_agent: userAgent,
+    before_state: opts?.before ?? null,
+    after_state: opts?.after ?? null,
   });
 }
 
@@ -68,7 +75,9 @@ export async function upsertBanner(form: {
     ? await supabase.from("cms_banners").update(row).eq("id", form.id).select("id").single()
     : await supabase.from("cms_banners").insert(row).select("id").single();
   if (error) throw new Error(error.message);
-  await audit(supabase, form.id ? "update" : "create", "cms_banners", data.id, row);
+  await audit(supabase, form.id ? "update" : "create", "cms_banners", data.id, row, {
+    after: row,
+  });
   revalidateCms();
 }
 
@@ -242,14 +251,23 @@ export async function setGameVisibility(
   note?: string
 ) {
   const supabase = await requireAdmin();
-  const { error } = await supabase.from("cms_game_visibility").upsert({
+  const { data: before } = await supabase
+    .from("cms_game_visibility")
+    .select("*")
+    .eq("game_slug", gameSlug)
+    .maybeSingle();
+  const afterRow = {
     game_slug: gameSlug,
     visibility,
     note: note ?? null,
     updated_at: new Date().toISOString(),
-  });
+  };
+  const { error } = await supabase.from("cms_game_visibility").upsert(afterRow);
   if (error) throw new Error(error.message);
-  await audit(supabase, "update", "cms_game_visibility", gameSlug, { visibility, note });
+  await audit(supabase, "update", "cms_game_visibility", gameSlug, { visibility, note }, {
+    before: before ?? undefined,
+    after: afterRow,
+  });
   revalidateCms();
 }
 

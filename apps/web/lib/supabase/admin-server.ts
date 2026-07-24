@@ -167,6 +167,19 @@ export async function fetchSeoAuditStats(): Promise<SeoAuditStats | null> {
   return data as SeoAuditStats;
 }
 
+export async function fetchSystemHealth(): Promise<Record<string, string> | null> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("get_system_health_summary");
+  if (error) {
+    console.error("get_system_health_summary:", error.message);
+    return null;
+  }
+
+  return data as Record<string, string>;
+}
+
 export async function fetchPlayerFunnel(
   period: DashboardPeriod = "today"
 ): Promise<Record<string, number> | null> {
