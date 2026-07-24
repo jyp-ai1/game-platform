@@ -1,6 +1,6 @@
 # Sprint 15 — Developer Report & Certification
 
-**Updated:** 2026-07-24 (Epic 1-B)  
+**Updated:** 2026-07-24 (Epic 1-D — Developer stage complete)  
 **Branch:** `content-factory`  
 **Preview:** https://game29-git-content-factory-jyp-ai1s-projects.vercel.app  
 **Executor:** Developer (RC1 readiness — code scope only)
@@ -149,12 +149,88 @@ Developer-scope minimum **8/8** per game (RC uses full 19/19 after QA):
 
 ---
 
+## Epic 1-D — Code Certification
+
+### Phase 1 — Static analysis
+
+| Check | Result |
+|-------|--------|
+| ESLint | **PASS** (0 errors, 0 warnings after fixes) |
+| Typecheck (all workspaces) | **PASS** |
+| Production build | **PASS** |
+| Unused imports (web app) | **PASS** — 3 removed |
+| `eslint-disable` in games | **0** across 50 games |
+
+**Fixes applied:**
+
+| File | Issue | Fix |
+|------|-------|-----|
+| `use-mounted.ts` | `setState-in-effect` lint error | `useSyncExternalStore` mount detection |
+| `game-player.tsx` | Unused `getDeviceId` import | Removed |
+| `manifest.ts` | Unused `siteUrl` import | Removed |
+| `soft-launch-metrics.ts` | Unused type import | Removed |
+| `realtime-monitoring-panel.tsx` | Sync `initial` via effect | Derive `stats` from prop directly |
+
+### Phase 2 — Bundle optimization (audit)
+
+| Item | Status |
+|------|--------|
+| Dynamic import per game | **50/50** — `game-player.tsx` `dynamic(..., { ssr: false })` |
+| Lazy loading UI | **PASS** — `Loading` spinner per game chunk |
+| Auto transpilePackages | **PASS** — `next.config.ts` discovers `games/*` |
+| Duplicate packages | **None detected** — single workspace per game |
+| Thumbnail assets | **50/50** PNG at `public/images/games/{slug}.png` |
+
+### Phase 3 — Performance audit (baseline)
+
+Production Lighthouse snapshots (local files, production URL @ 2026-07-24):
+
+| Page | Perf | LCP | CLS |
+|------|-----:|-----:|----:|
+| Home (`game29.vercel.app`) | 81 | 2.9s | 0 |
+| 2048 game page | 63 | 2.9s | 0.01 |
+
+**Notes:** LCP on home/game needs QA re-measure on Preview post-unblock. CLS PASS. Hydration fixes (Epic 1-B/C) target layout shift from XP widgets.
+
+### Phase 4 — 50-game developer checklist
+
+| Item | Code audit |
+|------|:----------:|
+| Save | **50/50** |
+| Resume | **50/50** |
+| Ranking (`reportScore`) | **50/50** |
+| Analytics (finish/retry) | **50/50** |
+| Thumbnail | **50/50** |
+| Category (CMS SQL) | **READY** — Operator migration |
+| SEO (platform) | **PASS** |
+| CMS row (DB) | **HOLD** — Operator 0023–0025 |
+
+**Hygiene note (P2, no action pre-RC1):** ~35 games destructure unused `canPlay` from `useReadyCountdown` (gate via `canPlayRef` instead). Not a lint error; defer to Sprint 16.
+
+---
+
+## Developer stage verdict
+
+**Epic 1-D COMPLETE — Developer work STOP until QA unblocks.**
+
+```
+Build PASS ✓
+Type PASS ✓
+ESLint PASS ✓
+Hydration (code) PASS ✓
+50/50 SDK checklist PASS ✓
+```
+
+**Do NOT:** new features, refactors, or Sprint 16 work until Independent QA PASS.
+
+---
+
 ## Gate status
 
 | Gate | Status |
 |------|--------|
 | Developer Certification | **PASS** |
-| Preview Deploy | **PASS** (`content-factory` @ `d1d1083` + Epic 1-C pending) |
+| Preview Deploy | **PASS** (`content-factory` @ `ee87537` + Epic 1-D pending) |
 | Independent QA (browser) | **HOLD** — Vercel Deployment Protection |
 | Operator (migration 0023–0025) | **HOLD** |
 | Console Error = 0 | **HOLD** — QA blocked |
@@ -167,5 +243,5 @@ Developer-scope minimum **8/8** per game (RC uses full 19/19 after QA):
 - **Playable:** 50/50 registered in `playable-games.ts`
 - **SDK 8/8:** 50/50 (save/resume/countdown/finish/retry analytics)
 - **Build:** typecheck PASS, Vercel Preview build PASS (after `2cbdc6c` deps fix)
-- **Commits:** `2036207` (Epic4 + Certification), `2cbdc6c` (Vercel deps)
-- **Next:** Independent QA on Preview after Operator unblocks SSO + applies migrations
+- **Commits:** `2036207` (Epic4), `2cbdc6c` (Vercel deps), `d1d1083` (Epic1-B), `ee87537` (Epic1-C)
+- **Developer stage:** **COMPLETE** (Epic 1-D) — await QA unblock

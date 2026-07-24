@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 
 import type { OpsRealtimeStats } from "@/lib/supabase/ops-server";
 
@@ -24,8 +24,8 @@ export function RealtimeMonitoringPanel({
   initial: OpsRealtimeStats | null;
 }) {
   const router = useRouter();
-  const [stats, setStats] = useState(initial);
   const [, startTransition] = useTransition();
+  const stats = initial;
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -33,10 +33,6 @@ export function RealtimeMonitoringPanel({
     }, 30_000);
     return () => window.clearInterval(id);
   }, [router]);
-
-  useEffect(() => {
-    setStats(initial);
-  }, [initial]);
 
   if (!stats) {
     return (

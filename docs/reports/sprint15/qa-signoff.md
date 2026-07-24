@@ -1,6 +1,6 @@
 # Sprint 15 Epic1-A/B — QA Signoff & RC1 Readiness
 
-**Updated:** 2026-07-24 (Epic 1-B/C complete — Developer scope)
+**Updated:** 2026-07-24 (Epic 1-D — Developer stage **COMPLETE**)
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Gate | Status | Owner |
 |------|--------|-------|
-| Developer | **PASS** | ✓ Epic 1-B complete |
+| Developer | **PASS** | ✓ Epic 1-D complete — **STOP** |
 | Preview Deploy | **PASS** | `content-factory` @ pending push |
 | Independent QA | **BLOCKED** | Preview SSO — Operator |
 | Operator | **BLOCKED** | Migration 0023–0025 |
@@ -27,6 +27,13 @@
 | Phase2 Release Package | 50-game code audit | **DONE** — 8/8 code |
 | Phase3 Analytics code | SDK instrumentation | **DONE** — 50/50 |
 | Phase4 Bug backlog | P0/P1/P2 classified | **DONE** |
+| Phase5 Code Certification | ESLint/Build/Type/50-game audit | **DONE** |
+
+---
+
+## Developer stage — COMPLETE
+
+Epic 1-A through 1-D finished. **No further development** until Independent QA unblocks. Fix only P0/P1 bugs found during QA.
 
 ---
 

@@ -1,5 +1,3 @@
-import type { DashboardPeriod } from "@/lib/supabase/admin-server";
-
 export type SoftLaunchRates = {
   finishRate: number;
   rankingRate: number;

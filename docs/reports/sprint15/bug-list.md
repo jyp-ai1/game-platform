@@ -1,7 +1,7 @@
-# Sprint 15 — Bug List (Epic 1 + 1-B)
+# Sprint 15 — Bug List (Epic 1 + 1-B/C/D)
 
 **Updated:** 2026-07-24  
-**Status:** Developer RC1-ready; Independent QA blocked (Preview SSO)
+**Status:** Developer stage **COMPLETE** (Epic 1-D); Independent QA blocked (Preview SSO)
 
 ---
 
@@ -32,6 +32,16 @@
 
 ---
 
+## P1 — Fixed (Epic 1-D)
+
+| ID | Area | Issue | Fix |
+|----|------|-------|-----|
+| P1-009 | ESLint | `use-mounted` setState-in-effect | `useSyncExternalStore` pattern |
+| P1-010 | ESLint | Admin realtime panel sync effect | Derive stats from prop |
+| P1-011 | Lint hygiene | 3 unused imports in web app | Removed |
+
+---
+
 ## P1 — Open (Operator)
 
 | ID | Area | Issue | Owner |
@@ -48,6 +58,7 @@
 | P2-002 | Analytics | Live `analytics_events` SQL | Operator |
 | P2-003 | Game feel | Particles/shake polish | Sprint 16 |
 | P2-004 | hangman | `game_end` missing on loss | **FIXED** — `reportScore(0)` on lost |
+| P2-005 | Games (~35) | Unused `canPlay` destructure | Sprint 16 hygiene (non-blocking) |
 
 ---
 
@@ -66,8 +77,8 @@
 | Severity | Open | Fixed |
 |----------|-----:|------:|
 | P0 | 0 | 6 |
-| P1 | 1 | 7 |
-| P2 | 3 | 1 |
+| P1 | 1 | 10 |
+| P2 | 4 | 1 |
 
 ---
 
@@ -80,4 +91,5 @@
 | P1-003 Operator unblock | **OPEN** |
 | 50/50 SDK wiring | **PASS** |
 | Hydration (known) | **PASS** (code) |
-| Independent QA | **BLOCKED** |
+| ESLint / Build / Type | **PASS** (Epic 1-D) |
+| Developer stage | **COMPLETE** — no further dev until QA |

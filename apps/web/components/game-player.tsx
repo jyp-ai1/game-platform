@@ -1,6 +1,6 @@
 "use client";
 
-import { GameSDKProvider, getDeviceId } from "@game-platform/game-sdk";
+import { GameSDKProvider } from "@game-platform/game-sdk";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
