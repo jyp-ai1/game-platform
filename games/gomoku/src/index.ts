@@ -1,0 +1,1 @@
+export { GomokuGame } from "./Gomoku";

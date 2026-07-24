@@ -1,0 +1,1 @@
+export { ReversiGame } from "./Reversi";

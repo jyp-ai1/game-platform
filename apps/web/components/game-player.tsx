@@ -201,6 +201,40 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       ),
     { ssr: false, loading: Loading }
   ),
+  connect4: dynamic(
+    () => import("@game-platform/game-connect4").then((mod) => mod.Connect4Game),
+    { ssr: false, loading: Loading }
+  ),
+  reversi: dynamic(
+    () => import("@game-platform/game-reversi").then((mod) => mod.ReversiGame),
+    { ssr: false, loading: Loading }
+  ),
+  gomoku: dynamic(
+    () => import("@game-platform/game-gomoku").then((mod) => mod.GomokuGame),
+    { ssr: false, loading: Loading }
+  ),
+  bowling: dynamic(
+    () => import("@game-platform/game-bowling").then((mod) => mod.BowlingGame),
+    { ssr: false, loading: Loading }
+  ),
+  archery: dynamic(
+    () => import("@game-platform/game-archery").then((mod) => mod.ArcheryGame),
+    { ssr: false, loading: Loading }
+  ),
+  "sliding-puzzle": dynamic(
+    () =>
+      import("@game-platform/game-sliding-puzzle").then(
+        (mod) => mod.SlidingPuzzleGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
+  "whack-a-mole": dynamic(
+    () =>
+      import("@game-platform/game-whack-a-mole").then(
+        (mod) => mod.WhackAMoleGame
+      ),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

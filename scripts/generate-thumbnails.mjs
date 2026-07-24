@@ -516,6 +516,75 @@ function iconMergeBlocks(accent) {
   return `<g transform="translate(382,50)">${tiles.join("\n")}</g>`;
 }
 
+function iconConnect4(accent) {
+  const cells = [];
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 5; c++) {
+      const fill = c === 2 && r > 1 ? accent : c === 3 && r === 2 ? "#ef4444" : CARD;
+      cells.push(`<circle cx="${c * 44 + 22}" cy="${r * 44 + 22}" r="18" fill="${fill}"/>`);
+    }
+  }
+  return `<g transform="translate(372,40)">${cells.join("\n")}</g>`;
+}
+
+function iconReversi(accent) {
+  const stones = [];
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      const fill = (r + c) % 3 === 0 ? accent : (r + c) % 3 === 1 ? "#111" : "#eee";
+      stones.push(`<circle cx="${c * 36 + 18}" cy="${r * 36 + 18}" r="14" fill="${fill}"/>`);
+    }
+  }
+  return `<g transform="translate(382,50)">${stones.join("\n")}</g>`;
+}
+
+function iconGomoku(accent) {
+  const dots = [];
+  for (let i = 0; i < 5; i++) {
+    dots.push(`<circle cx="${i * 32 + 16}" cy="${160 - i * 28}" r="${i === 4 ? 14 : 10}" fill="${i % 2 ? '#111' : '#eee'}"/>`);
+  }
+  return `<g transform="translate(372,30)"><rect width="160" height="160" fill="${accent}" opacity="0.2" rx="8"/>${dots.join("\n")}</g>`;
+}
+
+function iconBowling(accent) {
+  return `
+    <g transform="translate(362,40)">
+      ${[0, 1, 2, 3].map((i) => `<circle cx="${60 + i * 28}" cy="80" r="16" fill="${FG}"/>`).join("")}
+      <circle cx="140" cy="200" r="20" fill="${accent}"/>
+    </g>`;
+}
+
+function iconArchery(accent) {
+  return `
+    <g transform="translate(362,30)">
+      <circle cx="140" cy="140" r="100" fill="none" stroke="${accent}" stroke-width="8"/>
+      <circle cx="140" cy="140" r="60" fill="none" stroke="${accent}" stroke-width="4" opacity="0.6"/>
+      <circle cx="140" cy="140" r="20" fill="#ef4444"/>
+      <line x1="140" y1="140" x2="220" y2="90" stroke="${FG}" stroke-width="4"/>
+    </g>`;
+}
+
+function iconSlidingPuzzle(accent) {
+  const tiles = [];
+  for (let i = 1; i <= 8; i++) {
+    tiles.push(
+      `<rect x="${((i - 1) % 3) * 52}" y="${Math.floor((i - 1) / 3) * 52}" width="46" height="46" rx="8" fill="${accent}" opacity="${0.5 + (i % 4) * 0.1}"/><text x="${((i - 1) % 3) * 52 + 23}" y="${Math.floor((i - 1) / 3) * 52 + 30}" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">${i}</text>`
+    );
+  }
+  return `<g transform="translate(382,50)">${tiles.join("\n")}</g>`;
+}
+
+function iconWhackAMole(accent) {
+  const holes = [];
+  for (let i = 0; i < 9; i++) {
+    const up = i === 4;
+    holes.push(
+      `<rect x="${(i % 3) * 52}" y="${Math.floor(i / 3) * 52}" width="46" height="46" rx="10" fill="${up ? accent : CARD}"/>`
+    );
+  }
+  return `<g transform="translate(382,50)">${holes.join("\n")}</g>`;
+}
+
 const games = [
   { slug: "2048", title: "2048", accent: BRAND_PRIMARY, icon: icon2048 },
   { slug: "snake", title: "Snake", accent: "#22c55e", icon: iconSnake },
@@ -548,6 +617,13 @@ const games = [
   { slug: "darts", title: "Darts", accent: "#ef4444", icon: iconDarts },
   { slug: "bubble-shooter", title: "Bubble Shooter", accent: "#22c55e", icon: iconBubbleShooter },
   { slug: "merge-blocks", title: "Merge Blocks", accent: BRAND_AMBER, icon: iconMergeBlocks },
+  { slug: "connect4", title: "Connect 4", accent: BRAND_PRIMARY, icon: iconConnect4 },
+  { slug: "reversi", title: "Reversi", accent: "#22c55e", icon: iconReversi },
+  { slug: "gomoku", title: "Gomoku", accent: "#a855f7", icon: iconGomoku },
+  { slug: "bowling", title: "Bowling", accent: "#0ea5e9", icon: iconBowling },
+  { slug: "archery", title: "Archery", accent: "#ef4444", icon: iconArchery },
+  { slug: "sliding-puzzle", title: "Sliding Puzzle", accent: BRAND_AMBER, icon: iconSlidingPuzzle },
+  { slug: "whack-a-mole", title: "Whack-a-Mole", accent: "#22c55e", icon: iconWhackAMole },
 ];
 
 function buildSvg({ title, accent, icon }) {

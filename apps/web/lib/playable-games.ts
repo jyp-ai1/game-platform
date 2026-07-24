@@ -31,6 +31,13 @@ export const PLAYABLE_SLUGS = [
   "darts",
   "bubble-shooter",
   "merge-blocks",
+  "connect4",
+  "reversi",
+  "gomoku",
+  "bowling",
+  "archery",
+  "sliding-puzzle",
+  "whack-a-mole",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

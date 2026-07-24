@@ -1,0 +1,1 @@
+export { WhackAMoleGame } from "./WhackAMole";
