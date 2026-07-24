@@ -3,6 +3,7 @@
 import { useRef, useState, type MutableRefObject } from "react";
 
 import { clearSave, hasSave, loadGame } from "./save";
+import { isSaveEnabled } from "./platform-flags";
 import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 
 export type ResumePhase = "resume-prompt" | "ready";
@@ -30,7 +31,7 @@ export function useResumableGame<State>(
   createInitialState: () => State
 ): UseResumableGameResult<State> {
   const [savedState] = useState<State | null>(() =>
-    hasSave(slug) ? loadGame<State>(slug) : null
+    isSaveEnabled() && hasSave(slug) ? loadGame<State>(slug) : null
   );
 
   const [phase, setPhase] = useState<ResumePhase>(

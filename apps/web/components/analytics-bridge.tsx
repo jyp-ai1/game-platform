@@ -2,6 +2,8 @@
 
 import {
   getDeviceId,
+  isSaveEnabled,
+  isWeeklyMissionEnabled,
   subscribeEngagementEvents,
   subscribePlatformAnalyticsEvents,
   type EngagementEvent,
@@ -35,6 +37,7 @@ function onEngagement(event: EngagementEvent) {
       });
       break;
     case "weekly-mission-completed":
+      if (!isWeeklyMissionEnabled()) break;
       track("weekly_mission_complete", {
         mission_id: event.missionId,
         title: event.title,
@@ -58,9 +61,11 @@ function onPlatform(event: PlatformAnalyticsEvent) {
       track("game_end", { score: event.score }, event.gameSlug);
       break;
     case "save-created":
+      if (!isSaveEnabled()) break;
       track("save_created", {}, event.gameSlug);
       break;
     case "save-resumed":
+      if (!isSaveEnabled()) break;
       track("resume", {}, event.gameSlug);
       break;
   }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GameDetailTemplate } from "@/components/game-detail-template";
 import { GameSection } from "@/components/game-section";
 import { JsonLdScript } from "@/components/json-ld-script";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { selectHotSlugs, selectRelated } from "@/lib/game-sections";
 import { isPlayableSlug } from "@/lib/playable-games";
 import {
@@ -35,7 +36,11 @@ export async function generateMetadata({
 
 export default async function GamePage({ params }: GamePageProps) {
   const { slug } = await params;
-  const [game, allGames] = await Promise.all([getGameBySlug(slug), getGames()]);
+  const [game, allGames, rankingEnabled] = await Promise.all([
+    getGameBySlug(slug),
+    getGames(),
+    isFeatureEnabled("ranking"),
+  ]);
 
   if (!game || game.status === "HIDDEN") {
     notFound();
@@ -58,7 +63,12 @@ export default async function GamePage({ params }: GamePageProps) {
           ]),
         ]}
       />
-      <GameDetailTemplate game={game} slug={slug} isPlayable={isPlayable} />
+      <GameDetailTemplate
+        game={game}
+        slug={slug}
+        isPlayable={isPlayable}
+        rankingEnabled={rankingEnabled}
+      />
       <GameSection title="비슷한 게임" games={related} hotSlugs={hotSlugs} />
     </>
   );

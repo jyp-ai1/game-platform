@@ -39,6 +39,12 @@ export default async function AdminReportsPage() {
           new_players: monthly.new_players,
           errors: monthly.errors,
         },
+        ...monthly.top_games.map((g) => ({
+          month: monthly.month,
+          game_slug: g.game_slug,
+          plays: g.plays,
+          row_type: "top_game",
+        })),
       ])
     : "";
 

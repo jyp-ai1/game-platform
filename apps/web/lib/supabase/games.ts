@@ -1,6 +1,8 @@
 import type { Difficulty, Game, GameStatus } from "@game-platform/shared";
 import { cache } from "react";
 
+import { isFeatureEnabled } from "@/lib/feature-flags";
+
 import { supabase } from "./client";
 
 interface GameRow {
@@ -69,11 +71,16 @@ export const getGameBySlug = cache(async (slug: string): Promise<Game | null> =>
 });
 
 export async function getGames({
-  includeComingSoon = true,
+  includeComingSoon,
 }: { includeComingSoon?: boolean } = {}): Promise<Game[]> {
-  const visibleStatuses: GameStatus[] = includeComingSoon
+  const betaEnabled =
+    includeComingSoon !== undefined
+      ? includeComingSoon
+      : await isFeatureEnabled("beta_games");
+
+  const visibleStatuses: GameStatus[] = betaEnabled
     ? ["ACTIVE", "COMING_SOON", "MAINTENANCE"]
-    : ["ACTIVE"];
+    : ["ACTIVE", "MAINTENANCE"];
 
   const { data, error } = await supabase
     .from("games")

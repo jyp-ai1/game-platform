@@ -7,6 +7,8 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { MonitoringProvider } from "@/components/monitoring-provider";
+import { PlatformFlagsSync } from "@/components/platform-flags-sync";
+import { getPlatformFlagsFromDb } from "@/lib/feature-flags";
 import { ToastHost } from "@/components/toast/toast-host";
 import { siteConfig } from "@/lib/site-config";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo";
@@ -65,11 +67,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const platformFlags = await getPlatformFlagsFromDb();
+
   return (
     <html
       lang="ko"
@@ -83,6 +87,7 @@ export default function RootLayout({
             during the very same initial commit, e.g. the "첫 게임 플레이"
             achievement on a hard-loaded game page). */}
         <ToastHost />
+        <PlatformFlagsSync flags={platformFlags} />
         <AnalyticsBridge />
         <MonitoringProvider />
         <JsonLdScript data={[organizationJsonLd(), webSiteJsonLd()]} />

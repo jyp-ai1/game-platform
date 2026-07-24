@@ -47,4 +47,6 @@ export async function toggleFeatureFlag(key: string, enabled: boolean) {
 
   revalidatePath("/admin/flags");
   revalidatePath("/admin/system");
+  revalidatePath("/");
+  revalidatePath("/games", "layout");
 }

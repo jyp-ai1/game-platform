@@ -15,6 +15,7 @@ import {
   selectNew,
   selectPopular,
 } from "@/lib/game-sections";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { fetchActiveBanners, fetchActiveFeatured, fetchActiveNotices } from "@/lib/supabase/cms";
 import { getGames } from "@/lib/supabase/games";
 import { buildHomeMetadata } from "@/lib/seo";
@@ -37,12 +38,16 @@ const SLOT_META: Record<
 };
 
 export default async function Home() {
-  const [games, banners, notices, featured] = await Promise.all([
-    getGames(),
-    fetchActiveBanners(),
-    fetchActiveNotices(),
-    fetchActiveFeatured(),
-  ]);
+  const [games, banners, notices, featured, cmsEnabled, weeklyMissionEnabled, rankingEnabled] =
+    await Promise.all([
+      getGames(),
+      fetchActiveBanners(),
+      fetchActiveNotices(),
+      fetchActiveFeatured(),
+      isFeatureEnabled("cms"),
+      isFeatureEnabled("weekly_mission"),
+      isFeatureEnabled("ranking"),
+    ]);
   const hotSlugs = selectHotSlugs(games);
 
   const featuredBySlot = featured.reduce<Record<string, string[]>>((acc, row) => {
@@ -60,52 +65,56 @@ export default async function Home() {
   return (
     <main className="flex flex-1 flex-col">
       <Hero />
-      <CmsNoticeBar notices={notices} />
-      <CmsBannerStrip banners={banners} />
+      {cmsEnabled ? <CmsNoticeBar notices={notices} /> : null}
+      {cmsEnabled ? <CmsBannerStrip banners={banners} /> : null}
 
-      <GameCarousel
-        title={`${SLOT_META.weekly_pick.emoji} ${SLOT_META.weekly_pick.title}`}
-        description={SLOT_META.weekly_pick.description}
-        games={gamesForSlot("weekly_pick", () => selectPopular(games))}
-        hotSlugs={hotSlugs}
-      />
+      {cmsEnabled ? (
+        <>
+          <GameCarousel
+            title={`${SLOT_META.weekly_pick.emoji} ${SLOT_META.weekly_pick.title}`}
+            description={SLOT_META.weekly_pick.description}
+            games={gamesForSlot("weekly_pick", () => selectPopular(games))}
+            hotSlugs={hotSlugs}
+          />
 
-      <GameCarousel
-        title={`${SLOT_META.editors_pick.emoji} ${SLOT_META.editors_pick.title}`}
-        description={SLOT_META.editors_pick.description}
-        games={gamesForSlot("editors_pick", () => selectPopular(games, 4))}
-        hotSlugs={hotSlugs}
-      />
+          <GameCarousel
+            title={`${SLOT_META.editors_pick.emoji} ${SLOT_META.editors_pick.title}`}
+            description={SLOT_META.editors_pick.description}
+            games={gamesForSlot("editors_pick", () => selectPopular(games, 4))}
+            hotSlugs={hotSlugs}
+          />
 
-      <GameCarousel
-        title={`${SLOT_META.trending.emoji} ${SLOT_META.trending.title}`}
-        description={SLOT_META.trending.description}
-        games={gamesForSlot("trending", () => selectPopular(games))}
-        hotSlugs={hotSlugs}
-      />
+          <GameCarousel
+            title={`${SLOT_META.trending.emoji} ${SLOT_META.trending.title}`}
+            description={SLOT_META.trending.description}
+            games={gamesForSlot("trending", () => selectPopular(games))}
+            hotSlugs={hotSlugs}
+          />
 
-      <GameCarousel
-        title={`${SLOT_META.popular.emoji} ${SLOT_META.popular.title}`}
-        description={SLOT_META.popular.description}
-        games={gamesForSlot("popular", () => selectPopular(games))}
-        hotSlugs={hotSlugs}
-      />
+          <GameCarousel
+            title={`${SLOT_META.popular.emoji} ${SLOT_META.popular.title}`}
+            description={SLOT_META.popular.description}
+            games={gamesForSlot("popular", () => selectPopular(games))}
+            hotSlugs={hotSlugs}
+          />
 
-      <GameCarousel
-        title={`${SLOT_META.new_games.emoji} ${SLOT_META.new_games.title}`}
-        description={SLOT_META.new_games.description}
-        games={gamesForSlot("new_games", () => selectNew(games))}
-        hotSlugs={hotSlugs}
-      />
+          <GameCarousel
+            title={`${SLOT_META.new_games.emoji} ${SLOT_META.new_games.title}`}
+            description={SLOT_META.new_games.description}
+            games={gamesForSlot("new_games", () => selectNew(games))}
+            hotSlugs={hotSlugs}
+          />
+        </>
+      ) : null}
 
       <CategoryLinks />
 
       <RecentlyPlayedSection games={games} />
 
       <DailyChallengeCard />
-      <WeeklyMissionCard />
+      {weeklyMissionEnabled ? <WeeklyMissionCard /> : null}
       <SeasonCard />
-      <PlayerRankCard games={games} />
+      {rankingEnabled ? <PlayerRankCard games={games} /> : null}
 
       <GameCarousel
         title="🕹️ 추억의 오락실"

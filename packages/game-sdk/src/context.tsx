@@ -16,6 +16,7 @@ import {
 } from "./local-storage";
 import { recordMissionScoreReport } from "./missions";
 import { NicknameModal } from "./nickname-modal";
+import { isRankingEnabled } from "./platform-flags";
 import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 import { recordSeasonNewBest, recordSeasonScoreReport } from "./season";
 import { recordWeeklyMissionScoreReport } from "./weekly-missions";
@@ -65,13 +66,15 @@ export function GameSDKProvider({
       setBestScore(gameSlug, score);
       recordNewBest(gameSlug, score);
       recordSeasonNewBest();
-      setPending({ gameSlug, score });
+      if (isRankingEnabled()) {
+        setPending({ gameSlug, score });
+      }
     }
   }, []);
 
   async function handleSubmit(nickname: string) {
     const trimmed = nickname.trim();
-    if (!pending || !trimmed) {
+    if (!pending || !trimmed || !isRankingEnabled()) {
       return;
     }
     setLastNickname(trimmed);

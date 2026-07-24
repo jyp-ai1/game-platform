@@ -3,6 +3,7 @@
 // owns its own serializable reducer state; this module owns persistence,
 // versioning, and per-slug reactivity.
 import { getDeviceId } from "./local-storage";
+import { isSaveEnabled } from "./platform-flags";
 import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 
 const SAVE_KEY_PREFIX = "play29:save:";
@@ -89,6 +90,9 @@ function notifySlug(slug: string): void {
 const savedThisVisit = new Set<string>();
 
 export function saveGame<T>(slug: string, state: T): void {
+  if (!isSaveEnabled()) {
+    return;
+  }
   const envelope: SaveEnvelope<T> = {
     version: SAVE_VERSION,
     updatedAt: new Date().toISOString(),
@@ -105,6 +109,9 @@ export function saveGame<T>(slug: string, state: T): void {
 }
 
 export function loadGame<T>(slug: string): T | null {
+  if (!isSaveEnabled()) {
+    return null;
+  }
   const envelope = getCachedEnvelope(slug);
   if (!envelope) {
     return null;

@@ -1,4 +1,12 @@
 export {
+  configurePlatformFlags,
+  getPlatformFlags,
+  isRankingEnabled,
+  isSaveEnabled,
+  isWeeklyMissionEnabled,
+  type PlatformFlags,
+} from "./platform-flags";
+export {
   GameSDKProvider,
   useGameSDK,
   type GameSDKAdapter,

@@ -5,6 +5,7 @@
 // package, not two.
 import { getLevel } from "./engagement";
 import { emitEngagementEvent } from "./engagement-events";
+import { isWeeklyMissionEnabled } from "./platform-flags";
 import {
   anyPlayMission,
   categoryPlayMission,
@@ -151,6 +152,9 @@ export function subscribeWeeklyMission(listener: () => void): () => void {
 }
 
 function processWeeklyMissionUpdate(ctx: MissionCheckContext): void {
+  if (!isWeeklyMissionEnabled()) {
+    return;
+  }
   const state = ensureFreshWeeklyMissionState();
   if (state.completed) {
     return;

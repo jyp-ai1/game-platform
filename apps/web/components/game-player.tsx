@@ -161,10 +161,29 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
   ),
 };
 
-export function GamePlayer({ slug }: { slug: PlayableSlug }) {
+export function GamePlayer({
+  slug,
+  rankingEnabled = true,
+}: {
+  slug: PlayableSlug;
+  rankingEnabled?: boolean;
+}) {
   const Component = gameComponents[slug];
+
+  async function submitScoreWithFlags(
+    gameSlug: string,
+    nickname: string,
+    score: number,
+    deviceId: string
+  ): Promise<void> {
+    if (!rankingEnabled) {
+      return;
+    }
+    await submitScore(gameSlug, nickname, score, deviceId);
+  }
+
   return (
-    <GameSDKProvider sdk={{ submitScore }}>
+    <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
       <Component />
     </GameSDKProvider>
   );

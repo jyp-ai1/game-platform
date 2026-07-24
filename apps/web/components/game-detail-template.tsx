@@ -20,10 +20,12 @@ export function GameDetailTemplate({
   game,
   slug,
   isPlayable,
+  rankingEnabled = true,
 }: {
   game: Game;
   slug: string;
   isPlayable: boolean;
+  rankingEnabled?: boolean;
 }) {
   return (
     <main className="flex flex-1 flex-col">
@@ -97,7 +99,7 @@ export function GameDetailTemplate({
 
       <Container className="max-w-7xl py-8 lg:py-10">
         {isPlayable ? (
-          <PlayableLayout game={game} slug={slug} />
+          <PlayableLayout game={game} slug={slug} rankingEnabled={rankingEnabled} />
         ) : game.status !== "ACTIVE" ? (
           <BlockedLayout game={game} status={game.status} />
         ) : (
@@ -110,7 +112,15 @@ export function GameDetailTemplate({
   );
 }
 
-function PlayableLayout({ game, slug }: { game: Game; slug: string }) {
+function PlayableLayout({
+  game,
+  slug,
+  rankingEnabled,
+}: {
+  game: Game;
+  slug: string;
+  rankingEnabled: boolean;
+}) {
   return (
     <>
       <div className="mb-6 lg:hidden">
@@ -125,7 +135,7 @@ function PlayableLayout({ game, slug }: { game: Game; slug: string }) {
             categorySlug={game.category?.slug ?? null}
           />
           <GameDetailStage>
-            <GamePlayer slug={slug as PlayableSlug} />
+            <GamePlayer slug={slug as PlayableSlug} rankingEnabled={rankingEnabled} />
           </GameDetailStage>
 
           {game.howToPlay ? (
@@ -135,7 +145,7 @@ function PlayableLayout({ game, slug }: { game: Game; slug: string }) {
             </div>
           ) : null}
 
-          <MyBestScore gameSlug={slug} />
+          {rankingEnabled ? <MyBestScore gameSlug={slug} /> : null}
         </div>
 
         {/* Sidebar — ranking & meta (sticky on PC) */}
@@ -147,10 +157,12 @@ function PlayableLayout({ game, slug }: { game: Game; slug: string }) {
             <ScreenshotGallery slug={game.slug} title={game.title} compact />
           </div>
 
-          <div className="rounded-2xl border bg-card p-4 shadow-sm lg:p-5">
-            <h2 className="mb-4 text-lg font-semibold">랭킹</h2>
-            <Leaderboard gameSlug={slug} />
-          </div>
+          {rankingEnabled ? (
+            <div className="rounded-2xl border bg-card p-4 shadow-sm lg:p-5">
+              <h2 className="mb-4 text-lg font-semibold">랭킹</h2>
+              <Leaderboard gameSlug={slug} />
+            </div>
+          ) : null}
 
           {game.nostalgiaNote ? <NostalgiaNote note={game.nostalgiaNote} /> : null}
         </aside>
