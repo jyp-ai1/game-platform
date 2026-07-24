@@ -1,8 +1,11 @@
 # Sprint 12 — Operations Platform 2.0
 
-**Status:** IN PROGRESS (Phase 3 — T5/T6 complete, gates pending)  
+**Status:** **RC** — T0 Release Gate in progress · **NOT GA**  
 **Governance:** v2.0  
-**Theme:** 운영 자동화 + AI 기반 운영 도구
+**Theme:** 운영 자동화 (AI FROZEN)  
+**Sprint 13:** ⏸️ **DO NOT START** — [`docs/sprint-12-ga-checklist.md`](./sprint-12-ga-checklist.md)
+
+> **PM (2026-07-24):** Sprint 12 = RC. Gate PASS 후 `v1.12.0` GA. Sprint 13 구현 금지.
 
 ---
 
@@ -28,7 +31,7 @@ Sprint 12는 PM 부재 중 **Phase 1 개발 착수** (2026-07-24). GA 게이트�
 | **T3** Notification Center | DONE | `/admin/notifications` CMS hub |
 | **T4** Feature Flag | DONE | Runtime wired — CMS, ranking, save, weekly mission, beta games |
 | **T5** Report Center | DONE | CSV · Excel (.xls) · Print/PDF |
-| **T6** AI Assistant | DONE | LLM (OPS_AI_API_KEY) + rules fallback |
+| **T6** AI Assistant | **FROZEN** | Rules + optional LLM — **PM: 추가 AI 없음** |
 | **Phase 2** | DONE | SDK platform-flags, suspend enforcement (`0019`) |
 | **Phase 3** | DONE | Analytics page, export API, AI panel |
 | **T7–T10** QA/DevOps/PM | PENDING | Governance gates |
@@ -141,4 +144,6 @@ Sprint 12는 Admin/Analytics 계층 **확장** — 게임 패키지 추가 최�
 
 ## PM Note
 
-Sprint 11 Product **A (90%)** · Architecture **A+** — Sprint 12는 **Operation B+ → A** 를 목표로 Real-time Ops + AI Assistant에 집중.
+Sprint 11~12 = **Operation Platform ✅** (Game29 = 운영 플랫폼 수준)  
+**다음:** [`docs/sprint-13-plan.md`](./sprint-13-plan.md) — Fun & Retention  
+**KPI:** [`docs/pm-kpi-framework.md`](./pm-kpi-framework.md)

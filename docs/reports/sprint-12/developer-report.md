@@ -1,34 +1,24 @@
 # Senior Developer Report — Sprint 12
 
 **Date:** 2026-07-24  
-**Status:** IN PROGRESS (Phase 3 complete — pending QA/DevOps/PM gates)
+**Status:** RC — T0 Release Gate (**NOT GA**)  
+**Sprint 13:** ⏸️ HOLD (no implementation)
 
-## Delivered
+## Gate Deliverables
 
-| Phase | Scope | Status |
+| Report | Path | Status |
 | --- | --- | --- |
-| Phase 1 | Monitoring, CRM, Errors, Flags, Reports (CSV), Notifications, Assistant stub | DONE |
-| Phase 2 | Feature flag runtime wiring, player suspend (`0019`) | DONE |
-| Phase 3 | AI Assistant (LLM + rules), Excel export, Print/PDF, Analytics page | DONE |
+| QA | `docs/reports/sprint-12/qa-report.md` | HOLD |
+| DevOps | `docs/reports/sprint-12/devops-report.md` | HOLD |
+| Rollback drill | `docs/reports/sprint-12/devops-rollback-drill.md` | Pending operator |
+| PM Release | `docs/reports/sprint-12/pm-release.md` | HOLD |
+| Checklist | `docs/sprint-12-ga-checklist.md` | Active |
+| Release Notes | `RELEASE_NOTES_v1.12.0.md` | DRAFT |
 
-## Migrations
+## Automated Evidence (2026-07-24)
 
-| File | Status |
-| --- | --- |
-| `0018_sprint12.sql` | Applied |
-| `0019_player_suspend_enforcement.sql` | Applied |
+- Production smoke: 20/20 URLs → HTTP 200
+- typecheck + build: PASS
+- GA candidate SHA: `1820955`
 
-## Build
-
-- `npm run typecheck` — PASS
-- `npm run build` — PASS (pending Phase 3 commit)
-
-## Remaining (Governance)
-
-- T7 Independent QA
-- T8 DevOps rollback drill + `v1.12.0` tag
-- T9 AI Engineer Review (when `OPS_AI_API_KEY` enabled)
-- T10 PM Release Approval
-- Sprint 11 GA (`v1.11.0`) — parallel if not yet done
-
-**Senior Developer:** Cursor Agent **Result:** PASS (dev scope)
+**Senior Developer:** PASS (dev scope) · **GA:** pending T0
