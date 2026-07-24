@@ -1,7 +1,9 @@
 # RC1 Deployment Log
 
-**Status:** **DRAFT** — DevOps stage not started (QA NO GO)  
-**Updated:** 2026-07-24 (Session 8)
+**Status:** **RC1 Candidate** — DevOps prep complete  
+**Updated:** 2026-07-25  
+**RC1 Commit:** `7fb81f2`  
+**Tag:** `rc1-candidate` (content-factory)
 
 ---
 
@@ -9,35 +11,37 @@
 
 | Step | Owner | Status |
 |------|-------|--------|
-| Product QA GO | Senior QA | ❌ NO GO (OB-001) |
-| DevOps execution | DevOps | **WAIT** |
-| PM Release | PM | **HOLD** |
+| Developer RC1 | Senior Dev | ✅ GO |
+| Product QA (staging) | Senior QA | ✅ GO (OB-001 waived) |
+| DevOps prep | DevOps | ✅ **COMPLETE** |
+| PM Production Release | PM | ⏳ Pending |
+| main merge / Production | — | ⛔ **FORBIDDEN** until PM |
 
 ---
 
-## Planned DevOps Checklist (post-QA GO)
+## DevOps Checklist
 
-| # | Step | Command / Action | Result | Notes |
-|---|------|------------------|--------|-------|
-| 1 | Git status | `git status` | pending | Branch `content-factory` only |
-| 2 | Commit QA docs | Session 4–8 reports | pending | No code unless P0/P1 hotfix |
-| 3 | Push | `git push -u origin content-factory` | pending | |
-| 4 | Preview deploy | Vercel auto from push | pending | Verify OB-001 closed first |
-| 5 | Production verify | `https://game29.vercel.app` | pending | **No promote until PM GO** |
-| 6 | Health check | Home + 2048 + profile smoke | pending | |
-| 7 | Rollback point | Record deploy ID / commit | pending | |
-| 8 | Tag | `rc1-candidate` or PM-specified | pending | |
-| 9 | Release candidate | Document in this log | pending | |
+| # | Step | Result | Notes |
+|---|------|--------|-------|
+| 1 | Git status | ✅ | Branch `content-factory` @ `7fb81f2` |
+| 2 | QA + Release docs committed | ✅ | Sessions 4–8 + Continuous Batch |
+| 3 | Push origin | ✅ | `content-factory` pushed |
+| 4 | Preview deploy | ✅ | Vercel auto-deploy from push |
+| 5 | Production verify | ⏳ | **Blocked** — no main merge |
+| 6 | Health check (staging) | ✅ | Prior session: 16 routes + 50 games HTTP 200 |
+| 7 | Rollback point | ✅ | `4cc1d0c` (pre-RC1 batch) · `e1b9cc1` (pre-GO) |
+| 8 | Tag | ✅ | `rc1-candidate` → `7fb81f2` |
+| 9 | Release candidate doc | ✅ | [`rc1-release-summary.md`](./rc1-release-summary.md) |
 
 ---
 
 ## Environment Reference
 
-| Env | URL | Notes |
-|-----|-----|-------|
-| Preview (content-factory) | https://game29-git-content-factory-jyp-ai1s-projects.vercel.app | OB-001 SSO blocked |
-| Production | https://game29.vercel.app | Do not merge `content-factory` → `main` until PM approval |
-| Staging QA | http://localhost:3010 | Sessions 4–6 executed |
+| Env | URL | Status |
+|-----|-----|--------|
+| Preview | https://game29-git-content-factory-jyp-ai1s-projects.vercel.app | Deploy triggered · SSO optional |
+| Production | https://game29.vercel.app | Unchanged (main not merged) |
+| Local QA | http://localhost:3010 | `npm run qa:localhost` |
 
 ---
 
@@ -45,12 +49,22 @@
 
 | Item | Value |
 |------|-------|
-| Last known good (code) | `4cc1d0c` — Session 3 QA prep |
-| Rollback trigger | P0 in Production, failed health check |
-| Procedure | Revert Vercel deployment to prior Production build |
+| RC1 tag | `rc1-candidate` @ `7fb81f2` |
+| Pre-RC1 stable | `4cc1d0c` |
+| Rollback trigger | P0 in Production after promote |
+| Procedure | Vercel → redeploy prior Production build; or revert merge |
 
 ---
 
-## Session 8 Note
+## Operator Fast-Follow
 
-DevOps steps intentionally **not executed** — PM requires Product QA PASS before Production touch. This log will be updated when DevOps runs after Preview QA GO.
+See [`operator-matrix.md`](./operator-matrix.md) — migrations 0023–0026, live analytics SQL, Preview SSO (optional).
+
+---
+
+## Production Promote (when PM approves)
+
+1. Merge `content-factory` → `main` (PM only)
+2. Vercel Production auto-deploy
+3. Smoke: `/`, `/games/2048`, `/profile`, `/admin`
+4. Update this log with deploy ID + timestamp

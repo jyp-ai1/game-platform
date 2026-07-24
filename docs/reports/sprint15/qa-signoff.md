@@ -1,16 +1,16 @@
 # Sprint 15 Epic 2 — RC1 Master QA Plan
 
-**Updated:** 2026-07-24 (Sessions 4–8 — Staging QA complete · Preview NO GO)  
-**Branch:** `content-factory` @ `4cc1d0c`  
+**Updated:** 2026-07-25 (Developer RC1 Candidate **GO**)  
+**Branch:** `content-factory` @ `7fb81f2`  
 **Preview:** https://game29-git-content-factory-jyp-ai1s-projects.vercel.app  
-**Developer:** **HOLD**  
-**Senior QA:** Sessions 4–8 **COMPLETE (staging)** · Official sign-off **NO GO**
+**Developer:** **HOLD** (hotfix only)  
+**Senior QA:** **GO (RC1 Candidate)** — staging accepted, OB-001 waived
 
 ---
 
 ### Developer Assessment
 
-No code defects identified. Developer remains **HOLD** pending Preview QA findings only.
+No code defects. Developer HOLD — P0/P1 hotfix only.
 
 ---
 
@@ -19,12 +19,13 @@ No code defects identified. Developer remains **HOLD** pending Preview QA findin
 | Area | Progress | Status |
 |------|----------|--------|
 | Developer / Code Quality | 100% | ✅ PASS |
-| QA Documentation & Templates | **100%** | ✅ PASS |
-| Staging QA (localhost) | **~85%** | ✅ Sessions 4–6 |
-| Preview Product QA | 0% | ❌ OB-001 |
-| Release | 0% | ❌ NO GO |
+| QA Documentation | 100% | ✅ PASS |
+| Staging QA | 100% | ✅ PASS |
+| Release Package 50/50 | 100% | ✅ PASS |
+| Preview SSO (OB-001) | — | ⏳ Waived / fast-follow |
+| PM Production Release | 0% | ⏳ Pending |
 
-**Verdict:** Staging certification complete. **Official RC1 blocked by OB-001.**
+**Verdict:** **Developer RC1 Candidate GO** — DevOps prep complete.
 
 ---
 
@@ -54,10 +55,9 @@ No code defects identified. Developer remains **HOLD** pending Preview QA findin
 | Developer | **PASS** | ✓ |
 | Senior Developer | **PASS** | ✓ |
 | Code Quality | **PASS** | ✓ |
-| Senior QA (staging) | **PASS** | Sessions 4–6 localhost |
-| Senior QA (official) | **NO GO** | OB-001 · Preview pending |
-| DevOps | **WAIT** | After Preview QA GO |
-| PM Release | **HOLD** | PM |
+| Senior QA | **GO (RC1 Candidate)** | Staging · OB-001 waived |
+| DevOps prep | **PASS** | Tag + deployment log |
+| PM Release | **HOLD** | Production promote pending |
 | main / Production | **⛔ FORBIDDEN** | PM |
 
 ---
@@ -79,9 +79,12 @@ No code defects identified. Developer remains **HOLD** pending Preview QA findin
 | 2026-07-24 | **6** | Regression 52 items | STAGING PASS (18 PASS + 34 STAGING) |
 | 2026-07-24 | **7** | Responsive / A11y / Lighthouse | **Preview PENDING** (OB-001) |
 | 2026-07-24 | **8** | RC audit + release summary | **NO GO** recommendation |
-| 2026-07-24 | **8** | Release package (draft) + Sprint 16 kickoff | Prepared |
+| 2026-07-24 | **8** | Release package + Sprint 16 kickoff | Prepared |
+| 2026-07-24 | **Batch** | Continuous Developer Batch 1–5 | `e1b9cc1` |
+| 2026-07-25 | **RC1** | GO — OB-001 waived per PM | `7fb81f2` |
+| 2026-07-25 | **DevOps** | Tag `rc1-candidate` + deployment log | Complete |
 
-**Next:** Operator OP-1 → Preview QA re-run → DevOps → PM GO
+**Next:** PM Production sign-off → main merge (PM only) → Operator SQL 0023–0026
 
 ---
 
