@@ -16,7 +16,9 @@ import {
 import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
 import { GameDetailHero } from "@/components/game-detail-hero";
 import { GameDetailJourneyStrip } from "@/components/game-detail-journey-strip";
+import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailMetaPanel, GameDetailTrailer } from "@/components/game-detail-meta-panel";
+import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameDetailMissionPanel } from "@/components/game-detail-mission-panel";
 import { GameDetailSimilar } from "@/components/game-detail-similar";
 import { GameDetailStagePanel } from "@/components/game-detail-stage-panel";
@@ -65,7 +67,10 @@ export function GameDetailTemplate({
             {rankingEnabled ? (
               <>
                 <GameDetailTop3 gameSlug={slug} />
-                <GameDetailMyRecord gameSlug={slug} difficulty={game.difficulty} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <GameDetailMyRecord gameSlug={slug} difficulty={game.difficulty} />
+                  <GameDetailGlobalRanking gameSlug={slug} />
+                </div>
                 <GameDetailFriendRecord gameSlug={slug} />
               </>
             ) : null}
@@ -84,6 +89,7 @@ export function GameDetailTemplate({
               <GameDetailRating gameSlug={slug} />
             </div>
             <GameDetailMetaPanel game={game} />
+            <GameDetailPatchNotes game={game} />
             <GameDetailShare gameSlug={slug} title={game.title} challengeMode />
           </>
         ) : game.status !== "ACTIVE" ? (

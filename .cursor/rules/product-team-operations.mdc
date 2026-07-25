@@ -1,189 +1,143 @@
 ---
-description: Project Phoenix Master Task v3 — develop until Definition of Done, not tracks
+description: Project Phoenix Full Production Pipeline — manufacture until product feels complete
 alwaysApply: true
 ---
 
-# AUTO CONTINUATION RULE
+# Cursor AI Operation Mode
 
-Project Phoenix는 **08:00 Daily Report 이전에는 절대로 종료되지 않는다.**
+Cursor는 개발자가 아니라 **하나의 개발팀**이다.
 
-구현 단위(Track/Epic/Sprint)가 끝나도 **종료가 아니다.** 오직 **Definition of Done** 전체 충족 또는 08:00만 종료 조건.
+**08:00 Daily Report 이전에는 절대로 종료되지 않는다.**
 
-매 사이클:
+매 사이클 (무한 반복):
 
 1. MASTER TASK 로드
-2. 미완료 DoD 항목 탐색
-3. 우선순위 가장 높은 항목 구현
-4. QA
-5. Commit
-6. Push
-7. Preview 확인
-8. → 1로 반복
+2. 현재 서비스 분석
+3. 가장 부족한 사용자 경험 찾기
+4. 설계 → 구현 → QA → 리팩토링
+5. Commit → Push → Preview 확인
+6. → 1로 반복
 
 ## 절대 금지 (08:00 이전)
 
 - 중간보고 · 질문 · 승인 요청
-- "Track 완료" / "Epic 완료" / "오늘 작업 끝" / "현재 진행중"
-- "다음 뭐할까요"
+- Track / Epic / Phase / "오늘 작업" 완료 보고
+- "현재 진행중" / "다음 뭐할까요"
 
 **보고 가능 시점: 오직 08:00 Daily Report**
 
-## 중단 가능 조건 (P0만)
+## 중단 가능 (P0만)
 
-- 빌드 자체 불가
+- Build 자체 불가
 - GitHub push 권한 문제
-- 외부 API Key 필수 (OAuth secret 등)
+- 외부 API Key 필수
 
-그 외: **우회 구현 → 다음 DoD 항목**
+그 외: **우회 구현 → 다음 사이클**
 
----
-
-# Project Phoenix — Master Task v3
-
-**목표:** Re:Play를 **Steam + Duolingo + Discord** 수준의 웹게임 플랫폼으로 완성.
-
-Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`
-
+Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`  
 Preview: `https://game29-git-content-factory-jyp-ai1s-projects.vercel.app`
 
-## 종료 조건 (모두 완료 시에만 Done)
+---
 
+# Project Phoenix — Full Production Pipeline
+
+## Mission
+
+Re:Play를 **Steam + Duolingo + Discord** 수준의 **웹게임 라이프 플랫폼**으로 완성한다.
+
+기능 개발 프로젝트가 아니라 **제품(Product)을 완성하는 프로젝트**이다.
+
+**종료 조건 (하나뿐):**
+
+> 사용자가 "게임 사이트"가 아니라 **"게임을 계속하게 되는 플랫폼"**이라고 느끼는 상태
+
+---
+
+## Product Definition
+
+플레이 데이터를 자산으로 만든다. 모든 개발은 아래 경험을 완성하기 위한 것:
+
+```text
+방문 → 게임 발견 → 플레이 → 기록 → 성장 → 경쟁 → 공유 → 친구
+→ 컬렉션 → 습관 → 다시 방문
 ```
-Identity · Gameplay · Journey · Community · Social · Operation
-Developer Platform · AI Operation · Monetization Ready · Production Ready
-```
 
 ---
 
-## Phase 1 — Player Identity
+## 전체 구현 범위 (하나의 제품)
 
-**DoD:** 로그인 없이도 "내 계정"처럼 느껴진다.
+### 플레이 경험
+Runtime 통일 · Stage · 난이도 · XP · Coin · Achievement · Continue · Retry · Result · Next Game · Boss · Endless · Progress Save · Live Ranking/Score/Continue · 실시간 기록
 
-- [x] GuestID
-- [ ] Google Merge (real OAuth)
-- [x] Replay Score · Coins · XP · Level
-- [x] Mission · Collection
-- [x] Journey · Heatmap · Wrapped · Play History
-- [x] Profile Card · 최근 플레이 · 업적 · 플레이 성향 · 추천 장르
-- [ ] Replay DNA · Replay Rank (full)
+### 홈
+Hero · Continue · Daily/Weekly Mission · Collection · Replay Score · Streak · Coin · XP · Friends Activity · Challenge · AI 추천 · 최근 플레이/업적 · Rule Engine · Seasonal · Trending · Popular · Discover · 개인화
 
-## Phase 2 — Universal Gameplay
+### 게임 상세 (Steam 수준)
+Hero · Play · Difficulty · Stage · Mission · Achievement · Collection · Journey · Timeline · Reviews · Rating · Comments · AI Summary · Similar · Friends Records · Rankings · Replay Score · Patch Notes · Version · Developer · Update History
 
-**DoD:** 모든 게임 동일 흐름 + Stage/Mission/Reward.
+### Journey
+Timeline · Heatmap · Replay DNA · Wrapped · Replay Score/Level · Collection · Statistics · Weekly/Monthly/Annual Report · Longest Session · Favorite Genre/Time · Play Habit · Personal Dashboard
 
-- [x] Runtime: Loading→Ready→Playing→Pause→Result→Continue
-- [x] XP · Coin · Collection · Achievement · Leaderboard hooks
-- [x] Stage config layer (`game-stages.ts`)
-- [ ] 모든 50게임 in-engine Stage/Boss/Continue
+### Community
+댓글 · 답글 · 좋아요 · 싫어요 · 신고 · 리뷰 · 평점 · 활동 피드 · 친구 활동 · Weekly/Monthly/Season League · Daily/Weekly Challenge · Community Feed · 인기 플레이/리뷰
 
-## Phase 3 — Steam Style Detail
+### Multiplayer
+Room · Invite · QR · SMS · Kakao · Discord · Web Share · Spectator · Match Ready · Countdown · Voice 준비 · Friend Rematch · Challenge Link · Result Compare · 실시간 구조
 
-**DoD:** Steam 수준 상세페이지.
+### Social
+Friend · Follow · Activity · Share · Invite · Ranking Compare · Friend Ranking · Friend Journey · Friend Collection
 
-- [x] Hero · Play · Top3 · 내 기록 · Achievements · Collection
-- [x] AI Summary · Similar · Recommended
-- [ ] 친구 기록 · Journey · Stages · Difficulty · 리뷰/평점 · Developer · 패치노트
+### Replay Identity (핵심)
+GuestID · Google Login · Account Merge · Replay Score/Rank · Coins · XP · Level · Avatar · Title · Badge · Collection · Replay DNA · Wrapped
 
-## Phase 4 — Discovery
+### Retention
+Daily Login · Attendance · Daily/Weekly/Monthly/Season Mission · Quest · Reward · Coin Shop · Notification · Continue Reminder · Goal · Progress · Collection Reward
 
-**DoD:** 게임 탐험 허브.
+### 운영 시스템
+Health Dashboard · Live Metrics · Broken/Crash/Error/Bug · Review · Comment · Session · Retention · DAU/WAU/MAU · Top/Worst Game · Live/Deploy/Release Status
 
-- [x] Continue · Trending · Popular · Season · Challenge · AI Picks
-- [x] Friends Playing · Recently Updated · Mood · Genre · Difficulty · Play Time · Collections
-- [x] Rule Engine 추천
-- [ ] Developer browse · live analytics trending
+### AI Operation
+댓글 → 버그 추출 → 우선순위 → GitHub Issue → 자동 수정 → QA → PR → Deploy → Release Note
 
-## Phase 5 — Community
+### Developer Platform
+게임 등록/수정/승인 · 버전 · 썸네일 · 태그 · Analytics · CTR · Session · Crash · Review · Ranking · Revenue 준비
 
-**DoD:** 댓글·리뷰·활동·리그.
+### Monetization Ready
+Premium · Sponsor · Featured · Reward · Ads · Promotion · Store · Creator Program
 
-- [x] 댓글 · 좋아요 · 신고 (local)
-- [ ] 답글 · 싫어요 · 별점 · 리뷰 · 활동피드 · 친구 활동
-- [x] Friend search · Challenge hub
-- [ ] Weekly/Season League · Challenge Feed
-- [x] Daily/Weekly/Monthly Challenge UI
-
-## Phase 6 — Journey
-
-**DoD:** Replay Journey 완성.
-
-- [x] Timeline · Heatmap · Statistics · Wrapped · Replay Score
-- [x] Longest session · Play habit analysis
-- [ ] Collections deep link · 월간/연간 리포트 · Replay DNA full
-
-## Phase 7 — Multiplayer
-
-**DoD:** 게임 초대 → 같이 플레이 → 결과 비교 → 재도전.
-
-- [x] Room · 2–4P · Spectator (localStorage MVP)
-- [x] Web Share · SMS · Kakao · Code · QR · Discord
-- [x] 게임 선택→초대→결과 비교→재도전 (localStorage MVP)
-- [ ] 실시간 동기화 (WebSocket/Realtime)
-
-## Phase 8 — Retention
-
-**DoD:** 매일 돌아오게.
-
-- [x] Daily/Weekly/Season Mission · Streak · Coin Shop · Avatar
-- [x] Calendar (attendance)
-- [ ] Quest · Notification · Continue Reminder
-
-## Phase 9 — Health Center
-
-**DoD:** 운영자 전체 게임 상태.
-
-- [x] Admin health · RC dashboard · AI summary stub
-- [ ] Realtime game status · Retention/Session live · Broken game detect
-
-## Phase 10 — AI Operation
-
-**DoD:** 댓글→분류→Issue→PR→Deploy 자동화.
-
-- [x] Ops dashboard UI
-- [ ] Comment ingest · bug classify · GitHub Issue draft · release note auto
-
-## Phase 11 — Developer Platform
-
-**DoD:** 게임 등록·승인·Analytics.
-
-- [x] Admin CMS · games CRUD
-- [ ] Developer registration API · approval workflow · CTR/Retention analytics
-
-## Phase 12 — Monetization Ready
-
-**DoD:** Store 구조.
-
-- [x] Virtual coin shop
-- [ ] Ads · Premium · Sponsor · Featured · Developer Promotion
-
-## Phase 13 — Production Ready
-
-**DoD:** RC 100% · E2E · A11y · Perf · SEO · PWA.
-
-- [ ] RC 95%+ (current ~91%)
-- [ ] E2E all pass · Accessibility 90+ · Performance gate
-- [ ] SEO/OG · PWA manifest · Monitoring
+### Production Ready
+Build · Typecheck · QA · E2E · Accessibility · Performance · SEO · PWA · Monitoring · Analytics · Rollback · Release · CI/CD
 
 ---
 
-## 추가 구현 (핵심)
+## 개발 원칙
 
-1. **Stage 기반 게임:** Stage1→Stage2→Boss→Clear→Continue (50게임)
-2. **친구 초대:** 게임 선택→초대→같이 플레이→결과 비교→재도전 (Share/QR/SMS/Kakao/Discord)
-3. **Live Data:** 점수·랭킹·Journey·Profile·Top3·Home·Continue 실시간 반영
-
-KPI per change: Retention · Session Time · Social · Identity · Operations
+- 사용자 **체감 변화** 필수
+- Placeholder 금지
+- **새로고침 없이** 데이터 반영
+- 모바일·PC 동일 경험
+- 모든 기능 → Replay Identity 연결
+- 모든 기능 → Journey 기록
+- 모든 기능 → Health Dashboard 확인 가능
+- 모든 기능 → QA 자동화 대상
 
 ---
 
-## 08:00 Daily Report (고정 형식)
+## Commit 정책
+
+승인 없이 자동: `구현 → QA → Commit → Push → Preview → 다음 구현`
+
+---
+
+## 08:00 Daily Report (고정)
 
 ```text
 ========================================
 Project Phoenix
-Overall Progress ███░░░░░░░░░░░░░
-이번 작업: 구현 · 체감 변화 · QA · Preview · Commits · RC Score
-남은 범위: Player Platform · Community · Journey · Multiplayer · AI · Dev · Production
-예상 전체 진행률 XX%
+서비스 완성도 XX%
+이번 작업으로 사용자가 체감하는 변화: ...
+구현 완료 항목: ...
+QA: Build · Typecheck · Regression · E2E · A11y · Perf
+Preview URL · Commit 목록 · 남은 제품 완성도 · 예상 완료율 · Known Issues
 ========================================
 ```

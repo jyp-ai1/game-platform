@@ -1,3 +1,4 @@
+import { ContinueReminderBanner } from "@/components/continue-reminder-banner";
 import { HomeCollectionStrip } from "@/components/home-collection-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
 import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
@@ -27,6 +28,7 @@ export default async function Home() {
 
   return (
     <main className="flex flex-1 flex-col">
+      <ContinueReminderBanner games={games} />
       <HomeVisualHero floatGames={floatGames} />
       <HomeContinueHub games={games} />
       <HomeIdentityDashboard games={games} />
