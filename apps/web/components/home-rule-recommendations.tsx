@@ -14,8 +14,13 @@ import {
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
 
-/** Rule engine: recent play → same genre → score. No AI. */
-export function HomeRuleRecommendations({ games }: { games: Game[] }) {
+export function HomeRuleRecommendations({
+  games,
+  large = false,
+}: {
+  games: Game[];
+  large?: boolean;
+}) {
   const favorites = useSyncExternalStore(
     subscribeFavorites,
     getFavoritesSnapshot,
@@ -37,10 +42,10 @@ export function HomeRuleRecommendations({ games }: { games: Game[] }) {
 
   return (
     <GameCarousel
-      title="For You"
-      description=""
+      title="Recommended"
       games={picks}
       hotSlugs={hotSlugs}
+      large={large}
     />
   );
 }

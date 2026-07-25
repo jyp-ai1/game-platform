@@ -14,9 +14,11 @@ import { isRecentlyCreated } from "@/lib/game-sections";
 export function GameCard({
   game,
   isHot,
+  compact = false,
 }: {
   game: Game;
   isHot?: boolean;
+  compact?: boolean;
 }) {
   const isComingSoon = game.status === "COMING_SOON";
   const isMaintenance = game.status === "MAINTENANCE";
@@ -85,20 +87,24 @@ export function GameCard({
           </Badge>
         </div>
 
-        <div className="flex items-center gap-3">
-          <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Users className="size-3" />
-            {game.playCount.toLocaleString()}
-          </p>
-          <span className="text-xs text-muted-foreground">{balance.playTimeLabel}</span>
-          <CardBestScore slug={game.slug} />
-        </div>
+        {!compact ? (
+          <>
+            <div className="flex items-center gap-3">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Users className="size-3" />
+                {game.playCount.toLocaleString()}
+              </p>
+              <span className="text-xs text-muted-foreground">{balance.playTimeLabel}</span>
+              <CardBestScore slug={game.slug} />
+            </div>
 
-        <p className="line-clamp-2 flex-1 text-sm text-muted-foreground">
-          {game.description}
-        </p>
+            <p className="line-clamp-2 flex-1 text-sm text-muted-foreground">
+              {game.description}
+            </p>
+          </>
+        ) : null}
 
-        <div className="relative mt-2">
+        <div className={cn("relative", compact ? "mt-1" : "mt-2")}>
           <Button
             nativeButton={false}
             render={

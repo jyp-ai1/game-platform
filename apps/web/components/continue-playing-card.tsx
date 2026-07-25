@@ -1,30 +1,27 @@
 "use client";
 
 import {
-  getBestScore,
-  getLevel,
   getServerHasSaveSnapshot,
   hasSave,
   subscribeSave,
 } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, Play } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useSyncExternalStore } from "react";
 
 import { GameCardPlayLink } from "@/components/game-card-play-link";
-import { formatRelativeTime } from "@/lib/format-relative-time";
-import { getLastPlayedAt } from "@/lib/local-storage";
 import { useMounted } from "@/lib/use-mounted";
 
-// Deliberately separate from GameCard: this shows a "last played" timestamp
-// and a button whose label honestly reflects whether a real save exists —
-// "이어하기" only appears once Sprint 9's Save SDK actually has progress to
-// restore; otherwise it reads "플레이" rather than falsely promising Continue.
-export function ContinuePlayingCard({ game }: { game: Game }) {
+export function ContinuePlayingCard({
+  game,
+  featured = false,
+}: {
+  game: Game;
+  featured?: boolean;
+}) {
   const mounted = useMounted();
-  const lastPlayedAt = getLastPlayedAt(game.slug);
   const subscribe = useCallback(
     (listener: () => void) => subscribeSave(game.slug, listener),
     [game.slug]
@@ -35,50 +32,65 @@ export function ContinuePlayingCard({ game }: { game: Game }) {
     getServerHasSaveSnapshot
   );
 
+  if (featured) {
+    return (
+      <div className="group relative overflow-hidden rounded-3xl border border-primary/25 bg-card/80 shadow-xl shadow-primary/10 backdrop-blur">
+        <div className="relative aspect-[2/1] min-h-[180px] sm:min-h-[220px]">
+          {game.thumbnailUrl ? (
+            <Image
+              src={game.thumbnailUrl}
+              alt={game.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              priority
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-muted">
+              <Gamepad2 className="size-16 text-muted-foreground" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-3 p-5 sm:p-6">
+            <h3 className="text-2xl font-bold sm:text-3xl">{game.title}</h3>
+            <Button
+              size="lg"
+              className="gap-2 shadow-lg"
+              nativeButton={false}
+              render={
+                <GameCardPlayLink href={`/games/${game.slug}`}>
+                  <Play className="size-4 fill-current" />
+                  {saved ? "Continue" : "Play"}
+                </GameCardPlayLink>
+              }
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border">
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/60 backdrop-blur">
       <div className="relative aspect-video overflow-hidden bg-muted">
         {game.thumbnailUrl ? (
-          <Image
-            src={game.thumbnailUrl}
-            alt={game.title}
-            fill
-            className="object-cover"
-          />
+          <Image src={game.thumbnailUrl} alt={game.title} fill className="object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Gamepad2 className="size-10 text-muted-foreground" />
           </div>
         )}
       </div>
-
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex items-center justify-between gap-2 p-3">
         <h3 className="font-semibold">{game.title}</h3>
-        <p className="text-xs text-muted-foreground">
-          {mounted ? (
-            <>
-              Lv.{getLevel()}
-              {getBestScore(game.slug) > 0
-                ? ` · 최고 ${getBestScore(game.slug).toLocaleString()}점`
-                : ""}
-              {" · "}
-              {formatRelativeTime(lastPlayedAt)}
-            </>
-          ) : (
-            <>Lv.1 · 방금</>
-          )}
-        </p>
-
-        <div className="mt-2">
-          <Button
-            nativeButton={false}
-            render={
-              <GameCardPlayLink href={`/games/${game.slug}`}>
-                {saved ? "▶ 이어하기" : "▶ 플레이"}
-              </GameCardPlayLink>
-            }
-          />
-        </div>
+        <Button
+          size="sm"
+          nativeButton={false}
+          render={
+            <GameCardPlayLink href={`/games/${game.slug}`}>
+              {mounted && saved ? "Continue" : "Play"}
+            </GameCardPlayLink>
+          }
+        />
       </div>
     </div>
   );

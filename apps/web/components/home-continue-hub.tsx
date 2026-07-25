@@ -28,15 +28,11 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
   const [featured, ...rest] = recentGames;
 
   return (
-    <section className="-mt-2 pb-4 pt-2 sm:pb-6">
+    <section className="py-5 sm:py-8">
       <Container>
-        <h2 className="text-lg font-bold sm:text-xl">Continue</h2>
-
         {featured ? (
-          <div className="mt-3 space-y-3">
-            <div className="rounded-2xl border border-primary/20 bg-card/80 shadow-lg shadow-primary/5 backdrop-blur">
-              <ContinuePlayingCard game={featured} />
-            </div>
+          <div className="space-y-4">
+            <ContinuePlayingCard game={featured} featured />
             {rest.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {rest.map((game) => (
@@ -46,8 +42,12 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
             ) : null}
           </div>
         ) : (
-          <div className="mt-3 rounded-2xl border border-dashed border-white/10 bg-card/30 px-4 py-8 text-center backdrop-blur">
-            <Button nativeButton={false} render={<Link href="/games">Play your first game</Link>} />
+          <div className="rounded-3xl border border-dashed border-primary/20 bg-gradient-to-br from-primary/10 to-card/30 px-6 py-16 text-center backdrop-blur">
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link href="/games">Play</Link>}
+            />
           </div>
         )}
       </Container>

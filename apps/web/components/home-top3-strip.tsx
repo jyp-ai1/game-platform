@@ -9,15 +9,12 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { getLeaderboard, type LeaderboardEntry } from "@/lib/supabase/scores";
 
 const EMPTY: Record<string, number> = {};
-function getServerCounts(): Record<string, number> {
-  return EMPTY;
-}
 
 export function HomeTop3Strip({ games }: { games: Game[] }) {
   const playCounts = useSyncExternalStore(
     subscribeEngagement,
     getGamePlayCounts,
-    getServerCounts
+    () => EMPTY
   );
   const topSlug = Object.entries(playCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
   const topGame = topSlug ? games.find((g) => g.slug === topSlug) : games[0];
@@ -37,35 +34,39 @@ export function HomeTop3Strip({ games }: { games: Game[] }) {
   if (!topGame) return null;
 
   return (
-    <section className="py-4">
+    <section className="py-4 sm:py-6">
       <Container>
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Top 3</h2>
-          <Link
-            href={`/games/${topGame.slug}#leaderboard`}
-            className="text-xs text-primary hover:underline"
-          >
-            {topGame.title} →
-          </Link>
+        <div className="rounded-3xl border border-white/10 bg-card/50 p-5 backdrop-blur sm:p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold sm:text-2xl">Top Players</h2>
+            <Link
+              href={`/games/${topGame.slug}#leaderboard`}
+              className="text-sm text-primary hover:underline"
+            >
+              {topGame.title} →
+            </Link>
+          </div>
+          {entries === null ? (
+            <div className="h-24 animate-pulse rounded-2xl bg-muted/40" />
+          ) : entries.length === 0 ? (
+            <p className="py-8 text-center text-muted-foreground">—</p>
+          ) : (
+            <ol className="grid gap-3 sm:grid-cols-3">
+              {entries.map((e, i) => (
+                <li
+                  key={`${e.nickname}-${i}`}
+                  className="flex flex-col rounded-2xl border border-white/10 bg-background/40 px-4 py-5 text-center"
+                >
+                  <span className="text-sm text-muted-foreground">#{i + 1}</span>
+                  <span className="mt-1 truncate text-lg font-semibold">{e.nickname}</span>
+                  <span className="mt-1 text-2xl font-bold tabular-nums text-primary">
+                    {e.score.toLocaleString()}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
-        {entries === null ? (
-          <p className="mt-2 text-sm text-muted-foreground">…</p>
-        ) : entries.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">첫 기록을 남겨보세요</p>
-        ) : (
-          <ol className="mt-3 flex gap-2">
-            {entries.map((e, i) => (
-              <li
-                key={`${e.nickname}-${i}`}
-                className="flex flex-1 flex-col rounded-2xl border border-white/10 bg-card/60 px-3 py-3 backdrop-blur"
-              >
-                <span className="text-xs text-muted-foreground">#{i + 1}</span>
-                <span className="truncate text-sm font-medium">{e.nickname}</span>
-                <span className="text-xs tabular-nums text-primary">{e.score.toLocaleString()}</span>
-              </li>
-            ))}
-          </ol>
-        )}
       </Container>
     </section>
   );
