@@ -17,13 +17,14 @@
 
 ### Epic5 — Community
 
-- Top3 + Daily Challenge on community page
-- Bug report form (localStorage MVP), activity placeholder
+- Top Players + Daily Challenge ranking
+- Comments, star ratings, bug report (localStorage MVP)
+- Recent activity feed from play history
 
-### Epic6 — Replay Identity
+### Epic6 — Replay Identity (complete)
 
-- Replay Score (0–1000) + tier on Profile
-- Monthly / yearly play time cards
+- Replay DNA panel, favorites collection strip
+- Replay Score + monthly/yearly cards (prior commit)
 
 ### Epic7 — Operator Health
 
