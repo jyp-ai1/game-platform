@@ -37,7 +37,16 @@ const MOCK_FRIENDS: SocialProfile[] = [
   { id: "f1", nickname: "PixelPro", level: 12, online: true },
   { id: "f2", nickname: "SnakeMaster", level: 8, online: false },
   { id: "f3", nickname: "PuzzleQueen", level: 15, online: true },
+  { id: "f4", nickname: "ArcadeKing", level: 20, online: true },
+  { id: "f5", nickname: "CasualFox", level: 5, online: false },
+  { id: "f6", nickname: "BoardBoss", level: 11, online: true },
 ];
+
+export function searchFriends(query: string): SocialProfile[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return MOCK_FRIENDS;
+  return MOCK_FRIENDS.filter((f) => f.nickname.toLowerCase().includes(q));
+}
 
 export function getFollowing(): string[] {
   return readJson<string[]>(FOLLOWING_KEY, []);

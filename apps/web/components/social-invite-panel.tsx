@@ -8,7 +8,9 @@ import { getInviteUrl } from "@/lib/multiplayer-rooms";
 
 export function SocialInvitePanel({ gameSlug, title }: { gameSlug: string; title: string }) {
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
   const code = `REPLAY-${gameSlug.slice(0, 4).toUpperCase()}`;
+  const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/games/${gameSlug}` : "";
 
   async function copyCode() {
     await navigator.clipboard.writeText(code);
@@ -39,6 +41,11 @@ export function SocialInvitePanel({ gameSlug, title }: { gameSlug: string; title
     );
   }
 
+  function discordShare() {
+    const text = encodeURIComponent(`Re:Play · Beat my score in ${title}!\n${gameUrl}`);
+    window.open(`https://discord.com/channels/@me?text=${text}`, "_blank");
+  }
+
   return (
     <section className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
       <h3 className="font-semibold">Invite Friends</h3>
@@ -53,8 +60,14 @@ export function SocialInvitePanel({ gameSlug, title }: { gameSlug: string; title
         <Button size="sm" variant="outline" className="gap-1" onClick={kakaoShare}>
           Kakao
         </Button>
+        <Button size="sm" variant="outline" onClick={discordShare}>
+          Discord
+        </Button>
         <Button size="sm" variant="outline" className="gap-1" onClick={copyCode}>
           <Copy className="size-3" /> {copied ? "Copied" : "Code"}
+        </Button>
+        <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowQr((v) => !v)}>
+          <QrCode className="size-3" /> QR
         </Button>
         <Button
           size="sm"
@@ -62,9 +75,18 @@ export function SocialInvitePanel({ gameSlug, title }: { gameSlug: string; title
           className="gap-1"
           onClick={() => window.open(getInviteUrl(code), "_blank")}
         >
-          <QrCode className="size-3" /> Room
+          Room
         </Button>
       </div>
+      {showQr && gameUrl ? (
+        <img
+          src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(gameUrl)}`}
+          alt="Game invite QR"
+          width={160}
+          height={160}
+          className="mt-3 rounded-xl border border-white/10"
+        />
+      ) : null}
     </section>
   );
 }

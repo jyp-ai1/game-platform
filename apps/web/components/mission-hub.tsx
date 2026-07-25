@@ -19,6 +19,7 @@ import { Container, Progress } from "@game-platform/ui";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
+import { AttendanceCalendar } from "@/components/attendance-calendar";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 
 export function MissionHub() {
@@ -88,6 +89,8 @@ export function MissionHub() {
         <p className="mt-1 text-2xl font-bold">Daily · Weekly · Monthly · Season</p>
         <p className="mt-1 text-sm text-muted-foreground">{streak.currentStreak} day streak active</p>
       </div>
+
+      <AttendanceCalendar />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {missions.map((m) => (

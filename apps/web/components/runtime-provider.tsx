@@ -5,10 +5,17 @@ import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
 import { Loader2, Pause, Play, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { GameResultModal } from "@/components/game-result-modal";
 import { RuntimeRewardFlash } from "@/components/runtime-reward-flash";
+import {
+  getActiveChallengeId,
+  recordChallengeScore,
+  setActiveChallenge,
+} from "@/lib/challenge-scores-store";
+import { getDeviceId } from "@game-platform/game-sdk";
 import { getGameFramework } from "@/lib/game-framework";
 import { getDifficultyLabel, getRuntimeConfig } from "@/lib/game-runtime-config";
 import { selectRecommended } from "@/lib/game-sections";
@@ -33,6 +40,8 @@ export function RuntimeProvider({
   games: Game[];
   children: ReactNode;
 }) {
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get("challenge") ?? getActiveChallengeId();
   const config = getRuntimeConfig(slug);
   const [phase, setPhase] = useState<RuntimePhase>("loading");
   const [paused, setPaused] = useState(false);
@@ -73,6 +82,10 @@ export function RuntimeProvider({
       if (event.type !== "game-end" || event.gameSlug !== slug) return;
 
       const rewards = framework.onGameEnd(event.score);
+      if (challengeId) {
+        recordChallengeScore(challengeId, getDeviceId(), event.score);
+        setActiveChallenge(challengeId);
+      }
       setResult({ score: event.score, rewards });
       goPhase("gameover");
       emitRuntimeEvent({ type: "game-end", gameSlug: slug, score: event.score });
@@ -93,7 +106,7 @@ export function RuntimeProvider({
         setShowResult(true);
       }, 1400);
     });
-  }, [slug, goPhase]);
+  }, [slug, goPhase, challengeId]);
 
   function finishTutorial() {
     window.localStorage.setItem(`${TUTORIAL_SEEN_KEY}:${slug}`, "1");
@@ -193,6 +206,7 @@ export function RuntimeProvider({
           rewards={result.rewards}
           games={games}
           recommend={recommend}
+          challengeId={challengeId}
           onClose={handleResultClose}
         />
       ) : null}

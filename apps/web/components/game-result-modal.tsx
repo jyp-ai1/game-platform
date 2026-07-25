@@ -26,6 +26,7 @@ import type { GameEndRewards } from "@/lib/retention-engine";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 import { getMyRank } from "@/lib/supabase/scores";
+import { getChallenge, getChallengeUrl } from "@/lib/challenge-scores-store";
 
 export function GameResultModal({
   slug,
@@ -33,6 +34,7 @@ export function GameResultModal({
   rewards,
   games,
   recommend,
+  challengeId,
   onClose,
 }: {
   slug: string;
@@ -40,6 +42,7 @@ export function GameResultModal({
   rewards: GameEndRewards;
   games: Game[];
   recommend?: Game;
+  challengeId?: string | null;
   onClose: () => void;
 }) {
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
@@ -76,6 +79,15 @@ export function GameResultModal({
   const missionDone = isDailyChallengeComplete(mission);
   const inCollection = getCompleted().includes(slug);
   const badge = getGameLibraryBadge(slug, score, best);
+  const challenge = challengeId ? getChallenge(challengeId) : null;
+  const isChallenger = challenge?.challengerId === getDeviceId();
+  const myChallengeScore = isChallenger ? score : challenge?.targetScore;
+  const theirChallengeScore = isChallenger ? challenge?.targetScore : challenge?.challengerScore;
+  const challengeWin =
+    challenge &&
+    myChallengeScore != null &&
+    theirChallengeScore != null &&
+    myChallengeScore > theirChallengeScore;
 
   useEffect(() => {
     if (bossBeat) markCompleted(slug);
@@ -150,8 +162,37 @@ export function GameResultModal({
           ) : null}
         </div>
 
+        {challenge ? (
+          <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              Friend Challenge vs {challenge.targetNickname}
+            </p>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span>You: {myChallengeScore?.toLocaleString() ?? score.toLocaleString()}</span>
+              <span className="text-muted-foreground">vs</span>
+              <span>Them: {theirChallengeScore?.toLocaleString() ?? "pending"}</span>
+            </div>
+            {challenge.status === "complete" ? (
+              <p className={`mt-2 text-center text-sm font-bold ${challengeWin ? "text-emerald-400" : "text-amber-400"}`}>
+                {challengeWin ? "You win!" : "They lead — rematch?"}
+              </p>
+            ) : (
+              <p className="mt-2 text-center text-xs text-muted-foreground">Waiting for opponent score…</p>
+            )}
+          </div>
+        ) : null}
+
         <div className="mt-6 flex flex-wrap gap-2">
           <Button nativeButton={false} render={<Link href={`/games/${slug}`}>Retry</Link>} />
+          {challenge ? (
+            <Button
+              variant="secondary"
+              nativeButton={false}
+              render={
+                <Link href={getChallengeUrl(challenge.id, slug)}>Rematch</Link>
+              }
+            />
+          ) : null}
           {nextStage ? (
             <Button variant="secondary" nativeButton={false} render={<Link href={`/games/${slug}`}>Next Stage</Link>} />
           ) : null}

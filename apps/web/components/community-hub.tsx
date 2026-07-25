@@ -15,6 +15,8 @@ import {
 import { CommunityRatingsStrip } from "@/components/community-ratings-panel";
 import { SocialActivityFeed, WeeklyLeaguePanel } from "@/components/social-activity-feed";
 import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
+import { GameChallengeHub } from "@/components/game-challenge-hub";
+import { FriendSearchPanel } from "@/components/friend-search-panel";
 import { SocialInvitePanel } from "@/components/social-invite-panel";
 import { ensureCommunityMockData } from "@/lib/community-mock";
 import { listBugReports, submitBugReport } from "@/lib/community-store";
@@ -45,6 +47,8 @@ export function CommunityHub({ games }: { games: Game[] }) {
   return (
     <div className="flex flex-col gap-8">
       <CommunityActivityFeed />
+      <GameChallengeHub games={games} />
+      <FriendSearchPanel />
       <SocialInvitePanel gameSlug={games[0]?.slug ?? "snake"} title={games[0]?.title ?? "Re:Play"} />
       <WeeklyChallengeStrip />
       <CommunityFeedTabs games={games} />

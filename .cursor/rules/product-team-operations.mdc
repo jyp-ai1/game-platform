@@ -1,5 +1,5 @@
 ---
-description: Project Phoenix Master Task — auto-continue until Done or 08:00 report
+description: Project Phoenix Master Task v3 — develop until Definition of Done, not tracks
 alwaysApply: true
 ---
 
@@ -7,28 +7,23 @@ alwaysApply: true
 
 Project Phoenix는 **08:00 Daily Report 이전에는 절대로 종료되지 않는다.**
 
-Track이 끝나면 다음 순서로 **자동** 수행한다:
+구현 단위(Track/Epic/Sprint)가 끝나도 **종료가 아니다.** 오직 **Definition of Done** 전체 충족 또는 08:00만 종료 조건.
 
-1. QA
-2. Commit
-3. Push
-4. MASTER TASK 재로드
-5. 남은 Track 탐색
-6. 우선순위 가장 높은 Track 선택
-7. 구현
-8. QA
-9. Commit
-10. Push
+매 사이클:
 
-→ MASTER TASK의 마지막 Track(Phase 5 → Done)까지 반복.
+1. MASTER TASK 로드
+2. 미완료 DoD 항목 탐색
+3. 우선순위 가장 높은 항목 구현
+4. QA
+5. Commit
+6. Push
+7. Preview 확인
+8. → 1로 반복
 
 ## 절대 금지 (08:00 이전)
 
-- 중간보고
-- 질문
-- 승인 요청
-- "현재 진행중" / "현재 작업" 보고
-- "Track 완료" / "완료" 보고
+- 중간보고 · 질문 · 승인 요청
+- "Track 완료" / "Epic 완료" / "오늘 작업 끝" / "현재 진행중"
 - "다음 뭐할까요"
 
 **보고 가능 시점: 오직 08:00 Daily Report**
@@ -37,49 +32,158 @@ Track이 끝나면 다음 순서로 **자동** 수행한다:
 
 - 빌드 자체 불가
 - GitHub push 권한 문제
-- 외부 API Key 필수
+- 외부 API Key 필수 (OAuth secret 등)
 
-그 외: **우회 구현 → 다음 Track**
+그 외: **우회 구현 → 다음 DoD 항목**
 
 ---
 
-# Project Phoenix Master Task
+# Project Phoenix — Master Task v3
 
-```
-Project Phoenix
-├── Phase 1 Identity
-├── Phase 2 Platform Transformation  ← current
-├── Phase 3 Growth
-├── Phase 4 Creator
-├── Phase 5 Business
-└── Done
-```
+**목표:** Re:Play를 **Steam + Duolingo + Discord** 수준의 웹게임 플랫폼으로 완성.
 
 Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`
 
-## Phase 2 Tracks (1–20)
+Preview: `https://game29-git-content-factory-jyp-ai1s-projects.vercel.app`
 
-| # | Track | Status |
-|---|-------|--------|
-| 1 | Universal Runtime | done |
-| 2 | All Games Stage | done |
-| 3 | Game Detail 5.0 | done |
-| 4 | Discover | done |
-| 5 | Journey / Replay DNA | done |
-| 6 | Social | pending |
-| 7 | Multiplayer | pending |
-| 8 | Retention / Missions | pending |
-| 9 | Ranking / Leagues | pending |
-| 10 | Identity / Guest Merge | pending |
-| 11 | AI Pipeline | pending |
-| 12 | Health Center | pending |
-| 13 | Developer Platform | pending |
-| 14 | Admin / CMS | pending |
-| 15 | Performance | pending |
-| 16 | Accessibility | pending |
-| 17 | QA 50-game | pending |
-| 18 | Automation | pending |
-| 19 | Open Beta (SEO/PWA) | pending |
-| 20 | RC Final | pending |
+## 종료 조건 (모두 완료 시에만 Done)
+
+```
+Identity · Gameplay · Journey · Community · Social · Operation
+Developer Platform · AI Operation · Monetization Ready · Production Ready
+```
+
+---
+
+## Phase 1 — Player Identity
+
+**DoD:** 로그인 없이도 "내 계정"처럼 느껴진다.
+
+- [x] GuestID
+- [ ] Google Merge (real OAuth)
+- [x] Replay Score · Coins · XP · Level
+- [x] Mission · Collection
+- [x] Journey · Heatmap · Wrapped · Play History
+- [x] Profile Card · 최근 플레이 · 업적 · 플레이 성향 · 추천 장르
+- [ ] Replay DNA · Replay Rank (full)
+
+## Phase 2 — Universal Gameplay
+
+**DoD:** 모든 게임 동일 흐름 + Stage/Mission/Reward.
+
+- [x] Runtime: Loading→Ready→Playing→Pause→Result→Continue
+- [x] XP · Coin · Collection · Achievement · Leaderboard hooks
+- [x] Stage config layer (`game-stages.ts`)
+- [ ] 모든 50게임 in-engine Stage/Boss/Continue
+
+## Phase 3 — Steam Style Detail
+
+**DoD:** Steam 수준 상세페이지.
+
+- [x] Hero · Play · Top3 · 내 기록 · Achievements · Collection
+- [x] AI Summary · Similar · Recommended
+- [ ] 친구 기록 · Journey · Stages · Difficulty · 리뷰/평점 · Developer · 패치노트
+
+## Phase 4 — Discovery
+
+**DoD:** 게임 탐험 허브.
+
+- [x] Continue · Trending · Popular · Season · Challenge · AI Picks
+- [x] Friends Playing · Recently Updated · Mood · Genre · Difficulty · Play Time · Collections
+- [x] Rule Engine 추천
+- [ ] Developer browse · live analytics trending
+
+## Phase 5 — Community
+
+**DoD:** 댓글·리뷰·활동·리그.
+
+- [x] 댓글 · 좋아요 · 신고 (local)
+- [ ] 답글 · 싫어요 · 별점 · 리뷰 · 활동피드 · 친구 활동
+- [x] Friend search · Challenge hub
+- [ ] Weekly/Season League · Challenge Feed
+- [x] Daily/Weekly/Monthly Challenge UI
+
+## Phase 6 — Journey
+
+**DoD:** Replay Journey 완성.
+
+- [x] Timeline · Heatmap · Statistics · Wrapped · Replay Score
+- [x] Longest session · Play habit analysis
+- [ ] Collections deep link · 월간/연간 리포트 · Replay DNA full
+
+## Phase 7 — Multiplayer
+
+**DoD:** 게임 초대 → 같이 플레이 → 결과 비교 → 재도전.
+
+- [x] Room · 2–4P · Spectator (localStorage MVP)
+- [x] Web Share · SMS · Kakao · Code · QR · Discord
+- [x] 게임 선택→초대→결과 비교→재도전 (localStorage MVP)
+- [ ] 실시간 동기화 (WebSocket/Realtime)
+
+## Phase 8 — Retention
+
+**DoD:** 매일 돌아오게.
+
+- [x] Daily/Weekly/Season Mission · Streak · Coin Shop · Avatar
+- [x] Calendar (attendance)
+- [ ] Quest · Notification · Continue Reminder
+
+## Phase 9 — Health Center
+
+**DoD:** 운영자 전체 게임 상태.
+
+- [x] Admin health · RC dashboard · AI summary stub
+- [ ] Realtime game status · Retention/Session live · Broken game detect
+
+## Phase 10 — AI Operation
+
+**DoD:** 댓글→분류→Issue→PR→Deploy 자동화.
+
+- [x] Ops dashboard UI
+- [ ] Comment ingest · bug classify · GitHub Issue draft · release note auto
+
+## Phase 11 — Developer Platform
+
+**DoD:** 게임 등록·승인·Analytics.
+
+- [x] Admin CMS · games CRUD
+- [ ] Developer registration API · approval workflow · CTR/Retention analytics
+
+## Phase 12 — Monetization Ready
+
+**DoD:** Store 구조.
+
+- [x] Virtual coin shop
+- [ ] Ads · Premium · Sponsor · Featured · Developer Promotion
+
+## Phase 13 — Production Ready
+
+**DoD:** RC 100% · E2E · A11y · Perf · SEO · PWA.
+
+- [ ] RC 95%+ (current ~91%)
+- [ ] E2E all pass · Accessibility 90+ · Performance gate
+- [ ] SEO/OG · PWA manifest · Monitoring
+
+---
+
+## 추가 구현 (핵심)
+
+1. **Stage 기반 게임:** Stage1→Stage2→Boss→Clear→Continue (50게임)
+2. **친구 초대:** 게임 선택→초대→같이 플레이→결과 비교→재도전 (Share/QR/SMS/Kakao/Discord)
+3. **Live Data:** 점수·랭킹·Journey·Profile·Top3·Home·Continue 실시간 반영
 
 KPI per change: Retention · Session Time · Social · Identity · Operations
+
+---
+
+## 08:00 Daily Report (고정 형식)
+
+```text
+========================================
+Project Phoenix
+Overall Progress ███░░░░░░░░░░░░░
+이번 작업: 구현 · 체감 변화 · QA · Preview · Commits · RC Score
+남은 범위: Player Platform · Community · Journey · Multiplayer · AI · Dev · Production
+예상 전체 진행률 XX%
+========================================
+```
