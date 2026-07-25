@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-25T01:02:57.252Z",
-  "scanned": 127,
-  "suspects": 58,
+  "generatedAt": "2026-07-25T02:40:31.815Z",
+  "scanned": 144,
+  "suspects": 69,
   "items": [
     {
       "file": "components/admin/activity-heatmap.tsx",
@@ -128,12 +128,24 @@
       "export": "community-hub"
     },
     {
+      "file": "components/daily-challenge-card.tsx",
+      "export": "daily-challenge-card"
+    },
+    {
       "file": "components/favorites-section.tsx",
       "export": "favorites-section"
     },
     {
       "file": "components/footer.tsx",
       "export": "footer"
+    },
+    {
+      "file": "components/game-detail-breadcrumb.tsx",
+      "export": "game-detail-breadcrumb"
+    },
+    {
+      "file": "components/game-detail-similar.tsx",
+      "export": "game-detail-similar"
     },
     {
       "file": "components/game-detail-template.tsx",
@@ -148,12 +160,20 @@
       "export": "game-section"
     },
     {
+      "file": "components/game-tips-section.tsx",
+      "export": "game-tips-section"
+    },
+    {
       "file": "components/games-discovery-browser.tsx",
       "export": "games-discovery-browser"
     },
     {
       "file": "components/home-continue-hub.tsx",
       "export": "home-continue-hub"
+    },
+    {
+      "file": "components/home-daily-goal.tsx",
+      "export": "home-daily-goal"
     },
     {
       "file": "components/home-growth-panel.tsx",
@@ -168,41 +188,21 @@
       "export": "home-recent-strip"
     },
     {
+      "file": "components/home-rule-recommendations.tsx",
+      "export": "home-rule-recommendations"
+    },
+    {
+      "file": "components/home-visual-hero.tsx",
+      "export": "home-visual-hero"
+    },
+    {
       "file": "components/journey-hub.tsx",
       "export": "journey-hub"
     },
     {
       "file": "components/json-ld-script.tsx",
       "export": "json-ld-script"
-    },
-    {
-      "file": "components/mobile-bottom-nav.tsx",
-      "export": "mobile-bottom-nav"
-    },
-    {
-      "file": "components/monitoring-provider.tsx",
-      "export": "monitoring-provider"
-    },
-    {
-      "file": "components/personalized-picks-section.tsx",
-      "export": "personalized-picks-section"
-    },
-    {
-      "file": "components/platform-flags-sync.tsx",
-      "export": "platform-flags-sync"
-    },
-    {
-      "file": "components/player-rank-card.tsx",
-      "export": "player-rank-card"
-    },
-    {
-      "file": "components/profile-client.tsx",
-      "export": "profile-client"
-    },
-    {
-      "file": "components/recently-played-section.tsx",
-      "export": "recently-played-section"
     }
   ],
-  "overall": "PASS"
+  "overall": "WARN"
 }

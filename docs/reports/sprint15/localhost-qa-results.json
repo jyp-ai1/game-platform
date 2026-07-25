@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-07-24T23:02:59.540Z",
+  "baseUrl": "http://localhost:3010",
+  "ob001Waived": true,
+  "routes": {
+    "pass": 1,
+    "total": 14,
+    "detail": {
+      "/": {
+        "pass": true,
+        "status": 200
+      },
+      "/games": {
+        "pass": false,
+        "status": 0
+      },
+      "/profile": {
+        "pass": false,
+        "status": 0
+      },
+      "/favorites": {
+        "pass": false,
+        "status": 0
+      },
+      "/search": {
+        "pass": false,
+        "status": 0
+      },
+      "/about": {
+        "pass": false,
+        "status": 0
+      },
+      "/contact": {
+        "pass": false,
+        "status": 0
+      },
+      "/privacy": {
+        "pass": false,
+        "status": 0
+      },
+      "/terms": {
+        "pass": false,
+        "status": 0
+      },
+      "/categories/puzzle": {
+        "pass": false,
+        "status": 0
+      },
+      "/categories/arcade": {
+        "pass": false,
+        "status": 0
+      },
+      "/admin": {
+        "pass": false,
+        "status": 0
+      },
+      "/sitemap.xml": {
+        "pass": false,
+        "status": 0
+      },
+      "/robots.txt": {
+        "pass": false,
+        "status": 0
+      }
+    }
+  },
+  "games": {
+    "pass": 0,
+    "total": 50,
+    "detail": {
+      "2048": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "snake": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "breakout": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "arkanoid-dx": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "memory": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "minesweeper": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "samegame": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "maze-runner": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "tank-battle": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "galaxy-defender": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "space-defender": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "bubble-pop": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "sudoku": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "tic-tac-toe": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "simon": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "hangman": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "color-match": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "air-hockey": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "tetris": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "gold-miner": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "space-impact": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "stack-tower": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "ball-sort": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "color-sort": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "penalty-shootout": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "darts": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "bubble-shooter": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "merge-blocks": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "connect4": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "reversi": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "gomoku": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "bowling": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "archery": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "sliding-puzzle": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "whack-a-mole": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "chess": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "checkers": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "jigsaw": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "mancala": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "mini-golf": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "billiards": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "basketball": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "table-tennis": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "domino": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "crossword": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "chess960": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "shuffleboard": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "kakuro": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "nonogram": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      },
+      "word-search": {
+        "pass": false,
+        "status": 0,
+        "hasContent": false
+      }
+    }
+  },
+  "seo": {
+    "canonical": false,
+    "og": false,
+    "jsonLd": false
+  },
+  "overall": "PARTIAL"
+}

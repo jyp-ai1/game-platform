@@ -4,16 +4,16 @@
       "C:\\Program Files\\nodejs\\node.exe",
       "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\node_modules\\@playwright\\test\\cli.js",
       "test",
-      "tests/e2e/games/2048.spec.ts",
+      "tests/e2e/sprint16-epic3.spec.ts",
       "--config",
       "tests/e2e/playwright.config.ts",
-      "--grep",
-      "open"
+      "--workers",
+      "1"
     ],
     "configFile": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\playwright.config.ts",
     "rootDir": "C:/Users/김성길/Documents/GitHub/game-platform/tests/e2e",
     "failOnFlakyTests": false,
-    "forbidOnly": false,
+    "forbidOnly": true,
     "fullyParallel": true,
     "globalSetup": null,
     "globalTeardown": null,
@@ -29,7 +29,7 @@
       {
         "outputDir": "C:/Users/김성길/Documents/GitHub/game-platform/test-results",
         "repeatEach": 1,
-        "retries": 0,
+        "retries": 1,
         "metadata": {
           "actualWorkers": 1
         },
@@ -65,30 +65,30 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.61.1",
-    "workers": 4,
+    "workers": 1,
     "webServer": {
-      "command": "npm run start --workspace=@game-platform/web -- -p 3020",
-      "url": "http://localhost:3020",
+      "command": "npm run start --workspace=@game-platform/web -- -p 3021",
+      "url": "http://localhost:3021",
       "reuseExistingServer": false,
       "timeout": 120000
     }
   },
   "suites": [
     {
-      "title": "games\\2048.spec.ts",
-      "file": "games/2048.spec.ts",
+      "title": "sprint16-epic3.spec.ts",
+      "file": "sprint16-epic3.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "2048",
-          "file": "games/2048.spec.ts",
-          "line": 5,
+          "title": "Sprint16 Epic3 — Home Experience 3.0",
+          "file": "sprint16-epic3.spec.ts",
+          "line": 3,
           "column": 6,
           "specs": [
             {
-              "title": "open → start → interact → PASS",
+              "title": "visual hero with play CTA",
               "ok": false,
               "tags": [],
               "tests": [
@@ -103,36 +103,354 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "failed",
-                      "duration": 6,
+                      "duration": 5269,
                       "error": {
-                        "message": "Error: browserType.launch: Executable doesn't exist at C:\\Users\\김성길\\AppData\\Local\\Temp\\cursor-sandbox-cache\\b815e16133a3422a7ee903eedd3e5ef0\\playwright\\chromium_headless_shell-1228\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
-                        "stack": "Error: browserType.launch: Executable doesn't exist at C:\\Users\\김성길\\AppData\\Local\\Temp\\cursor-sandbox-cache\\b815e16133a3422a7ee903eedd3e5ef0\\playwright\\chromium_headless_shell-1228\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\u001b[22m\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:6:68",
+                        "location": {
+                          "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                          "column": 68,
+                          "line": 6
+                        },
+                        "snippet": "  4 |   test(\"visual hero with play CTA\", async ({ page }) => {\n  5 |     await page.goto(\"/\");\n> 6 |     await expect(page.getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)).toBeVisible();\n    |                                                                    ^\n  7 |     await expect(page.getByRole(\"link\", { name: \"Play\" })).toBeVisible();\n  8 |     await expect(page.getByRole(\"link\", { name: \"Discover\" })).toBeVisible();\n  9 |   });"
                       },
                       "errors": [
                         {
-                          "message": "Error: browserType.launch: Executable doesn't exist at C:\\Users\\김성길\\AppData\\Local\\Temp\\cursor-sandbox-cache\\b815e16133a3422a7ee903eedd3e5ef0\\playwright\\chromium_headless_shell-1228\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+                          "location": {
+                            "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                            "column": 68,
+                            "line": 6
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\u001b[22m\n\n\n  4 |   test(\"visual hero with play CTA\", async ({ page }) => {\n  5 |     await page.goto(\"/\");\n> 6 |     await expect(page.getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)).toBeVisible();\n    |                                                                    ^\n  7 |     await expect(page.getByRole(\"link\", { name: \"Play\" })).toBeVisible();\n  8 |     await expect(page.getByRole(\"link\", { name: \"Discover\" })).toBeVisible();\n  9 |   });\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:6:68"
                         }
                       ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-07-24T18:39:34.851Z",
+                      "startTime": "2026-07-25T02:38:38.754Z",
                       "annotations": [],
                       "attachments": [
                         {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-27c0b-0-visual-hero-with-play-CTA-chromium\\test-failed-1.png"
+                        },
+                        {
                           "name": "error-context",
                           "contentType": "text/markdown",
-                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\games-2048-2048-open-→-start-→-interact-→-PASS-chromium\\error-context.md"
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-27c0b-0-visual-hero-with-play-CTA-chromium\\error-context.md"
                         }
-                      ]
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                        "column": 68,
+                        "line": 6
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5443,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\u001b[22m\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:6:68",
+                        "location": {
+                          "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                          "column": 68,
+                          "line": 6
+                        },
+                        "snippet": "  4 |   test(\"visual hero with play CTA\", async ({ page }) => {\n  5 |     await page.goto(\"/\");\n> 6 |     await expect(page.getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)).toBeVisible();\n    |                                                                    ^\n  7 |     await expect(page.getByRole(\"link\", { name: \"Play\" })).toBeVisible();\n  8 |     await expect(page.getByRole(\"link\", { name: \"Discover\" })).toBeVisible();\n  9 |   });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                            "column": 68,
+                            "line": 6
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)\u001b[22m\n\n\n  4 |   test(\"visual hero with play CTA\", async ({ page }) => {\n  5 |     await page.goto(\"/\");\n> 6 |     await expect(page.getByText(/Play\\.\\s*Track\\.\\s*Challenge\\./)).toBeVisible();\n    |                                                                    ^\n  7 |     await expect(page.getByRole(\"link\", { name: \"Play\" })).toBeVisible();\n  8 |     await expect(page.getByRole(\"link\", { name: \"Discover\" })).toBeVisible();\n  9 |   });\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:6:68"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-07-25T02:38:44.586Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-27c0b-0-visual-hero-with-play-CTA-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-27c0b-0-visual-hero-with-play-CTA-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-27c0b-0-visual-hero-with-play-CTA-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                        "column": 68,
+                        "line": 6
+                      }
                     }
                   ],
                   "status": "unexpected"
                 }
               ],
-              "id": "baeac63075d5ff06d61a-2078e1df112d12bc17ef",
-              "file": "games/2048.spec.ts",
-              "line": 6,
+              "id": "5b678e08f93ce51ca12a-89e17ee2de181ea8e942",
+              "file": "sprint16-epic3.spec.ts",
+              "line": 4,
+              "column": 7
+            },
+            {
+              "title": "continue and daily challenge above fold on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5291,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Daily Challenge/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Daily Challenge/i)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Daily Challenge/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Daily Challenge/i)\u001b[22m\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:15:54",
+                        "location": {
+                          "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                          "column": 54,
+                          "line": 15
+                        },
+                        "snippet": "  13 |     await page.goto(\"/\");\n  14 |     await expect(page.getByRole(\"heading\", { name: \"Continue\" })).toBeVisible();\n> 15 |     await expect(page.getByText(/Daily Challenge/i)).toBeVisible();\n     |                                                      ^\n  16 |   });\n  17 |\n  18 |   test(\"for you recommendations section\", async ({ page }) => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                            "column": 54,
+                            "line": 15
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Daily Challenge/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Daily Challenge/i)\u001b[22m\n\n\n  13 |     await page.goto(\"/\");\n  14 |     await expect(page.getByRole(\"heading\", { name: \"Continue\" })).toBeVisible();\n> 15 |     await expect(page.getByText(/Daily Challenge/i)).toBeVisible();\n     |                                                      ^\n  16 |   });\n  17 |\n  18 |   test(\"for you recommendations section\", async ({ page }) => {\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:15:54"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-25T02:38:50.675Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-bd5c5-llenge-above-fold-on-mobile-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-bd5c5-llenge-above-fold-on-mobile-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                        "column": 54,
+                        "line": 15
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5468,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Daily Challenge/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Daily Challenge/i)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Daily Challenge/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Daily Challenge/i)\u001b[22m\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:15:54",
+                        "location": {
+                          "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                          "column": 54,
+                          "line": 15
+                        },
+                        "snippet": "  13 |     await page.goto(\"/\");\n  14 |     await expect(page.getByRole(\"heading\", { name: \"Continue\" })).toBeVisible();\n> 15 |     await expect(page.getByText(/Daily Challenge/i)).toBeVisible();\n     |                                                      ^\n  16 |   });\n  17 |\n  18 |   test(\"for you recommendations section\", async ({ page }) => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                            "column": 54,
+                            "line": 15
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Daily Challenge/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Daily Challenge/i)\u001b[22m\n\n\n  13 |     await page.goto(\"/\");\n  14 |     await expect(page.getByRole(\"heading\", { name: \"Continue\" })).toBeVisible();\n> 15 |     await expect(page.getByText(/Daily Challenge/i)).toBeVisible();\n     |                                                      ^\n  16 |   });\n  17 |\n  18 |   test(\"for you recommendations section\", async ({ page }) => {\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:15:54"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-07-25T02:38:56.561Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-bd5c5-llenge-above-fold-on-mobile-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-bd5c5-llenge-above-fold-on-mobile-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-bd5c5-llenge-above-fold-on-mobile-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                        "column": 54,
+                        "line": 15
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "5b678e08f93ce51ca12a-7cccd30aa556d1ec22bf",
+              "file": "sprint16-epic3.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "for you recommendations section",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5238,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /For You/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /For You/i })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /For You/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /For You/i })\u001b[22m\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:20:67",
+                        "location": {
+                          "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                          "column": 67,
+                          "line": 20
+                        },
+                        "snippet": "  18 |   test(\"for you recommendations section\", async ({ page }) => {\n  19 |     await page.goto(\"/\");\n> 20 |     await expect(page.getByRole(\"heading\", { name: /For You/i })).toBeVisible();\n     |                                                                   ^\n  21 |   });\n  22 | });\n  23 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                            "column": 67,
+                            "line": 20
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /For You/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /For You/i })\u001b[22m\n\n\n  18 |   test(\"for you recommendations section\", async ({ page }) => {\n  19 |     await page.goto(\"/\");\n> 20 |     await expect(page.getByRole(\"heading\", { name: /For You/i })).toBeVisible();\n     |                                                                   ^\n  21 |   });\n  22 | });\n  23 |\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:20:67"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-25T02:39:02.666Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-330fb-you-recommendations-section-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-330fb-you-recommendations-section-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                        "column": 67,
+                        "line": 20
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5459,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /For You/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /For You/i })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /For You/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /For You/i })\u001b[22m\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:20:67",
+                        "location": {
+                          "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                          "column": 67,
+                          "line": 20
+                        },
+                        "snippet": "  18 |   test(\"for you recommendations section\", async ({ page }) => {\n  19 |     await page.goto(\"/\");\n> 20 |     await expect(page.getByRole(\"heading\", { name: /For You/i })).toBeVisible();\n     |                                                                   ^\n  21 |   });\n  22 | });\n  23 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                            "column": 67,
+                            "line": 20
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /For You/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /For You/i })\u001b[22m\n\n\n  18 |   test(\"for you recommendations section\", async ({ page }) => {\n  19 |     await page.goto(\"/\");\n> 20 |     await expect(page.getByRole(\"heading\", { name: /For You/i })).toBeVisible();\n     |                                                                   ^\n  21 |   });\n  22 | });\n  23 |\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts:20:67"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-07-25T02:39:08.469Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-330fb-you-recommendations-section-chromium-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-330fb-you-recommendations-section-chromium-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\test-results\\sprint16-epic3-Sprint16-Ep-330fb-you-recommendations-section-chromium-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\tests\\e2e\\sprint16-epic3.spec.ts",
+                        "column": 67,
+                        "line": 20
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "5b678e08f93ce51ca12a-60c9319f69c177c8ac00",
+              "file": "sprint16-epic3.spec.ts",
+              "line": 18,
               "column": 7
             }
           ]
@@ -142,11 +460,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-07-24T18:39:29.806Z",
-    "duration": 5837.842000000001,
+    "startTime": "2026-07-25T02:38:36.673Z",
+    "duration": 37583.44,
     "expected": 0,
     "skipped": 0,
-    "unexpected": 1,
+    "unexpected": 3,
     "flaky": 0
   }
 }

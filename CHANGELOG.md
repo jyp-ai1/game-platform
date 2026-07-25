@@ -1,5 +1,37 @@
 # Changelog
 
+## [Sprint 16 — Re:Play Identity Pivot] — 2026-07-25
+
+**Branch:** `content-factory` · **Commits:** `161768c` → `3ea1c9a`
+
+### Epic3 — Home Experience 3.0
+
+- Visual hero (80% visual / 20% text): gradient, floating game cards, Play · Discover CTAs
+- Continue hub featured card, Daily Challenge + 5분 목표, Top3 strip
+- Rule-engine “For You” recommendations (no AI)
+
+### Epic4 — Game Detail 2.0
+
+- Play-first vertical flow: Play → Stats/Top3 → Recent → Rating/Comments → Next Game
+- Similar games carousel, compact header
+
+### Epic5 — Community
+
+- Top3 + Daily Challenge on community page
+- Bug report form (localStorage MVP), activity placeholder
+
+### Epic6 — Replay Identity
+
+- Replay Score (0–1000) + tier on Profile
+- Monthly / yearly play time cards
+
+### Epic7 — Operator Health
+
+- `/admin/health` — RC score, quality gates, operator links
+- Windows regression runner grep pipe fix
+
+---
+
 ## [RC1 Candidate — Extended Batch] — 2026-07-25
 
 **Branch:** `content-factory` · **Tag:** `rc1-candidate` (re-tag after push)

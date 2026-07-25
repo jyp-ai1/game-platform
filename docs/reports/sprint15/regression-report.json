@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-07-25T02:31:11.580Z",
+  "steps": [
+    {
+      "name": "verify-games",
+      "pass": true
+    },
+    {
+      "name": "analytics",
+      "pass": true
+    },
+    {
+      "name": "build",
+      "pass": true
+    },
+    {
+      "name": "e2e-games",
+      "pass": false
+    }
+  ],
+  "games": "50/50",
+  "overall": "FAIL"
+}

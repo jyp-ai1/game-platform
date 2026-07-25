@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-25T02:02:51.168Z",
+  "generatedAt": "2026-07-25T02:40:32.220Z",
   "branch": "content-factory",
   "playable": 50,
-  "rc1Score": 93,
+  "rc1Score": 91,
   "gates": {
     "regression": {
       "status": "PASS",
