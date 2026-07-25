@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-24T23:47:44.313Z",
-  "scanned": 117,
-  "suspects": 52,
+  "generatedAt": "2026-07-25T01:02:57.252Z",
+  "scanned": 127,
+  "suspects": 58,
   "items": [
     {
       "file": "components/admin/activity-heatmap.tsx",
@@ -124,8 +124,8 @@
       "export": "cms-notice-bar"
     },
     {
-      "file": "components/daily-challenge-card.tsx",
-      "export": "daily-challenge-card"
+      "file": "components/community-hub.tsx",
+      "export": "community-hub"
     },
     {
       "file": "components/favorites-section.tsx",
@@ -152,8 +152,32 @@
       "export": "games-discovery-browser"
     },
     {
+      "file": "components/home-continue-hub.tsx",
+      "export": "home-continue-hub"
+    },
+    {
+      "file": "components/home-growth-panel.tsx",
+      "export": "home-growth-panel"
+    },
+    {
+      "file": "components/home-identity-hero.tsx",
+      "export": "home-identity-hero"
+    },
+    {
+      "file": "components/home-recent-strip.tsx",
+      "export": "home-recent-strip"
+    },
+    {
+      "file": "components/journey-hub.tsx",
+      "export": "journey-hub"
+    },
+    {
       "file": "components/json-ld-script.tsx",
       "export": "json-ld-script"
+    },
+    {
+      "file": "components/mobile-bottom-nav.tsx",
+      "export": "mobile-bottom-nav"
     },
     {
       "file": "components/monitoring-provider.tsx",
@@ -178,30 +202,6 @@
     {
       "file": "components/recently-played-section.tsx",
       "export": "recently-played-section"
-    },
-    {
-      "file": "components/search-box.tsx",
-      "export": "search-box"
-    },
-    {
-      "file": "components/season-card.tsx",
-      "export": "season-card"
-    },
-    {
-      "file": "components/static-page.tsx",
-      "export": "static-page"
-    },
-    {
-      "file": "components/toast/toast-host.tsx",
-      "export": "toast-host"
-    },
-    {
-      "file": "components/weekly-mission-card.tsx",
-      "export": "weekly-mission-card"
-    },
-    {
-      "file": "lib/get-release-dashboard.ts",
-      "export": "get-release-dashboard"
     }
   ],
   "overall": "PASS"

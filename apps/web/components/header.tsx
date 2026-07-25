@@ -3,24 +3,11 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 
 import { siteConfig } from "@/lib/site-config";
+import { mainNavItems } from "@/lib/main-nav";
 
 import { HeaderLevelBadge } from "./header-level-badge";
 import { MobileNav } from "./mobile-nav";
 import { SoundToggle } from "./sound-toggle";
-
-interface NavItem {
-  label: string;
-  href?: string;
-}
-
-const navItems: NavItem[] = [
-  { label: "Games", href: "/games" },
-  { label: "Favorites", href: "/favorites" },
-  { label: "Profile", href: "/profile" },
-  { label: "Ranking" },
-  { label: "About", href: "/about" },
-  { label: "Login" },
-];
 
 export function Header() {
   return (
@@ -28,28 +15,21 @@ export function Header() {
       <Container className="relative flex h-14 items-center justify-between">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           {siteConfig.name}
+          <span className="ml-1.5 hidden text-xs font-normal text-primary sm:inline">
+            2.0
+          </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 sm:flex">
-          {navItems.map((item) =>
-            item.href ? (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span
-                key={item.label}
-                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
-              >
-                {item.label}
-                <Badge variant="outline">Soon</Badge>
-              </span>
-            )
-          )}
+        <nav className="hidden items-center gap-5 md:flex">
+          {mainNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="flex items-center gap-1">
@@ -66,7 +46,7 @@ export function Header() {
               </Link>
             }
           />
-          <MobileNav navItems={navItems} />
+          <MobileNav navItems={mainNavItems.map(({ label, href }) => ({ label, href }))} />
         </div>
       </Container>
     </header>

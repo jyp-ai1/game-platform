@@ -1,8 +1,8 @@
 export const siteConfig = {
   name: "Re:Play",
-  tagline: "Play Again. Feel Again.",
-  subTagline: "1990년대부터 2010년대까지, 우리가 사랑했던 게임들을 다시 만나다.",
-  description: "Play Again. Feel Again. Re:Play",
+  tagline: "Your Game Life, Re:Played.",
+  subTagline: "플레이하고, 성장하고, 경쟁하는 — 내 게임 생활 플랫폼.",
+  description: "Re:Play 2.0 — Your Game Life Platform",
   keywords: [
     "Retro",
     "Nostalgia",

@@ -17,8 +17,8 @@ export default async function ProfilePage() {
     <main className="flex flex-1 flex-col py-16">
       <Container>
         <SectionTitle
-          title="내 프로필"
-          description="지금까지의 플레이 기록과 성장을 확인하세요."
+          title="My Profile"
+          description="게임 인생 — 레벨, 기록, 업적을 한곳에서"
         />
         <div className="mt-8">
           <ProfileClient games={games} />

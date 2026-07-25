@@ -5,6 +5,7 @@ import "./globals.css";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { MonitoringProvider } from "@/components/monitoring-provider";
 import { PlatformFlagsSync } from "@/components/platform-flags-sync";
@@ -79,7 +80,7 @@ export default async function RootLayout({
       lang="ko"
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col pb-16 sm:pb-0">
         {/* Mounted before {children} so its event subscription is registered
             before any page content's mount effects can emit an event (React
             fires mount effects in tree order — a component declared after
@@ -94,6 +95,7 @@ export default async function RootLayout({
         <Header />
         {children}
         <Footer />
+        <MobileBottomNav />
       </body>
     </html>
   );

@@ -8,6 +8,7 @@ import { GameDetailBreadcrumb } from "@/components/game-detail-breadcrumb";
 import { GameDetailStage } from "@/components/game-detail-stage";
 import { GamePlayer } from "@/components/game-player";
 import { GameStatusBlock } from "@/components/game-status-block";
+import { GameDetailStatsPanel } from "@/components/game-detail-stats-panel";
 import { GameTipsSection } from "@/components/game-tips-section";
 import { Leaderboard } from "@/components/leaderboard";
 import { MyBestScore } from "@/components/my-best-score";
@@ -166,6 +167,8 @@ function PlayableLayout({
 
         {/* Sidebar — ranking & meta (sticky on PC) */}
         <aside className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+          <GameDetailStatsPanel gameSlug={slug} difficulty={game.difficulty} />
+
           <div className="hidden lg:block">
             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               스크린샷
