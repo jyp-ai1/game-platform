@@ -1,119 +1,103 @@
 "use client";
 
-import {
-  getDeviceId,
-  getGamePlayCounts,
-  subscribeEngagement,
-} from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
-import { Badge, SectionTitle } from "@game-platform/ui";
+import { Badge, Button } from "@game-platform/ui";
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useState, type FormEvent } from "react";
 
-import { DailyChallengeCard } from "@/components/daily-challenge-card";
-import { getMyRank } from "@/lib/supabase/scores";
-
-const EMPTY_PLAY_COUNTS: Record<string, number> = {};
-function getServerGamePlayCountsSnapshot(): Record<string, number> {
-  return EMPTY_PLAY_COUNTS;
-}
-
-function topPlayedSlugs(counts: Record<string, number>, limit: number): string[] {
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([slug]) => slug);
-}
-
-function TopPlayerRow({ game, rankLabel }: { game: Game; rankLabel: string }) {
-  const [rank, setRank] = useState<number | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    getMyRank(game.slug, getDeviceId(), "weekly")
-      .then((r) => {
-        if (active) setRank(r);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [game.slug]);
-
-  return (
-    <Link
-      href={`/games/${game.slug}#leaderboard`}
-      className="flex items-center justify-between rounded-xl border bg-card px-4 py-3 transition-colors hover:border-primary/40"
-    >
-      <div>
-        <p className="font-medium">{game.title}</p>
-        <p className="text-xs text-muted-foreground">{rankLabel}</p>
-      </div>
-      <span className="text-sm font-bold text-primary">
-        {rank !== null ? `#${rank}` : "—"}
-      </span>
-    </Link>
-  );
-}
+import { HomeTop3Strip } from "@/components/home-top3-strip";
+import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
+import { listBugReports, submitBugReport } from "@/lib/community-feedback";
 
 export function CommunityHub({ games }: { games: Game[] }) {
-  const playCounts = useSyncExternalStore(
-    subscribeEngagement,
-    getGamePlayCounts,
-    getServerGamePlayCountsSnapshot
-  );
+  const [bugGame, setBugGame] = useState(games[0]?.slug ?? "");
+  const [bugMsg, setBugMsg] = useState("");
+  const [sent, setSent] = useState(false);
+  const [reports, setReports] = useState<ReturnType<typeof listBugReports>>([]);
 
-  const bySlug = new Map(games.map((g) => [g.slug, g]));
-  const topGames = topPlayedSlugs(playCounts, 5)
-    .map((slug) => bySlug.get(slug))
-    .filter((g): g is Game => g !== undefined);
+  function refreshReports() {
+    setReports(listBugReports());
+  }
+
+  function handleBug(e: FormEvent) {
+    e.preventDefault();
+    submitBugReport(bugGame, bugMsg);
+    setBugMsg("");
+    setSent(true);
+    refreshReports();
+  }
 
   return (
-    <div className="flex flex-col gap-12">
-      <section>
-        <SectionTitle
-          title="🏆 Top Players"
-          description="내가 플레이한 게임의 주간 랭킹"
-        />
-        {topGames.length > 0 ? (
-          <div className="mt-4 flex flex-col gap-2">
-            {topGames.map((game, index) => (
-              <TopPlayerRow key={game.slug} game={game} rankLabel={`Top ${index + 1} 게임`} />
-            ))}
-          </div>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">
-            게임을 플레이하면 주간 랭킹이 표시됩니다.{" "}
-            <Link href="/games" className="text-primary underline">
-              게임 시작
-            </Link>
-          </p>
-        )}
-      </section>
-
-      <DailyChallengeCard />
+    <div className="flex flex-col gap-10">
+      <HomeTop3Strip games={games} />
+      <HomeDailyChallengeStrip />
 
       <section>
-        <SectionTitle title="💬 Community" description="소셜 기능 (MVP)" />
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {[
-            { title: "댓글", desc: "게임별 토론" },
-            { title: "리뷰", desc: "별점 & 후기" },
-            { title: "최근 활동", desc: "친구 피드" },
-            { title: "공유", desc: "점수 & 기록 공유" },
+            { title: "Comments", href: "/games" },
+            { title: "Reviews", href: "/games" },
+            { title: "Share", href: "/profile" },
+            { title: "Report", href: "#bug" },
           ].map((item) => (
-            <div
+            <Link
               key={item.title}
-              className="rounded-xl border border-dashed bg-card/40 p-4"
+              href={item.href}
+              className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur transition-colors hover:border-primary/30"
             >
-              <div className="flex items-center justify-between">
-                <p className="font-medium">{item.title}</p>
-                <Badge variant="outline">Soon</Badge>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{item.desc}</p>
-            </div>
+              <p className="font-medium">{item.title}</p>
+            </Link>
           ))}
         </div>
+      </section>
+
+      <section id="bug" className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
+        <h2 className="font-semibold">Bug Report</h2>
+        <form className="mt-3 space-y-3" onSubmit={handleBug}>
+          <select
+            className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm"
+            value={bugGame}
+            onChange={(e) => setBugGame(e.target.value)}
+            aria-label="게임 선택"
+          >
+            {games.slice(0, 20).map((g) => (
+              <option key={g.slug} value={g.slug}>
+                {g.title}
+              </option>
+            ))}
+          </select>
+          <textarea
+            className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm"
+            rows={3}
+            value={bugMsg}
+            onChange={(e) => setBugMsg(e.target.value)}
+            placeholder="무엇이 문제였나요?"
+            required
+          />
+          <Button type="submit" size="sm">
+            Submit
+          </Button>
+          {sent ? <p className="text-xs text-primary">접수됨 (로컬 저장)</p> : null}
+        </form>
+        {reports.length > 0 ? (
+          <ul className="mt-4 space-y-2 text-xs text-muted-foreground">
+            {reports.slice(0, 3).map((r) => (
+              <li key={r.id} className="rounded-lg border border-dashed px-3 py-2">
+                {r.gameSlug}: {r.message.slice(0, 80)}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold">Recent Activity</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sprint17 — friends & feeds
+        </p>
+        <Badge className="mt-2" variant="outline">
+          Soon
+        </Badge>
       </section>
     </div>
   );

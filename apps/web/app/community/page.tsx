@@ -17,10 +17,7 @@ export default async function CommunityPage() {
   return (
     <main className="flex flex-1 flex-col py-10 sm:py-14">
       <Container>
-        <SectionTitle
-          title="Community"
-          description="랭킹 경쟁과 주간 도전 — Sprint17에서 소셜 기능 확장 예정"
-        />
+        <SectionTitle title="Community" />
         <div className="mt-8">
           <CommunityHub games={games} />
         </div>
