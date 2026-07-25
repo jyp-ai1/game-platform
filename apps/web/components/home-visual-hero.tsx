@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
+import { siteConfig } from "@/lib/site-config";
 import {
   getRecentlyPlayedSnapshot,
   getServerRecentlyPlayedSnapshot,
@@ -30,6 +31,7 @@ export function HomeVisualHero({ floatGames }: { floatGames: Game[] }) {
           src={heroGame.thumbnailUrl}
           alt=""
           fill
+          sizes="100vw"
           className="object-cover opacity-40"
           priority
         />
@@ -54,18 +56,37 @@ export function HomeVisualHero({ floatGames }: { floatGames: Game[] }) {
           }}
         >
           {game.thumbnailUrl ? (
-            <Image src={game.thumbnailUrl} alt={game.title} fill className="object-cover" />
+            <Image src={game.thumbnailUrl} alt={game.title} fill sizes="80px" className="object-cover" />
           ) : null}
         </Link>
       ))}
 
-      <Container className="relative flex min-h-[140px] items-end justify-end py-4 sm:min-h-[180px] lg:min-h-[220px]">
-        <Link
-          href={continueHref}
-          className="rounded-2xl bg-primary/90 px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 backdrop-blur transition-transform hover:scale-[1.02]"
-        >
-          ▶ Continue
-        </Link>
+      <Container className="relative flex min-h-[140px] flex-col justify-end gap-4 py-4 sm:min-h-[180px] sm:flex-row sm:items-end sm:justify-between lg:min-h-[220px]">
+        <div className="max-w-md">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            {siteConfig.name}
+          </p>
+          <h1 className="mt-1 text-xl font-bold leading-tight sm:text-2xl lg:text-3xl">
+            {siteConfig.tagline}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            {siteConfig.subTagline}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={continueHref}
+            className="rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 backdrop-blur transition-transform hover:scale-[1.02]"
+          >
+            ▶ {recentSlugs.length > 0 ? "Continue" : "Play Now"}
+          </Link>
+          <Link
+            href="/games"
+            className="rounded-2xl border border-white/20 bg-card/60 px-5 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/40"
+          >
+            Browse Games
+          </Link>
+        </div>
       </Container>
     </section>
   );

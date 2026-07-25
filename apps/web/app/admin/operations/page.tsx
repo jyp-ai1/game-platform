@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AdminOpsLiveDashboard } from "@/components/admin-ops-live-dashboard";
+import { OperationsGatePanel } from "@/components/operations-gate-panel";
 import { getReleaseDashboardData } from "@/lib/get-release-dashboard";
 
 export const metadata = { title: "AI Operation Center — Project Phoenix" };
@@ -41,6 +42,7 @@ export default function AiOperationCenterPage() {
         </ol>
       </section>
 
+      <OperationsGatePanel />
       <AdminOpsLiveDashboard />
 
       <div className="grid gap-3 sm:grid-cols-3">

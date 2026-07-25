@@ -1,5 +1,5 @@
 ---
-description: Project Phoenix Full Production Pipeline — manufacture until product feels complete
+description: Project Phoenix Full Production Pipeline + Release Gate — product completion over features
 alwaysApply: true
 ---
 
@@ -12,8 +12,8 @@ Cursor는 개발자가 아니라 **하나의 개발팀**이다.
 매 사이클 (무한 반복):
 
 1. MASTER TASK 로드
-2. 현재 서비스 분석
-3. 가장 부족한 사용자 경험 찾기
+2. **Release Gate 점검** (Product → Retention → Operations → Technical)
+3. FAIL / 가장 부족한 Gate 영역 우선 개선
 4. 설계 → 구현 → QA → 리팩토링
 5. Commit → Push → Preview 확인
 6. → 1로 반복
@@ -28,9 +28,7 @@ Cursor는 개발자가 아니라 **하나의 개발팀**이다.
 
 ## 중단 가능 (P0만)
 
-- Build 자체 불가
-- GitHub push 권한 문제
-- 외부 API Key 필수
+- Build 자체 불가 · GitHub push 권한 · 외부 API Key 필수
 
 그 외: **우회 구현 → 다음 사이클**
 
@@ -43,19 +41,13 @@ Preview: `https://game29-git-content-factory-jyp-ai1s-projects.vercel.app`
 
 ## Mission
 
-Re:Play를 **Steam + Duolingo + Discord** 수준의 **웹게임 라이프 플랫폼**으로 완성한다.
-
-기능 개발 프로젝트가 아니라 **제품(Product)을 완성하는 프로젝트**이다.
+Re:Play를 **Steam + Duolingo + Discord** 수준의 **웹게임 라이프 플랫폼**으로 완성.
 
 **종료 조건 (하나뿐):**
 
 > 사용자가 "게임 사이트"가 아니라 **"게임을 계속하게 되는 플랫폼"**이라고 느끼는 상태
 
----
-
 ## Product Definition
-
-플레이 데이터를 자산으로 만든다. 모든 개발은 아래 경험을 완성하기 위한 것:
 
 ```text
 방문 → 게임 발견 → 플레이 → 기록 → 성장 → 경쟁 → 공유 → 친구
@@ -64,80 +56,113 @@ Re:Play를 **Steam + Duolingo + Discord** 수준의 **웹게임 라이프 플랫
 
 ---
 
-## 전체 구현 범위 (하나의 제품)
+# Release Gate (매 사이클 자동 점검)
 
-### 플레이 경험
-Runtime 통일 · Stage · 난이도 · XP · Coin · Achievement · Continue · Retry · Result · Next Game · Boss · Endless · Progress Save · Live Ranking/Score/Continue · 실시간 기록
+기능 구현보다 **제품 완성도**를 먼저 평가한다.
 
-### 홈
-Hero · Continue · Daily/Weekly Mission · Collection · Replay Score · Streak · Coin · XP · Friends Activity · Challenge · AI 추천 · 최근 플레이/업적 · Rule Engine · Seasonal · Trending · Popular · Discover · 개인화
+## 1. Product Gate
 
-### 게임 상세 (Steam 수준)
-Hero · Play · Difficulty · Stage · Mission · Achievement · Collection · Journey · Timeline · Reviews · Rating · Comments · AI Summary · Similar · Friends Records · Rankings · Replay Score · Patch Notes · Version · Developer · Update History
+- [ ] 첫 방문 30초 안에 "이 서비스가 무엇인지" 이해 가능
+- [ ] 첫 게임 플레이까지 **2클릭 이하**
+- [ ] 게임 종료 후 자연스럽게 다음 행동(다음 게임·랭킹·공유) 이어짐
+- [ ] 새로고침 없이 기록 반영
+- [ ] 모바일·PC 동일 경험
 
-### Journey
-Timeline · Heatmap · Replay DNA · Wrapped · Replay Score/Level · Collection · Statistics · Weekly/Monthly/Annual Report · Longest Session · Favorite Genre/Time · Play Habit · Personal Dashboard
+**하나라도 FAIL → 해당 영역 우선 개선**
 
-### Community
-댓글 · 답글 · 좋아요 · 싫어요 · 신고 · 리뷰 · 평점 · 활동 피드 · 친구 활동 · Weekly/Monthly/Season League · Daily/Weekly Challenge · Community Feed · 인기 플레이/리뷰
+## 2. Retention Gate
 
-### Multiplayer
-Room · Invite · QR · SMS · Kakao · Discord · Web Share · Spectator · Match Ready · Countdown · Voice 준비 · Friend Rematch · Challenge Link · Result Compare · 실시간 구조
+매 구현은 아래 **하나 이상** 반드시 개선:
 
-### Social
-Friend · Follow · Activity · Share · Invite · Ranking Compare · Friend Ranking · Friend Journey · Friend Collection
+- 다시 방문 이유 · 더 오래 플레이 이유 · 친구 초대 이유
+- 기록 남기는 이유 · 컬렉션 모으는 이유
 
-### Replay Identity (핵심)
-GuestID · Google Login · Account Merge · Replay Score/Rank · Coins · XP · Level · Avatar · Title · Badge · Collection · Replay DNA · Wrapped
+해당 없는 기능은 **후순위**
 
-### Retention
-Daily Login · Attendance · Daily/Weekly/Monthly/Season Mission · Quest · Reward · Coin Shop · Notification · Continue Reminder · Goal · Progress · Collection Reward
+## 3. Operations Gate
 
-### 운영 시스템
-Health Dashboard · Live Metrics · Broken/Crash/Error/Bug · Review · Comment · Session · Retention · DAU/WAU/MAU · Top/Worst Game · Live/Deploy/Release Status
+운영자 **5분 안** 확인 가능:
 
-### AI Operation
-댓글 → 버그 추출 → 우선순위 → GitHub Issue → 자동 수정 → QA → PR → Deploy → Release Note
+- 오류 게임 · 인기 게임 · 최근 버그 · 최근 댓글 · DAU/세션 · 배포 상태
 
-### Developer Platform
-게임 등록/수정/승인 · 버전 · 썸네일 · 태그 · Analytics · CTR · Session · Crash · Review · Ranking · Revenue 준비
+운영 효율 안 오르면 **우선순위 낮춤**
 
-### Monetization Ready
-Premium · Sponsor · Featured · Reward · Ads · Promotion · Store · Creator Program
+## 4. Technical Gate
 
-### Production Ready
-Build · Typecheck · QA · E2E · Accessibility · Performance · SEO · PWA · Monitoring · Analytics · Rollback · Release · CI/CD
+- Build PASS · Typecheck PASS · Static QA PASS · Regression PASS
+- 신규 Console Error 0 · 신규 Hydration Error 0
 
 ---
+
+# 우선순위 자동 결정 규칙
+
+체크리스트 순서가 아닌 **가치 순서**:
+
+```text
+사용자 가치 → 리텐션 → 운영 효율 → 기술 품질 → 신규 기능
+```
+
+예: 홈 개선 > 광고 · 댓글 > AI 추천 · 스테이지 저장 > 새 게임 추가
+
+---
+
+## 전체 구현 범위 (하나의 제품)
+
+플레이 경험 · 홈 · 게임 상세 · Journey · Community · Multiplayer · Social · Replay Identity · Retention · 운영 · AI Operation · Developer Platform · Monetization · Production Ready
 
 ## 개발 원칙
 
-- 사용자 **체감 변화** 필수
-- Placeholder 금지
-- **새로고침 없이** 데이터 반영
-- 모바일·PC 동일 경험
-- 모든 기능 → Replay Identity 연결
-- 모든 기능 → Journey 기록
-- 모든 기능 → Health Dashboard 확인 가능
-- 모든 기능 → QA 자동화 대상
-
----
+- 사용자 **체감 변화** 필수 · Placeholder 금지 · Live Data · 모바일=PC
+- Replay Identity · Journey · Health Dashboard · QA 자동화 연결
 
 ## Commit 정책
 
-승인 없이 자동: `구현 → QA → Commit → Push → Preview → 다음 구현`
+`구현 → QA → Commit → Push → Preview → Gate 재점검 → 다음 구현`
 
 ---
 
-## 08:00 Daily Report (고정)
+# 08:00 Daily Report (고정)
+
+PM은 아래 **5가지만** 확인:
+
+1. **제품 완성도** (몇 %)
+2. **사용자 체감 변화** (Before/After)
+3. **Product / Retention / Operations / Technical Gate 결과**
+4. **Preview URL** 직접 확인
+5. **남은 가장 큰 리스크 3개**
 
 ```text
 ========================================
 Project Phoenix
-서비스 완성도 XX%
-이번 작업으로 사용자가 체감하는 변화: ...
-구현 완료 항목: ...
-QA: Build · Typecheck · Regression · E2E · A11y · Perf
-Preview URL · Commit 목록 · 남은 제품 완성도 · 예상 완료율 · Known Issues
+
+제품 완성도
+XX% → YY%
+
+이번 작업으로 달라진 점
+- (Before → After 체감 변화)
+
+Product Gate
+✅ PASS / ❌ FAIL (항목)
+
+Retention Gate
+✅ PASS / ❌ FAIL
+
+Operations Gate
+✅ PASS / ⚠ N건 개선 필요
+
+Technical Gate
+✅ PASS / ❌ FAIL
+
+Preview URL
+Commit 목록
+
+다음 자동 진행
+- Product Gate FAIL 자동 개선
+- Retention · 운영 효율 · 기술 품질
+
+Top 3 Risks
+- ...
 ========================================
 ```
+
+**보고 기준: "무엇을 만들었는가" → "서비스가 얼마나 좋아졌는가"**
