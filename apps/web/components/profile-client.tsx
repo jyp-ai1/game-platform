@@ -17,6 +17,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
 import { ProfileIdentityBadges } from "@/components/profile-identity-badges";
+import { ProfileReplayScore } from "@/components/profile-replay-score";
 import {
   ProfileQuickLinks,
   ProfileRecentGames,
@@ -145,6 +146,10 @@ export function ProfileClient({ games }: { games: Game[] }) {
             )}
           </div>
         </div>
+      </section>
+
+      <section>
+        <ProfileReplayScore />
       </section>
 
       <section>
