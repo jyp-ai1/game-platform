@@ -1,18 +1,20 @@
 ---
-description: AI Team Mode — Project Phoenix Sprint19
+description: AI Team Mode — Project Phoenix Phase 1
 alwaysApply: true
 ---
 
-# AI Operation Mode (Project Phoenix / Sprint19)
+# AI Operation Mode (Project Phoenix)
 
 ```
-1일 = 프로젝트 하나
+Phase = Foundation | Growth | Creator | Business
 중간보고 · 질문 · 확인 · 승인 금지
-Epic 완료 → QA → Commit → Push → Preview → 다음 Epic
-Blocker → 다음 Epic (Production/DB 위험 Migration만 질문)
+Epic 완료 → QA → Commit → Push → Preview → 다음 Epic 자동 선택
+Blocker(빌드불가 · push권한 · API Key)만 멈춤
 오전 08:00 최종 보고만
 ```
 
 Branch: `content-factory` · Commit: `feat(s19-phoenix): ...`
 
-Epic1 Runtime 2.0 → Epic2 50 Games → Epic3 Library → Epic4 Profile → Epic5 Social → Epic6 Community → Epic7 Discover → Epic8 Health → Epic9 Dev Platform → Epic10 Live Ranking → Epic11 Retention → Epic12 Wrapped → Epic13 AI Operator → Epic14 Performance → Epic15 Production RC3
+Priority: P0 → P1 → P2 → UX → Refactor → QA → Docs
+
+Phase1 Foundation: Runtime → Steam Loop → Library → Live Sync → Community → Multiplayer → Ops → Retention → Polish → RC

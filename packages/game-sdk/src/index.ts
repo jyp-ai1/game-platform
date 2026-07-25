@@ -21,6 +21,7 @@ export {
   getServerSoundEnabledSnapshot,
   isSoundEnabled,
   setLastNickname,
+  setBestScore,
   setSoundEnabled,
   subscribeBestScore,
   subscribeNickname,

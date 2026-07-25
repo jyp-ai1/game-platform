@@ -1,11 +1,17 @@
 "use client";
 
-import { getBestScore, getDeviceId } from "@game-platform/game-sdk";
+import {
+  getBestScore,
+  getDeviceId,
+  getServerBestScoreSnapshot,
+  subscribeBestScore,
+} from "@game-platform/game-sdk";
 import type { Difficulty } from "@game-platform/shared";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import { formatDifficulty } from "@/lib/difficulty";
 import { getGameBalanceMeta } from "@/lib/game-balance";
+import { subscribeLiveData, subscribeLiveProfile } from "@/lib/live-data-bus";
 import {
   getLeaderboard,
   getMyRank,
@@ -20,26 +26,40 @@ export function GameDetailStatsPanel({
   difficulty: Difficulty;
 }) {
   const balance = getGameBalanceMeta(gameSlug, difficulty);
-  const best = getBestScore(gameSlug);
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
+
+  const best = useSyncExternalStore(
+    useCallback((listener: () => void) => subscribeBestScore(gameSlug, listener), [gameSlug]),
+    () => getBestScore(gameSlug),
+    () => getServerBestScoreSnapshot(gameSlug)
+  );
+
   const [top3, setTop3] = useState<LeaderboardEntry[] | null>(null);
   const [myRank, setMyRank] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
-    getLeaderboard(gameSlug, "weekly")
-      .then((entries) => {
-        if (active) setTop3(entries.slice(0, 3));
-      })
-      .catch(() => {
-        if (active) setTop3([]);
-      });
-    getMyRank(gameSlug, getDeviceId(), "weekly")
-      .then((rank) => {
-        if (active) setMyRank(rank);
-      })
-      .catch(() => {});
+    function refresh() {
+      getLeaderboard(gameSlug, "weekly")
+        .then((entries) => {
+          if (active) setTop3(entries.slice(0, 3));
+        })
+        .catch(() => {
+          if (active) setTop3([]);
+        });
+      getMyRank(gameSlug, getDeviceId(), "weekly")
+        .then((rank) => {
+          if (active) setMyRank(rank);
+        })
+        .catch(() => {});
+    }
+    refresh();
+    const unsub = subscribeLiveProfile((p) => {
+      if (p.gameSlug === gameSlug) refresh();
+    });
     return () => {
       active = false;
+      unsub();
     };
   }, [gameSlug]);
 

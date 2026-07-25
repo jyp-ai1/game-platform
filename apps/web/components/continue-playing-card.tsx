@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useCallback, useSyncExternalStore } from "react";
 
 import { GameCardPlayLink } from "@/components/game-card-play-link";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getNextStage } from "@/lib/game-stages";
 import { useMounted } from "@/lib/use-mounted";
 
@@ -26,6 +27,7 @@ export function ContinuePlayingCard({
   featured?: boolean;
 }) {
   const mounted = useMounted();
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const subscribe = useCallback(
     (listener: () => void) => subscribeSave(game.slug, listener),
     [game.slug]

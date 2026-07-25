@@ -1,5 +1,5 @@
 /** Game-end retention hooks — coins, missions, live sync. */
-import { getBestScore } from "@game-platform/game-sdk";
+import { getBestScore, recordNewBest, setBestScore } from "@game-platform/game-sdk";
 
 import { addCoins, coinsForScore } from "@/lib/coins";
 import { emitLiveProfileUpdate } from "@/lib/live-data-bus";
@@ -15,7 +15,11 @@ export interface GameEndRewards {
 
 export function applyGameEndRetention(gameSlug: string, score: number): GameEndRewards {
   const best = getBestScore(gameSlug);
-  const isNewBest = score > 0 && score >= best;
+  const isNewBest = score > 0 && score > best;
+  if (isNewBest) {
+    setBestScore(gameSlug, score);
+    recordNewBest(gameSlug, score);
+  }
   recordWeeklyPlay();
   let bossBonus = 0;
   if (isBossDefeated(gameSlug, score)) {

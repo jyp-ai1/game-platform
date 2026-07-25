@@ -44,8 +44,8 @@ export function JourneyHeatMap() {
     <section className="rounded-3xl border border-white/10 bg-card/50 p-5 backdrop-blur">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">Play Calendar</h3>
-        <Link href="/journey" className="text-xs text-primary hover:underline">
-          Journey →
+        <Link href="/library" className="text-xs text-primary hover:underline">
+          Library →
         </Link>
       </div>
       <div className="mt-4 grid grid-cols-10 gap-1">
