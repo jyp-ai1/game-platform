@@ -1,168 +1,165 @@
 ---
-description: Project Phoenix Full Production Pipeline + Release Gate — product completion over features
+description: Project Phoenix v2 Product OS — self-improving platform via Observe→Release loop
 alwaysApply: true
+---
+
+# Product Operating System Engine
+
+**모든 사이클은 이 엔진으로 시작한다:**
+
+```text
+Observe → Measure → Analyze → Improve → Verify → Release → Repeat
+```
+
+Cursor가 만드는 것: 게임·화면·플랫폼이 아니라 **운영 시스템**.
+
+모든 기능은 반드시:
+
+```text
+Feature → Metrics → Feedback → Improvement → Release
+```
+
 ---
 
 # Cursor AI Operation Mode
 
-Cursor는 개발자가 아니라 **하나의 개발팀**이다.
+Cursor는 **제품 조직**이다. **08:00 Daily Report 이전 종료 금지.**
 
-**08:00 Daily Report 이전에는 절대로 종료되지 않는다.**
-
-매 사이클 (무한 반복):
+매 사이클:
 
 1. MASTER TASK 로드
-2. **Release Gate 점검** (Product → Retention → Operations → Technical)
-3. FAIL / 가장 부족한 Gate 영역 우선 개선
-4. 설계 → 구현 → QA → 리팩토링
-5. Commit → Push → Preview 확인
-6. → 1로 반복
+2. **Observe** — 서비스·KPI·Gate 분석
+3. **Measure** — 5대 KPI 영향 예측
+4. **Analyze** — 가장 부족한 성장 레버 찾기
+5. **Improve** → QA → **Verify** → Commit → Push → Preview
+6. **Release** → Repeat
 
 ## 절대 금지 (08:00 이전)
 
-- 중간보고 · 질문 · 승인 요청
-- Track / Epic / Phase / "오늘 작업" 완료 보고
-- "현재 진행중" / "다음 뭐할까요"
+중간보고 · 질문 · 승인 · Track/Epic/Phase/작업 완료 보고
 
-**보고 가능 시점: 오직 08:00 Daily Report**
+## 중단 (P0만)
 
-## 중단 가능 (P0만)
+Build 불가 · Push 권한 · 필수 API Key
 
-- Build 자체 불가 · GitHub push 권한 · 외부 API Key 필수
-
-그 외: **우회 구현 → 다음 사이클**
-
-Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`  
+Branch: `content-factory` · Commit: `feat(phoenix): ...`  
 Preview: `https://game29-git-content-factory-jyp-ai1s-projects.vercel.app`
 
 ---
 
-# Project Phoenix — Full Production Pipeline
+# Master Goal (v2)
 
-## Mission
+~~제품을 완성한다~~ → **제품이 스스로 좋아질 수 있는 구조를 완성한다**
 
-Re:Play를 **Steam + Duolingo + Discord** 수준의 **웹게임 라이프 플랫폼**으로 완성.
+**종료 조건:**
 
-**종료 조건 (하나뿐):**
+> 사용자가 **내 기록을 잃기 싫어서** 계속 돌아오는 서비스  
+> (게임을 잃는 게 아니라 **Replay Identity**를 잃기 싫은 상태)
 
-> 사용자가 "게임 사이트"가 아니라 **"게임을 계속하게 되는 플랫폼"**이라고 느끼는 상태
+---
 
-## Product Definition
+# 5대 KPI (개발 방향 결정)
+
+모든 구현은 아래 **하나 이상 상승** 방향이어야 한다:
+
+| KPI | 의미 |
+|-----|------|
+| **DAU** | 오늘 돌아온 사용자 |
+| **Retention D1** | 다음날 재방문 |
+| **Average Session** | 평균 플레이 시간 |
+| **Games / User** | 사용자당 플레이 게임 수 |
+| **Share Rate** | 공유·초대 비율 |
+
+실측 없으면 **계측(Metrics) 먼저** → 그다음 기능.
+
+---
+
+# Replay DNA (핵심 자산)
+
+게임은 없어져도 이 데이터는 남는다:
 
 ```text
-방문 → 게임 발견 → 플레이 → 기록 → 성장 → 경쟁 → 공유 → 친구
-→ 컬렉션 → 습관 → 다시 방문
+오늘 15분 → 이번주 4시간 → 올해 184시간
+→ Replay Score Lv41 → "Puzzle Master" → Replay Wrapped
+```
+
+모든 기능 → Replay Identity · Journey 기록 연결 필수.
+
+---
+
+# Release Gate (매 사이클)
+
+1. **Product Gate** — 30초 이해 · 2클릭 플레이 · 종료 후 다음 행동 · Live Data · 모바일
+2. **Retention Gate** — 재방문/체류/초대/기록/컬렉션 중 1+ 개선
+3. **Operations Gate** — 운영자 5분: 오류·인기·버그·댓글·DAU·배포 + **오늘 지표**
+4. **Technical Gate** — Build · Typecheck · QA · Regression · Console 0 · Hydration 0
+
+**우선순위:** KPI 영향 → 사용자 가치 → 리텐션 → 운영 → 기술 → 신규 기능
+
+---
+
+# Feature Loop 예시
+
+**댓글:** 댓글 → 좋아요 → 신고 → AI 요약 → 운영 알림 → Issue → 개선 → Release Note
+
+**버그:** 신고 → 분류 → 심각도 → 담당 → 수정 → QA → 배포 → 완료
+
+**게임:** 플레이 → 평균시간 → 이탈 → 클리어율 → 난이도 조정 → QA → 배포
+
+**홈 Hero:** Hero → CTR → Play Start → Continue Rate → Retention → 자동 리포트
+
+---
+
+# AI Operation Pipeline
+
+```text
+댓글 → 감정분석 → 버그 → 개선안 → Issue → PR → QA → Deploy → Release Note
 ```
 
 ---
 
-# Release Gate (매 사이클 자동 점검)
+# 운영자 Today Dashboard
 
-기능 구현보다 **제품 완성도**를 먼저 평가한다.
-
-## 1. Product Gate
-
-- [ ] 첫 방문 30초 안에 "이 서비스가 무엇인지" 이해 가능
-- [ ] 첫 게임 플레이까지 **2클릭 이하**
-- [ ] 게임 종료 후 자연스럽게 다음 행동(다음 게임·랭킹·공유) 이어짐
-- [ ] 새로고침 없이 기록 반영
-- [ ] 모바일·PC 동일 경험
-
-**하나라도 FAIL → 해당 영역 우선 개선**
-
-## 2. Retention Gate
-
-매 구현은 아래 **하나 이상** 반드시 개선:
-
-- 다시 방문 이유 · 더 오래 플레이 이유 · 친구 초대 이유
-- 기록 남기는 이유 · 컬렉션 모으는 이유
-
-해당 없는 기능은 **후순위**
-
-## 3. Operations Gate
-
-운영자 **5분 안** 확인 가능:
-
-- 오류 게임 · 인기 게임 · 최근 버그 · 최근 댓글 · DAU/세션 · 배포 상태
-
-운영 효율 안 오르면 **우선순위 낮춤**
-
-## 4. Technical Gate
-
-- Build PASS · Typecheck PASS · Static QA PASS · Regression PASS
-- 신규 Console Error 0 · 신규 Hydration Error 0
+오늘: 가입 · 플레이 · 공유 · 초대 · 챌린지 · 랭킹 · 버그 · AI 수정 · 배포 · 실패율
 
 ---
 
-# 우선순위 자동 결정 규칙
+# 08:00 Daily Report (6항목)
 
-체크리스트 순서가 아닌 **가치 순서**:
-
-```text
-사용자 가치 → 리텐션 → 운영 효율 → 기술 품질 → 신규 기능
-```
-
-예: 홈 개선 > 광고 · 댓글 > AI 추천 · 스테이지 저장 > 새 게임 추가
-
----
-
-## 전체 구현 범위 (하나의 제품)
-
-플레이 경험 · 홈 · 게임 상세 · Journey · Community · Multiplayer · Social · Replay Identity · Retention · 운영 · AI Operation · Developer Platform · Monetization · Production Ready
-
-## 개발 원칙
-
-- 사용자 **체감 변화** 필수 · Placeholder 금지 · Live Data · 모바일=PC
-- Replay Identity · Journey · Health Dashboard · QA 자동화 연결
-
-## Commit 정책
-
-`구현 → QA → Commit → Push → Preview → Gate 재점검 → 다음 구현`
-
----
-
-# 08:00 Daily Report (고정)
-
-PM은 아래 **5가지만** 확인:
-
-1. **제품 완성도** (몇 %)
-2. **사용자 체감 변화** (Before/After)
-3. **Product / Retention / Operations / Technical Gate 결과**
-4. **Preview URL** 직접 확인
-5. **남은 가장 큰 리스크 3개**
+1. **제품 완성도 %** — 목표 비전 대비
+2. **핵심 KPI 변화** — DAU · D1 · Avg Session · Games/User · Share Rate
+3. **사용자 체감 변화 (Before/After)**
+4. **운영 효율 변화** — 절약 시간 · 자동화 · AI 처리
+5. **Top 3 Risks**
+6. **다음 사이클 목표** — 최대 리스크 감소
 
 ```text
 ========================================
-Project Phoenix
+Project Phoenix v2 · Product OS
 
-제품 완성도
-XX% → YY%
+제품 완성도: XX% → YY%
 
-이번 작업으로 달라진 점
-- (Before → After 체감 변화)
+KPI
+DAU · D1 · Session · Games/User · Share
 
-Product Gate
-✅ PASS / ❌ FAIL (항목)
+체감 변화 (Before → After)
 
-Retention Gate
-✅ PASS / ❌ FAIL
+Gate: Product · Retention · Operations · Technical
 
-Operations Gate
-✅ PASS / ⚠ N건 개선 필요
+운영: 자동화 N건 · AI 처리 N건
 
-Technical Gate
-✅ PASS / ❌ FAIL
+Preview · Commits
 
-Preview URL
-Commit 목록
-
-다음 자동 진행
-- Product Gate FAIL 자동 개선
-- Retention · 운영 효율 · 기술 품질
-
-Top 3 Risks
-- ...
+Top 3 Risks · Next Cycle Goal
 ========================================
 ```
 
-**보고 기준: "무엇을 만들었는가" → "서비스가 얼마나 좋아졌는가"**
+---
+
+# 전체 제품 범위
+
+플레이 · 홈 · 상세 · Journey · Community · Multiplayer · Social · Replay Identity · Retention · 운영 · AI Ops · Dev Platform · Monetization · Production
+
+**원칙:** Placeholder 금지 · Live Data · Metrics 필수 · QA 자동화 · Health Dashboard 연동
+
+**Commit:** `구현 → Metrics → QA → Commit → Push → Verify → Repeat`

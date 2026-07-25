@@ -18,6 +18,7 @@ import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
 import { GameChallengeHub } from "@/components/game-challenge-hub";
 import { FriendSearchPanel } from "@/components/friend-search-panel";
 import { SocialInvitePanel } from "@/components/social-invite-panel";
+import { trackBugMetric } from "@/components/product-metrics-bridge";
 import { ensureCommunityMockData } from "@/lib/community-mock";
 import { listBugReports, submitBugReport } from "@/lib/community-store";
 
@@ -39,6 +40,7 @@ export function CommunityHub({ games }: { games: Game[] }) {
   function handleBug(e: FormEvent) {
     e.preventDefault();
     submitBugReport(bugGame, bugMsg);
+    trackBugMetric();
     setBugMsg("");
     setSent(true);
     refreshReports();

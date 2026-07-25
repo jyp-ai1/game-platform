@@ -1,4 +1,5 @@
 import { ContinueReminderBanner } from "@/components/continue-reminder-banner";
+import { ReplayDnaLadder } from "@/components/replay-dna-ladder";
 import { HomeCollectionStrip } from "@/components/home-collection-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
 import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
@@ -32,6 +33,7 @@ export default async function Home() {
       <HomeVisualHero floatGames={floatGames} />
       <HomeContinueHub games={games} />
       <HomeIdentityDashboard games={games} />
+      <ReplayDnaLadder games={games} />
       <HomeDailyChallengeStrip />
       <HomeMissionHub />
       <section className="py-4">

@@ -4,6 +4,7 @@ import { Button } from "@game-platform/ui";
 import { Copy, MessageCircle, QrCode, Share2 } from "lucide-react";
 import { useState } from "react";
 
+import { trackInviteMetric, trackShareMetric } from "@/components/product-metrics-bridge";
 import { getInviteUrl } from "@/lib/multiplayer-rooms";
 
 export function SocialInvitePanel({ gameSlug, title }: { gameSlug: string; title: string }) {
@@ -26,11 +27,13 @@ export function SocialInvitePanel({ gameSlug, title }: { gameSlug: string; title
     } else {
       await navigator.clipboard.writeText(`${text}\n${url}`);
     }
+    trackShareMetric();
   }
 
   function smsShare() {
     const url = `${window.location.origin}/games/${gameSlug}`;
     window.location.href = `sms:?body=${encodeURIComponent(`Re:Play Challenge · ${title}\n${url}`)}`;
+    trackInviteMetric();
   }
 
   function kakaoShare() {

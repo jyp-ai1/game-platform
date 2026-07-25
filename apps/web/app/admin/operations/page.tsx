@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AdminOpsLiveDashboard } from "@/components/admin-ops-live-dashboard";
+import { ProductOsDashboard } from "@/components/product-os-dashboard";
 import { OperationsGatePanel } from "@/components/operations-gate-panel";
 import { getReleaseDashboardData } from "@/lib/get-release-dashboard";
 
@@ -42,6 +43,7 @@ export default function AiOperationCenterPage() {
         </ol>
       </section>
 
+      <ProductOsDashboard />
       <OperationsGatePanel />
       <AdminOpsLiveDashboard />
 

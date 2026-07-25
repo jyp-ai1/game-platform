@@ -15,6 +15,7 @@ import {
   subscribeChallenges,
   type ChallengeSession,
 } from "@/lib/challenge-scores-store";
+import { trackChallengeMetric, trackInviteMetric, trackShareMetric } from "@/components/product-metrics-bridge";
 import { getFriendsList, searchFriends } from "@/lib/social-store";
 
 export function GameChallengeHub({ games }: { games: Game[] }) {
@@ -42,6 +43,7 @@ export function GameChallengeHub({ games }: { games: Game[] }) {
       friend.nickname
     );
     setSession(s);
+    trackChallengeMetric();
   }
 
   async function shareWeb() {
@@ -53,11 +55,13 @@ export function GameChallengeHub({ games }: { games: Game[] }) {
     } else {
       await navigator.clipboard.writeText(text);
     }
+    trackShareMetric();
   }
 
   function shareSms() {
     if (!session) return;
     window.location.href = `sms:?body=${encodeURIComponent(getChallengeShareText(session))}`;
+    trackInviteMetric();
   }
 
   function shareDiscord() {

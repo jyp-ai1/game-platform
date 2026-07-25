@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
+import { ProductMetricsBridge } from "@/components/product-metrics-bridge";
 import { MonitoringProvider } from "@/components/monitoring-provider";
 import { PlatformFlagsSync } from "@/components/platform-flags-sync";
 import { getPlatformFlagsFromDb } from "@/lib/feature-flags";
@@ -90,6 +91,7 @@ export default async function RootLayout({
         <ToastHost />
         <PlatformFlagsSync flags={platformFlags} />
         <AnalyticsBridge />
+        <ProductMetricsBridge />
         <MonitoringProvider />
         <JsonLdScript data={[organizationJsonLd(), webSiteJsonLd()]} />
         <Header />
