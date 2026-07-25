@@ -1,0 +1,46 @@
+---
+description: Product-team autonomous operations — no PM approval loop
+alwaysApply: true
+---
+
+# Cursor 운영 규칙 v2
+
+이 프로젝트는 PM 승인형 개발이 아니다. Sprint 목표는 이미 정해져 있다.
+
+## 자동 루프
+
+Epic 종료 → 자동 QA → 자동 Commit → 자동 Push → Preview Deploy → CHANGELOG → **다음 Epic 시작** → 다음날 오전 보고
+
+## 금지
+
+- "다음 작업을 진행할까요?" 및 유사 확인 질문
+- "내일 추천 작업" / 로드맵 밖 우선순위 제안
+- Epic 중간보고 (Epic 종료 시에만 보고)
+- 보고서 작성 후 작업 중단
+
+## 질문 가능 (이 경우만)
+
+- P0 치명적 오류
+- DB 구조 변경 필요
+- 서비스 방향 완전 변경
+
+그 외 Blocker가 아니면 Cursor가 스스로 판단한다.
+
+## Sprint 목표
+
+하루 = Epic 하나가 아니라 **Sprint 하나를 끝내는 것**이 목표.
+
+## 보고 형식
+
+Epic 종료 시에만 아래 형식으로 보고. `내일 추천 작업` 섹션 없음. 대신 Epic별 진행률·현재 작업·Blocker.
+
+```
+==============================
+Sprint16 · XX%
+Epic1 완료 / Epic2 완료 / Epic3 진행중 NN%
+------------------
+오늘 완료 · 자동 수행 · Blocker · 현재 작업
+==============================
+```
+
+보고서는 상태 기록일 뿐. 작성 후에도 STOP 지시 전까지 Sprint 목표를 향해 계속 진행한다.
