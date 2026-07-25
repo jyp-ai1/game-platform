@@ -1,13 +1,17 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { Badge, Button } from "@game-platform/ui";
-import Link from "next/link";
+import { Button } from "@game-platform/ui";
 import { useState, type FormEvent } from "react";
 
-import { HomeTop3Strip } from "@/components/home-top3-strip";
-import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
-import { listBugReports, submitBugReport } from "@/lib/community-feedback";
+import { CommunityActivityFeed } from "@/components/community-activity-feed";
+import { CommunityCommentsPanel } from "@/components/community-comments-panel";
+import {
+  CommunityDailyRanking,
+  CommunityTopPlayers,
+} from "@/components/community-leaderboards";
+import { CommunityRatingsStrip } from "@/components/community-ratings-panel";
+import { listBugReports, submitBugReport } from "@/lib/community-store";
 
 export function CommunityHub({ games }: { games: Game[] }) {
   const [bugGame, setBugGame] = useState(games[0]?.slug ?? "");
@@ -28,28 +32,16 @@ export function CommunityHub({ games }: { games: Game[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <HomeTop3Strip games={games} />
-      <HomeDailyChallengeStrip />
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CommunityDailyRanking games={games} />
+        <CommunityTopPlayers games={games} />
+      </div>
 
-      <section>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[
-            { title: "Comments", href: "/games" },
-            { title: "Reviews", href: "/games" },
-            { title: "Share", href: "/profile" },
-            { title: "Report", href: "#bug" },
-          ].map((item) => (
-            <Link
-              key={item.title}
-              href={item.href}
-              className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur transition-colors hover:border-primary/30"
-            >
-              <p className="font-medium">{item.title}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CommunityCommentsPanel games={games} />
+        <CommunityRatingsStrip games={games} />
+      </div>
 
       <section id="bug" className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
         <h2 className="font-semibold">Bug Report</h2>
@@ -71,13 +63,13 @@ export function CommunityHub({ games }: { games: Game[] }) {
             rows={3}
             value={bugMsg}
             onChange={(e) => setBugMsg(e.target.value)}
-            placeholder="무엇이 문제였나요?"
+            placeholder="…"
             required
           />
           <Button type="submit" size="sm">
             Submit
           </Button>
-          {sent ? <p className="text-xs text-primary">접수됨 (로컬 저장)</p> : null}
+          {sent ? <p className="text-xs text-primary">OK</p> : null}
         </form>
         {reports.length > 0 ? (
           <ul className="mt-4 space-y-2 text-xs text-muted-foreground">
@@ -90,15 +82,7 @@ export function CommunityHub({ games }: { games: Game[] }) {
         ) : null}
       </section>
 
-      <section>
-        <h2 className="text-lg font-semibold">Recent Activity</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Sprint17 — friends & feeds
-        </p>
-        <Badge className="mt-2" variant="outline">
-          Soon
-        </Badge>
-      </section>
+      <CommunityActivityFeed />
     </div>
   );
 }
