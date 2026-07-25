@@ -9,12 +9,16 @@ import {
 } from "@game-platform/game-sdk";
 
 import { recordFirstVisit, recordProductMetric } from "@/lib/product-metrics-store";
+import { ensureReplayPassport } from "@/lib/passport-store";
+import { recordVisit } from "@/lib/growth-engine";
 
 /** Mirrors key events into Product OS local KPI store. */
 export function ProductMetricsBridge() {
   useEffect(() => {
     recordFirstVisit();
     recordProductMetric("session_start");
+    ensureReplayPassport();
+    recordVisit();
 
     const offEngagement = subscribeEngagementEvents((event) => {
       if (event.type === "new-record") {

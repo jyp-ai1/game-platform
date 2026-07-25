@@ -5,18 +5,21 @@ import { useEffect, useState } from "react";
 
 import { getCoreKpis, getFailureRate, getTodayMetrics } from "@/lib/product-metrics-store";
 import { getReleaseDashboardData } from "@/lib/get-release-dashboard";
+import { buildAiOpsSummary } from "@/lib/ai-ops-summary";
 
 /** Product OS — Today dashboard for operators. */
 export function ProductOsDashboard() {
   const data = getReleaseDashboardData();
   const [today, setToday] = useState(getTodayMetrics());
   const [kpis, setKpis] = useState(getCoreKpis());
+  const [aiSummary, setAiSummary] = useState(buildAiOpsSummary());
 
   useEffect(() => {
     import("@/lib/community-store").then((m) => {
       const bugs = m.listBugReports().length;
       setToday({ ...getTodayMetrics(), bugs: Math.max(getTodayMetrics().bugs, bugs) });
       setKpis(getCoreKpis());
+      setAiSummary(buildAiOpsSummary(bugs));
     });
   }, []);
 
@@ -29,6 +32,13 @@ export function ProductOsDashboard() {
     { label: "Challenge 생성", value: String(today.challenges) },
     { label: "공유", value: String(today.shares + today.invites) },
     { label: "재방문", value: `${returnRate}%` },
+  ];
+
+  const growthOps = [
+    { label: "재방문", value: `${returnRate}%` },
+    { label: "플레이", value: String(today.gameEnds) },
+    { label: "Challenge", value: String(today.challenges) },
+    { label: "버그", value: String(today.bugs), warn: today.bugs > 0 },
   ];
 
   const rows = [
@@ -46,6 +56,24 @@ export function ProductOsDashboard() {
 
   return (
     <div className="space-y-6">
+      <section
+        className={`replay-panel rounded-2xl p-5 ${
+          aiSummary.health === "critical"
+            ? "border border-red-500/30"
+            : aiSummary.health === "watch"
+              ? "border border-amber-500/30"
+              : ""
+        }`}
+      >
+        <h2 className="font-semibold">AI Operations Summary</h2>
+        <p className="mt-2 text-sm">{aiSummary.headline}</p>
+        <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
+          {aiSummary.bullets.map((b) => (
+            <li key={b}>· {b}</li>
+          ))}
+        </ul>
+      </section>
+
       <section className="replay-panel rounded-2xl p-5">
         <h2 className="font-semibold">Core KPI (Product OS)</h2>
         <p className="mt-1 text-xs text-muted-foreground">All development must move one of these ↑</p>
@@ -81,6 +109,23 @@ export function ProductOsDashboard() {
                   ↓
                 </span>
               ) : null}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="replay-panel rounded-2xl p-5">
+        <h2 className="font-semibold">Replay Loop Ops (Today)</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+          {growthOps.map((step) => (
+            <div
+              key={step.label}
+              className={`rounded-xl border px-4 py-3 text-center ${
+                "warn" in step && step.warn ? "border-amber-500/30 bg-amber-500/5" : "border-primary/20 bg-primary/5"
+              }`}
+            >
+              <p className="text-[10px] text-muted-foreground">{step.label}</p>
+              <p className="text-xl font-bold tabular-nums">{step.value}</p>
             </div>
           ))}
         </div>

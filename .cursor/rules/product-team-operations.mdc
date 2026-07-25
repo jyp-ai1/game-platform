@@ -1,70 +1,70 @@
 ---
-description: Project Phoenix Product OS v3 — emotional identity + KPI-driven experience polish
+description: Replay OS — complete play loop + off-play engagement until product completion
 alwaysApply: true
 ---
 
-# Product OS v3 Engine
+# Replay OS — Master Task
+
+> **Replay를 웹게임의 Steam + Duolingo로 완성한다.** 제품 완성도 기준이 충족될 때까지 설계 → 구현 → QA → Commit → Push → Preview를 반복. **08:00 Daily Report 외 중간 보고 없음.**
 
 ```text
 Observe → Measure → Analyze → Improve → Verify → Release → Repeat
 ```
 
-**Master Goal:** 제품이 스스로 좋아질 수 있는 구조 + **감탄 포인트** (기능 수가 아님)
+**종료:** 사용자가 Replay Passport(게임 인생)를 잃기 싫어서 돌아옴
 
-**종료 조건:** 사용자가 **내 기록(Replay Identity)을 잃기 싫어서** 돌아오는 서비스
+**비전:** Steam Library + Spotify Wrapped + Duolingo Streak
 
-**비전:** Steam + Spotify Wrapped + Duolingo Streak
-
----
-
-# 매 사이클 목표 (5개만)
-
-| 목표 | 완료 기준 |
-|------|-----------|
-| **D1 Retention** | 다음 날 다시 올 이유 1+ 추가 |
-| **Session Time** | 한 판 끝 → 자연스러운 다음 행동 |
-| **Identity** | "내 게임 생활" 핵심 화면 노출 |
-| **Social** | 게임 종료 후 공유/도전 흐름 |
-| **Operations** | 운영자 5분 내 상태 파악 |
-
-**우선순위:** KPI 영향 → Identity/Social 감정 → Release Gate → 신규 기능
+Branch: `content-factory` · Live: `https://game29.vercel.app` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Experience Priorities
+# Play Cycle (핵심)
 
-1. **Replay Identity** — "당신은 Puzzle Master" (통계 그리드 X)
-2. **Game End** — "한 판 더" 동기 (TOP3/Stage/친구 gap)
-3. **Home** — Continue → Mission → Challenge → Recommend → Games
-4. **Journey** — 스토리 (오늘 → 이번주 → Top 게임 → 정체성)
-5. **Community** — 게임 끝에서 도전장 (페이지 방문 X)
+```text
+홈 → 게임 → 결과 → Challenge → Journey → Mission → 다음 게임 → 다음날 복귀
+```
 
-**Replay DNA:** 모든 화면 — "이 사람은 어떤 게이머인가?"
+**오프플레이도 설계:** 출석 · 미완 미션 · 도전장 · TOP50 gap
 
 ---
 
-# 5대 KPI
+# Replay Loop (10 modules)
 
-DAU · D1 Retention · Average Session · Games/User · Share Rate
-
----
-
-# Release Gate + Feature Loop
-
-Product / Retention / Operations / Technical Gate — 매 사이클 점검
-
-Feature → Metrics → Feedback → Improvement → Release
-
----
-
-# Cursor Operation
-
-08:00 이전 종료 금지 · 중간보고/질문/승인 금지 · P0만 중단
-
-Branch: `content-factory` · Production: `https://game29.vercel.app` · Commit: `feat(phoenix): ...`
+1. **Complete Gameplay Loop** — Loading→Ready→Play→Pause→Result→Reward→Challenge→Continue (100%)
+2. **Universal Mission Engine** — 플랫폼 공통 일일/주간 미션
+3. **Universal Reward Engine** — Coin/XP/Badge/Collection/Replay Score 자동
+4. **Universal Collection** — 장르별 수집 % (Puzzle 32%…)
+5. **Universal Achievement** — 100판/50000점/Stage20 등 공통
+6. **Replay Profile / Passport** — 내 게임 인생 한 장 (Steam Library)
+7. **Social Loop** — 도전→플레이→비교→리벤지
+8. **AI Operations** — 재방문/Mission/Challenge/버그 AI 요약
+9. **Growth Engine** — 미접속/Challenge/Mission 리마인더 구조
+10. **Developer Platform** — 등록→QA→AI→승인→배포
 
 ---
 
-# 08:00 Report (6항목)
+# 완료 기준 (8가지)
 
-1. 제품 완성도 %  2. KPI 변화  3. 체감 Before/After  4. 운영 효율  5. Top 3 Risks  6. Next Cycle Goal
+- [ ] 게임 후 다음 행동 자연 연결
+- [ ] 모든 게임 공통 Runtime/Result/Reward
+- [ ] Mission/Achievement/Collection 플랫폼 공통
+- [ ] Replay Passport만으로 게임 생활 파악
+- [ ] 친구 경쟁·공유·리벤지 한 흐름
+- [ ] `/admin/operations` 하루 운영 가능
+- [ ] 개발자 등록→QA→배포 한 흐름
+- [ ] 첫인상 "게임 라이프 플랫폼"
+
+---
+
+# KPI (개발 방향)
+
+DAU · D1 Retention · Session Time · Games/User · Share Rate
+
+**기능 추가 중단 — 플레이 사이클 완성만**
+
+---
+
+# 08:00 Report
+
+완성도 % · KPI · Before/After · Gate · 운영 · Risks · Next Cycle

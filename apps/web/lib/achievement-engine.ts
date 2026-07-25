@@ -1,7 +1,15 @@
 /**
- * Per-game achievement definitions — Track J.
+ * Universal + per-game achievements (Replay OS).
  */
-import { getBestScore, getAchievements } from "@game-platform/game-sdk";
+import {
+  getBestScore,
+  getAchievements,
+  getTotalPlayCount,
+} from "@game-platform/game-sdk";
+
+import { getCurrentStage } from "@/lib/game-stages";
+
+const PLATFORM_ACH_KEY = "play29:platform-achievements";
 
 export interface GameAchievementDef {
   id: string;
@@ -9,6 +17,48 @@ export interface GameAchievementDef {
   description: string;
   check: (slug: string, score?: number) => boolean;
 }
+
+export interface PlatformAchievementDef {
+  id: string;
+  title: string;
+  titleKo: string;
+  description: string;
+  check: (slug: string, score: number) => boolean;
+}
+
+const PLATFORM_ACHIEVEMENTS: PlatformAchievementDef[] = [
+  {
+    id: "platform-100-plays",
+    title: "Century Club",
+    titleKo: "100판 플레이",
+    description: "Play 100 games total",
+    check: () => getTotalPlayCount() >= 100,
+  },
+  {
+    id: "platform-50k-score",
+    title: "Score Hunter",
+    titleKo: "50000점",
+    description: "Score 50,000 in one game",
+    check: (_slug, score) => score >= 50000,
+  },
+  {
+    id: "platform-stage-20",
+    title: "Stage Master",
+    titleKo: "Stage 20",
+    description: "Reach stage 20 in any game",
+    check: (slug, score) => {
+      const stage = getCurrentStage(slug, score);
+      return stage.index >= 5;
+    },
+  },
+  {
+    id: "platform-10k-best",
+    title: "Elite Record",
+    titleKo: "만점 도전",
+    description: "Best score 10,000+ in any game",
+    check: (slug) => getBestScore(slug) >= 10000,
+  },
+];
 
 const PER_GAME: Record<string, GameAchievementDef[]> = {
   snake: [
@@ -54,5 +104,48 @@ export function getGameAchievementProgress(slug: string): { unlocked: number; to
 }
 
 export function countGlobalAchievements(): number {
-  return Object.keys(getAchievements()).length;
+  return Object.keys(getAchievements()).length + readPlatformUnlocked().length;
+}
+
+function readPlatformUnlocked(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(window.localStorage.getItem(PLATFORM_ACH_KEY) ?? "[]") as string[];
+  } catch {
+    return [];
+  }
+}
+
+function writePlatformUnlocked(ids: string[]): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(PLATFORM_ACH_KEY, JSON.stringify(ids));
+}
+
+export function getPlatformAchievements(): PlatformAchievementDef[] {
+  return PLATFORM_ACHIEVEMENTS;
+}
+
+export function getUnlockedPlatformAchievements(): PlatformAchievementDef[] {
+  const unlocked = new Set(readPlatformUnlocked());
+  return PLATFORM_ACHIEVEMENTS.filter((a) => unlocked.has(a.id));
+}
+
+/** Check and persist newly unlocked platform achievements after a game. */
+export function checkPlatformAchievements(slug: string, score: number): string[] {
+  const unlocked = new Set(readPlatformUnlocked());
+  const newly: string[] = [];
+
+  for (const ach of PLATFORM_ACHIEVEMENTS) {
+    if (unlocked.has(ach.id)) continue;
+    if (ach.check(slug, score)) {
+      unlocked.add(ach.id);
+      newly.push(ach.id);
+    }
+  }
+
+  if (newly.length > 0) {
+    writePlatformUnlocked([...unlocked]);
+  }
+
+  return newly;
 }

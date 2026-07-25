@@ -1,3 +1,4 @@
+import { ReplayOffPlayStrip } from "@/components/replay-offplay-strip";
 import { ContinueReminderBanner } from "@/components/continue-reminder-banner";
 import { HomeChallengeStrip } from "@/components/home-challenge-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
@@ -21,6 +22,7 @@ export default async function Home() {
   return (
     <main className="flex flex-1 flex-col">
       <ContinueReminderBanner games={games} />
+      <ReplayOffPlayStrip games={games} />
       <HomeContinueHub games={games} />
       <ReplayIdentityHero games={games} />
       <HomeDailyChallengeStrip />

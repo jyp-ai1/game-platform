@@ -9,7 +9,7 @@ import {
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
 import { selectRecommended } from "@/lib/game-sections";
-import type { GameEndRewards } from "@/lib/retention-engine";
+import type { UniversalRewardBundle } from "@/lib/reward-engine";
 import {
   subscribeEngagement,
   subscribePlatformAnalyticsEvents,
@@ -29,7 +29,7 @@ export function GameLifecycleBridge({
   games: Game[];
   children: React.ReactNode;
 }) {
-  const [result, setResult] = useState<{ score: number; rewards: GameEndRewards } | null>(null);
+  const [result, setResult] = useState<{ score: number; rewards: UniversalRewardBundle } | null>(null);
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,
@@ -47,11 +47,11 @@ export function GameLifecycleBridge({
     const framework = getGameFramework(slug);
     return subscribePlatformAnalyticsEvents((event) => {
       if (event.type === "game-end" && event.gameSlug === slug) {
-        const rewards = framework.onGameEnd(event.score);
+        const rewards = framework.onGameEnd(event.score, games);
         setResult({ score: event.score, rewards });
       }
     });
-  }, [slug]);
+  }, [slug, games]);
 
   const recommend =
     selectRecommended(games, recent, favorites, 1)[0] ?? games.find((g) => g.slug !== slug);

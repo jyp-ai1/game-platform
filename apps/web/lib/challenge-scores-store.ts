@@ -1,6 +1,7 @@
 /**
  * Friend challenge sessions — invite → play → compare → rematch.
  */
+import { recordFriendChallengeSent } from "@/lib/universal-mission-engine";
 const CHALLENGES_KEY = "play29:challenges";
 const ACTIVE_CHALLENGE_KEY = "play29:active-challenge";
 
@@ -67,6 +68,7 @@ export function createChallenge(
   };
   const list = [session, ...readAll()].slice(0, 50);
   writeAll(list);
+  recordFriendChallengeSent();
   if (typeof window !== "undefined") {
     window.localStorage.setItem(ACTIVE_CHALLENGE_KEY, session.id);
   }

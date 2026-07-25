@@ -34,9 +34,9 @@ export const mainNavItems: MainNavItem[] = [
     match: (p) => p.startsWith("/community"),
   },
   {
-    label: "Profile",
-    href: "/profile",
+    label: "Passport",
+    href: "/passport",
     icon: User,
-    match: (p) => p.startsWith("/profile") || p.startsWith("/wrapped"),
+    match: (p) => p.startsWith("/passport") || p.startsWith("/profile") || p.startsWith("/wrapped"),
   },
 ];

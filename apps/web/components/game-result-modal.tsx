@@ -22,11 +22,12 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { getRuntimeConfig } from "@/lib/game-runtime-config";
 import { getCurrentStage, getNextStage, getStageProgress } from "@/lib/game-stages";
 import { getCompleted, getGameLibraryBadge, markCompleted, markMastered } from "@/lib/library-store";
-import type { GameEndRewards } from "@/lib/retention-engine";
+import type { UniversalRewardBundle } from "@/lib/reward-engine";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 import { getMyRank } from "@/lib/supabase/scores";
 import { GameEndMotivation } from "@/components/game-end-motivation";
+import { GameResultLoopNav } from "@/components/game-result-loop-nav";
 import { getChallenge, getChallengeUrl } from "@/lib/challenge-scores-store";
 
 export function GameResultModal({
@@ -40,7 +41,7 @@ export function GameResultModal({
 }: {
   slug: string;
   score: number;
-  rewards: GameEndRewards;
+  rewards: UniversalRewardBundle;
   games: Game[];
   recommend?: Game;
   challengeId?: string | null;
@@ -137,6 +138,12 @@ export function GameResultModal({
           <StatBox label="Level" value={`Lv.${level.level}`} />
         </div>
 
+        {rewards.newAchievements.length > 0 ? (
+          <p className="mt-3 flex items-center justify-center gap-1 text-sm font-medium text-violet-400">
+            <Sparkles className="size-4" /> Achievement unlocked!
+          </p>
+        ) : null}
+
         {rewards.isNewBest ? (
           <p className="mt-3 flex items-center justify-center gap-1 text-sm font-medium text-emerald-400">
             <Trophy className="size-4" /> New Best!
@@ -155,7 +162,7 @@ export function GameResultModal({
 
         <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-muted/20 p-3">
           <Row icon={<Target className="size-4 text-primary" />} label="Mission" value={missionDone ? "Complete" : `${missionPct}%`} />
-          <Row icon={<Library className="size-4 text-primary" />} label="Collection" value={inCollection ? badge : badge} />
+          <Row icon={<Library className="size-4 text-primary" />} label="Collection" value={`${rewards.collectionPercent}% · ${badge}`} />
           {nextStage ? (
             <div>
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -205,6 +212,12 @@ export function GameResultModal({
             />
           </div>
         )}
+
+        <GameResultLoopNav
+          slug={slug}
+          recommendSlug={recommend?.slug}
+          missionDone={missionDone}
+        />
 
         <div className="mt-6 flex flex-wrap gap-2">
           <Button nativeButton={false} render={<Link href={`/games/${slug}`}>Retry</Link>} />

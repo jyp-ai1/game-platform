@@ -25,7 +25,7 @@ import {
   getServerFavoritesSnapshot,
   getServerRecentlyPlayedSnapshot,
 } from "@/lib/local-storage";
-import type { GameEndRewards } from "@/lib/retention-engine";
+import type { UniversalRewardBundle } from "@/lib/reward-engine";
 import { emitRuntimeEvent, type RuntimePhase } from "@/lib/runtime-events";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
 
@@ -46,7 +46,7 @@ export function RuntimeProvider({
   const [phase, setPhase] = useState<RuntimePhase>("loading");
   const [paused, setPaused] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [result, setResult] = useState<{ score: number; rewards: GameEndRewards } | null>(null);
+  const [result, setResult] = useState<{ score: number; rewards: UniversalRewardBundle } | null>(null);
   const [showRewardFlash, setShowRewardFlash] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
@@ -81,7 +81,7 @@ export function RuntimeProvider({
     return subscribePlatformAnalyticsEvents((event) => {
       if (event.type !== "game-end" || event.gameSlug !== slug) return;
 
-      const rewards = framework.onGameEnd(event.score);
+      const rewards = framework.onGameEnd(event.score, games);
       if (challengeId) {
         recordChallengeScore(challengeId, getDeviceId(), event.score);
         setActiveChallenge(challengeId);
@@ -106,7 +106,7 @@ export function RuntimeProvider({
         setShowResult(true);
       }, 1400);
     });
-  }, [slug, goPhase, challengeId]);
+  }, [slug, goPhase, challengeId, games]);
 
   function finishTutorial() {
     window.localStorage.setItem(`${TUTORIAL_SEEN_KEY}:${slug}`, "1");
