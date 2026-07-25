@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { GameDetailTemplate } from "@/components/game-detail-template";
-import { GameSection } from "@/components/game-section";
+import { GameDetailSimilar } from "@/components/game-detail-similar";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { selectHotSlugs, selectRelated } from "@/lib/game-sections";
+import { selectRelated } from "@/lib/game-sections";
 import { isPlayableSlug } from "@/lib/playable-games";
 import {
   breadcrumbJsonLd,
@@ -48,7 +48,6 @@ export default async function GamePage({ params }: GamePageProps) {
   }
 
   const related = selectRelated(allGames, game);
-  const hotSlugs = selectHotSlugs(allGames);
   const isPlayable = game.status === "ACTIVE" && isPlayableSlug(slug);
 
   return (
@@ -70,8 +69,10 @@ export default async function GamePage({ params }: GamePageProps) {
         slug={slug}
         isPlayable={isPlayable}
         rankingEnabled={rankingEnabled}
+        related={related}
+        allGames={allGames}
       />
-      <GameSection title="비슷한 게임" games={related} hotSlugs={hotSlugs} />
+      <GameDetailSimilar games={allGames} related={related} />
     </>
   );
 }
