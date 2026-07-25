@@ -30,8 +30,9 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
   const [featured, ...rest] = recentGames;
 
   return (
-    <section className="py-5 sm:py-8">
+    <section className="-mt-2 py-6 sm:py-10">
       <Container>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">Continue Playing</p>
         {featured ? (
           <div className="space-y-4">
             <ContinuePlayingCard game={featured} featured />

@@ -61,7 +61,7 @@ export function HomeDailyChallengeStrip() {
     <section className="py-4 sm:py-6">
       <Container>
         <Link
-          href="/journey"
+          href="/library"
           className="block rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/15 via-card/80 to-card/60 p-6 shadow-lg shadow-primary/5 backdrop-blur transition-colors hover:border-primary/40 sm:p-8"
         >
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">

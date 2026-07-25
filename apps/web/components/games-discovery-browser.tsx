@@ -27,6 +27,19 @@ import {
   subscribeFavorites,
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
+import {
+  getDailyMission,
+  getDailyStreak,
+  getGamePlayCounts,
+  getServerDailyMissionSnapshot,
+  getServerDailyStreakSnapshot,
+  isDailyChallengeComplete,
+  subscribeEngagement,
+  subscribeMissions,
+} from "@game-platform/game-sdk";
+import { recommendGames, topRecommendationReason } from "@/lib/recommendation-engine";
+import { buildWrappedSnapshot } from "@/lib/wrapped-data";
+import { GameCard } from "@/components/game-card";
 
 export function GamesDiscoveryBrowser({
   games,
@@ -40,7 +53,8 @@ export function GamesDiscoveryBrowser({
   const [sort, setSort] = useState<GameSortOption>("popular");
   const [preset, setPreset] = useState<DiscoveryPreset | null>(null);
   const [mood, setMood] = useState<"all" | "chill" | "intense" | "quick">("all");
-  const [query, setQuery] = useState("");
+  const [difficulty, setDifficulty] = useState<"all" | "EASY" | "MEDIUM" | "HARD">("all");
+  const [tag, setTag] = useState<string>("all");
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,
@@ -52,8 +66,64 @@ export function GamesDiscoveryBrowser({
     getRecentlyPlayedSnapshot,
     getServerRecentlyPlayedSnapshot
   );
+  const streak = useSyncExternalStore(
+    subscribeEngagement,
+    getDailyStreak,
+    getServerDailyStreakSnapshot
+  );
+  const mission = useSyncExternalStore(
+    subscribeMissions,
+    getDailyMission,
+    getServerDailyMissionSnapshot
+  );
+  const playCounts = useSyncExternalStore(
+    subscribeEngagement,
+    getGamePlayCounts,
+    () => ({})
+  );
 
   const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
+
+  const popularTags = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const g of games) {
+      for (const t of g.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([t]) => t);
+  }, [games]);
+
+  const aiPicks = useMemo(
+    () =>
+      recommendGames(
+        games,
+        {
+          recentlyPlayed,
+          favorites,
+          streak: streak.currentStreak,
+          missionIncomplete: !isDailyChallengeComplete(mission),
+          replayScore: buildWrappedSnapshot(games).replayScore,
+          playCounts,
+        },
+        4
+      ),
+    [games, recentlyPlayed, favorites, streak, mission, playCounts]
+  );
+
+  const aiReason = useMemo(
+    () =>
+      topRecommendationReason(games, {
+        recentlyPlayed,
+        favorites,
+        streak: streak.currentStreak,
+        missionIncomplete: !isDailyChallengeComplete(mission),
+        replayScore: buildWrappedSnapshot(games).replayScore,
+        playCounts,
+      }),
+    [games, recentlyPlayed, favorites, streak, mission, playCounts]
+  );
 
   const visible = useMemo(
     () => {
@@ -63,17 +133,35 @@ export function GamesDiscoveryBrowser({
         sort,
         favorites,
         recentlyPlayed,
-        query,
+        "",
         view,
         preset,
         resolvedHotSlugs
       );
       if (mood === "chill") list = list.filter((g) => g.difficulty === "EASY");
       if (mood === "intense") list = list.filter((g) => g.difficulty === "HARD");
-      if (mood === "quick") list = list.filter((g) => g.category?.slug === "casual" || g.category?.slug === "puzzle");
+      if (mood === "quick") {
+        list = list.filter(
+          (g) => g.category?.slug === "casual" || g.category?.slug === "puzzle"
+        );
+      }
+      if (difficulty !== "all") list = list.filter((g) => g.difficulty === difficulty);
+      if (tag !== "all") list = list.filter((g) => g.tags.includes(tag));
       return list;
     },
-    [games, category, sort, favorites, recentlyPlayed, query, view, preset, resolvedHotSlugs, mood]
+    [
+      games,
+      category,
+      sort,
+      favorites,
+      recentlyPlayed,
+      view,
+      preset,
+      resolvedHotSlugs,
+      mood,
+      difficulty,
+      tag,
+    ]
   );
 
   function selectPreset(next: DiscoveryPreset) {
@@ -88,19 +176,18 @@ export function GamesDiscoveryBrowser({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <label htmlFor="games-search" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Search
-        </label>
-        <input
-          id="games-search"
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="게임명 · 태그 검색..."
-          className="w-full max-w-md rounded-md border bg-background px-3 py-2 text-sm"
-        />
-      </div>
+      {aiPicks.length > 0 ? (
+        <section className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-card/60 p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            AI Picks · {aiReason}
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {aiPicks.map((game) => (
+              <GameCard key={game.id} game={game} isHot={resolvedHotSlugs.has(game.slug)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="flex flex-col gap-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -196,6 +283,59 @@ export function GamesDiscoveryBrowser({
           ))}
         </div>
       </div>
+
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Difficulty
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              { value: "all", label: "All" },
+              { value: "EASY", label: "Easy" },
+              { value: "MEDIUM", label: "Medium" },
+              { value: "HARD", label: "Hard" },
+            ] as const
+          ).map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              size="sm"
+              variant={difficulty === item.value ? "default" : "outline"}
+              onClick={() => setDifficulty(item.value)}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {popularTags.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tags</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={tag === "all" ? "default" : "outline"}
+              onClick={() => setTag("all")}
+            >
+              All
+            </Button>
+            {popularTags.map((t) => (
+              <Button
+                key={t}
+                type="button"
+                size="sm"
+                variant={tag === t ? "default" : "outline"}
+                onClick={() => setTag(t)}
+              >
+                {t}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">

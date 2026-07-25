@@ -33,8 +33,8 @@ export function HomeRecentStrip({ games }: { games: Game[] }) {
       <Container>
         <div className="flex items-end justify-between gap-4">
           <h2 className="text-base font-semibold sm:text-lg">🕐 최근 플레이</h2>
-          <Link href="/journey" className="text-sm font-medium text-primary hover:underline">
-            전체 보기
+          <Link href="/library" className="text-sm font-medium text-primary hover:underline">
+            Library →
           </Link>
         </div>
         <div className="scrollbar-hide mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">

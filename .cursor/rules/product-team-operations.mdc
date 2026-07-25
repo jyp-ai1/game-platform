@@ -1,20 +1,23 @@
 ---
-description: AI Team Mode — Project Phoenix Phase 1
+description: Project Phoenix Master Task — autonomous until Beta
 alwaysApply: true
 ---
 
-# AI Operation Mode (Project Phoenix)
+# Project Phoenix Master Task
+
+Goal: Re:Play → Web Game Steam + Duolingo. Open Beta ready.
 
 ```
-Phase = Foundation | Growth | Creator | Business
-중간보고 · 질문 · 확인 · 승인 금지
-Epic 완료 → QA → Commit → Push → Preview → 다음 Epic 자동 선택
-Blocker(빌드불가 · push권한 · API Key)만 멈춤
-오전 08:00 최종 보고만
+START → Phase1 Identity → Phase2 Growth → Phase3 Creator → Beta → Open Beta → Done
 ```
 
-Branch: `content-factory` · Commit: `feat(s19-phoenix): ...`
+Rules: No questions · No mid-reports · Epic→QA→Commit→Push→Preview→next auto · 08:00 report only
+Branch: `content-factory` · Never merge main
 
-Priority: P0 → P1 → P2 → UX → Refactor → QA → Docs
+KPI per change: Retention | Session Time | Social | Identity | Operations
 
-Phase1 Foundation: Runtime → Steam Loop → Library → Live Sync → Community → Multiplayer → Ops → Retention → Polish → RC
+Phase1: Home · Discover · Detail · Runtime · Library · Community · Profile UX unity
+Phase2: Social · Challenge · Notification · Retention · Wrapped
+Phase3: Dev Platform · Monetization · AI Operator · Health Center
+
+Commit: `feat(phoenix): ...`

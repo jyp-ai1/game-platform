@@ -5,7 +5,6 @@ import { Container, SectionTitle } from "@game-platform/ui";
 
 import { selectHotSlugs } from "@/lib/game-sections";
 import { buildGamesListMetadata } from "@/lib/seo";
-import { siteConfig } from "@/lib/site-config";
 import { getGames } from "@/lib/supabase/games";
 
 export const metadata: Metadata = buildGamesListMetadata();
@@ -21,8 +20,8 @@ export default async function AllGamesPage() {
       <section className="py-8">
         <Container>
           <SectionTitle
-            title="전체 게임"
-            description={`${siteConfig.name}의 전체 게임 목록 — 카테고리·정렬로 찾아보세요.`}
+            title="Discover"
+            description="Browse by category, tag, mood, difficulty — AI picks for you."
           />
           <div className="mt-8">
             <GamesDiscoveryBrowser games={games} hotSlugs={hotSlugs} />
