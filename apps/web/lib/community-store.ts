@@ -4,6 +4,7 @@
 import { getPlayHistorySnapshot } from "@/lib/play-history";
 
 const COMMENTS_KEY = "play29:community-comments";
+const LIKES_KEY = "play29:comment-likes";
 const RATINGS_KEY = "play29:game-ratings";
 const BUG_KEY = "play29:bug-reports";
 
@@ -58,6 +59,16 @@ export function postComment(gameSlug: string, message: string): void {
     createdAt: new Date().toISOString(),
   });
   writeJson(COMMENTS_KEY, list.slice(0, 100));
+}
+
+export function toggleCommentLike(commentId: string): void {
+  const likes = readJson<Record<string, boolean>>(LIKES_KEY, {});
+  likes[commentId] = !likes[commentId];
+  writeJson(LIKES_KEY, likes);
+}
+
+export function isCommentLiked(commentId: string): boolean {
+  return readJson<Record<string, boolean>>(LIKES_KEY, {})[commentId] ?? false;
 }
 
 export function getRating(gameSlug: string): number {

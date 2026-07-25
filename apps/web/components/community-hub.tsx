@@ -2,7 +2,8 @@
 
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
-import { useState, type FormEvent } from "react";
+import { Heart } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { CommunityActivityFeed } from "@/components/community-activity-feed";
 import { CommunityCommentsPanel } from "@/components/community-comments-panel";
@@ -11,6 +12,7 @@ import {
   CommunityTopPlayers,
 } from "@/components/community-leaderboards";
 import { CommunityRatingsStrip } from "@/components/community-ratings-panel";
+import { ensureCommunityMockData } from "@/lib/community-mock";
 import { listBugReports, submitBugReport } from "@/lib/community-store";
 
 export function CommunityHub({ games }: { games: Game[] }) {
@@ -18,6 +20,11 @@ export function CommunityHub({ games }: { games: Game[] }) {
   const [bugMsg, setBugMsg] = useState("");
   const [sent, setSent] = useState(false);
   const [reports, setReports] = useState<ReturnType<typeof listBugReports>>([]);
+
+  useEffect(() => {
+    ensureCommunityMockData();
+    refreshReports();
+  }, []);
 
   function refreshReports() {
     setReports(listBugReports());
@@ -43,9 +50,12 @@ export function CommunityHub({ games }: { games: Game[] }) {
         <CommunityRatingsStrip games={games} />
       </div>
 
-      <section id="bug" className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
-        <h2 className="font-semibold">Bug Report</h2>
-        <form className="mt-3 space-y-3" onSubmit={handleBug}>
+      <section id="bug" className="rounded-3xl border border-white/10 bg-card/50 p-6 backdrop-blur">
+        <div className="flex items-center gap-2">
+          <Heart className="size-4 text-destructive" />
+          <h2 className="font-semibold">Bug Report</h2>
+        </div>
+        <form className="mt-4 space-y-3" onSubmit={handleBug}>
           <select
             className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm"
             value={bugGame}
@@ -72,10 +82,10 @@ export function CommunityHub({ games }: { games: Game[] }) {
           {sent ? <p className="text-xs text-primary">OK</p> : null}
         </form>
         {reports.length > 0 ? (
-          <ul className="mt-4 space-y-2 text-xs text-muted-foreground">
-            {reports.slice(0, 3).map((r) => (
-              <li key={r.id} className="rounded-lg border border-dashed px-3 py-2">
-                {r.gameSlug}: {r.message.slice(0, 80)}
+          <ul className="mt-4 space-y-2 text-sm">
+            {reports.slice(0, 5).map((r) => (
+              <li key={r.id} className="rounded-xl border border-white/5 px-3 py-2">
+                <span className="text-primary">{r.gameSlug}</span> · {r.message.slice(0, 100)}
               </li>
             ))}
           </ul>

@@ -2,14 +2,28 @@
 
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
-import { useState, type FormEvent } from "react";
+import { Heart } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import { listComments, postComment, type CommunityComment } from "@/lib/community-store";
+import {
+  isCommentLiked,
+  listComments,
+  postComment,
+  toggleCommentLike,
+  type CommunityComment,
+} from "@/lib/community-store";
+import { ensureCommunityMockData } from "@/lib/community-mock";
 
 export function CommunityCommentsPanel({ games }: { games: Game[] }) {
   const [gameSlug, setGameSlug] = useState(games[0]?.slug ?? "");
   const [message, setMessage] = useState("");
-  const [items, setItems] = useState<CommunityComment[]>(() => listComments());
+  const [items, setItems] = useState<CommunityComment[]>([]);
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    ensureCommunityMockData();
+    setItems(listComments());
+  }, []);
 
   function refresh() {
     setItems(listComments());
@@ -22,10 +36,15 @@ export function CommunityCommentsPanel({ games }: { games: Game[] }) {
     refresh();
   }
 
+  function handleLike(id: string) {
+    toggleCommentLike(id);
+    tick((n) => n + 1);
+  }
+
   return (
-    <section className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
-      <h2 className="font-semibold">Comments</h2>
-      <form className="mt-3 space-y-2" onSubmit={handleSubmit}>
+    <section className="rounded-3xl border border-white/10 bg-card/50 p-6 backdrop-blur">
+      <h2 className="text-lg font-semibold">Comments</h2>
+      <form className="mt-4 space-y-2" onSubmit={handleSubmit}>
         <select
           className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm"
           value={gameSlug}
@@ -52,13 +71,23 @@ export function CommunityCommentsPanel({ games }: { games: Game[] }) {
       </form>
       {items.length > 0 ? (
         <ul className="mt-4 space-y-2">
-          {items.slice(0, 5).map((c) => (
+          {items.slice(0, 6).map((c) => (
             <li
               key={c.id}
-              className="rounded-xl border border-white/5 bg-background/40 px-3 py-2 text-sm"
+              className="flex items-start justify-between gap-2 rounded-xl border border-white/5 bg-background/40 px-3 py-2 text-sm"
             >
-              <span className="text-xs text-primary">{c.gameSlug}</span>
-              <p className="mt-0.5">{c.message}</p>
+              <div>
+                <span className="text-xs text-primary">{c.gameSlug}</span>
+                <p className="mt-0.5">{c.message}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleLike(c.id)}
+                className={`shrink-0 ${isCommentLiked(c.id) ? "text-red-400" : "text-muted-foreground"}`}
+                aria-label="Like"
+              >
+                <Heart className="size-4" fill={isCommentLiked(c.id) ? "currentColor" : "none"} />
+              </button>
             </li>
           ))}
         </ul>
