@@ -39,10 +39,21 @@ import {
 } from "@game-platform/game-sdk";
 import { recommendGames, topRecommendationReason } from "@/lib/recommendation-engine";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
+import { DiscoverChallengeStrip } from "@/components/discover-challenge-strip";
+import { DiscoverSeasonStrip } from "@/components/discover-season-strip";
 import { GameCard } from "@/components/game-card";
 import { LIBRARY_COLLECTIONS } from "@/lib/library-store";
 import { getOnlineFriends } from "@/lib/social-store";
 import Link from "next/link";
+
+const CATEGORY_EMOJI: Partial<Record<GameCategoryFilter, string>> = {
+  puzzle: "🧩",
+  arcade: "🕹️",
+  board: "♟️",
+  sports: "⚽",
+  casual: "🎮",
+  new: "✨",
+};
 
 export function GamesDiscoveryBrowser({
   games,
@@ -199,6 +210,9 @@ export function GamesDiscoveryBrowser({
 
   return (
     <div className="flex flex-col gap-6">
+      <DiscoverChallengeStrip />
+      <DiscoverSeasonStrip games={games} hotSlugs={resolvedHotSlugs} />
+
       <div className="flex flex-wrap gap-2">
         <Link href="/missions" className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium">
           Season Missions
@@ -370,6 +384,7 @@ export function GamesDiscoveryBrowser({
               variant={category === item.value ? "default" : "outline"}
               onClick={() => setCategory(item.value)}
             >
+              {CATEGORY_EMOJI[item.value] ? `${CATEGORY_EMOJI[item.value]} ` : ""}
               {item.label}
             </Button>
           ))}

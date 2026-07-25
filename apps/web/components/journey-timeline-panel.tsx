@@ -13,6 +13,10 @@ import {
   subscribePlayHistory,
   type PlayHistoryPeriod,
 } from "@/lib/play-history";
+import {
+  formatPlayTime,
+  getPlayHabitAnalysis,
+} from "@/lib/library-analytics";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 
 const PERIODS: { id: PlayHistoryPeriod; label: string }[] = [
@@ -31,6 +35,7 @@ export function JourneyTimelinePanel({ games }: { games: Game[] }) {
   );
 
   const wrapped = useMemo(() => buildWrappedSnapshot(games), [games, history]);
+  const habits = useMemo(() => getPlayHabitAnalysis(history), [history]);
 
   return (
     <section className="flex flex-col gap-6">
@@ -60,6 +65,39 @@ export function JourneyTimelinePanel({ games }: { games: Game[] }) {
         <div className="rounded-2xl border border-white/10 bg-card/60 p-4">
           <p className="text-xs text-muted-foreground">Replay Score</p>
           <p className="mt-1 text-xl font-bold tabular-nums">{wrapped.replayScore}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-2xl border border-white/10 bg-card/60 p-4">
+          <p className="text-xs text-muted-foreground">Longest Session</p>
+          <p className="mt-1 font-semibold tabular-nums">
+            {habits.longestSession
+              ? formatPlayTime(Math.ceil(habits.longestSession.durationSec / 60))
+              : "—"}
+          </p>
+          {habits.longestSession ? (
+            <Link
+              href={`/games/${habits.longestSession.slug}`}
+              className="mt-1 block text-xs text-primary hover:underline"
+            >
+              {habits.longestSession.slug}
+            </Link>
+          ) : null}
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-card/60 p-4">
+          <p className="text-xs text-muted-foreground">Avg Session</p>
+          <p className="mt-1 font-semibold tabular-nums">{habits.avgSessionMin}m</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-card/60 p-4">
+          <p className="text-xs text-muted-foreground">Peak Hour</p>
+          <p className="mt-1 font-semibold">{habits.peakHourLabel}</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-card/60 p-4">
+          <p className="text-xs text-muted-foreground">Play Habit</p>
+          <p className="mt-1 text-sm font-semibold">
+            {habits.activeDaysThisWeek}d this week · {habits.weekendRatio}% weekend
+          </p>
         </div>
       </div>
 
