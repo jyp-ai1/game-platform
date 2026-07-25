@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Sprint16 Epic1 — Identity Pivot routes", () => {
-  test("home shows Re:Play 2.0 identity hero", async ({ page }) => {
+  test("home shows play-first visual hero", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText(/Re:Play 2\.0/i)).toBeVisible();
-    await expect(page.getByText(/Continue Playing/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Play" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Continue" })).toBeVisible();
   });
 
   test("journey page loads", async ({ page }) => {

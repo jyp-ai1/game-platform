@@ -24,9 +24,9 @@ export function GameCarousel({
   }
 
   return (
-    <section className="animate-in fade-in slide-in-from-bottom-4 border-b py-10 duration-500 sm:py-14">
+    <section className="animate-in fade-in slide-in-from-bottom-4 border-b py-8 sm:py-10">
       <Container>
-        <SectionTitle title={title} description={description} />
+        <SectionTitle title={title} description={description || undefined} />
         <div className="scrollbar-hide mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
           {games.map((game) => (
             <div key={game.id} className="w-64 shrink-0 snap-start sm:w-72">

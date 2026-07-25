@@ -25,28 +25,29 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
     .filter((game): game is Game => game !== undefined)
     .slice(0, 3);
 
-  return (
-    <section className="border-b py-4 sm:py-6">
-      <Container>
-        <h2 className="text-base font-semibold sm:text-lg">▶ Continue Playing</h2>
+  const [featured, ...rest] = recentGames;
 
-        {recentGames.length > 0 ? (
-          <div className="scrollbar-hide mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 sm:overflow-visible">
-            {recentGames.map((game) => (
-              <div key={game.id} className="w-[min(100%,280px)] shrink-0 snap-start sm:w-auto">
-                <ContinuePlayingCard game={game} />
+  return (
+    <section className="-mt-2 pb-4 pt-2 sm:pb-6">
+      <Container>
+        <h2 className="text-lg font-bold sm:text-xl">Continue</h2>
+
+        {featured ? (
+          <div className="mt-3 space-y-3">
+            <div className="rounded-2xl border border-primary/20 bg-card/80 shadow-lg shadow-primary/5 backdrop-blur">
+              <ContinuePlayingCard game={featured} />
+            </div>
+            {rest.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {rest.map((game) => (
+                  <ContinuePlayingCard key={game.id} game={game} />
+                ))}
               </div>
-            ))}
+            ) : null}
           </div>
         ) : (
-          <div className="mt-3 rounded-xl border border-dashed bg-card/40 px-4 py-5 text-center sm:py-6">
-            <p className="text-sm font-medium">첫 게임을 시작해보세요</p>
-            <Button
-              className="mt-3"
-              size="sm"
-              nativeButton={false}
-              render={<Link href="/games">Discover Games</Link>}
-            />
+          <div className="mt-3 rounded-2xl border border-dashed border-white/10 bg-card/30 px-4 py-8 text-center backdrop-blur">
+            <Button nativeButton={false} render={<Link href="/games">Play your first game</Link>} />
           </div>
         )}
       </Container>

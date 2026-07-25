@@ -211,6 +211,16 @@
     animation: hero-glow-pulse 8s ease-in-out infinite;
   }
 
+  .hero-float-card {
+    animation: hero-float 6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-float-card {
+      animation: none;
+    }
+  }
+
   /* CRT feel: faint scanlines + a soft vignette. */
   .hero-scanlines {
     background-image: repeating-linear-gradient(
@@ -236,6 +246,16 @@
   }
   50% {
     opacity: 1;
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }
 
