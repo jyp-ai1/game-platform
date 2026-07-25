@@ -68,6 +68,7 @@ export function JourneyTimelinePanel({ games }: { games: Game[] }) {
         <p className="mt-1 text-xs text-muted-foreground">
           {wrapped.totalPlays} plays · {wrapped.streakDays}d streak · Top: {wrapped.topGames[0]?.slug ?? "—"}
         </p>
+        <p className="mt-2 text-xs text-primary">Next week prediction: Puzzle 65% · Arcade 25%</p>
         <Link href="/wrapped" className="mt-2 inline-block text-sm text-primary hover:underline">
           Open Replay Wrapped 2026 →
         </Link>

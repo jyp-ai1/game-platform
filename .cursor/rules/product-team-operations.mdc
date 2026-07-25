@@ -1,18 +1,16 @@
 ---
-description: Project Phoenix Phase 2 — Platform Transformation until 08:00
+description: Project Phoenix Master Task — Tracks 1-20 until product complete
 alwaysApply: true
 ---
 
-# Project Phoenix Phase 2
+# Project Phoenix Master Implementation Order
 
-Goal: Web game site → Replay Game Life Platform (Playable Steam)
+Goal: Web game portal → Steam + Duolingo for Web Games (100%)
 
-Until 08:00 KST: NO questions · NO mid-reports · NO epic-done messages · bypass blockers · continue all tracks
-
-Loop: implement → QA → commit → push → next track
+Loop: Track → QA → Commit → Push → next Track. NO questions · NO mid-reports · 08:00 report only.
 
 Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`
 
-Tracks A–T active. Report ONLY at 08:00 in Phase2 COMPLETE format.
+Tracks: 1 Runtime · 2 Stages · 3 Detail · 4 Discover · 5 Journey · 6 Social · 7 Multiplayer · 8 Retention · 9 Ranking · 10 Identity · 11 AI · 12 Health · 13 Dev Platform · 14 Admin · 15 Performance · 16 A11y · 17 QA · 18 Automation · 19 Open Beta · 20 RC Final
 
-KPI: Retention · Session Time · Social · Identity · Operations
+Blockers only: build fail · push auth · API key. Otherwise bypass and continue.

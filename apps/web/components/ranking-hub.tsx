@@ -7,6 +7,15 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getLeaderboard, type LeaderboardEntry } from "@/lib/supabase/scores";
 
+const LEAGUES = ["Bronze", "Silver", "Gold", "Diamond", "Master"] as const;
+
+function leagueForScore(score: number): (typeof LEAGUES)[number] {
+  if (score >= 8000) return "Master";
+  if (score >= 5000) return "Diamond";
+  if (score >= 2500) return "Gold";
+  if (score >= 1000) return "Silver";
+  return "Bronze";
+}
 const PERIODS = [
   { id: "today" as const, label: "Today" },
   { id: "weekly" as const, label: "Week" },
@@ -31,8 +40,15 @@ export function RankingHub({ games }: { games: Game[] }) {
 
   const game = games.find((g) => g.slug === slug);
 
+  const topScore = entries?.[0]?.score ?? 0;
+  const myLeague = leagueForScore(topScore);
+
   return (
     <div className="flex flex-col gap-6">
+      <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-sm">
+        League tier: <span className="font-bold text-primary">{myLeague}</span>
+        <span className="ml-3 text-xs text-muted-foreground">{LEAGUES.join(" → ")}</span>
+      </div>
       <div className="flex flex-wrap gap-2">
         {PERIODS.map((p) => (
           <button

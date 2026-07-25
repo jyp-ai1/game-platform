@@ -248,6 +248,18 @@
     @apply text-xs font-semibold uppercase tracking-widest text-muted-foreground;
   }
 
+  @keyframes runtime-float-up {
+    0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+    40% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-24px) scale(1.02); }
+  }
+  .runtime-xp-float {
+    animation: runtime-float-up 1.2s ease-out forwards;
+  }
+  .runtime-coin-float {
+    animation: runtime-float-up 1.2s ease-out 0.15s forwards;
+  }
+
   /* Focus visible for accessibility Epic19 */
   :focus-visible {
     outline: 2px solid var(--ring);

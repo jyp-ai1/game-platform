@@ -11,7 +11,7 @@ export interface GameStage {
 }
 
 const MERGE_GAMES = new Set(["2048", "merge-blocks"]);
-const GRID_GAMES = new Set(["memory"]);
+const GRID_GAMES = new Set(["memory", "sliding-puzzle", "samegame"]);
 const ROUND_GAMES = new Set([
   "minesweeper",
   "sudoku",
@@ -34,10 +34,10 @@ const ROUND_GAMES = new Set([
 const GAME_OVERRIDES: Record<string, GameStage[]> = {
   snake: [
     { index: 1, label: "Stage 1", target: 500 },
-    { index: 2, label: "Stage 2", target: 1200 },
+    { index: 2, label: "Stage 2", target: 1000 },
     { index: 3, label: "Stage 3", target: 2500 },
     { index: 4, label: "Stage 4", target: 5000 },
-    { index: 5, label: "Stage 5", target: 10000 },
+    { index: 5, label: "Boss", target: 9999 },
   ],
   "2048": [
     { index: 1, label: "256", target: 256 },
@@ -60,11 +60,40 @@ const GAME_OVERRIDES: Record<string, GameStage[]> = {
     { index: 4, label: "Complex", target: 1200 },
     { index: 5, label: "Maze Master", target: 2500 },
   ],
+  "maze-runner": [
+    { index: 1, label: "Small", target: 100 },
+    { index: 2, label: "Medium", target: 300 },
+    { index: 3, label: "Large", target: 600 },
+    { index: 4, label: "Complex", target: 1200 },
+    { index: 5, label: "Boss", target: 2500 },
+  ],
   memory: [
     { index: 1, label: "2×2", target: 1 },
-    { index: 2, label: "4×4", target: 2 },
-    { index: 3, label: "6×6", target: 3 },
-    { index: 4, label: "8×8", target: 4 },
+    { index: 2, label: "3×3", target: 2 },
+    { index: 3, label: "4×4", target: 3 },
+    { index: 4, label: "5×5", target: 4 },
+    { index: 5, label: "Boss", target: 5 },
+  ],
+  breakout: [
+    { index: 1, label: "Stage 1", target: 200 },
+    { index: 2, label: "Stage 2", target: 500 },
+    { index: 3, label: "Stage 3", target: 1000 },
+    { index: 4, label: "Stage 4", target: 2000 },
+    { index: 5, label: "Boss", target: 5000 },
+  ],
+  tetris: [
+    { index: 1, label: "Stage 1", target: 500 },
+    { index: 2, label: "Stage 2", target: 1500 },
+    { index: 3, label: "Stage 3", target: 3000 },
+    { index: 4, label: "Stage 4", target: 6000 },
+    { index: 5, label: "Boss", target: 10000 },
+  ],
+  "bubble-shooter": [
+    { index: 1, label: "Stage 1", target: 300 },
+    { index: 2, label: "Stage 2", target: 800 },
+    { index: 3, label: "Stage 3", target: 1500 },
+    { index: 4, label: "Stage 4", target: 3000 },
+    { index: 5, label: "Boss", target: 6000 },
   ],
 };
 
@@ -82,7 +111,8 @@ function defaultScoreStages(): GameStage[] {
     { index: 2, label: "Stage 2", target: 300 },
     { index: 3, label: "Stage 3", target: 600 },
     { index: 4, label: "Stage 4", target: 1200 },
-    { index: 5, label: "Stage 5", target: 2500 },
+    { index: 5, label: "Boss", target: 2500 },
+    { index: 6, label: "Endless", target: 999999 },
   ];
 }
 
