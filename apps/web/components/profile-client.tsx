@@ -16,6 +16,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
+import { ProfileCoinsBadge } from "@/components/profile-coins-badge";
 import { ProfileCollections } from "@/components/profile-collections";
 import { ProfileIdentityBadges } from "@/components/profile-identity-badges";
 import { ProfileReplayDna } from "@/components/profile-replay-dna";
@@ -116,8 +117,9 @@ export function ProfileClient({ games }: { games: Game[] }) {
             )}
             <p className="mt-2 text-sm text-muted-foreground">Play. Track. Challenge.</p>
             {mounted ? (
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <ProfileIdentityBadges level={levelProgress.level} />
+                <ProfileCoinsBadge />
               </div>
             ) : null}
             <div className="mt-4">

@@ -1,7 +1,8 @@
 /**
  * Universal stage system — auto-generated targets per game profile.
+ * Sprint18: per-game overrides with difficulty auto-scaling.
  */
-export type StageProfile = "score" | "merge" | "round";
+export type StageProfile = "score" | "merge" | "round" | "grid";
 
 export interface GameStage {
   index: number;
@@ -10,8 +11,8 @@ export interface GameStage {
 }
 
 const MERGE_GAMES = new Set(["2048", "merge-blocks"]);
+const GRID_GAMES = new Set(["memory"]);
 const ROUND_GAMES = new Set([
-  "memory",
   "minesweeper",
   "sudoku",
   "crossword",
@@ -29,28 +30,55 @@ const ROUND_GAMES = new Set([
   "gomoku",
 ]);
 
+/** Per-game stage ladders — Sprint18 Epic2. */
+const GAME_OVERRIDES: Record<string, GameStage[]> = {
+  snake: [
+    { index: 1, label: "Stage 1", target: 500 },
+    { index: 2, label: "Stage 2", target: 1200 },
+    { index: 3, label: "Stage 3", target: 2500 },
+    { index: 4, label: "Stage 4", target: 5000 },
+    { index: 5, label: "Stage 5", target: 10000 },
+  ],
+  "2048": [
+    { index: 1, label: "256", target: 256 },
+    { index: 2, label: "512", target: 512 },
+    { index: 3, label: "1024", target: 1024 },
+    { index: 4, label: "2048", target: 2048 },
+    { index: 5, label: "4096", target: 4096 },
+  ],
+  memory: [
+    { index: 1, label: "2×2", target: 1 },
+    { index: 2, label: "3×3", target: 2 },
+    { index: 3, label: "4×4", target: 3 },
+    { index: 4, label: "5×5", target: 4 },
+  ],
+};
+
 export function getStageProfile(slug: string): StageProfile {
+  if (GAME_OVERRIDES[slug]) return "score";
   if (MERGE_GAMES.has(slug)) return "merge";
+  if (GRID_GAMES.has(slug)) return "grid";
   if (ROUND_GAMES.has(slug)) return "round";
   return "score";
 }
 
-function scoreStages(): GameStage[] {
+function defaultScoreStages(): GameStage[] {
   return [
-    { index: 1, label: "Lv.1", target: 100 },
-    { index: 2, label: "Lv.2", target: 300 },
-    { index: 3, label: "Lv.3", target: 600 },
-    { index: 4, label: "Lv.4", target: 1000 },
-    { index: 5, label: "Lv.5", target: 2000 },
+    { index: 1, label: "Stage 1", target: 100 },
+    { index: 2, label: "Stage 2", target: 300 },
+    { index: 3, label: "Stage 3", target: 600 },
+    { index: 4, label: "Stage 4", target: 1200 },
+    { index: 5, label: "Stage 5", target: 2500 },
   ];
 }
 
 function mergeStages(): GameStage[] {
   return [
-    { index: 1, label: "2048", target: 2048 },
-    { index: 2, label: "4096", target: 4096 },
-    { index: 3, label: "8192", target: 8192 },
-    { index: 4, label: "16384", target: 16384 },
+    { index: 1, label: "256", target: 256 },
+    { index: 2, label: "512", target: 512 },
+    { index: 3, label: "1024", target: 1024 },
+    { index: 4, label: "2048", target: 2048 },
+    { index: 5, label: "4096", target: 4096 },
   ];
 }
 
@@ -65,10 +93,11 @@ function roundStages(): GameStage[] {
 }
 
 export function getStagesForGame(slug: string): GameStage[] {
+  if (GAME_OVERRIDES[slug]) return GAME_OVERRIDES[slug];
   const profile = getStageProfile(slug);
-  if (profile === "merge") return mergeStages();
+  if (profile === "merge" || profile === "grid") return mergeStages();
   if (profile === "round") return roundStages();
-  return scoreStages();
+  return defaultScoreStages();
 }
 
 export function getCurrentStage(slug: string, score: number): GameStage {
@@ -93,4 +122,8 @@ export function getStageProgress(slug: string, score: number): number {
   const range = next.target - prev.target;
   if (range <= 0) return 0;
   return Math.min(100, Math.round(((score - prev.target) / range) * 100));
+}
+
+export function getStageCount(slug: string): number {
+  return getStagesForGame(slug).length;
 }

@@ -2,7 +2,7 @@
 
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
-import { Check, Copy, QrCode, Users } from "lucide-react";
+import { Check, Copy, MessageCircle, QrCode, Share2, Users } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
@@ -35,8 +35,25 @@ export function MultiplayerInvitePanel({ game }: { game: Game }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleWebShare() {
+    if (!roomCode || !navigator.share) {
+      await handleCopy();
+      return;
+    }
+    await navigator.share({
+      title: `Re:Play Room ${roomCode}`,
+      text: getShareText(roomCode, game.slug),
+      url: inviteUrl,
+    });
+  }
+
+  function handleSms() {
+    if (!roomCode) return;
+    window.location.href = `sms:?body=${encodeURIComponent(getShareText(roomCode, game.slug))}`;
+  }
+
   return (
-    <section className="rounded-3xl border border-white/10 bg-card/50 p-5 backdrop-blur">
+    <section className="rounded-3xl border border-white/10 bg-card/50 p-5 backdrop-blur transition-shadow hover:shadow-lg hover:shadow-primary/5">
       <div className="flex items-center gap-2">
         <Users className="size-4 text-primary" />
         <h3 className="font-semibold">Invite Friends</h3>
@@ -48,7 +65,7 @@ export function MultiplayerInvitePanel({ game }: { game: Game }) {
             key={n}
             type="button"
             onClick={() => setMaxPlayers(n)}
-            className={`rounded-lg px-3 py-1 text-sm ${maxPlayers === n ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+            className={`rounded-lg px-3 py-1 text-sm transition-colors ${maxPlayers === n ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}
           >
             {n}P
           </button>
@@ -67,6 +84,12 @@ export function MultiplayerInvitePanel({ game }: { game: Game }) {
               {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
               Copy
             </Button>
+            <Button size="sm" variant="outline" onClick={handleWebShare} className="gap-1">
+              <Share2 className="size-3" /> Share
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleSms} className="gap-1">
+              <MessageCircle className="size-3" /> SMS
+            </Button>
             <Button
               size="sm"
               variant="outline"
@@ -82,7 +105,7 @@ export function MultiplayerInvitePanel({ game }: { game: Game }) {
                 </a>
               }
             />
-            <Button size="sm" nativeButton={false} render={<Link href={`/room/${roomCode}`}>Join →</Link>} />
+            <Button size="sm" nativeButton={false} render={<Link href={`/room/${roomCode}`}>Lobby →</Link>} />
           </div>
           <p className="truncate text-xs text-muted-foreground">{inviteUrl}</p>
         </div>

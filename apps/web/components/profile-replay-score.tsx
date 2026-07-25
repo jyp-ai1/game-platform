@@ -24,9 +24,11 @@ import {
   getServerFavoritesSnapshot,
   subscribeFavorites,
 } from "@/lib/local-storage";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 import { computeReplayScore, replayScoreTier } from "@/lib/replay-score";
 
 export function ProfileReplayScore() {
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const totalPlays = useSyncExternalStore(
     subscribeEngagement,
     getTotalPlayCount,

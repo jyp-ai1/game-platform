@@ -8,7 +8,8 @@ import { useSyncExternalStore } from "react";
 import { ContinuePlayingCard } from "@/components/continue-playing-card";
 import { GameCard } from "@/components/game-card";
 import { JourneyStatsPanel } from "@/components/journey-stats-panel";
-import { JourneyHeatMap } from "@/components/journey-heat-map";
+import { JourneyHeatMap, JourneyMonthlyReport } from "@/components/journey-heat-map";
+import { JourneyIdentityPanel } from "@/components/journey-identity-panel";
 import { PlayHistoryTimeline } from "@/components/play-history-timeline";
 import {
   getJourneyProfileSnapshot,
@@ -82,7 +83,15 @@ export function JourneyHub({ games }: { games: Game[] }) {
       </section>
 
       <section>
+        <JourneyIdentityPanel games={games} />
+      </section>
+
+      <section>
         <JourneyHeatMap />
+      </section>
+
+      <section>
+        <JourneyMonthlyReport />
       </section>
 
       <section>

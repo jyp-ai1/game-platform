@@ -8,12 +8,13 @@ import {
 } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
+import { Coins, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { getCurrentStage, getNextStage, getStageProgress } from "@/lib/game-stages";
 import { selectRecommended } from "@/lib/game-sections";
-import { recordWeeklyPlay } from "@/lib/weekly-challenge";
+import { emitLiveScoreUpdate } from "@/lib/live-data-bus";
 import {
   getFavoritesSnapshot,
   getRecentlyPlayedSnapshot,
@@ -22,7 +23,7 @@ import {
   subscribeFavorites,
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
-import { emitLiveScoreUpdate } from "@/lib/live-data-bus";
+import { applyGameEndRetention, type GameEndRewards } from "@/lib/retention-engine";
 
 export function GameLifecycleBridge({
   slug,
@@ -33,7 +34,7 @@ export function GameLifecycleBridge({
   games: Game[];
   children: React.ReactNode;
 }) {
-  const [result, setResult] = useState<{ score: number } | null>(null);
+  const [result, setResult] = useState<{ score: number; rewards: GameEndRewards } | null>(null);
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,
@@ -55,8 +56,8 @@ export function GameLifecycleBridge({
     return subscribePlatformAnalyticsEvents((event) => {
       if (event.type === "game-end" && event.gameSlug === slug) {
         emitLiveScoreUpdate(slug, event.score);
-        recordWeeklyPlay();
-        setResult({ score: event.score });
+        const rewards = applyGameEndRetention(slug, event.score);
+        setResult({ score: event.score, rewards });
       }
     });
   }, [slug]);
@@ -69,7 +70,7 @@ export function GameLifecycleBridge({
   const stage = getCurrentStage(slug, result.score);
   const nextStage = getNextStage(slug, result.score);
   const progress = getStageProgress(slug, result.score);
-  const xpGain = Math.max(10, Math.round(result.score / 50));
+  const { rewards } = result;
 
   return (
     <>
@@ -79,10 +80,16 @@ export function GameLifecycleBridge({
           <p className="text-xs font-medium uppercase tracking-widest text-primary">Result</p>
           <p className="mt-1 text-3xl font-bold tabular-nums">{result.score.toLocaleString()}</p>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
+          <div className="mt-4 grid grid-cols-4 gap-2 text-center text-sm">
             <div className="rounded-xl bg-primary/10 px-2 py-3">
-              <p className="font-bold text-primary">+{xpGain} XP</p>
-              <p className="text-xs text-muted-foreground">Reward</p>
+              <p className="font-bold text-primary">+{rewards.xpDisplay}</p>
+              <p className="text-xs text-muted-foreground">XP</p>
+            </div>
+            <div className="rounded-xl bg-amber-500/10 px-2 py-3">
+              <p className="flex items-center justify-center gap-1 font-bold text-amber-400">
+                <Coins className="size-3" />+{rewards.coins}
+              </p>
+              <p className="text-xs text-muted-foreground">Coin</p>
             </div>
             <div className="rounded-xl bg-muted/50 px-2 py-3">
               <p className="font-bold">{stage.label}</p>
@@ -94,14 +101,23 @@ export function GameLifecycleBridge({
             </div>
           </div>
 
+          {rewards.isNewBest ? (
+            <p className="mt-3 flex items-center justify-center gap-1 text-sm font-medium text-emerald-400">
+              <Trophy className="size-4" /> New Best!
+            </p>
+          ) : null}
+
           {nextStage ? (
             <div className="mt-4">
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Next: {nextStage.label}</span>
+                <span className="flex items-center gap-1">
+                  <Sparkles className="size-3" />
+                  Next Goal: {nextStage.label}
+                </span>
                 <span>{progress}%</span>
               </div>
               <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
               </div>
             </div>
           ) : null}
@@ -115,11 +131,7 @@ export function GameLifecycleBridge({
                 render={<Link href={`/games/${recommend.slug}`}>Next · {recommend.title}</Link>}
               />
             ) : null}
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href="/">Continue</Link>}
-            />
+            <Button variant="outline" nativeButton={false} render={<Link href="/">Continue</Link>} />
           </div>
 
           <button

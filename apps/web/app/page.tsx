@@ -1,5 +1,6 @@
 import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
+import { HomeRetentionHub } from "@/components/home-retention-hub";
 import { HomeRuleRecommendations } from "@/components/home-rule-recommendations";
 import { HomeTop3Strip } from "@/components/home-top3-strip";
 import { HomeVisualHero } from "@/components/home-visual-hero";
@@ -23,6 +24,7 @@ export default async function Home() {
       <HomeVisualHero floatGames={floatGames} />
       <HomeContinueHub games={games} />
       <HomeDailyChallengeStrip />
+      <HomeRetentionHub />
       {rankingEnabled ? <HomeTop3Strip games={games} /> : null}
       <HomeRuleRecommendations games={games} large />
     </main>

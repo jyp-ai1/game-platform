@@ -6,13 +6,13 @@ import { Heart } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { CommunityActivityFeed } from "@/components/community-activity-feed";
-import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
-import { CommunityCommentsPanel } from "@/components/community-comments-panel";
+import { CommunityAiSummary, CommunityCommentsPanel } from "@/components/community-comments-panel";
 import {
   CommunityDailyRanking,
   CommunityTopPlayers,
 } from "@/components/community-leaderboards";
 import { CommunityRatingsStrip } from "@/components/community-ratings-panel";
+import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
 import { ensureCommunityMockData } from "@/lib/community-mock";
 import { listBugReports, submitBugReport } from "@/lib/community-store";
 
@@ -42,6 +42,7 @@ export function CommunityHub({ games }: { games: Game[] }) {
   return (
     <div className="flex flex-col gap-8">
       <WeeklyChallengeStrip />
+      <CommunityAiSummary />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <CommunityDailyRanking games={games} />

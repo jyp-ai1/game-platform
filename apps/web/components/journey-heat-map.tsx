@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useSyncExternalStore } from "react";
 
+import { subscribeLiveData } from "@/lib/live-data-bus";
 import {
   filterPlayHistory,
   getPlayHistorySnapshot,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/play-history";
 
 export function JourneyHeatMap() {
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const history = useSyncExternalStore(
     subscribePlayHistory,
     getPlayHistorySnapshot,

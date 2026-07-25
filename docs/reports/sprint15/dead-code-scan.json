@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-25T03:17:44.193Z",
-  "scanned": 166,
+  "generatedAt": "2026-07-25T03:44:43.215Z",
+  "scanned": 175,
   "suspects": 75,
   "items": [
     {
@@ -128,10 +128,6 @@
       "export": "community-hub"
     },
     {
-      "file": "components/daily-challenge-card.tsx",
-      "export": "daily-challenge-card"
-    },
-    {
       "file": "components/favorites-section.tsx",
       "export": "favorites-section"
     },
@@ -172,6 +168,10 @@
       "export": "games-discovery-browser"
     },
     {
+      "file": "components/health-ai-summary.tsx",
+      "export": "health-ai-summary"
+    },
+    {
       "file": "components/home-continue-hub.tsx",
       "export": "home-continue-hub"
     },
@@ -196,12 +196,12 @@
       "export": "home-recent-strip"
     },
     {
-      "file": "components/home-rule-recommendations.tsx",
-      "export": "home-rule-recommendations"
+      "file": "components/home-retention-hub.tsx",
+      "export": "home-retention-hub"
     },
     {
-      "file": "components/home-top3-strip.tsx",
-      "export": "home-top3-strip"
+      "file": "components/home-rule-recommendations.tsx",
+      "export": "home-rule-recommendations"
     }
   ],
   "overall": "WARN"

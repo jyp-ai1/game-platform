@@ -2,6 +2,7 @@
 
 import type { Game } from "@game-platform/shared";
 import Link from "next/link";
+import { Share2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { StarRatingPanel } from "@/components/community-ratings-panel";
@@ -58,24 +59,71 @@ export function GameDetailRating({ gameSlug }: { gameSlug: string }) {
   );
 }
 
-export function GameDetailShare({ gameSlug, title }: { gameSlug: string; title: string }) {
-  async function handleShare() {
+export function GameDetailShare({
+  gameSlug,
+  title,
+  challengeMode = false,
+}: {
+  gameSlug: string;
+  title: string;
+  challengeMode?: boolean;
+}) {
+  async function handleShare(mode: "default" | "challenge" | "kakao" | "sms" = "default") {
     const url = typeof window !== "undefined" ? window.location.href : `/games/${gameSlug}`;
-    const text = `Re:Play · ${title}`;
+    const text =
+      mode === "challenge"
+        ? `Re:Play Challenge · Beat my score in ${title}!`
+        : `Re:Play · ${title}`;
+
+    if (mode === "kakao") {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      return;
+    }
+    if (mode === "sms") {
+      window.location.href = `sms:?body=${encodeURIComponent(`${text}\n${url}`)}`;
+      return;
+    }
     if (navigator.share) {
-      await navigator.share({ title: text, url });
+      await navigator.share({ title: text, url, text });
     } else {
       await navigator.clipboard.writeText(`${text}\n${url}`);
     }
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleShare}
-      className="w-full rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
-    >
-      Share
-    </button>
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={() => handleShare("default")}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
+      >
+        <Share2 className="size-4" /> Share
+      </button>
+      {challengeMode ? (
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => handleShare("challenge")}
+            className="rounded-xl border border-primary/20 bg-primary/5 py-2 text-xs font-medium"
+          >
+            Challenge Friends
+          </button>
+          <button
+            type="button"
+            onClick={() => handleShare("kakao")}
+            className="rounded-xl border border-white/10 py-2 text-xs"
+          >
+            Kakao
+          </button>
+          <button
+            type="button"
+            onClick={() => handleShare("sms")}
+            className="rounded-xl border border-white/10 py-2 text-xs"
+          >
+            SMS
+          </button>
+        </div>
+      ) : null}
+    </div>
   );
 }

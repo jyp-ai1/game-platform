@@ -1,5 +1,5 @@
 /**
- * Local community data (MVP) — Sprint17 server sync target.
+ * Community data — Sprint18 full local MVP with replies, sort, report.
  */
 import { getPlayHistorySnapshot } from "@/lib/play-history";
 
@@ -7,12 +7,18 @@ const COMMENTS_KEY = "play29:community-comments";
 const LIKES_KEY = "play29:comment-likes";
 const RATINGS_KEY = "play29:game-ratings";
 const BUG_KEY = "play29:bug-reports";
+const REPORTS_KEY = "play29:comment-reports";
+
+export type CommentSort = "recent" | "popular";
 
 export interface CommunityComment {
   id: string;
   gameSlug: string;
   message: string;
+  author: string;
   createdAt: string;
+  likes: number;
+  parentId?: string;
 }
 
 export interface BugReport {
@@ -45,30 +51,64 @@ function writeJson(key: string, value: unknown): void {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function listComments(): CommunityComment[] {
-  return readJson<CommunityComment[]>(COMMENTS_KEY, []);
+export function listComments(sort: CommentSort = "recent"): CommunityComment[] {
+  const list = readJson<CommunityComment[]>(COMMENTS_KEY, []);
+  if (sort === "popular") {
+    return [...list].sort((a, b) => b.likes - a.likes || b.createdAt.localeCompare(a.createdAt));
+  }
+  return list;
 }
 
-export function postComment(gameSlug: string, message: string): void {
+export function listCommentsForGame(gameSlug: string, sort: CommentSort = "recent"): CommunityComment[] {
+  return listComments(sort).filter((c) => c.gameSlug === gameSlug && !c.parentId);
+}
+
+export function listReplies(parentId: string): CommunityComment[] {
+  return listComments().filter((c) => c.parentId === parentId);
+}
+
+export function postComment(
+  gameSlug: string,
+  message: string,
+  opts?: { author?: string; parentId?: string }
+): void {
   if (!message.trim()) return;
   const list = listComments();
   list.unshift({
-    id: `${Date.now()}`,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     gameSlug,
     message: message.trim(),
+    author: opts?.author ?? "Player",
     createdAt: new Date().toISOString(),
+    likes: 0,
+    parentId: opts?.parentId,
   });
-  writeJson(COMMENTS_KEY, list.slice(0, 100));
+  writeJson(COMMENTS_KEY, list.slice(0, 200));
 }
 
 export function toggleCommentLike(commentId: string): void {
   const likes = readJson<Record<string, boolean>>(LIKES_KEY, {});
-  likes[commentId] = !likes[commentId];
+  const list = listComments();
+  const comment = list.find((c) => c.id === commentId);
+  if (!comment) return;
+
+  const wasLiked = likes[commentId] ?? false;
+  likes[commentId] = !wasLiked;
+  comment.likes = Math.max(0, comment.likes + (wasLiked ? -1 : 1));
   writeJson(LIKES_KEY, likes);
+  writeJson(COMMENTS_KEY, list);
 }
 
 export function isCommentLiked(commentId: string): boolean {
   return readJson<Record<string, boolean>>(LIKES_KEY, {})[commentId] ?? false;
+}
+
+export function reportComment(commentId: string): void {
+  const reports = readJson<string[]>(REPORTS_KEY, []);
+  if (!reports.includes(commentId)) {
+    reports.push(commentId);
+    writeJson(REPORTS_KEY, reports.slice(0, 100));
+  }
 }
 
 export function getRating(gameSlug: string): number {
@@ -98,6 +138,30 @@ export function submitBugReport(gameSlug: string, message: string): void {
   writeJson(BUG_KEY, list.slice(0, 50));
 }
 
+/** AI Summary input — cluster bugs/comments by game. */
+export function getCommunityAiSummary(): { gameSlug: string; count: number; theme: string }[] {
+  const bugs = listBugReports();
+  const byGame = new Map<string, number>();
+  for (const b of bugs) {
+    byGame.set(b.gameSlug, (byGame.get(b.gameSlug) ?? 0) + 1);
+  }
+  const comments = listComments();
+  for (const c of comments) {
+    if (c.message.toLowerCase().includes("bug") || c.message.toLowerCase().includes("error")) {
+      byGame.set(c.gameSlug, (byGame.get(c.gameSlug) ?? 0) + 1);
+    }
+  }
+
+  return [...byGame.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([gameSlug, count]) => ({
+      gameSlug,
+      count,
+      theme: count >= 3 ? "오류 집중" : count >= 2 ? "모바일/UX" : "피드백",
+    }));
+}
+
 export function getRecentActivity(limit = 8): ActivityItem[] {
   const history = getPlayHistorySnapshot();
   const comments = listComments();
@@ -111,7 +175,7 @@ export function getRecentActivity(limit = 8): ActivityItem[] {
     })),
     ...comments.slice(0, 10).map((c) => ({
       id: `comment-${c.id}`,
-      label: `Comment on ${c.gameSlug}`,
+      label: `${c.author} · ${c.gameSlug}`,
       createdAt: c.createdAt,
     })),
     ...bugs.slice(0, 5).map((b) => ({

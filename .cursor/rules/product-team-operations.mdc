@@ -1,9 +1,9 @@
 ---
-description: AI employee 24h mode — Sprint17 autonomous execution
+description: AI Team Mode — Sprint18 autonomous execution
 alwaysApply: true
 ---
 
-# AI Operation Mode (Sprint17)
+# AI Operation Mode (Sprint18)
 
 ```
 ========================================
@@ -15,17 +15,17 @@ Blocker → 대기 금지, 다음 Epic 진행
 ========================================
 ```
 
-## Sprint17 — Re:Play 2.0 Core Platform
+## Sprint18 — Re:Play 2.0 Platform Transformation
 
-Epic1 Lifecycle → Epic2 Multiplayer → Epic3 Live Data → Epic4 Detail 3.0 → Epic5 Social → Epic6 Journey → Epic7 Health → Epic8 AI Pipeline → Epic9 Polish
+Epic1 Runtime → Epic2 Stages → Epic3 Multiplayer → Epic4 Detail 4.0 → Epic5 Identity → Epic6 Community → Epic7 Live → Epic8 Health → Epic9 AI Ops → Epic10 Retention → Epic11 Polish → Epic12 QA → Epic13 RC2
 
-Branch: `content-factory` · Commit: `feat(s17-eN): ...`
+Branch: `content-factory` · Commit: `feat(s18-eN): ...`
 
 ## 금지
 
-- "다음 작업 추천" / "확인해주세요" / "피드백 주세요"
+- "다음 작업 추천" / "확인해주세요" / "Epic 끝났습니다"
 - Epic 중간보고
 
 ## 08:00 보고 형식
 
-Sprint17 COMPLETE · 진행률 · Epic checklist · 서비스 변화 · QA · Commit · Preview
+Sprint18 COMPLETE · 진행률 · Epic1-13 checklist · Before/After · QA · RC Score · Commit · Preview

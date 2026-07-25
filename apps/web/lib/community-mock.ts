@@ -12,11 +12,11 @@ import {
 const SEED_KEY = "play29:community-seeded";
 
 const MOCK_COMMENTS: Omit<CommunityComment, "id" | "createdAt">[] = [
-  { gameSlug: "2048", message: "Addictive." },
-  { gameSlug: "snake", message: "Classic vibes." },
-  { gameSlug: "tetris", message: "Best on mobile." },
-  { gameSlug: "breakout", message: "Smooth controls." },
-  { gameSlug: "memory", message: "Great warm-up." },
+  { gameSlug: "2048", message: "Addictive.", author: "Player1", likes: 3 },
+  { gameSlug: "snake", message: "Classic vibes.", author: "RetroFan", likes: 5 },
+  { gameSlug: "tetris", message: "Best on mobile.", author: "MobileGamer", likes: 2 },
+  { gameSlug: "breakout", message: "Smooth controls.", author: "Arcade", likes: 1 },
+  { gameSlug: "memory", message: "Great warm-up.", author: "PuzzlePro", likes: 4 },
 ];
 
 export function ensureCommunityMockData(): void {

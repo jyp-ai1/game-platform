@@ -1,5 +1,44 @@
 # Changelog
 
+## [Sprint 18 — Re:Play 2.0 Platform Transformation] — 2026-07-25
+
+**Branch:** `content-factory`
+
+### Epic1 — Universal Game Runtime
+- Loading → Ready (3-2-1) → Playing → Pause → unified Result modal
+
+### Epic2 — Universal Stage System 2.0
+- Per-game ladders: Snake 500/1200/2500, 2048 256→4096, Memory 2×2→5×5
+
+### Epic3 — Multiplayer Foundation
+- Waiting Room UI, Web Share / SMS / QR / Copy invite flows
+
+### Epic4 — Game Detail 4.0
+- Hero → Play → Top3 → Rank → Achievements → Stages → Journey → Reviews → Similar → Challenge
+
+### Epic5 — Replay Identity
+- Journey Identity panel, Wrapped snapshot data structure, heat map live sync
+
+### Epic6 — Community 2.0
+- Replies, sort, report, likes count, AI summary
+
+### Epic7 — Live Ranking
+- Profile/Journey live sync via extended live-data-bus
+
+### Epic8 — Health Center 2.0
+- Top/Worst game, gate dashboard, dynamic AI summary
+
+### Epic9 — AI Operation Pipeline
+- Classify → issue drafts → priority → release notes
+
+### Epic10 — Retention Engine
+- Coins economy, game-end rewards, Daily + Weekly mission cards on Home
+
+### Epic11–13 — Polish / QA / RC2
+- Build PASS, static QA PASS, RC 91% (E2E/accessibility SKIP)
+
+---
+
 ## [Sprint 16 — Re:Play Identity Pivot] — 2026-07-25
 
 **Branch:** `content-factory` · **Commits:** `161768c` → `3ea1c9a`

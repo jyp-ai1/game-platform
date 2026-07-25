@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-07-25T03:44:43.706Z",
+  "sprint": 18,
+  "pipeline": [
+    "comment",
+    "classify",
+    "issue",
+    "priority",
+    "qa",
+    "draft-pr",
+    "release-note"
+  ],
+  "drafts": [
+    {
+      "type": "bug",
+      "gameSlug": "snake",
+      "title": "[P2] snake: Stage progression unclear on first play",
+      "labels": [
+        "gameplay",
+        "stage-system",
+        "sprint18",
+        "auto-pipeline"
+      ],
+      "priority": "P2",
+      "body": "Auto-generated from AI Operation Pipeline.\n\n> Stage progression unclear on first play\n\n## Suggested actions\n- [ ] Reproduce\n- [ ] Fix\n- [ ] QA regression\n- [ ] Deploy",
+      "status": "draft-pr-ready"
+    },
+    {
+      "type": "bug",
+      "gameSlug": "memory",
+      "title": "[P1] memory: Mobile touch targets too small",
+      "labels": [
+        "mobile",
+        "ux",
+        "sprint18",
+        "auto-pipeline"
+      ],
+      "priority": "P1",
+      "body": "Auto-generated from AI Operation Pipeline.\n\n> Mobile touch targets too small\n\n## Suggested actions\n- [ ] Reproduce\n- [ ] Fix\n- [ ] QA regression\n- [ ] Deploy",
+      "status": "draft-pr-ready"
+    },
+    {
+      "type": "bug",
+      "gameSlug": "2048",
+      "title": "[P2] 2048: Tile merge animation stutter",
+      "labels": [
+        "bug",
+        "sprint18",
+        "auto-pipeline"
+      ],
+      "priority": "P2",
+      "body": "Auto-generated from AI Operation Pipeline.\n\n> Tile merge animation stutter\n\n## Suggested actions\n- [ ] Reproduce\n- [ ] Fix\n- [ ] QA regression\n- [ ] Deploy",
+      "status": "draft-pr-ready"
+    },
+    {
+      "type": "ops",
+      "title": "[P3] Operator dashboard — wire live bug feed",
+      "labels": [
+        "enhancement",
+        "health-center"
+      ],
+      "priority": "P3",
+      "body": "Connect community-store bug reports to Health Center AI Summary in real-time.",
+      "status": "backlog"
+    }
+  ],
+  "releaseNote": "# Sprint18 Release Notes\n\n## Fixes\n- Fix: snake — Stage progression unclear on first play\n- Fix: memory — Mobile touch targets too small\n- Fix: 2048 — Tile merge animation stutter\n\n## Features\n- Universal Game Runtime\n- Stage System 2.0\n- Live Ranking sync\n- Retention Engine (Coins)\n",
+  "operatorDashboard": {
+    "openIssues": 1,
+    "draftPrs": 3
+  }
+}
