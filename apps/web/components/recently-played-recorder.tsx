@@ -11,18 +11,22 @@ import {
 import { useEffect } from "react";
 
 import { recordPlayed } from "@/lib/local-storage";
+import { recordPlayHistorySession } from "@/lib/play-history";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
 import { incrementPlayCount } from "@/lib/supabase/plays";
 
 export function RecentlyPlayedRecorder({
   slug,
   categorySlug,
+  difficulty = "MEDIUM",
 }: {
   slug: string;
   categorySlug: string | null;
+  difficulty?: "EASY" | "MEDIUM" | "HARD";
 }) {
   useEffect(() => {
     recordPlayed(slug);
+    recordPlayHistorySession(slug, categorySlug, difficulty);
     recordSessionStart(slug, categorySlug);
     claimDailyReward();
     recordMissionSessionStart(slug, categorySlug);
@@ -38,7 +42,7 @@ export function RecentlyPlayedRecorder({
       gameSlug: slug,
       deviceId: getDeviceId(),
     }).catch(() => {});
-  }, [slug, categorySlug]);
+  }, [slug, categorySlug, difficulty]);
 
   return null;
 }

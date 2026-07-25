@@ -1,13 +1,19 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { Button, Container, SectionTitle } from "@game-platform/ui";
+import { Badge, SectionTitle } from "@game-platform/ui";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
 import { ContinuePlayingCard } from "@/components/continue-playing-card";
 import { GameCard } from "@/components/game-card";
-import { PlayerStats } from "@/components/player-stats";
+import { JourneyStatsPanel } from "@/components/journey-stats-panel";
+import { PlayHistoryTimeline } from "@/components/play-history-timeline";
+import {
+  getJourneyProfileSnapshot,
+  getServerJourneyProfileSnapshot,
+  subscribeJourneyProfile,
+} from "@/lib/journey-profile";
 import {
   getFavoritesSnapshot,
   getRecentlyPlayedSnapshot,
@@ -37,13 +43,15 @@ export function JourneyHub({ games }: { games: Game[] }) {
     getFavoritesSnapshot,
     getServerFavoritesSnapshot
   );
+  const journey = useSyncExternalStore(
+    subscribeJourneyProfile,
+    getJourneyProfileSnapshot,
+    getServerJourneyProfileSnapshot
+  );
 
   const bySlug = new Map(games.map((g) => [g.slug, g]));
   const continueGames = recentSlugs
     .slice(0, 3)
-    .map((s) => bySlug.get(s))
-    .filter((g): g is Game => g !== undefined);
-  const historyGames = recentSlugs
     .map((s) => bySlug.get(s))
     .filter((g): g is Game => g !== undefined);
   const favoriteGames = favoriteSlugs
@@ -52,6 +60,36 @@ export function JourneyHub({ games }: { games: Game[] }) {
 
   return (
     <div className="flex flex-col gap-12">
+      {journey ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card/50 px-4 py-3 text-xs text-muted-foreground">
+          <span>Guest Journey</span>
+          <Badge variant="outline" className="font-mono text-[10px]">
+            {journey.guestId.slice(0, 8)}…
+          </Badge>
+          <span>· Sprint17 로그인 시 Merge 예정</span>
+        </div>
+      ) : null}
+
+      <section>
+        <SectionTitle
+          title="📊 My Statistics"
+          description="총 플레이 · 시간 · streak · Top 게임"
+        />
+        <div className="mt-4">
+          <JourneyStatsPanel games={games} period="all" />
+        </div>
+      </section>
+
+      <section>
+        <SectionTitle
+          title="🕐 Play History Timeline"
+          description="오늘 · 이번주 · 이번달 · 전체"
+        />
+        <div className="mt-4">
+          <PlayHistoryTimeline games={games} />
+        </div>
+      </section>
+
       <section>
         <SectionTitle title="▶ Continue Playing" description="이어서 플레이할 게임" />
         {continueGames.length > 0 ? (
@@ -98,34 +136,6 @@ export function JourneyHub({ games }: { games: Game[] }) {
           </div>
         </section>
       ) : null}
-
-      <section>
-        <SectionTitle title="🕐 Play History" description="최근 플레이한 게임" />
-        {historyGames.length > 0 ? (
-          <div className="scrollbar-hide mt-4 flex gap-4 overflow-x-auto pb-2">
-            {historyGames.map((game) => (
-              <div key={game.id} className="w-56 shrink-0">
-                <GameCard game={game} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">아직 기록이 없습니다.</p>
-        )}
-      </section>
-
-      <section>
-        <SectionTitle title="📊 Statistics" description="내 플레이 통계" />
-        <div className="mt-4">
-          <PlayerStats games={games} />
-        </div>
-        <Button
-          className="mt-4"
-          variant="outline"
-          nativeButton={false}
-          render={<Link href="/profile">프로필에서 자세히 보기</Link>}
-        />
-      </section>
     </div>
   );
 }

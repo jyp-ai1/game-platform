@@ -148,6 +148,7 @@ function PlayableLayout({
           <RecentlyPlayedRecorder
             slug={slug}
             categorySlug={game.category?.slug ?? null}
+            difficulty={game.difficulty}
           />
           <GameDetailStage>
             <GamePlayer slug={slug as PlayableSlug} rankingEnabled={rankingEnabled} />

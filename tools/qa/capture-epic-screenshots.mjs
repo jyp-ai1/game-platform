@@ -26,7 +26,14 @@ async function shot(page, url, file) {
 
 async function main() {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+    extraHTTPHeaders: bypass
+      ? { "x-vercel-protection-bypass": bypass }
+      : undefined,
+  });
+  const page = await context.newPage();
 
   for (const { path: p, name } of PAGES) {
     await shot(page, `${BEFORE}${p}`, path.join(OUT, `before-${name}.png`));
