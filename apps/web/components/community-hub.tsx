@@ -49,8 +49,9 @@ export function CommunityHub({ games }: { games: Game[] }) {
   return (
     <div className="flex flex-col gap-8">
       <CommunityActivityFeed />
-      <GameChallengeHub games={games} />
-      <FriendSearchPanel />
+      <div id="challenge">
+        <GameChallengeHub games={games} />
+      </div>
       <SocialInvitePanel gameSlug={games[0]?.slug ?? "snake"} title={games[0]?.title ?? "Re:Play"} />
       <WeeklyChallengeStrip />
       <CommunityFeedTabs games={games} />

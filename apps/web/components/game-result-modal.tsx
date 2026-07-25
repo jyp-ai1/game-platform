@@ -26,6 +26,7 @@ import type { GameEndRewards } from "@/lib/retention-engine";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 import { getMyRank } from "@/lib/supabase/scores";
+import { GameEndMotivation } from "@/components/game-end-motivation";
 import { getChallenge, getChallengeUrl } from "@/lib/challenge-scores-store";
 
 export function GameResultModal({
@@ -117,6 +118,14 @@ export function GameResultModal({
         <p className="text-xs font-medium uppercase tracking-widest text-primary">Result</p>
         <p className="mt-1 text-4xl font-bold tabular-nums">{score.toLocaleString()}</p>
 
+        <GameEndMotivation
+          slug={slug}
+          score={score}
+          isNewBest={rewards.isNewBest}
+          best={best}
+          todayRank={todayRank}
+        />
+
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm sm:grid-cols-4">
           <StatBox label="XP" value={`+${rewards.xpDisplay}`} highlight />
           <StatBox label="Coin" value={`+${rewards.coins}`} icon={<Coins className="mx-auto size-3 text-amber-400" />} />
@@ -180,7 +189,22 @@ export function GameResultModal({
               <p className="mt-2 text-center text-xs text-muted-foreground">Waiting for opponent score…</p>
             )}
           </div>
-        ) : null}
+        ) : (
+          <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+            <p className="text-sm font-semibold">친구에게 도전장 보내기</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {score.toLocaleString()}점 — 친구가 이길 수 있을까요?
+            </p>
+            <Button
+              className="mt-3 w-full gap-1"
+              size="sm"
+              nativeButton={false}
+              render={
+                <Link href={`/community?challenge=${slug}`}>도전장 보내기 →</Link>
+              }
+            />
+          </div>
+        )}
 
         <div className="mt-6 flex flex-wrap gap-2">
           <Button nativeButton={false} render={<Link href={`/games/${slug}`}>Retry</Link>} />

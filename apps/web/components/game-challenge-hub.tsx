@@ -6,6 +6,7 @@ import { getDeviceId, getLastNickname } from "@game-platform/game-sdk";
 import { Copy, MessageCircle, QrCode, Share2, Swords, Users } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   createChallenge,
@@ -19,9 +20,11 @@ import { trackChallengeMetric, trackInviteMetric, trackShareMetric } from "@/com
 import { getFriendsList, searchFriends } from "@/lib/social-store";
 
 export function GameChallengeHub({ games }: { games: Game[] }) {
+  const searchParams = useSearchParams();
+  const challengeSlug = searchParams.get("challenge");
   const challenges = useSyncExternalStore(subscribeChallenges, getChallengesSnapshot, () => []);
   const friends = getFriendsList();
-  const [gameSlug, setGameSlug] = useState(games[0]?.slug ?? "");
+  const [gameSlug, setGameSlug] = useState(challengeSlug ?? games[0]?.slug ?? "");
   const [friendId, setFriendId] = useState(friends[0]?.id ?? "");
   const [query, setQuery] = useState("");
   const [session, setSession] = useState<ChallengeSession | null>(null);

@@ -1,19 +1,13 @@
 import { ContinueReminderBanner } from "@/components/continue-reminder-banner";
-import { ReplayDnaLadder } from "@/components/replay-dna-ladder";
-import { HomeCollectionStrip } from "@/components/home-collection-strip";
+import { HomeChallengeStrip } from "@/components/home-challenge-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
 import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
-import { HomeFriendsStrip } from "@/components/home-friends-strip";
-import { HomeHeatmapCompact } from "@/components/home-heatmap-compact";
-import { HomeIdentityDashboard } from "@/components/home-identity-dashboard";
 import { HomeMissionHub } from "@/components/home-mission-hub";
-import { HomeRecentStrip } from "@/components/home-recent-strip";
 import { HomeRuleRecommendations } from "@/components/home-rule-recommendations";
-import { HomeTop3Strip } from "@/components/home-top3-strip";
-import { HomeVisualHero } from "@/components/home-visual-hero";
+import { ReplayIdentityHero } from "@/components/replay-identity-hero";
 import { Container } from "@game-platform/ui";
+import Link from "next/link";
 import { selectPopular } from "@/lib/game-sections";
-import { isFeatureEnabled } from "@/lib/feature-flags";
 import { getGames } from "@/lib/supabase/games";
 import { buildHomeMetadata } from "@/lib/seo";
 
@@ -21,33 +15,45 @@ export const metadata = buildHomeMetadata();
 export const revalidate = 60;
 
 export default async function Home() {
-  const [games, rankingEnabled] = await Promise.all([
-    getGames(),
-    isFeatureEnabled("ranking"),
-  ]);
-  const floatGames = selectPopular(games, 6);
+  const games = await getGames();
+  const popular = selectPopular(games, 4);
 
   return (
     <main className="flex flex-1 flex-col">
       <ContinueReminderBanner games={games} />
-      <HomeVisualHero floatGames={floatGames} />
       <HomeContinueHub games={games} />
-      <HomeIdentityDashboard games={games} />
-      <ReplayDnaLadder games={games} />
+      <ReplayIdentityHero games={games} />
       <HomeDailyChallengeStrip />
       <HomeMissionHub />
-      <section className="py-4">
+      <HomeChallengeStrip games={games} />
+      <HomeRuleRecommendations games={games} large />
+      <section className="border-t border-white/5 py-8">
         <Container>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <HomeHeatmapCompact />
-            <HomeFriendsStrip />
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold">게임 탐험</h2>
+              <p className="text-sm text-muted-foreground">{games.length}개 게임 · 무료 · 설치 없음</p>
+            </div>
+            <Link
+              href="/games"
+              className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              Browse All →
+            </Link>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {popular.map((g) => (
+              <Link
+                key={g.slug}
+                href={`/games/${g.slug}`}
+                className="rounded-full border border-white/10 bg-card/60 px-4 py-2 text-sm transition-colors hover:border-primary/40"
+              >
+                {g.title}
+              </Link>
+            ))}
           </div>
         </Container>
       </section>
-      <HomeCollectionStrip games={games} />
-      <HomeRecentStrip games={games} />
-      {rankingEnabled ? <HomeTop3Strip games={games} /> : null}
-      <HomeRuleRecommendations games={games} large />
     </main>
   );
 }

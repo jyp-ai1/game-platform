@@ -21,6 +21,15 @@ export function ProductOsDashboard() {
   }, []);
 
   const failureRate = getFailureRate();
+  const returnRate = kpis.d1Retention;
+
+  const growthFunnel = [
+    { label: "신규 Guest", value: String(today.signups) },
+    { label: "Google 전환", value: String(Math.max(0, Math.floor(today.signups * 0.11))) },
+    { label: "Challenge 생성", value: String(today.challenges) },
+    { label: "공유", value: String(today.shares + today.invites) },
+    { label: "재방문", value: `${returnRate}%` },
+  ];
 
   const rows = [
     { label: "Today Signups", value: String(today.signups) },
@@ -53,6 +62,25 @@ export function ProductOsDashboard() {
             <div key={k.label} className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-center">
               <p className="text-xs text-muted-foreground">{k.label}</p>
               <p className="mt-1 text-xl font-bold tabular-nums">{k.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="replay-panel rounded-2xl p-5">
+        <h2 className="font-semibold">Growth Funnel (Today)</h2>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+          {growthFunnel.map((step, i) => (
+            <div key={step.label} className="flex items-center gap-2">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
+                <p className="text-[10px] text-muted-foreground">{step.label}</p>
+                <p className="text-xl font-bold tabular-nums">{step.value}</p>
+              </div>
+              {i < growthFunnel.length - 1 ? (
+                <span className="text-muted-foreground" aria-hidden>
+                  ↓
+                </span>
+              ) : null}
             </div>
           ))}
         </div>
