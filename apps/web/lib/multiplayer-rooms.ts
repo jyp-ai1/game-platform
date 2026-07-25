@@ -106,8 +106,20 @@ export function setPlayerReady(code: string, ready: boolean): GameRoom | null {
   );
   if (room.players.every((p) => p.ready) && room.players.length >= 2) {
     room.status = "ready";
+    room.countdown = 3;
   }
   saveRoom(room);
+  return room;
+}
+
+export function tickRoomCountdown(code: string): GameRoom | null {
+  const room = readRoom(code);
+  if (!room || room.status !== "ready") return room;
+  if (room.countdown > 0) {
+    room.countdown -= 1;
+    if (room.countdown === 0) room.status = "playing";
+    saveRoom(room);
+  }
   return room;
 }
 
@@ -138,6 +150,11 @@ export function reconnectRoom(code: string, token: string): GameRoom | null {
 export function getDiscordShareUrl(code: string, gameSlug: string): string {
   const text = encodeURIComponent(getShareText(code, gameSlug));
   return `https://discord.com/channels/@me?text=${text}`;
+}
+
+export function getKakaoShareUrl(code: string, gameSlug: string): string {
+  const text = encodeURIComponent(getShareText(code, gameSlug));
+  return `https://story.kakao.com/share?url=${encodeURIComponent(getInviteUrl(code))}&text=${text}`;
 }
 
 export function getShareText(code: string, gameSlug: string): string {

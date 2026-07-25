@@ -11,6 +11,7 @@ import {
   subscribePlayHistory,
   type PlayHistoryPeriod,
 } from "@/lib/play-history";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
@@ -28,6 +29,7 @@ export function JourneyStatsPanel({
   games: Game[];
   period?: PlayHistoryPeriod;
 }) {
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const history = useSyncExternalStore(
     subscribePlayHistory,
     getPlayHistorySnapshot,

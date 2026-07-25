@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { GameCard } from "@/components/game-card";
+import { LibraryAnalyticsPanel } from "@/components/library-analytics-panel";
 import { getLibraryShelves, LIBRARY_COLLECTIONS, type LibraryShelf } from "@/lib/library-store";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 
@@ -29,6 +30,8 @@ export function LibraryHub({ games }: { games: Game[] }) {
           Recently played, favorites, completed, wishlist — all in one place.
         </p>
       </div>
+
+      <LibraryAnalyticsPanel games={games} />
 
       <div className="flex flex-wrap gap-2">
         {shelves.map((shelf) => (

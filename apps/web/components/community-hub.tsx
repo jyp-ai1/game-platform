@@ -13,6 +13,7 @@ import {
   CommunityTopPlayers,
 } from "@/components/community-leaderboards";
 import { CommunityRatingsStrip } from "@/components/community-ratings-panel";
+import { SocialActivityFeed, WeeklyLeaguePanel } from "@/components/social-activity-feed";
 import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
 import { ensureCommunityMockData } from "@/lib/community-mock";
 import { listBugReports, submitBugReport } from "@/lib/community-store";
@@ -49,6 +50,11 @@ export function CommunityHub({ games }: { games: Game[] }) {
       <div className="grid gap-4 lg:grid-cols-2">
         <CommunityDailyRanking games={games} />
         <CommunityTopPlayers games={games} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SocialActivityFeed />
+        <WeeklyLeaguePanel games={games} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

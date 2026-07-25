@@ -23,6 +23,7 @@ import {
   getServerFavoritesSnapshot,
   subscribeFavorites,
 } from "@/lib/local-storage";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 
 const EMPTY_PLAY_COUNTS: Record<string, number> = {};
 function getServerGamePlayCountsSnapshot(): Record<string, number> {
@@ -47,6 +48,7 @@ function StatItem({ label, value }: { label: string; value: string }) {
 }
 
 export function PlayerStats({ games }: { games: Game[] }) {
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const totalPlayCount = useSyncExternalStore(
     subscribeEngagement,
     getTotalPlayCount,

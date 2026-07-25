@@ -113,6 +113,10 @@ export function GameLifecycleBridge({
             </p>
           ) : null}
 
+          {progress >= 100 && nextStage ? (
+            <p className="mt-3 text-center text-sm font-bold text-emerald-400">Stage Clear — {stage.label}!</p>
+          ) : null}
+
           {rewards.isNewBest ? (
             <p className="mt-3 flex items-center justify-center gap-1 text-sm font-medium text-emerald-400">
               <Trophy className="size-4" /> New Best!

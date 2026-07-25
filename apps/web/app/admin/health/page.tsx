@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { HealthAiSummary } from "@/components/health-ai-summary";
+import { HealthCenterLive } from "@/components/health-center-live";
 import { getReleaseDashboardData } from "@/lib/get-release-dashboard";
 
 export const metadata = { title: "Health — Operator Center 2.0" };
@@ -95,6 +96,8 @@ export default function AdminHealthPage() {
         <Stat label="QA Automation" value={data.gates.qaAutomation?.status ?? "—"} />
         <Stat label="Regression" value={data.gates.regression?.status ?? "—"} />
       </div>
+
+      <HealthCenterLive />
 
       <HealthAiSummary />
 

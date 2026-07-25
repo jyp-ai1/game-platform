@@ -11,8 +11,10 @@ import {
   getServerRecentlyPlayedSnapshot,
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 
 export function HomeContinueHub({ games }: { games: Game[] }) {
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const slugs = useSyncExternalStore(
     subscribeRecentlyPlayed,
     getRecentlyPlayedSnapshot,

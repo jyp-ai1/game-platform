@@ -5,6 +5,7 @@ import { getPlayHistorySnapshot } from "@/lib/play-history";
 
 const COMMENTS_KEY = "play29:community-comments";
 const LIKES_KEY = "play29:comment-likes";
+const DISLIKES_KEY = "play29:comment-dislikes";
 const RATINGS_KEY = "play29:game-ratings";
 const BUG_KEY = "play29:bug-reports";
 const REPORTS_KEY = "play29:comment-reports";
@@ -101,6 +102,26 @@ export function toggleCommentLike(commentId: string): void {
 
 export function isCommentLiked(commentId: string): boolean {
   return readJson<Record<string, boolean>>(LIKES_KEY, {})[commentId] ?? false;
+}
+
+export function isCommentDisliked(commentId: string): boolean {
+  return readJson<Record<string, boolean>>(DISLIKES_KEY, {})[commentId] ?? false;
+}
+
+export function toggleCommentDislike(commentId: string): void {
+  const dislikes = readJson<Record<string, boolean>>(DISLIKES_KEY, {});
+  const likes = readJson<Record<string, boolean>>(LIKES_KEY, {});
+  const wasDisliked = dislikes[commentId] ?? false;
+  dislikes[commentId] = !wasDisliked;
+  if (!wasDisliked && likes[commentId]) {
+    likes[commentId] = false;
+    const list = listComments();
+    const comment = list.find((c) => c.id === commentId);
+    if (comment) comment.likes = Math.max(0, comment.likes - 1);
+    writeJson(COMMENTS_KEY, list);
+  }
+  writeJson(DISLIKES_KEY, dislikes);
+  writeJson(LIKES_KEY, likes);
 }
 
 export function reportComment(commentId: string): void {

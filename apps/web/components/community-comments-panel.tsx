@@ -2,16 +2,18 @@
 
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
-import { Flag, Heart, MessageCircle, Share2 } from "lucide-react";
+import { Flag, Heart, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import {
   isCommentLiked,
+  isCommentDisliked,
   listComments,
   listReplies,
   postComment,
   reportComment,
   toggleCommentLike,
+  toggleCommentDislike,
   type CommentSort,
   type CommunityComment,
 } from "@/lib/community-store";
@@ -124,6 +126,7 @@ function CommentRow({
 }) {
   const replies = listReplies(comment.id);
   const liked = isCommentLiked(comment.id);
+  const disliked = isCommentDisliked(comment.id);
 
   return (
     <li className="rounded-xl border border-white/5 bg-background/40 px-3 py-2 text-sm">
@@ -145,6 +148,16 @@ function CommentRow({
         >
           <Heart className="size-3" fill={liked ? "currentColor" : "none"} />
           {comment.likes}
+        </button>
+        <button
+          type="button"
+          className={`flex items-center gap-1 ${disliked ? "text-amber-400" : ""}`}
+          onClick={() => {
+            toggleCommentDislike(comment.id);
+            onChange();
+          }}
+        >
+          <ThumbsDown className="size-3" fill={disliked ? "currentColor" : "none"} />
         </button>
         <button type="button" className="flex items-center gap-1" onClick={onReply}>
           <MessageCircle className="size-3" /> Reply
