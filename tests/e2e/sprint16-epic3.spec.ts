@@ -17,6 +17,6 @@ test.describe("Sprint16 Epic3 — Home Experience 3.0", () => {
 
   test("for you recommendations section", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "For You" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Recommended" })).toBeVisible();
   });
 });

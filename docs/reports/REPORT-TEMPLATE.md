@@ -1,60 +1,40 @@
-# Epic 종료 보고 템플릿
-
-> PM 승인·추천 작업 없음. Epic 종료 시에만 작성. 작성 후 다음 Epic 자동 시작.
+# Epic 종료 보고 템플릿 (Sprint16 FINAL+)
 
 ```
-==============================
+Sprint{N} FINAL
 
-Sprint{N}
+██████████ 100%
 
-{overall}%
+서비스 변화
+(3줄)
 
-{progress_bar}
+Before / After
+(스크린샷 경로)
 
-Epic1 {status}
-Epic2 {status}
-...
+Preview
+{url}
 
-------------------
+Deployment
+{url}
 
-오늘 완료
+QA
+{PASS|FAIL}
 
-- ...
+RC Score
+{NN}%
 
-------------------
+Known Issue
+{없음 | 목록}
 
-자동 수행
-
-QA {PASS|FAIL}
-Commit {hash}
-Push {yes|no}
-Preview {url}
-
-------------------
-
-Blocker
-
-{없음 | 설명}
-
-------------------
-
-현재 작업
-
-Epic{N} {name}
-
-(계속 진행중...)
-
-==============================
+다음 Sprint
+Sprint{N+1}
 ```
 
-## Epic 상태 표기
-
-- `완료`
-- `진행중 NN%`
-- `대기`
-
-## 금지 섹션
+## 금지
 
 - 내일 추천 작업
-- "다음에 무엇을 할까요?"
-- PM에게 방향 확인 요청
+- "다음 작업할까요?"
+
+## AI Operation Mode
+
+PM 응답 전까지 작업 중단 금지. 보고서 작성 후 다음 Epic/Sprint 자동 시작.

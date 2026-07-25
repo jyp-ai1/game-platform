@@ -26,10 +26,14 @@
 - Replay DNA panel, favorites collection strip
 - Replay Score + monthly/yearly cards (prior commit)
 
-### Epic7 — Operator Health
+### Epic8–13 — Sprint16 FINAL
 
-- `/admin/health` — RC score, quality gates, operator links
-- Windows regression runner grep pipe fix
+- **E8 Home Polish:** compact hero, visual-first Continue/Daily/Top Players/Recommended
+- **E9 Game Detail Final:** hero banner, compact Top3/Record/Achievements flow
+- **E10 Community Polish:** mock seed, likes, live comments/ratings UI
+- **E11 Health Dashboard:** operator one-screen RC gates
+- **E12 Platform Identity:** empty/skeleton states, 404, identity tokens
+- **E13 Production Readiness:** full static QA pass (RC 91%)
 
 ---
 

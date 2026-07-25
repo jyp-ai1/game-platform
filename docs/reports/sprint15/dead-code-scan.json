@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-25T02:40:31.815Z",
-  "scanned": 144,
-  "suspects": 69,
+  "generatedAt": "2026-07-25T02:56:02.228Z",
+  "scanned": 156,
+  "suspects": 74,
   "items": [
     {
       "file": "components/admin/activity-heatmap.tsx",
@@ -144,8 +144,12 @@
       "export": "game-detail-breadcrumb"
     },
     {
-      "file": "components/game-detail-similar.tsx",
-      "export": "game-detail-similar"
+      "file": "components/game-detail-recent-strip.tsx",
+      "export": "game-detail-recent-strip"
+    },
+    {
+      "file": "components/game-detail-stats-panel.tsx",
+      "export": "game-detail-stats-panel"
     },
     {
       "file": "components/game-detail-template.tsx",
@@ -172,6 +176,10 @@
       "export": "home-continue-hub"
     },
     {
+      "file": "components/home-daily-challenge-strip.tsx",
+      "export": "home-daily-challenge-strip"
+    },
+    {
       "file": "components/home-daily-goal.tsx",
       "export": "home-daily-goal"
     },
@@ -192,16 +200,8 @@
       "export": "home-rule-recommendations"
     },
     {
-      "file": "components/home-visual-hero.tsx",
-      "export": "home-visual-hero"
-    },
-    {
-      "file": "components/journey-hub.tsx",
-      "export": "journey-hub"
-    },
-    {
-      "file": "components/json-ld-script.tsx",
-      "export": "json-ld-script"
+      "file": "components/home-top3-strip.tsx",
+      "export": "home-top3-strip"
     }
   ],
   "overall": "WARN"
