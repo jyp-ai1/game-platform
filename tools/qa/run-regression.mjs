@@ -10,11 +10,11 @@ import { fileURLToPath } from "node:url";
 const REPO = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const OUT = path.join(REPO, "docs/reports/sprint15/regression-report.json");
 
-function run(cmd, args) {
+function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, {
     cwd: REPO,
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: opts.shell ?? process.platform === "win32",
   });
   return r.status === 0;
 }
@@ -44,16 +44,20 @@ async function main() {
       failed = true;
     } else {
       steps.push({ name: "build", pass: true });
-      const e2eOk = run("npx", [
-        "playwright",
-        "test",
-        "tests/e2e/games",
-        "tests/e2e/routes-404.spec.ts",
-        "--config",
-        "tests/e2e/playwright.config.ts",
-        "--grep",
-        "open → start|404 check",
-      ]);
+      const e2eOk = run(
+        "npx",
+        [
+          "playwright",
+          "test",
+          "tests/e2e/games",
+          "tests/e2e/routes-404.spec.ts",
+          "--config",
+          "tests/e2e/playwright.config.ts",
+          "--grep",
+          "(open → start|404 check)",
+        ],
+        { shell: false }
+      );
       steps.push({ name: "e2e-games", pass: e2eOk });
       if (!e2eOk) failed = true;
     }
