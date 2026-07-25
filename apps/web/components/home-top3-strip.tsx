@@ -4,8 +4,9 @@ import { getGamePlayCounts, subscribeEngagement } from "@game-platform/game-sdk"
 import type { Game } from "@game-platform/shared";
 import { Container } from "@game-platform/ui";
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
+import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getLeaderboard, type LeaderboardEntry } from "@/lib/supabase/scores";
 
 const EMPTY: Record<string, number> = {};
@@ -20,29 +21,26 @@ export function HomeTop3Strip({ games }: { games: Game[] }) {
   const topGame = topSlug ? games.find((g) => g.slug === topSlug) : games[0];
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!topGame) return;
-    let active = true;
-    getLeaderboard(topGame.slug, "weekly").then((data) => {
-      if (active) setEntries(data.slice(0, 3));
-    });
-    return () => {
-      active = false;
-    };
-  }, [topGame?.slug]);
+    getLeaderboard(topGame.slug, "weekly").then((data) => setEntries(data.slice(0, 3)));
+  }, [topGame]);
+
+  useEffect(() => {
+    load();
+    const unsubLive = subscribeLiveData(load);
+    return unsubLive;
+  }, [load]);
 
   if (!topGame) return null;
 
   return (
     <section className="py-4 sm:py-6">
       <Container>
-        <div className="rounded-3xl border border-white/10 bg-card/50 p-5 backdrop-blur sm:p-6">
+        <div className="replay-panel rounded-3xl border border-white/10 bg-card/50 p-5 backdrop-blur sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold sm:text-2xl">Top Players</h2>
-            <Link
-              href={`/games/${topGame.slug}#leaderboard`}
-              className="text-sm text-primary hover:underline"
-            >
+            <Link href={`/games/${topGame.slug}`} className="text-sm text-primary hover:underline">
               {topGame.title} →
             </Link>
           </div>
@@ -55,7 +53,7 @@ export function HomeTop3Strip({ games }: { games: Game[] }) {
               {entries.map((e, i) => (
                 <li
                   key={`${e.nickname}-${i}`}
-                  className="flex flex-col rounded-2xl border border-white/10 bg-background/40 px-4 py-5 text-center"
+                  className="flex flex-col rounded-2xl border border-white/10 bg-background/40 px-4 py-5 text-center transition-transform hover:scale-[1.02]"
                 >
                   <span className="text-sm text-muted-foreground">#{i + 1}</span>
                   <span className="mt-1 truncate text-lg font-semibold">{e.nickname}</span>

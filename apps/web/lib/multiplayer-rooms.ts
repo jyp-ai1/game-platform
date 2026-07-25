@@ -6,13 +6,14 @@ import { getDeviceId, getLastNickname } from "@game-platform/game-sdk";
 const ROOM_PREFIX = "play29:room:";
 const ACTIVE_ROOM_KEY = "play29:active-room";
 
-export type RoomStatus = "waiting" | "ready" | "playing";
+export type RoomStatus = "waiting" | "ready" | "playing" | "spectating";
 export type MaxPlayers = 2 | 3 | 4;
 
 export interface RoomPlayer {
   deviceId: string;
   nickname: string;
   ready: boolean;
+  reconnectToken?: string;
 }
 
 export interface GameRoom {
@@ -21,7 +22,9 @@ export interface GameRoom {
   hostId: string;
   maxPlayers: MaxPlayers;
   players: RoomPlayer[];
+  spectators: string[];
   status: RoomStatus;
+  countdown: number;
   createdAt: string;
 }
 
@@ -60,8 +63,10 @@ export function createRoom(gameSlug: string, maxPlayers: MaxPlayers = 2): GameRo
     gameSlug,
     hostId: deviceId,
     maxPlayers,
-    players: [{ deviceId, nickname: getLastNickname() || "Player", ready: true }],
+    players: [{ deviceId, nickname: getLastNickname() || "Player", ready: true, reconnectToken: deviceId.slice(0, 8) }],
+    spectators: [],
     status: "waiting",
+    countdown: 3,
     createdAt: new Date().toISOString(),
   };
   saveRoom(room);
@@ -109,6 +114,30 @@ export function setPlayerReady(code: string, ready: boolean): GameRoom | null {
 export function getInviteUrl(code: string): string {
   if (typeof window === "undefined") return `/room/${code}`;
   return `${window.location.origin}/room/${code}`;
+}
+
+export function joinAsSpectator(code: string): GameRoom | null {
+  const room = readRoom(code);
+  if (!room) return null;
+  const deviceId = getDeviceId();
+  if (!room.spectators.includes(deviceId)) {
+    room.spectators.push(deviceId);
+    saveRoom(room);
+  }
+  return room;
+}
+
+export function reconnectRoom(code: string, token: string): GameRoom | null {
+  const room = readRoom(code);
+  if (!room) return null;
+  const player = room.players.find((p) => p.reconnectToken === token);
+  if (player) return room;
+  return joinRoom(code);
+}
+
+export function getDiscordShareUrl(code: string, gameSlug: string): string {
+  const text = encodeURIComponent(getShareText(code, gameSlug));
+  return `https://discord.com/channels/@me?text=${text}`;
 }
 
 export function getShareText(code: string, gameSlug: string): string {

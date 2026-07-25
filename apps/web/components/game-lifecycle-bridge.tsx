@@ -12,11 +12,12 @@ import { Coins, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { getGameFramework } from "@/lib/game-framework";
+import { getRuntimeConfig } from "@/lib/game-runtime-config";
 import { getCurrentStage, getNextStage, getStageProgress } from "@/lib/game-stages";
-import { isBossDefeated, getRuntimeConfig } from "@/lib/game-runtime-config";
 import { markCompleted } from "@/lib/library-store";
 import { selectRecommended } from "@/lib/game-sections";
-import { emitLiveScoreUpdate } from "@/lib/live-data-bus";
+import type { GameEndRewards } from "@/lib/retention-engine";
 import {
   getFavoritesSnapshot,
   getRecentlyPlayedSnapshot,
@@ -25,7 +26,6 @@ import {
   subscribeFavorites,
   subscribeRecentlyPlayed,
 } from "@/lib/local-storage";
-import { applyGameEndRetention, type GameEndRewards } from "@/lib/retention-engine";
 
 export function GameLifecycleBridge({
   slug,
@@ -55,10 +55,10 @@ export function GameLifecycleBridge({
   );
 
   useEffect(() => {
+    const framework = getGameFramework(slug);
     return subscribePlatformAnalyticsEvents((event) => {
       if (event.type === "game-end" && event.gameSlug === slug) {
-        emitLiveScoreUpdate(slug, event.score);
-        const rewards = applyGameEndRetention(slug, event.score);
+        const rewards = framework.onGameEnd(event.score);
         setResult({ score: event.score, rewards });
       }
     });
@@ -74,7 +74,7 @@ export function GameLifecycleBridge({
   const progress = getStageProgress(slug, result.score);
   const { rewards } = result;
   const runtime = getRuntimeConfig(slug);
-  const bossBeat = isBossDefeated(slug, result.score);
+  const bossBeat = result.score >= runtime.boss.threshold;
 
   if (bossBeat) markCompleted(slug);
 
@@ -107,9 +107,9 @@ export function GameLifecycleBridge({
             </div>
           </div>
 
-          {bossBeat && runtime.boss ? (
+          {bossBeat ? (
             <p className="mt-3 text-center text-sm font-bold text-amber-400">
-              Boss Defeated: {runtime.boss.name}! +{runtime.boss.rewardCoins} bonus coins
+              Boss Defeated: {runtime.boss.name}! +{runtime.boss.rewardCoins} bonus
             </p>
           ) : null}
 

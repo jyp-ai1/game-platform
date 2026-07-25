@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-25T03:57:57.629Z",
+  "generatedAt": "2026-07-25T04:07:23.061Z",
   "note": "Games use optional WebAudio via game-sdk; missing per-game audio is not a failure",
   "passCount": 50,
   "total": 50,

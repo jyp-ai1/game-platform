@@ -11,8 +11,11 @@ import {
   GameDetailRating,
   GameDetailShare,
 } from "@/components/game-detail-extras";
+import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
 import { GameDetailHero } from "@/components/game-detail-hero";
 import { GameDetailJourneyStrip } from "@/components/game-detail-journey-strip";
+import { GameDetailMetaPanel, GameDetailTrailer } from "@/components/game-detail-meta-panel";
+import { GameDetailMissionPanel } from "@/components/game-detail-mission-panel";
 import { GameDetailSimilar } from "@/components/game-detail-similar";
 import { GameDetailStagePanel } from "@/components/game-detail-stage-panel";
 import { GameDetailStage } from "@/components/game-detail-stage";
@@ -43,6 +46,7 @@ export function GameDetailTemplate({
     <main className="flex flex-1 flex-col">
       <Container className="max-w-4xl space-y-5 py-5 sm:py-6">
         <GameDetailHero game={game} />
+        <GameDetailTrailer game={game} />
 
         {isPlayable ? (
           <>
@@ -63,11 +67,13 @@ export function GameDetailTemplate({
               <>
                 <GameDetailTop3 gameSlug={slug} />
                 <GameDetailMyRecord gameSlug={slug} difficulty={game.difficulty} />
+                <GameDetailFriendRecord gameSlug={slug} />
               </>
             ) : null}
 
             <GameDetailAchievements />
             <GameDetailStagePanel slug={slug} difficulty={game.difficulty} />
+            <GameDetailMissionPanel gameSlug={slug} />
             <GameDetailJourneyStrip slug={slug} />
             <MultiplayerInvitePanel game={game} />
 
@@ -77,6 +83,7 @@ export function GameDetailTemplate({
             </div>
 
             <GameDetailSimilar games={allGames} related={related} />
+            <GameDetailMetaPanel game={game} />
             <GameDetailShare gameSlug={slug} title={game.title} challengeMode />
           </>
         ) : game.status !== "ACTIVE" ? (
