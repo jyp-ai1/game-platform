@@ -40,7 +40,9 @@ import {
 import { recommendGames, topRecommendationReason } from "@/lib/recommendation-engine";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 import { GameCard } from "@/components/game-card";
+import { LIBRARY_COLLECTIONS } from "@/lib/library-store";
 import { getOnlineFriends } from "@/lib/social-store";
+import Link from "next/link";
 
 export function GamesDiscoveryBrowser({
   games,
@@ -56,6 +58,7 @@ export function GamesDiscoveryBrowser({
   const [mood, setMood] = useState<"all" | "chill" | "intense" | "quick">("all");
   const [difficulty, setDifficulty] = useState<"all" | "EASY" | "MEDIUM" | "HARD">("all");
   const [tag, setTag] = useState<string>("all");
+  const [length, setLength] = useState<"all" | "short" | "medium" | "long">("all");
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,
@@ -148,6 +151,9 @@ export function GamesDiscoveryBrowser({
       }
       if (difficulty !== "all") list = list.filter((g) => g.difficulty === difficulty);
       if (tag !== "all") list = list.filter((g) => g.tags.includes(tag));
+      if (length === "short") list = list.filter((g) => g.tags.includes("quick-play") || g.difficulty === "EASY");
+      if (length === "medium") list = list.filter((g) => g.difficulty === "MEDIUM");
+      if (length === "long") list = list.filter((g) => g.difficulty === "HARD" || g.tags.includes("long-play"));
       return list;
     },
     [
@@ -162,6 +168,7 @@ export function GamesDiscoveryBrowser({
       mood,
       difficulty,
       tag,
+      length,
     ]
   );
 
@@ -192,6 +199,31 @@ export function GamesDiscoveryBrowser({
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap gap-2">
+        <Link href="/missions" className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium">
+          Season Missions
+        </Link>
+        <Link href="/wrapped" className="rounded-xl border border-white/10 px-4 py-2 text-sm">
+          Replay Wrapped
+        </Link>
+        <Link href="/ranking" className="rounded-xl border border-white/10 px-4 py-2 text-sm">
+          Rankings
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {LIBRARY_COLLECTIONS.map((c) => (
+          <Link
+            key={c.href}
+            href={c.href}
+            className="rounded-xl border border-white/10 bg-card/60 p-3 text-center text-sm transition-colors hover:border-primary/30"
+          >
+            <span className="text-xl">{c.emoji}</span>
+            <p className="mt-1 font-medium">{c.title}</p>
+          </Link>
+        ))}
+      </div>
+
       {continueGames.length > 0 ? (
         <section>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">Continue</p>
@@ -363,6 +395,30 @@ export function GamesDiscoveryBrowser({
               size="sm"
               variant={difficulty === item.value ? "default" : "outline"}
               onClick={() => setDifficulty(item.value)}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Play Length</p>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              { value: "all", label: "All" },
+              { value: "short", label: "≤5 min" },
+              { value: "medium", label: "5–15 min" },
+              { value: "long", label: "15+ min" },
+            ] as const
+          ).map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              size="sm"
+              variant={length === item.value ? "default" : "outline"}
+              onClick={() => setLength(item.value)}
             >
               {item.label}
             </Button>

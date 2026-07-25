@@ -1,16 +1,85 @@
 ---
-description: Project Phoenix Master Task — Tracks 1-20 until product complete
+description: Project Phoenix Master Task — auto-continue until Done or 08:00 report
 alwaysApply: true
 ---
 
-# Project Phoenix Master Implementation Order
+# AUTO CONTINUATION RULE
 
-Goal: Web game portal → Steam + Duolingo for Web Games (100%)
+Project Phoenix는 **08:00 Daily Report 이전에는 절대로 종료되지 않는다.**
 
-Loop: Track → QA → Commit → Push → next Track. NO questions · NO mid-reports · 08:00 report only.
+Track이 끝나면 다음 순서로 **자동** 수행한다:
+
+1. QA
+2. Commit
+3. Push
+4. MASTER TASK 재로드
+5. 남은 Track 탐색
+6. 우선순위 가장 높은 Track 선택
+7. 구현
+8. QA
+9. Commit
+10. Push
+
+→ MASTER TASK의 마지막 Track(Phase 5 → Done)까지 반복.
+
+## 절대 금지 (08:00 이전)
+
+- 중간보고
+- 질문
+- 승인 요청
+- "현재 진행중" / "현재 작업" 보고
+- "Track 완료" / "완료" 보고
+- "다음 뭐할까요"
+
+**보고 가능 시점: 오직 08:00 Daily Report**
+
+## 중단 가능 조건 (P0만)
+
+- 빌드 자체 불가
+- GitHub push 권한 문제
+- 외부 API Key 필수
+
+그 외: **우회 구현 → 다음 Track**
+
+---
+
+# Project Phoenix Master Task
+
+```
+Project Phoenix
+├── Phase 1 Identity
+├── Phase 2 Platform Transformation  ← current
+├── Phase 3 Growth
+├── Phase 4 Creator
+├── Phase 5 Business
+└── Done
+```
 
 Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`
 
-Tracks: 1 Runtime · 2 Stages · 3 Detail · 4 Discover · 5 Journey · 6 Social · 7 Multiplayer · 8 Retention · 9 Ranking · 10 Identity · 11 AI · 12 Health · 13 Dev Platform · 14 Admin · 15 Performance · 16 A11y · 17 QA · 18 Automation · 19 Open Beta · 20 RC Final
+## Phase 2 Tracks (1–20)
 
-Blockers only: build fail · push auth · API key. Otherwise bypass and continue.
+| # | Track | Status |
+|---|-------|--------|
+| 1 | Universal Runtime | done |
+| 2 | All Games Stage | done |
+| 3 | Game Detail 5.0 | done |
+| 4 | Discover | in progress |
+| 5 | Journey / Replay DNA | in progress |
+| 6 | Social | pending |
+| 7 | Multiplayer | pending |
+| 8 | Retention / Missions | pending |
+| 9 | Ranking / Leagues | pending |
+| 10 | Identity / Guest Merge | pending |
+| 11 | AI Pipeline | pending |
+| 12 | Health Center | pending |
+| 13 | Developer Platform | pending |
+| 14 | Admin / CMS | pending |
+| 15 | Performance | pending |
+| 16 | Accessibility | pending |
+| 17 | QA 50-game | pending |
+| 18 | Automation | pending |
+| 19 | Open Beta (SEO/PWA) | pending |
+| 20 | RC Final | pending |
+
+KPI per change: Retention · Session Time · Social · Identity · Operations

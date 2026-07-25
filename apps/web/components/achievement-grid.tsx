@@ -10,10 +10,10 @@ import {
 import { cn } from "@game-platform/ui";
 import { useSyncExternalStore } from "react";
 
+import { useMounted } from "@/lib/use-mounted";
+
 export function AchievementGrid() {
-  // Subscribed purely to trigger a re-render when unlocks change — each
-  // card below re-checks isAchievementUnlocked itself against the same
-  // (now-current) cache.
+  const mounted = useMounted();
   useSyncExternalStore(
     subscribeEngagement,
     getAchievements,
@@ -23,7 +23,7 @@ export function AchievementGrid() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {Object.values(ACHIEVEMENTS).map((achievement) => {
-        const unlocked = isAchievementUnlocked(achievement.id);
+        const unlocked = mounted && isAchievementUnlocked(achievement.id);
         return (
           <div
             key={achievement.id}
