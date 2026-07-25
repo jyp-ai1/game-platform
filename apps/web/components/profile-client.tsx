@@ -16,7 +16,9 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
+import { ProfileCollections } from "@/components/profile-collections";
 import { ProfileIdentityBadges } from "@/components/profile-identity-badges";
+import { ProfileReplayDna } from "@/components/profile-replay-dna";
 import { ProfileReplayScore } from "@/components/profile-replay-score";
 import {
   ProfileQuickLinks,
@@ -112,9 +114,7 @@ export function ProfileClient({ games }: { games: Game[] }) {
                 </button>
               </div>
             )}
-            <p className="mt-2 text-sm text-muted-foreground">
-              Play. Track. Challenge. — 상세 분석은 Journey에서
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Play. Track. Challenge.</p>
             {mounted ? (
               <div className="mt-3">
                 <ProfileIdentityBadges level={levelProgress.level} />
@@ -151,6 +151,10 @@ export function ProfileClient({ games }: { games: Game[] }) {
       <section>
         <ProfileReplayScore />
       </section>
+
+      <ProfileReplayDna />
+
+      <ProfileCollections games={games} />
 
       <section>
         <h3 className="text-lg font-semibold">최근 플레이</h3>
