@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminOpsLiveDashboard } from "@/components/admin-ops-live-dashboard";
 import { getReleaseDashboardData } from "@/lib/get-release-dashboard";
 
 export const metadata = { title: "AI Operation Center — Project Phoenix" };
@@ -39,6 +40,8 @@ export default function AiOperationCenterPage() {
           ))}
         </ol>
       </section>
+
+      <AdminOpsLiveDashboard />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="replay-panel rounded-2xl p-4">

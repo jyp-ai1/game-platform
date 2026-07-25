@@ -43,6 +43,7 @@ export function CommunityHub({ games }: { games: Game[] }) {
 
   return (
     <div className="flex flex-col gap-8">
+      <CommunityActivityFeed />
       <WeeklyChallengeStrip />
       <CommunityFeedTabs games={games} />
       <CommunityAiSummary />

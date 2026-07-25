@@ -18,7 +18,7 @@ import {
   type GameSortOption,
   type GameViewFilter,
 } from "@/lib/games-discovery";
-import { selectHotSlugs } from "@/lib/game-sections";
+import { selectHotSlugs, selectNew } from "@/lib/game-sections";
 import {
   getFavoritesSnapshot,
   getRecentlyPlayedSnapshot,
@@ -40,6 +40,7 @@ import {
 import { recommendGames, topRecommendationReason } from "@/lib/recommendation-engine";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 import { GameCard } from "@/components/game-card";
+import { getOnlineFriends } from "@/lib/social-store";
 
 export function GamesDiscoveryBrowser({
   games,
@@ -174,8 +175,67 @@ export function GamesDiscoveryBrowser({
     }
   }
 
+  const continueGames = useMemo(() => {
+    const bySlug = new Map(games.map((g) => [g.slug, g]));
+    return recentlyPlayed
+      .map((s) => bySlug.get(s))
+      .filter((g): g is Game => g !== undefined)
+      .slice(0, 4);
+  }, [games, recentlyPlayed]);
+
+  const recentlyUpdated = useMemo(() => selectNew(games, 6), [games]);
+  const trending = useMemo(
+    () => [...games].sort((a, b) => b.playCount - a.playCount).slice(0, 6),
+    [games]
+  );
+  const friendsPlaying = getOnlineFriends();
+
   return (
     <div className="flex flex-col gap-6">
+      {continueGames.length > 0 ? (
+        <section>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Continue</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {continueGames.map((game) => (
+              <GameCard key={game.id} game={game} isHot={resolvedHotSlugs.has(game.slug)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {friendsPlaying.length > 0 ? (
+        <section className="rounded-2xl border border-white/10 bg-card/50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">Friends Playing</p>
+          <ul className="mt-2 flex flex-wrap gap-2 text-sm">
+            {friendsPlaying.map((f) => (
+              <li key={f.id} className="rounded-full border border-white/10 px-3 py-1">
+                {f.nickname} · online
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Trending</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {trending.map((game) => (
+            <GameCard key={game.id} game={game} isHot={resolvedHotSlugs.has(game.slug)} />
+          ))}
+        </div>
+      </section>
+
+      {recentlyUpdated.length > 0 ? (
+        <section>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Recently Updated</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {recentlyUpdated.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {aiPicks.length > 0 ? (
         <section className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-card/60 p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">

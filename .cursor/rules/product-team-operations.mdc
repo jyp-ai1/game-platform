@@ -1,23 +1,18 @@
 ---
-description: Project Phoenix Master Task — autonomous until Beta
+description: Project Phoenix Phase 2 — Platform Transformation until 08:00
 alwaysApply: true
 ---
 
-# Project Phoenix Master Task
+# Project Phoenix Phase 2
 
-Goal: Re:Play → Web Game Steam + Duolingo. Open Beta ready.
+Goal: Web game site → Replay Game Life Platform (Playable Steam)
 
-```
-START → Phase1 Identity → Phase2 Growth → Phase3 Creator → Beta → Open Beta → Done
-```
+Until 08:00 KST: NO questions · NO mid-reports · NO epic-done messages · bypass blockers · continue all tracks
 
-Rules: No questions · No mid-reports · Epic→QA→Commit→Push→Preview→next auto · 08:00 report only
-Branch: `content-factory` · Never merge main
+Loop: implement → QA → commit → push → next track
 
-KPI per change: Retention | Session Time | Social | Identity | Operations
+Branch: `content-factory` · Never merge main · Commit: `feat(phoenix): ...`
 
-Phase1: Home · Discover · Detail · Runtime · Library · Community · Profile UX unity
-Phase2: Social · Challenge · Notification · Retention · Wrapped
-Phase3: Dev Platform · Monetization · AI Operator · Health Center
+Tracks A–T active. Report ONLY at 08:00 in Phase2 COMPLETE format.
 
-Commit: `feat(phoenix): ...`
+KPI: Retention · Session Time · Social · Identity · Operations

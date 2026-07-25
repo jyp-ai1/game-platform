@@ -46,11 +46,25 @@ const GAME_OVERRIDES: Record<string, GameStage[]> = {
     { index: 4, label: "2048", target: 2048 },
     { index: 5, label: "4096", target: 4096 },
   ],
+  sudoku: [
+    { index: 1, label: "Easy", target: 1 },
+    { index: 2, label: "Normal", target: 2 },
+    { index: 3, label: "Hard", target: 3 },
+    { index: 4, label: "Expert", target: 4 },
+    { index: 5, label: "Master", target: 5 },
+  ],
+  maze: [
+    { index: 1, label: "Small", target: 100 },
+    { index: 2, label: "Medium", target: 300 },
+    { index: 3, label: "Large", target: 600 },
+    { index: 4, label: "Complex", target: 1200 },
+    { index: 5, label: "Maze Master", target: 2500 },
+  ],
   memory: [
     { index: 1, label: "2×2", target: 1 },
-    { index: 2, label: "3×3", target: 2 },
-    { index: 3, label: "4×4", target: 3 },
-    { index: 4, label: "5×5", target: 4 },
+    { index: 2, label: "4×4", target: 2 },
+    { index: 3, label: "6×6", target: 3 },
+    { index: 4, label: "8×8", target: 4 },
   ],
 };
 

@@ -7,6 +7,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { GameCard } from "@/components/game-card";
 import { LibraryAnalyticsPanel } from "@/components/library-analytics-panel";
+import { JourneyTimelinePanel } from "@/components/journey-timeline-panel";
 import { getLibraryShelves, LIBRARY_COLLECTIONS, type LibraryShelf } from "@/lib/library-store";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 
@@ -32,6 +33,7 @@ export function LibraryHub({ games }: { games: Game[] }) {
       </div>
 
       <LibraryAnalyticsPanel games={games} />
+      <JourneyTimelinePanel games={games} />
 
       <div className="flex flex-wrap gap-2">
         {shelves.map((shelf) => (

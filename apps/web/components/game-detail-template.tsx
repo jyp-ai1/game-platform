@@ -2,6 +2,8 @@ import { Container } from "@game-platform/ui";
 import type { Game, GameStatus } from "@game-platform/shared";
 
 import { GameDetailAchievements } from "@/components/game-detail-achievements";
+import { GameDetailAiSummary } from "@/components/game-detail-ai-summary";
+import { GameDetailCollectionPanel } from "@/components/game-detail-collection-panel";
 import {
   GameDetailMyRecord,
   GameDetailTop3,
@@ -71,12 +73,14 @@ export function GameDetailTemplate({
               </>
             ) : null}
 
-            <GameDetailAchievements />
             <GameDetailStagePanel slug={slug} difficulty={game.difficulty} />
             <GameDetailMissionPanel gameSlug={slug} />
             <GameDetailJourneyStrip slug={slug} />
+            <GameDetailCollectionPanel gameSlug={slug} />
+            <GameDetailAchievements />
             <MultiplayerInvitePanel game={game} />
 
+            <GameDetailAiSummary gameSlug={slug} />
             <div className="grid gap-4 sm:grid-cols-2">
               <GameDetailRating gameSlug={slug} />
               <GameDetailComments gameSlug={slug} />

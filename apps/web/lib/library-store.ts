@@ -8,11 +8,13 @@ import { getPlayHistorySnapshot } from "@/lib/play-history";
 
 const WISHLIST_KEY = "play29:wishlist";
 const COMPLETED_KEY = "play29:completed-games";
+const MASTERED_KEY = "play29:mastered-games";
 
 export type LibraryShelf =
   | "recent"
   | "favorites"
   | "completed"
+  | "mastered"
   | "achievements"
   | "wishlist"
   | "collections"
@@ -64,11 +66,32 @@ export function markCompleted(slug: string): void {
   if (!list.includes(slug)) writeList(COMPLETED_KEY, [slug, ...list]);
 }
 
+export function getMastered(): string[] {
+  return readList(MASTERED_KEY);
+}
+
+export function markMastered(slug: string): void {
+  const list = getMastered();
+  if (!list.includes(slug)) writeList(MASTERED_KEY, [slug, ...list]);
+}
+
+export type LibraryBadge = "Played" | "Completed" | "Mastered" | "Perfect";
+
+export function getGameLibraryBadge(slug: string, score: number, best: number): LibraryBadge {
+  if (getMastered().includes(slug)) return "Mastered";
+  if (getCompleted().includes(slug)) return "Completed";
+  if (best > 0 && score >= best) return "Perfect";
+  const counts = getGamePlayCounts();
+  if ((counts[slug] ?? 0) > 0) return "Played";
+  return "Played";
+}
+
 export function getLibraryShelves(): LibraryShelfData[] {
   const recent = getRecentlyPlayedSnapshot();
   const favorites = getFavoritesSnapshot();
   const wishlist = getWishlist();
   const completed = getCompleted();
+  const mastered = getMastered();
   const history = [...new Set(getPlayHistorySnapshot().map((e) => e.slug))];
   const achievements = Object.keys(getAchievements()).length > 0
     ? getRecentlyPlayedSnapshot().slice(0, 10)
@@ -78,6 +101,7 @@ export function getLibraryShelves(): LibraryShelfData[] {
     { id: "recent", label: "Recently Played", emoji: "▶", slugs: recent },
     { id: "favorites", label: "Favorites", emoji: "❤", slugs: favorites },
     { id: "completed", label: "Completed", emoji: "✓", slugs: completed },
+    { id: "mastered", label: "Mastered", emoji: "★", slugs: mastered },
     { id: "wishlist", label: "Wishlist", emoji: "☆", slugs: wishlist },
     { id: "achievements", label: "Achievements", emoji: "🏆", slugs: achievements },
     { id: "history", label: "History", emoji: "🕐", slugs: history },
