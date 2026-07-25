@@ -1,22 +1,31 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { subscribeLiveData, subscribeLiveProfile } from "@/lib/live-data-bus";
 import { getLeaderboard, type LeaderboardEntry } from "@/lib/supabase/scores";
 
 export function CommunityTopPlayers({ games }: { games: Game[] }) {
   const slug = games[0]?.slug ?? "2048";
   const game = games.find((g) => g.slug === slug);
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
 
   useEffect(() => {
     let active = true;
-    getLeaderboard(slug, "weekly").then((data) => {
-      if (active) setEntries(data.slice(0, 5));
+    function load() {
+      getLeaderboard(slug, "weekly").then((data) => {
+        if (active) setEntries(data.slice(0, 5));
+      });
+    }
+    load();
+    const unsub = subscribeLiveProfile((p) => {
+      if (p.gameSlug === slug) load();
     });
     return () => {
       active = false;
+      unsub();
     };
   }, [slug]);
 
@@ -50,18 +59,26 @@ export function CommunityTopPlayers({ games }: { games: Game[] }) {
 }
 
 export function CommunityDailyRanking({ games }: { games: Game[] }) {
-  const slug = "2048";
+  const slug = games[0]?.slug ?? "2048";
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
 
   useEffect(() => {
     let active = true;
-    getLeaderboard(slug, "today").then((data) => {
-      if (active) setEntries(data.slice(0, 3));
+    function load() {
+      getLeaderboard(slug, "today").then((data) => {
+        if (active) setEntries(data.slice(0, 3));
+      });
+    }
+    load();
+    const unsub = subscribeLiveProfile((p) => {
+      if (p.gameSlug === slug) load();
     });
     return () => {
       active = false;
+      unsub();
     };
-  }, []);
+  }, [slug]);
 
   return (
     <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 backdrop-blur">

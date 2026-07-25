@@ -2,24 +2,35 @@
 
 import type { Game } from "@game-platform/shared";
 import Link from "next/link";
-import { Share2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { Share2, ThumbsDown, Heart, Flag } from "lucide-react";
+import { useCallback, useState, useSyncExternalStore, type FormEvent } from "react";
 
 import { StarRatingPanel } from "@/components/community-ratings-panel";
-import { listComments, postComment } from "@/lib/community-store";
+import {
+  isCommentDisliked,
+  isCommentLiked,
+  listCommentsForGame,
+  postComment,
+  reportComment,
+  toggleCommentDislike,
+  toggleCommentLike,
+} from "@/lib/community-store";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 
 export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
   const [message, setMessage] = useState("");
-  const [posted, setPosted] = useState(false);
+  const [, bump] = useState(0);
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
+
+  const refresh = useCallback(() => bump((n) => n + 1), []);
+  const comments = listCommentsForGame(gameSlug, "recent").slice(0, 5);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     postComment(gameSlug, message);
     setMessage("");
-    setPosted(true);
+    refresh();
   }
-
-  const recent = listComments().filter((c) => c.gameSlug === gameSlug).slice(0, 2);
 
   return (
     <div className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
@@ -30,7 +41,7 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
           rows={2}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="…"
+          placeholder="Leave a comment…"
           aria-label="댓글"
           required
         />
@@ -41,12 +52,51 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
           Post
         </button>
       </form>
-      {posted ? <p className="mt-1 text-xs text-primary">OK</p> : null}
-      {recent.map((c) => (
-        <p key={c.id} className="mt-2 text-sm text-muted-foreground">
-          {c.message}
-        </p>
-      ))}
+      {comments.length > 0 ? (
+        <ul className="mt-4 space-y-2">
+          {comments.map((c) => {
+            const liked = isCommentLiked(c.id);
+            const disliked = isCommentDisliked(c.id);
+            return (
+              <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm">
+                <p className="text-xs text-muted-foreground">{c.author}</p>
+                <p>{c.message}</p>
+                <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+                  <button
+                    type="button"
+                    className={liked ? "text-red-400" : ""}
+                    onClick={() => {
+                      toggleCommentLike(c.id);
+                      refresh();
+                    }}
+                  >
+                    <Heart className="mr-0.5 inline size-3" fill={liked ? "currentColor" : "none"} />
+                    {c.likes}
+                  </button>
+                  <button
+                    type="button"
+                    className={disliked ? "text-amber-400" : ""}
+                    onClick={() => {
+                      toggleCommentDislike(c.id);
+                      refresh();
+                    }}
+                  >
+                    <ThumbsDown className="inline size-3" />
+                  </button>
+                  <button type="button" onClick={() => reportComment(c.id)}>
+                    <Flag className="inline size-3" /> Report
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="mt-3 text-xs text-muted-foreground">Be the first to comment.</p>
+      )}
+      <Link href="/community" className="mt-3 inline-block text-xs text-primary hover:underline">
+        View all in Community →
+      </Link>
     </div>
   );
 }
