@@ -69,7 +69,7 @@ content-factory
 
 Commit
 
-(see git log)
+b62f371
 
 Preview
 
