@@ -1,68 +1,60 @@
-# Daily Report — Sprint16 Epic1
+# Daily Report — Sprint16 Epic1 (Complete)
 
-**Date:** 2026-07-25  
-**Branch:** `content-factory`  
-**Epic:** Identity Pivot — Re:Play 2.0 Game Life Platform
+**Date:** 2026-07-25
 
 ---
 
-## Epic
+## Branch / Commit / Preview / Deployment
 
-**목표:** "웹게임 사이트" → **"내 게임 생활 플랫폼"** 첫인상 전환
-
-### Before
-
-- 홈: 레트로 히어로 + 게임 캐러셀 나열
-- Nav: Games / Favorites / Profile / Ranking(Soon) / Login(Soon)
-- 게임 상세: 플레이 + 랭킹 사이드바
-- 프로필: 닉네임 + 통계 + 업적 (기능 중심)
-
-### After
-
-- 홈: **Continue Playing 중심** → 오늘의 도전 / 내 성장 / 최근 플레이 / Top Players
-- Nav: **Home / Discover / Journey / Community / Profile** + 모바일 하단 5탭
-- `/journey`: 이어하기 · Collections · Play History · Statistics
-- `/community`: Top Players · Daily Challenge · Community MVP(Soon)
-- 게임 상세: **Top3 · 내 기록 · 난이도 · 플레이시간** 패널 추가
-- 프로필: **Game Life** 헤더 + 최근 플레이 + Journey/Community 링크
+```text
+Branch:      content-factory
+Commit:      8fdecf9
+Preview:     https://game29-8e0jp39xo-jyp-ai1s-projects.vercel.app
+Branch URL:  https://game29-git-content-factory-jyp-ai1s-projects.vercel.app
+Deployment:  https://vercel.com/jyp-ai1s-projects/game29/EBi85FVUWsdkVZcFkpkJZq9a1JzF
+Before ref:  https://game29-mqqsuwgtr-jyp-ai1s-projects.vercel.app  (c000ffe)
+```
 
 ---
 
-## 완료
+## Epic — Identity Pivot
 
-- Home Identity Hero (`HomeIdentityHero`)
-- Home Continue Hub (Continue Playing 1순위)
-- Home Growth Panel (오늘의 도전 / 레벨 / streak)
-- Home Recent Strip + Top Players
-- Navigation 재구성 + Mobile Bottom Nav
-- `/journey` · `/community` 신규 라우트
-- Game Detail Stats Panel (Top3, my rank, meta)
-- Profile Game Life redesign
-- E2E: `tests/e2e/sprint16-epic1.spec.ts`
-- site-config tagline → Re:Play 2.0
+**목표:** "웹게임 사이트" → **"내 게임 생활 플랫폼"**
+
+| Before | After |
+|--------|-------|
+| 레트ro 히어로 + 게임 나열 | Continue Playing 중심 + Growth Panel |
+| Games/Favorites/Profile nav | Home/Discover/Journey/Community/Profile + Bottom Nav |
+| Journey/Community 없음 | 신규 허브 2개 |
+
+**상세 보고:** [epic1-complete-report.md](./epic1-complete-report.md)
+
+---
+
+## Screenshots (After — local build 8fdecf9)
+
+- Home → `screenshots/epic1/after-home.png`
+- Journey → `screenshots/epic1/after-journey.png`
+- Community → `screenshots/epic1/after-community.png`
+- Profile → `screenshots/epic1/after-profile.png`
+
+> Before: c000ffe Preview URL (PM 브라우저). Journey/Community는 Epic1 전 404.  
+> Vercel Preview Protection → 자동 Before 캡처 불가 (Vercel login gate).
 
 ---
 
 ## QA
 
-| Gate | Status |
-|------|--------|
-| Typecheck | PASS |
-| qa:quality (static) | PASS |
-| E2E Epic1 | Pending server |
-| Performance / 404 | SKIP (server) |
+| | |
+|---|---|
+| **PASS** | Typecheck, qa:quality, 50/50 regression, metadata |
+| **RC1 Score** | **93%** |
+| **PENDING** | E2E on Preview (Protection), Performance |
 
-**Known Issue:** Preview Protection 해제 전 E2E/Performance 전수검사 불가
+**QA URL:** https://game29-8e0jp39xo-jyp-ai1s-projects.vercel.app
 
 ---
 
 ## 다음 Epic
 
-**Epic2 — Personal Journey** (Day2, ~12h)
-
-- GuestID 강화
-- Play History 타임라인
-- Journey Collections 심화
-- Statistics 대시보드
-
-**위험요소:** 실 운영 데이터 없음 → localStorage 기반 UX 검증 필요
+Epic2 Personal Journey (~12h) — Play History 타임라인, Statistics
