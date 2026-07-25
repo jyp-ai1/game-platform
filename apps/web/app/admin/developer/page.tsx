@@ -32,6 +32,24 @@ export default async function DeveloperPlatformPage() {
       </div>
 
       <section className="rounded-2xl border border-white/10 bg-card/40 p-5">
+        <h2 className="font-semibold">Register New Game</h2>
+        <form className="mt-4 grid gap-3 sm:grid-cols-2">
+          {["Title", "Slug", "Tags", "Difficulty", "Play Time", "Description"].map((field) => (
+            <label key={field} className="text-sm">
+              <span className="text-xs text-muted-foreground">{field}</span>
+              <input className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm" placeholder={field} />
+            </label>
+          ))}
+        </form>
+        <div className="mt-4 flex gap-2">
+          <button type="button" className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground">
+            Submit for Review
+          </button>
+          <span className="self-center text-xs text-muted-foreground">Status: Draft → Review → Publish</span>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-card/40 p-5">
         <h2 className="font-semibold">Pipeline</h2>
         <ol className="mt-3 space-y-2 text-sm text-muted-foreground">
           <li>1. Register game → scaffold via content-factory</li>

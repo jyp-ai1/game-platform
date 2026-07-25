@@ -14,6 +14,7 @@ import type { Game } from "@game-platform/shared";
 import { Button, Progress } from "@game-platform/ui";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { GuestIdentityPanel } from "@/components/guest-identity-panel";
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
 import {
@@ -109,6 +110,7 @@ export function ProfileClient({ games }: { games: Game[] }) {
 
       <ProfileStatsGrid games={games} />
       <ProfileSocialStrip />
+      <GuestIdentityPanel />
       <ProfileHeatmapSection />
       <ProfileWrappedTeaser />
       <ShopPanel />
