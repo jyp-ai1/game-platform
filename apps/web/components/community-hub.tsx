@@ -13,7 +13,7 @@ import {
   CommunityTopPlayers,
 } from "@/components/community-leaderboards";
 import { CommunityRatingsStrip } from "@/components/community-ratings-panel";
-import { SocialActivityFeed, WeeklyLeaguePanel } from "@/components/social-activity-feed";
+import { WeeklyLeaguePanel } from "@/components/social-activity-feed";
 import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
 import { GameChallengeHub } from "@/components/game-challenge-hub";
 import { FriendSearchPanel } from "@/components/friend-search-panel";
@@ -48,24 +48,24 @@ export function CommunityHub({ games }: { games: Game[] }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <CommunityActivityFeed />
+      <CommunityActivityFeed games={games} />
+
       <div id="challenge">
         <GameChallengeHub games={games} />
       </div>
+
+      <FriendSearchPanel />
       <SocialInvitePanel gameSlug={games[0]?.slug ?? "snake"} title={games[0]?.title ?? "Re:Play"} />
       <WeeklyChallengeStrip />
-      <CommunityFeedTabs games={games} />
-      <CommunityAiSummary />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <CommunityDailyRanking games={games} />
         <CommunityTopPlayers games={games} />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <SocialActivityFeed />
         <WeeklyLeaguePanel games={games} />
       </div>
+
+      <CommunityFeedTabs games={games} />
+      <CommunityAiSummary />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <CommunityCommentsPanel games={games} />
@@ -95,7 +95,7 @@ export function CommunityHub({ games }: { games: Game[] }) {
             rows={3}
             value={bugMsg}
             onChange={(e) => setBugMsg(e.target.value)}
-            placeholder="…"
+            placeholder="버그 설명…"
             required
           />
           <Button type="submit" size="sm">
@@ -113,8 +113,6 @@ export function CommunityHub({ games }: { games: Game[] }) {
           </ul>
         ) : null}
       </section>
-
-      <CommunityActivityFeed />
     </div>
   );
 }

@@ -6,17 +6,19 @@ import {
   getTodayPlayCount,
   getServerTodayPlayCountSnapshot,
   subscribeEngagement,
+  subscribeMissions,
 } from "@game-platform/game-sdk";
+import type { Game } from "@game-platform/shared";
 import { Container } from "@game-platform/ui";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
+import { buildTodayReason } from "@/lib/today-reason";
 import {
   getTodayMissionMix,
   getTodayMissionProgress,
   isTodayMissionMixComplete,
-  subscribeMissions,
 } from "@/lib/universal-mission-engine";
 import {
   filterPlayHistory,
@@ -25,13 +27,15 @@ import {
   getServerPlayHistorySnapshot,
   subscribePlayHistory,
 } from "@/lib/play-history";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 import { useMounted } from "@/lib/use-mounted";
 
 const GOAL_SEC = 5 * 60;
 
-export function HomeDailyChallengeStrip() {
+export function HomeDailyChallengeStrip({ games }: { games: Game[] }) {
   const mounted = useMounted();
   useSyncExternalStore(subscribeMissions, getDailyMission, getServerDailyMissionSnapshot);
+  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
   const todayPlays = useSyncExternalStore(
     subscribeEngagement,
     getTodayPlayCount,
@@ -43,7 +47,12 @@ export function HomeDailyChallengeStrip() {
     getServerPlayHistorySnapshot
   );
 
-  if (!mounted) return null;
+  const reason = useMemo(() => {
+    if (!mounted) return null;
+    return buildTodayReason(games);
+  }, [games, mounted]);
+
+  if (!mounted || !reason) return null;
 
   const mix = getTodayMissionMix();
   const progress = getTodayMissionProgress();
@@ -55,7 +64,7 @@ export function HomeDailyChallengeStrip() {
     <section className="py-4 sm:py-6">
       <Container>
         <Link
-          href="/missions"
+          href={reason.href}
           className="block rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/15 via-card/80 to-card/60 p-6 shadow-lg shadow-primary/5 backdrop-blur transition-colors hover:border-primary/40 sm:p-8"
         >
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -64,11 +73,12 @@ export function HomeDailyChallengeStrip() {
                 <Sparkles className="size-7 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold sm:text-2xl">오늘의 Mission</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {complete ? "완료!" : `${progress.done}/${progress.total}`}
-                  {todayPlays > 0 ? ` · ${todayPlays} plays` : ""}
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                  오늘의 Replay
                 </p>
+                <p className="mt-1 text-xl font-bold sm:text-2xl">{reason.headline}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{reason.subline}</p>
+                <p className="mt-2 text-xs font-medium text-amber-400">{reason.rewardHint}</p>
                 <ul className="mt-3 space-y-1 text-sm">
                   {mix.map((m) => (
                     <li key={m.id} className={m.done ? "text-emerald-400" : "text-muted-foreground"}>
@@ -80,8 +90,11 @@ export function HomeDailyChallengeStrip() {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-3xl font-bold tabular-nums text-primary">{progress.pct}%</p>
+                <p className="text-3xl font-bold tabular-nums text-primary">
+                  {complete ? "✓" : `${progress.done}/${progress.total}`}
+                </p>
                 <p className="text-xs text-muted-foreground">
+                  {todayPlays > 0 ? `${todayPlays} plays · ` : ""}
                   {formatDuration(todaySec)} / 5m
                 </p>
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { Badge, SectionTitle } from "@game-platform/ui";
+import { SectionTitle } from "@game-platform/ui";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
@@ -9,10 +9,7 @@ import { ContinuePlayingCard } from "@/components/continue-playing-card";
 import { GameCard } from "@/components/game-card";
 import { JourneyStoryPanel } from "@/components/journey-story-panel";
 import { JourneyPeriodReports } from "@/components/journey-period-reports";
-import { JourneyStatsPanel } from "@/components/journey-stats-panel";
-import { JourneyHeatMap, JourneyMonthlyReport } from "@/components/journey-heat-map";
-import { JourneyIdentityPanel } from "@/components/journey-identity-panel";
-import { PlayHistoryTimeline } from "@/components/play-history-timeline";
+import { JourneyHeatMap } from "@/components/journey-heat-map";
 import {
   getJourneyProfileSnapshot,
   getServerJourneyProfileSnapshot,
@@ -64,58 +61,10 @@ export function JourneyHub({ games }: { games: Game[] }) {
 
   return (
     <div className="flex flex-col gap-12">
-      {journey ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card/50 px-4 py-3 text-xs text-muted-foreground">
-          <span>Guest Journey</span>
-          <Badge variant="outline" className="font-mono text-[10px]">
-            {journey.guestId.slice(0, 8)}…
-          </Badge>
-          <span>· Sprint17 로그인 시 Merge 예정</span>
-        </div>
-      ) : null}
+      <JourneyStoryPanel games={games} />
 
       <section>
-        <SectionTitle
-          title="📊 My Statistics"
-          description="총 플레이 · 시간 · streak · Top 게임"
-        />
-        <div className="mt-4">
-          <JourneyStatsPanel games={games} period="all" />
-        </div>
-      </section>
-
-      <section>
-        <JourneyIdentityPanel games={games} />
-      </section>
-
-      <section>
-        <JourneyStoryPanel games={games} />
-      </section>
-
-      <section>
-        <JourneyPeriodReports games={games} />
-      </section>
-
-      <section>
-        <JourneyHeatMap />
-      </section>
-
-      <section>
-        <JourneyMonthlyReport />
-      </section>
-
-      <section>
-        <SectionTitle
-          title="🕐 Play History Timeline"
-          description="오늘 · 이번주 · 이번달 · 전체"
-        />
-        <div className="mt-4">
-          <PlayHistoryTimeline games={games} />
-        </div>
-      </section>
-
-      <section>
-        <SectionTitle title="▶ Continue Playing" description="이어서 플레이할 게임" />
+        <SectionTitle title="▶ Continue Playing" description="다음 한 판" />
         {continueGames.length > 0 ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {continueGames.map((game) => (
@@ -131,6 +80,16 @@ export function JourneyHub({ games }: { games: Game[] }) {
           </div>
         )}
       </section>
+
+      <JourneyPeriodReports games={games} />
+
+      <JourneyHeatMap />
+
+      {journey ? (
+        <p className="text-center text-xs text-muted-foreground">
+          Replay Passport · {journey.guestId.slice(0, 8)}…
+        </p>
+      ) : null}
 
       <section>
         <SectionTitle title="📚 Collections" description="테마별 게임 모음" />

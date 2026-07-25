@@ -4,85 +4,85 @@ import type { Game } from "@game-platform/shared";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
+import { buildReplayStoryFeed, type StoryEvent } from "@/lib/replay-story-feed";
 import { subscribeLiveData } from "@/lib/live-data-bus";
-import { formatPlayTime } from "@/lib/library-analytics";
-import {
-  filterPlayHistory,
-  getPlayHistorySnapshot,
-  getServerPlayHistorySnapshot,
-  subscribePlayHistory,
-} from "@/lib/play-history";
-import { buildReplayIdentityProfile } from "@/lib/replay-identity";
+import { getTodayMissionProgress } from "@/lib/universal-mission-engine";
+import { useMounted } from "@/lib/use-mounted";
 
-/** Journey as story, not spreadsheet. */
+function formatWhen(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 60_000) return "방금";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}분 전`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}시간 전`;
+  return `${Math.floor(diff / 86_400_000)}일 전`;
+}
+
+/** Journey as chronological story feed. */
 export function JourneyStoryPanel({ games }: { games: Game[] }) {
+  const mounted = useMounted();
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
-  const history = useSyncExternalStore(
-    subscribePlayHistory,
-    getPlayHistorySnapshot,
-    getServerPlayHistorySnapshot
-  );
 
-  const story = useMemo(() => {
-    const identity = buildReplayIdentityProfile(games);
-    const todayMin = Math.round(
-      filterPlayHistory(history, "today").reduce((s, e) => s + e.durationSec, 0) / 60
-    );
-    const weekMin = Math.round(
-      filterPlayHistory(history, "week").reduce((s, e) => s + e.durationSec, 0) / 60
-    );
-    return { identity, todayMin, weekMin };
-  }, [games, history]);
+  const events = useMemo(() => {
+    if (!mounted) return [];
+    return buildReplayStoryFeed(games, 12);
+  }, [games, mounted]);
 
-  const beats = [
-    {
-      label: "오늘",
-      value: story.todayMin > 0 ? `${story.todayMin}분` : "—",
-      sub: "플레이",
-    },
-    {
-      label: "이번 주",
-      value: formatPlayTime(story.weekMin),
-      sub: "함께한 시간",
-    },
-    {
-      label: "가장 많이 한 게임",
-      value: story.identity.topGameTitle ?? "—",
-      sub: story.identity.topGameSlug ? (
-        <Link href={`/games/${story.identity.topGameSlug}`} className="text-primary hover:underline">
-          다시 플레이 →
-        </Link>
-      ) : (
-        "아직 기록 없음"
-      ),
-    },
-    {
-      label: "이번 달 정체성",
-      value: story.identity.titleKo,
-      sub: story.identity.playStyle,
-    },
-  ];
+  const mission = mounted ? getTodayMissionProgress() : { done: 0, total: 0, pct: 0 };
+
+  if (!mounted) return null;
 
   return (
     <section className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/60 p-6">
       <p className="text-xs font-semibold uppercase tracking-widest text-primary">Your Story</p>
-      <h2 className="mt-2 text-xl font-bold">Replay Journey</h2>
-      <ol className="mt-6 space-y-6">
-        {beats.map((b, i) => (
-          <li key={b.label} className="relative pl-6">
-            {i < beats.length - 1 ? (
-              <span
-                className="absolute left-[7px] top-8 h-[calc(100%+8px)] w-0.5 bg-primary/20"
-                aria-hidden
-              />
-            ) : null}
-            <span className="absolute left-0 top-1 size-4 rounded-full border-2 border-primary bg-background" />
-            <p className="text-xs text-muted-foreground">{b.label}</p>
-            <p className="text-2xl font-bold">{b.value}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{b.sub}</p>
-          </li>
-        ))}
+      <h2 className="mt-2 text-xl font-bold">오늘의 Replay</h2>
+
+      {mission.total > 0 && mission.done < mission.total ? (
+        <Link
+          href="/missions"
+          className="mt-4 block rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm hover:border-amber-500/50"
+        >
+          미션 {mission.done}/{mission.total} —{" "}
+          <span className="font-semibold text-amber-400">계속하기 →</span>
+        </Link>
+      ) : null}
+
+      <ol className="mt-6 space-y-0">
+        {events.length === 0 ? (
+          <li className="text-sm text-muted-foreground">첫 게임을 플레이하면 스토리가 쌓입니다.</li>
+        ) : (
+          events.map((e, i) => (
+            <StoryBeat key={e.id} event={e} isLast={i === events.length - 1} when={formatWhen(e.createdAt)} />
+          ))
+        )}
       </ol>
     </section>
+  );
+}
+
+function StoryBeat({
+  event,
+  isLast,
+  when,
+}: {
+  event: StoryEvent;
+  isLast: boolean;
+  when: string;
+}) {
+  return (
+    <li className="relative pl-8 pb-6">
+      {!isLast ? (
+        <span className="absolute left-[11px] top-6 h-[calc(100%-8px)] w-0.5 bg-primary/20" aria-hidden />
+      ) : null}
+      <span className="absolute left-0 top-1 flex size-6 items-center justify-center rounded-full border-2 border-primary bg-background text-xs">
+        {event.emoji}
+      </span>
+      <Link href={event.href} className="block rounded-xl transition-colors hover:bg-muted/20">
+        <p className="text-xs text-muted-foreground">
+          {event.actor} · {when}
+        </p>
+        <p className="mt-0.5 font-semibold">{event.headline}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{event.detail}</p>
+      </Link>
+    </li>
   );
 }

@@ -130,6 +130,10 @@ export function getUnlockedPlatformAchievements(): PlatformAchievementDef[] {
   return PLATFORM_ACHIEVEMENTS.filter((a) => unlocked.has(a.id));
 }
 
+export function getPlatformAchievementTitle(id: string): string {
+  return PLATFORM_ACHIEVEMENTS.find((a) => a.id === id)?.titleKo ?? id;
+}
+
 /** Check and persist newly unlocked platform achievements after a game. */
 export function checkPlatformAchievements(slug: string, score: number): string[] {
   const unlocked = new Set(readPlatformUnlocked());

@@ -13,12 +13,14 @@ export function GameEndMotivation({
   isNewBest,
   best,
   todayRank,
+  top10Gap,
 }: {
   slug: string;
   score: number;
   isNewBest: boolean;
   best: number;
   todayRank: number | null;
+  top10Gap?: number | null;
 }) {
   const [top3, setTop3] = useState<LeaderboardEntry[]>([]);
   const nextStage = getNextStage(slug, score);
@@ -52,6 +54,11 @@ export function GameEndMotivation({
       ? { icon: Sparkles, text: "오늘 TOP3까지", value: `${gapToTop3.toLocaleString()}점`, color: "text-primary" }
       : todayRank !== null && todayRank <= 3
         ? { icon: Sparkles, text: "오늘 TOP3", value: `#${todayRank} 🎉`, color: "text-emerald-400" }
+        : null,
+    top10Gap != null && top10Gap > 0
+      ? { icon: Sparkles, text: "오늘 TOP10까지", value: `${top10Gap.toLocaleString()}점`, color: "text-primary" }
+      : todayRank !== null && todayRank <= 10
+        ? { icon: Sparkles, text: "오늘 TOP10", value: `#${todayRank}`, color: "text-emerald-400" }
         : null,
     nextStageGap !== null
       ? { icon: Target, text: `다음 Stage · ${nextStage?.label}`, value: `${nextStageGap}점`, color: "text-primary" }

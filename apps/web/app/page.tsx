@@ -3,7 +3,6 @@ import { ContinueReminderBanner } from "@/components/continue-reminder-banner";
 import { HomeChallengeStrip } from "@/components/home-challenge-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
 import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
-import { HomeMissionHub } from "@/components/home-mission-hub";
 import { HomeRuleRecommendations } from "@/components/home-rule-recommendations";
 import { ReplayIdentityHero } from "@/components/replay-identity-hero";
 import { Container } from "@game-platform/ui";
@@ -25,8 +24,7 @@ export default async function Home() {
       <ReplayOffPlayStrip games={games} />
       <HomeContinueHub games={games} />
       <ReplayIdentityHero games={games} />
-      <HomeDailyChallengeStrip />
-      <HomeMissionHub />
+      <HomeDailyChallengeStrip games={games} />
       <HomeChallengeStrip games={games} />
       <HomeRuleRecommendations games={games} large />
       <section className="border-t border-white/5 py-8">
