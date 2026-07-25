@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-25T02:56:02.228Z",
-  "scanned": 156,
-  "suspects": 74,
+  "generatedAt": "2026-07-25T03:17:44.193Z",
+  "scanned": 166,
+  "suspects": 75,
   "items": [
     {
       "file": "components/admin/activity-heatmap.tsx",

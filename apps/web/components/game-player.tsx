@@ -18,6 +18,8 @@ async function submitScore(
   deviceId: string
 ): Promise<void> {
   await submitScoreRpc(gameSlug, nickname, score, deviceId);
+  const { emitLiveScoreUpdate } = await import("@/lib/live-data-bus");
+  emitLiveScoreUpdate(gameSlug, score);
   trackAnalyticsEvent("ranking_submit", {
     gameSlug,
     deviceId,

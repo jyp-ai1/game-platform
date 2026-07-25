@@ -9,12 +9,16 @@ import {
 import {
   GameDetailComments,
   GameDetailRating,
+  GameDetailShare,
 } from "@/components/game-detail-extras";
 import { GameDetailHero } from "@/components/game-detail-hero";
 import { GameDetailSimilar } from "@/components/game-detail-similar";
+import { GameDetailStagePanel } from "@/components/game-detail-stage-panel";
 import { GameDetailStage } from "@/components/game-detail-stage";
+import { GameLifecycleBridge } from "@/components/game-lifecycle-bridge";
 import { GamePlayer } from "@/components/game-player";
 import { GameStatusBlock } from "@/components/game-status-block";
+import { MultiplayerInvitePanel } from "@/components/multiplayer-invite-panel";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
 import type { PlayableSlug } from "@/lib/playable-games";
 
@@ -45,9 +49,14 @@ export function GameDetailTemplate({
               categorySlug={game.category?.slug ?? null}
               difficulty={game.difficulty}
             />
-            <GameDetailStage>
-              <GamePlayer slug={slug as PlayableSlug} rankingEnabled={rankingEnabled} />
-            </GameDetailStage>
+            <GameLifecycleBridge slug={slug} games={allGames}>
+              <GameDetailStage>
+                <GamePlayer slug={slug as PlayableSlug} rankingEnabled={rankingEnabled} />
+              </GameDetailStage>
+            </GameLifecycleBridge>
+
+            <MultiplayerInvitePanel game={game} />
+            <GameDetailStagePanel slug={slug} difficulty={game.difficulty} />
 
             {rankingEnabled ? (
               <>
@@ -63,6 +72,7 @@ export function GameDetailTemplate({
               <GameDetailComments gameSlug={slug} />
             </div>
 
+            <GameDetailShare gameSlug={slug} title={game.title} />
             <GameDetailSimilar games={allGames} related={related} />
           </>
         ) : game.status !== "ACTIVE" ? (

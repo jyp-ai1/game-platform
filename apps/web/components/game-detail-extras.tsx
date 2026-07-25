@@ -58,18 +58,24 @@ export function GameDetailRating({ gameSlug }: { gameSlug: string }) {
   );
 }
 
-export function GameDetailNextGame({ next }: { next: Game | null }) {
-  if (!next) return null;
+export function GameDetailShare({ gameSlug, title }: { gameSlug: string; title: string }) {
+  async function handleShare() {
+    const url = typeof window !== "undefined" ? window.location.href : `/games/${gameSlug}`;
+    const text = `Re:Play · ${title}`;
+    if (navigator.share) {
+      await navigator.share({ title: text, url });
+    } else {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+    }
+  }
+
   return (
-    <Link
-      href={`/games/${next.slug}`}
-      className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-5 transition-colors hover:bg-primary/10"
+    <button
+      type="button"
+      onClick={handleShare}
+      className="w-full rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
     >
-      <div>
-        <p className="text-xs font-medium uppercase text-primary">Next Game</p>
-        <p className="mt-1 text-lg font-semibold">{next.title}</p>
-      </div>
-      <span className="text-sm font-medium">Play →</span>
-    </Link>
+      Share
+    </button>
   );
 }

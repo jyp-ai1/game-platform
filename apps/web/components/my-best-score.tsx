@@ -1,36 +1,39 @@
 "use client";
 
-import { getBestScore } from "@game-platform/game-sdk";
+import {
+  getBestScore,
+  getServerBestScoreSnapshot,
+  subscribeBestScore,
+} from "@game-platform/game-sdk";
 import { useSyncExternalStore } from "react";
 
-// Best score never changes from outside this component while it's mounted
-// (no cross-tab sync needed for a casual game platform), so subscribe is a
-// no-op — useSyncExternalStore is used purely for its dual snapshot API,
-// which avoids the SSR/client hydration mismatch a plain useState+useEffect
-// read of localStorage would cause.
-function noopSubscribe() {
-  return () => {};
-}
+import { subscribeLiveData } from "@/lib/live-data-bus";
 
-function getServerSnapshot() {
-  return 0;
+function useLiveBestScore(gameSlug: string): number {
+  const fromStore = useSyncExternalStore(
+    (cb) => {
+      const u1 = subscribeBestScore(gameSlug, cb);
+      const u2 = subscribeLiveData(cb);
+      return () => {
+        u1();
+        u2();
+      };
+    },
+    () => getBestScore(gameSlug),
+    () => getServerBestScoreSnapshot(gameSlug)
+  );
+  return fromStore;
 }
 
 export function MyBestScore({ gameSlug }: { gameSlug: string }) {
-  const best = useSyncExternalStore(
-    noopSubscribe,
-    () => getBestScore(gameSlug),
-    getServerSnapshot
-  );
+  const best = useLiveBestScore(gameSlug);
 
-  if (!best) {
-    return null;
-  }
+  if (!best) return null;
 
   return (
     <p className="text-sm text-muted-foreground">
-      내 최고 기록:{" "}
-      <span className="font-semibold text-foreground">
+      Best{" "}
+      <span className="font-semibold tabular-nums text-foreground">
         {best.toLocaleString()}
       </span>
     </p>

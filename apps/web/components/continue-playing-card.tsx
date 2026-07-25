@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  getBestScore,
+  getServerBestScoreSnapshot,
   getServerHasSaveSnapshot,
   hasSave,
+  subscribeBestScore,
   subscribeSave,
 } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
@@ -12,6 +15,7 @@ import Image from "next/image";
 import { useCallback, useSyncExternalStore } from "react";
 
 import { GameCardPlayLink } from "@/components/game-card-play-link";
+import { getNextStage } from "@/lib/game-stages";
 import { useMounted } from "@/lib/use-mounted";
 
 export function ContinuePlayingCard({
@@ -31,6 +35,12 @@ export function ContinuePlayingCard({
     () => hasSave(game.slug),
     getServerHasSaveSnapshot
   );
+  const bestScore = useSyncExternalStore(
+    useCallback((listener: () => void) => subscribeBestScore(game.slug, listener), [game.slug]),
+    () => getBestScore(game.slug),
+    () => getServerBestScoreSnapshot(game.slug)
+  );
+  const nextStage = getNextStage(game.slug, bestScore);
 
   if (featured) {
     return (
@@ -51,7 +61,14 @@ export function ContinuePlayingCard({
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-3 p-5 sm:p-6">
-            <h3 className="text-2xl font-bold sm:text-3xl">{game.title}</h3>
+            <div>
+              <h3 className="text-2xl font-bold sm:text-3xl">{game.title}</h3>
+              {nextStage ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Next goal: {nextStage.label}
+                </p>
+              ) : null}
+            </div>
             <Button
               size="lg"
               className="gap-2 shadow-lg"

@@ -1,41 +1,31 @@
 ---
-description: AI employee operation mode — no PM approval loop
+description: AI employee 24h mode — Sprint17 autonomous execution
 alwaysApply: true
 ---
 
-# AI Operation Mode
+# AI Operation Mode (Sprint17)
 
 ```
-==============================
-AI Operation Mode
+========================================
 PM 응답 전까지 작업 중단 금지
-Epic 완료 시 — Commit · Push · Preview Deploy · QA · Report 자동 수행
-다음 Epic이 준비되어 있으면 자동 진행
-질문 금지
-PM은 매일 오전 08시 결과만 확인한다.
-==============================
+중간보고 · 질문 · 확인 · 승인 요청 금지
+Epic 완료 → Commit → Push → QA → 다음 Epic
+Blocker → 대기 금지, 다음 Epic 진행
+오전 08:00 최종 보고만
+========================================
 ```
 
-## Sprint16 FINAL 로드맵 (Epic8→13)
+## Sprint17 — Re:Play 2.0 Core Platform
 
-Epic8 Home Polish → Epic9 Game Detail Final → Epic10 Community Polish → Epic11 Health Dashboard → Epic12 Platform Identity → Epic13 Production Readiness
+Epic1 Lifecycle → Epic2 Multiplayer → Epic3 Live Data → Epic4 Detail 3.0 → Epic5 Social → Epic6 Journey → Epic7 Health → Epic8 AI Pipeline → Epic9 Polish
 
-Sprint17은 Sprint16 100% 완료 후 시작.
+Branch: `content-factory` · Commit: `feat(s17-eN): ...`
 
 ## 금지
 
-- "다음 작업할까요?" / "Epic4 갈까요?" / "이 기능 넣을까요?"
-- 내일 추천 작업 / 로드맵 밖 우선순위 제안
-- Epic 중간보고 · 보고서 작성 후 작업 중단
+- "다음 작업 추천" / "확인해주세요" / "피드백 주세요"
+- Epic 중간보고
 
-## 질문 가능 (P0만)
+## 08:00 보고 형식
 
-- P0 치명적 오류 · DB 구조 변경 · 서비스 방향 완전 변경
-
-## 보고 (Sprint16 FINAL 완료 시)
-
-```
-Sprint16 FINAL · 100% · 서비스 변화 · Before/After · Preview · QA · RC 95+ · Known Issue · 다음 Sprint17
-```
-
-보고서는 상태 기록. 작성 후 STOP 지시 전까지 계속 진행.
+Sprint17 COMPLETE · 진행률 · Epic checklist · 서비스 변화 · QA · Commit · Preview

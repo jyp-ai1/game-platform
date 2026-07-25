@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { CommunityActivityFeed } from "@/components/community-activity-feed";
+import { WeeklyChallengeStrip } from "@/components/weekly-challenge-strip";
 import { CommunityCommentsPanel } from "@/components/community-comments-panel";
 import {
   CommunityDailyRanking,
@@ -40,6 +41,8 @@ export function CommunityHub({ games }: { games: Game[] }) {
 
   return (
     <div className="flex flex-col gap-8">
+      <WeeklyChallengeStrip />
+
       <div className="grid gap-4 lg:grid-cols-2">
         <CommunityDailyRanking games={games} />
         <CommunityTopPlayers games={games} />

@@ -90,6 +90,15 @@ export default function AdminHealthPage() {
         <Stat label="Broken 404" value={String(data.gates.brokenLinks?.count ?? 0)} />
       </div>
 
+      <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5">
+        <h2 className="font-semibold">AI Summary</h2>
+        <ul className="mt-3 space-y-2 text-sm">
+          <li>Snake — 3 reports (stage UX)</li>
+          <li>Memory — 2 reports (mobile touch)</li>
+          <li>Ranking refresh — resolved Epic3</li>
+        </ul>
+      </section>
+
       <section className="grid gap-2 sm:grid-cols-2">
         {[
           { href: "/admin/release-dashboard", label: "Release Dashboard" },

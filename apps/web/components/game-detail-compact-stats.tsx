@@ -1,29 +1,52 @@
 "use client";
 
-import { getBestScore, getDeviceId } from "@game-platform/game-sdk";
+import {
+  getBestScore,
+  getDeviceId,
+  getServerBestScoreSnapshot,
+  subscribeBestScore,
+} from "@game-platform/game-sdk";
 import type { Difficulty } from "@game-platform/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { getStagesForGame } from "@/lib/game-stages";
+import { subscribeLiveData } from "@/lib/live-data-bus";
 import {
   getLeaderboard,
   getMyRank,
   type LeaderboardEntry,
 } from "@/lib/supabase/scores";
 
+function useLiveBest(gameSlug: string): number {
+  return useSyncExternalStore(
+    (cb) => {
+      const u1 = subscribeBestScore(gameSlug, cb);
+      const u2 = subscribeLiveData(cb);
+      return () => {
+        u1();
+        u2();
+      };
+    },
+    () => getBestScore(gameSlug),
+    () => getServerBestScoreSnapshot(gameSlug)
+  );
+}
+
 export function GameDetailTop3({ gameSlug }: { gameSlug: string }) {
   const [top3, setTop3] = useState<LeaderboardEntry[] | null>(null);
 
   useEffect(() => {
     let active = true;
-    getLeaderboard(gameSlug, "weekly")
-      .then((entries) => {
+    function load() {
+      getLeaderboard(gameSlug, "weekly").then((entries) => {
         if (active) setTop3(entries.slice(0, 3));
-      })
-      .catch(() => {
-        if (active) setTop3([]);
       });
+    }
+    load();
+    const unsub = subscribeLiveData(load);
     return () => {
       active = false;
+      unsub();
     };
   }, [gameSlug]);
 
@@ -61,18 +84,24 @@ export function GameDetailMyRecord({
   gameSlug: string;
   difficulty: Difficulty;
 }) {
-  const best = getBestScore(gameSlug);
+  const best = useLiveBest(gameSlug);
   const [myRank, setMyRank] = useState<number | null>(null);
+  const stages = getStagesForGame(gameSlug);
 
   useEffect(() => {
     let active = true;
-    getMyRank(gameSlug, getDeviceId(), "weekly")
-      .then((rank) => {
-        if (active) setMyRank(rank);
-      })
-      .catch(() => {});
+    function load() {
+      getMyRank(gameSlug, getDeviceId(), "weekly")
+        .then((rank) => {
+          if (active) setMyRank(rank);
+        })
+        .catch(() => {});
+    }
+    load();
+    const unsub = subscribeLiveData(load);
     return () => {
       active = false;
+      unsub();
     };
   }, [gameSlug]);
 
@@ -92,6 +121,16 @@ export function GameDetailMyRecord({
           </p>
           <p className="text-xs text-muted-foreground">Weekly</p>
         </div>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-1">
+        {stages.slice(0, 4).map((s) => (
+          <span
+            key={s.index}
+            className={`rounded-full px-2 py-0.5 text-xs ${best >= s.target ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}
+          >
+            {s.label}
+          </span>
+        ))}
       </div>
     </div>
   );

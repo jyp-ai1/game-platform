@@ -16,11 +16,13 @@ export {
   getBestScore,
   getDeviceId,
   getLastNickname,
+  getServerBestScoreSnapshot,
   getServerNicknameSnapshot,
   getServerSoundEnabledSnapshot,
   isSoundEnabled,
   setLastNickname,
   setSoundEnabled,
+  subscribeBestScore,
   subscribeNickname,
   subscribeSoundEnabled,
 } from "./local-storage";

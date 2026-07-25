@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { GameDetailTemplate } from "@/components/game-detail-template";
-import { GameDetailSimilar } from "@/components/game-detail-similar";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { selectRelated } from "@/lib/game-sections";
@@ -72,7 +71,6 @@ export default async function GamePage({ params }: GamePageProps) {
         related={related}
         allGames={allGames}
       />
-      <GameDetailSimilar games={allGames} related={related} />
     </>
   );
 }

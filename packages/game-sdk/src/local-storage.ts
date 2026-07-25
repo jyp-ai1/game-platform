@@ -21,9 +21,33 @@ export function getBestScore(gameSlug: string): number {
   return raw ? Number(raw) : 0;
 }
 
+const bestScoreListeners = new Map<string, Set<() => void>>();
+
+function notifyBestScore(gameSlug: string): void {
+  const set = bestScoreListeners.get(gameSlug);
+  if (set) {
+    for (const listener of set) listener();
+  }
+}
+
+export function subscribeBestScore(gameSlug: string, listener: () => void): () => void {
+  let set = bestScoreListeners.get(gameSlug);
+  if (!set) {
+    set = new Set();
+    bestScoreListeners.set(gameSlug, set);
+  }
+  set.add(listener);
+  return () => set!.delete(listener);
+}
+
+export function getServerBestScoreSnapshot(_gameSlug: string): number {
+  return 0;
+}
+
 export function setBestScore(gameSlug: string, score: number): void {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(BEST_SCORE_PREFIX + gameSlug, String(score));
+    notifyBestScore(gameSlug);
   }
 }
 

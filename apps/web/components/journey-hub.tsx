@@ -8,6 +8,7 @@ import { useSyncExternalStore } from "react";
 import { ContinuePlayingCard } from "@/components/continue-playing-card";
 import { GameCard } from "@/components/game-card";
 import { JourneyStatsPanel } from "@/components/journey-stats-panel";
+import { JourneyHeatMap } from "@/components/journey-heat-map";
 import { PlayHistoryTimeline } from "@/components/play-history-timeline";
 import {
   getJourneyProfileSnapshot,
@@ -78,6 +79,10 @@ export function JourneyHub({ games }: { games: Game[] }) {
         <div className="mt-4">
           <JourneyStatsPanel games={games} period="all" />
         </div>
+      </section>
+
+      <section>
+        <JourneyHeatMap />
       </section>
 
       <section>
