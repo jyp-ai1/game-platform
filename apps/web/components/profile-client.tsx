@@ -16,6 +16,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
+import { ProfileIdentityBadges } from "@/components/profile-identity-badges";
 import {
   ProfileQuickLinks,
   ProfileRecentGames,
@@ -58,7 +59,7 @@ export function ProfileClient({ games }: { games: Game[] }) {
     <div className="flex flex-col gap-10">
       <section className="rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-          Game Life Profile
+          Replay Identity
         </p>
         <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -111,8 +112,13 @@ export function ProfileClient({ games }: { games: Game[] }) {
               </div>
             )}
             <p className="mt-2 text-sm text-muted-foreground">
-              내 게임 인생 — 플레이, 성장, 경쟁의 기록
+              Play. Track. Challenge. — 상세 분석은 Journey에서
             </p>
+            {mounted ? (
+              <div className="mt-3">
+                <ProfileIdentityBadges level={levelProgress.level} />
+              </div>
+            ) : null}
             <div className="mt-4">
               <ProfileQuickLinks />
             </div>

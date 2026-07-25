@@ -1,7 +1,7 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { Button, Container, SectionTitle } from "@game-platform/ui";
+import { Button, Container } from "@game-platform/ui";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
@@ -26,29 +26,26 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
     .slice(0, 3);
 
   return (
-    <section className="border-b py-10 sm:py-14">
+    <section className="border-b py-4 sm:py-6">
       <Container>
-        <SectionTitle
-          title="▶ Continue Playing"
-          description="이어서 플레이할 게임 — 내 게임 생활의 중심입니다."
-        />
+        <h2 className="text-base font-semibold sm:text-lg">▶ Continue Playing</h2>
 
         {recentGames.length > 0 ? (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="scrollbar-hide mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 sm:overflow-visible">
             {recentGames.map((game) => (
-              <ContinuePlayingCard key={game.id} game={game} />
+              <div key={game.id} className="w-[min(100%,280px)] shrink-0 snap-start sm:w-auto">
+                <ContinuePlayingCard game={game} />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="mt-6 rounded-2xl border border-dashed bg-card/40 p-8 text-center">
-            <p className="text-lg font-semibold">아직 플레이 기록이 없습니다</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              첫 게임을 시작하면 여기에 이어하기 카드가 표시됩니다.
-            </p>
+          <div className="mt-3 rounded-xl border border-dashed bg-card/40 px-4 py-5 text-center sm:py-6">
+            <p className="text-sm font-medium">첫 게임을 시작해보세요</p>
             <Button
-              className="mt-6"
+              className="mt-3"
+              size="sm"
               nativeButton={false}
-              render={<Link href="/games">첫 게임 시작하기</Link>}
+              render={<Link href="/games">Discover Games</Link>}
             />
           </div>
         )}

@@ -1,31 +1,22 @@
 "use client";
 
 import {
-  getDailyMission,
   getDailyStreak,
   getLevelProgress,
-  getMissionDefinition,
-  getServerDailyMissionSnapshot,
   getServerDailyStreakSnapshot,
   getServerLevelProgressSnapshot,
-  isDailyChallengeComplete,
   subscribeEngagement,
-  subscribeMissions,
 } from "@game-platform/game-sdk";
-import { Container, Progress } from "@game-platform/ui";
-import { Flame, Sparkles, Trophy } from "lucide-react";
+import { Container } from "@game-platform/ui";
+import { Flame, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
 import { useMounted } from "@/lib/use-mounted";
 
+/** Compact growth strip — belongs lower on Home; deep stats live on Journey. */
 export function HomeGrowthPanel() {
   const mounted = useMounted();
-  const mission = useSyncExternalStore(
-    subscribeMissions,
-    getDailyMission,
-    getServerDailyMissionSnapshot
-  );
   const streak = useSyncExternalStore(
     subscribeEngagement,
     getDailyStreak,
@@ -37,66 +28,35 @@ export function HomeGrowthPanel() {
     getServerLevelProgressSnapshot
   );
 
-  const dailyComplete = mission.date ? isDailyChallengeComplete(mission) : false;
-  const dailyXp = mission.missionIds.reduce(
-    (sum, id) => sum + (getMissionDefinition(id)?.xp ?? 0),
-    0
-  );
-
   return (
-    <section className="border-b py-8 sm:py-10">
+    <section className="border-b py-4 sm:py-5">
       <Container>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-medium text-muted-foreground">My Growth</p>
+          <Link href="/journey" className="text-xs text-primary hover:underline">
+            Journey에서 자세히 →
+          </Link>
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 rounded-lg border bg-card/50 px-3 py-2.5 text-sm transition-colors hover:border-primary/40"
+          >
+            <Trophy className="size-4 text-primary" />
+            <span>{mounted ? `Lv.${level.level}` : "Lv.1"}</span>
+          </Link>
           <Link
             href="/journey"
-            className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40"
+            className="flex items-center gap-2 rounded-lg border bg-card/50 px-3 py-2.5 text-sm transition-colors hover:border-primary/40"
           >
-            <div className="flex items-center gap-2 text-primary">
-              <Sparkles className="size-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">오늘의 도전</span>
-            </div>
-            <p className="mt-3 text-lg font-semibold">
-              {mounted && mission.date
-                ? dailyComplete
-                  ? "오늘 미션 완료!"
-                  : `미션 ${mission.completed.length}/${mission.missionIds.length}`
-                : "미션 불러오는 중"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {mounted && dailyXp > 0 ? `+${dailyXp} XP 보상` : "플레이하고 XP를 모으세요"}
-            </p>
+            <Flame className="size-4 text-primary" />
+            <span>{mounted ? `${streak.currentStreak}일 streak` : "—"}</span>
           </Link>
-
           <Link
-            href="/profile"
-            className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40"
+            href="/journey"
+            className="col-span-2 flex items-center justify-center gap-2 rounded-lg border border-dashed bg-card/30 px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 sm:col-span-1"
           >
-            <div className="flex items-center gap-2 text-primary">
-              <Trophy className="size-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">내 성장</span>
-            </div>
-            {mounted ? (
-              <>
-                <p className="mt-3 text-lg font-semibold tabular-nums">Lv.{level.level}</p>
-                <Progress value={level.percent} label="레벨 진행률" className="mt-2" />
-              </>
-            ) : (
-              <p className="mt-3 text-lg font-semibold">Lv.1</p>
-            )}
-          </Link>
-
-          <Link
-            href="/profile"
-            className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40"
-          >
-            <div className="flex items-center gap-2 text-primary">
-              <Flame className="size-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">연속 출석</span>
-            </div>
-            <p className="mt-3 text-lg font-semibold tabular-nums">
-              {mounted ? `${streak.currentStreak}일` : "—"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">매일 플레이하고 streak을 유지하세요</p>
+            통계 · 타임라인
           </Link>
         </div>
       </Container>

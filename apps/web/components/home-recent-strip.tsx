@@ -1,7 +1,7 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { Container, SectionTitle } from "@game-platform/ui";
+import { Container } from "@game-platform/ui";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
@@ -29,10 +29,10 @@ export function HomeRecentStrip({ games }: { games: Game[] }) {
   }
 
   return (
-    <section className="border-b py-10 sm:py-14">
+    <section className="border-b py-4 sm:py-6">
       <Container>
         <div className="flex items-end justify-between gap-4">
-          <SectionTitle title="🕐 최근 플레이" description="방금 즐긴 게임들입니다." />
+          <h2 className="text-base font-semibold sm:text-lg">🕐 최근 플레이</h2>
           <Link href="/journey" className="text-sm font-medium text-primary hover:underline">
             전체 보기
           </Link>

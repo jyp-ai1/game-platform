@@ -2,18 +2,26 @@
 
 import {
   getLastNickname,
-  getLevelProgress,
-  getServerLevelProgressSnapshot,
   getServerNicknameSnapshot,
-  subscribeEngagement,
   subscribeNickname,
 } from "@game-platform/game-sdk";
 import { Button, Container } from "@game-platform/ui";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
-import { siteConfig } from "@/lib/site-config";
+import {
+  getRecentlyPlayedSnapshot,
+  getServerRecentlyPlayedSnapshot,
+  subscribeRecentlyPlayed,
+} from "@/lib/local-storage";
 import { useMounted } from "@/lib/use-mounted";
+
+function getTimeGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good Morning";
+  if (h < 18) return "Good Afternoon";
+  return "Good Evening";
+}
 
 export function HomeIdentityHero() {
   const mounted = useMounted();
@@ -22,39 +30,43 @@ export function HomeIdentityHero() {
     getLastNickname,
     getServerNicknameSnapshot
   );
-  const level = useSyncExternalStore(
-    subscribeEngagement,
-    getLevelProgress,
-    getServerLevelProgressSnapshot
+  const recentSlugs = useSyncExternalStore(
+    subscribeRecentlyPlayed,
+    getRecentlyPlayedSnapshot,
+    getServerRecentlyPlayedSnapshot
   );
 
-  const greeting = nickname ? `${nickname}님, 다시 플레이할 시간` : "내 게임 생활을 시작하세요";
+  const continueHref =
+    recentSlugs.length > 0 ? `/games/${recentSlugs[0]}` : "/games";
+
+  const headline = mounted
+    ? nickname
+      ? `${nickname}님`
+      : "Welcome Back"
+    : "Welcome Back";
 
   return (
-    <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-background py-10 sm:py-14">
-      <Container className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Re:Play 2.0 · Game Life Platform
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{greeting}</h1>
-          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            {siteConfig.subTagline}
-          </p>
-        </div>
+    <section className="relative overflow-hidden border-b py-5 sm:py-7">
+      <div className="hero-pixel-grid pointer-events-none absolute inset-0 -z-20" />
+      <div className="hero-neon-glow pointer-events-none absolute inset-0 -z-20" />
+      <div className="hero-home-orb pointer-events-none absolute -right-16 -top-16 -z-10 size-48 rounded-full bg-primary/20 blur-3xl sm:size-64" />
+      <div className="hero-home-orb pointer-events-none absolute -bottom-20 -left-10 -z-10 size-40 rounded-full bg-amber-500/10 blur-3xl" />
 
-        <div className="flex flex-wrap items-center gap-3">
-          {mounted ? (
-            <div className="rounded-xl border bg-card/80 px-4 py-3 text-sm backdrop-blur">
-              <p className="text-xs text-muted-foreground">내 레벨</p>
-              <p className="text-xl font-bold tabular-nums">Lv.{level.level}</p>
-            </div>
-          ) : null}
-          <Button nativeButton={false} render={<Link href="/journey">내 여정 보기</Link>} />
+      <Container className="relative">
+        <p className="text-xs font-medium text-primary/90">
+          {mounted ? getTimeGreeting() : "Welcome Back"}
+        </p>
+        <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">{headline}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Play. Track. Challenge.
+        </p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button nativeButton={false} render={<Link href={continueHref}>Continue Playing</Link>} />
           <Button
             variant="outline"
             nativeButton={false}
-            render={<Link href="/games">게임 탐색</Link>}
+            render={<Link href="/games">Discover Games</Link>}
           />
         </div>
       </Container>

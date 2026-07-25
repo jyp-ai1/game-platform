@@ -202,6 +202,13 @@
     .hero-neon-glow {
       animation: none;
     }
+    .hero-home-orb {
+      animation: none;
+    }
+  }
+
+  .hero-home-orb {
+    animation: hero-glow-pulse 8s ease-in-out infinite;
   }
 
   /* CRT feel: faint scanlines + a soft vignette. */

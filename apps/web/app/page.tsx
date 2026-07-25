@@ -2,6 +2,7 @@ import { CategoryLinks } from "@/components/category-links";
 import { CmsBannerStrip } from "@/components/cms-banner-strip";
 import { CmsNoticeBar } from "@/components/cms-notice-bar";
 import { GameCarousel } from "@/components/game-carousel";
+import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
 import { HomeGrowthPanel } from "@/components/home-growth-panel";
 import { HomeIdentityHero } from "@/components/home-identity-hero";
@@ -63,9 +64,9 @@ export default async function Home() {
     <main className="flex flex-1 flex-col">
       <HomeIdentityHero />
       <HomeContinueHub games={games} />
-      <HomeGrowthPanel />
+      <HomeDailyChallengeStrip />
       <HomeRecentStrip games={games} />
-      {rankingEnabled ? <PlayerRankCard games={games} /> : null}
+      <PersonalizedPicksSection games={games} />
 
       {cmsEnabled ? <CmsNoticeBar notices={notices} /> : null}
       {cmsEnabled ? <CmsBannerStrip banners={banners} /> : null}
@@ -94,7 +95,8 @@ export default async function Home() {
       ) : null}
 
       <CategoryLinks />
-      <PersonalizedPicksSection games={games} />
+      <HomeGrowthPanel />
+      {rankingEnabled ? <PlayerRankCard games={games} /> : null}
 
       <GameCarousel
         title="🕹️ Arcade"
