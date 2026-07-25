@@ -7,7 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const OUT_DIR = path.join(REPO, "docs/reports/sprint18");
+const OUT_DIR = path.join(REPO, "docs/reports/sprint19");
 
 const BUG_PATTERNS = [
   { match: /mobile|touch|responsive/i, labels: ["mobile", "ux"], priority: "P1" },
@@ -55,7 +55,8 @@ async function main() {
 
   const output = {
     generatedAt: new Date().toISOString(),
-    sprint: 18,
+    sprint: 19,
+    project: "phoenix",
     pipeline: ["comment", "classify", "issue", "priority", "qa", "draft-pr", "release-note"],
     drafts,
     releaseNote: `# Sprint18 Release Notes\n\n## Fixes\n${releaseNotes.join("\n")}\n\n## Features\n- Universal Game Runtime\n- Stage System 2.0\n- Live Ranking sync\n- Retention Engine (Coins)\n`,

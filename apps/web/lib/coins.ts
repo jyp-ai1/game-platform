@@ -29,6 +29,15 @@ export function addCoins(amount: number): number {
   return next;
 }
 
+export function spendCoins(amount: number): boolean {
+  if (typeof window === "undefined" || amount <= 0) return false;
+  const current = getCoins();
+  if (current < amount) return false;
+  window.localStorage.setItem(COINS_KEY, String(current - amount));
+  notify();
+  return true;
+}
+
 export function subscribeCoins(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);

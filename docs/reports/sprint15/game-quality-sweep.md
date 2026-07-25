@@ -1,6 +1,6 @@
 # Game Quality Sweep — 50 Games
 
-**Generated:** 2026-07-25T03:45:02.110Z  
+**Generated:** 2026-07-25T03:57:58.035Z  
 **Scope:** Static SDK verification (start · finish · save · resume · restart · ranking · analytics)  
 **Runtime errors:** `GameErrorMonitor` in game-player: **ENABLED** (window.onerror · unhandledrejection → analytics `error`)  
 **Result:** **50/50 PASS** · Overall: **PASS**

@@ -39,6 +39,7 @@ export function GamesDiscoveryBrowser({
   const [view, setView] = useState<GameViewFilter>("all");
   const [sort, setSort] = useState<GameSortOption>("popular");
   const [preset, setPreset] = useState<DiscoveryPreset | null>(null);
+  const [mood, setMood] = useState<"all" | "chill" | "intense" | "quick">("all");
   const [query, setQuery] = useState("");
 
   const favorites = useSyncExternalStore(
@@ -55,8 +56,8 @@ export function GamesDiscoveryBrowser({
   const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
 
   const visible = useMemo(
-    () =>
-      discoverGames(
+    () => {
+      let list = discoverGames(
         games,
         category,
         sort,
@@ -66,8 +67,13 @@ export function GamesDiscoveryBrowser({
         view,
         preset,
         resolvedHotSlugs
-      ),
-    [games, category, sort, favorites, recentlyPlayed, query, view, preset, resolvedHotSlugs]
+      );
+      if (mood === "chill") list = list.filter((g) => g.difficulty === "EASY");
+      if (mood === "intense") list = list.filter((g) => g.difficulty === "HARD");
+      if (mood === "quick") list = list.filter((g) => g.category?.slug === "casual" || g.category?.slug === "puzzle");
+      return list;
+    },
+    [games, category, sort, favorites, recentlyPlayed, query, view, preset, resolvedHotSlugs, mood]
   );
 
   function selectPreset(next: DiscoveryPreset) {
@@ -126,6 +132,30 @@ export function GamesDiscoveryBrowser({
               Clear preset
             </Button>
           ) : null}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Mood</p>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              { value: "all", label: "All" },
+              { value: "chill", label: "Chill 🧘" },
+              { value: "intense", label: "Intense 🔥" },
+              { value: "quick", label: "5 Min ⚡" },
+            ] as const
+          ).map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              size="sm"
+              variant={mood === item.value ? "default" : "outline"}
+              onClick={() => setMood(item.value)}
+            >
+              {item.label}
+            </Button>
+          ))}
         </div>
       </div>
 

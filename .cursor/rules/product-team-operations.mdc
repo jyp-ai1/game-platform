@@ -1,31 +1,18 @@
 ---
-description: AI Team Mode — Sprint18 autonomous execution
+description: AI Team Mode — Project Phoenix Sprint19
 alwaysApply: true
 ---
 
-# AI Operation Mode (Sprint18)
+# AI Operation Mode (Project Phoenix / Sprint19)
 
 ```
-========================================
-PM 응답 전까지 작업 중단 금지
-중간보고 · 질문 · 확인 · 승인 요청 금지
-Epic 완료 → Commit → Push → QA → 다음 Epic
-Blocker → 대기 금지, 다음 Epic 진행
+1일 = 프로젝트 하나
+중간보고 · 질문 · 확인 · 승인 금지
+Epic 완료 → QA → Commit → Push → Preview → 다음 Epic
+Blocker → 다음 Epic (Production/DB 위험 Migration만 질문)
 오전 08:00 최종 보고만
-========================================
 ```
 
-## Sprint18 — Re:Play 2.0 Platform Transformation
+Branch: `content-factory` · Commit: `feat(s19-phoenix): ...`
 
-Epic1 Runtime → Epic2 Stages → Epic3 Multiplayer → Epic4 Detail 4.0 → Epic5 Identity → Epic6 Community → Epic7 Live → Epic8 Health → Epic9 AI Ops → Epic10 Retention → Epic11 Polish → Epic12 QA → Epic13 RC2
-
-Branch: `content-factory` · Commit: `feat(s18-eN): ...`
-
-## 금지
-
-- "다음 작업 추천" / "확인해주세요" / "Epic 끝났습니다"
-- Epic 중간보고
-
-## 08:00 보고 형식
-
-Sprint18 COMPLETE · 진행률 · Epic1-13 checklist · Before/After · QA · RC Score · Commit · Preview
+Epic1 Runtime 2.0 → Epic2 50 Games → Epic3 Library → Epic4 Profile → Epic5 Social → Epic6 Community → Epic7 Discover → Epic8 Health → Epic9 Dev Platform → Epic10 Live Ranking → Epic11 Retention → Epic12 Wrapped → Epic13 AI Operator → Epic14 Performance → Epic15 Production RC3

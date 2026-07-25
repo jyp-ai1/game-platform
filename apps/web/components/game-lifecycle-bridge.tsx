@@ -13,6 +13,8 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { getCurrentStage, getNextStage, getStageProgress } from "@/lib/game-stages";
+import { isBossDefeated, getRuntimeConfig } from "@/lib/game-runtime-config";
+import { markCompleted } from "@/lib/library-store";
 import { selectRecommended } from "@/lib/game-sections";
 import { emitLiveScoreUpdate } from "@/lib/live-data-bus";
 import {
@@ -71,6 +73,10 @@ export function GameLifecycleBridge({
   const nextStage = getNextStage(slug, result.score);
   const progress = getStageProgress(slug, result.score);
   const { rewards } = result;
+  const runtime = getRuntimeConfig(slug);
+  const bossBeat = isBossDefeated(slug, result.score);
+
+  if (bossBeat) markCompleted(slug);
 
   return (
     <>
@@ -100,6 +106,12 @@ export function GameLifecycleBridge({
               <p className="text-xs text-muted-foreground">Level</p>
             </div>
           </div>
+
+          {bossBeat && runtime.boss ? (
+            <p className="mt-3 text-center text-sm font-bold text-amber-400">
+              Boss Defeated: {runtime.boss.name}! +{runtime.boss.rewardCoins} bonus coins
+            </p>
+          ) : null}
 
           {rewards.isNewBest ? (
             <p className="mt-3 flex items-center justify-center gap-1 text-sm font-medium text-emerald-400">

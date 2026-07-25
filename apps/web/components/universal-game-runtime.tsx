@@ -1,10 +1,14 @@
 "use client";
 
 import { Button } from "@game-platform/ui";
-import { Loader2, Pause, Play } from "lucide-react";
+import { Loader2, Pause, Play, Sparkles } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-type RuntimePhase = "loading" | "ready" | "playing";
+import { getDifficultyLabel, getRuntimeConfig } from "@/lib/game-runtime-config";
+
+type Phase = "loading" | "ready" | "tutorial" | "playing" | "paused";
+
+const TUTORIAL_SEEN_KEY = "play29:runtime-tutorial-seen";
 
 export function UniversalGameRuntime({
   slug,
@@ -13,21 +17,49 @@ export function UniversalGameRuntime({
   slug: string;
   children: ReactNode;
 }) {
-  const [phase, setPhase] = useState<RuntimePhase>("loading");
+  const config = getRuntimeConfig(slug);
+  const [phase, setPhase] = useState<Phase>("loading");
   const [paused, setPaused] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     setPhase("loading");
     setPaused(false);
-    const t = window.setTimeout(() => setPhase("ready"), 400);
+    const seen = typeof window !== "undefined" && window.localStorage.getItem(`${TUTORIAL_SEEN_KEY}:${slug}`);
+    setShowTutorial(!seen);
+
+    const t = window.setTimeout(() => setPhase(seen ? "ready" : "tutorial"), 400);
     return () => window.clearTimeout(t);
   }, [slug]);
 
+  function finishTutorial() {
+    window.localStorage.setItem(`${TUTORIAL_SEEN_KEY}:${slug}`, "1");
+    setShowTutorial(false);
+    setPhase("ready");
+  }
+
   if (phase === "loading") {
     return (
-      <div className="flex aspect-square w-full max-w-sm flex-col items-center justify-center gap-3 rounded-2xl border border-white/10 bg-muted/30 backdrop-blur">
+      <div className="flex aspect-square w-full max-w-sm flex-col items-center justify-center gap-3 rounded-2xl border border-white/10 bg-muted/30 backdrop-blur animate-in fade-in">
         <Loader2 className="size-8 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-xs text-muted-foreground">{getDifficultyLabel(slug)} · Runtime 2.0</p>
+      </div>
+    );
+  }
+
+  if (phase === "tutorial" && showTutorial) {
+    return (
+      <div className="flex aspect-square w-full max-w-sm flex-col items-center justify-center gap-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/90 p-6 backdrop-blur animate-in fade-in">
+        <Sparkles className="size-8 text-primary" />
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Tutorial</p>
+        <p className="text-center text-sm">{config.tutorialHint}</p>
+        {config.boss ? (
+          <p className="text-xs text-amber-400">Boss: {config.boss.name} @ {config.boss.threshold.toLocaleString()}</p>
+        ) : null}
+        <Button size="sm" onClick={finishTutorial}>
+          Got it — Start
+        </Button>
       </div>
     );
   }
@@ -37,7 +69,7 @@ export function UniversalGameRuntime({
   }
 
   return (
-    <div className="relative">
+    <div className="relative animate-in fade-in">
       {paused ? (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 rounded-2xl bg-background/90 backdrop-blur-sm">
           <Pause className="size-10 text-primary" />
@@ -70,14 +102,14 @@ function ReadyOverlay({ onComplete }: { onComplete: () => void }) {
       onComplete();
       return;
     }
-    const t = window.setTimeout(() => setCount((c) => c - 1), 700);
+    const t = window.setTimeout(() => setCount((c) => c - 1), 600);
     return () => window.clearTimeout(t);
   }, [count, onComplete]);
 
   return (
     <div className="flex aspect-square w-full max-w-sm flex-col items-center justify-center rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/20 to-card/80 backdrop-blur">
       <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Ready</p>
-      <p className="mt-2 text-6xl font-black tabular-nums text-primary">
+      <p className="mt-2 text-6xl font-black tabular-nums text-primary transition-all">
         {count > 0 ? count : "GO!"}
       </p>
     </div>
