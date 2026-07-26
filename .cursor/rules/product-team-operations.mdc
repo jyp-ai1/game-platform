@@ -247,6 +247,302 @@ Product · Viral · Retention · Creator · Technical (Build/Typecheck/Test/E2E/
 
 ## Autonomous Loop
 
-기여 판단 → 구현 → QA → Commit → Push → Preview → 반복
+기여 판단 → 구현 → Commit → Push → Preview Deploy → PM QA → PASS → Production
 
 Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지**
+
+---
+
+## 배포 · QA · 보고 규칙 (고정)
+
+### URL 구분
+
+| URL | 용도 |
+| --- | --- |
+| `https://game29.vercel.app` | **Production** — 사용자용, QA 금지 |
+| `game29-git-content-factory-...` | Branch alias — stale 가능, QA 기준 아님 |
+| `game29-xxxx-jyp-ai1s-projects.vercel.app` | **Deployment Visit** — QA는 항상 이 URL |
+
+### 보고 금지 (중간 보고 전면 금지)
+
+- `구현 완료` / `Typecheck 통과` / `다음 작업` / `다음은...` 등 **중간 진행 보고**
+- 중간 질문 · 중간 승인 요청 · 중간 "다음 작업할까요?"
+
+### Cursor 보고 조건 (10/10 모두 충족 시에만)
+
+1. 코드 수정 완료
+2. Lint / Typecheck / Build 통과
+3. Preview에서 직접 확인 (오류 없이 동작)
+4. Golden Path 전부 통과
+5. 기존 기능 Regression 없음
+6. Known Issue 없음 (있으면 스스로 수정)
+7. Commit 완료
+8. Push 완료
+9. Preview Deploy 완료
+10. 실제 Preview URL에서 재검증 완료
+
+### 최종 보고 형식 (RELEASE REPORT)
+
+```
+=== RELEASE REPORT ===
+
+Git SHA:
+Deployment:
+Preview URL:
+
+HOME          ✅ PASS
+ENTRY         ✅ PASS
+WORLD         ✅ PASS
+PRACTICE FALLBACK ✅ PASS
+REGRESSION    ✅ PASS
+
+Console Error 0
+Known Issue   None
+
+PM Action: Preview URL에서 ① Home ② 바로 참가 ③ 3분 플레이 확인
+```
+
+**Cursor는 Commit → Push → Preview Deploy → Visit URL 검증까지 자율 수행.**  
+**Production 배포는 Stage 1 PM QA PASS 전 금지.**
+
+### P0-2 Golden Path Recovery (현재 Sprint)
+
+- **Branch:** `content-factory`
+- **Target:** `490b8ad` (`GameSDKProvider` · Practice fallback · `[ENTRY]` logs)
+- **목표:** Home → 바로 참가 → WORLD → 3분 → 죽음 → Replay (새 기능 금지)
+
+Stage 1 FAIL 시 수정 허용: entry · provider · router · play page · timeout · fallback  
+Stage 1 FAIL 시 수정 금지: Snake Feel · AI · Boss · Balance · UI · Living World
+
+---
+
+## 우선순위 (User Journey Gate)
+
+**판단 기준:** "사용자가 30초 안에 게임을 시작하는가?" (NOT "Snake가 재밌는가?")
+
+```
+P0 Home Recovery  →  P1 Quick Play (3초)  →  P2 WORLD  →  P3 Snake Feel
+```
+
+| P | Gate | DoD |
+| --- | --- | --- |
+| **P0** | Home Recovery | 홈 크래시 없음 · LCP 정상 · Quick Play/Party/Community 진입 |
+| **P1** | Entry | 홈 → 바로 참가 → WORLD · 3초 이내 |
+| **P2** | WORLD + Living World | Canvas · 뱀/BOT · 움직임 · TOP10 · **30초 idle에도 월드가 살아있음** |
+| **P3** | Feel | Snake polish · Playtest |
+
+**Playtest Sprint는 Stage 1 + Stage 1-1 PASS 후에만 시작.**
+
+**Stage 1 PASS 전까지 새 기능 개발 금지** — Golden Path 끊김 수정 · entry crash log만 허용.
+
+### QA 기록
+
+`docs/qa/YYYY-MM-DD-<stage>.md` — Build · Visit URL · PASS/FAIL · Fix Commit
+
+### Stage 1 PASS 후 P1 백로그
+
+| P | 항목 |
+| --- | --- |
+| P1 | WORLD 안정화 (reconnect · disconnect · timeout · latency) |
+| P2 | Living World (AI · event · TOP10) |
+| P3 | Playtest (10→30명 · KPI) |
+| P4 | Snake Feel (숫자만) |
+| P5 | End Flow 확장 (Golf · UNO · Bomber) |
+
+### Entry Crash Analytics
+
+`[ENTRY][FAIL]` → `localStorage` (`play29:entry-crash-log`). Play 페이지 **최근 오류 복사** 또는 `EntryCrashLog.export()`.
+
+---
+
+## QA Sheet (User Journey 중심)
+
+### Stage 0 — Platform Gate ✅ PASS (`f636bcb`)
+
+| 항목 | PASS |
+| --- | --- |
+| 홈 열린다 | ☑ |
+| 오류 없음 | ☑ |
+| Quick Play 보인다 | ☑ |
+| 바로 참가 가능 | ☑ |
+
+→ PASS해야 Stage 1
+
+### Stage 1 — Entry Gate (PM 실기기 QA)
+
+**URL 도달만으로 PASS 아님.** Canvas · in-game 전부 확인.
+
+#### ① 입장
+
+| 항목 | PASS |
+| --- | --- |
+| 3초 안에 게임 시작 | □ |
+| 로딩 멈춤 없음 | □ |
+| 내 뱀 생성 | □ |
+| Canvas 정상 렌더링 | □ |
+
+#### ② 월드 (in-game)
+
+| 항목 | PASS |
+| --- | --- |
+| 움직이는 뱀 많음 | □ |
+| BOT처럼 안 보임 | □ |
+| Kill Feed 계속 흐름 | □ |
+| TOP10 계속 변경 | □ |
+| LIVE HUD 표시 | □ |
+
+#### ③ 플레이
+
+| 항목 | PASS |
+| --- | --- |
+| Boost 정상 | □ |
+| 먹는 손맛 | □ |
+| 죽으면 음식 생성 | □ |
+| 사운드 정상 | □ |
+
+> **AI Fill ≠ Living World.** 50명 존재 ≠ 50명이 살아움직임.
+
+### Stage 1-1 — Living World Gate (Global World DoD)
+
+**30초 가만히 있어도 월드가 살아 움직이는가?**
+
+| 항목 | PASS |
+| --- | --- |
+| Kill Feed 30초 동안 계속 발생 | □ |
+| TOP10 순위 변화 | □ |
+| BOT끼리 교전 | □ |
+| 플레이어 idle여도 월드가 움직임 | □ |
+| Golden Snake 향해 이동 등 이벤트 | □ |
+
+→ PASS해야 "Global World 완성" · Stage 2 진입
+
+### Stage 2 — Gameplay Gate
+
+| 항목 | PASS |
+| --- | --- |
+| 5분 플레이 | □ |
+| 리매치 | □ |
+| Spectator | □ |
+
+### Stage 3 — Retention Gate
+
+| 항목 | PASS |
+| --- | --- |
+| Continue Together | □ |
+| Party Journey | □ |
+| 다음 게임 이동 (Mini Golf) | □ |
+| 홈 안 나감 | □ |
+
+### Golden Path (최우선 QA 시나리오)
+
+```
+Home → Quick Play → WORLD → 5분 플레이 → 죽음 → 리매치 → Mini Golf → 홈 안 나감
+```
+
+**현재 QA URL:** Deployment Visit only (예: `game29-30wnd71mk-jyp-ai1s-projects.vercel.app` @ `f636bcb`)
+
+끊기는 지점 = 다음 P0. Stage 1 PASS 전까지 기능 추가 금지.
+
+---
+
+## Stage 1 Golden Path QA (PM 실기기)
+
+> PM/Cursor는 Preview URL을 **직접 플레이 검증할 수 없음** — 실기기 QA + FAIL 보고로 Stage 1 판정.
+
+### STEP 1 — Home (10초)
+
+| PASS | |
+| --- | --- |
+| ☐ | 홈 2초 안에 열림 |
+| ☐ | `🔥 LIVE Snake.io` 보임 |
+| ☐ | `바로 참가` 보임 |
+| ☐ | 클릭 시 즉시 이동 |
+
+FAIL: 버튼 없음 · 클릭 무응 · 로딩만
+
+### STEP 2 — WORLD 입장 (10초)
+
+| PASS | |
+| --- | --- |
+| ☐ | Canvas 렌더링 |
+| ☐ | 내 뱀 생성 |
+| ☐ | 먹이 생성 |
+| ☐ | HUD 표시 |
+| ☐ | 움직일 수 있다 |
+
+FAIL: Error Boundary · 검은 화면 · Loading 무한
+
+### STEP 3 — Living World (30초 idle)
+
+| PASS | |
+| --- | --- |
+| ☐ | Kill Feed 계속 |
+| ☐ | TOP10 변화 |
+| ☐ | BOT끼리 죽음 |
+| ☐ | 다른 뱀 계속 이동 |
+| ☐ | Golden Snake/Boss/Event |
+
+**하나라도 멈추면 FAIL**
+
+### STEP 4 — Gameplay (2~3분)
+
+| PASS | |
+| --- | --- |
+| ☐ | 먹는 손맛 |
+| ☐ | Boost |
+| ☐ | 킬 |
+| ☐ | 죽음 |
+
+### STEP 5 — End Flow
+
+| PASS | |
+| --- | --- |
+| ☐ | 리매치 |
+| ☐ | Continue Together |
+| ☐ | Party Journey |
+
+### Stage 1 PASS = 5/5 (Home · WORLD · Living · Gameplay · End Flow)
+
+### Stage 1-1 Living World PASS
+
+30초 idle: Kill Feed · TOP10 변화 · BOT 이동 · Event — **4가지 자연스럽게** → PASS
+
+### FAIL 보고 양식 (Cursor 수정용)
+
+```text
+[FAIL]
+
+Stage
+3 (Living World)
+
+시간
+00:18
+
+현상
+Kill Feed가 멈춤
+
+재현
+가만히 30초
+
+스크린샷
+첨부
+
+영상
+15초
+```
+
+```text
+[FAIL]
+
+Stage
+2
+
+현상
+Canvas 로딩 후 Error Boundary
+
+재현
+100%
+
+브라우저
+Chrome
+```

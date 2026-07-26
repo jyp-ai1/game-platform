@@ -11,7 +11,7 @@ import { Button, cn } from "@game-platform/ui";
 import { Users, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { createRoom } from "@/lib/multiplayer-rooms";
 
@@ -26,12 +26,8 @@ export function SnakeMultiplayerEntry({
 }) {
   const router = useRouter();
   const [joining, setJoining] = useState(false);
-  const [liveCount, setLiveCount] = useState(GLOBAL_WORLD_TARGET);
+  const [liveCount] = useState(() => getGlobalWorldStatus("snake").live);
   const [roomCode, setRoomCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLiveCount(getGlobalWorldStatus("snake").live);
-  }, []);
 
   const handleQuickPlay = useCallback(async () => {
     setJoining(true);
@@ -42,7 +38,8 @@ export function SnakeMultiplayerEntry({
       router.push(href);
     } catch (err) {
       entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
-      router.push("/flagship/snake-io/play?room=WORLD");
+      entryLog("PRACTICE_FALLBACK", "quick-play-join-fail");
+      router.push("/flagship/snake-io/play?room=PRACTICE");
     } finally {
       setJoining(false);
     }
@@ -161,10 +158,7 @@ export function SnakeFriendJoinEntry({
 }
 
 export function SnakeLiveBadge() {
-  const [liveCount, setLiveCount] = useState(GLOBAL_WORLD_TARGET);
-  useEffect(() => {
-    setLiveCount(getGlobalWorldStatus("snake").live);
-  }, []);
+  const liveCount = useMemo(() => getGlobalWorldStatus("snake").live, []);
   return (
     <span className="rounded-md bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-950">
       🟢 LIVE · {liveCount}

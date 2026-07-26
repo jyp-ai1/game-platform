@@ -67,7 +67,7 @@ export function ReplayTogetherStrip() {
       const { href } = await quickPlayGlobal("snake");
       router.push(href);
     } catch {
-      router.push("/flagship/snake-io/play?room=WORLD");
+      router.push("/flagship/snake-io/play?room=PRACTICE");
     }
   }
 

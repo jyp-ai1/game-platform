@@ -1,22 +1,23 @@
 import { getDeviceId } from "@game-platform/game-sdk";
 import type { GameRoom } from "@game-platform/shared";
 
+import { recordEntryCrash } from "./entry-crash-log";
 import { createRoom, ensureRoom, getRoom, joinRoomAsync, start } from "./room-client";
+
+export const GLOBAL_WORLD_TARGET = 50;
+export const CLUSTER_SIZE = 50;
+
+const GLOBAL_BASE = "WORLD";
 
 function logEntry(step: string, detail?: string): void {
   if (typeof window === "undefined") return;
   console.info(detail ? `[ENTRY] ${step} — ${detail}` : `[ENTRY] ${step}`);
 }
 
-function logEntryFail(step: string, reason: string): void {
-  if (typeof window === "undefined") return;
+function logEntryFail(step: string, reason: string, room?: string): void {
   console.error(`[ENTRY][FAIL] step: ${step} reason: ${reason}`);
+  recordEntryCrash(step, reason, { room });
 }
-
-export const GLOBAL_WORLD_TARGET = 50;
-export const CLUSTER_SIZE = 50;
-
-const GLOBAL_BASE = "WORLD";
 
 /** Cluster codes: WORLD, WORLD-2, WORLD-3 … */
 export function globalWorldCode(gameSlug: string, clusterIndex = 1): string {
@@ -71,7 +72,7 @@ export async function joinGlobalWorld(gameSlug: string): Promise<GameRoom> {
     logEntry("JOINED", `${code} (already in room)`);
     return room;
   }
-  logEntryFail("JOIN", "Global World full");
+  logEntryFail("JOIN", "Global World full", code);
   throw new Error("Global World full");
 }
 

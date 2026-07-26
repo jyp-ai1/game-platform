@@ -45,6 +45,16 @@ export {
   type GlobalWorldStatus,
 } from "./client/global-world";
 
+export {
+  EntryCrashLog,
+  recordEntryCrash,
+  loadEntryCrashLog,
+  exportEntryCrashLogText,
+  copyEntryCrashLogText,
+  clearEntryCrashLog,
+  type EntryCrashRecord,
+} from "./client/entry-crash-log";
+
 // Lobby / invites
 export {
   getPartyLinkUrl,

@@ -5,6 +5,7 @@ import { ViralLoopResultPanel } from "@/components/viral-loop-result";
 import { GameSDKProvider } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
 import { entryLog, entryLogFail } from "@game-platform/game-snake";
+import { EntryCrashLog, loadEntryCrashLog } from "@game-platform/multiplayer-sdk";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Component, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
@@ -47,7 +48,9 @@ class SnakePlayErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error): void {
-    entryLogFail("RENDER", error.message);
+    entryLogFail("RENDER", error.message, {
+      room: typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("room") ?? undefined : undefined,
+    });
     this.props.onPracticeFallback();
   }
 
@@ -72,7 +75,16 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   useEffect(() => {
     entryLog("PLAY_MOUNTED", practiceMode ? "PRACTICE" : room ?? "no-room");
     entryLog("ROUTE", typeof window !== "undefined" ? window.location.pathname + window.location.search : "");
+    if (typeof window !== "undefined") {
+      (window as Window & { EntryCrashLog?: typeof EntryCrashLog }).EntryCrashLog = EntryCrashLog;
+    }
   }, [practiceMode, room]);
+
+  useEffect(() => {
+    if (practiceMode || room) return;
+    entryLog("PRACTICE_FALLBACK", "no-room-param");
+    router.replace("/flagship/snake-io/play?room=PRACTICE");
+  }, [practiceMode, room, router]);
 
   useEffect(() => {
     function onEnd(e: Event) {
@@ -109,7 +121,42 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   return (
     <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
       <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} />
+      <EntryCrashReporter />
     </SnakePlayErrorBoundary>
+  );
+}
+
+function EntryCrashReporter() {
+  const [msg, setMsg] = useState<string | null>(null);
+  const count = loadEntryCrashLog().length;
+  const show =
+    count > 0 ||
+    (typeof window !== "undefined" && window.location.hostname.includes("vercel.app"));
+
+  const copy = useCallback(async () => {
+    const text = EntryCrashLog.export();
+    try {
+      await navigator.clipboard.writeText(text);
+      setMsg("복사됨");
+    } catch {
+      setMsg(text.slice(0, 200));
+    }
+    setTimeout(() => setMsg(null), 3000);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div className="mt-4 flex flex-col items-center gap-1 text-xs text-muted-foreground">
+      <button
+        type="button"
+        onClick={copy}
+        className="rounded-lg border border-white/15 px-3 py-1.5 hover:border-primary/40"
+      >
+        최근 오류 복사 {count > 0 ? `(${count})` : ""}
+      </button>
+      {msg ? <span>{msg}</span> : null}
+    </div>
   );
 }
 
@@ -117,6 +164,10 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
 export function SnakeIoPlayClient() {
   const params = useSearchParams();
   const practiceMode = params.get("room")?.toUpperCase() === "PRACTICE";
+
+  useEffect(() => {
+    entryLog("PROVIDER_READY");
+  }, []);
 
   return (
     <GameSDKProvider sdk={{ submitScore }}>

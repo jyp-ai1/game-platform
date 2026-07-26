@@ -1,9 +1,21 @@
 # Sprint: Playtest Sprint #1
 
 > **유일한 승인 작업:** Playtest #1~#10 수집 + 매 스프린트 숫자 하나만 조정  
-> **코드 작성 금지** — QA·수치 튜닝만
+> **코드 작성 금지** — QA·수치 튜닝만  
+> **전제:** Stage 1 + Stage 1-1 (Living World) PASS 후 시작. Stage 1 PASS 전까지 새 기능 개발 금지.
 
 ---
+
+## Gate 순서 (Playtest 전)
+
+```
+Stage 0 Platform  ✅ PASS
+Stage 1 Entry     ← PM 실기기 (Canvas · in-game)
+Stage 1-1 Living  ← 30초 idle · Kill Feed · BOT 교전 · TOP10 변화
+Stage 2 Gameplay
+Stage 3 Retention
+→ Playtest Sprint
+```
 
 ## 스프린트 루프 (2~3주)
 

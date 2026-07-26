@@ -1,6 +1,7 @@
 export { SnakeGame } from "./Snake";
 export { SnakeIoGame } from "./SnakeIo";
 export { entryLog, entryLogFail, type EntryStep, type EntryFailStep } from "./snake-entry-log";
+export { EntryCrashLog } from "@game-platform/multiplayer-sdk";
 export {
   buildPartyMemoryLines,
   loadSnakeDayMemory,

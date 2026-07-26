@@ -138,6 +138,7 @@ export function SnakeIoGame({
   const boostingRef = useRef(false);
   const shakeRef = useRef(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const inputLoggedRef = useRef(false);
   const [renderAlpha, setRenderAlpha] = useState(1);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [shake, setShake] = useState(0);
@@ -228,6 +229,13 @@ export function SnakeIoGame({
   }, []);
 
   useEffect(() => {
+    if (practiceMode || roomCode) return;
+    entryLogFail("JOIN", "missing room param");
+    entryLog("PRACTICE_FALLBACK", "empty-room");
+    onJoinTimeout?.();
+  }, [roomCode, practiceMode, onJoinTimeout]);
+
+  useEffect(() => {
     if (!roomCode) return;
     if (practiceMode) {
       entryLog("CONNECTING", "PRACTICE");
@@ -250,7 +258,7 @@ export function SnakeIoGame({
     entryLog("CONNECTING", roomCode);
     const timeout = window.setTimeout(() => {
       if (!active || worldRef.current) return;
-      entryLogFail("TIMEOUT", `join ${roomCode}`);
+      entryLogFail("TIMEOUT", `join ${roomCode}`, { room: roomCode });
       onJoinTimeout?.();
     }, 8000);
     (async () => {
@@ -268,7 +276,7 @@ export function SnakeIoGame({
         Replay.multiplayer.team.create(roomCode, playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party", r.players.map((p) => p.deviceId));
         setConnected(true);
       } catch (err) {
-        entryLogFail("CONNECT", err instanceof Error ? err.message : String(err));
+        entryLogFail("CONNECT", err instanceof Error ? err.message : String(err), { room: roomCode });
         onJoinTimeout?.();
       }
     })();
@@ -494,6 +502,11 @@ export function SnakeIoGame({
 
   const handleDirection = useCallback((direction: Direction) => {
     if (!roomCode || !worldRef.current || isSpectating) return;
+    if (!inputLoggedRef.current) {
+      inputLoggedRef.current = true;
+      entryLog("INPUT", direction);
+      entryLog("GAME_START", roomCode);
+    }
     markFirstMove(roomCode);
     const payload = { deviceId, direction, boosting: boostingRef.current };
     if (isHost) {
