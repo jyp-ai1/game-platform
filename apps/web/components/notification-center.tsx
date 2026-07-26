@@ -2,7 +2,7 @@
 
 import { getDailyStreak } from "@game-platform/game-sdk";
 import Link from "next/link";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 import {
   getNotifications,
@@ -16,7 +16,7 @@ import {
 /** Notification center — action-driving alerts. */
 export function NotificationCenter({ compact = false }: { compact?: boolean }) {
   const unread = useSyncExternalStore(subscribeNotifications, getUnreadCount, () => 0);
-  const items = useSyncExternalStore(subscribeNotifications, () => getNotifications(true), () => []);
+  const items = useMemo(() => getNotifications(true), [unread]);
 
   useEffect(() => {
     const streak = getDailyStreak();
