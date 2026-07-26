@@ -21,7 +21,7 @@ import { Button, cn, ScoreBox } from "@game-platform/ui";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { ReplayMoment } from "@game-platform/shared";
+import type { GameRoom, ReplayMoment } from "@game-platform/shared";
 import {
   applyBlackHolePull,
   applyMatchIdentity,
@@ -150,6 +150,7 @@ export function SnakeIoGame({
   const sessionDeathsRef = useRef<Record<string, number>>({});
   const processedKillsRef = useRef<Set<string>>(new Set());
   const deviceId = getDeviceId();
+  const spawnTimeoutRef = useRef<number | undefined>(undefined);
 
   const room = getRoom(roomCode);
   const isGlobalWorld = isGlobalWorldRoom(roomCode, "snake");
@@ -256,9 +257,9 @@ export function SnakeIoGame({
     }
     let active = true;
     entryLog("CONNECTING", roomCode);
-    const timeout = window.setTimeout(() => {
+    const connectTimeout = window.setTimeout(() => {
       if (!active || worldRef.current) return;
-      entryLogFail("TIMEOUT", `join ${roomCode}`, { room: roomCode });
+      entryLogFail("TIMEOUT", `connect ${roomCode}`, { room: roomCode });
       onJoinTimeout?.();
     }, 8000);
     (async () => {
@@ -268,6 +269,7 @@ export function SnakeIoGame({
         const r = getRoom(roomCode);
         if (!r || !active) return;
         start(roomCode);
+        window.clearTimeout(connectTimeout);
         entryLog("CONNECTED", roomCode);
         entryLog("JOINED");
         startSnakeTelemetry(roomCode, { isGlobalWorld, quickPlay: isGlobalWorld });
@@ -275,23 +277,30 @@ export function SnakeIoGame({
         Replay.multiplayer.analytics.start(roomCode, "snake", r.players.length);
         Replay.multiplayer.team.create(roomCode, playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party", r.players.map((p) => p.deviceId));
         setConnected(true);
+        spawnTimeoutRef.current = window.setTimeout(() => {
+          if (!active || worldRef.current) return;
+          entryLogFail("SPAWN", `world not ready ${roomCode}`, { room: roomCode });
+          onJoinTimeout?.();
+        }, 12_000);
       } catch (err) {
+        window.clearTimeout(connectTimeout);
         entryLogFail("CONNECT", err instanceof Error ? err.message : String(err), { room: roomCode });
         onJoinTimeout?.();
       }
     })();
     return () => {
       active = false;
-      window.clearTimeout(timeout);
+      window.clearTimeout(connectTimeout);
+      if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
     };
   }, [roomCode, playerCount, practiceMode, isGlobalWorld, deviceId, onJoinTimeout]);
 
   useEffect(() => {
     if (!roomCode || !connected || practiceMode) return;
-    const unsub = subscribeRoom(roomCode, (r) => {
+    const applyRoom = (r: GameRoom) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
-      if (state) { worldRef.current = state; setWorld(state); }
-      else if (!worldRef.current && isHost) {
+      if (state) { worldRef.current = state; setWorld(state); return; }
+      if (!worldRef.current && (isHost || isGlobalWorld)) {
         const cfg = Replay.multiplayer.balance("snake", isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length));
         const obj = Replay.multiplayer.objectives.create(Replay.multiplayer.objectives.pick(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
         const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
@@ -313,12 +322,19 @@ export function SnakeIoGame({
         }
         if (isHost) send(roomCode, "state", initial);
       }
-    });
+    };
+    const unsub = subscribeRoom(roomCode, applyRoom);
+    const current = getRoom(roomCode);
+    if (current) applyRoom(current);
     return unsub;
   }, [roomCode, connected, isHost, isGlobalWorld, practiceMode]);
 
   useEffect(() => {
     if (!world) return;
+    if (spawnTimeoutRef.current) {
+      window.clearTimeout(spawnTimeoutRef.current);
+      spawnTimeoutRef.current = undefined;
+    }
     entryLog("SPAWNED");
     entryLog("CANVAS_READY");
     entryLog("GAME_READY", roomCode);

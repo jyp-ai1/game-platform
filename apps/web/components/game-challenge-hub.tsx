@@ -12,7 +12,8 @@ import {
   createChallenge,
   getChallengeShareText,
   getChallengeUrl,
-  getChallengesSnapshot,
+  getChallengesVersion,
+  listChallenges,
   subscribeChallenges,
   type ChallengeSession,
 } from "@/lib/challenge-scores-store";
@@ -22,7 +23,8 @@ import { getFriendsList, searchFriends } from "@/lib/social-store";
 export function GameChallengeHub({ games }: { games: Game[] }) {
   const searchParams = useSearchParams();
   const challengeSlug = searchParams.get("challenge");
-  const challenges = useSyncExternalStore(subscribeChallenges, getChallengesSnapshot, () => []);
+  const challengeVersion = useSyncExternalStore(subscribeChallenges, getChallengesVersion, () => 0);
+  const challenges = useMemo(() => listChallenges(100), [challengeVersion]);
   const friends = getFriendsList();
   const [gameSlug, setGameSlug] = useState(challengeSlug ?? games[0]?.slug ?? "");
   const [friendId, setFriendId] = useState(friends[0]?.id ?? "");

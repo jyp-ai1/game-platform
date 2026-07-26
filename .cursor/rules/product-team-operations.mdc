@@ -263,25 +263,39 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 | `game29-git-content-factory-...` | Branch alias — stale 가능, QA 기준 아님 |
 | `game29-xxxx-jyp-ai1s-projects.vercel.app` | **Deployment Visit** — QA는 항상 이 URL |
 
-### 보고 금지 (중간 보고 전면 금지)
+### Release Rule v2
 
-- `구현 완료` / `Typecheck 통과` / `다음 작업` / `다음은...` 등 **중간 진행 보고**
-- 중간 질문 · 중간 승인 요청 · 중간 "다음 작업할까요?"
+**배포가 Vercel 한도 등으로 불가능해도 개발은 멈추지 않는다.**  
+Preview PASS는 배포 가능한 시점에만 진행한다.
 
-### Cursor 보고 조건 (10/10 모두 충족 시에만)
+#### READY FOR DEPLOY (9/9 — Preview 제외)
 
-1. 코드 수정 완료
-2. Lint / Typecheck / Build 통과
-3. Preview에서 직접 확인 (오류 없이 동작)
-4. Golden Path 전부 통과
-5. 기존 기능 Regression 없음
-6. Known Issue 없음 (있으면 스스로 수정)
-7. Commit 완료
-8. Push 완료
-9. Preview Deploy 완료
-10. 실제 Preview URL에서 재검증 완료
+1. 코드 수정
+2. Typecheck
+3. Build
+4. Lint (변경 파일)
+5. Regression Test (Playwright)
+6. Golden Path Local Test (Playwright)
+7. Known Issue 제거
+8. Commit
+9. Push
 
-### 최종 보고 형식 (RELEASE REPORT)
+```
+=== READY FOR DEPLOY ===
+
+Git SHA:
+Branch: content-factory
+
+HOME / ENTRY / WORLD / PRACTICE / REGRESSION  (local E2E)
+Console Error 0
+Known Issue None
+
+PM Action: Vercel Create Deployment → Visit URL → Golden Path → Release Report
+```
+
+#### RELEASE REPORT (Preview 배포 가능 시 — 10/10)
+
+1–9 위와 동일 + **10. Preview URL 재검증**
 
 ```
 === RELEASE REPORT ===
@@ -302,8 +316,12 @@ Known Issue   None
 PM Action: Preview URL에서 ① Home ② 바로 참가 ③ 3분 플레이 확인
 ```
 
-**Cursor는 Commit → Push → Preview Deploy → Visit URL 검증까지 자율 수행.**  
 **Production 배포는 Stage 1 PM QA PASS 전 금지.**
+
+### 보고 금지 (중간 보고 전면 금지)
+
+- `구현 완료` / `Typecheck 통과` / `다음 작업` / `다음은...` 등 **중간 진행 보고**
+- 중간 질문 · 중간 승인 요청 · 중간 "다음 작업할까요?"
 
 ### P0-2 Golden Path Recovery (현재 Sprint)
 

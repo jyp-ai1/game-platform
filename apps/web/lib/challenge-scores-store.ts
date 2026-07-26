@@ -21,8 +21,10 @@ export interface ChallengeSession {
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
+let challengeVersion = 0;
 
 function notify(): void {
+  challengeVersion += 1;
   for (const l of listeners) l();
 }
 
@@ -128,4 +130,8 @@ export function subscribeChallenges(listener: Listener): () => void {
 
 export function getChallengesSnapshot(): ChallengeSession[] {
   return readAll();
+}
+
+export function getChallengesVersion(): number {
+  return challengeVersion;
 }

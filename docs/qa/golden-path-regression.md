@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Before** | `490b8ad` — GameSDKProvider fix, initial entry logs |
-| **After** | _(local — not pushed)_ — full ENTRY chain, Practice-only fallback, crash log `commit` field, play `error.tsx` |
+| **After** | _(this commit)_ — Release Rule v2, WORLD spawn fix, Community crash fix, Playwright Golden Path E2E |
 
 ## Changed files
 
