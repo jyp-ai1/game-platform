@@ -18,6 +18,8 @@ import {
 import {
   createRoom,
   joinRoom,
+  joinRoomAsync,
+  ensureRoom,
   leaveRoom,
   send,
   sync,
@@ -25,6 +27,7 @@ import {
   finish,
   spectator,
   replay as reconnectRoom,
+  subscribeRoom,
   getPartyLinkUrl,
   shareRoom,
 } from "@game-platform/multiplayer-sdk";
