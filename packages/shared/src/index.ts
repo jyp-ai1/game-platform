@@ -12,6 +12,16 @@ export type {
   MultiplayerResultPayload,
 } from "./multiplayer";
 export type {
+  BiomeKind,
+  ZoneKind,
+  WeatherKind,
+  DayPhase,
+  BossKind,
+  WorldScaleTier,
+  WorldEnvironment,
+} from "./world";
+export { BOSS_LABELS, BIOME_LABELS } from "./world";
+export type {
   GameProfile,
   BalanceProfile,
   ComputedBalance,

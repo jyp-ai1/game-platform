@@ -2,6 +2,7 @@
 
 import { getDeviceId, useGameSDK, emitGameRetry } from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
+import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
 import {
   buildMultiplayerResult,
@@ -27,6 +28,7 @@ import {
   getSpectatorTarget,
   setInput,
   spawnEventFood,
+  spawnWorldBoss,
   tickWorld,
   type Direction,
   type SnakeIoWorld,
@@ -76,6 +78,10 @@ export function SnakeIoGame() {
   const activeEvent = world?.events[0];
 
   useEffect(() => {
+    Replay.Engine.enable({ gameSlug: "snake", multiplayer: true, party: true });
+  }, []);
+
+  useEffect(() => {
     if (!roomCode) return;
     let active = true;
     (async () => {
@@ -119,13 +125,32 @@ export function SnakeIoGame() {
       if (!worldRef.current) return;
 
       const before = structuredClone(worldRef.current);
-      let next = tickWorld(structuredClone(worldRef.current));
+      let next = structuredClone(worldRef.current);
+      next.config = {
+        ...next.config,
+        environment: EnvironmentEngine.resolve(playerCount, next.tick + 1),
+      };
 
       if (ux.events) {
         next.events = ExperienceEngine.events.expire(next.events);
+        next.expMultiplier = next.events.some((e) => e.kind === "double_exp") ? 2 : 1;
+      }
+
+      next = tickWorld(next);
+
+      if (ux.events) {
         const evt = ExperienceEngine.events.roll(playerCount, next.config.worldSize, next.tick, next.events);
-        if (evt) { next.events = [evt, ...next.events]; spawnEventFood(next, evt); }
+        if (evt) {
+          next.events = [evt, ...next.events];
+          spawnEventFood(next, evt);
+          if (evt.kind === "boss_spawn") spawnWorldBoss(next);
+        }
         for (const e of next.events) applyBlackHolePull(next, e);
+      }
+
+      if (before.boss && !before.boss.defeated && next.boss?.defeated) {
+        const m = Replay.multiplayer.moments.capture("comeback", deviceId, next.boss.label, next.tick, { boss: true });
+        next.moments = [m, ...next.moments].slice(0, 5);
       }
 
       const deaths = Object.keys(next.snakes).length;
@@ -236,12 +261,20 @@ export function SnakeIoGame() {
           className="relative overflow-hidden rounded-xl border border-white/10"
           style={{ width: 480, height: 480, backgroundColor: seasonStyle.bg }}
         >
-          <div className="absolute left-2 top-2 z-10 rounded bg-black/40 px-2 py-0.5 text-[10px] text-white">
-            {seasonStyle.label} · {stage.name}
-          </div>
+        <div className="absolute left-2 top-2 z-10 rounded bg-black/40 px-2 py-0.5 text-[10px] text-white">
+          {seasonStyle.label} · {balance.environment.weather} · {balance.environment.dayPhase} · {balance.environment.scaleTier}
+        </div>
           <div className="absolute origin-top-left" style={{ width: worldSize * cellSize, height: worldSize * cellSize, transform: `translate(${-camX}px, ${-camY}px)` }}>
             {world.features.map((f, i) => (
-              <div key={i} className={cn("absolute opacity-40", f.type === "river" && "bg-sky-500/30", f.type === "wall" && "bg-stone-600/50", f.type === "boss_zone" && "border-2 border-dashed border-amber-400/40")}
+              <div key={i} className={cn("absolute opacity-40",
+                f.type === "river" && "bg-sky-500/30",
+                f.type === "wall" && "bg-stone-600/50",
+                (f.type === "boss_zone" || f.type === "danger_zone") && "border-2 border-dashed border-amber-400/40",
+                f.type === "safe_zone" && "border border-emerald-400/30 bg-emerald-500/10",
+                f.type === "treasure_zone" && "border border-yellow-400/40 bg-yellow-500/10",
+                f.type === "fog_zone" && "bg-slate-500/20",
+                f.type === "biome" && "border border-white/10"
+              )}
                 style={{ left: f.x * cellSize, top: f.y * cellSize, width: (f.w ?? 1) * cellSize, height: (f.h ?? 1) * cellSize }} />
             ))}
             {world.events.map((e) => (
@@ -252,6 +285,15 @@ export function SnakeIoGame() {
               <div key={i} className={cn("absolute rounded-full", f.kind !== "normal" && "ring-2 ring-white/40 animate-pulse")}
                 style={{ left: f.x * cellSize, top: f.y * cellSize, width: cellSize - 1, height: cellSize - 1, backgroundColor: FOOD_COLORS[f.kind] ?? FOOD_COLORS.normal }} />
             ))}
+            {world.boss && !world.boss.defeated ? (
+              <div className="absolute flex flex-col items-center" style={{ left: (world.boss.x - 2) * cellSize, top: (world.boss.y - 2) * cellSize, width: cellSize * 5, height: cellSize * 5 }}>
+                <div className="absolute inset-0 animate-pulse rounded-full border-4 border-red-500/60 bg-red-500/20" />
+                <div className="absolute -top-4 left-0 right-0 text-center text-[9px] font-bold text-red-300">{world.boss.label}</div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 overflow-hidden rounded bg-black/50">
+                  <div className="h-full bg-red-500 transition-all" style={{ width: `${(world.boss.hp / world.boss.maxHp) * 100}%` }} />
+                </div>
+              </div>
+            ) : null}
             {Object.values(world.snakes).map((snake) => snake.segments.map((seg, i) => (
               <div key={`${snake.deviceId}-${i}`} className={cn("absolute rounded-[1px]", (!snake.alive || snake.spectating) && "opacity-25")}
                 style={{ left: seg.x * cellSize, top: seg.y * cellSize, width: cellSize - 1, height: cellSize - 1, backgroundColor: i === 0 ? snake.color : `${snake.color}99`, boxShadow: snake.invincibleUntil && Date.now() < snake.invincibleUntil ? "0 0 8px white" : undefined }} />

@@ -5,7 +5,14 @@ export type WorldEventKind =
   | "meteor_shower"
   | "black_hole"
   | "boss_snake"
-  | "treasure_chest";
+  | "treasure_chest"
+  | "double_exp"
+  | "food_storm"
+  | "portal_open"
+  | "boss_spawn"
+  | "team_battle"
+  | "survival"
+  | "treasure_rain";
 
 export interface WorldEvent {
   id: string;

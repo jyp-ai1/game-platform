@@ -12,6 +12,13 @@ const EVENT_CONFIG: Record<
   black_hole: { durationMs: 15_000, radius: 5, minPlayers: 8 },
   boss_snake: { durationMs: 45_000, radius: 6, minPlayers: 8 },
   treasure_chest: { durationMs: 20_000, radius: 2, minPlayers: 2 },
+  double_exp: { durationMs: 30_000, radius: 10, minPlayers: 4 },
+  food_storm: { durationMs: 20_000, radius: 12, minPlayers: 8 },
+  portal_open: { durationMs: 25_000, radius: 4, minPlayers: 4 },
+  boss_spawn: { durationMs: 60_000, radius: 8, minPlayers: 10 },
+  team_battle: { durationMs: 40_000, radius: 15, minPlayers: 16 },
+  survival: { durationMs: 90_000, radius: 20, minPlayers: 20 },
+  treasure_rain: { durationMs: 22_000, radius: 14, minPlayers: 8 },
 };
 
 export function rollWorldEvent(
@@ -60,6 +67,13 @@ export function eventLabel(kind: WorldEventKind): string {
     black_hole: "Black Hole — 위험 + 대보상",
     boss_snake: "Boss Snake — 협동 처치",
     treasure_chest: "Treasure Chest — 랜덤 버프",
+    double_exp: "Double EXP — 2배 경험치",
+    food_storm: "Food Storm — 먹이 폭풍",
+    portal_open: "Portal Open — 순간이동",
+    boss_spawn: "Boss Spawn — 전원 협동",
+    team_battle: "Team Battle — 팀 대전",
+    survival: "Survival — 최후 1인",
+    treasure_rain: "Treasure Rain — 보물 비",
   };
   return labels[kind];
 }

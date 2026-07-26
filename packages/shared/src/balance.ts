@@ -1,5 +1,6 @@
 /** Universal Multiplayer Balance — shared types. */
 import type { PlayModes } from "./social";
+import type { WorldEnvironment } from "./world";
 
 export interface GameProfile {
   gameSlug: string;
@@ -69,11 +70,22 @@ export interface ComputedBalance {
   bossEventsEnabled: boolean;
   dynamicEventsEnabled: boolean;
   spectatorEnabled: boolean;
+  environment: WorldEnvironment;
   features: WorldFeature[];
   viewportCells: number;
 }
 
-export type WorldFeatureType = "river" | "wall" | "portal" | "biome" | "boss_zone";
+export type WorldFeatureType =
+  | "river"
+  | "wall"
+  | "portal"
+  | "biome"
+  | "boss_zone"
+  | "safe_zone"
+  | "danger_zone"
+  | "treasure_zone"
+  | "fog_zone"
+  | "portal_zone";
 
 export interface WorldFeature {
   type: WorldFeatureType;

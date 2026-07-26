@@ -34,6 +34,7 @@ import {
 import { BalanceEngine, balanceFor } from "@game-platform/replay-engine/balance";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { PartyEngine, FriendsEngine, RecommendEngine, ViralLoopEngine, PartyMissionEngine, PartyJourneyEngine, RankingEngine, PartyVoiceEngine, ActivityEngine } from "@game-platform/replay-engine/social";
+import { enableEngine } from "@game-platform/replay-engine/engine";
 
 export interface ReplayInitOptions {
   gameSlug: string;
@@ -44,9 +45,9 @@ let _initialized = false;
 let _gameSlug = "";
 
 function init(options: ReplayInitOptions): void {
+  enableEngine({ gameSlug: options.gameSlug, categorySlug: options.categorySlug });
   _initialized = true;
   _gameSlug = options.gameSlug;
-  recordSessionStart(options.gameSlug, options.categorySlug ?? null);
 }
 
 function score(slug: string, value: number): void {
@@ -227,8 +228,16 @@ const ai = { prompt: async (_text: string) => ({ response: "" }) };
 const share = { partyLink: getPartyLinkUrl, room: shareRoom };
 const ads = { show: (_p: string) => ({ shown: false }), rewarded: async () => ({ reward: 0 }) };
 
+const Engine = {
+  enable: enableEngine,
+  balance: BalanceEngine,
+  experience: ExperienceEngine,
+};
+
 export const Replay = {
   init,
+  Engine,
+  enable: enableEngine,
   score,
   stage,
   loadStage,

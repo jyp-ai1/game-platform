@@ -1,4 +1,5 @@
 /** Snake.io world engine — balance-aware multi-snake realtime. */
+import { BossEngine, type BossEncounter } from "@game-platform/replay-engine/balance";
 import type { ActivePowerUp, ComputedBalance, FoodKind, MatchObjective, ReplayMoment, WorldEvent, WorldFeature } from "@game-platform/shared";
 
 export type Direction = "up" | "down" | "left" | "right";
@@ -40,6 +41,8 @@ export interface SnakeIoWorld {
   features: WorldFeature[];
   rankings: { deviceId: string; nickname: string; score: number }[];
   bossSpawned?: boolean;
+  boss?: BossEncounter;
+  expMultiplier?: number;
   events: WorldEvent[];
   objective: MatchObjective;
   moments: ReplayMoment[];
@@ -100,18 +103,33 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
   }
 }
 
-function spawnBossFood(world: SnakeIoWorld): void {
-  if (world.bossSpawned || !world.config.bossEventsEnabled) return;
-  const mid = Math.floor(world.config.worldSize / 2);
-  const bosses: FoodItem[] = [
-    { x: mid, y: mid, kind: "golden_apple", value: 50 },
-    { x: mid + 2, y: mid, kind: "meteor", value: 30 },
-    { x: mid - 2, y: mid, kind: "black_hole", value: 40 },
-  ];
-  for (const b of bosses) {
-    if (!occupied(world, b)) world.food.push(b);
-  }
+function spawnWorldBoss(world: SnakeIoWorld): void {
+  if (world.boss || world.bossSpawned || !world.config.bossEventsEnabled) return;
+  const kind = world.config.environment.activeBoss;
+  if (!kind) return;
+  world.boss = BossEngine.spawn(kind, world.config.worldSize);
   world.bossSpawned = true;
+}
+
+function tickBoss(world: SnakeIoWorld): void {
+  if (!world.boss || world.boss.defeated) return;
+  for (const snake of Object.values(world.snakes)) {
+    if (!snake.alive || !snake.segments[0]) continue;
+    const head = snake.segments[0];
+    const dist = Math.hypot(head.x - world.boss!.x, head.y - world.boss!.y);
+    if (dist <= 10 && world.tick % 20 === 0) {
+      const boss = world.boss;
+      world.boss = BossEngine.damage(boss, 8);
+      if (world.boss.defeated) {
+        const playerCount = Object.keys(world.snakes).length;
+        const reward = BossEngine.reward(world.boss, playerCount);
+        for (const s of Object.values(world.snakes)) {
+          if (s.alive) s.score += reward.xp;
+        }
+      }
+      break;
+    }
+  }
 }
 
 function enemyPositions(world: SnakeIoWorld, excludeId: string): Vec[] {
@@ -187,7 +205,7 @@ export function createInitialWorld(
     world.snakes[p.deviceId] = createSnake(p.deviceId, p.nickname, i, world);
   });
   spawnFoodItems(world, config.foodCount);
-  spawnBossFood(world);
+  spawnWorldBoss(world);
   updateRankings(world);
   return world;
 }
@@ -277,7 +295,7 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     if (foodIdx >= 0) {
       const food = world.food[foodIdx]!;
       world.food.splice(foodIdx, 1);
-      let mult = world.config.rewardRate;
+      let mult = world.config.rewardRate * (world.expMultiplier ?? 1);
       if (food.kind === "golden_apple") mult *= 5;
       if (snake.powerUp?.kind === "double_score") mult *= 2;
       snake.score += Math.round(food.value * mult);
@@ -287,6 +305,7 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     }
   }
 
+  tickBoss(world);
   updateRankings(world);
   return world;
 }
@@ -318,10 +337,23 @@ export function spawnEventFood(world: SnakeIoWorld, event: WorldEvent): void {
     black_hole: "black_hole",
     boss_snake: "golden_apple",
     treasure_chest: "normal",
+    double_exp: "golden_apple",
+    food_storm: "normal",
+    treasure_rain: "golden_apple",
+    boss_spawn: "golden_apple",
+    team_battle: "normal",
+    survival: "meteor",
+    portal_open: "normal",
   };
   const kind = kindMap[event.kind] ?? "normal";
-  const value = event.kind === "golden_apple" ? 50 : event.kind === "boss_snake" ? 40 : 25;
-  for (let i = 0; i < (event.kind === "meteor_shower" ? 5 : 3); i++) {
+  const value = event.kind === "golden_apple" || event.kind === "double_exp" ? 50
+    : event.kind === "boss_snake" || event.kind === "boss_spawn" ? 40
+    : event.kind === "treasure_rain" ? 35 : 25;
+  const count = event.kind === "meteor_shower" ? 5
+    : event.kind === "food_storm" ? 24
+    : event.kind === "treasure_rain" ? 18
+    : event.kind === "team_battle" ? 12 : 3;
+  for (let i = 0; i < count; i++) {
     const x = event.x + Math.floor(Math.random() * event.radius * 2) - event.radius;
     const y = event.y + Math.floor(Math.random() * event.radius * 2) - event.radius;
     if (!occupied(world, { x, y }) && !isBlocked(world, { x, y })) {
@@ -344,6 +376,7 @@ export function applyBlackHolePull(world: SnakeIoWorld, event: WorldEvent): void
   }
 }
 
+export { spawnWorldBoss };
 export function getDeathPosition(snake: SnakeEntity): Vec | null {
   return snake.segments[0] ?? null;
 }

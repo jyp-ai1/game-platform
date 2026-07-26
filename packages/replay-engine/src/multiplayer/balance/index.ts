@@ -14,7 +14,12 @@ import {
   recordRespawn,
   startMatchAnalytics,
 } from "./analytics";
+export { BossEngine } from "./boss";
+export type { BossEncounter } from "./boss";
+export { EnvironmentEngine } from "./environment";
+import { BossEngine } from "./boss";
 import { computeBalance } from "./compute";
+import { EnvironmentEngine } from "./environment";
 import { buildHeatmap, summarizeHeatmap } from "./heatmap";
 import {
   getBalanceProfile,
@@ -67,6 +72,8 @@ export const BalanceEngine = {
   },
   heatmap: { build: buildHeatmap, summarize: summarizeHeatmap },
   ai: { recommend: recommendBalance },
+  environment: EnvironmentEngine,
+  boss: BossEngine,
 };
 
 export {

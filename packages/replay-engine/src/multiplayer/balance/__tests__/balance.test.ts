@@ -13,11 +13,26 @@ describe("Universal Balance Engine", () => {
     assert.ok(b.spawnShieldMs >= 3000);
   });
 
-  it("2P — 180x180 duel", () => {
+  it("2P — 200x200 duel", () => {
     const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 2);
-    assert.equal(b.worldSize, 180);
+    assert.equal(b.worldSize, 200);
     assert.equal(b.matchType, "duel");
     assert.ok(b.antiCampEnabled);
+    assert.equal(b.environment.scaleTier, "duel");
+  });
+
+  it("50P — mega world", () => {
+    const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 50);
+    assert.equal(b.worldSize, 1400);
+    assert.equal(b.environment.scaleTier, "mega_world");
+    assert.ok(b.environment.biomes.includes("sky"));
+  });
+
+  it("100P — world event", () => {
+    const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 100);
+    assert.equal(b.worldSize, 2000);
+    assert.equal(b.environment.scaleTier, "world_event");
+    assert.equal(b.environment.activeBoss, "dragon");
   });
 
   it("20P — 900x900 festival", () => {

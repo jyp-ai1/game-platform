@@ -1,81 +1,81 @@
 ---
-description: Project Phoenix — Browser Game Ecosystem (FINAL MASTER TASK)
+description: Project Phoenix vNext — Browser Game Ecosystem Complete Edition
 alwaysApply: true
 ---
 
-# Project Phoenix — Browser Game Ecosystem
+# Project Phoenix Master Task vNext
 
-## FINAL MASTER TASK
+## Browser Game Ecosystem Complete Edition
 
-**종료조건** — 아래 6문항 모두 YES까지 중간보고 없이 개발. 08:00 Daily Report만.
+**최종 목표:** The Operating System for Browser Games
+
+> 누구나 게임을 만들고 · 친구와 플레이하고 · 성장하며 · 게임이 계속 올라오는 생태계
+
+**경쟁 상대:** Roblox · Steam Workshop · Fortnite Creative (NOT Slither.io / Poki)
+
+**판단 기준:** 생태계 성장에 기여하지 않는 기능은 추가하지 않는다.
+
+---
+
+## 개발 우선순위
 
 ```
-친구 때문에 들어오는가?
-게임 때문에 머무는가?
-매일 이유가 생기는가?
-새 게임이 계속 올라오는가?
-개발자가 계속 만들고 싶은가?
-운영자가 5분 안에 운영 가능한가?
+P0 Platform Core → P1 Flagship MP → P2 Creator → P3 Growth/Viral → P4 Business → P5 AI → P6 Production
 ```
 
-NO → `설계 → 구현 → QA → Commit → Push → Preview → 분석 → 반복`
+---
 
-P0(Blocker)만 중단.
+## P0 — Browser Game Engine
+
+SDK가 아닌 **Browser Game Engine**. 게임은 `Replay.Engine.enable()` 끝.
+
+Runtime · Save · Reward · Identity · Mission · Collection · Party · Friends · Voice · Tournament · Matchmaking · Balance · Moment · Leaderboard · AI Director · Analytics
 
 ---
 
-## 목표
+## P1 — Flagship Multiplayer (Snake.io)
 
-Browser Game **Steam × Roblox Creator × Discord Party × Slither.io Multiplayer**
+Slither + Agar + Brawl Stars + Fall Guys + Among Us + Vampire Survivors (좋은 점만)
 
----
-
-## Priority (순서 고정)
-
-| P | 영역 | 핵심 |
-|---|------|------|
-| **1** | Flagship Multiplayer | Snake — Dynamic Map, Safe Spawn, Dynamic World, Match Types, Spectator, Replay Moment |
-| **2** | Party Platform | Party 유지 · Continue Together · Voice/Ping/Emoji/QuickChat |
-| **3** | Friends | Best Friend/Rival/Mentor · Activity Feed · Revenge Loop |
-| **4** | Universal Multiplayer | 모든 게임 동일 SDK (Lobby/Result/Ranking/Party/Balance) |
-| **5** | Creator Ecosystem | No-Code · AI Builder · Upload · Creator Page · Remix |
-| **6** | Marketplace | Map/Skin/Music/Template 거래 |
-| **7** | Retention | Daily Gift · Mission · Season · Tournament · Boss |
-| **8** | Identity | Replay Passport 최종형 |
-| **9** | Operations | AI Summary · Broken Games · 5분 운영 |
-| **10** | Performance | 100 games · FPS/Memory/E2E |
-
-**현재 병목: 연결성** — Party·SDK·Snake·Creator는 있으나 "친구 3명 매일" 경험 미완.
+- Biome: Forest · Ice · Lava · Ocean · Sky · Space · City
+- Zone: Safe · Danger · Boss · Treasure · Portal · Fog
+- Weather: Rain · Snow · Meteor · Storm · Night · Wind
+- Day Cycle: Morning · Evening · Night
+- Scale: 1P→100P (20=Festival · 50=Mega · 100=World Event)
+- Boss: Dragon · Kraken · Titan Snake · Meteor Worm · King Food
+- World Events: Golden Apple · Treasure Rain · Meteor · Black Hole · Double EXP · Food Storm · Portal · Boss Spawn · Team Battle · Survival
 
 ---
 
-## Release Gate (매 사이클 — 통과 전 다음 기능 금지)
+## P2–P6 (순서 고정, P0/P1 완성 후)
 
-### Product Gate
-- 30초 내 서비스 이해 · 2클릭 플레이 · 종료 후 다음 행동 · 친구 30초 함께 플레이 · 모바일 동일
+- P2: Universal MP (Golf · UNO · Bomber · Kart…) · Party/Friends/Guild 강화
+- P3: Creator (AI Builder · No-Code · Marketplace · Revenue)
+- P4: Growth (Notification · Calendar · Wrapped)
+- P5: AI Ops (QA · Patch notes · PR Draft)
+- P6: Developer Platform (AI/No-Code/Pro Studio · 승인→Publish)
 
-### Viral Gate
-- 초대/공유/리벤지/파티 유지 이유
+---
 
-### Retention Gate
-- 내일 재방문 이유 · 주간/시즌 목표
+## Definition of Done
 
-### Creator Gate
-- 제작·업로드·AI 지원
+**Player:** 종료→다음행동 · 홈=이유 먼저 · 공통 Engine  
+**Multiplayer:** 2–100P 자동 · Party 유지 · Snake=대표게임  
+**Creator:** AI/No-Code/Pro → Marketplace 원클릭  
+**Ecosystem:** 게임↑=가치↑ · 개발자↑=콘텐츠↑ · 친구↑=재방문↑  
+**Ops:** 5분 운영 · AI QA/패치노트  
+**Business:** 다중 수익모델 · Creator+Platform 수익
 
-### Technical Gate
-- Build · Typecheck · Test · E2E · Console 0 · Hydration 0 · RC ≥ 95
+---
+
+## Release Gate (매 사이클)
+
+Product · Viral · Retention · Creator · Technical (Build/Typecheck/Test/E2E/RC≥95)
 
 ---
 
 ## Autonomous Loop
 
-P gap → 기존 Engine 확장 → QA → Commit → Push → Preview → 반복
+기여 판단 → 구현 → QA → Commit → Push → Preview → 반복
 
-Branch: `content-factory`
-
----
-
-## 08:00 Daily Report
-
-**"무엇을 만들었는지"가 아니라 "제품이 얼마나 좋아졌는지"** — 6문항 YES 진행 · Gate · Wins/Risks · URL · Commit
+Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지**

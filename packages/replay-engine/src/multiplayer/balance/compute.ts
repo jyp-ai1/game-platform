@@ -2,6 +2,7 @@
 import type { BalanceProfile, ComputedBalance, GameProfile, MatchType } from "@game-platform/shared";
 
 import { interpolateMap, resolveMatchType, resolveWorldSize } from "./dynamic-map";
+import { resolveEnvironment } from "./environment";
 
 /** Compute full balance — world size from DYNAMIC_MAP, never hardcoded in games. */
 export function computeBalance(
@@ -10,7 +11,7 @@ export function computeBalance(
   gameProfile?: Pick<GameProfile, "worldScaling" | "dynamicDifficulty">,
   mode?: string
 ): ComputedBalance {
-  const count = Math.max(1, playerCount);
+  const count = Math.max(1, Math.min(100, playerCount));
   const useAbsolute = gameProfile?.worldScaling !== false;
 
   const worldSize = useAbsolute
@@ -57,6 +58,7 @@ export function computeBalance(
     bossEventsEnabled: count >= 4,
     dynamicEventsEnabled: count >= 4,
     spectatorEnabled: count >= 2,
+    environment: resolveEnvironment(count),
     features: [],
     viewportCells: profile.viewportCells ?? Math.min(100, Math.max(60, Math.floor(8000 / worldSize))),
   };
