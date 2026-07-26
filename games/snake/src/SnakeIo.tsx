@@ -23,16 +23,30 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyBlackHolePull,
   createInitialWorld,
+  createScheduledEvent,
   getDeathPosition,
   getMyRank,
   getSpectatorTarget,
+  lerpSegments,
+  setBoost,
   setInput,
   spawnEventFood,
   spawnWorldBoss,
   tickWorld,
   type Direction,
   type SnakeIoWorld,
+  type Vec,
 } from "./snake-io-engine";
+import {
+  playBoostSound,
+  playDeathSound,
+  playEatSound,
+  shakeIntensity,
+  spawnDeathBurst,
+  spawnEatParticles,
+  tickParticles,
+  type Particle,
+} from "./snake-feel";
 
 const DIRECTION_KEYS: Record<string, Direction> = {
   ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
@@ -56,6 +70,15 @@ export function SnakeIoGame() {
   const prevAliveRef = useRef(true);
   const prevRankRef = useRef(99);
   const camRef = useRef({ x: 0, y: 0 });
+  const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
+  const prevWorldRef = useRef<SnakeIoWorld | null>(null);
+  const boostingRef = useRef(false);
+  const shakeRef = useRef(0);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const [renderAlpha, setRenderAlpha] = useState(1);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [shake, setShake] = useState(0);
+  const [cheerMsg, setCheerMsg] = useState<string | null>(null);
   const deviceId = getDeviceId();
 
   const room = getRoom(roomCode);
@@ -126,8 +149,11 @@ export function SnakeIoGame() {
     const tickMs = balance.physicsTickMs;
     const id = setInterval(() => {
       const r = getRoom(roomCode);
-      const input = r?.gameState?.input as { deviceId: string; direction: Direction } | undefined;
-      if (input && worldRef.current) setInput(worldRef.current, input.deviceId, input.direction);
+      const input = r?.gameState?.input as { deviceId: string; direction: Direction; boosting?: boolean } | undefined;
+      if (input && worldRef.current) {
+        setInput(worldRef.current, input.deviceId, input.direction);
+        setBoost(worldRef.current, input.deviceId, !!input.boosting);
+      }
       if (!worldRef.current) return;
 
       const before = structuredClone(worldRef.current);
@@ -150,6 +176,12 @@ export function SnakeIoGame() {
           next.events = [evt, ...next.events];
           spawnEventFood(next, evt);
           if (evt.kind === "boss_spawn") spawnWorldBoss(next);
+        }
+        const scheduled = createScheduledEvent(next, playerCount);
+        if (scheduled) {
+          next.events = [scheduled, ...next.events];
+          spawnEventFood(next, scheduled);
+          if (scheduled.kind === "boss_spawn") spawnWorldBoss(next);
         }
         for (const e of next.events) applyBlackHolePull(next, e);
       }
@@ -211,18 +243,77 @@ export function SnakeIoGame() {
 
   const handleDirection = useCallback((direction: Direction) => {
     if (!roomCode || !worldRef.current || isSpectating) return;
-    if (isHost) setInput(worldRef.current, deviceId, direction);
-    else send(roomCode, "input", { deviceId, direction });
+    const payload = { deviceId, direction, boosting: boostingRef.current };
+    if (isHost) {
+      setInput(worldRef.current, deviceId, direction);
+      setBoost(worldRef.current, deviceId, boostingRef.current);
+    } else {
+      send(roomCode, "input", payload);
+    }
   }, [roomCode, isHost, deviceId, isSpectating]);
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    function onKeyDown(e: KeyboardEvent) {
       const dir = DIRECTION_KEYS[e.key];
-      if (dir) { e.preventDefault(); handleDirection(dir); }
+      if (dir) { e.preventDefault(); handleDirection(dir); return; }
+      if (e.code === "Space" && !isSpectating) {
+        e.preventDefault();
+        if (!boostingRef.current) playBoostSound();
+        boostingRef.current = true;
+        if (isHost && worldRef.current) setBoost(worldRef.current, deviceId, true);
+        else if (roomCode) send(roomCode, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: true });
+      }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [handleDirection]);
+    function onKeyUp(e: KeyboardEvent) {
+      if (e.code === "Space") {
+        boostingRef.current = false;
+        if (isHost && worldRef.current) setBoost(worldRef.current, deviceId, false);
+        else if (roomCode) send(roomCode, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: false });
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, [handleDirection, isSpectating, isHost, deviceId, roomCode]);
+
+  useEffect(() => {
+    if (!world) return;
+    const prev = prevWorldRef.current;
+    if (prev && prev.tick !== world.tick) {
+      prevSegmentsRef.current = Object.fromEntries(
+        Object.entries(prev.snakes).map(([id, s]) => [id, s.segments.map((v) => ({ ...v }))])
+      );
+      setRenderAlpha(0);
+      const me = world.snakes[deviceId];
+      const prevMe = prev.snakes[deviceId];
+      if (prevMe && me && me.score > prevMe.score && me.segments[0]) {
+        playEatSound("normal");
+        setParticles((p) => spawnEatParticles(p, me.segments[0]!.x, me.segments[0]!.y, me.color));
+      }
+      if (prevMe?.alive && !me?.alive && prevMe.segments[0]) {
+        playDeathSound();
+        setParticles((p) => spawnDeathBurst(p, prevMe.segments[0]!.x, prevMe.segments[0]!.y, prevMe.color));
+        shakeRef.current = 8;
+      }
+    }
+    prevWorldRef.current = world;
+  }, [world, deviceId]);
+
+  useEffect(() => {
+    let frame = 0;
+    const loop = () => {
+      setRenderAlpha((a) => Math.min(1, a + 0.22));
+      setParticles((p) => tickParticles(p));
+      shakeRef.current = shakeIntensity(shakeRef.current);
+      setShake(shakeRef.current);
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   async function handleEnd() {
     if (!roomCode || !world) return;
@@ -242,7 +333,8 @@ export function SnakeIoGame() {
   if (!connected || !world) return <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>;
 
   const worldSize = world.config.worldSize;
-  const zoom = world.config.cameraZoom;
+  const isBoosting = mySnake?.boosting && mySnake.alive;
+  const zoom = world.config.cameraZoom * (isBoosting ? 1.12 : 1);
   const cellSize = (480 / (world.config.viewportCells ?? 80)) * zoom;
   const targetCamX = cameraHead ? cameraHead.x * cellSize - 240 : camRef.current.x;
   const targetCamY = cameraHead ? cameraHead.y * cellSize - 240 : camRef.current.y;
@@ -286,11 +378,31 @@ export function SnakeIoGame() {
 
       <div className="relative flex gap-3">
         <div
-          className="relative overflow-hidden rounded-xl border border-white/10"
-          style={{ width: 480, height: 480, backgroundColor: seasonStyle.bg }}
+          className="relative overflow-hidden rounded-xl border border-white/10 touch-none"
+          style={{
+            width: 480,
+            height: 480,
+            backgroundColor: seasonStyle.bg,
+            transform: shake > 0 ? `translate(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px)` : undefined,
+          }}
+          onTouchStart={(e) => {
+            const t = e.touches[0];
+            if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
+          }}
+          onTouchEnd={(e) => {
+            const start = touchStartRef.current;
+            touchStartRef.current = null;
+            const t = e.changedTouches[0];
+            if (!start || !t) return;
+            const dx = t.clientX - start.x;
+            const dy = t.clientY - start.y;
+            if (Math.hypot(dx, dy) < 24) return;
+            const dir: Direction = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+            handleDirection(dir);
+          }}
         >
         <div className="absolute left-2 top-2 z-10 rounded bg-black/40 px-2 py-0.5 text-[10px] text-white">
-          {seasonStyle.label} · {balance.environment.weather} · {balance.environment.dayPhase} · {balance.environment.scaleTier}
+          {seasonStyle.label} · {balance.environment.weather} · {isBoosting ? "⚡ BOOST" : balance.environment.scaleTier}
         </div>
           <div className="absolute origin-top-left" style={{ width: worldSize * cellSize, height: worldSize * cellSize, transform: `translate(${-camX}px, ${-camY}px)` }}>
             {world.features.map((f, i) => (
@@ -322,8 +434,10 @@ export function SnakeIoGame() {
                 </div>
               </div>
             ) : null}
-            {Object.values(world.snakes).map((snake) => snake.segments.map((seg, i) => (
-              <div key={`${snake.deviceId}-${i}`} className={cn("absolute rounded-[1px]", (!snake.alive || snake.spectating) && "opacity-25", i === 0 && "z-10")}
+            {Object.values(world.snakes).map((snake) => {
+              const segs = lerpSegments(prevSegmentsRef.current[snake.deviceId], snake.segments, renderAlpha);
+              return segs.map((seg, i) => (
+              <div key={`${snake.deviceId}-${i}`} className={cn("absolute", (!snake.alive || snake.spectating) && "opacity-25", i === 0 && "z-10")}
                 style={{
                   left: seg.x * cellSize, top: seg.y * cellSize,
                   width: i === 0 ? cellSize : cellSize - 1,
@@ -332,11 +446,29 @@ export function SnakeIoGame() {
                   boxShadow: i === 0
                     ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
                       ? "0 0 10px white"
-                      : `0 0 6px ${snake.color}`
+                      : snake.boosting
+                        ? `0 0 12px ${snake.color}`
+                        : `0 0 6px ${snake.color}`
                     : undefined,
                   borderRadius: i === 0 ? "40%" : "1px",
+                  transition: "box-shadow 0.1s",
                 }} />
-            )))}
+            ));
+            })}
+            {particles.map((p) => (
+              <div
+                key={p.id}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  left: p.x * cellSize,
+                  top: p.y * cellSize,
+                  width: p.size * p.life,
+                  height: p.size * p.life,
+                  backgroundColor: p.color,
+                  opacity: p.life,
+                }}
+              />
+            ))}
           </div>
         </div>
 
@@ -353,6 +485,12 @@ export function SnakeIoGame() {
           </div>
         ) : null}
       </div>
+
+      {cheerMsg ? (
+        <div className="w-full max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/20 px-4 py-2 text-center text-lg font-bold animate-pulse">
+          {cheerMsg}
+        </div>
+      ) : null}
 
       {world.moments.length > 0 ? (
         <div className="w-full max-w-lg rounded-2xl border border-primary/30 bg-primary/10 p-4 text-center">
@@ -387,6 +525,7 @@ export function SnakeIoGame() {
                 <option value="friend">친구 시점</option>
                 <option value="free">자유 카메라</option>
               </select>
+              <Button variant="outline" size="sm" onClick={() => { setCheerMsg("🔥 응원!"); setTimeout(() => setCheerMsg(null), 2000); }}>응원 🔥</Button>
               <Button variant="outline" size="sm" onClick={() => setSpectatorTarget(getSpectatorTarget(world))}>Watch TOP1</Button>
               <Button variant="outline" size="sm" onClick={() => emitGameRetry("snake")}>Retry</Button>
             </>

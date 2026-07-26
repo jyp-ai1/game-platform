@@ -31,6 +31,7 @@ export interface SnakeEntity {
   powerUp?: ActivePowerUp;
   killStreak?: number;
   foodEaten?: number;
+  boosting?: boolean;
 }
 
 export interface SnakeIoWorld {
@@ -226,6 +227,86 @@ export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direc
   snake.pendingDirection = direction;
 }
 
+export function setBoost(world: SnakeIoWorld, deviceId: string, boosting: boolean): void {
+  const snake = world.snakes[deviceId];
+  if (!snake || !snake.alive || snake.spectating) return;
+  snake.boosting = boosting && snake.score >= 5;
+}
+
+function applyFoodMagnet(world: SnakeIoWorld, snake: SnakeEntity): void {
+  if (!snake.alive || !snake.segments[0]) return;
+  const head = snake.segments[0];
+  const radius = snake.boosting ? 3.5 : 2.2;
+  for (const food of world.food) {
+    const dist = Math.hypot(food.x - head.x, food.y - head.y);
+    if (dist <= 0 || dist > radius) continue;
+    const dx = Math.sign(head.x - food.x);
+    const dy = Math.sign(head.y - food.y);
+    if (dx !== 0 || dy !== 0) {
+      const nx = food.x + dx;
+      const ny = food.y + dy;
+      if (!isBlocked(world, { x: nx, y: ny })) {
+        food.x = nx;
+        food.y = ny;
+      }
+    }
+  }
+}
+
+function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): boolean {
+  snake.direction = snake.pendingDirection;
+  const head = snake.segments[0]!;
+  const delta = DELTAS[snake.direction];
+  const next: Vec = { x: head.x + delta.x, y: head.y + delta.y };
+
+  if (isBlocked(world, next)) {
+    killSnake(snake, world.config, world);
+    return false;
+  }
+
+  const foodIdx = world.food.findIndex((f) => f.x === next.x && f.y === next.y);
+  const bodyCheck = foodIdx >= 0 ? snake.segments : snake.segments.slice(0, -1);
+  const hitSelf = bodyCheck.some((s) => s.x === next.x && s.y === next.y);
+  const hitOther = Object.values(world.snakes).some(
+    (other) =>
+      other.alive &&
+      !other.spectating &&
+      other.deviceId !== snake.deviceId &&
+      !(other.invincibleUntil && now < other.invincibleUntil) &&
+      other.segments.some((s) => s.x === next.x && s.y === next.y)
+  );
+
+  if (hitSelf || hitOther) {
+    let killer: SnakeEntity | undefined;
+    if (hitOther) {
+      killer = Object.values(world.snakes).find(
+        (o) => o.alive && o.deviceId !== snake.deviceId &&
+          o.segments.some((s) => s.x === next.x && s.y === next.y)
+      );
+      if (killer) {
+        killer.killStreak = (killer.killStreak ?? 0) + 1;
+        snake.killStreak = 0;
+      }
+    }
+    killSnake(snake, world.config, world, killer);
+    return false;
+  }
+
+  snake.segments = foodIdx >= 0 ? [next, ...snake.segments] : [next, ...snake.segments.slice(0, -1)];
+  if (foodIdx >= 0) {
+    const food = world.food[foodIdx]!;
+    world.food.splice(foodIdx, 1);
+    let mult = world.config.rewardRate * (world.expMultiplier ?? 1);
+    if (food.kind === "golden_apple") mult *= 5;
+    if (snake.powerUp?.kind === "double_score") mult *= 2;
+    snake.score += Math.round(food.value * mult);
+    snake.foodEaten = (snake.foodEaten ?? 0) + 1;
+    world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
+    spawnFoodItems(world, 1);
+  }
+  return true;
+}
+
 function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
   if (snake.segments.length === 0) return;
   const maxFood = Math.floor(world.config.foodCount * 1.8);
@@ -300,56 +381,20 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
       continue;
     }
 
-    snake.direction = snake.pendingDirection;
-    if (snake.invincibleUntil && now < snake.invincibleUntil) continue;
-    const head = snake.segments[0]!;
-    const delta = DELTAS[snake.direction];
-    const next: Vec = { x: head.x + delta.x, y: head.y + delta.y };
-
-    if (isBlocked(world, next)) {
-      killSnake(snake, world.config, world);
+    if (snake.invincibleUntil && now < snake.invincibleUntil) {
+      snake.direction = snake.pendingDirection;
       continue;
     }
 
-    const foodIdx = world.food.findIndex((f) => f.x === next.x && f.y === next.y);
-    const bodyCheck = foodIdx >= 0 ? snake.segments : snake.segments.slice(0, -1);
-    const hitSelf = bodyCheck.some((s) => s.x === next.x && s.y === next.y);
-    const hitOther = Object.values(world.snakes).some(
-      (other) =>
-        other.alive &&
-        !other.spectating &&
-        other.deviceId !== snake.deviceId &&
-        !(other.invincibleUntil && now < other.invincibleUntil) &&
-        other.segments.some((s) => s.x === next.x && s.y === next.y)
-    );
-
-    if (hitSelf || hitOther) {
-      let killer: SnakeEntity | undefined;
-      if (hitOther) {
-        killer = Object.values(world.snakes).find(
-          (o) => o.alive && o.deviceId !== snake.deviceId &&
-            o.segments.some((s) => s.x === next.x && s.y === next.y)
-        );
-        if (killer) {
-          killer.killStreak = (killer.killStreak ?? 0) + 1;
-          snake.killStreak = 0;
-        }
-      }
-      killSnake(snake, world.config, world, killer);
-      continue;
+    applyFoodMagnet(world, snake);
+    const steps = snake.boosting && snake.score >= 5 ? 2 : 1;
+    for (let step = 0; step < steps; step++) {
+      if (!snake.alive) break;
+      moveSnakeOnce(world, snake, now);
     }
-
-    snake.segments = foodIdx >= 0 ? [next, ...snake.segments] : [next, ...snake.segments.slice(0, -1)];
-    if (foodIdx >= 0) {
-      const food = world.food[foodIdx]!;
-      world.food.splice(foodIdx, 1);
-      let mult = world.config.rewardRate * (world.expMultiplier ?? 1);
-      if (food.kind === "golden_apple") mult *= 5;
-      if (snake.powerUp?.kind === "double_score") mult *= 2;
-      snake.score += Math.round(food.value * mult);
-      snake.foodEaten = (snake.foodEaten ?? 0) + 1;
-      world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
-      spawnFoodItems(world, 1);
+    if (snake.boosting && snake.alive) {
+      snake.score = Math.max(0, snake.score - 2);
+      if (snake.score < 5) snake.boosting = false;
     }
   }
 
@@ -425,6 +470,42 @@ export function applyBlackHolePull(world: SnakeIoWorld, event: WorldEvent): void
 }
 
 export { spawnWorldBoss };
+
+/** Force a world event every ~2 min — "이번 판은 다르네" */
+export function createScheduledEvent(world: SnakeIoWorld, playerCount: number): WorldEvent | null {
+  if (playerCount < 2 || world.tick % 1200 !== 0) return null;
+  const pool = ["meteor_shower", "food_storm", "double_exp", "golden_apple", "treasure_rain", "boss_spawn"] as const;
+  const kind = pool[Math.floor(world.tick / 1200) % pool.length]!;
+  const now = Date.now();
+  const w = world.config.worldSize;
+  const cfg: Record<string, { durationMs: number; radius: number }> = {
+    meteor_shower: { durationMs: 18_000, radius: 10 },
+    food_storm: { durationMs: 22_000, radius: 14 },
+    double_exp: { durationMs: 30_000, radius: 12 },
+    golden_apple: { durationMs: 25_000, radius: 3 },
+    treasure_rain: { durationMs: 22_000, radius: 14 },
+    boss_spawn: { durationMs: 60_000, radius: 8 },
+  };
+  const c = cfg[kind] ?? { durationMs: 20_000, radius: 8 };
+  return {
+    id: `sched-${world.tick}`,
+    kind,
+    x: Math.floor(w / 2) + Math.floor(Math.random() * 20 - 10),
+    y: Math.floor(w / 2) + Math.floor(Math.random() * 20 - 10),
+    radius: c.radius,
+    startedAt: now,
+    expiresAt: now + c.durationMs,
+    announced: true,
+  };
+}
+
+export function lerpSegments(prev: Vec[] | undefined, curr: Vec[], alpha: number): Vec[] {
+  return curr.map((c, i) => {
+    const p = prev?.[i] ?? c;
+    return { x: p.x + (c.x - p.x) * alpha, y: p.y + (c.y - p.y) * alpha };
+  });
+}
+
 export function getDeathPosition(snake: SnakeEntity): Vec | null {
   return snake.segments[0] ?? null;
 }

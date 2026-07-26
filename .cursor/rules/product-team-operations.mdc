@@ -46,13 +46,33 @@ P0 Flagship Snake (재미) → P1 Party Experience → P2 Player Home → P3 Cre
 
 ---
 
-## P0 — Flagship Multiplayer Snake (최우선)
+## P0 — Flagship Snake Experience (최우선)
 
-**목표:** Slither.io를 켜야 하는 이유가 없어지는 것. UI가 아니라 **재미**.
+**목표:** Slither 복제가 아니라 **"Replay에서만 가능한 Snake"** — 중독성
 
-손맛 · 이동감 · 충돌감 · 카메라 · 월드 이벤트 · 팀전 · 보스 · 시즌 · 랭킹 · 리벤지 · 관전 · 토너먼트 · Party · Continue Together
+**4축:** 손맛 + 친구 + 목표 + 예측불가능한 이벤트
 
-**DoD:** Quick Match → 친구와 플레이 → 한 판 더 → 친구 초대 → 내일 재방문
+**판단:** "한 판 더 하게 만드는가?" YES만 구현
+
+### P0-1 Snake Feel Polish
+Boost · Magnet · 보간 · 파티클 · 사운드 · Shake · 60fps · 터치
+
+### P0-2 Dynamic World Events
+2분 Meteor · Golden Snake · Boss · Food Rush · Double XP · Portal · Festival
+
+### P0-3 Social Moments
+Triple Kill · Giant Slayer · Revenge · Top1 · Auto Share Card
+
+### P0-4 Spectator 2.0
+TOP1/친구 관전 · 응원 · 즉시 리매치
+
+### P0-5 Dynamic Match Rules
+2P 결투 · 4P 추격 · 8P 보스 · 12P 이벤트 · 20P Festival
+
+### Replay Moments (Replay-only)
+AI 명장면 · 30s GIF · 공유 · 친구 초대
+
+**절대 금지:** Admin · Dashboard · AI PM 화면 · Company 기능
 
 ---
 
