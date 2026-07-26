@@ -8,6 +8,7 @@ import { getPlatformAchievementTitle } from "@/lib/achievement-engine";
 import { getGenreCollections } from "@/lib/collection-engine";
 import { getFriendBeatGap } from "@/lib/replay-identity";
 import type { UniversalRewardBundle } from "@/lib/reward-engine";
+import { getCelebrationMessage } from "@/lib/emotion-engine";
 import {
   getTodayMissionMix,
   getTodayMissionProgress,
@@ -116,6 +117,9 @@ export function GameResultReplayMoment({
     <div className="mt-4 space-y-3">
       <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">Replay Moment</p>
+        <p className="mt-2 text-sm font-medium text-emerald-400">
+          {getCelebrationMessage("game-end", { newBest: rewards.isNewBest ? 1 : 0 })}
+        </p>
         <ul className="mt-3 space-y-3">
           {moments.map((m) => (
             <li key={m.text} className="flex items-start gap-3 text-sm">

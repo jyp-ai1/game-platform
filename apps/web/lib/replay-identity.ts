@@ -10,6 +10,8 @@ import type { Game } from "@game-platform/shared";
 
 import { filterPlayHistory, getPlayHistorySnapshot } from "@/lib/play-history";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
+import { getOverallCollectionPercent } from "@/lib/collection-engine";
+import { getAttendanceStreak } from "@/lib/shop-store";
 import { replayScoreTier } from "@/lib/replay-score";
 
 export interface ReplayIdentityProfile {
@@ -27,6 +29,18 @@ export interface ReplayIdentityProfile {
   playStyle: string;
   topGameSlug: string | null;
   topGameTitle: string | null;
+}
+
+export interface FullReplayIdentity extends ReplayIdentityProfile {
+  displayName: string;
+  badgeLabels: string[];
+  badgeLabelsKo: string[];
+  seasonTier: string;
+  seasonTierKo: string;
+  topPercent: number | null;
+  collectionPercent: number;
+  isCollector: boolean;
+  isExplorer: boolean;
 }
 
 const GENRE_TITLES: Record<string, { en: string; ko: string }> = {
@@ -96,6 +110,73 @@ export function buildReplayIdentityProfile(games: Game[]): ReplayIdentityProfile
     playStyle: wrapped.playStyle,
     topGameSlug: topSlug,
     topGameTitle: topGame?.title ?? topSlug,
+  };
+}
+
+function seasonTierFromStreak(streak: number): { en: string; ko: string } {
+  if (streak >= 30) return { en: "Season Platinum", ko: "Season Platinum" };
+  if (streak >= 14) return { en: "Season Gold", ko: "Season Gold" };
+  if (streak >= 7) return { en: "Season Silver", ko: "Season Silver" };
+  return { en: "Season Bronze", ko: "Season Bronze" };
+}
+
+function estimateTopPercent(replayScore: number): number | null {
+  if (replayScore <= 0) return null;
+  if (replayScore >= 2000) return 1;
+  if (replayScore >= 1200) return 3;
+  if (replayScore >= 800) return 10;
+  if (replayScore >= 400) return 25;
+  return 50;
+}
+
+/** Full identity with badges — profile first screen (Replay OS v4). */
+export function buildFullReplayIdentity(games: Game[], displayName = "Player"): FullReplayIdentity {
+  const base = buildReplayIdentityProfile(games);
+  const collectionPercent = getOverallCollectionPercent(games);
+  const uniqueGames = Object.keys(getGamePlayCounts()).length;
+  const seasonStreak = getAttendanceStreak();
+  const season = seasonTierFromStreak(Math.max(base.streakDays, seasonStreak));
+  const topPercent = estimateTopPercent(base.replayScore);
+
+  const isCollector = collectionPercent >= 40;
+  const isExplorer = uniqueGames >= 8;
+
+  const badgeLabels: string[] = [];
+  const badgeLabelsKo: string[] = [];
+
+  badgeLabels.push(base.title);
+  badgeLabelsKo.push(base.titleKo);
+
+  if (isCollector) {
+    badgeLabels.push("Collector");
+    badgeLabelsKo.push("Collector");
+  }
+  if (isExplorer) {
+    badgeLabels.push("Explorer");
+    badgeLabelsKo.push("Explorer");
+  }
+  if (topPercent !== null && topPercent <= 10) {
+    badgeLabels.push(`Top ${topPercent}%`);
+    badgeLabelsKo.push(`Top ${topPercent}%`);
+  }
+  badgeLabels.push(season.en);
+  badgeLabelsKo.push(season.ko);
+
+  if (base.streakDays >= 3) {
+    badgeLabelsKo.push(`${base.streakDays}일 Streak`);
+  }
+
+  return {
+    ...base,
+    displayName,
+    badgeLabels,
+    badgeLabelsKo,
+    seasonTier: season.en,
+    seasonTierKo: season.ko,
+    topPercent,
+    collectionPercent,
+    isCollector,
+    isExplorer,
   };
 }
 

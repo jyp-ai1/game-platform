@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
 import { buildReplayStoryFeed, type StoryEvent } from "@/lib/replay-story-feed";
+import { emotionalizeStoryEvent } from "@/lib/emotion-engine";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getTodayMissionProgress } from "@/lib/universal-mission-engine";
 import { useMounted } from "@/lib/use-mounted";
@@ -24,7 +25,7 @@ export function JourneyStoryPanel({ games }: { games: Game[] }) {
 
   const events = useMemo(() => {
     if (!mounted) return [];
-    return buildReplayStoryFeed(games, 12);
+    return buildReplayStoryFeed(games, 12).map(emotionalizeStoryEvent);
   }, [games, mounted]);
 
   const mission = mounted ? getTodayMissionProgress() : { done: 0, total: 0, pct: 0 };

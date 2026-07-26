@@ -5,8 +5,10 @@ import { Container } from "@game-platform/ui";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
+import { ReplayIdentityCard } from "@/components/replay-identity-card";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { buildReplayPassport } from "@/lib/replay-loop";
+import { getMemoryFlashes } from "@/lib/memory-engine";
 import { getUnlockedPlatformAchievements } from "@/lib/achievement-engine";
 import { useMounted } from "@/lib/use-mounted";
 
@@ -25,23 +27,38 @@ export function ReplayPassportPanel({ games }: { games: Game[] }) {
     return getUnlockedPlatformAchievements();
   }, [mounted]);
 
+  const memories = useMemo(() => {
+    if (!mounted) return [];
+    return getMemoryFlashes(games, 2);
+  }, [games, mounted]);
+
   if (!mounted || !passport) return null;
 
   return (
-    <Container className="py-8">
-      <div className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-card/80 p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Replay Passport</p>
-        <h1 className="mt-2 text-3xl font-bold">{passport.titleKo}</h1>
-        <p className="text-muted-foreground">{passport.title}</p>
+    <Container className="py-8 space-y-8">
+      <ReplayIdentityCard games={games} />
 
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <PassportStat label="Level" value={`Lv.${passport.level}`} />
-          <PassportStat label="Replay Score" value={String(passport.replayScore)} />
+      {memories.length > 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-card/50 p-5">
+          <h2 className="font-semibold">Memory</h2>
+          <ul className="mt-3 space-y-2">
+            {memories.map((m) => (
+              <li key={m.id}>
+                <Link href={m.href} className="flex items-center gap-2 text-sm hover:text-primary">
+                  <span>{m.emoji}</span>
+                  <span>{m.headline} — {m.detail}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="rounded-3xl border border-white/10 bg-card/60 p-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <PassportStat label="Coins" value={passport.coins.toLocaleString()} />
           <PassportStat label="Collection" value={`${passport.collectionPercent}%`} />
           <PassportStat label="Achievements" value={String(passport.achievementCount)} />
-          <PassportStat label="Streak" value={`${passport.streakDays}d`} />
-          <PassportStat label="Season" value={`Lv.${passport.seasonLevel}`} />
           <PassportStat label="Challenges" value={String(passport.pendingChallenges)} />
         </div>
 
@@ -62,9 +79,6 @@ export function ReplayPassportPanel({ games }: { games: Game[] }) {
                     style={{ width: `${c.percent}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {c.completed}/{c.total} games
-                </p>
               </div>
             ))}
           </div>
@@ -88,16 +102,13 @@ export function ReplayPassportPanel({ games }: { games: Game[] }) {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/journey" className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-            Journey →
+            Timeline →
           </Link>
-          <Link href="/library" className="rounded-xl border px-4 py-2 text-sm">
-            Library →
+          <Link href="/community" className="rounded-xl border px-4 py-2 text-sm">
+            Replay Feed →
           </Link>
           <Link href="/wrapped" className="rounded-xl border px-4 py-2 text-sm">
             Wrapped →
-          </Link>
-          <Link href="/community#challenge" className="rounded-xl border px-4 py-2 text-sm">
-            Challenges →
           </Link>
         </div>
       </div>

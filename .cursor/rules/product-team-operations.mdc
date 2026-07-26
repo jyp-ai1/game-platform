@@ -1,70 +1,49 @@
 ---
-description: Replay OS — complete play loop + off-play engagement until product completion
+description: Replay OS v4 — habit + emotion engines until daily return reason exists
 alwaysApply: true
 ---
 
-# Replay OS — Master Task
+# Replay OS v4 — Master Task
 
-> **Replay를 웹게임의 Steam + Duolingo로 완성한다.** 제품 완성도 기준이 충족될 때까지 설계 → 구현 → QA → Commit → Push → Preview를 반복. **08:00 Daily Report 외 중간 보고 없음.**
+> **Replay를 웹게임의 Steam + Duolingo로 완성한다.** 매일 "내일도 Replay에 들어오고 싶은 이유"를 하나 만든다. **08:00 Daily Report 외 중간 보고 없음.**
 
 ```text
-Observe → Measure → Analyze → Improve → Verify → Release → Repeat
+나 → 내 기록 → 친구 → 내 성장 → 게임
 ```
 
-**종료:** 사용자가 Replay Passport(게임 인생)를 잃기 싫어서 돌아옴
-
-**비전:** Steam Library + Spotify Wrapped + Duolingo Streak
+**종료:** 사용자가 Replay Passport를 잃기 싫어서 매일 돌아옴
 
 Branch: `content-factory` · Live: `https://game29.vercel.app` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Play Cycle (핵심)
+# 4 Engines (v4)
 
-```text
-홈 → 게임 → 결과 → Challenge → Journey → Mission → 다음 게임 → 다음날 복귀
-```
-
-**오프플레이도 설계:** 출석 · 미완 미션 · 도전장 · TOP50 gap
-
----
-
-# Replay Loop (10 modules)
-
-1. **Complete Gameplay Loop** — Loading→Ready→Play→Pause→Result→Reward→Challenge→Continue (100%)
-2. **Universal Mission Engine** — 플랫폼 공통 일일/주간 미션
-3. **Universal Reward Engine** — Coin/XP/Badge/Collection/Replay Score 자동
-4. **Universal Collection** — 장르별 수집 % (Puzzle 32%…)
-5. **Universal Achievement** — 100판/50000점/Stage20 등 공통
-6. **Replay Profile / Passport** — 내 게임 인생 한 장 (Steam Library)
-7. **Social Loop** — 도전→플레이→비교→리벤지
-8. **AI Operations** — 재방문/Mission/Challenge/버그 AI 요약
-9. **Growth Engine** — 미접속/Challenge/Mission 리마인더 구조
-10. **Developer Platform** — 등록→QA→AI→승인→배포
+1. **Habit Engine** — 오늘 목표 · 미션 · 도전 · 보상 · streak at-risk · 잃는 것 시각화
+2. **Emotion Engine** — 축하 · 친구비교 · 승급 · 감정이 숫자보다 먼저
+3. **Memory Engine** — 이번 달 성장 · 대표 게임 · 한 달 전 오늘 · Wrapped 누적
+4. **Network Engine** — Replay Feed · 친구 대기 · 도전 · 리벤지
 
 ---
 
-# 완료 기준 (8가지)
+# 완료 기준 (v4)
 
-- [ ] 게임 후 다음 행동 자연 연결
-- [ ] 모든 게임 공통 Runtime/Result/Reward
-- [ ] Mission/Achievement/Collection 플랫폼 공통
-- [ ] Replay Passport만으로 게임 생활 파악
-- [ ] 친구 경쟁·공유·리벤지 한 흐름
-- [ ] `/admin/operations` 하루 운영 가능
-- [ ] 개발자 등록→QA→배포 한 흐름
-- [ ] 첫인상 "게임 라이프 플랫폼"
+- [ ] 홈 첫 화면이 게임이 아니라 **감정 + Identity**
+- [ ] 게임 종료가 Duolingo급 Replay Moment
+- [ ] Journey/Feed가 **스토리** (통계 아님)
+- [ ] Passport = **Replay Identity** 첫 화면
+- [ ] "내일 돌아올 이유"가 habit engine으로 매일 1개+
 
 ---
 
-# KPI (개발 방향)
+# KPI
 
-DAU · D1 Retention · Session Time · Games/User · Share Rate
+D1 Retention · Session Time · Streak · Share · Replay Score
 
-**기능 추가 중단 — 플레이 사이클 완성만**
+**기능 추가 중단 — 습관·감정·연결만**
 
 ---
 
 # 08:00 Report
 
-완성도 % · KPI · Before/After · Gate · 운영 · Risks · Next Cycle
+내일 돌아올 이유 · 감정 Before/After · Habit 지표 · Risks · Next

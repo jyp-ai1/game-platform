@@ -4,7 +4,8 @@ import type { Game } from "@game-platform/shared";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-import { buildReplayStoryFeed } from "@/lib/replay-story-feed";
+import { emotionalizeStoryEvent } from "@/lib/emotion-engine";
+import { buildReplayFeedItems } from "@/lib/network-engine";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { subscribeChallenges } from "@/lib/challenge-scores-store";
 import { subscribeSocial } from "@/lib/social-store";
@@ -18,6 +19,7 @@ function formatWhen(iso: string): string {
   return `${Math.floor(diff / 86_400_000)}일 전`;
 }
 
+/** Replay Feed — friend activity, not bulletin board (Replay OS v4). */
 export function CommunityActivityFeed({ games }: { games: Game[] }) {
   const mounted = useMounted();
   useSyncExternalStore(subscribeSocial, () => 0, () => 0);
@@ -33,13 +35,13 @@ export function CommunityActivityFeed({ games }: { games: Game[] }) {
   const items = useMemo(() => {
     if (!mounted) return [];
     void tick;
-    return buildReplayStoryFeed(games, 14);
+    return buildReplayFeedItems(games, 14).map(emotionalizeStoryEvent);
   }, [games, mounted, tick]);
 
   return (
     <section className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/60 p-5 backdrop-blur">
-      <h2 className="text-lg font-bold">오늘 Replay 활동</h2>
-      <p className="mt-1 text-sm text-muted-foreground">친구 · 나 · 도전 · 업적</p>
+      <h2 className="text-lg font-bold">Replay Feed</h2>
+      <p className="mt-1 text-sm text-muted-foreground">친구 · 활동 · 반응</p>
       {items.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">활동이 없습니다. 게임을 플레이해보세요.</p>
       ) : (
@@ -53,9 +55,9 @@ export function CommunityActivityFeed({ games }: { games: Game[] }) {
                 <span className="text-lg">{item.emoji}</span>
                 <div className="min-w-0 flex-1">
                   <p>
-                    <span className="font-semibold">{item.actor}</span>{" "}
-                    <span className="text-muted-foreground">{item.headline}</span>
+                    <span className="font-semibold">{item.actor}</span>
                   </p>
+                  <p className="font-medium">{item.headline}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {item.detail} · {formatWhen(item.createdAt)}
                   </p>
