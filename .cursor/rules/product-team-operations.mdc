@@ -1,119 +1,79 @@
 ---
-description: Replay OS v7 — Multiplayer Platform + 7 Engines
+description: Replay OS v8 — Creator Platform (Player + Creator)
 alwaysApply: true
 ---
 
-# Replay OS v7 — Master Task
+# Replay OS v8 — Master Task
 
-> **Replay Multiplayer Platform.** 게임 추가가 아니라 플랫폼 위에 콘텐츠를 올린다.
+> **Player + Creator Platform.** 웹게임판 Steam + Roblox + Scratch + GitHub.
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# 비전
+# 최종 목표
+
+누구나 **만들고 · 올리고 · 플레이하고 · 성장**하는 플랫폼.
 
 ```
-Replay OS
-├── Single Game Engine
-├── Multiplayer SDK      ← NEW
-├── Lobby / Matchmaking
-├── Presence / Spectator
-├── Universal Runtime
-├── Universal Reward
-├── Journey / Passport
-├── Mission Engine
-├── AI Operation
-├── Developer Platform
-└── Live Ops
+Play → Journey → Community → Creator → Studio → Publish → AI QA → Marketplace → Revenue
 ```
 
-**목표:** Steam + Discord + .io — 친구와 함께, 기록이 쌓이고, 운영이 자동화되는 웹게임 플랫폼.
+---
+
+# Nav
+
+Home · Discover · Journey · Community · **Creators** · Passport
 
 ---
 
-# 게임 Tier
+# Creator Platform (13 layers)
 
-| Tier | 유형 | 예시 |
-|------|------|------|
-| Tier1 | Single | Snake, 2048, Memory, Sudoku |
-| Tier2 | Party 2~4P | Mini Golf, Bomber, Kart, Quiz, Drawing |
-| Tier3 | Realtime .io | Slither (Flagship) — SNS 공유 폭발 |
-
----
-
-# 구현 원칙
-
-* 50개 게임 개별 수정 ❌ → **공통 플랫폼 SDK** ✅
-* 신규 게임 = Multiplayer SDK + Runtime SDK + Reward SDK 필수
-* 게임별 lobby/result/invite 구현 **금지**
-
----
-
-# 플랫폼 레이어 (필수)
-
-## 1. Multiplayer SDK (`@game-platform/multiplayer-sdk`)
-
-`createRoom()` · `joinRoom()` · `leaveRoom()` · `send()` · `sync()` · `start()` · `finish()` · `spectator()` · `replay()`
-
-## 2. Universal Lobby
-
-QR · 링크 · WebShare · SMS · Kakao · Discord — **플랫폼 공통**
-
-## 3. Universal Match
-
-Quick Match · Private · Friends · Public · AI Bot Fallback
-
-## 4. Universal Presence
-
-친구 접속 · 플레이 중 게임 · Lobby · 관전 가능
-
-## 5. Universal Result
-
-Winner · XP · Coin · Replay Score · Friend Rank · Share · Rematch · Continue — **100% 동일**
-
-## 6. Universal Spectator
-
-친구 경기 관전 · Live Score · 종료 후 즉시 참가
-
-## 7. Party Link
-
-`replay.gg/p/{code}` — Guest 즉시 입장, 로그인 불필요, 플레이 후 계정 연결
+| # | Layer | Route |
+|---|-------|-------|
+| 1 | Creator Hub | `/creators` |
+| 2 | Developer Profile | `/creators/[id]` |
+| 3 | Creator Studio | `/studio` |
+| 4 | Upload Wizard | `/studio/upload` |
+| 5 | AI QA Pipeline | `/studio/qa` |
+| 6 | Replay SDK | `@game-platform/replay-sdk` |
+| 7 | Template Marketplace | `/studio/templates` |
+| 8 | Developer Analytics | `/studio/analytics` |
+| 9 | Creator Community | `/creators` (hub) |
+| 10 | AI Co-Developer | `/studio/qa` |
+| 11 | Revenue UI | `/studio/revenue` |
+| 12 | Creator Identity | Passport + Studio |
+| 13 | Marketplace | `/marketplace` |
 
 ---
 
-# 7 Engines (유지 + Social 강화)
+# Replay SDK (games import ONLY this)
 
-| Engine | v7 focus |
-|--------|----------|
-| Identity | Living Identity |
-| Motivation | Priority (친구 추월 100) |
-| Habit | Loss aversion |
-| **Social** | **Multiplayer + Relationship Feed** |
-| Growth | Universal Result |
-| Reward | H2H winner flow |
-| Operations | AI self-improve loop |
+```
+submitScore() · unlockAchievement() · saveStage() · saveCollection()
+multiplayer.join() · reward.coin() · mission.complete() · analytics.track()
+```
 
 ---
 
-# Flagship (Tier3)
+# Multiplayer Platform (v7 유지)
 
-우선순위: Multiplayer Snake (.io) → Agar → Bomber Arena → Kart Arena
+Tier1 Single · Tier2 Party · Tier3 Realtime (.io Flagship)
 
 ---
 
-# KPI (신규 기능은 1개 이상 개선)
+# 7 Engines
 
-Retention · Session Time · Social · Content · Revenue
+Identity · Motivation · Habit · Social · Growth · Reward · Operations
 
 ---
 
 # 검증
 
-> **친구 초대 → 플레이 → 결과 → 재도전 → Journey → Passport가 하나의 흐름인가?**
+> **플레이어 Journey + Creator Journey가 하나로 이어지는가?**
 
 ---
 
 # 08:00 Report
 
-Multiplayer adoption · Party Link conversion · Social Loop % · Flagship progress · Risks
+Creator uploads · QA pass rate · Template clones · Marketplace · Flagship progress

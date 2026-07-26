@@ -9,7 +9,7 @@ import { mainNavItems } from "@/lib/main-nav";
 export function MobileBottomNav() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/studio")) {
     return null;
   }
 

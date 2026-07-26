@@ -62,6 +62,7 @@
     "@game-platform/game-word-search": "*",
     "@game-platform/game-sdk": "*",
     "@game-platform/multiplayer-sdk": "*",
+    "@game-platform/replay-sdk": "*",
     "@game-platform/shared": "*",
     "@game-platform/ui": "*",
     "@supabase/supabase-js": "^2.110.7",

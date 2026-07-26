@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Compass, Home, Library, User, Users } from "lucide-react";
+import { Compass, Home, Map, Palette, User, Users } from "lucide-react";
 
 export interface MainNavItem {
   label: string;
@@ -22,16 +22,22 @@ export const mainNavItems: MainNavItem[] = [
     match: (p) => p === "/games" || p.startsWith("/categories/") || p.startsWith("/search"),
   },
   {
-    label: "Library",
-    href: "/library",
-    icon: Library,
-    match: (p) => p.startsWith("/library") || p.startsWith("/journey") || p === "/favorites",
+    label: "Journey",
+    href: "/journey",
+    icon: Map,
+    match: (p) => p.startsWith("/journey") || p.startsWith("/library") || p === "/favorites",
   },
   {
     label: "Community",
     href: "/community",
     icon: Users,
     match: (p) => p.startsWith("/community"),
+  },
+  {
+    label: "Creators",
+    href: "/creators",
+    icon: Palette,
+    match: (p) => p.startsWith("/creators") || p.startsWith("/studio") || p.startsWith("/marketplace"),
   },
   {
     label: "Passport",
