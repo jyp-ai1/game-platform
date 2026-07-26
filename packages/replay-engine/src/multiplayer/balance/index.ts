@@ -26,7 +26,7 @@ import {
 } from "./registry";
 import { computeRuntimeTicks } from "./scale";
 import { computeSpawnBatch, rollBossSpawns, rollSpawnPoints } from "./spawn";
-import { findSafeSpawn, grantInvincibility, isInvincible } from "./safe-spawn";
+import { findSafeSpawn, grantInvincibility, isInvincible, recordDeathZone } from "./safe-spawn";
 import { generateWorldFeatures, isBlockedByFeature } from "./world";
 
 export function balanceFor(gameSlug: string, playerCount: number): ComputedBalance {
@@ -54,7 +54,7 @@ export const BalanceEngine = {
   spawn: { batch: computeSpawnBatch, roll: rollSpawnPoints, boss: rollBossSpawns },
   scale: computeRuntimeTicks,
   world: { features: generateWorldFeatures, blocked: isBlockedByFeature },
-  safeSpawn: { find: findSafeSpawn, invincible: isInvincible, grant: grantInvincibility },
+  safeSpawn: { find: findSafeSpawn, invincible: isInvincible, grant: grantInvincibility, recordDeath: recordDeathZone },
   analytics: {
     start: startMatchAnalytics,
     death: recordDeath,
@@ -80,6 +80,7 @@ export {
   findSafeSpawn,
   isInvincible,
   grantInvincibility,
+  recordDeathZone,
   startMatchAnalytics,
   recordDeath,
   flushMatchAnalytics,

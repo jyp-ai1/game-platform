@@ -33,7 +33,7 @@ import {
 } from "@game-platform/multiplayer-sdk";
 import { BalanceEngine, balanceFor } from "@game-platform/replay-engine/balance";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
-import { PartyEngine, FriendsEngine, RecommendEngine, ViralLoopEngine, PartyMissionEngine, PartyJourneyEngine, RankingEngine, PARTY_REACTIONS } from "@game-platform/replay-engine/social";
+import { PartyEngine, FriendsEngine, RecommendEngine, ViralLoopEngine, PartyMissionEngine, PartyJourneyEngine, RankingEngine, PartyVoiceEngine, ActivityEngine } from "@game-platform/replay-engine/social";
 
 export interface ReplayInitOptions {
   gameSlug: string;
@@ -151,6 +151,9 @@ const friend = {
   favorite: FriendsEngine.favorite,
   relation: FriendsEngine.relation,
   labels: FriendsEngine.labels,
+  activity: ActivityEngine.feed,
+  like: ActivityEngine.like,
+  revenge: ActivityEngine.revenge,
 };
 
 const party = {
@@ -170,6 +173,10 @@ const party = {
   activeId: PartyEngine.activeId,
   mission: PartyMissionEngine,
   journey: PartyJourneyEngine,
+  voice: PartyVoiceEngine.join,
+  ping: PartyVoiceEngine.ping,
+  emoji: PartyVoiceEngine.emoji,
+  quickChat: PartyVoiceEngine.quickChat,
 };
 
 const viral = {

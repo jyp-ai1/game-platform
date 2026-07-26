@@ -3,6 +3,7 @@ import { getDeviceId } from "@game-platform/game-sdk";
 import { buildMultiplayerResult } from "@game-platform/multiplayer-sdk";
 import type { GameRoom, MultiplayerResultPayload } from "@game-platform/shared";
 
+import { ActivityEngine } from "./activity";
 import { nextContinueGame } from "./constants";
 import { recordCoPlay } from "./friends";
 import { finishPartyGame, getActivePartyId, getMyParty, queuePartyGame, travelToGame } from "./party";
@@ -36,6 +37,10 @@ export async function completeMultiplayerMatch(room: GameRoom): Promise<ViralLoo
     if (p.deviceId === myId) continue;
     recordCoPlay(p.deviceId, p.nickname, room.gameSlug, won ? "win" : p.deviceId === result.winnerId ? "loss" : "draw");
     recordCrossGameScore(p.deviceId, p.nickname, room.gameSlug, p.score ?? 0);
+    const score = p.score ?? 0;
+    if (score >= 1000) {
+      ActivityEngine.record(p.deviceId, p.nickname, score >= 5000 ? "top10" : "score", `${p.nickname} ${score.toLocaleString()}점`, room.gameSlug, score);
+    }
   }
 
   const partyId = getActivePartyId();

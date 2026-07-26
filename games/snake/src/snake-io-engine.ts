@@ -43,6 +43,7 @@ export interface SnakeIoWorld {
   events: WorldEvent[];
   objective: MatchObjective;
   moments: ReplayMoment[];
+  deathZones: { x: number; y: number; at: number }[];
 }
 
 const DELTAS: Record<Direction, Vec> = {
@@ -126,11 +127,22 @@ function findSafePosition(world: SnakeIoWorld, excludeId: string): Vec {
   const minDist = world.config.safeSpawnMinDistance;
   const w = world.config.worldSize;
   const enemies = enemyPositions(world, excludeId);
-  for (let t = 0; t < 120; t++) {
-    const pos = { x: Math.floor(Math.random() * (w - 10)) + 5, y: Math.floor(Math.random() * (w - 10)) + 5 };
+  const campRadius = world.config.antiCampEnabled ? world.config.safeZoneRadius : 0;
+  const now = Date.now();
+  const recentDeaths = world.deathZones.filter((d) => now - d.at < 30_000);
+
+  for (let t = 0; t < 150; t++) {
+    const margin = world.config.safeZoneRadius;
+    const pos = {
+      x: Math.floor(Math.random() * (w - margin * 2)) + margin,
+      y: Math.floor(Math.random() * (w - margin * 2)) + margin,
+    };
     if (occupied(world, pos) || isBlocked(world, pos)) continue;
     const tooClose = enemies.some((e) => Math.hypot(e.x - pos.x, e.y - pos.y) < minDist);
-    if (!tooClose) return pos;
+    if (tooClose) continue;
+    const inCamp = recentDeaths.some((d) => Math.hypot(d.x - pos.x, d.y - pos.y) < campRadius);
+    if (inCamp) continue;
+    return pos;
   }
   return { x: Math.floor(w / 2), y: Math.floor(w / 2) };
 }
@@ -151,7 +163,7 @@ export function createSnake(
     score: 0,
     alive: true,
     color: COLORS[index % COLORS.length]!,
-    invincibleUntil: Date.now() + world.config.invincibilityMs,
+    invincibleUntil: Date.now() + world.config.spawnShieldMs,
   };
 }
 
@@ -169,6 +181,7 @@ export function createInitialWorld(
     events: [],
     objective: { kind: "score_race", target: 500, progress: {}, label: "최고 점수" },
     moments: [],
+    deathZones: [],
   };
   players.forEach((p, i) => {
     world.snakes[p.deviceId] = createSnake(p.deviceId, p.nickname, i, world);
@@ -185,7 +198,11 @@ export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direc
   snake.pendingDirection = direction;
 }
 
-function killSnake(snake: SnakeEntity, config: ComputedBalance): void {
+function killSnake(snake: SnakeEntity, config: ComputedBalance, world: SnakeIoWorld): void {
+  const head = snake.segments[0];
+  if (head && config.antiCampEnabled) {
+    world.deathZones = [...world.deathZones.filter((d) => Date.now() - d.at < 30_000), { x: head.x, y: head.y, at: Date.now() }].slice(-40);
+  }
   snake.alive = false;
   snake.spectating = true;
   snake.respawnAt = Date.now() + config.respawnMs;
@@ -201,7 +218,7 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   snake.score = Math.max(0, snake.score - Math.round(20 * world.config.rewardRate));
   snake.color = COLORS[index % COLORS.length]!;
   snake.respawnAt = undefined;
-  snake.invincibleUntil = now + world.config.invincibilityMs;
+  snake.invincibleUntil = now + world.config.spawnShieldMs;
 }
 
 export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
@@ -225,7 +242,7 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     const next: Vec = { x: head.x + delta.x, y: head.y + delta.y };
 
     if (isBlocked(world, next)) {
-      killSnake(snake, world.config);
+      killSnake(snake, world.config, world);
       continue;
     }
 
@@ -252,7 +269,7 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
           snake.killStreak = 0;
         }
       }
-      killSnake(snake, world.config);
+      killSnake(snake, world.config, world);
       continue;
     }
 

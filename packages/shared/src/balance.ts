@@ -32,6 +32,16 @@ export interface BalanceProfile {
   invincibilityMs?: number;
 }
 
+export type MatchType =
+  | "solo"
+  | "duel"
+  | "party"
+  | "ranked"
+  | "tournament"
+  | "festival"
+  | "boss_raid"
+  | "guild_war";
+
 export interface ComputedBalance {
   playerCount: number;
   worldSize: number;
@@ -47,10 +57,18 @@ export interface ComputedBalance {
   cameraZoom: number;
   safeSpawnMinDistance: number;
   invincibilityMs: number;
+  /** Spawn Shield duration — anti spawn-kill. */
+  spawnShieldMs: number;
+  /** Safe zone radius around spawn points. */
+  safeZoneRadius: number;
+  antiCampEnabled: boolean;
+  matchType: MatchType;
   difficulty: number;
   rewardRate: number;
   enemyDensity: number;
   bossEventsEnabled: boolean;
+  dynamicEventsEnabled: boolean;
+  spectatorEnabled: boolean;
   features: WorldFeature[];
   viewportCells: number;
 }

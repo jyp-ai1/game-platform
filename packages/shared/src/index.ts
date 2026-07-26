@@ -15,6 +15,7 @@ export type {
   GameProfile,
   BalanceProfile,
   ComputedBalance,
+  MatchType,
   WorldFeature,
   FoodKind,
   SpawnPoint,

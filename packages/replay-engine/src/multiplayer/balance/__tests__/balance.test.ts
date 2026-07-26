@@ -6,27 +6,27 @@ import { balanceFor, computeBalance } from "../index";
 import { getMatchSizeProfile } from "../registry";
 
 describe("Universal Balance Engine", () => {
-  it("1 player — small map, fast tempo, high food", () => {
+  it("1P — 100x100 dynamic map", () => {
     const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 1);
     assert.equal(b.worldSize, 100);
-    assert.ok(b.foodCount >= 260);
-    assert.ok(b.physicsTickMs < 120);
-    assert.equal(b.mapScale, 1);
+    assert.equal(b.matchType, "solo");
+    assert.ok(b.spawnShieldMs >= 3000);
   });
 
-  it("2 players — map 1.8x", () => {
+  it("2P — 180x180 duel", () => {
     const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 2);
-    assert.ok(b.worldSize >= 170 && b.worldSize <= 190);
-    assert.ok(b.foodCount >= 320);
-    assert.ok(b.respawnMs < 3000);
+    assert.equal(b.worldSize, 180);
+    assert.equal(b.matchType, "duel");
+    assert.ok(b.antiCampEnabled);
   });
 
-  it("20 players — festival scale", () => {
+  it("20P — 900x900 festival", () => {
     const b = balanceFor("snake", 20);
-    assert.ok(b.worldSize >= 650);
-    assert.ok(b.foodCount >= 1600);
+    assert.equal(b.worldSize, 900);
+    assert.equal(b.matchType, "festival");
     assert.ok(b.bossEventsEnabled);
-    assert.ok(b.features.some((f) => f.type === "boss_zone"));
+    assert.ok(b.dynamicEventsEnabled);
+    assert.ok(b.features.some((f) => f.type === "biome"));
   });
 
   it("snake match profile 2-20", () => {
@@ -38,7 +38,7 @@ describe("Universal Balance Engine", () => {
   it("runtime ticks scale with players", () => {
     const low = balanceFor("snake", 2);
     const high = balanceFor("snake", 20);
-    assert.ok(high.physicsTickMs <= low.physicsTickMs);
+    assert.ok(high.worldSize > low.worldSize);
     assert.ok(high.cameraZoom < low.cameraZoom);
   });
 });

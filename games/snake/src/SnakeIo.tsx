@@ -226,7 +226,7 @@ export function SnakeIoGame() {
 
       <div className="flex w-full max-w-lg flex-wrap items-center gap-2 justify-between">
         <ScoreBox label="Score" value={mySnake?.score ?? 0} />
-        <ScoreBox label={ux.label} value={playerCount} />
+        <ScoreBox label={balance.matchType.toUpperCase()} value={playerCount} />
         <ScoreBox label="Stage" value={stage.id} />
         <ScoreBox label="Goal" value={world.objective.target} />
       </div>
@@ -274,8 +274,10 @@ export function SnakeIoGame() {
       </div>
 
       {world.moments.length > 0 ? (
-        <div className="w-full max-w-lg text-center text-xs text-primary">
-          {Replay.multiplayer.moments.labels[world.moments[0]!.kind]} — {world.moments[0]!.nickname}
+        <div className="w-full max-w-lg rounded-2xl border border-primary/30 bg-primary/10 p-4 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Replay Moment</p>
+          <p className="mt-1 font-bold">{Replay.multiplayer.moments.labels[world.moments[0]!.kind]}</p>
+          <p className="text-sm text-primary">{world.moments[0]!.nickname}</p>
         </div>
       ) : null}
 
