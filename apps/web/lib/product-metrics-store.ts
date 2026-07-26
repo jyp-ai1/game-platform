@@ -161,6 +161,23 @@ export function getTodayMetrics(): DayMetrics {
   return readStore()[key] ?? emptyDay(key);
 }
 
+export function getYesterdayMetrics(): DayMetrics {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yKey = yesterday.toISOString().slice(0, 10);
+  return readStore()[yKey] ?? emptyDay(yKey);
+}
+
+export function getMetricsForDate(dateKey: string): DayMetrics {
+  return readStore()[dateKey] ?? emptyDay(dateKey);
+}
+
+/** Percent change helper — returns null if baseline is 0 */
+export function percentChange(current: number, previous: number): number | null {
+  if (previous === 0) return current > 0 ? 100 : null;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
 export function getCoreKpis(): CoreKpis {
   const store = readStore();
   const today = todayKey();
