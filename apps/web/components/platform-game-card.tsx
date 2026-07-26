@@ -9,6 +9,7 @@ import Link from "next/link";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GameCardPlayLink } from "@/components/game-card-play-link";
 import { difficultyLabel, formatDifficulty } from "@/lib/difficulty";
+import { IMAGE_BLUR_PLACEHOLDER } from "@/lib/image-placeholder";
 import { useLivePlayerCount } from "@/lib/use-live-player-count";
 
 /** Stable display rating for platform cards (no DB field yet). */
@@ -135,7 +136,7 @@ export function PlatformGameCard({
     <article
       data-testid={hero ? "home-hero-card" : undefined}
       className={cn(
-        "group flex h-full min-h-[340px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-md transition-all duration-300",
+        "group flex h-full min-h-[340px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-md motion-base transition-all",
         hero && "hover:scale-[1.01] hover:border-primary/30 hover:shadow-lg",
         !hero && "hover:border-primary/30 hover:shadow-lg",
         live && "border-emerald-500/35 shadow-emerald-500/10",
@@ -147,16 +148,19 @@ export function PlatformGameCard({
         {game.thumbnailUrl ? (
           <Image
             src={game.thumbnailUrl}
-            alt={game.title}
+            alt={`${game.title} thumbnail`}
             fill
             className={cn(
-              "object-cover transition-transform duration-500 ease-out",
+              "object-cover motion-base transition-transform",
               hero
-                ? "scale-[1.02] group-hover:scale-[1.06] group-hover:-translate-y-1"
+                ? "scale-[1.02] group-hover:scale-[1.05] group-hover:-translate-y-0.5"
                 : "group-hover:scale-[1.02]"
             )}
             sizes="(max-width:640px) 85vw, 320px"
             priority={!!live}
+            loading={live ? undefined : "lazy"}
+            placeholder="blur"
+            blurDataURL={IMAGE_BLUR_PLACEHOLDER}
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-gradient-to-br from-muted to-background">
@@ -189,7 +193,7 @@ export function PlatformGameCard({
               <span className="live-dot-pulse mr-1 inline-block">🟢</span>
               LIVE
             </p>
-            <p className="text-sm font-semibold tabular-nums transition-all duration-300">
+            <p className="text-sm font-semibold tabular-nums motion-base transition-all">
               {playerLabel}
             </p>
             {live.topScore != null && live.topScore > 0 ? (
@@ -236,7 +240,7 @@ export function PlatformGameCard({
             {actions.primary.href ? (
               <Button
                 className={cn(
-                  "gap-1.5 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]",
+                  "gap-1.5 motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
                   live && "bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
                 )}
                 nativeButton={false}
@@ -249,7 +253,7 @@ export function PlatformGameCard({
             ) : (
               <Button
                 className={cn(
-                  "gap-1.5 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]",
+                  "gap-1.5 motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
                   live && "bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
                 )}
                 onClick={actions.primary.onClick}

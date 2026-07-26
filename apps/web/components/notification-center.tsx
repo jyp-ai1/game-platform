@@ -4,6 +4,7 @@ import { getDailyStreak } from "@game-platform/game-sdk";
 import Link from "next/link";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 
+import { HomeEmptyLine } from "@/components/home-empty-line";
 import {
   getNotifications,
   getUnreadCount,
@@ -12,7 +13,9 @@ import {
   subscribeNotifications,
 } from "@game-platform/replay-engine";
 
-/** Notification — home compact: single line only. */
+const COMPACT_MIN_H = "min-h-[5.5rem]";
+
+/** Notification — home compact with empty state. */
 export function NotificationCenter({ compact = false }: { compact?: boolean }) {
   const unread = useSyncExternalStore(subscribeNotifications, getUnreadCount, () => 0);
   const items = useMemo(() => getNotifications(true), [unread]);
@@ -28,7 +31,13 @@ export function NotificationCenter({ compact = false }: { compact?: boolean }) {
     });
   }, []);
 
-  if (compact && items.length === 0) return null;
+  if (compact && items.length === 0) {
+    return (
+      <HomeEmptyLine testId="notification-empty" className={COMPACT_MIN_H}>
+        새로운 알림이 없습니다.
+      </HomeEmptyLine>
+    );
+  }
 
   if (compact) {
     const first = items[0];
@@ -39,7 +48,8 @@ export function NotificationCenter({ compact = false }: { compact?: boolean }) {
       <Link
         href={first?.href ?? "/missions"}
         onClick={() => first && markRead(first.id)}
-        className="block rounded-xl border border-white/10 bg-card/40 px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/25 hover:text-foreground"
+        aria-label={`알림: ${line}`}
+        className={`motion-base block ${COMPACT_MIN_H} rounded-xl border border-white/10 bg-card/40 px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/25 hover:text-foreground`}
       >
         🔔 {line}
       </Link>
@@ -52,7 +62,9 @@ export function NotificationCenter({ compact = false }: { compact?: boolean }) {
         Notifications {unread > 0 ? `(${unread})` : ""}
       </h2>
       {items.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">알림 없음</p>
+        <HomeEmptyLine testId="notification-empty" className="mt-2">
+          새로운 알림이 없습니다.
+        </HomeEmptyLine>
       ) : (
         <ul className="mt-2 space-y-1.5">
           {items.map((n) => (

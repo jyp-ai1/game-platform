@@ -53,6 +53,12 @@ function toastContent(event: EngagementEvent): {
         title: "연습 모드",
         subtitle: event.message,
       };
+    case "platform-notice":
+      return {
+        emoji: "ℹ️",
+        title: event.title,
+        subtitle: event.message,
+      };
   }
 }
 

@@ -14,6 +14,7 @@ import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
+import { HomeEmptyLine } from "@/components/home-empty-line";
 import { buildTodayReason } from "@/lib/today-reason";
 import {
   getTodayMissionMix,
@@ -67,10 +68,18 @@ export function HomeDailyChallengeStrip({
   const goalPct = Math.min(100, Math.round((todaySec / GOAL_SEC) * 100));
 
   if (compact) {
+    if (complete) {
+      return (
+        <HomeEmptyLine testId="mission-empty" className="min-h-[5.5rem] border-primary/15">
+          오늘의 미션을 모두 완료했습니다.
+        </HomeEmptyLine>
+      );
+    }
     return (
       <Link
         href={reason.href}
-        className="block rounded-xl border border-primary/20 bg-card/40 p-3 transition-colors hover:border-primary/35"
+        aria-label="오늘의 미션 이어하기"
+        className="motion-base block min-h-[5.5rem] rounded-xl border border-primary/20 bg-card/40 p-3 transition-colors hover:border-primary/35"
       >
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Today&apos;s Mission

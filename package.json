@@ -34,7 +34,8 @@
     "test:e2e": "playwright test --config tests/e2e/playwright.config.ts",
     "test:e2e:games": "playwright test tests/e2e/games --config tests/e2e/playwright.config.ts",
     "test:e2e:golden-path": "playwright test tests/e2e/golden-path.spec.ts --config tests/e2e/playwright.config.ts",
-    "test:e2e:home-visual": "playwright test tests/e2e/home-visual-qa.spec.ts --config tests/e2e/playwright.config.ts"
+    "test:e2e:home-visual": "playwright test tests/e2e/home-visual-qa.spec.ts --config tests/e2e/playwright.config.ts",
+    "test:e2e:rc2": "playwright test tests/e2e/rc2-polish.spec.ts --config tests/e2e/playwright.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useSyncExternalStore } from "react";
 
+import { HomeEmptyLine } from "@/components/home-empty-line";
 import {
   getRecentlyPlayedSnapshot,
   getServerRecentlyPlayedSnapshot,
@@ -57,10 +58,10 @@ function ContinueRow({
   return (
     <div
       data-testid="home-continue-row"
-      className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-card/40 px-4 py-3"
+      className="flex min-h-[4.5rem] items-center justify-between gap-4 rounded-xl border border-white/10 bg-card/40 px-4 py-3"
     >
-      <div>
-        <p className="font-semibold">{game.title}</p>
+      <div className="min-w-0">
+        <p className="truncate font-semibold">{game.title}</p>
         <p className="text-sm font-medium tabular-nums">
           {score > 0 ? `${score.toLocaleString()}점` : "—"}
         </p>
@@ -73,10 +74,7 @@ function ContinueRow({
       {href ? (
         <Button size="sm" nativeButton={false} render={<Link href={href}>이어하기</Link>} />
       ) : (
-        <Button
-          size="sm"
-          onClick={() => void enterSnakeQuickPlay(router)}
-        >
+        <Button size="sm" aria-label={`${game.title} 이어하기`} onClick={() => void enterSnakeQuickPlay(router)}>
           이어하기
         </Button>
       )}
@@ -119,25 +117,33 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
       .slice(0, 2);
   }, [slugs, bySlug, history, mounted]);
 
-  if (!mounted || rows.length === 0) return null;
+  if (!mounted) return null;
 
   return (
-    <section data-testid="home-continue" className="py-4 sm:py-5">
+    <section
+      data-testid="home-continue"
+      aria-labelledby="home-continue-heading"
+      className="border-b border-white/5 py-5 sm:py-6"
+    >
       <Container>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">
+        <h2 id="home-continue-heading" className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">
           Continue Playing
-        </p>
-        <div className="space-y-2">
-          {rows.map(({ game, score, startedAt, durationSec }) => (
-            <ContinueRow
-              key={game.id}
-              game={game}
-              score={score}
-              startedAt={startedAt}
-              durationSec={durationSec}
-            />
-          ))}
-        </div>
+        </h2>
+        {rows.length === 0 ? (
+          <HomeEmptyLine testId="home-continue-empty">최근 플레이가 없습니다.</HomeEmptyLine>
+        ) : (
+          <div className="space-y-2">
+            {rows.map(({ game, score, startedAt, durationSec }) => (
+              <ContinueRow
+                key={game.id}
+                game={game}
+                score={score}
+                startedAt={startedAt}
+                durationSec={durationSec}
+              />
+            ))}
+          </div>
+        )}
       </Container>
     </section>
   );

@@ -3,7 +3,7 @@
 ```
 Git SHA
 
-(pending commit)
+3f96c1c
 
 Build
 

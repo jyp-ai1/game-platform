@@ -30,7 +30,7 @@ test.describe("Home Visual QA", () => {
       if (await continueRow.count()) {
         await expect(continueSection).toBeVisible();
       } else {
-        await expect(continueSection).toHaveCount(0);
+        await expect(page.getByTestId("home-continue-empty")).toBeVisible();
       }
 
       // No horizontal overflow
@@ -50,19 +50,19 @@ test.describe("Home Visual QA", () => {
     await expect(page.getByTestId("home-skeleton")).toBeHidden({ timeout: 15_000 });
   });
 
-  test("home empty continue section hidden", async ({ page }) => {
+  test("home continue empty shows message", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(800);
 
     const row = page.getByTestId("home-continue-row");
-    const section = page.getByTestId("home-continue");
+    const empty = page.getByTestId("home-continue-empty");
+    await expect(page.getByTestId("home-continue")).toBeVisible();
 
     if (await row.count()) {
-      await expect(section).toBeVisible();
       await expect(row.first()).toBeVisible();
     } else {
-      await expect(section).toBeHidden();
-      await expect(page.getByTestId("home-continue-empty")).toBeHidden();
+      await expect(empty).toBeVisible();
+      await expect(empty).toHaveText(/최근 플레이가 없습니다/);
     }
   });
 });

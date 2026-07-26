@@ -6,6 +6,7 @@ import {
   type SnakeFriendPresence,
 } from "@/components/snake-live-game-card";
 import { enterSnakeQuickPlay } from "@/lib/snake-entry";
+import { emitPlatformNoticeWithRetry } from "@/lib/platform-notice";
 import {
   fetchPresenceEntries,
   getGlobalWorldStatus,
@@ -22,7 +23,7 @@ import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { Button } from "@game-platform/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /** Plausible mock score when presence has no score field yet. */
 function mockPresenceScore(nickname: string): number {
@@ -57,57 +58,86 @@ function presenceToFriend(entry: PresenceEntry): SnakeFriendPresence {
 export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) {
   const router = useRouter();
   const [friend, setFriend] = useState<SnakeFriendPresence | null>(null);
+  const [presenceLoaded, setPresenceLoaded] = useState(false);
   const [party, setParty] = useState<Awaited<ReturnType<typeof getMyParty>>>(null);
   const [tournament, setTournament] = useState<{ label: string } | null>(null);
 
-  useEffect(() => {
-    void (async () => {
+  const loadPresence = useCallback(async () => {
+    try {
       getGlobalWorldStatus("snake");
-
       const presence = await fetchPresenceEntries();
       const playing = presence.filter((p) => p.status === "playing" || p.status === "lobby");
       const first = playing[0];
-      if (first) setFriend(presenceToFriend(first));
+      setFriend(first ? presenceToFriend(first) : null);
+    } catch {
+      emitPlatformNoticeWithRetry("친구 목록", "플레이 중인 친구 정보를 불러오지 못했습니다.");
+      setFriend(null);
+    } finally {
+      setPresenceLoaded(true);
+    }
+  }, []);
 
-      setParty(await getMyParty());
+  useEffect(() => {
+    void (async () => {
+      await loadPresence();
 
-      const t = ExperienceEngine.tournament.upcoming()[0];
-      if (t) {
-        const mins = Math.max(0, Math.round((new Date(t.startsAt).getTime() - Date.now()) / 60_000));
-        setTournament({
-          label: mins <= 2 ? "🏆 토너먼트 시작!" : `🏆 토너먼트 ${mins}분 후`,
-        });
+      try {
+        setParty(await getMyParty());
+      } catch {
+        emitPlatformNoticeWithRetry("Party", "Party 정보를 불러오지 못했습니다.");
+      }
+
+      try {
+        const t = ExperienceEngine.tournament.upcoming()[0];
+        if (t) {
+          const mins = Math.max(0, Math.round((new Date(t.startsAt).getTime() - Date.now()) / 60_000));
+          setTournament({
+            label: mins <= 2 ? "🏆 토너먼트 시작!" : `🏆 토너먼트 ${mins}분 후`,
+          });
+        }
+      } catch {
+        emitPlatformNoticeWithRetry("토너먼트", "토너먼트 정보를 불러오지 못했습니다.");
       }
     })();
 
-    const presencePoll = window.setInterval(() => {
-      void fetchPresenceEntries().then((presence) => {
-        const playing = presence.filter((p) => p.status === "playing" || p.status === "lobby");
-        const first = playing[0];
-        setFriend(first ? presenceToFriend(first) : null);
-      });
-    }, 5000);
-
+    const presencePoll = window.setInterval(() => void loadPresence(), 5000);
     return () => window.clearInterval(presencePoll);
-  }, []);
+  }, [loadPresence]);
 
   async function handleTournamentJoin() {
-    await enterSnakeQuickPlay(router);
+    try {
+      await enterSnakeQuickPlay(router);
+    } catch {
+      emitPlatformNoticeWithRetry("입장", "토너먼트 입장에 실패했습니다.");
+    }
   }
 
   const mission = party ? PartyMissionEngine.active(party) : null;
   const badges = party ? PartyJourneyEngine.achievements(party) : [];
 
   return (
-    <section className="border-b border-primary/20 bg-gradient-to-b from-primary/10 to-transparent py-6 sm:py-8">
+    <section
+      aria-labelledby="home-hero-heading"
+      className="border-b border-primary/20 bg-gradient-to-b from-primary/10 to-transparent py-5 sm:py-6"
+    >
       <div className="mx-auto max-w-4xl space-y-3 px-4">
+        <h2 id="home-hero-heading" className="sr-only">
+          LIVE Snake
+        </h2>
         <SnakeLiveGameCard game={snakeGame} friend={friend} />
+
+        {presenceLoaded && !friend ? (
+          <p data-testid="hero-friend-empty" className="text-sm text-muted-foreground">
+            지금 플레이 중인 친구가 없습니다.
+          </p>
+        ) : null}
 
         {tournament ? (
           <button
             type="button"
+            aria-label="토너먼트 참가"
             onClick={handleTournamentJoin}
-            className="flex w-full items-center justify-between rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm text-left"
+            className="motion-base flex w-full items-center justify-between rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm text-left transition hover:border-violet-400/50"
           >
             <span>{tournament.label}</span>
             <span className="text-violet-400">참가 →</span>

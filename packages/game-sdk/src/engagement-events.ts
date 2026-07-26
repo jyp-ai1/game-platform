@@ -10,7 +10,8 @@ export type EngagementEvent =
   | { type: "mission-completed"; missionId: string; title: string; xp: number }
   | { type: "weekly-mission-completed"; missionId: string; title: string; xp: number }
   | { type: "daily-reward-claimed"; xp: number; streakDay: number }
-  | { type: "practice-fallback"; message: string };
+  | { type: "practice-fallback"; message: string }
+  | { type: "platform-notice"; title: string; message: string };
 
 type Listener = (event: EngagementEvent) => void;
 
