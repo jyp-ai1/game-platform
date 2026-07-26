@@ -10,6 +10,8 @@ const NAV: Array<{ href: string; label: string; exact?: boolean }> = [
   { href: "/admin/errors", label: "Errors" },
   { href: "/admin/notifications", label: "Notifications" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/os", label: "Replay OS" },
+  { href: "/admin/operations", label: "AI Operations" },
   { href: "/admin/developer", label: "Developer" },
   { href: "/admin/release-dashboard", label: "Release RC3" },
   { href: "/admin/cms", label: "CMS" },

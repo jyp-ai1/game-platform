@@ -28,6 +28,14 @@ export default function AiOperationCenterPage() {
         <p className="text-sm text-muted-foreground">Track H — automated ops pipeline</p>
       </div>
 
+      <section className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
+        <h2 className="font-semibold">Replay OS 2.0</h2>
+        <p className="mt-1 text-sm text-muted-foreground">8 Platforms · 6 Operating Systems</p>
+        <Link href="/admin/os" className="mt-3 inline-block text-sm text-violet-400 hover:underline">
+          Open OS Dashboard →
+        </Link>
+      </section>
+
       <section className="replay-panel rounded-2xl p-6">
         <h2 className="font-semibold">Pipeline</h2>
         <ol className="mt-4 flex flex-wrap gap-2">

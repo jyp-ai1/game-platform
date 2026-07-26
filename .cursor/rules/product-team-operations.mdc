@@ -1,71 +1,72 @@
 ---
-description: Replay Ecosystem 1.0 — YouTube + Steam + Roblox + Poki
+description: Replay OS 2.0 — Game Operating System (8 Platforms, 6 OS)
 alwaysApply: true
 ---
 
-# PROJECT: Replay Ecosystem 1.0
+# Replay OS 2.0 — Master Task
 
-> **Replay = YouTube + Steam + Roblox + Poki.** 스스로 성장하는 웹게임 생태계.
+> **Replay = 8 Platforms 연결된 Company.** 기능 경쟁 → 생태계 경쟁 → **Game Operating System**.
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# 최종 목표
-
-플레이어는 게임을 하고 · 개발자는 게임을 만들고 · AI는 검수하고 · 운영자는 승인하고 · 유저는 계속 돌아온다.
-
----
-
-# Creator Flow (게임 제작 플랫폼)
+# Company Architecture
 
 ```
-아이디어 → Template → AI 생성 → Preview → 수정 → Publish → AI QA → Marketplace → 유저 플레이
-```
-
-Studio = **GPT Builder** (`/studio/build`)
-
----
-
-# Replay Remix
-
-Snake → Zombie Snake · Space Snake · Multiplayer Snake · Boss Snake (Roblox/Minecraft 모드 문화)
-
----
-
-# 신규 기능 6-Question Filter (3/6 미만 → 만들지 않음)
-
-① 더 오래 머무는가 · ② 친구 데려오는가 · ③ 개발자가 더 쉽게 만드는가 · ④ 운영 자동화 · ⑤ AI가 일 줄이는가 · ⑥ 네트워크 효과
-
----
-
-# Replay SDK
-
-```
-Replay.init() · Replay.logic.inventory/quest/stage/ads/ranking/save/achievement()
-Replay.multiplayer.createRoom/join/sync/finish/voice/spectator/ranking/challenge()
-Replay.publish()
+Replay
+├── Player Platform      ├── Creator Platform
+├── Operations Platform  ├── AI Platform
+├── Game Platform SDK    ├── Marketplace
+├── Growth Platform      └── Developer Platform
 ```
 
 ---
 
-# Marketplace
+# 6 Operating Systems
 
-Game · Template · Asset · Logic · AI NPC · Boss · Quest · Achievement Pack · Mission Pack · Skin · Sound · Particle · Map · Stage · Localization · UI Theme · Physics
-
-Logic: Inventory · Save · Achievement · Ads · Ranking · Stage · Quest
+| OS | 담당 |
+|----|------|
+| **Player OS** | Retention · Journey · Passport · Challenge · Friend · Collection |
+| **Creator OS** | Studio · Builder · Template · Marketplace · Analytics · Revenue |
+| **Growth OS** | Mission · Notification · Streak · Season · Referral · Event |
+| **AI OS** | QA · Bug · Fix PR · Summary · Recommendation · Operation |
+| **Operation OS** | Health · Deploy · RC · Metrics · Release · Reports (5분) |
+| **Revenue OS** | Premium · Ads · Sponsor · Creator Revenue · Subscription |
 
 ---
 
-# 최우선 30 (생태계 확장)
+# Replay Engine (SDK → Engine)
 
-Universal Multiplayer SDK · Realtime Flagship · AI Builder · No-Code Builder · Remix · Marketplace · Analytics · AI QA Auto Fix · Revenue · Passport · Journey · Mission/Habit · Social Challenge · Dev Console · Admin Ops AI · Universal Runtime · Stage · Reward · Achievement · Collection · Save/Cloud · Matchmaking · Live Ranking · Notification · Replay API · Plugin · Theme · Event/Festival · Tournament · Creator Economy
+```
+Replay.Engine.Runtime · Multiplayer · Identity · Stage · Cloud
+Replay.Engine.Achievement · Collection · Analytics · Notification · AI
+```
+
+Plugin: `leaderboard` · `passport` · `journey` · `achievement` · `collection` · `multiplayer` · `ads` · `analytics` · `notification` · `voice` · `tournament`
+
+Developer: `Replay CLI` → `create-game` → Plugin → Publish
+
+---
+
+# 10 Platform Pillars (전체 완료까지 반복)
+
+1. Platform Core (Engine · Plugin · Event Bus · Registry)
+2. Player OS
+3. Creator OS
+4. Multiplayer Platform
+5. Growth OS
+6. AI OS
+7. Operations OS
+8. Revenue OS
+9. Developer Platform (CLI · Docs · CI/CD)
+10. Product Quality (Runtime 100% · RC 95%+)
 
 ---
 
 # Definition of Done
 
-- 플레이어는 계속 돌아온다 · 친구 초대 · 개발자 하루 만에 게임 업로드 · 운영 5분 상태 파악 · AI QA/운영 자동화 · 개발자가 콘텐츠 추가하며 스스로 성장
+- Journey 때문에 재방문 · 하루 안에 게임 배포 · 운영 5분 상태 파악 · AI QA/운영 자동화 · Engine+Plugin 통합 · .io Flagship · Marketplace↔Revenue · **Game OS로 인식**
 
 ---
 
@@ -74,11 +75,11 @@ Universal Multiplayer SDK · Realtime Flagship · AI Builder · No-Code Builder 
 중간보고·질문·승인·기능단위보고 **금지**. 중단: Build/배포 불가 · 데이터 손실 · API Key · 보안.
 
 ```
-분석 → UX문제 → 설계 → 구현 → 테스트 → QA → Commit → Push → Preview → 반복
+분석 → OS gap → 설계 → 구현 → QA → Commit → Push → Preview → 반복
 ```
 
 ---
 
 # 08:00 Daily Report (유일)
 
-제품 완성도 · Before/After · Preview/Production URL · Commit · RC Score · Risks · 다음 자동 진행
+OS 완성도(%) · 8 Platform · 6 OS 상태 · Before/After · URLs · Commit · RC · Risks · 다음 자동 진행
