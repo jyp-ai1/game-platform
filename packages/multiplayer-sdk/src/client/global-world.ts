@@ -3,6 +3,16 @@ import type { GameRoom } from "@game-platform/shared";
 
 import { createRoom, ensureRoom, getRoom, joinRoomAsync, start } from "./room-client";
 
+function logEntry(step: string, detail?: string): void {
+  if (typeof window === "undefined") return;
+  console.info(detail ? `[ENTRY] ${step} — ${detail}` : `[ENTRY] ${step}`);
+}
+
+function logEntryFail(step: string, reason: string): void {
+  if (typeof window === "undefined") return;
+  console.error(`[ENTRY][FAIL] step: ${step} reason: ${reason}`);
+}
+
 export const GLOBAL_WORLD_TARGET = 50;
 export const CLUSTER_SIZE = 50;
 
@@ -38,6 +48,7 @@ export async function resolveAvailableCluster(gameSlug: string): Promise<string>
 
 /** Find-or-create Global World cluster and join */
 export async function joinGlobalWorld(gameSlug: string): Promise<GameRoom> {
+  logEntry("CONNECTING", `joinGlobalWorld ${gameSlug}`);
   const code = await resolveAvailableCluster(gameSlug);
   await ensureRoom(code);
   let room = getRoom(code);
@@ -53,9 +64,14 @@ export async function joinGlobalWorld(gameSlug: string): Promise<GameRoom> {
   if (joined) {
     start(code);
     cacheGlobalWorldStatus(gameSlug, joined, code);
+    logEntry("JOINED", code);
     return joined;
   }
-  if (room.players.some((p) => p.deviceId === getDeviceId())) return room;
+  if (room.players.some((p) => p.deviceId === getDeviceId())) {
+    logEntry("JOINED", `${code} (already in room)`);
+    return room;
+  }
+  logEntryFail("JOIN", "Global World full");
   throw new Error("Global World full");
 }
 
@@ -113,10 +129,12 @@ export function getGlobalWorldStatus(gameSlug = "snake"): GlobalWorldStatus {
 }
 
 export async function quickPlayGlobal(gameSlug: string): Promise<{ code: string; href: string }> {
+  logEntry("CLICK", `quickPlayGlobal ${gameSlug}`);
   const room = await joinGlobalWorld(gameSlug);
   const playPath = gameSlug === "snake"
     ? `/flagship/snake-io/play?room=${room.code}`
     : `/games/${gameSlug}?room=${room.code}`;
+  logEntry("ROUTE", playPath);
   return { code: room.code, href: playPath };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { getDeviceId, useGameSDK, emitGameRetry } from "@game-platform/game-sdk";
+import { getDeviceId, getLastNickname, useGameSDK, emitGameRetry } from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
@@ -85,6 +85,7 @@ import {
   recordGlobalWorldTick,
   tryRecordPostDeathAction,
 } from "./snake-telemetry";
+import { entryLog, entryLogFail } from "./snake-entry-log";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -114,9 +115,15 @@ const FOOD_COLORS: Record<string, string> = {
 };
 
 /** Flagship Snake.io — Events · Teams · Objectives · Spectator 2.0 */
-export function SnakeIoGame() {
+export function SnakeIoGame({
+  practiceMode = false,
+  onJoinTimeout,
+}: {
+  practiceMode?: boolean;
+  onJoinTimeout?: () => void;
+} = {}) {
   const params = useSearchParams();
-  const roomCode = params.get("room")?.toUpperCase() ?? "";
+  const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<SnakeIoWorld | null>(null);
   const [connected, setConnected] = useState(false);
@@ -156,7 +163,7 @@ export function SnakeIoGame() {
     () => Replay.multiplayer.progression.stageFor(Replay.multiplayer.progression.snake, world?.snakes[deviceId]?.score ?? 0),
     [world?.snakes[deviceId]?.score, deviceId]
   );
-  const isHost = room?.hostId === deviceId;
+  const isHost = practiceMode || room?.hostId === deviceId;
   const mySnake = world?.snakes[deviceId];
   const isSpectating = mySnake?.spectating && !mySnake?.alive;
   const matchRule = useMemo(() => resolveSnakeMatchRule(playerCount), [playerCount]);
@@ -204,6 +211,7 @@ export function SnakeIoGame() {
   }, [spectatorMode, world?.tick, friendIds]);
 
   useEffect(() => {
+    entryLog("ENGINE_READY");
     Replay.Engine.enable({ gameSlug: "snake", multiplayer: true, party: true });
     if (typeof window !== "undefined") {
       const w = window as Window & {
@@ -221,24 +229,57 @@ export function SnakeIoGame() {
 
   useEffect(() => {
     if (!roomCode) return;
-    let active = true;
-    (async () => {
-      await ensureRoom(roomCode);
-      await joinRoomAsync(roomCode);
-      const r = getRoom(roomCode);
-      if (!r || !active) return;
-      start(roomCode);
-      startSnakeTelemetry(roomCode, { isGlobalWorld, quickPlay: isGlobalWorld });
-      refreshWorldTuningFromTelemetry();
-      Replay.multiplayer.analytics.start(roomCode, "snake", r.players.length);
-      Replay.multiplayer.team.create(roomCode, playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party", r.players.map((p) => p.deviceId));
+    if (practiceMode) {
+      entryLog("CONNECTING", "PRACTICE");
+      const cfg = Replay.multiplayer.balance("snake", SNAKE_WORLD_TARGET);
+      const humans = [{ deviceId, nickname: getLastNickname() || "Player" }];
+      let initial = createInitialWorld(humans, cfg);
+      syncSnakePopulation(initial, humans, SNAKE_WORLD_TARGET);
+      warmGlobalWorld(initial);
+      initLivingWorld(initial, resolveSnakeMatchRule(SNAKE_WORLD_TARGET));
+      applyMatchIdentity(initial);
+      worldRef.current = initial;
+      setWorld(initial);
       setConnected(true);
+      entryLog("CONNECTED", "PRACTICE");
+      entryLog("SPAWNED");
+      entryLog("GAME_READY", "PRACTICE");
+      return;
+    }
+    let active = true;
+    entryLog("CONNECTING", roomCode);
+    const timeout = window.setTimeout(() => {
+      if (!active || worldRef.current) return;
+      entryLogFail("TIMEOUT", `join ${roomCode}`);
+      onJoinTimeout?.();
+    }, 8000);
+    (async () => {
+      try {
+        await ensureRoom(roomCode);
+        await joinRoomAsync(roomCode);
+        const r = getRoom(roomCode);
+        if (!r || !active) return;
+        start(roomCode);
+        entryLog("CONNECTED", roomCode);
+        entryLog("JOINED");
+        startSnakeTelemetry(roomCode, { isGlobalWorld, quickPlay: isGlobalWorld });
+        refreshWorldTuningFromTelemetry();
+        Replay.multiplayer.analytics.start(roomCode, "snake", r.players.length);
+        Replay.multiplayer.team.create(roomCode, playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party", r.players.map((p) => p.deviceId));
+        setConnected(true);
+      } catch (err) {
+        entryLogFail("CONNECT", err instanceof Error ? err.message : String(err));
+        onJoinTimeout?.();
+      }
     })();
-    return () => { active = false; };
-  }, [roomCode, playerCount]);
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [roomCode, playerCount, practiceMode, isGlobalWorld, deviceId, onJoinTimeout]);
 
   useEffect(() => {
-    if (!roomCode || !connected) return;
+    if (!roomCode || !connected || practiceMode) return;
     const unsub = subscribeRoom(roomCode, (r) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) { worldRef.current = state; setWorld(state); }
@@ -266,7 +307,14 @@ export function SnakeIoGame() {
       }
     });
     return unsub;
-  }, [roomCode, connected, isHost, isGlobalWorld]);
+  }, [roomCode, connected, isHost, isGlobalWorld, practiceMode]);
+
+  useEffect(() => {
+    if (!world) return;
+    entryLog("SPAWNED");
+    entryLog("CANVAS_READY");
+    entryLog("GAME_READY", roomCode);
+  }, [world, roomCode]);
 
   useEffect(() => {
     if (!roomCode || !isHost || !connected) return;

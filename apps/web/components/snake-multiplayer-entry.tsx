@@ -5,6 +5,7 @@ import {
   GLOBAL_WORLD_TARGET,
   quickPlayGlobal,
 } from "@game-platform/multiplayer-sdk";
+import { entryLog, entryLogFail } from "@game-platform/game-snake";
 import { createParty } from "@game-platform/replay-engine/social";
 import { Button, cn } from "@game-platform/ui";
 import { Users, Zap } from "lucide-react";
@@ -34,10 +35,13 @@ export function SnakeMultiplayerEntry({
 
   const handleQuickPlay = useCallback(async () => {
     setJoining(true);
+    entryLog("CLICK", "home-quick-play");
     try {
       const { href } = await quickPlayGlobal("snake");
+      entryLog("ROUTE", href);
       router.push(href);
-    } catch {
+    } catch (err) {
+      entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
       router.push("/flagship/snake-io/play?room=WORLD");
     } finally {
       setJoining(false);
