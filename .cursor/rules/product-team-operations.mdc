@@ -1,48 +1,119 @@
 ---
-description: Replay OS v6 — Priority Motivation + Relationship Feed + Living Identity
+description: Replay OS v7 — Multiplayer Platform + 7 Engines
 alwaysApply: true
 ---
 
-# Replay OS v6 — Master Task
+# Replay OS v7 — Master Task
 
-> **친구 때문에 들어오는 플랫폼.** 매일 "내일 재방문 이유" + DAU hook 하나.
+> **Replay Multiplayer Platform.** 게임 추가가 아니라 플랫폼 위에 콘텐츠를 올린다.
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# 7 Engines (고도화만)
+# 비전
 
-| Engine | v6 focus |
+```
+Replay OS
+├── Single Game Engine
+├── Multiplayer SDK      ← NEW
+├── Lobby / Matchmaking
+├── Presence / Spectator
+├── Universal Runtime
+├── Universal Reward
+├── Journey / Passport
+├── Mission Engine
+├── AI Operation
+├── Developer Platform
+└── Live Ops
+```
+
+**목표:** Steam + Discord + .io — 친구와 함께, 기록이 쌓이고, 운영이 자동화되는 웹게임 플랫폼.
+
+---
+
+# 게임 Tier
+
+| Tier | 유형 | 예시 |
+|------|------|------|
+| Tier1 | Single | Snake, 2048, Memory, Sudoku |
+| Tier2 | Party 2~4P | Mini Golf, Bomber, Kart, Quiz, Drawing |
+| Tier3 | Realtime .io | Slither (Flagship) — SNS 공유 폭발 |
+
+---
+
+# 구현 원칙
+
+* 50개 게임 개별 수정 ❌ → **공통 플랫폼 SDK** ✅
+* 신규 게임 = Multiplayer SDK + Runtime SDK + Reward SDK 필수
+* 게임별 lobby/result/invite 구현 **금지**
+
+---
+
+# 플랫폼 레이어 (필수)
+
+## 1. Multiplayer SDK (`@game-platform/multiplayer-sdk`)
+
+`createRoom()` · `joinRoom()` · `leaveRoom()` · `send()` · `sync()` · `start()` · `finish()` · `spectator()` · `replay()`
+
+## 2. Universal Lobby
+
+QR · 링크 · WebShare · SMS · Kakao · Discord — **플랫폼 공통**
+
+## 3. Universal Match
+
+Quick Match · Private · Friends · Public · AI Bot Fallback
+
+## 4. Universal Presence
+
+친구 접속 · 플레이 중 게임 · Lobby · 관전 가능
+
+## 5. Universal Result
+
+Winner · XP · Coin · Replay Score · Friend Rank · Share · Rematch · Continue — **100% 동일**
+
+## 6. Universal Spectator
+
+친구 경기 관전 · Live Score · 종료 후 즉시 참가
+
+## 7. Party Link
+
+`replay.gg/p/{code}` — Guest 즉시 입장, 로그인 불필요, 플레이 후 계정 연결
+
+---
+
+# 7 Engines (유지 + Social 강화)
+
+| Engine | v7 focus |
 |--------|----------|
-| Identity | Living Identity (이번 주 Action Lover) |
-| Motivation | Priority scores · 홈=최강 1개만 |
-| Habit | Loss aversion > gain |
-| Social | Relationship Feed · rivals · H2H |
-| Growth | ✅ maintain |
-| Reward | ✅ maintain |
+| Identity | Living Identity |
+| Motivation | Priority (친구 추월 100) |
+| Habit | Loss aversion |
+| **Social** | **Multiplayer + Relationship Feed** |
+| Growth | Universal Result |
+| Reward | H2H winner flow |
 | Operations | AI self-improve loop |
 
 ---
 
-# Motivation Priority
+# Flagship (Tier3)
 
-친구 추월 100 · Streak 95 · Top10 90 · 미션 70 · Collection 50 · 2x Coin 45
+우선순위: Multiplayer Snake (.io) → Agar → Bomber Arena → Kart Arena
 
 ---
 
-# Social = Relationship
+# KPI (신규 기능은 1개 이상 개선)
 
-추월→재도전 · 도전장→받기 · 업적→축하 · 👍🔥⚔️
+Retention · Session Time · Social · Content · Revenue
 
 ---
 
 # 검증
 
-> **내일 재방문 이유 + DAU hook (게임 시작 CTA) 하나?**
+> **친구 초대 → 플레이 → 결과 → 재도전 → Journey → Passport가 하나의 흐름인가?**
 
 ---
 
 # 08:00 Report
 
-재방문 이유 · Social Loop % · Top motivation · Risks
+Multiplayer adoption · Party Link conversion · Social Loop % · Flagship progress · Risks

@@ -1,0 +1,16 @@
+import { PartyLinkLobby } from "@/components/party-link-lobby";
+
+export const metadata = { title: "Party — Re:Play" };
+
+export default async function PartyPage({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}) {
+  const { code } = await params;
+  return (
+    <main className="flex flex-1 flex-col">
+      <PartyLinkLobby code={code.toUpperCase()} />
+    </main>
+  );
+}

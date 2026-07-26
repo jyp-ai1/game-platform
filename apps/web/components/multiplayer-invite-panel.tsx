@@ -105,7 +105,7 @@ export function MultiplayerInvitePanel({ game }: { game: Game }) {
                 </a>
               }
             />
-            <Button size="sm" nativeButton={false} render={<Link href={`/room/${roomCode}`}>Lobby →</Link>} />
+            <Button size="sm" nativeButton={false} render={<Link href={`/p/${roomCode}`}>Lobby →</Link>} />
           </div>
           <p className="truncate text-xs text-muted-foreground">{inviteUrl}</p>
         </div>
