@@ -1,85 +1,77 @@
 ---
-description: Replay OS 2.0 — Game Operating System (8 Platforms, 6 OS)
+description: Replay Layer Architecture — Build. Play. Share. Grow.
 alwaysApply: true
 ---
 
-# Replay OS 2.0 — Master Task
+# Replay — Master Task
 
-> **Replay = 8 Platforms 연결된 Company.** 기능 경쟁 → 생태계 경쟁 → **Game Operating System**.
+> **The Operating System for Browser Games.** · **Build. Play. Share. Grow.**
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Company Architecture
+# Master Rules
+
+Replay는 **기능(Function)** 을 개발하지 않는다 → **Layer**를 완성한다.
+
+Replay는 **화면(UI)** 을 개발하지 않는다 → **Engine**을 개발한다.
+
+Replay는 **게임(Game)** 을 개발하지 않는다 → **Ecosystem**을 개발한다.
+
+Replay는 **코드(Code)** 를 작성하지 않는다 → **Platform Asset**을 만든다.
+
+**하위 Layer 완료 전 상위 Layer 금지.** L1 → L2 → L3 → … 순서만.
+
+**측정 불가능한 % 점수 금지.** Definition of Done 체크리스트만.
+
+**구현 전 RFC 작성 필수.** `/docs/rfc` · `/docs/adr`
+
+---
+
+# 10-Gate (8/10 미만 → 구현 금지)
+
+1. 어느 Layer인가? · 2. 어느 Engine인가? · 3. 어느 Plugin인가?
+4. 어느 RFC인가? · 5. 어느 ADR인가? · 6. 모든 게임 재사용 가능한가?
+7. Creator도 사용하는가? · 8. 운영도 사용하는가? · 9. AI도 사용하는가?
+10. 플랫폼 가치가 증가하는가?
+
+---
+
+# Layer Stack (하위→상위)
 
 ```
-Replay
-├── Player Platform      ├── Creator Platform
-├── Operations Platform  ├── AI Platform
-├── Game Platform SDK    ├── Marketplace
-├── Growth Platform      └── Developer Platform
+L7 Business      Revenue · Premium · Sponsor · Ads
+L6 Creator       Studio · Marketplace · Templates
+L5 Community     Friends · Challenge · League · Guild
+L4 Identity      Passport · Journey · Wrapped · Mission
+L3 Gameplay      Runtime · Stage · Reward · Ranking
+L2 Engine        Replay Engine · Plugins · Bus · Cloud
+L1 Infrastructure Auth · Supabase · Storage · CI · Deploy · QA
 ```
 
 ---
 
-# 6 Operating Systems
+# Engine Definition of Done (체크리스트)
 
-| OS | 담당 |
-|----|------|
-| **Player OS** | Retention · Journey · Passport · Challenge · Friend · Collection |
-| **Creator OS** | Studio · Builder · Template · Marketplace · Analytics · Revenue |
-| **Growth OS** | Mission · Notification · Streak · Season · Referral · Event |
-| **AI OS** | QA · Bug · Fix PR · Summary · Recommendation · Operation |
-| **Operation OS** | Health · Deploy · RC · Metrics · Release · Reports (5분) |
-| **Revenue OS** | Premium · Ads · Sponsor · Creator Revenue · Subscription |
-
----
-
-# Replay Engine (SDK → Engine)
-
-```
-Replay.Engine.Runtime · Multiplayer · Identity · Stage · Cloud
-Replay.Engine.Achievement · Collection · Analytics · Notification · AI
-```
-
-Plugin: `leaderboard` · `passport` · `journey` · `achievement` · `collection` · `multiplayer` · `ads` · `analytics` · `notification` · `voice` · `tournament`
-
-Developer: `Replay CLI` → `create-game` → Plugin → Publish
-
----
-
-# 10 Platform Pillars (전체 완료까지 반복)
-
-1. Platform Core (Engine · Plugin · Event Bus · Registry)
-2. Player OS
-3. Creator OS
-4. Multiplayer Platform
-5. Growth OS
-6. AI OS
-7. Operations OS
-8. Revenue OS
-9. Developer Platform (CLI · Docs · CI/CD)
-10. Product Quality (Runtime 100% · RC 95%+)
-
----
-
-# Definition of Done
-
-- Journey 때문에 재방문 · 하루 안에 게임 배포 · 운영 5분 상태 파악 · AI QA/운영 자동화 · Engine+Plugin 통합 · .io Flagship · Marketplace↔Revenue · **Game OS로 인식**
+- [x] Runtime · [x] Stage · [x] Save · [x] Reward
+- [ ] Multiplayer (cross-device transport)
+- [ ] Notification
+- [x] Analytics · [ ] AI (production)
+- [x] Plugin · [x] CLI
 
 ---
 
 # Autonomous Loop
 
-중간보고·질문·승인·기능단위보고 **금지**. 중단: Build/배포 불가 · 데이터 손실 · API Key · 보안.
+```
+Layer gap 분석 → RFC/ADR → Engine/Plugin 구현 → QA → Commit → Push → Preview → 반복
+```
 
-```
-분석 → OS gap → 설계 → 구현 → QA → Commit → Push → Preview → 반복
-```
+중간보고·질문·승인·기능단위보고 **금지**. 중단: Build/배포 불가 · 데이터 손실 · API Key · 보안.
 
 ---
 
 # 08:00 Daily Report (유일)
 
-OS 완성도(%) · 8 Platform · 6 OS 상태 · Before/After · URLs · Commit · RC · Risks · 다음 자동 진행
+Layer DoD 체크 · Engine 체크리스트 · RFC/ADR · Before/After · URLs · Commit · RC · Risks · 다음 Layer 작업
