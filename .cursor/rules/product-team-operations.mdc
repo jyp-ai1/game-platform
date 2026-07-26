@@ -1,102 +1,51 @@
 ---
-description: Replay — Product-first execution (P0 Player/Multiplayer)
+description: Replay — Product-first execution (P0 Viral Loop)
 alwaysApply: true
 ---
 
 # Replay — Master Task
 
-> **The Operating System for Browser Games.** · **Build. Play. Share. Grow.**
+> **친구와 놀기 위해 들어오는 플랫폼**
 
-Branch: `content-factory` · Commit: `feat(phoenix): ...`
+Branch: `content-factory`
 
 ---
 
-# Phase: P0 Flagship Experience
-
-> **"Slither.io보다 Replay Snake가 더 재미있다"** — Events · Teams · Objectives · AI Director
+# Phase: P0 Final — Viral Loop
 
 ```
-Dynamic Events → Team Mode → Match Objectives → Power-Ups → Seasons → AI Director → Moments → Spectator 2.0 → Tournament
+친구 접속 → Party → 같이 게임 → 결과 → 리벤지 → 다른 게임 → 다음날 초대
 ```
 
-People-first home: 친구/토너먼트/Quick Match before game pick.
+## Connected
+
+- `completeMultiplayerMatch()` — party finish + friends + journey + ranking
+- `ContinueTogetherPanel` — post-game next game (Snake → Golf → UNO → Bomber)
+- Party Persistence — XP, Level, Streak, History, Collection, Missions
+- Friend Passport — title, level, badges, top%
+- Party Chat — quick reactions (🔥 GG 리벤지 가자)
+- Universal Invite — Kakao, SMS, Discord, Web Share, Deep Link
+- Replay Together home strip — friends waiting → party mission → tournament
+- Balance tiers — 1P / 2-3P / 4-8P / 9-20P auto via `Replay.multiplayer.balance()`
 
 **Creator Platform freeze**
 
 ---
 
-# Reuse Rules (Master Rule)
+# Reuse Rules
 
-새로운 구조를 추가하기 전에 기존 구조를 활용할 수 있는지 먼저 검토한다.
-
-- 새로운 Engine보다 **기존 Engine 확장**을 우선한다.
-- 새로운 Plugin보다 **기존 Plugin 재사용**을 우선한다.
-- 새로운 화면보다 **기존 화면 연결성**을 우선한다.
-- 새로운 게임보다 **기존 게임의 리텐션**을 우선한다.
-- 새로운 Creator 기능보다 **Player 증가**를 우선한다.
+기존 Engine 확장 우선 · Player 증가 우선 · 4-Gate (친구·재방문·콘텐츠·운영) 2+ YES
 
 ---
 
-# Execution Priority (고정)
-
-## P0 — L2 Engine DoD
-
-1. Cross-device Multiplayer (Realtime transport)
-2. Notification Engine (행동 유도)
-3. AI Production Engine (Issue pipeline)
-
-## P0 — Flagship
-
-**Replay Snake.io** — 20명 · 실시간 · 랭킹 · 친구 초대
-
-## P1 — Player Retention
-
-Challenge · Streak · Mission · Passport · Journey
-
-## P1 — Ops Automation
-
-`/admin/os` AI Daily Summary · Issue Pipeline · Release Assistant
-
-## P2 — Creator (Player 성장 후)
-
-Upload API · 심사 · 배포 · 수익화
-
----
-
-# Player Loop (순서)
+# Player Loop
 
 ```
-Player → Friend → Multiplayer → Challenge → Retention → Creator
+Player → Friend → Party → Multiplayer → Result → Continue → Retention
 ```
-
----
-
-# Layer Stack (참고만 — % 금지)
-
-L1 Infra · L2 Engine · L3 Gameplay · L4 Identity · L5 Community · L6 Creator · L7 Business
-
-Engine DoD 체크리스트만 추적.
-
----
-
-# Labs
-
-`/labs` — 실험 기능. 반응 좋은 것만 정식 승격.
-
----
-
-# 10-Gate · RFC/ADR (유지)
-
-구현 전 Layer/Engine/Plugin/RFC/ADR 확인. 8/10 미만 → 금지.
 
 ---
 
 # Autonomous Loop
 
-P0 gap → 기존 Engine 확장 → QA → Commit → Push → Preview → 반복
-
----
-
-# 08:00 Daily Report
-
-Engine DoD · P0 progress · Today's Wins/Risks/Opp · URLs · Commit · RC · Risks
+P0 gap → Engine 확장 → QA → Commit → Push → Preview

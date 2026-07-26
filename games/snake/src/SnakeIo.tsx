@@ -14,6 +14,7 @@ import {
   start,
   subscribeRoom,
 } from "@game-platform/multiplayer-sdk";
+import { completeMultiplayerMatch } from "@game-platform/replay-engine/social";
 import { Button, cn, ScoreBox } from "@game-platform/ui";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -192,14 +193,18 @@ export function SnakeIoGame() {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleDirection]);
 
-  function handleEnd() {
+  async function handleEnd() {
     if (!roomCode || !world) return;
     const scores: Record<string, number> = {};
     for (const s of Object.values(world.snakes)) scores[s.deviceId] = s.score;
     finish(roomCode, { roomCode, gameSlug: "snake", winnerId: world.rankings[0]?.deviceId ?? null, scores, finishedAt: new Date().toISOString() });
     reportScore("snake", mySnake?.score ?? 0);
-    buildMultiplayerResult(getRoom(roomCode)!);
     Replay.multiplayer.analytics.flush(roomCode, world.config.worldSize);
+    const room = getRoom(roomCode);
+    if (room && typeof window !== "undefined") {
+      const loop = await completeMultiplayerMatch(room);
+      window.dispatchEvent(new CustomEvent("replay:viral-loop-complete", { detail: loop }));
+    }
   }
 
   if (!roomCode) return <p className="text-center text-muted-foreground">Room code required</p>;

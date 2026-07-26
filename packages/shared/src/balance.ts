@@ -1,4 +1,5 @@
 /** Universal Multiplayer Balance — shared types. */
+import type { PlayModes } from "./social";
 
 export interface GameProfile {
   gameSlug: string;
@@ -11,6 +12,12 @@ export interface GameProfile {
   spectator: boolean;
   replayMoments: boolean;
   aiBalance: boolean;
+  /** Per-game play mode flags — home auto-surfaces solo/friends/party/tournament. */
+  playModes: PlayModes;
+  /** Creator metadata — platform auto-attaches multiplayer features. */
+  multiplayer?: boolean;
+  party?: boolean;
+  tournament?: boolean;
 }
 
 /** Per-game balance.ts profile — games define this only. */

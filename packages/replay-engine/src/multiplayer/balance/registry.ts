@@ -49,6 +49,10 @@ export function initBalanceRegistry(): void {
     spectator: true,
     replayMoments: true,
     aiBalance: true,
+    multiplayer: true,
+    party: true,
+    tournament: true,
+    playModes: { solo: true, duo: true, party: true, tournament: true, spectator: true },
   });
   registerBalanceProfile("snake", {
     baseWorldSize: 100,

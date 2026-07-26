@@ -33,6 +33,7 @@ import {
 } from "@game-platform/multiplayer-sdk";
 import { BalanceEngine, balanceFor } from "@game-platform/replay-engine/balance";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
+import { PartyEngine, FriendsEngine, RecommendEngine, ViralLoopEngine, PartyMissionEngine, PartyJourneyEngine, RankingEngine, PARTY_REACTIONS } from "@game-platform/replay-engine/social";
 
 export interface ReplayInitOptions {
   gameSlug: string;
@@ -142,6 +143,53 @@ const collection = {
 const friend = {
   deviceId: () => getDeviceId(),
   nickname: () => getLastNickname(),
+  list: FriendsEngine.list,
+  recent: FriendsEngine.recent,
+  favorites: FriendsEngine.favorites,
+  record: FriendsEngine.record,
+  recommend: FriendsEngine.recommend,
+  favorite: FriendsEngine.favorite,
+  relation: FriendsEngine.relation,
+  labels: FriendsEngine.labels,
+};
+
+const party = {
+  create: PartyEngine.create,
+  join: PartyEngine.join,
+  leave: PartyEngine.leave,
+  get: PartyEngine.get,
+  mine: PartyEngine.mine,
+  ready: PartyEngine.ready,
+  chat: PartyEngine.chat,
+  react: PartyEngine.react,
+  leader: PartyEngine.leader,
+  queue: PartyEngine.queue,
+  travel: PartyEngine.travel,
+  finish: PartyEngine.finish,
+  subscribe: PartyEngine.subscribe,
+  activeId: PartyEngine.activeId,
+  mission: PartyMissionEngine,
+  journey: PartyJourneyEngine,
+};
+
+const viral = {
+  complete: ViralLoopEngine.complete,
+  continue: ViralLoopEngine.continue,
+  rematch: ViralLoopEngine.rematch,
+};
+
+const ranking = {
+  record: RankingEngine.record,
+  global: RankingEngine.global,
+  friends: RankingEngine.friends,
+  party: RankingEngine.party,
+};
+
+const recommend = {
+  situations: RecommendEngine.situations,
+  fetch: RecommendEngine.fetch,
+  playModes: RecommendEngine.playModes,
+  recordGame: RecommendEngine.recordGame,
 };
 
 const challenge = {
@@ -182,6 +230,10 @@ export const Replay = {
   reward,
   collection,
   friend,
+  party,
+  viral,
+  ranking,
+  recommend,
   challenge,
   analytics,
   storage,

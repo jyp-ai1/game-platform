@@ -1,107 +1,173 @@
 "use client";
 
+import { PartyChatBar } from "@/components/party-chat-bar";
+import { PartyInvitePanel } from "@/components/party-invite-panel";
 import { getDeviceId } from "@game-platform/game-sdk";
 import {
   ensureRoom,
   getPartyLinkUrl,
   joinRoomAsync,
   setPlayerReady,
-  shareRoom,
   subscribeRoom,
   tickRoomCountdown,
 } from "@game-platform/multiplayer-sdk";
+import {
+  getParty,
+  joinParty,
+  sendPartyChat,
+  setPartyReady,
+  subscribeParty,
+  travelToGame,
+} from "@game-platform/replay-engine/social";
+import type { Party, PartyMember } from "@game-platform/shared";
 import { Button, Container } from "@game-platform/ui";
-import { Share2, Users } from "lucide-react";
+import { MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-/** Party Link lobby — cross-device via Supabase Realtime. */
+/** Universal Party lobby — persistent party above room, cross-device Realtime. */
 export function PartyLinkLobby({ code }: { code: string }) {
+  const searchParams = useSearchParams();
+  const autoJoin = searchParams.get("join") === "1";
   const [guestName, setGuestName] = useState("");
   const [joined, setJoined] = useState(false);
   const [room, setRoom] = useState<Awaited<ReturnType<typeof ensureRoom>>>(null);
+  const [party, setParty] = useState<Party | null>(null);
+  const [chatInput, setChatInput] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const roomCode = party?.currentRoomCode;
 
   useEffect(() => {
     let active = true;
     setLoading(true);
-    ensureRoom(code).then((r) => {
-      if (active) {
-        setRoom(r);
-        setLoading(false);
+    void (async () => {
+      const p = await getParty(code);
+      if (!active) return;
+      setParty(p);
+      if (p?.currentRoomCode) {
+        const r = await ensureRoom(p.currentRoomCode);
+        if (active) setRoom(r);
       }
+      if (active) setLoading(false);
+    })();
+    const unsubParty = subscribeParty(code, (p) => {
+      setParty(p);
+      if (p.currentRoomCode) void ensureRoom(p.currentRoomCode).then(setRoom);
     });
-    const unsub = subscribeRoom(code, setRoom);
     return () => {
       active = false;
-      unsub();
+      unsubParty();
     };
   }, [code]);
 
-  const existing = room?.players.find((p) => p.deviceId === getDeviceId());
-  const inRoom = joined || !!existing;
-  const waiting = room ? room.maxPlayers - room.players.length : 0;
-  const allReady = room ? room.players.length >= 2 && room.players.every((p) => p.ready) : false;
+  const deviceId = getDeviceId();
+  const partyMember = party?.members.find((m) => m.deviceId === deviceId);
 
   useEffect(() => {
-    if (!allReady || !room || room.status !== "ready" || room.countdown <= 0) return;
+    if (!autoJoin || !party || loading || partyMember) return;
+    void joinParty(code, "Guest").then((p) => {
+      if (p) { setParty(p); setJoined(true); }
+    });
+  }, [autoJoin, party, loading, partyMember, code]);
+
+  useEffect(() => {
+    if (!roomCode) return;
+    const unsubRoom = subscribeRoom(roomCode, setRoom);
+    return unsubRoom;
+  }, [roomCode]);
+
+  const inParty = joined || !!partyMember;
+  const isLeader = party?.leaderId === deviceId;
+  const members: PartyMember[] = party?.members ?? [];
+  const allReady = members.length >= 2 && members.every((m) => m.ready);
+  const gameSlug = party?.currentGameSlug ?? room?.gameSlug ?? "snake";
+  const maxPlayers = room?.maxPlayers ?? 20;
+
+  useEffect(() => {
+    if (!allReady || !room || room.status !== "ready" || room.countdown <= 0 || !roomCode) return;
     const id = setInterval(() => {
-      const next = tickRoomCountdown(code);
+      const next = tickRoomCountdown(roomCode);
       if (next) setRoom({ ...next });
     }, 1000);
     return () => clearInterval(id);
-  }, [allReady, code, room?.status, room?.countdown]);
+  }, [allReady, room?.status, room?.countdown, roomCode]);
 
   async function handleJoin() {
-    const next = await joinRoomAsync(code, { nickname: guestName.trim() || "Guest", isGuest: true });
-    if (next) {
-      setRoom(next);
+    const nickname = guestName.trim() || "Guest";
+    const nextParty = await joinParty(code, nickname);
+    if (nextParty) {
+      setParty(nextParty);
       setJoined(true);
+    }
+    if (nextParty?.currentRoomCode) {
+      const nextRoom = await joinRoomAsync(nextParty.currentRoomCode, { nickname, isGuest: true });
+      if (nextRoom) setRoom(nextRoom);
     }
   }
 
-  function handleReady() {
-    setPlayerReady(code, true);
+  async function handleReady() {
+    await setPartyReady(code, true);
+    if (roomCode) setPlayerReady(roomCode, true);
+  }
+
+  async function handleTravel() {
+    const result = await travelToGame(code, gameSlug);
+    if (result) {
+      setParty(result.party);
+      const r = await ensureRoom(result.roomCode);
+      setRoom(r);
+    }
+  }
+
+  async function handleChat(e: React.FormEvent) {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const next = await sendPartyChat(code, chatInput.trim());
+    if (next) setParty(next);
+    setChatInput("");
   }
 
   if (loading) {
     return (
       <Container className="flex min-h-[60vh] items-center justify-center py-16">
-        <p className="text-muted-foreground">방 연결 중…</p>
+        <p className="text-muted-foreground">파티 연결 중…</p>
       </Container>
     );
   }
 
-  if (!room) {
+  if (!party) {
     return (
       <Container className="flex min-h-[60vh] flex-col items-center justify-center py-16 text-center">
-        <p className="text-lg font-semibold">방을 찾을 수 없습니다</p>
+        <p className="text-lg font-semibold">파티를 찾을 수 없습니다</p>
         <p className="mt-2 text-sm text-muted-foreground">링크가 만료되었거나 잘못된 코드입니다.</p>
         <Button className="mt-6" nativeButton={false} render={<Link href="/games">게임 둘러보기</Link>} />
       </Container>
     );
   }
 
-  const gameStarted = room.status === "playing" || (allReady && room.countdown === 0);
-  const playHref = room.gameSlug === "snake"
-    ? `/flagship/snake-io/play?room=${code}`
-    : `/games/${room.gameSlug}?room=${code}`;
+  const gameStarted = room?.status === "playing" || (allReady && room?.countdown === 0);
+  const playHref = gameSlug === "snake"
+    ? `/flagship/snake-io/play?room=${roomCode ?? code}`
+    : `/games/${gameSlug}?room=${roomCode ?? code}`;
 
   return (
     <Container className="flex min-h-[60vh] max-w-md flex-col justify-center py-10">
       <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card/90 p-8 text-center shadow-lg shadow-primary/10">
         <Users className="mx-auto size-8 text-primary" />
-        <h1 className="mt-4 text-xl font-bold">친구가 기다립니다</h1>
-        <p className="mt-1 capitalize text-muted-foreground">{room.gameSlug.replace(/-/g, " ")}</p>
+        <h1 className="mt-4 text-xl font-bold">Universal Party</h1>
+        <p className="mt-1 capitalize text-muted-foreground">{gameSlug.replace(/-/g, " ")}</p>
+        <p className="mt-1 text-xs text-primary">파티 {party.id} · Lv{party.progress.level} · Streak {party.progress.streak}</p>
 
         <p className="mt-6 text-4xl font-bold tabular-nums text-primary">
-          {room.players.length} / {room.maxPlayers}
+          {members.length} / {maxPlayers}
         </p>
-        {waiting > 0 && !gameStarted ? (
-          <p className="mt-1 text-sm text-amber-400">{waiting}명 더 필요</p>
+        {members.length < 2 && !gameStarted ? (
+          <p className="mt-1 text-sm text-amber-400">친구 초대 후 함께 플레이</p>
         ) : null}
 
-        {!inRoom ? (
+        {!inParty ? (
           <div className="mt-6 space-y-3">
             <input
               type="text"
@@ -112,19 +178,19 @@ export function PartyLinkLobby({ code }: { code: string }) {
               maxLength={16}
             />
             <Button className="w-full" size="lg" onClick={handleJoin}>
-              입장
+              파티 입장
             </Button>
-            <p className="text-xs text-muted-foreground">로그인 없이 바로 플레이 · Cross-device Realtime</p>
+            <p className="text-xs text-muted-foreground">로그인 없이 · Cross-device Realtime</p>
           </div>
         ) : (
           <div className="mt-6 space-y-3">
             <ul className="space-y-2 text-left">
-              {room.players.map((p) => (
+              {members.map((p) => (
                 <li
                   key={p.deviceId}
                   className="flex items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-sm"
                 >
-                  <span>{p.nickname}{p.isGuest ? " (Guest)" : ""}</span>
+                  <span>{p.nickname}{p.isLeader ? " 👑" : ""}</span>
                   <span className={p.ready ? "text-emerald-400" : "text-muted-foreground"}>
                     {p.ready ? "Ready ✓" : "Waiting…"}
                   </span>
@@ -132,23 +198,52 @@ export function PartyLinkLobby({ code }: { code: string }) {
               ))}
             </ul>
 
-            {existing && !existing.ready && !gameStarted ? (
+            {partyMember && !partyMember.ready && !gameStarted ? (
               <Button className="w-full" onClick={handleReady}>Ready</Button>
+            ) : null}
+
+            {isLeader && !gameStarted ? (
+              <Button className="w-full" variant="outline" onClick={handleTravel}>
+                {roomCode ? "게임 재시작" : "게임 시작 (파티 이동)"}
+              </Button>
             ) : null}
 
             {gameStarted ? (
               <Button className="w-full" size="lg" nativeButton={false} render={<Link href={playHref}>게임 시작 →</Link>} />
-            ) : allReady && room.countdown > 0 ? (
+            ) : allReady && room && room.countdown > 0 ? (
               <p className="text-3xl font-bold tabular-nums text-primary">{room.countdown}</p>
             ) : null}
+
+            {party.chat.length > 0 ? (
+              <div className="max-h-24 overflow-y-auto rounded-xl border border-white/10 p-2 text-left text-xs">
+                {party.chat.slice(-5).map((m) => (
+                  <p key={m.id} className="text-muted-foreground">
+                    <span className="text-foreground">{m.nickname}</span>: {m.text}
+                    {m.emoji ? ` ${m.emoji}` : ""}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+
+            <PartyChatBar partyCode={code} />
+
+            <form onSubmit={handleChat} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="파티 채팅…"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                className="flex-1 rounded-lg border border-white/10 bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                maxLength={120}
+              />
+              <Button type="submit" size="sm" variant="outline" aria-label="Send chat">
+                <MessageCircle className="size-4" />
+              </Button>
+            </form>
           </div>
         )}
 
-        <div className="mt-6 flex justify-center gap-2">
-          <Button size="sm" variant="outline" className="gap-1" onClick={() => shareRoom(code, room.gameSlug, room)}>
-            <Share2 className="size-3" /> 초대
-          </Button>
-        </div>
+        <PartyInvitePanel code={code} gameSlug={gameSlug} />
         <p className="mt-3 truncate text-[10px] text-muted-foreground">{getPartyLinkUrl(code)}</p>
       </div>
     </Container>

@@ -6,16 +6,17 @@ import { balanceFor, computeBalance } from "../index";
 import { getMatchSizeProfile } from "../registry";
 
 describe("Universal Balance Engine", () => {
-  it("1 player — base scale", () => {
+  it("1 player — small map, fast tempo, high food", () => {
     const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 1);
     assert.equal(b.worldSize, 100);
-    assert.equal(b.foodCount, 200);
+    assert.ok(b.foodCount >= 260);
+    assert.ok(b.physicsTickMs < 120);
     assert.equal(b.mapScale, 1);
   });
 
-  it("2 players — map 150% food 170%", () => {
+  it("2 players — map 1.8x", () => {
     const b = computeBalance({ baseWorldSize: 100, baseFoodDensity: 200, baseRespawnMs: 3000 }, 2);
-    assert.ok(b.worldSize >= 140 && b.worldSize <= 160);
+    assert.ok(b.worldSize >= 170 && b.worldSize <= 190);
     assert.ok(b.foodCount >= 320);
     assert.ok(b.respawnMs < 3000);
   });

@@ -12,6 +12,16 @@ const snakeGameProfile: GameProfile = {
   spectator: true,
   replayMoments: true,
   aiBalance: true,
+  multiplayer: true,
+  party: true,
+  tournament: true,
+  playModes: {
+    solo: true,
+    duo: true,
+    party: true,
+    tournament: true,
+    spectator: true,
+  },
 };
 
 export default snakeGameProfile;

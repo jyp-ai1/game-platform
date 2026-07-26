@@ -25,6 +25,25 @@ export type {
   MatchSizeProfile,
 } from "./balance";
 export type {
+  PlayModes,
+  Party,
+  PartyMember,
+  PartyChatMessage,
+  PartyQueueItem,
+  PartyHistoryEntry,
+  PartyProgress,
+  PartyMissionProgress,
+  PartyReactionId,
+  PartyJourneyEntry,
+  FriendRelationKind,
+  FriendProfile,
+  FriendPassport,
+  SituationKind,
+  SituationRecommendation,
+  CrossGameRankingEntry,
+  CreatorMultiplayerMeta,
+} from "./social";
+export type {
   WorldEventKind,
   WorldEvent,
   PowerUpKind,

@@ -1,6 +1,6 @@
 "use client";
 
-import type { MultiplayerResultPayload } from "@game-platform/shared";
+import type { MultiplayerResultPayload, PartyProgress } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
 import { Share2, Swords, Trophy } from "lucide-react";
 import Link from "next/link";
@@ -10,12 +10,17 @@ export function UniversalMultiplayerResult({
   result,
   onRematch,
   onContinue,
+  partyProgress,
+  partyId,
 }: {
   result: MultiplayerResultPayload;
   onRematch?: () => void;
   onContinue?: () => void;
+  partyProgress?: PartyProgress;
+  partyId?: string | null;
 }) {
   const isWinner = result.scores[0]?.deviceId === result.winnerId;
+  const rematchHref = partyId ? `/p/${partyId}` : `/p/${result.roomCode}`;
 
   return (
     <div className="rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-primary/5 to-card p-6 sm:p-8">
@@ -23,6 +28,12 @@ export function UniversalMultiplayerResult({
         <Trophy className="size-4 text-amber-400" />
         Match Result
       </div>
+
+      {partyProgress ? (
+        <p className="mt-2 text-xs text-primary">
+          Party Lv{partyProgress.level} · Streak {partyProgress.streak} · +XP
+        </p>
+      ) : null}
 
       {result.winnerNickname ? (
         <h2 className="mt-4 text-2xl font-bold">
@@ -58,7 +69,7 @@ export function UniversalMultiplayerResult({
             <Swords className="size-4" /> Rematch
           </Button>
         ) : (
-          <Button nativeButton={false} render={<Link href={`/p/${result.roomCode}`}>Rematch</Link>} className="gap-1">
+          <Button nativeButton={false} render={<Link href={rematchHref}>Rematch</Link>} className="gap-1">
             <Swords className="size-4" /> Rematch
           </Button>
         )}

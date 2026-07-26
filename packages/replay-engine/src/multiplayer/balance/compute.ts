@@ -2,11 +2,11 @@
 import type { BalanceProfile, ComputedBalance, GameProfile } from "@game-platform/shared";
 
 const BREAKPOINTS = [
-  { players: 1, map: 1.0, food: 1.0, respawn: 1.0, speed: 1.0 },
-  { players: 2, map: 1.5, food: 1.7, respawn: 1.2, speed: 1.0 },
-  { players: 4, map: 2.2, food: 2.5, respawn: 1.8, speed: 1.05 },
-  { players: 8, map: 3.5, food: 4.2, respawn: 3.0, speed: 1.1 },
-  { players: 16, map: 5.0, food: 6.5, respawn: 5.0, speed: 1.12 },
+  { players: 1, map: 1.0, food: 1.35, respawn: 0.85, speed: 1.15 },
+  { players: 2, map: 1.8, food: 1.7, respawn: 1.2, speed: 1.05 },
+  { players: 4, map: 2.5, food: 2.5, respawn: 1.8, speed: 1.08 },
+  { players: 8, map: 4.0, food: 4.2, respawn: 3.0, speed: 1.1 },
+  { players: 16, map: 5.5, food: 6.5, respawn: 5.0, speed: 1.12 },
   { players: 20, map: 7.0, food: 8.5, respawn: 6.5, speed: 1.15 },
   { players: 32, map: 9.0, food: 10.0, respawn: 8.0, speed: 1.2 },
 ] as const;
@@ -64,7 +64,7 @@ export function computeBalance(
     difficulty,
     rewardRate: (profile.baseRewardRate ?? 1) * (1 + playerCount * 0.005),
     enemyDensity: Math.min(1, playerCount / 20),
-    bossEventsEnabled: playerCount >= 20,
+    bossEventsEnabled: playerCount >= 4,
     features: [],
     viewportCells: profile.viewportCells ?? 80,
   };

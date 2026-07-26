@@ -1,6 +1,7 @@
 "use client";
 
 import { createRoom, getPartyLinkUrl } from "@game-platform/multiplayer-sdk";
+import { createParty } from "@game-platform/replay-engine/social";
 import { Button } from "@game-platform/ui";
 import { Share2, Users, Zap } from "lucide-react";
 import Link from "next/link";
@@ -9,10 +10,18 @@ import { useState } from "react";
 /** Flagship — Replay Snake.io entry (P0). */
 export function FlagshipSnakeIoHub() {
   const [code, setCode] = useState<string | null>(null);
+  const [isParty, setIsParty] = useState(false);
 
   function handleQuickPlay() {
     const room = createRoom("snake", 20, "public");
     setCode(room.code);
+    setIsParty(false);
+  }
+
+  async function handleCreateParty() {
+    const party = await createParty();
+    setCode(party.id);
+    setIsParty(true);
   }
 
   async function handleShare() {
@@ -44,19 +53,24 @@ export function FlagshipSnakeIoHub() {
           <Button size="lg" onClick={handleQuickPlay} className="gap-2">
             <Zap className="size-5" /> Quick Match
           </Button>
-          <Button variant="outline" nativeButton={false} render={<Link href="/p/DEMO">Join Party</Link>} />
+          <Button size="lg" variant="outline" onClick={handleCreateParty} className="gap-2">
+            <Users className="size-5" /> Create Party
+          </Button>
+          <Button variant="ghost" nativeButton={false} render={<Link href="/p/DEMO">Join Party</Link>} />
         </div>
       ) : (
         <div className="rounded-3xl border border-primary/30 bg-primary/5 p-8 text-center">
-          <p className="text-sm text-muted-foreground">Room Code</p>
+          <p className="text-sm text-muted-foreground">{isParty ? "Party Code" : "Room Code"}</p>
           <p className="mt-2 text-4xl font-bold tracking-widest text-primary">{code}</p>
           <p className="mt-4 text-sm">{getPartyLinkUrl(code)}</p>
           <div className="mt-6 flex justify-center gap-3">
-            <Button nativeButton={false} render={<Link href={`/p/${code}`}>Enter Lobby</Link>} />
+            <Button nativeButton={false} render={<Link href={`/p/${code}`}>{isParty ? "Party Lobby" : "Enter Lobby"}</Link>} />
             <Button variant="outline" onClick={handleShare} className="gap-2">
               <Share2 className="size-4" /> Invite Friends
             </Button>
-            <Button variant="outline" nativeButton={false} render={<Link href={`/flagship/snake-io/play?room=${code}`}>Play →</Link>} />
+            {!isParty ? (
+              <Button variant="outline" nativeButton={false} render={<Link href={`/flagship/snake-io/play?room=${code}`}>Play →</Link>} />
+            ) : null}
           </div>
         </div>
       )}
