@@ -20,20 +20,8 @@ alwaysApply: true
 ## 개발 우선순위
 
 ```
-P0 AI PM Experience 2.0 + Platform Core → P1 Flagship MP → P2 Creator → P3 Growth → P4 Business → P5 AI Ops → P6 Production
+P0 Platform Core → P1 Flagship MP → P2 Creator → P3 Growth/Viral → P4 Business → P5 AI → P6 Production
 ```
-
----
-
-## P0 — AI PM Experience 2.0 (Co-Founder AI)
-
-**목표:** Founder가 "AI를 사용한다"가 아니라 **"AI PM과 함께 회사를 운영한다"**고 느낀다.
-
-**판단 기준:** 이 기능이 Founder에게 '혼자가 아니라 AI PM과 함께 회사를 운영한다'는 느낌을 더 강하게 주는가? YES가 아니면 제외.
-
-**Rules:** Why before What · 분석 중 Micro Question (멈추지 않음) · 문제 설명 금지·실행 제안 · 완료=브리핑 · Today Hero=시간·효과·행동 · Thinking Timeline · Confidence Engine · Action First CTA
-
-**Route:** `/admin/pm` · KPI: Trust · Co-work feel · Today action · Return tomorrow
 
 ---
 

@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 const NAV: Array<{ href: string; label: string; exact?: boolean }> = [
-  { href: "/admin/pm", label: "AI PM" },
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/health", label: "Health" },
   { href: "/admin/monitoring", label: "Monitoring" },

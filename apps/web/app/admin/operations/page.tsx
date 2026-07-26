@@ -26,9 +26,6 @@ export default function AiOperationCenterPage() {
       <div>
         <h1 className="text-2xl font-bold">AI Operation Center</h1>
         <p className="text-sm text-muted-foreground">Track H — automated ops pipeline</p>
-        <Link href="/admin/pm" className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-          AI PM Experience 2.0 — Co-Founder Hub →
-        </Link>
       </div>
 
       <section className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
