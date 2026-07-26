@@ -42,8 +42,10 @@ export function getCreatorRevenue(): RevenueSummary {
 
 /** Marketplace — Games, Templates, Assets, Music, Sprites, UI, AI, NPC, Effects, etc. */
 export type MarketplaceItemType =
-  | "game" | "template" | "asset" | "music" | "sprite" | "ui"
-  | "ai-prompt" | "npc" | "effect" | "background" | "icon" | "shader";
+  | "game" | "template" | "asset" | "logic" | "music" | "sprite" | "ui"
+  | "ai-prompt" | "npc" | "boss" | "quest" | "achievement-pack" | "mission-pack"
+  | "skin" | "sound" | "particle" | "map" | "stage" | "localization"
+  | "ui-theme" | "physics" | "effect" | "background" | "icon" | "shader";
 
 export interface MarketplaceItem {
   id: string;
@@ -69,6 +71,12 @@ export const MARKETPLACE_ITEMS: MarketplaceItem[] = [
   { id: "m9", type: "npc", title: "Shopkeeper NPC", author: "AIForge", price: 250, currency: "coin", downloads: 67, rating: 4.6, tags: ["npc", "rpg"] },
   { id: "m10", type: "effect", title: "Particle FX Pack", author: "VFXLab", price: 350, currency: "coin", downloads: 178, rating: 4.8, tags: ["vfx", "particles"] },
   { id: "m11", type: "shader", title: "Retro CRT Shader", author: "ShaderDev", price: 100, currency: "coin", downloads: 245, rating: 4.4, tags: ["shader", "retro"] },
+  { id: "m12", type: "boss", title: "Dragon Boss Pack", author: "BossLab", price: 400, currency: "coin", downloads: 112, rating: 4.7, tags: ["boss", "rpg"] },
+  { id: "m13", type: "quest", title: "Daily Quest Pack", author: "QuestForge", price: 0, currency: "free", downloads: 340, rating: 4.6, tags: ["quest", "daily"] },
+  { id: "m14", type: "achievement-pack", title: "Arcade Achievements", author: "Re:Play", price: 0, currency: "free", downloads: 520, rating: 4.8, tags: ["achievement"] },
+  { id: "m15", type: "skin", title: "Neon Snake Skins", author: "SkinDev", price: 150, currency: "coin", downloads: 890, rating: 4.9, tags: ["skin", "snake"] },
+  { id: "m16", type: "map", title: "Dungeon Map Pack", author: "MapLab", price: 250, currency: "coin", downloads: 167, rating: 4.5, tags: ["map", "rpg"] },
+  { id: "m17", type: "logic", title: "Inventory System", author: "Re:Play", price: 0, currency: "free", downloads: 890, rating: 4.9, tags: ["logic", "inventory"] },
 ];
 
 export function getMarketplaceByType(type: MarketplaceItemType | "all"): MarketplaceItem[] {

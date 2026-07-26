@@ -63,8 +63,8 @@ export function CreatorIdentityCard({ compact = false }: { compact?: boolean }) 
         <Stat label="Likes" value={identity.totalLikes.toLocaleString()} />
         <Stat label="Followers" value={String(identity.followers)} />
       </div>
-      <Link href="/studio/create" className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white">
-        + Create Game
+      <Link href="/studio/build" className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white">
+        AI Builder →
       </Link>
     </div>
   );

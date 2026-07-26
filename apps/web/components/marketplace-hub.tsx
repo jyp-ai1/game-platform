@@ -12,7 +12,12 @@ const TABS: { id: MarketplaceItemType | "all"; label: string }[] = [
   { id: "music", label: "Music" },
   { id: "sprite", label: "Sprites" },
   { id: "ui", label: "UI Kit" },
-  { id: "ai-prompt", label: "AI Prompt" },
+  { id: "logic", label: "Logic" },
+  { id: "boss", label: "Boss" },
+  { id: "quest", label: "Quest" },
+  { id: "achievement-pack", label: "Achievements" },
+  { id: "skin", label: "Skins" },
+  { id: "map", label: "Maps" },
   { id: "npc", label: "NPC" },
   { id: "effect", label: "Effects" },
   { id: "background", label: "Backgrounds" },
@@ -29,8 +34,11 @@ export function MarketplaceHub() {
       <div>
         <h1 className="text-2xl font-bold">Replay Marketplace</h1>
         <p className="text-sm text-muted-foreground">
-          Games · Templates · Assets · Music · Sprites · UI · AI · NPC · Effects · Backgrounds · Icons · Shaders
+          Games · Templates · Assets · Logic · AI NPC · Boss · Quest · Skins · Maps · Stages · Physics
         </p>
+        <a href="/marketplace/logic" className="mt-2 inline-block text-sm text-violet-400 hover:underline">
+          Logic Marketplace → Inventory · Save · Quest · Ranking
+        </a>
       </div>
 
       <div className="flex flex-wrap gap-2">

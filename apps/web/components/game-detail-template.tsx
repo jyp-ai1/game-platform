@@ -27,6 +27,7 @@ import { RuntimeProvider } from "@/components/runtime-provider";
 import { GamePlayer } from "@/components/game-player";
 import { GameStatusBlock } from "@/components/game-status-block";
 import { MultiplayerInvitePanel } from "@/components/multiplayer-invite-panel";
+import { RemixPanel } from "@/components/remix-panel";
 import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
 import type { PlayableSlug } from "@/lib/playable-games";
 
@@ -83,6 +84,7 @@ export function GameDetailTemplate({
             <GameDetailMissionPanel gameSlug={slug} />
             <GameDetailJourneyStrip slug={slug} />
             <MultiplayerInvitePanel game={game} />
+            <RemixPanel baseSlug={slug} baseTitle={game.title} />
 
             <GameDetailSimilar games={allGames} related={related} />
             <div className="grid gap-4 sm:grid-cols-2">

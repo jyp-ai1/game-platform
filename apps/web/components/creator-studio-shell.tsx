@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Bot,
   Bug,
   DollarSign,
   Gamepad2,
@@ -16,7 +17,8 @@ import {
 
 const STUDIO_NAV = [
   { href: "/studio", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/studio/create", label: "Create Game", icon: Rocket },
+  { href: "/studio/build", label: "AI Builder", icon: Bot },
+  { href: "/studio/create", label: "No-Code", icon: Rocket },
   { href: "/studio/games", label: "My Games", icon: Gamepad2 },
   { href: "/studio/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/studio/comments", label: "Comments", icon: MessageSquare },

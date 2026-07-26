@@ -1,6 +1,5 @@
 /**
- * Replay SDK — unified namespace for all platform features.
- * Games import ONLY `@game-platform/replay-sdk`.
+ * Replay SDK — unified namespace: logic, multiplayer, publish.
  */
 import {
   recordScoreReport,
@@ -19,11 +18,13 @@ import {
 import {
   createRoom,
   joinRoom,
+  leaveRoom,
   send,
   sync,
   start,
   finish,
   spectator,
+  replay as reconnectRoom,
   getPartyLinkUrl,
   shareRoom,
 } from "@game-platform/multiplayer-sdk";
@@ -36,7 +37,6 @@ export interface ReplayInitOptions {
 let _initialized = false;
 let _gameSlug = "";
 
-/** Initialize Replay SDK for a game session. */
 function init(options: ReplayInitOptions): void {
   _initialized = true;
   _gameSlug = options.gameSlug;
@@ -56,6 +56,47 @@ function loadStage(slug: string): unknown {
   return loadGame(slug);
 }
 
+/** Publish game to marketplace — creator flow hook. */
+async function publish(meta: { slug: string; title: string; tags?: string[] }): Promise<{ ok: boolean; slug: string }> {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("replay:publish", { detail: meta }));
+  }
+  return { ok: true, slug: meta.slug };
+}
+
+const logic = {
+  inventory: () => ({ enabled: true, api: "Replay.logic.inventory" }),
+  save: (slug: string, state: unknown) => saveGame(slug, state),
+  load: (slug: string) => loadGame(slug),
+  achievement: (id: string) => isAchievementUnlocked(id as Parameters<typeof isAchievementUnlocked>[0]),
+  ads: { show: (_p: string) => ({ shown: false }), rewarded: async () => ({ reward: 0 }) },
+  ranking: (slug: string, value: number) => recordScoreReport(slug, value),
+  stage: (slug: string, state: unknown) => saveGame(slug, state),
+  quest: (_id: string) => ({ active: false }),
+  mission: (slug: string, value: number) => recordMissionScoreReport(slug, value),
+  collection: (slug: string, data: Record<string, boolean>) => saveGame(slug, { collection: data }),
+  cloud: {
+    save: (slug: string, state: unknown) => saveGame(slug, state),
+    load: (slug: string) => loadGame(slug),
+    sync: async () => ({ synced: false }),
+  },
+};
+
+const multiplayer = {
+  createRoom,
+  join: joinRoom,
+  leave: leaveRoom,
+  send,
+  sync,
+  start,
+  finish,
+  voice: async (_roomCode: string) => ({ enabled: false }),
+  spectator,
+  reconnect: reconnectRoom,
+  ranking: (slug: string, score: number) => recordScoreReport(slug, score),
+  challenge: (slug: string, score: number) => recordScoreReport(slug, score),
+};
+
 const reward = {
   coin: (slug: string, value: number) => recordScoreReport(slug, value),
   newBest: (slug: string, value: number) => recordNewBest(slug, value),
@@ -72,18 +113,7 @@ const friend = {
 };
 
 const challenge = {
-  /** Challenge URL param handled by web app — games emit score for compare. */
   submit: (slug: string, value: number) => recordScoreReport(slug, value),
-};
-
-const multiplayer = {
-  createRoom,
-  joinRoom,
-  send,
-  sync,
-  start,
-  finish,
-  spectator,
 };
 
 const analytics = {
@@ -97,50 +127,30 @@ const analytics = {
   sessionStart: (slug: string, category: string | null = null) => recordSessionStart(slug, category),
 };
 
-const storage = {
-  save: saveGame,
-  load: loadGame,
-};
+const storage = { save: saveGame, load: loadGame };
 
 const cloud = {
-  /** Cloud save — future Supabase sync. MVP: localStorage via storage. */
   save: (slug: string, state: unknown) => saveGame(slug, state),
   load: (slug: string) => loadGame(slug),
-  sync: async (_slug: string) => ({ synced: false, reason: "mvp-local-only" }),
+  sync: async () => ({ synced: false, reason: "mvp-local-only" }),
 };
 
-const voice = {
-  /** Voice chat — future WebRTC. */
-  join: async (_roomCode: string) => ({ enabled: false }),
-};
+const voice = { join: async () => ({ enabled: false }) };
+const ai = { prompt: async (_text: string) => ({ response: "" }) };
+const share = { partyLink: getPartyLinkUrl, room: shareRoom };
+const ads = { show: (_p: string) => ({ shown: false }), rewarded: async () => ({ reward: 0 }) };
 
-const ai = {
-  /** AI NPC / events — future integration. */
-  prompt: async (_text: string) => ({ response: "" }),
-};
-
-const share = {
-  partyLink: getPartyLinkUrl,
-  room: shareRoom,
-};
-
-const ads = {
-  /** Ad placement — future AdSense integration. */
-  show: (_placement: string) => ({ shown: false }),
-  rewarded: async (_placement: string) => ({ reward: 0 }),
-};
-
-/** Unified Replay namespace — `Replay.init()`, `Replay.score()`, etc. */
 export const Replay = {
   init,
   score,
   stage,
   loadStage,
+  logic,
+  multiplayer,
   reward,
   collection,
   friend,
   challenge,
-  multiplayer,
   analytics,
   storage,
   cloud,
@@ -148,15 +158,11 @@ export const Replay = {
   ai,
   share,
   ads,
-  get initialized() {
-    return _initialized;
-  },
-  get gameSlug() {
-    return _gameSlug;
-  },
+  publish,
+  get initialized() { return _initialized; },
+  get gameSlug() { return _gameSlug; },
 };
 
-// Legacy flat exports (backward compat)
 export const submitScore = score;
 export function unlockAchievement(id: string): boolean {
   return isAchievementUnlocked(id as Parameters<typeof isAchievementUnlocked>[0]);
@@ -165,7 +171,7 @@ export { getAchievements };
 export const saveStage = stage;
 export { loadStage };
 export const saveCollection = collection.save;
-export { multiplayer, reward, analytics };
+export { reward, analytics };
 export const mission = {
   complete: (s: string, v: number) => recordMissionScoreReport(s, v),
   getDaily: getDailyMission,

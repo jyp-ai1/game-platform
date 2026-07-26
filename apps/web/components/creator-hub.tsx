@@ -20,7 +20,8 @@ export function CreatorHub({ games }: { games: Game[] }) {
       <CreatorIdentityCard compact />
 
       <div className="flex flex-wrap gap-3">
-        <Button nativeButton={false} render={<Link href="/studio/create"><Plus className="size-4" /> Create Game</Link>} />
+        <Button nativeButton={false} render={<Link href="/studio/build"><Plus className="size-4" /> AI Builder</Link>} />
+        <Button variant="outline" nativeButton={false} render={<Link href="/studio/create">No-Code</Link>} />
         <Button variant="outline" nativeButton={false} render={<Link href="/studio">Creator Studio</Link>} />
         <Button variant="outline" nativeButton={false} render={<Link href="/studio/templates">Templates</Link>} />
         <Button variant="outline" nativeButton={false} render={<Link href="/marketplace">Marketplace</Link>} />

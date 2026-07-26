@@ -1,109 +1,84 @@
 ---
-description: Replay Ecosystem — Player + Creator + Community + Platform
+description: Replay Ecosystem 1.0 — YouTube + Steam + Roblox + Poki
 alwaysApply: true
 ---
 
-# PROJECT: Replay Ecosystem
+# PROJECT: Replay Ecosystem 1.0
 
-> **세계 최고의 웹게임 생태계.** 게임 생활 + 게임 제작 플랫폼.
+> **Replay = YouTube + Steam + Roblox + Poki.** 스스로 성장하는 웹게임 생태계.
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# 최종 정체성
+# 최종 목표
 
-```
-게임 사이트 → 게임 생활 플랫폼 → 게임 생활 + 게임 제작 플랫폼
-```
-
-```
-Player → Creator → Community → Platform → Ecosystem
-```
+플레이어는 게임을 하고 · 개발자는 게임을 만들고 · AI는 검수하고 · 운영자는 승인하고 · 유저는 계속 돌아온다.
 
 ---
 
-# Creator Journey (자연스러운 흐름)
+# Creator Flow (게임 제작 플랫폼)
 
 ```
-Guest → Player → Challenge → Community → Creator → Top Creator → Studio
+아이디어 → Template → AI 생성 → Preview → 수정 → Publish → AI QA → Marketplace → 유저 플레이
 ```
+
+Studio = **GPT Builder** (`/studio/build`)
 
 ---
 
-# Creator 종류
+# Replay Remix
 
-| Type | 역할 |
-|------|------|
-| 🎮 Game Creator | 게임 제작 |
-| 🎨 Asset Creator | 이미지 · UI · 사운드 |
-| 🧩 Template Creator | Snake · 2048 · Puzzle 템플릿 |
-| 🤖 AI Creator | 프롬프트 · AI NPC · AI 이벤트 |
-| 🏆 Event Creator | 시즌 · 대회 · 챌린지 |
+Snake → Zombie Snake · Space Snake · Multiplayer Snake · Boss Snake (Roblox/Minecraft 모드 문화)
 
 ---
 
-# Studio (No-Code → Advanced)
+# 신규 기능 6-Question Filter (3/6 미만 → 만들지 않음)
 
-**No-Code:** Template → 맵/이미지/속도 변경 → Publish
-
-**Advanced:** Github Import · HTML5 · React · Phaser · Godot · Unity WebGL
+① 더 오래 머무는가 · ② 친구 데려오는가 · ③ 개발자가 더 쉽게 만드는가 · ④ 운영 자동화 · ⑤ AI가 일 줄이는가 · ⑥ 네트워크 효과
 
 ---
 
-# Replay SDK (games import ONLY `@game-platform/replay-sdk`)
+# Replay SDK
 
 ```
-Replay.init() · score() · stage() · reward() · collection()
-friend() · challenge() · multiplayer() · analytics()
-storage() · cloud() · voice() · ai() · share() · ads()
+Replay.init() · Replay.logic.inventory/quest/stage/ads/ranking/save/achievement()
+Replay.multiplayer.createRoom/join/sync/finish/voice/spectator/ranking/challenge()
+Replay.publish()
 ```
 
 ---
 
 # Marketplace
 
-Games · Templates · Assets · Music · Sprites · UI Kit · AI Prompt · NPC · Effects · Background · Icons · Shaders
+Game · Template · Asset · Logic · AI NPC · Boss · Quest · Achievement Pack · Mission Pack · Skin · Sound · Particle · Map · Stage · Localization · UI Theme · Physics
+
+Logic: Inventory · Save · Achievement · Ads · Ranking · Stage · Quest
 
 ---
 
-# Creator Growth
+# 최우선 30 (생태계 확장)
 
-Creator Lv · XP · Followers · Downloads · Play Time · Like · Retention · Revenue
-
-Badges: Top Creator · Rising Creator · Verified Creator · Official Creator
+Universal Multiplayer SDK · Realtime Flagship · AI Builder · No-Code Builder · Remix · Marketplace · Analytics · AI QA Auto Fix · Revenue · Passport · Journey · Mission/Habit · Social Challenge · Dev Console · Admin Ops AI · Universal Runtime · Stage · Reward · Achievement · Collection · Save/Cloud · Matchmaking · Live Ranking · Notification · Replay API · Plugin · Theme · Event/Festival · Tournament · Creator Economy
 
 ---
 
-# Revenue (광고 의존 ↓)
+# Definition of Done
 
-게임 판매 수수료 · 프리미엄 노출 · 템플릿/에셋 판매 · 후원 · 구독 · 토너먼트 · 브랜드 이벤트 · AI QA Pro · Analytics Pro · Cloud Save Pro
-
----
-
-# Multiplayer + 7 Engines (유지)
-
-Tier1 Single · Tier2 Party · Tier3 Realtime (.io Flagship)
-
-Identity · Motivation · Habit · Social · Growth · Reward · Operations
+- 플레이어는 계속 돌아온다 · 친구 초대 · 개발자 하루 만에 게임 업로드 · 운영 5분 상태 파악 · AI QA/운영 자동화 · 개발자가 콘텐츠 추가하며 스스로 성장
 
 ---
 
-# Cursor Autonomous Loop
+# Autonomous Loop
 
-중간 승인/보고 없이 **제품 완성**까지 반복. 중단 조건: Build 불가 · 배포 불가 · 데이터 손실 · API Key 필수 · 보안 문제.
+중간보고·질문·승인·기능단위보고 **금지**. 중단: Build/배포 불가 · 데이터 손실 · API Key · 보안.
 
 ```
-1. 현재 서비스 분석
-2. 재방문 이유 부족한 부분 찾기
-3. Creator 성장 어려운 부분 찾기
-4. 운영/업로드 어려운 부분 찾기
-5. 설계 → 구현 → 테스트 → QA → Commit → Push → Preview 확인
-6. 다음 개선 자동 분석 → 1번 반복
+분석 → UX문제 → 설계 → 구현 → 테스트 → QA → Commit → Push → Preview → 반복
 ```
 
 ---
 
-# 08:00 Report (유일한 보고)
+# 08:00 Daily Report (유일)
 
-제품 완성도(%) · 사용자/Creator/운영 가치 · Before/After · Preview/Production URL · Commit · RC Score · Top Risks · 다음 자동 진행
+제품 완성도 · Before/After · Preview/Production URL · Commit · RC Score · Risks · 다음 자동 진행
