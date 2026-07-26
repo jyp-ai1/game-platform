@@ -1,5 +1,5 @@
 ---
-description: Replay Layer Architecture — Build. Play. Share. Grow.
+description: Replay — Product-first execution (P0 Player/Multiplayer)
 alwaysApply: true
 ---
 
@@ -11,67 +11,90 @@ Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Master Rules
+# Phase: Product Experience (구조 개선 중단)
 
-Replay는 **기능(Function)** 을 개발하지 않는다 → **Layer**를 완성한다.
-
-Replay는 **화면(UI)** 을 개발하지 않는다 → **Engine**을 개발한다.
-
-Replay는 **게임(Game)** 을 개발하지 않는다 → **Ecosystem**을 개발한다.
-
-Replay는 **코드(Code)** 를 작성하지 않는다 → **Platform Asset**을 만든다.
-
-**하위 Layer 완료 전 상위 Layer 금지.** L1 → L2 → L3 → … 순서만.
-
-**측정 불가능한 % 점수 금지.** Definition of Done 체크리스트만.
-
-**구현 전 RFC 작성 필수.** `/docs/rfc` · `/docs/adr`
-
----
-
-# 10-Gate (8/10 미만 → 구현 금지)
-
-1. 어느 Layer인가? · 2. 어느 Engine인가? · 3. 어느 Plugin인가?
-4. 어느 RFC인가? · 5. 어느 ADR인가? · 6. 모든 게임 재사용 가능한가?
-7. Creator도 사용하는가? · 8. 운영도 사용하는가? · 9. AI도 사용하는가?
-10. 플랫폼 가치가 증가하는가?
-
----
-
-# Layer Stack (하위→상위)
+Architecture / Layer / RFC / ADR **충분**. 더 설계하지 않는다.
 
 ```
-L7 Business      Revenue · Premium · Sponsor · Ads
-L6 Creator       Studio · Marketplace · Templates
-L5 Community     Friends · Challenge · League · Guild
-L4 Identity      Passport · Journey · Wrapped · Mission
-L3 Gameplay      Runtime · Stage · Reward · Ranking
-L2 Engine        Replay Engine · Plugins · Bus · Cloud
-L1 Infrastructure Auth · Supabase · Storage · CI · Deploy · QA
+플레이 → 재방문 → 친구 초대 → Creator → 게임 증가
+```
+
+**Creator Platform freeze** — Studio/Marketplace/Builder/SDK 유지, 확장 금지.
+
+---
+
+# Reuse Rules (Master Rule)
+
+새로운 구조를 추가하기 전에 기존 구조를 활용할 수 있는지 먼저 검토한다.
+
+- 새로운 Engine보다 **기존 Engine 확장**을 우선한다.
+- 새로운 Plugin보다 **기존 Plugin 재사용**을 우선한다.
+- 새로운 화면보다 **기존 화면 연결성**을 우선한다.
+- 새로운 게임보다 **기존 게임의 리텐션**을 우선한다.
+- 새로운 Creator 기능보다 **Player 증가**를 우선한다.
+
+---
+
+# Execution Priority (고정)
+
+## P0 — L2 Engine DoD
+
+1. Cross-device Multiplayer (Realtime transport)
+2. Notification Engine (행동 유도)
+3. AI Production Engine (Issue pipeline)
+
+## P0 — Flagship
+
+**Replay Snake.io** — 20명 · 실시간 · 랭킹 · 친구 초대
+
+## P1 — Player Retention
+
+Challenge · Streak · Mission · Passport · Journey
+
+## P1 — Ops Automation
+
+`/admin/os` AI Daily Summary · Issue Pipeline · Release Assistant
+
+## P2 — Creator (Player 성장 후)
+
+Upload API · 심사 · 배포 · 수익화
+
+---
+
+# Player Loop (순서)
+
+```
+Player → Friend → Multiplayer → Challenge → Retention → Creator
 ```
 
 ---
 
-# Engine Definition of Done (체크리스트)
+# Layer Stack (참고만 — % 금지)
 
-- [x] Runtime · [x] Stage · [x] Save · [x] Reward
-- [ ] Multiplayer (cross-device transport)
-- [ ] Notification
-- [x] Analytics · [ ] AI (production)
-- [x] Plugin · [x] CLI
+L1 Infra · L2 Engine · L3 Gameplay · L4 Identity · L5 Community · L6 Creator · L7 Business
+
+Engine DoD 체크리스트만 추적.
+
+---
+
+# Labs
+
+`/labs` — 실험 기능. 반응 좋은 것만 정식 승격.
+
+---
+
+# 10-Gate · RFC/ADR (유지)
+
+구현 전 Layer/Engine/Plugin/RFC/ADR 확인. 8/10 미만 → 금지.
 
 ---
 
 # Autonomous Loop
 
-```
-Layer gap 분석 → RFC/ADR → Engine/Plugin 구현 → QA → Commit → Push → Preview → 반복
-```
-
-중간보고·질문·승인·기능단위보고 **금지**. 중단: Build/배포 불가 · 데이터 손실 · API Key · 보안.
+P0 gap → 기존 Engine 확장 → QA → Commit → Push → Preview → 반복
 
 ---
 
-# 08:00 Daily Report (유일)
+# 08:00 Daily Report
 
-Layer DoD 체크 · Engine 체크리스트 · RFC/ADR · Before/After · URLs · Commit · RC · Risks · 다음 Layer 작업
+Engine DoD · P0 progress · Today's Wins/Risks/Opp · URLs · Commit · RC · Risks

@@ -6,6 +6,7 @@ import { HomeChallengeStrip } from "@/components/home-challenge-strip";
 import { HomeContinueHub } from "@/components/home-continue-hub";
 import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
 import { HomeRuleRecommendations } from "@/components/home-rule-recommendations";
+import { NotificationCenter } from "@/components/notification-center";
 import { Container } from "@game-platform/ui";
 import Link from "next/link";
 import { selectPopular } from "@/lib/game-sections";
@@ -23,6 +24,7 @@ export default async function Home() {
     <main className="flex flex-1 flex-col">
       {/* 나 → 성장 → 친구 → (게임) */}
       <ReplayGreetingHero games={games} />
+      <NotificationCenter compact />
       <ReplayMotivationStrip games={games} />
       <ReplayTimelineStrip games={games} />
       <ReplayOffPlayStrip games={games} />

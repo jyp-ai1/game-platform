@@ -88,9 +88,9 @@ export const ENGINE_DOD: EngineDoDItem[] = [
   { id: "save", label: "Save", done: true, layer: "L2", rfc: "RFC-0001" },
   { id: "reward", label: "Reward", done: true, layer: "L2", rfc: "RFC-0001" },
   { id: "multiplayer", label: "Multiplayer (cross-device)", done: false, layer: "L2", rfc: "RFC-0001" },
-  { id: "notification", label: "Notification", done: false, layer: "L2", rfc: "RFC-0001" },
+  { id: "notification", label: "Notification", done: true, layer: "L2", rfc: "RFC-0001" },
   { id: "analytics", label: "Analytics", done: true, layer: "L2", rfc: "RFC-0001" },
-  { id: "ai", label: "AI (production)", done: false, layer: "L2", rfc: "RFC-0001" },
+  { id: "ai", label: "AI (production)", done: true, layer: "L2", rfc: "RFC-0001" },
   { id: "plugin", label: "Plugin", done: true, layer: "L2", rfc: "RFC-0002" },
   { id: "cli", label: "CLI", done: true, layer: "L2", rfc: "RFC-0002" },
 ];

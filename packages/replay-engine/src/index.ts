@@ -78,5 +78,27 @@ export type { ReplayPlugin, PluginId } from "./plugins";
 export type { ReplayEvent, ReplayEventType } from "./event-bus";
 export type { ReplayService } from "./registry";
 
+export {
+  getNotifications,
+  getUnreadCount,
+  pushNotification,
+  markRead,
+  markAllRead,
+  subscribeNotifications,
+  refreshMotivationNotifications,
+  Notification,
+} from "./engines/notification";
+export type { ReplayNotification, NotificationKind } from "./engines/notification";
+
+export {
+  getAiIssues,
+  generateAiIssues,
+  runAiIssuePipeline,
+  pushAiIssue,
+  subscribeAiIssues,
+  AI,
+} from "./engines/ai";
+export type { AiIssue, AiIssueContext, AiIssueSeverity, AiIssueSource } from "./engines/ai";
+
 // Re-export SDK for single import path
 export { Replay, GameSDKProvider, useGameSDK, MultiplayerProvider, useRoom } from "@game-platform/replay-sdk";

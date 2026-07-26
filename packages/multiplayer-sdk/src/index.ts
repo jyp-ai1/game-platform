@@ -61,6 +61,12 @@ export {
   localStorageTransport,
 } from "./transport/local-storage";
 
+// Transport
+export {
+  broadcastChannelTransport,
+  isSupabaseRealtimeAvailable,
+} from "./transport/broadcast-channel";
+
 // React
 export { MultiplayerProvider, useMultiplayerRoom } from "./react/MultiplayerProvider";
 export { useRoom } from "./react/useRoom";

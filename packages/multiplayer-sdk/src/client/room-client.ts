@@ -1,9 +1,9 @@
 import type { GameRoom, MatchMode, MatchResult, MaxPlayers } from "@game-platform/shared";
 
-import { localStorageTransport } from "../transport/local-storage";
+import { broadcastChannelTransport } from "../transport/broadcast-channel";
 import type { CreateRoomParams, JoinRoomOptions, MultiplayerTransport } from "../transport/interface";
 
-let activeTransport: MultiplayerTransport = localStorageTransport;
+let activeTransport: MultiplayerTransport = broadcastChannelTransport;
 
 export function setMultiplayerTransport(transport: MultiplayerTransport): void {
   activeTransport = transport;

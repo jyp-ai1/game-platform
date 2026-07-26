@@ -5,7 +5,7 @@ export type ReplayEventType =
   | "player:level-up" | "player:achievement"
   | "creator:publish" | "creator:qa-pass"
   | "multiplayer:room-created" | "multiplayer:match-finish"
-  | "growth:mission-complete" | "growth:streak"
+  | "growth:mission-complete" | "growth:streak" | "growth:notification"
   | "ai:qa-result" | "ai:fix-pr"
   | "revenue:earn";
 
