@@ -34,6 +34,12 @@ export interface PlayMotivation {
   isLoss: boolean;
 }
 
+const SNAKE_QUICK_PLAY = "/flagship/snake-io/play?room=WORLD";
+
+function playHrefForSlug(slug: string): string {
+  return slug === "snake" ? SNAKE_QUICK_PLAY : `/games/${slug}`;
+}
+
 function topGameSlug(games: Game[], identity: ReturnType<typeof buildReplayIdentityProfile>): string {
   return identity.topGameSlug ?? games.find((g) => g.status === "ACTIVE")?.slug ?? "snake";
 }
@@ -56,7 +62,7 @@ export function buildPlayMotivations(games: Game[]): PlayMotivation[] {
       headline: `${friend.nickname}가 당신을 추월했습니다`,
       detail: `${friend.friendScore.toLocaleString()}점 · ${friend.gap.toLocaleString()}점 차`,
       ctaLabel: "재도전",
-      ctaHref: `/games/${slug}`,
+      ctaHref: playHrefForSlug(slug),
       score: MOTIVATION_SCORES.friend_overtake,
       isLoss: true,
     });
@@ -71,7 +77,10 @@ export function buildPlayMotivations(games: Game[]): PlayMotivation[] {
       headline: `${c.challengerNickname} — 도전장`,
       detail: `${c.gameTitle} · 받고 바로 플레이`,
       ctaLabel: "받기",
-      ctaHref: `/games/${c.gameSlug}?challenge=${c.id}`,
+      ctaHref:
+        c.gameSlug === "snake"
+          ? `${SNAKE_QUICK_PLAY}?challenge=${c.id}`
+          : `/games/${c.gameSlug}?challenge=${c.id}`,
       score: MOTIVATION_SCORES.challenge_invite,
       isLoss: false,
     });
@@ -86,7 +95,7 @@ export function buildPlayMotivations(games: Game[]): PlayMotivation[] {
       headline: `오늘 안 하면 ${streak.currentStreak}일 streak 종료`,
       detail: "자정 전 한 판 · 잃기 전에 지키세요",
       ctaLabel: "Streak 지키기",
-      ctaHref: `/games/${slug}`,
+      ctaHref: playHrefForSlug(slug),
       score: MOTIVATION_SCORES.streak_loss,
       isLoss: true,
     });
@@ -101,7 +110,7 @@ export function buildPlayMotivations(games: Game[]): PlayMotivation[] {
       headline: `Top10까지 ${top10Gap.toLocaleString()}점`,
       detail: "한 판이면 될 수 있어요",
       ctaLabel: "Replay 시작",
-      ctaHref: `/games/${slug}`,
+      ctaHref: playHrefForSlug(slug),
       score: MOTIVATION_SCORES.top10,
       isLoss: false,
     });
@@ -117,7 +126,7 @@ export function buildPlayMotivations(games: Game[]): PlayMotivation[] {
       headline: `오늘 미션 ${mission.done}/${mission.total}`,
       detail: next?.label ?? "",
       ctaLabel: "미션 플레이",
-      ctaHref: next?.href ?? `/games/${slug}`,
+      ctaHref: next?.href ?? playHrefForSlug(slug),
       score: MOTIVATION_SCORES.mission,
       isLoss: false,
     });
@@ -146,7 +155,7 @@ export function buildPlayMotivations(games: Game[]): PlayMotivation[] {
       headline: "오늘만 2배 Coin",
       detail: "첫 판 보너스",
       ctaLabel: "첫 판 시작",
-      ctaHref: `/games/${slug}`,
+      ctaHref: playHrefForSlug(slug),
       score: MOTIVATION_SCORES.double_coin,
       isLoss: false,
     });
@@ -164,5 +173,5 @@ export function getSecondaryMotivations(games: Game[], limit = 3): PlayMotivatio
 }
 
 export function getPrimaryPlayHref(games: Game[]): string {
-  return getTopMotivation(games)?.ctaHref ?? `/games/${games[0]?.slug ?? "snake"}`;
+  return getTopMotivation(games)?.ctaHref ?? playHrefForSlug(games[0]?.slug ?? "snake");
 }

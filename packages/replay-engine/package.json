@@ -9,6 +9,7 @@
     "./balance": "./src/multiplayer/balance/index.ts",
     "./experience": "./src/multiplayer/experience/index.ts",
     "./social": "./src/social/index.ts",
+    "./global-world": "./src/multiplayer/global-world/index.ts",
     "./engine": "./src/engine/index.ts"
   },
   "scripts": {

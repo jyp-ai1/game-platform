@@ -15,6 +15,7 @@ import {
 } from "@/components/game-detail-extras";
 import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
 import { GameDetailHero } from "@/components/game-detail-hero";
+import { SnakeMultiplayerEntry } from "@/components/snake-multiplayer-entry";
 import { GameDetailJourneyStrip } from "@/components/game-detail-journey-strip";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailMetaPanel, GameDetailTrailer } from "@/components/game-detail-meta-panel";
@@ -51,6 +52,8 @@ export function GameDetailTemplate({
       <Container className="max-w-4xl space-y-5 py-5 sm:py-6">
         <GameDetailHero game={game} />
         <GameDetailTrailer game={game} />
+
+        {slug === "snake" ? <SnakeMultiplayerEntry variant="detail" /> : null}
 
         {isPlayable ? (
           <>

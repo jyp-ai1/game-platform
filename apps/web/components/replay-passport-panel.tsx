@@ -6,16 +6,27 @@ import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
 import { ReplayIdentityCard } from "@/components/replay-identity-card";
+import { PartyPassportCard } from "@/components/party-passport-card";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { buildReplayPassport } from "@/lib/replay-loop";
+import { Replay } from "@game-platform/replay-sdk";
 import { getMemoryFlashes } from "@/lib/memory-engine";
 import { getUnlockedPlatformAchievements } from "@/lib/achievement-engine";
 import { useMounted } from "@/lib/use-mounted";
+import { getMyParty } from "@game-platform/replay-engine/social";
+import { useEffect, useState } from "react";
+import type { Party } from "@game-platform/shared";
 
 /** Replay Passport — Steam Library for your game life. */
 export function ReplayPassportPanel({ games }: { games: Game[] }) {
   const mounted = useMounted();
+  const [party, setParty] = useState<Party | null>(null);
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
+
+  useEffect(() => {
+    if (!mounted) return;
+    void getMyParty().then(setParty);
+  }, [mounted]);
 
   const passport = useMemo(() => {
     if (!mounted) return null;
@@ -32,11 +43,18 @@ export function ReplayPassportPanel({ games }: { games: Game[] }) {
     return getMemoryFlashes(games, 2);
   }, [games, mounted]);
 
+  const bestMoments = useMemo(() => {
+    if (!mounted) return [];
+    return Replay.multiplayer.moments.recent(6);
+  }, [mounted]);
+
   if (!mounted || !passport) return null;
 
   return (
     <Container className="py-8 space-y-8">
       <ReplayIdentityCard games={games} />
+
+      <PartyPassportCard party={party} />
 
       {memories.length > 0 ? (
         <div className="rounded-2xl border border-white/10 bg-card/50 p-5">
@@ -48,6 +66,20 @@ export function ReplayPassportPanel({ games }: { games: Game[] }) {
                   <span>{m.emoji}</span>
                   <span>{m.headline} — {m.detail}</span>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {bestMoments.length > 0 ? (
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5">
+          <h2 className="font-semibold">Best Moments</h2>
+          <ul className="mt-3 space-y-2">
+            {bestMoments.map((m) => (
+              <li key={m.id} className="flex items-center justify-between text-sm">
+                <span>{Replay.multiplayer.moments.labels[m.kind]}</span>
+                <span className="text-muted-foreground">{m.nickname}</span>
               </li>
             ))}
           </ul>

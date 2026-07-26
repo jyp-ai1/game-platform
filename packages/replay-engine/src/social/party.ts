@@ -1,6 +1,6 @@
 /** Universal Party System — persistent party above rooms, survives game transitions. */
 import { getDeviceId, getLastNickname } from "@game-platform/game-sdk";
-import { createRoom, defaultMaxPlayers, getMultiplayerSupabase, joinRoomAsync } from "@game-platform/multiplayer-sdk";
+import { createRoom, defaultMaxPlayers, getMultiplayerSupabase, joinRoomAsync, globalWorldCode, ensureRoom, getRoom, joinGlobalWorld } from "@game-platform/multiplayer-sdk";
 import type { MaxPlayers, Party, PartyChatMessage, PartyHistoryEntry, PartyMember, PartyProgress, PartyReactionId } from "@game-platform/shared";
 
 import { REACTION_TEXT } from "./constants";
@@ -245,18 +245,31 @@ export async function travelToGame(code: string, gameSlug: string): Promise<{ pa
   if (!party) return null;
   if (party.leaderId !== getDeviceId()) return null;
 
-  const maxPlayers: MaxPlayers = defaultMaxPlayers(gameSlug);
-  const room = createRoom(gameSlug, maxPlayers, "friends");
-  party.currentGameSlug = gameSlug;
-  party.currentRoomCode = room.code;
-
-  for (const m of party.members) {
-    if (m.deviceId !== getDeviceId()) continue;
-    await joinRoomAsync(room.code, { nickname: m.nickname, isGuest: false });
-    m.ready = false;
+  let roomCode: string;
+  if (gameSlug === "snake") {
+    const gw = globalWorldCode("snake");
+    await ensureRoom(gw);
+    if (!getRoom(gw)) await joinGlobalWorld("snake");
+    roomCode = gw;
+    for (const m of party.members) {
+      if (m.deviceId !== getDeviceId()) continue;
+      await joinRoomAsync(gw, { nickname: m.nickname, isGuest: false });
+      m.ready = false;
+    }
+  } else {
+    const maxPlayers: MaxPlayers = defaultMaxPlayers(gameSlug);
+    const room = createRoom(gameSlug, maxPlayers, "friends");
+    roomCode = room.code;
+    for (const m of party.members) {
+      if (m.deviceId !== getDeviceId()) continue;
+      await joinRoomAsync(room.code, { nickname: m.nickname, isGuest: false });
+      m.ready = false;
+    }
   }
+  party.currentGameSlug = gameSlug;
+  party.currentRoomCode = roomCode;
   const saved = await saveParty(party);
-  return { party: saved, roomCode: room.code };
+  return { party: saved, roomCode };
 }
 
 /** Send quick reaction — 1-tap game chat. */

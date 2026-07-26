@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchSituations, playModeActions } from "@game-platform/replay-engine/social";
+import { fetchSituations } from "@game-platform/replay-engine/social";
 import type { SituationRecommendation } from "@game-platform/shared";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -17,7 +17,6 @@ const KIND_STYLES: Record<SituationRecommendation["kind"], string> = {
 /** People-first home — situation-based recommendations, not game lists. */
 export function HomePeopleFirstStrip() {
   const [situations, setSituations] = useState<SituationRecommendation[]>([]);
-  const snakeModes = playModeActions("snake");
 
   useEffect(() => {
     void fetchSituations().then(setSituations);
@@ -36,7 +35,7 @@ export function HomePeopleFirstStrip() {
           {situations.length === 0 ? (
             <p className="text-sm text-muted-foreground">친구가 온라인이면 여기서 바로 참가</p>
           ) : (
-            situations.slice(0, 5).map((s) => (
+            situations.slice(0, 1).map((s) => (
               <Link
                 key={s.id}
                 href={s.href}
@@ -48,18 +47,6 @@ export function HomePeopleFirstStrip() {
               </Link>
             ))
           )}
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {snakeModes.map((m) => (
-            <Link
-              key={m.label}
-              href={m.href}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/30"
-            >
-              {m.label}
-            </Link>
-          ))}
         </div>
       </div>
     </section>

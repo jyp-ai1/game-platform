@@ -8,12 +8,18 @@ if (typeof window !== "undefined") initMultiplayerTransport();
 
 export { setMultiplayerTransport, getMultiplayerTransport, initMultiplayerTransport };
 
+export function createRoom(params: CreateRoomParams): GameRoom;
+export function createRoom(gameSlug: string, maxPlayers?: MaxPlayers, matchMode?: MatchMode): GameRoom;
 export function createRoom(
-  gameSlug: string,
+  gameSlugOrParams: string | CreateRoomParams,
   maxPlayers?: MaxPlayers,
   matchMode: MatchMode = "private"
 ): GameRoom {
-  return getMultiplayerTransport().createRoom({ gameSlug, maxPlayers, matchMode });
+  const params: CreateRoomParams =
+    typeof gameSlugOrParams === "string"
+      ? { gameSlug: gameSlugOrParams, maxPlayers, matchMode }
+      : gameSlugOrParams;
+  return getMultiplayerTransport().createRoom(params);
 }
 
 export function joinRoom(code: string, options?: JoinRoomOptions): GameRoom | null {

@@ -1,4 +1,5 @@
 /** Snake feel — audio, particles, screen shake (Replay-only juice) */
+import { SNAKE_FEEL } from "./snake-feel-tuning";
 
 export interface Particle {
   id: number;
@@ -43,16 +44,25 @@ function tone(freq: number, duration: number, type: OscillatorType = "sine", gai
 }
 
 export function playEatSound(kind: string): void {
-  tone(kind === "golden_apple" ? 880 : 520, 0.06, "sine", 0.06);
+  tone(kind === "golden_apple" ? SNAKE_FEEL.goldenEatHz : SNAKE_FEEL.eatSoundBaseHz, 0.08, "sine", 0.08);
 }
 
 export function playBoostSound(): void {
-  tone(180, 0.04, "triangle", 0.04);
+  tone(SNAKE_FEEL.boostSoundHz, 0.045, "triangle", 0.05);
 }
 
 export function playDeathSound(): void {
-  tone(120, 0.2, "sawtooth", 0.1);
-  setTimeout(() => tone(80, 0.25, "sawtooth", 0.08), 80);
+  tone(110, 0.22, "sawtooth", 0.11);
+  setTimeout(() => tone(70, 0.28, "sawtooth", 0.09), 90);
+}
+
+export function playKillSound(isFirst = false): void {
+  if (isFirst) {
+    tone(SNAKE_FEEL.killSoundHz, 0.08, "square", 0.12);
+    setTimeout(() => tone(SNAKE_FEEL.killSoundHz + 260, 0.1, "sine", 0.1), 45);
+  } else {
+    tone(SNAKE_FEEL.killSoundHz - 40, 0.06, "square", 0.09);
+  }
 }
 
 export function spawnEatParticles(
@@ -60,7 +70,7 @@ export function spawnEatParticles(
   x: number,
   y: number,
   color: string,
-  count = 6
+  count = SNAKE_FEEL.eatParticleCount
 ): Particle[] {
   const next = [...particles];
   for (let i = 0; i < count; i++) {
@@ -69,8 +79,8 @@ export function spawnEatParticles(
       id: ++particleId,
       x,
       y,
-      vx: Math.cos(angle) * 2,
-      vy: Math.sin(angle) * 2,
+      vx: Math.cos(angle) * 2.6,
+      vy: Math.sin(angle) * 2.6,
       color,
       life: 1,
       maxLife: 1,
@@ -87,7 +97,7 @@ export function spawnDeathBurst(
   color: string
 ): Particle[] {
   let next = [...particles];
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < SNAKE_FEEL.deathParticleCount; i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = 1 + Math.random() * 4;
     next.push({

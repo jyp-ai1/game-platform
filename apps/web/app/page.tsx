@@ -24,10 +24,9 @@ export default async function Home() {
 
   return (
     <main className="flex flex-1 flex-col">
-      {/* 나 → 성장 → 친구 → (게임) */}
-      <ReplayGreetingHero games={games} />
+      {/* P0 — LIVE Quick Play first (no URL typing) */}
       <ReplayTogetherStrip />
-      <HomePeopleFirstStrip />
+      <ReplayGreetingHero games={games} />
       <NotificationCenter compact />
       <ReplayMotivationStrip games={games} />
       <ReplayTimelineStrip games={games} />
@@ -36,16 +35,17 @@ export default async function Home() {
       <HomeContinueHub games={games} />
       <HomeChallengeStrip games={games} />
       <HomeRuleRecommendations games={games} large />
-      <section className="border-t border-white/5 py-8">
+      <HomePeopleFirstStrip />
+      <section className="border-t border-white/5 py-6 opacity-80">
         <Container>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold">게임 탐험</h2>
-              <p className="text-sm text-muted-foreground">{games.length}개 게임 · Replay 후 플레이</p>
+              <h2 className="text-base font-semibold text-muted-foreground">혼자 탐험</h2>
+              <p className="text-xs text-muted-foreground">{games.length}개 게임 · Party 없을 때</p>
             </div>
             <Link
               href="/games"
-              className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm text-muted-foreground"
             >
               Browse All →
             </Link>

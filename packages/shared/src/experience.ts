@@ -83,7 +83,11 @@ export type MomentKind =
   | "longest_escape"
   | "boss_slayer"
   | "comeback"
-  | "top10_entry";
+  | "top10_entry"
+  | "first_kill"
+  | "giant_slayer"
+  | "revenge"
+  | "survival_5min";
 
 export interface ReplayMoment {
   id: string;

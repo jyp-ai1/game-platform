@@ -2,6 +2,11 @@
 import { BossEngine, type BossEncounter } from "@game-platform/replay-engine/balance";
 import type { ActivePowerUp, ComputedBalance, FoodKind, MatchObjective, ReplayMoment, WorldEvent, WorldFeature } from "@game-platform/shared";
 
+import type { LivingWorldState } from "./snake-living-world";
+import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
+
+export type { FoodKind };
+
 export type Direction = "up" | "down" | "left" | "right";
 
 export interface Vec {
@@ -32,6 +37,16 @@ export interface SnakeEntity {
   killStreak?: number;
   foodEaten?: number;
   boosting?: boolean;
+  hp?: number;
+  lastKillerId?: string;
+  aliveSinceTick?: number;
+  totalKills?: number;
+  isBot?: boolean;
+  botDifficulty?: "easy" | "normal" | "hunter" | "legend";
+  botRole?: "explorer" | "hunter" | "farmer" | "aggressive" | "scavenger";
+  /** Per-bot desync — fake crowd prevention */
+  botPhase?: number;
+  botSeed?: number;
 }
 
 export interface SnakeIoWorld {
@@ -49,6 +64,7 @@ export interface SnakeIoWorld {
   moments: ReplayMoment[];
   deathZones: { x: number; y: number; at: number }[];
   killFeed: KillFeedEntry[];
+  living?: LivingWorldState;
 }
 
 export interface KillFeedEntry {
@@ -101,15 +117,16 @@ function occupied(world: SnakeIoWorld, pos: Vec): boolean {
 }
 
 export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
+  const n = Math.max(1, Math.round(count * SNAKE_POLISH.foodDensityMult));
   const w = world.config.worldSize;
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < n; i++) {
     let pos = randPos(w);
     let tries = 0;
     while ((occupied(world, pos) || isBlocked(world, pos)) && tries < 100) {
       pos = randPos(w);
       tries++;
     }
-    world.food.push({ x: pos.x, y: pos.y, kind: "normal", value: 10 });
+    world.food.push({ x: pos.x, y: pos.y, kind: "normal", value: Math.round(10 * SNAKE_POLISH.eatValueMult) });
   }
 }
 
@@ -118,6 +135,11 @@ function spawnWorldBoss(world: SnakeIoWorld): void {
   const kind = world.config.environment.activeBoss;
   if (!kind) return;
   world.boss = BossEngine.spawn(kind, world.config.worldSize);
+  world.boss = {
+    ...world.boss,
+    maxHp: Math.round(world.boss.maxHp * SNAKE_POLISH.bossHpMult),
+    hp: Math.round(world.boss.hp * SNAKE_POLISH.bossHpMult),
+  };
   world.bossSpawned = true;
 }
 
@@ -129,7 +151,7 @@ function tickBoss(world: SnakeIoWorld): void {
     const dist = Math.hypot(head.x - world.boss!.x, head.y - world.boss!.y);
     if (dist <= 10 && world.tick % 20 === 0) {
       const boss = world.boss;
-      world.boss = BossEngine.damage(boss, 8);
+      world.boss = BossEngine.damage(boss, SNAKE_POLISH.bossDamagePerHit);
       if (world.boss.defeated) {
         const playerCount = Object.keys(world.snakes).length;
         const reward = BossEngine.reward(world.boss, playerCount);
@@ -175,24 +197,84 @@ function findSafePosition(world: SnakeIoWorld, excludeId: string): Vec {
   return { x: Math.floor(w / 2), y: Math.floor(w / 2) };
 }
 
+export function createSnakeAt(
+  deviceId: string,
+  nickname: string,
+  index: number,
+  world: SnakeIoWorld,
+  pos: Vec,
+  segmentCount = 3,
+  opts?: { score?: number; isBot?: boolean; botRole?: SnakeEntity["botRole"] }
+): SnakeEntity {
+  const segments: Vec[] = [pos];
+  for (let i = 1; i < segmentCount; i++) {
+    segments.push({ x: pos.x - i, y: pos.y });
+  }
+  return {
+    deviceId,
+    nickname,
+    segments,
+    direction: "right",
+    pendingDirection: "right",
+    score: opts?.score ?? 0,
+    alive: true,
+    color: COLORS[index % COLORS.length]!,
+    invincibleUntil: Date.now() + world.config.spawnShieldMs,
+    hp: 100,
+    aliveSinceTick: world.tick,
+    totalKills: 0,
+    isBot: opts?.isBot,
+    botRole: opts?.botRole,
+  };
+}
+
 export function createSnake(
   deviceId: string,
   nickname: string,
   index: number,
-  world: SnakeIoWorld
+  world: SnakeIoWorld,
+  segmentCount = 3
 ): SnakeEntity {
   const pos = findSafePosition(world, deviceId);
+  const segments: Vec[] = [pos];
+  for (let i = 1; i < segmentCount; i++) {
+    segments.push({ x: pos.x - i, y: pos.y });
+  }
   return {
     deviceId,
     nickname,
-    segments: [pos, { x: pos.x - 1, y: pos.y }, { x: pos.x - 2, y: pos.y }],
+    segments,
     direction: "right",
     pendingDirection: "right",
     score: 0,
     alive: true,
     color: COLORS[index % COLORS.length]!,
     invincibleUntil: Date.now() + world.config.spawnShieldMs,
+    hp: 100,
+    aliveSinceTick: world.tick,
+    totalKills: 0,
   };
+}
+
+export function applyMatchIdentity(world: SnakeIoWorld): void {
+  const rule = world.living?.matchRule;
+  if (!rule) return;
+  world.objective.target = rule.scoreTarget;
+  for (const [i, snake] of Object.entries(world.snakes)) {
+    const idx = Object.keys(world.snakes).indexOf(i);
+    const segs = rule.startingSegments;
+    if (snake.segments.length < segs) {
+      const head = snake.segments[0]!;
+      while (snake.segments.length < segs) {
+        const tail = snake.segments[snake.segments.length - 1]!;
+        snake.segments.push({ x: tail.x - 1, y: tail.y });
+      }
+    }
+    world.snakes[i] = snake;
+    void idx;
+  }
+  const extra = Math.round(world.config.foodCount * (rule.foodDensityMult - 1));
+  if (extra > 0) spawnFoodItems(world, extra);
 }
 
 export function createInitialWorld(
@@ -230,13 +312,13 @@ export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direc
 export function setBoost(world: SnakeIoWorld, deviceId: string, boosting: boolean): void {
   const snake = world.snakes[deviceId];
   if (!snake || !snake.alive || snake.spectating) return;
-  snake.boosting = boosting && snake.score >= 5;
+  snake.boosting = boosting && snake.score >= SNAKE_FEEL.boostMinScore;
 }
 
 function applyFoodMagnet(world: SnakeIoWorld, snake: SnakeEntity): void {
   if (!snake.alive || !snake.segments[0]) return;
   const head = snake.segments[0];
-  const radius = snake.boosting ? 3.5 : 2.2;
+  const radius = snake.boosting ? SNAKE_FEEL.magnetRadiusBoost : SNAKE_FEEL.magnetRadius;
   for (const food of world.food) {
     const dist = Math.hypot(food.x - head.x, food.y - head.y);
     if (dist <= 0 || dist > radius) continue;
@@ -285,7 +367,9 @@ function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): bo
       );
       if (killer) {
         killer.killStreak = (killer.killStreak ?? 0) + 1;
+        killer.totalKills = (killer.totalKills ?? 0) + 1;
         snake.killStreak = 0;
+        snake.lastKillerId = killer.deviceId;
       }
     }
     killSnake(snake, world.config, world, killer);
@@ -299,7 +383,7 @@ function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): bo
     let mult = world.config.rewardRate * (world.expMultiplier ?? 1);
     if (food.kind === "golden_apple") mult *= 5;
     if (snake.powerUp?.kind === "double_score") mult *= 2;
-    snake.score += Math.round(food.value * mult);
+    snake.score += Math.round(food.value * mult * SNAKE_POLISH.eatValueMult);
     snake.foodEaten = (snake.foodEaten ?? 0) + 1;
     world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
     spawnFoodItems(world, 1);
@@ -347,11 +431,21 @@ function killSnake(
         tick: world.tick,
       },
       ...world.killFeed,
-    ].slice(0, 6);
+    ].slice(0, 12);
   }
   snake.alive = false;
   snake.spectating = true;
   snake.respawnAt = Date.now() + config.respawnMs;
+}
+
+/** Natural bot retirement — death + food drop, removed from world (no respawn) */
+export function retireSnakeNaturally(world: SnakeIoWorld, snake: SnakeEntity): void {
+  const head = snake.segments[0];
+  if (head) {
+    world.deathZones = [...world.deathZones.filter((d) => Date.now() - d.at < 30_000), { x: head.x, y: head.y, at: Date.now() }].slice(-40);
+  }
+  dropFoodFromSnake(world, snake);
+  delete world.snakes[snake.deviceId];
 }
 
 function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, now: number): void {
@@ -365,6 +459,14 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   snake.color = COLORS[index % COLORS.length]!;
   snake.respawnAt = undefined;
   snake.invincibleUntil = now + world.config.spawnShieldMs;
+  snake.hp = 100;
+  snake.aliveSinceTick = world.tick;
+}
+
+export function damageSnake(world: SnakeIoWorld, snake: SnakeEntity, amount: number): void {
+  if (!snake.alive || snake.spectating) return;
+  snake.hp = Math.max(0, (snake.hp ?? 100) - amount);
+  if (snake.hp <= 0) killSnake(snake, world.config, world);
 }
 
 export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
@@ -377,7 +479,8 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
   for (const [i, snake] of Object.entries(world.snakes)) {
     const idx = Object.keys(world.snakes).indexOf(i);
     if (!snake.alive) {
-      if (snake.respawnAt && now >= snake.respawnAt) respawnSnake(world, snake, idx, now);
+      const canRespawn = world.living?.matchRule.respawnEnabled ?? true;
+      if (canRespawn && snake.respawnAt && now >= snake.respawnAt) respawnSnake(world, snake, idx, now);
       continue;
     }
 
@@ -387,14 +490,16 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     }
 
     applyFoodMagnet(world, snake);
-    const steps = snake.boosting && snake.score >= 5 ? 2 : 1;
+    const steps = snake.boosting && snake.score >= SNAKE_FEEL.boostMinScore ? SNAKE_FEEL.boostSteps : 1;
     for (let step = 0; step < steps; step++) {
       if (!snake.alive) break;
       moveSnakeOnce(world, snake, now);
     }
     if (snake.boosting && snake.alive) {
-      snake.score = Math.max(0, snake.score - 2);
-      if (snake.score < 5) snake.boosting = false;
+      const costMult = world.living?.matchRule.boostCostMult ?? 1;
+      const cost = Math.max(1, Math.round(SNAKE_FEEL.boostCostPerTick * costMult));
+      snake.score = Math.max(0, snake.score - cost);
+      if (snake.score < SNAKE_FEEL.boostMinScore) snake.boosting = false;
     }
   }
 
@@ -414,9 +519,17 @@ export function getMyRank(world: SnakeIoWorld, deviceId: string): number {
   return idx >= 0 ? idx + 1 : world.rankings.length + 1;
 }
 
-export function getSpectatorTarget(world: SnakeIoWorld | null | undefined, preferDeviceId?: string): string | null {
+export function getSpectatorTarget(
+  world: SnakeIoWorld | null | undefined,
+  preferDeviceId?: string,
+  friendIds?: string[]
+): string | null {
   if (!world) return null;
   if (preferDeviceId && world.snakes[preferDeviceId]?.alive) return preferDeviceId;
+  if (friendIds?.length) {
+    const friend = friendIds.find((id) => world.snakes[id]?.alive);
+    if (friend) return friend;
+  }
   const top = world.rankings[0];
   if (top && world.snakes[top.deviceId]?.alive) return top.deviceId;
   const alive = Object.values(world.snakes).find((s) => s.alive);

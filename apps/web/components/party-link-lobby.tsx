@@ -2,6 +2,7 @@
 
 import { PartyChatBar } from "@/components/party-chat-bar";
 import { PartyInvitePanel } from "@/components/party-invite-panel";
+import { PartyJourneyFeed } from "@/components/party-journey-feed";
 import { getDeviceId } from "@game-platform/game-sdk";
 import {
   ensureRoom,
@@ -18,6 +19,7 @@ import {
   setPartyReady,
   subscribeParty,
   travelToGame,
+  PartyMissionEngine,
 } from "@game-platform/replay-engine/social";
 import type { Party, PartyMember } from "@game-platform/shared";
 import { Button, Container } from "@game-platform/ui";
@@ -151,16 +153,21 @@ export function PartyLinkLobby({ code }: { code: string }) {
   const playHref = gameSlug === "snake"
     ? `/flagship/snake-io/play?room=${roomCode ?? code}`
     : `/games/${gameSlug}?room=${roomCode ?? code}`;
+  const mission = PartyMissionEngine.active(party);
+  const inviteReason = mission
+    ? `오늘 우리 Party — ${PartyMissionEngine.label(mission.missionId)} (${mission.current}/${mission.target})`
+    : `오늘 우리 Party Lv${party.progress.level + 1} 찍자`;
 
   return (
     <Container className="flex min-h-[60vh] max-w-md flex-col justify-center py-10">
       <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card/90 p-8 text-center shadow-lg shadow-primary/10">
         <Users className="mx-auto size-8 text-primary" />
         <h1 className="mt-4 text-xl font-bold">Universal Party</h1>
-        <p className="mt-1 capitalize text-muted-foreground">{gameSlug.replace(/-/g, " ")}</p>
-        <p className="mt-1 text-xs text-primary">파티 {party.id} · Lv{party.progress.level} · Streak {party.progress.streak}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {members.length}명 · {gameStarted ? `${gameSlug.replace(/-/g, " ")} 중` : "같이 놀 준비"}
+        </p>
 
-        <p className="mt-6 text-4xl font-bold tabular-nums text-primary">
+        <p className="mt-4 text-4xl font-bold tabular-nums text-primary">
           {members.length} / {maxPlayers}
         </p>
         {members.length < 2 && !gameStarted ? (
@@ -243,7 +250,24 @@ export function PartyLinkLobby({ code }: { code: string }) {
           </div>
         )}
 
-        <PartyInvitePanel code={code} gameSlug={gameSlug} />
+        <details className="mt-4 text-left text-sm">
+          <summary className="cursor-pointer text-muted-foreground">Party 자세히</summary>
+          <div className="mt-2 space-y-2">
+            <p className="text-xs text-primary">Lv{party.progress.level} · Streak {party.progress.streak}</p>
+            {mission ? (
+              <p>🎯 {PartyMissionEngine.label(mission.missionId)} {mission.current}/{mission.target}</p>
+            ) : null}
+            <PartyJourneyFeed partyId={party.id} compact />
+          </div>
+        </details>
+
+        <PartyInvitePanel
+          code={code}
+          gameSlug={gameSlug}
+          inviteReason={inviteReason}
+          playerCount={members.length}
+          maxPlayers={maxPlayers}
+        />
         <p className="mt-3 truncate text-[10px] text-muted-foreground">{getPartyLinkUrl(code)}</p>
       </div>
     </Container>

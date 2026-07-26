@@ -20,7 +20,7 @@ export const memoryTransport: MultiplayerTransport = {
     const deviceId = getDeviceId();
     const nickname = params.hostNickname ?? getLastNickname() ?? "Player";
     const room: GameRoom = {
-      code: randomCode(),
+      code: (params.code ?? randomCode()).toUpperCase(),
       gameSlug: params.gameSlug,
       hostId: deviceId,
       maxPlayers: params.maxPlayers ?? 8,

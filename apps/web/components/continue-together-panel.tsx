@@ -2,7 +2,7 @@
 
 import { CONTINUE_GAMES, continueTogether } from "@game-platform/replay-engine/social";
 import { Button } from "@game-platform/ui";
-import { ArrowRight, Swords } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -54,9 +54,6 @@ export function ContinueTogetherPanel({
             {g.label} <ArrowRight className="size-3" />
           </Button>
         ))}
-        <Button size="sm" onClick={onRematch} className="gap-1">
-          <Swords className="size-3" /> 리벤지
-        </Button>
       </div>
     </div>
   );

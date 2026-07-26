@@ -2,7 +2,7 @@
 
 export type RoomStatus = "waiting" | "ready" | "playing" | "finished" | "spectating";
 export type MatchMode = "quick" | "private" | "friends" | "public";
-export type MaxPlayers = 2 | 3 | 4 | 8 | 16 | 20;
+export type MaxPlayers = 2 | 3 | 4 | 8 | 16 | 20 | 50;
 export type GameTier = "single" | "party" | "realtime";
 
 export interface RoomPlayer {

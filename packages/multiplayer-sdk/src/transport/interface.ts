@@ -6,6 +6,8 @@ export interface CreateRoomParams {
   matchMode?: MatchMode;
   hostNickname?: string;
   isGuest?: boolean;
+  /** Fixed room code — Global World shards */
+  code?: string;
 }
 
 export interface JoinRoomOptions {

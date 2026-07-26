@@ -2,7 +2,7 @@
 import type { BalanceProfile, GameProfile, MatchSizeProfile } from "@game-platform/shared";
 
 export const MATCH_SIZE_PROFILES: MatchSizeProfile[] = [
-  { gameSlug: "snake", minPlayers: 2, maxPlayers: 20 },
+  { gameSlug: "snake", minPlayers: 2, maxPlayers: 50 },
   { gameSlug: "mini-golf", minPlayers: 2, maxPlayers: 8 },
   { gameSlug: "uno", minPlayers: 2, maxPlayers: 6 },
   { gameSlug: "bomber", minPlayers: 2, maxPlayers: 8 },
@@ -41,8 +41,8 @@ export function initBalanceRegistry(): void {
   registerGameProfile({
     gameSlug: "snake",
     minPlayers: 2,
-    maxPlayers: 20,
-    recommendedPlayers: 8,
+    maxPlayers: 50,
+    recommendedPlayers: 20,
     worldScaling: true,
     dynamicDifficulty: true,
     safeSpawn: true,

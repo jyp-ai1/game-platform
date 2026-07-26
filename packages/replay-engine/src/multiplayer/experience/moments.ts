@@ -45,12 +45,16 @@ export function getRecentMoments(limit = 20): ReplayMoment[] {
 }
 
 export const MOMENT_LABELS: Record<MomentKind, string> = {
-  triple_kill: "Triple Kill",
+  triple_kill: "🔥 Triple Kill",
   near_death: "Near Death",
   longest_escape: "Longest Escape",
-  boss_slayer: "Boss Slayer",
+  boss_slayer: "👑 Boss Slayer",
   comeback: "Comeback",
   top10_entry: "Top 10 Entry",
+  first_kill: "💀 First Kill",
+  giant_slayer: "💀 Giant Slayer",
+  revenge: "⚔️ Revenge",
+  survival_5min: "⏱️ 5 Min Survival",
 };
 
 export const MomentsEngine = { capture: captureMoment, recent: getRecentMoments, labels: MOMENT_LABELS };

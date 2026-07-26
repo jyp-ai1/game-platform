@@ -59,7 +59,7 @@ export const localStorageTransport: MultiplayerTransport = {
     const deviceId = getDeviceId();
     const nickname = params.hostNickname ?? getLastNickname() ?? "Player";
     const room: GameRoom = {
-      code: randomCode(),
+      code: (params.code ?? randomCode()).toUpperCase(),
       gameSlug: params.gameSlug,
       hostId: deviceId,
       maxPlayers: params.maxPlayers ?? 2,
@@ -237,6 +237,6 @@ export function isMultiplayerGame(slug: string): boolean {
 }
 
 export function defaultMaxPlayers(slug: string): MaxPlayers {
-  if (REALTIME_GAMES.has(slug)) return 20;
+  if (REALTIME_GAMES.has(slug)) return 50;
   return 2;
 }

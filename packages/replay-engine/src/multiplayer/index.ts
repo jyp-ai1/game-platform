@@ -60,7 +60,12 @@ export {
   isMultiplayerGame,
   getGameTier,
   defaultMaxPlayers,
-  isSupabaseRealtimeConfigured,
+  joinGlobalWorld,
+  quickPlayGlobal,
+  getGlobalWorldStatus,
+  globalWorldCode,
+  isGlobalWorldRoom,
+  GLOBAL_WORLD_TARGET,
 } from "@game-platform/multiplayer-sdk";
 
 export { startHeartbeat, stopHeartbeat, getLatencyMs } from "./heartbeat";

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { CardBestScore } from "@/components/card-best-score";
 import { FavoriteButton } from "@/components/favorite-button";
 import { GameCardPlayLink } from "@/components/game-card-play-link";
+import { SnakeLiveBadge, SnakeMultiplayerEntry } from "@/components/snake-multiplayer-entry";
 import { difficultyVariant, formatDifficulty } from "@/lib/difficulty";
 import { getGameBalanceMeta } from "@/lib/game-balance";
 import { isRecentlyCreated } from "@/lib/game-sections";
@@ -24,6 +25,7 @@ export function GameCard({
   const isMaintenance = game.status === "MAINTENANCE";
   const isNew = !isComingSoon && !isMaintenance && isRecentlyCreated(game.createdAt);
   const balance = getGameBalanceMeta(game.slug, game.difficulty);
+  const isSnake = game.slug === "snake";
 
   return (
     <div className="animate-in fade-in group flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
@@ -70,6 +72,7 @@ export function GameCard({
         />
 
         <div className="absolute right-2 top-2 z-10 flex flex-col items-end gap-1">
+          {isSnake ? <SnakeLiveBadge /> : null}
           {isComingSoon ? <Badge>Coming Soon</Badge> : null}
           {isMaintenance ? <Badge variant="secondary">Maintenance</Badge> : null}
           {isNew ? (
@@ -105,23 +108,27 @@ export function GameCard({
         ) : null}
 
         <div className={cn("relative", compact ? "mt-1" : "mt-2")}>
-          <Button
-            nativeButton={false}
-            render={
-              isComingSoon || isMaintenance ? (
-                <Link href={`/games/${game.slug}`}>
-                  {isMaintenance ? "점검 중" : "Coming Soon"}
-                </Link>
-              ) : (
-                <GameCardPlayLink
-                  href={`/games/${game.slug}`}
-                  indicatorClassName="rounded-lg"
-                >
-                  Play
-                </GameCardPlayLink>
-              )
-            }
-          />
+          {isSnake && !isComingSoon && !isMaintenance ? (
+            <SnakeMultiplayerEntry variant="card" />
+          ) : (
+            <Button
+              nativeButton={false}
+              render={
+                isComingSoon || isMaintenance ? (
+                  <Link href={`/games/${game.slug}`}>
+                    {isMaintenance ? "점검 중" : "Coming Soon"}
+                  </Link>
+                ) : (
+                  <GameCardPlayLink
+                    href={`/games/${game.slug}`}
+                    indicatorClassName="rounded-lg"
+                  >
+                    Play
+                  </GameCardPlayLink>
+                )
+              }
+            />
+          )}
         </div>
       </div>
     </div>

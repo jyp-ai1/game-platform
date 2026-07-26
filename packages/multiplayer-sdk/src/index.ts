@@ -31,6 +31,20 @@ export {
   type MatchRequest,
 } from "./client/matchmaking";
 
+export {
+  joinGlobalWorld,
+  quickPlayGlobal,
+  getGlobalWorldStatus,
+  cacheGlobalWorldStatus,
+  globalWorldCode,
+  isGlobalWorldRoom,
+  resolveAvailableCluster,
+  GLOBAL_WORLD_TARGET,
+  CLUSTER_SIZE,
+  GlobalWorldEngine,
+  type GlobalWorldStatus,
+} from "./client/global-world";
+
 // Lobby / invites
 export {
   getPartyLinkUrl,

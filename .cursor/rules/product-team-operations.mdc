@@ -17,9 +17,19 @@ alwaysApply: true
 
 ---
 
+## Product Principle (고정)
+
+> **Replay는 게임을 고르는 곳이 아니라, 사람이 있는 곳으로 들어가는 플랫폼이다.**
+
+**Gate (모든 기능):** "이 기능이 친구와 함께 더 오래 놀게 만드는가?" → YES만 개발
+
+**홈 UI:** 첫 화면에는 **하나만** — CTA 클릭 후 Party Lv · Journey · Mission · Badge
+
+---
+
 ## Product Boundary (절대 규칙)
 
-**Replay = Browser Game Platform** (Steam + Poki + Slither + Roblox Creator + Discord Party)
+**Replay = 친구들과 노는 플랫폼** (NOT 게임 모음집 · NOT Slither clone)
 
 **AI는 게임 플랫폼을 강화하는 데만 사용한다:**
 게임 추천 · 친구 매칭 · 맵 밸런스 · 신규 게임 QA · 악성 댓글 · Creator 리뷰 · 리텐션 · 이벤트
@@ -37,42 +47,140 @@ CEO Office · Company OS · Founder Memory · Company Score · Company Simulator
 ## 개발 우선순위
 
 ```
-P0 Flagship Snake (재미) → P1 Party Experience → P2 Player Home → P3 Creator Upload → P4 Viral Loop → P5 Marketplace
+P0 Snake Feel 9.5/10 → P1 End Flow 공통화 → P2 Party 강화 → P3 Creator → P4 Marketplace
 ```
 
-**판단 기준:** "친구와 다시 한 판 하게 만드는가?"
+**판단 기준:** Product Principle Gate
 
 **절대 금지:** 새 Admin · Dashboard · AI PM 화면 · KPI · OS · Company 기능
 
 ---
 
-## P0 — Flagship Snake Experience (최우선)
+## P0-2 — Living Global World (현재)
 
-**목표:** Slither 복제가 아니라 **"Replay에서만 가능한 Snake"** — 중독성
+**목표:** AI가 BOT이 아니라 **살아있는 서버**처럼 느껴진다.
 
-**4축:** 손맛 + 친구 + 목표 + 예측불가능한 이벤트
+**구현:** 역할 AI (Explorer/Hunter/Farmer/Aggressive/Scavenger) · AI vs AI 킬 · Kill Feed 12 · 월드 persist · 자연스러운 AI 교체 · 이벤트 몰림 · TOP10 사람 우선 · WORLD Cluster
 
-**판단:** "한 판 더 하게 만드는가?" YES만 구현
+**Gate:** "이 서버는 살아있다"
 
-### P0-1 Snake Feel Polish
-Boost · Magnet · 보간 · 파티클 · 사운드 · Shake · 60fps · 터치
+---
 
-### P0-2 Dynamic World Events
-2분 Meteor · Golden Snake · Boss · Food Rush · Double XP · Portal · Festival
+**Product Principle:** Replay는 **사람이 있는 곳**으로 들어가는 플랫폼이다.
 
-### P0-3 Social Moments
-Triple Kill · Giant Slayer · Revenge · Top1 · Auto Share Card
+**Gate:** "첫 방문자가 '사람이 많아서 재미있다'고 느끼게 만드는가?"
 
-### P0-4 Spectator 2.0
-TOP1/친구 관전 · 응원 · 즉시 리매치
+**Snake Global World:** Quick Play → WORLD shard · AI Fill 50 · LIVE HUD · TOP10
 
-### P0-5 Dynamic Match Rules
-2P 결투 · 4P 추격 · 8P 보스 · 12P 이벤트 · 20P Festival
+**재사용:** `global-world` + `PopulationEngine` → Golf/Bomber/Kart
 
-### Replay Moments (Replay-only)
-AI 명장면 · 30s GIF · 공유 · 친구 초대
+**금지:** Creator · Marketplace · Admin · Guild · Economy · 시즌패스 · 스킨 · 신규 UI 페이지
 
-**절대 금지:** Admin · Dashboard · AI PM 화면 · Company 기능
+---
+
+## Playtest Sprint — Real Player Validation (현재 · P0)
+
+**목표:** 개발 완료가 아니라 **플레이어가 진짜 그렇게 느끼는지** 검증.
+
+**금지 (Merge 전):** 새 이벤트 · 새 UI · Creator · Marketplace · Passport · 스킨 · 업적 · Guild
+
+**허용:** 수치 튜닝 (`snake-playtest-tuning.ts`) · Fake Crowd desync · Telemetry · Heatmap · Playtest Log
+
+**Merge Gate (전부 충족):**
+- 평균 플레이 10분+
+- 리매치 60%
+- 관전 후 재입장 40%
+- AI Turing 50%
+- Observation Sheet 10개+
+- **"재밌었다" 50%+** (관찰자 기록)
+- Blind Test Replay 60%+ (선택)
+
+## Playtest Sprint #1 (현재 · 유일한 승인 작업)
+
+**목표:** Playtest #1~#10 수집 → 매 스프린트 숫자 **하나만** 조정
+
+**코드 작성 금지** (QA 인프라·수치 튜닝만 허용)
+
+**스프린트 루프 (2~3주):**
+```
+Sprint 1 Playtest → Sprint 2 Fix (1 number) → Sprint 3 Playtest → Sprint 4 Fix
+```
+
+**플레이 루프:**
+```
+Play → Observe → One Number Change → Play
+```
+
+**콘솔 API:**
+- `PlaytestObservation.append({ funBreak: { at, why }, invitedFriendWithin3s })`
+- `PlaytestObservation.stranger.append({ targetLabel, thoughtHuman })`
+- `PlaytestReport.generate()` — 😊😡🔥👥🤖 자동 리포트
+- `PlaytestLog.gates()` — Merge Gate
+
+**Stranger Test:** 모르는 사람 2명 · 같은 WORLD · 10분 · 말 안 시킴 → "사람/BOT?"
+
+**Blind Test:** Slither 30분 vs Replay 30분 → "한 판 더?" (이유 금지)
+
+---
+
+## P0 — Snake Feel Final Polish (완료 · 유지)
+
+**목표:** "Replay Snake를 다시 켜고 싶다" (Slither 기능 비교 ❌)
+
+**허용:** 수치 · 효과음 · 파티클 · 카메라 · Boost · Food 밀도 · 2/8/20 밸런스
+
+**금지:** 새 UI · 새 기능 · 새 시스템 · Engine/SDK 수정
+
+**검증 (4 YES):** 5분+ 플레이 · 죽고 리매치 · 친구 추천 욕구 · 종료 후 Replay 유지
+
+**파일:** `snake-feel-tuning.ts` · `snake-match-rules.ts` · `snake-feel.ts`
+
+---
+
+## P1 — End Flow 공통화 (Snake 검증 후)
+
+Result → Rematch → Party Journey → Continue Together → Next Game  
+→ Mini Golf · UNO · Bomber 복사
+
+---
+
+## P2 — Party Experience 강화 (Snake+End Flow 검증 후)
+
+Party Mission · Passport · Season
+
+---
+
+## P0 — Social Retention (완료 · 동결)
+
+**Replay = 친구들과 노는 플랫폼** (게임 플랫폼 ❌)
+
+**Gate:** "이 기능이 친구와 함께 '한 판만 더'를 만들 수 있는가?" → NO면 보류
+
+**동결:** Platform Engine · Multiplayer SDK · Party core · Creator MVP · Marketplace MVP · 새 게임 · 새 시스템
+
+**홈 구조:** People First → Party → 상황 → (게임은 아래)
+
+**Replay KPI:** Party 생성률 · Party 유지 · D+1/D+7 · 같이 플레이 시간 · 게임 이동률
+
+**End Flow:** Result → Party Journey → Continue Together → 내일 약속 → 홈
+
+**초대:** "친구야 와" ❌ → "오늘 Party Lv10 찍자" ⭕
+
+---
+
+## P0 — Gameplay Polish + Retention Polish
+
+**Gameplay:** Snake 수치만 · "한 판 더?" · Slither 비교는 재미 차이 3개
+
+**Retention:** Snake 종료 → Replay 유지 · Engine/SDK 수정 금지
+
+**End Flow (3초):** 1 리매치 → 2 친구 초대 → 3 다음 게임 → 4 Passport → 5 홈
+
+**Party Journey:** 오늘 함께 논 기억 (추억, not KPI)
+
+**Platform KPI:** Party 유지 · 다음 게임 이동 · 리매치 · D+1
+
+**최종:** Snake 끝 → Replay 종료 ❌
 
 ---
 

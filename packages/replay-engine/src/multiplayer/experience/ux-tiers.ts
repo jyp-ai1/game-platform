@@ -39,9 +39,9 @@ export const UX_TIERS: UxTier[] = [
     aiDirector: true,
   },
   {
-    minPlayers: 20,
-    label: "Festival",
-    features: ["월드 이벤트", "시즌", "실시간 랭킹", "관전", "AI Director"],
+    minPlayers: 50,
+    label: "Global",
+    features: ["50인 월드", "Food Storm", "Boss", "World Collapse", "AI Fill"],
     minimap: true,
     events: true,
     spectator: true,
