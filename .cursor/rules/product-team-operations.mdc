@@ -1,39 +1,48 @@
 ---
-description: Replay OS v5 — Social Loop + Motivation Engine (DAU / return reason)
+description: Replay OS v6 — Priority Motivation + Relationship Feed + Living Identity
 alwaysApply: true
 ---
 
-# Replay OS v5 — Master Task
+# Replay OS v6 — Master Task
 
-> **"내일 다시 Replay에 들어올 이유"를 매일 하나 이상.** 기능이 DAU/재방문을 올리지 않으면 만들지 않는다.
+> **친구 때문에 들어오는 플랫폼.** 매일 "내일 재방문 이유" + DAU hook 하나.
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# 3 Loops
+# 7 Engines (고도화만)
 
-1. **Play Loop** — 홈→게임→결과→다음 (✅)
-2. **Growth Loop** — XP→Mission→Achievement→Identity (✅)
-3. **Social Loop** — 친구→도전→반응→재도전 (**1순위**)
-
----
-
-# v5 Engines
-
-- **Motivation Engine** — Top10 · 2x Coin · 도전장 · 미션 → **Replay 시작**
-- **Timeline Actions** — 모든 beat에 CTA (다시 도전 · 점수 깨기 · 마지막 조각)
-- **Social Reactions** — 👍 🔥 축하 도전 · Feed 즉시 노출
-- **Identity Statement** — "상위 2% 퍼즐 플레이어" (수치 아님)
+| Engine | v6 focus |
+|--------|----------|
+| Identity | Living Identity (이번 주 Action Lover) |
+| Motivation | Priority scores · 홈=최강 1개만 |
+| Habit | Loss aversion > gain |
+| Social | Relationship Feed · rivals · H2H |
+| Growth | ✅ maintain |
+| Reward | ✅ maintain |
+| Operations | AI self-improve loop |
 
 ---
 
-# 검증 질문 (매 커밋)
+# Motivation Priority
 
-> **이 기능이 사용자의 '내일 재방문 이유'를 하나 이상 늘리는가?**
+친구 추월 100 · Streak 95 · Top10 90 · 미션 70 · Collection 50 · 2x Coin 45
+
+---
+
+# Social = Relationship
+
+추월→재도전 · 도전장→받기 · 업적→축하 · 👍🔥⚔️
+
+---
+
+# 검증
+
+> **내일 재방문 이유 + DAU hook (게임 시작 CTA) 하나?**
 
 ---
 
 # 08:00 Report
 
-재방문 이유 · Social Loop · Motivation CTA · DAU proxy · Risks
+재방문 이유 · Social Loop % · Top motivation · Risks

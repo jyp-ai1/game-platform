@@ -11,8 +11,9 @@ import {
 } from "@game-platform/game-sdk";
 
 import { subscribeLiveData } from "@/lib/live-data-bus";
-import { buildFullReplayIdentity, getIdentityStatement } from "@/lib/replay-identity";
+import { getLivingIdentity, getLivingIdentityStatement } from "@/lib/living-identity";
 import { getPrimaryPlayHref } from "@/lib/motivation-engine";
+import { buildFullReplayIdentity } from "@/lib/replay-identity";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Replay Identity — emotional first, stats second. */
@@ -30,7 +31,12 @@ export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; 
     return buildFullReplayIdentity(games, nickname || "Player");
   }, [games, mounted, nickname]);
 
-  const statement = identity ? getIdentityStatement(identity) : "";
+  const living = useMemo(() => {
+    if (!mounted) return null;
+    return getLivingIdentity(games);
+  }, [games, mounted]);
+
+  const statement = mounted ? getLivingIdentityStatement(games) : "";
   const playHref = mounted ? getPrimaryPlayHref(games) : "/games";
 
   if (!mounted || !identity) return null;
@@ -43,9 +49,14 @@ export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; 
 
   return (
     <div className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-card/80 p-6 sm:p-8">
-      <p className="text-xs font-semibold uppercase tracking-widest text-primary">Replay Passport</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+        {living?.periodLabel ?? "Replay"} Identity
+      </p>
       <p className="mt-4 text-sm text-muted-foreground">당신은</p>
       <h2 className="mt-1 text-2xl font-bold leading-snug sm:text-3xl">{statement}</h2>
+      {living?.isWeekly ? (
+        <p className="mt-2 text-sm text-violet-400">살아있는 정체성 · 매주 업데이트</p>
+      ) : null}
 
       <div className="mt-6 flex flex-wrap gap-2">
         {identity.badgeLabelsKo.map((label) => (

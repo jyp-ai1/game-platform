@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { CommunityActivityFeed } from "@/components/community-activity-feed";
+import { SocialRelationshipsPanel } from "@/components/social-relationships-panel";
 import { CommunityFeedTabs } from "@/components/community-feed-tabs";
 import { CommunityAiSummary, CommunityCommentsPanel } from "@/components/community-comments-panel";
 import {
@@ -49,6 +50,7 @@ export function CommunityHub({ games }: { games: Game[] }) {
   return (
     <div className="flex flex-col gap-8">
       <CommunityActivityFeed games={games} />
+      <SocialRelationshipsPanel />
 
       <div id="challenge">
         <GameChallengeHub games={games} />

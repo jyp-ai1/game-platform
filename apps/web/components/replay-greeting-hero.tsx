@@ -12,14 +12,11 @@ import {
 } from "@game-platform/game-sdk";
 
 import { subscribeLiveData } from "@/lib/live-data-bus";
-import { buildHabitState } from "@/lib/habit-engine";
-import { getTimeGreetingKo } from "@/lib/emotion-engine";
-import { buildNetworkState } from "@/lib/network-engine";
-import { buildFullReplayIdentity, getIdentityStatement } from "@/lib/replay-identity";
-import { getPrimaryPlayHref } from "@/lib/motivation-engine";
+import { getLivingIdentity, getLivingIdentityStatement } from "@/lib/living-identity";
+import { getTopMotivation, getPrimaryPlayHref } from "@/lib/motivation-engine";
 import { useMounted } from "@/lib/use-mounted";
 
-/** Emotion-first home — 나 → 성장 → 친구 → 게임 (Replay OS v4). */
+/** Home hero — single strongest motivation only (Priority Engine). */
 export function ReplayGreetingHero({ games }: { games: Game[] }) {
   const mounted = useMounted();
   const nickname = useSyncExternalStore(
@@ -31,81 +28,66 @@ export function ReplayGreetingHero({ games }: { games: Game[] }) {
 
   const state = useMemo(() => {
     if (!mounted) return null;
-    const name = nickname || "Player";
-    const identity = buildFullReplayIdentity(games, name);
-    const habit = buildHabitState(games);
-    const network = buildNetworkState();
-    return { identity, habit, network, name };
+    const top = getTopMotivation(games);
+    const living = getLivingIdentity(games);
+    const statement = getLivingIdentityStatement(games);
+    return { top, living, statement, name: nickname || "Player" };
   }, [games, mounted, nickname]);
 
   if (!mounted || !state) return null;
 
-  const { identity, habit, network, name } = state;
+  const { top, living, statement, name } = state;
   const displayName = name === "Player" ? "Player" : `${name}님`;
   const playHref = getPrimaryPlayHref(games);
-  const identityLine = getIdentityStatement(identity);
 
   return (
     <section className="relative overflow-hidden border-b border-primary/20 bg-gradient-to-br from-primary/15 via-card/90 to-card/70 py-8 sm:py-10">
       <Container className="relative">
-        <p className="text-sm font-medium text-primary">{getTimeGreetingKo()}</p>
+        <p className="text-sm font-medium text-primary">{living.periodLabel}</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">{displayName}</h1>
-        <p className="mt-2 text-lg text-muted-foreground">{identityLine}</p>
+        <p className="mt-2 text-lg text-muted-foreground">{statement}</p>
 
-        <div className="mt-5 space-y-2 text-base">
-          {!habit.todayPlayed ? (
-            <p>
-              오늘 Replay Score{" "}
-              <span className="font-bold tabular-nums text-primary">+{habit.possibleScoreGain}</span>
-              {" "}가능합니다.
+        {top ? (
+          <div
+            className={`mt-6 rounded-2xl border p-5 ${
+              top.isLoss
+                ? "border-red-500/40 bg-red-500/10"
+                : "border-primary/30 bg-primary/10"
+            }`}
+          >
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {top.isLoss ? "지금 안 하면" : "오늘의 동기"} · {top.score}pt
             </p>
-          ) : (
-            <p className="text-emerald-400">오늘 Replay 중 — 잘하고 있어요!</p>
-          )}
-          {network.waitingFriends > 0 ? (
-            <p>
-              친구{" "}
-              <span className="font-bold text-amber-400">{network.waitingFriends}명</span>
-              이 기다리고 있습니다.
+            <p className="mt-2 flex items-center gap-2 text-xl font-bold">
+              <span>{top.emoji}</span>
+              {top.headline}
             </p>
-          ) : null}
-        </div>
-
-        {habit.lossMessage ? (
-          <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-200">
-            ⚠ {habit.lossMessage}
-          </p>
-        ) : null}
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {identity.badgeLabelsKo.map((b) => (
-            <span
-              key={b}
-              className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+            <p className="mt-1 text-sm text-muted-foreground">{top.detail}</p>
+            <Link
+              href={top.ctaHref}
+              className="mt-4 inline-flex rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20"
             >
-              {b}
-            </span>
-          ))}
-          <span className="rounded-full border border-white/10 bg-card/60 px-3 py-1 text-xs">
-            Lv.{identity.level}
-          </span>
-          <span className="rounded-full border border-white/10 bg-card/60 px-3 py-1 text-xs">
-            Replay {identity.replayScore}
-          </span>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2">
+              {top.ctaLabel} →
+            </Link>
+          </div>
+        ) : (
           <Link
             href={playHref}
-            className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+            className="mt-6 inline-flex rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground"
           >
             Replay 시작 →
           </Link>
-          <Link href="/passport" className="rounded-xl border px-5 py-2.5 text-sm">
+        )}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium">
+            {living.titleKo}
+          </span>
+          <Link href="/passport" className="rounded-full border px-3 py-1 text-xs hover:border-primary/40">
             Passport
           </Link>
-          <Link href="/community" className="rounded-xl border px-5 py-2.5 text-sm">
-            Replay Feed
+          <Link href="/community" className="rounded-full border px-3 py-1 text-xs hover:border-primary/40">
+            Relationship Feed
           </Link>
         </div>
       </Container>
