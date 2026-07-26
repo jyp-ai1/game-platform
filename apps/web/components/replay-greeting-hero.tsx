@@ -13,9 +13,10 @@ import {
 
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { buildHabitState } from "@/lib/habit-engine";
-import { getTimeGreetingKo, getIdentityEmotion } from "@/lib/emotion-engine";
+import { getTimeGreetingKo } from "@/lib/emotion-engine";
 import { buildNetworkState } from "@/lib/network-engine";
-import { buildFullReplayIdentity } from "@/lib/replay-identity";
+import { buildFullReplayIdentity, getIdentityStatement } from "@/lib/replay-identity";
+import { getPrimaryPlayHref } from "@/lib/motivation-engine";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Emotion-first home — 나 → 성장 → 친구 → 게임 (Replay OS v4). */
@@ -41,13 +42,15 @@ export function ReplayGreetingHero({ games }: { games: Game[] }) {
 
   const { identity, habit, network, name } = state;
   const displayName = name === "Player" ? "Player" : `${name}님`;
+  const playHref = getPrimaryPlayHref(games);
+  const identityLine = getIdentityStatement(identity);
 
   return (
     <section className="relative overflow-hidden border-b border-primary/20 bg-gradient-to-br from-primary/15 via-card/90 to-card/70 py-8 sm:py-10">
       <Container className="relative">
         <p className="text-sm font-medium text-primary">{getTimeGreetingKo()}</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">{displayName}</h1>
-        <p className="mt-2 text-lg text-muted-foreground">{getIdentityEmotion(identity.titleKo, identity.streakDays)}</p>
+        <p className="mt-2 text-lg text-muted-foreground">{identityLine}</p>
 
         <div className="mt-5 space-y-2 text-base">
           {!habit.todayPlayed ? (
@@ -93,16 +96,16 @@ export function ReplayGreetingHero({ games }: { games: Game[] }) {
 
         <div className="mt-6 flex flex-wrap gap-2">
           <Link
-            href="/passport"
+            href={playHref}
             className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
           >
-            내 Replay →
+            Replay 시작 →
+          </Link>
+          <Link href="/passport" className="rounded-xl border px-5 py-2.5 text-sm">
+            Passport
           </Link>
           <Link href="/community" className="rounded-xl border px-5 py-2.5 text-sm">
             Replay Feed
-          </Link>
-          <Link href="/journey" className="rounded-xl border px-5 py-2.5 text-sm">
-            Timeline
           </Link>
         </div>
       </Container>

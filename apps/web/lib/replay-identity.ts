@@ -180,6 +180,28 @@ export function buildFullReplayIdentity(games: Game[], displayName = "Player"): 
   };
 }
 
+/** Emotional identity copy — people remember identity, not numbers. */
+export function getIdentityStatement(identity: FullReplayIdentity): string {
+  const genre =
+    identity.titleKo.includes("퍼즐") || identity.titleKo.includes("Puzzle")
+      ? "퍼즐"
+      : identity.titleKo.replace(/ 마스터| 에이스| 전략가| 챔피언| 탐험가| 트레이너/g, "");
+
+  if (identity.topPercent !== null && identity.topPercent <= 5) {
+    return `당신은 상위 ${identity.topPercent}% ${genre} 플레이어입니다.`;
+  }
+  if (identity.topPercent !== null && identity.topPercent <= 10) {
+    return `당신은 Top ${identity.topPercent}% ${identity.titleKo}입니다.`;
+  }
+  if (identity.streakDays >= 30) {
+    return `${identity.streakDays}일째 Replay — ${identity.titleKo}로 성장 중입니다.`;
+  }
+  if (identity.isCollector && identity.collectionPercent >= 50) {
+    return `수집가 ${identity.titleKo} — Collection ${identity.collectionPercent}%`;
+  }
+  return `당신은 ${identity.titleKo}입니다.`;
+}
+
 /** Mock friend score for "beat friend" motivation on game end. */
 export function getFriendBeatGap(slug: string, yourScore: number): {
   nickname: string;

@@ -11,10 +11,11 @@ import {
 } from "@game-platform/game-sdk";
 
 import { subscribeLiveData } from "@/lib/live-data-bus";
-import { buildFullReplayIdentity } from "@/lib/replay-identity";
+import { buildFullReplayIdentity, getIdentityStatement } from "@/lib/replay-identity";
+import { getPrimaryPlayHref } from "@/lib/motivation-engine";
 import { useMounted } from "@/lib/use-mounted";
 
-/** Replay Identity — profile first screen (Lv · titles · badges). */
+/** Replay Identity — emotional first, stats second. */
 export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; compact?: boolean }) {
   const mounted = useMounted();
   const nickname = useSyncExternalStore(
@@ -29,26 +30,22 @@ export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; 
     return buildFullReplayIdentity(games, nickname || "Player");
   }, [games, mounted, nickname]);
 
+  const statement = identity ? getIdentityStatement(identity) : "";
+  const playHref = mounted ? getPrimaryPlayHref(games) : "/games";
+
   if (!mounted || !identity) return null;
 
   if (compact) {
     return (
-      <div className="flex flex-wrap gap-2">
-        {identity.badgeLabelsKo.slice(0, 5).map((b) => (
-          <span key={b} className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs">
-            {b}
-          </span>
-        ))}
-      </div>
+      <p className="text-sm font-medium text-primary">{statement}</p>
     );
   }
 
   return (
     <div className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-card/80 p-6 sm:p-8">
-      <p className="text-xs font-semibold uppercase tracking-widest text-primary">Replay Identity</p>
-      <h2 className="mt-2 text-3xl font-bold">Lv.{identity.level}</h2>
-      <p className="mt-1 text-xl font-semibold text-primary">{identity.titleKo}</p>
-      <p className="text-muted-foreground">{identity.title}</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-primary">Replay Passport</p>
+      <p className="mt-4 text-sm text-muted-foreground">당신은</p>
+      <h2 className="mt-1 text-2xl font-bold leading-snug sm:text-3xl">{statement}</h2>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {identity.badgeLabelsKo.map((label) => (
@@ -67,20 +64,17 @@ export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; 
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="Level" value={`Lv.${identity.level}`} />
         <Stat label="Replay Score" value={String(identity.replayScore)} />
         <Stat label="Collection" value={`${identity.collectionPercent}%`} />
-        <Stat label="Tier" value={identity.replayTier} />
         <Stat label="Season" value={identity.seasonTierKo} />
       </div>
 
-      {identity.topPercent !== null && identity.topPercent <= 10 ? (
-        <p className="mt-4 text-sm font-medium text-emerald-400">
-          Top {identity.topPercent}% — 상위 Replay 유저입니다
-        </p>
-      ) : null}
-
-      <Link href="/journey" className="mt-6 inline-block text-sm font-medium text-primary hover:underline">
-        내 Timeline →
+      <Link
+        href={playHref}
+        className="mt-6 inline-flex rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+      >
+        Replay 시작 →
       </Link>
     </div>
   );

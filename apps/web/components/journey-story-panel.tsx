@@ -60,6 +60,14 @@ export function JourneyStoryPanel({ games }: { games: Game[] }) {
   );
 }
 
+function ctaLabel(event: StoryEvent): string {
+  if (event.type === "collection") return "마지막 조각 찾기";
+  if (event.type === "challenge") return "재도전";
+  if (event.type === "mission") return "미션 플레이";
+  if (event.type === "achievement") return "축하하기";
+  return "다시 도전";
+}
+
 function StoryBeat({
   event,
   isLast,
@@ -77,13 +85,19 @@ function StoryBeat({
       <span className="absolute left-0 top-1 flex size-6 items-center justify-center rounded-full border-2 border-primary bg-background text-xs">
         {event.emoji}
       </span>
-      <Link href={event.href} className="block rounded-xl transition-colors hover:bg-muted/20">
+      <div className="rounded-xl pr-2">
         <p className="text-xs text-muted-foreground">
           {event.actor} · {when}
         </p>
         <p className="mt-0.5 font-semibold">{event.headline}</p>
         <p className="mt-0.5 text-sm text-muted-foreground">{event.detail}</p>
-      </Link>
+        <Link
+          href={event.href}
+          className="mt-2 inline-flex rounded-lg bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/25"
+        >
+          {ctaLabel(event)} →
+        </Link>
+      </div>
     </li>
   );
 }

@@ -3,6 +3,7 @@
  */
 import {
   getBestScore,
+  getLastNickname,
   getTotalPlayCount,
 } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
@@ -13,6 +14,8 @@ import type { GameEndRewards } from "@/lib/retention-engine";
 import { applyGameEndRetention } from "@/lib/retention-engine";
 import { buildWrappedSnapshot } from "@/lib/wrapped-data";
 import { checkPlatformAchievements } from "@/lib/achievement-engine";
+import { getFriendBeatGap } from "@/lib/replay-identity";
+import { recordSocialBeatEvent } from "@/lib/social-reactions-store";
 
 export interface UniversalRewardBundle extends GameEndRewards {
   replayScoreGain: number;
@@ -32,6 +35,29 @@ export function applyUniversalRewards(
   const replayScoreTotal = games.length > 0 ? buildWrappedSnapshot(games).replayScore : 0;
   const replayScoreGain = Math.max(10, Math.round(score / 100));
   const newAchievements = checkPlatformAchievements(gameSlug, score);
+
+  if (typeof window !== "undefined") {
+    const actor = getLastNickname() || "나";
+    if (base.isNewBest) {
+      recordSocialBeatEvent({
+        actor,
+        headline: `${gameSlug} 최고기록 ${score.toLocaleString()}점`,
+        detail: "Replay Feed에 공유됨",
+        gameSlug,
+        score,
+      });
+    }
+    const friend = getFriendBeatGap(gameSlug, score);
+    if (friend.gap <= 0 && score > 0) {
+      recordSocialBeatEvent({
+        actor,
+        headline: `친구 ${friend.nickname}보다 ${Math.abs(friend.gap).toLocaleString()}점 앞섬`,
+        detail: "친구에게 알림",
+        gameSlug,
+        score,
+      });
+    }
+  }
 
   return {
     ...base,

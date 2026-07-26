@@ -1,4 +1,5 @@
 import { ReplayGreetingHero } from "@/components/replay-greeting-hero";
+import { ReplayMotivationStrip } from "@/components/replay-motivation-strip";
 import { ReplayTimelineStrip } from "@/components/replay-timeline-strip";
 import { ReplayOffPlayStrip } from "@/components/replay-offplay-strip";
 import { HomeChallengeStrip } from "@/components/home-challenge-strip";
@@ -22,6 +23,7 @@ export default async function Home() {
     <main className="flex flex-1 flex-col">
       {/* 나 → 성장 → 친구 → (게임) */}
       <ReplayGreetingHero games={games} />
+      <ReplayMotivationStrip games={games} />
       <ReplayTimelineStrip games={games} />
       <ReplayOffPlayStrip games={games} />
       <HomeDailyChallengeStrip games={games} />

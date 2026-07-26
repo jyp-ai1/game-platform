@@ -5,6 +5,7 @@ import type { Game } from "@game-platform/shared";
 
 import { listChallenges } from "@/lib/challenge-scores-store";
 import { buildReplayStoryFeed } from "@/lib/replay-story-feed";
+import { listSocialFeedEvents } from "@/lib/social-reactions-store";
 import { getFriendsList } from "@/lib/social-store";
 
 export interface NetworkState {
@@ -43,7 +44,21 @@ export function buildNetworkState(): NetworkState {
 
 export function buildReplayFeedItems(games: Game[], limit = 12) {
   const friends = getFriendsList();
+  const socialEvents = listSocialFeedEvents(limit);
   const feed = buildReplayStoryFeed(games, limit);
+
+  for (const ev of socialEvents) {
+    feed.unshift({
+      id: ev.id,
+      type: "score",
+      actor: ev.actor,
+      headline: ev.headline,
+      detail: ev.detail,
+      href: ev.gameSlug ? `/games/${ev.gameSlug}` : "/community",
+      createdAt: ev.createdAt,
+      emoji: "🏆",
+    });
+  }
 
   const friendSamples = [
     { nickname: "민수", headline: "Top10 진입", detail: "Snake 14,200점", emoji: "🏆" },
