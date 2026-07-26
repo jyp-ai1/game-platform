@@ -31,6 +31,7 @@ import {
   getPartyLinkUrl,
   shareRoom,
 } from "@game-platform/multiplayer-sdk";
+import { BalanceEngine, balanceFor } from "@game-platform/replay-engine/balance";
 
 export interface ReplayInitOptions {
   gameSlug: string;
@@ -101,6 +102,13 @@ const multiplayer = {
   ranking: (slug: string, score: number) => recordScoreReport(slug, score),
   challenge: (slug: string, score: number) => recordScoreReport(slug, score),
   subscribe: subscribeRoom,
+  balance: (gameSlug: string, playerCount: number) => balanceFor(gameSlug, playerCount),
+  world: BalanceEngine.world,
+  spawn: BalanceEngine.spawn,
+  scale: BalanceEngine.scale,
+  analytics: BalanceEngine.analytics,
+  heatmap: BalanceEngine.heatmap,
+  ai: BalanceEngine.ai,
 };
 
 const reward = {

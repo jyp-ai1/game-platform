@@ -11,3 +11,16 @@ export type {
   PresenceEntry,
   MultiplayerResultPayload,
 } from "./multiplayer";
+export type {
+  GameProfile,
+  BalanceProfile,
+  ComputedBalance,
+  WorldFeature,
+  FoodKind,
+  SpawnPoint,
+  DeathEvent,
+  MatchAnalyticsSnapshot,
+  HeatmapCell,
+  AiBalanceRecommendation,
+  MatchSizeProfile,
+} from "./balance";

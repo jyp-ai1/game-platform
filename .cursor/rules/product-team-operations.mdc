@@ -11,15 +11,15 @@ Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Phase: P0 Realtime Multiplayer (고정 순서)
+# Phase: P0 Balance Engine + Realtime Multiplayer
 
 ```
-Supabase Realtime Engine → Test Suite → Snake.io → Presence → Notification → Admin Dashboard
+Balance Engine → Realtime Engine → Snake.io → Analytics → AI Balance
 ```
 
-**L2 Engine DoD: 10/10 complete**
+게임은 `balance.ts` + `game-profile.ts` 만 정의. Replay Engine이 자동 계산.
 
-**Creator Platform freeze** — 확장 금지
+**Creator Platform freeze**
 
 ---
 

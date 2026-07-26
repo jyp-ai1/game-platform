@@ -2,6 +2,24 @@
  * Replay Engine — Multiplayer module (facade over transport layer).
  * Games use Replay.multiplayer only — never transport directly.
  */
+import {
+  createRoom,
+  joinRoom,
+  joinRoomAsync,
+  ensureRoom,
+  leaveRoom,
+  getRoom,
+  send,
+  sync,
+  start,
+  finish,
+  spectator,
+  replay,
+  subscribeRoom,
+} from "@game-platform/multiplayer-sdk";
+
+import { BalanceEngine, balanceFor } from "./balance";
+
 export type {
   CreateRoomParams,
   JoinRoomOptions,
@@ -48,6 +66,7 @@ export {
 export { startHeartbeat, stopHeartbeat, getLatencyMs } from "./heartbeat";
 export { applyLatencyBuffer, mergeGameState } from "./sync";
 export { watchSpectator, leaveSpectator } from "./spectator";
+export { BalanceEngine, balanceFor, computeBalance, recommendBalance, buildHeatmap } from "./balance";
 
 /** ReplayOS.Engine.Multiplayer namespace */
 export const Multiplayer = {
@@ -64,21 +83,11 @@ export const Multiplayer = {
   spectator,
   reconnect: replay,
   subscribe: subscribeRoom,
+  balance: balanceFor,
+  world: BalanceEngine.world,
+  spawn: BalanceEngine.spawn,
+  scale: BalanceEngine.scale,
+  analytics: BalanceEngine.analytics,
+  heatmap: BalanceEngine.heatmap,
+  ai: BalanceEngine.ai,
 };
-
-// Re-import for namespace object
-import {
-  createRoom,
-  joinRoom,
-  joinRoomAsync,
-  ensureRoom,
-  leaveRoom,
-  getRoom,
-  send,
-  sync,
-  start,
-  finish,
-  spectator,
-  replay,
-  subscribeRoom,
-} from "@game-platform/multiplayer-sdk";

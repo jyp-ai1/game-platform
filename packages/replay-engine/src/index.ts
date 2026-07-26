@@ -113,5 +113,7 @@ export {
 } from "./engines/ai";
 export type { AiIssue, AiIssueContext, AiIssueSeverity, AiIssueSource } from "./engines/ai";
 
+export { BalanceEngine, balanceFor } from "./multiplayer/balance";
+
 // Re-export SDK for single import path
 export { Replay, GameSDKProvider, useGameSDK, MultiplayerProvider, useRoom } from "@game-platform/replay-sdk";
