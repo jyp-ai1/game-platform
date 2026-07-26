@@ -1,5 +1,6 @@
 import { Container, SectionTitle } from "@game-platform/ui";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { CommunityHub } from "@/components/community-hub";
 import { getGames } from "@/lib/supabase/games";
@@ -19,7 +20,9 @@ export default async function CommunityPage() {
       <Container>
         <SectionTitle title="Community" />
         <div className="mt-8">
-          <CommunityHub games={games} />
+          <Suspense fallback={<p className="text-sm text-muted-foreground">Loading community…</p>}>
+            <CommunityHub games={games} />
+          </Suspense>
         </div>
       </Container>
     </main>
