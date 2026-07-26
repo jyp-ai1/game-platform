@@ -5,7 +5,7 @@
  */
 import type { GameRoom } from "@game-platform/shared";
 
-import { localStorageTransport } from "./local-storage";
+import { memoryTransport } from "./memory";
 import type { MultiplayerTransport } from "./interface";
 
 const CHANNEL = "replay:rooms";
@@ -86,8 +86,8 @@ function wrap(base: MultiplayerTransport): MultiplayerTransport {
   return wrapped;
 }
 
-/** Cross-tab realtime bridge — use until Supabase Realtime ships. */
-export const broadcastChannelTransport: MultiplayerTransport = wrap(localStorageTransport);
+/** Cross-tab realtime bridge — memory + BroadcastChannel (dev fallback). */
+export const broadcastChannelTransport: MultiplayerTransport = wrap(memoryTransport);
 
 /** Check if Supabase Realtime should be used (future). */
 export function isSupabaseRealtimeAvailable(): boolean {

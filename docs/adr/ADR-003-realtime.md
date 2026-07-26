@@ -1,18 +1,18 @@
 # ADR-003: Realtime Transport
 
-**Status:** Proposed  
-**Date:** 2026-07  
+**Status:** Accepted  
+**Date:** 2026-07-26  
 **Layer:** L1 Infrastructure / L2 Engine
 
 ## Context
 
-Multiplayer MVP uses localStorage — same-browser only. Cross-device required for ecosystem.
+Multiplayer MVP used localStorage — same-browser only. Cross-device required for ecosystem.
 
-## Decision (Proposed)
+## Decision
 
-Transport abstraction in `@game-platform/multiplayer-sdk`. Swap `localStorageTransport` → Supabase Realtime or WebSocket without game changes.
+Transport abstraction in `@game-platform/multiplayer-sdk` / `replay-engine/multiplayer`. Default transport: **Supabase Realtime** (`mp_rooms`, `mp_presence` tables). Dev fallback: memory + BroadcastChannel.
 
 ## Consequences
 
-- Engine DoD item "Multiplayer" blocked until this ships
-- No game-level WebSocket code allowed
+- Engine DoD item "Multiplayer" complete
+- All games use `Replay.multiplayer` only — no game-level WebSocket code

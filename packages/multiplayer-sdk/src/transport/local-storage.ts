@@ -237,6 +237,6 @@ export function isMultiplayerGame(slug: string): boolean {
 }
 
 export function defaultMaxPlayers(slug: string): MaxPlayers {
-  if (REALTIME_GAMES.has(slug)) return 8;
+  if (REALTIME_GAMES.has(slug)) return 20;
   return 2;
 }

@@ -5,17 +5,20 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/__tests__/multiplayer.test.ts"
   },
   "dependencies": {
     "@game-platform/game-sdk": "*",
-    "@game-platform/shared": "*"
+    "@game-platform/shared": "*",
+    "@supabase/supabase-js": "^2.49.1"
   },
   "peerDependencies": {
     "react": "^19"
   },
   "devDependencies": {
     "@types/react": "^19",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }

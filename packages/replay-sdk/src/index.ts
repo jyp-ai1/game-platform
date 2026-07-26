@@ -85,6 +85,8 @@ const logic = {
 const multiplayer = {
   createRoom,
   join: joinRoom,
+  joinAsync: joinRoomAsync,
+  ensureRoom,
   leave: leaveRoom,
   send,
   sync,
@@ -95,6 +97,7 @@ const multiplayer = {
   reconnect: reconnectRoom,
   ranking: (slug: string, score: number) => recordScoreReport(slug, score),
   challenge: (slug: string, score: number) => recordScoreReport(slug, score),
+  subscribe: subscribeRoom,
 };
 
 const reward = {

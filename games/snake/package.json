@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@game-platform/game-sdk": "*",
+    "@game-platform/multiplayer-sdk": "*",
     "@game-platform/ui": "*"
   },
   "peerDependencies": {

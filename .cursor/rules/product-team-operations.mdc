@@ -11,15 +11,15 @@ Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Phase: Product Experience (구조 개선 중단)
-
-Architecture / Layer / RFC / ADR **충분**. 더 설계하지 않는다.
+# Phase: P0 Realtime Multiplayer (고정 순서)
 
 ```
-플레이 → 재방문 → 친구 초대 → Creator → 게임 증가
+Supabase Realtime Engine → Test Suite → Snake.io → Presence → Notification → Admin Dashboard
 ```
 
-**Creator Platform freeze** — Studio/Marketplace/Builder/SDK 유지, 확장 금지.
+**L2 Engine DoD: 10/10 complete**
+
+**Creator Platform freeze** — 확장 금지
 
 ---
 

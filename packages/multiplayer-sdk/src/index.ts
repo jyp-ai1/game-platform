@@ -2,6 +2,8 @@
 export {
   createRoom,
   joinRoom,
+  joinRoomAsync,
+  ensureRoom,
   leaveRoom,
   getRoom,
   setPlayerReady,
@@ -15,6 +17,7 @@ export {
   subscribeRoom,
   setMultiplayerTransport,
   getMultiplayerTransport,
+  initMultiplayerTransport,
 } from "./client/room-client";
 
 // Matchmaking
@@ -43,6 +46,7 @@ export {
 // Presence
 export {
   getPresenceEntries,
+  fetchPresenceEntries,
   setMyPresence,
   formatPresenceLabel,
   presenceMinutesAgo,
@@ -58,14 +62,15 @@ export {
   defaultMaxPlayers,
   PARTY_GAMES,
   REALTIME_GAMES,
-  localStorageTransport,
 } from "./transport/local-storage";
 
 // Transport
-export {
-  broadcastChannelTransport,
-  isSupabaseRealtimeAvailable,
-} from "./transport/broadcast-channel";
+export { isSupabaseRealtimeConfigured, getMultiplayerSupabase } from "./transport/supabase-client";
+export { isSupabaseRealtimeAvailable } from "./transport/broadcast-channel";
+export { supabaseTransport } from "./transport/supabase";
+export { memoryTransport } from "./transport/memory";
+export { broadcastChannelTransport } from "./transport/broadcast-channel";
+export { localStorageTransport } from "./transport/local-storage";
 
 // React
 export { MultiplayerProvider, useMultiplayerRoom } from "./react/MultiplayerProvider";

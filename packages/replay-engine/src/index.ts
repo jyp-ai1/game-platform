@@ -78,6 +78,19 @@ export type { ReplayPlugin, PluginId } from "./plugins";
 export type { ReplayEvent, ReplayEventType } from "./event-bus";
 export type { ReplayService } from "./registry";
 
+export { Multiplayer } from "./multiplayer";
+export {
+  createRoom,
+  joinRoom,
+  joinRoomAsync,
+  ensureRoom,
+  send,
+  sync,
+  start,
+  finish,
+  subscribeRoom as subscribeMultiplayerRoom,
+} from "./multiplayer";
+
 export {
   getNotifications,
   getUnreadCount,

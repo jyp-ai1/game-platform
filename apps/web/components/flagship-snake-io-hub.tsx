@@ -11,7 +11,7 @@ export function FlagshipSnakeIoHub() {
   const [code, setCode] = useState<string | null>(null);
 
   function handleQuickPlay() {
-    const room = createRoom("snake", 8, "public");
+    const room = createRoom("snake", 20, "public");
     setCode(room.code);
   }
 
@@ -56,7 +56,7 @@ export function FlagshipSnakeIoHub() {
             <Button variant="outline" onClick={handleShare} className="gap-2">
               <Share2 className="size-4" /> Invite Friends
             </Button>
-            <Button variant="outline" nativeButton={false} render={<Link href={`/games/snake?room=${code}`}>Play →</Link>} />
+            <Button variant="outline" nativeButton={false} render={<Link href={`/flagship/snake-io/play?room=${code}`}>Play →</Link>} />
           </div>
         </div>
       )}

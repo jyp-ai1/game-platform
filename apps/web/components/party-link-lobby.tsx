@@ -2,11 +2,12 @@
 
 import { getDeviceId } from "@game-platform/game-sdk";
 import {
+  ensureRoom,
   getPartyLinkUrl,
-  getRoom,
-  joinRoom,
+  joinRoomAsync,
   setPlayerReady,
   shareRoom,
+  subscribeRoom,
   tickRoomCountdown,
 } from "@game-platform/multiplayer-sdk";
 import { Button, Container } from "@game-platform/ui";
@@ -14,15 +15,27 @@ import { Share2, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-/** Party Link lobby — guest instant join, no login required. */
+/** Party Link lobby — cross-device via Supabase Realtime. */
 export function PartyLinkLobby({ code }: { code: string }) {
   const [guestName, setGuestName] = useState("");
   const [joined, setJoined] = useState(false);
-  const [room, setRoom] = useState(() => getRoom(code));
+  const [room, setRoom] = useState<Awaited<ReturnType<typeof ensureRoom>>>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const id = setInterval(() => setRoom(getRoom(code)), 800);
-    return () => clearInterval(id);
+    let active = true;
+    setLoading(true);
+    ensureRoom(code).then((r) => {
+      if (active) {
+        setRoom(r);
+        setLoading(false);
+      }
+    });
+    const unsub = subscribeRoom(code, setRoom);
+    return () => {
+      active = false;
+      unsub();
+    };
   }, [code]);
 
   const existing = room?.players.find((p) => p.deviceId === getDeviceId());
@@ -39,8 +52,8 @@ export function PartyLinkLobby({ code }: { code: string }) {
     return () => clearInterval(id);
   }, [allReady, code, room?.status, room?.countdown]);
 
-  function handleJoin() {
-    const next = joinRoom(code, { nickname: guestName.trim() || "Guest", isGuest: true });
+  async function handleJoin() {
+    const next = await joinRoomAsync(code, { nickname: guestName.trim() || "Guest", isGuest: true });
     if (next) {
       setRoom(next);
       setJoined(true);
@@ -49,7 +62,14 @@ export function PartyLinkLobby({ code }: { code: string }) {
 
   function handleReady() {
     setPlayerReady(code, true);
-    setRoom(getRoom(code));
+  }
+
+  if (loading) {
+    return (
+      <Container className="flex min-h-[60vh] items-center justify-center py-16">
+        <p className="text-muted-foreground">방 연결 중…</p>
+      </Container>
+    );
   }
 
   if (!room) {
@@ -63,6 +83,9 @@ export function PartyLinkLobby({ code }: { code: string }) {
   }
 
   const gameStarted = room.status === "playing" || (allReady && room.countdown === 0);
+  const playHref = room.gameSlug === "snake"
+    ? `/flagship/snake-io/play?room=${code}`
+    : `/games/${room.gameSlug}?room=${code}`;
 
   return (
     <Container className="flex min-h-[60vh] max-w-md flex-col justify-center py-10">
@@ -91,7 +114,7 @@ export function PartyLinkLobby({ code }: { code: string }) {
             <Button className="w-full" size="lg" onClick={handleJoin}>
               입장
             </Button>
-            <p className="text-xs text-muted-foreground">로그인 없이 바로 플레이 · 나중에 계정 연결 가능</p>
+            <p className="text-xs text-muted-foreground">로그인 없이 바로 플레이 · Cross-device Realtime</p>
           </div>
         ) : (
           <div className="mt-6 space-y-3">
@@ -114,12 +137,7 @@ export function PartyLinkLobby({ code }: { code: string }) {
             ) : null}
 
             {gameStarted ? (
-              <Button
-                className="w-full"
-                size="lg"
-                nativeButton={false}
-                render={<Link href={`/games/${room.gameSlug}?room=${code}`}>게임 시작 →</Link>}
-              />
+              <Button className="w-full" size="lg" nativeButton={false} render={<Link href={playHref}>게임 시작 →</Link>} />
             ) : allReady && room.countdown > 0 ? (
               <p className="text-3xl font-bold tabular-nums text-primary">{room.countdown}</p>
             ) : null}
@@ -127,12 +145,7 @@ export function PartyLinkLobby({ code }: { code: string }) {
         )}
 
         <div className="mt-6 flex justify-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1"
-            onClick={() => shareRoom(code, room.gameSlug, room)}
-          >
+          <Button size="sm" variant="outline" className="gap-1" onClick={() => shareRoom(code, room.gameSlug, room)}>
             <Share2 className="size-3" /> 초대
           </Button>
         </div>
