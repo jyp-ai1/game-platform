@@ -1,33 +1,62 @@
-import { buildDailyOpsBrief } from "@/lib/ai-daily-ops";
+import Link from "next/link";
 
-/** AI-generated daily ops brief — 5-minute admin routine. */
+import { buildAiPmSession } from "@/lib/ai-pm-engine";
+
+/** Compact AI PM briefing card for /admin/os — links to full experience */
 export function AdminDailySummary() {
-  const brief = buildDailyOpsBrief();
-  const date = new Date(brief.generatedAt).toLocaleDateString("ko-KR", {
-    month: "short",
-    day: "numeric",
-    weekday: "short",
-  });
+  const session = buildAiPmSession();
+  const { hero, briefing } = session;
 
   return (
-    <section className="grid gap-4 lg:grid-cols-3">
-      <BriefCard title="Today's Wins" subtitle={date} items={brief.wins} accent="emerald" />
-      <BriefCard title="Today's Risks" subtitle="주의" items={brief.risks} accent="amber" />
-      <BriefCard title="Today's Opportunities" subtitle="다음 P0" items={brief.opportunities} accent="violet" />
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-widest text-primary">AI PM Briefing</p>
+          <h2 className="font-semibold">오늘 {hero.minutesNeeded}분 · {hero.beforePercent}% → {hero.afterPercent}%</h2>
+        </div>
+        <Link
+          href="/admin/pm"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          AI PM과 함께 →
+        </Link>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <BriefCard
+          title="좋은 소식"
+          body={briefing.goodNews}
+          accent="emerald"
+        />
+        <BriefCard
+          title="가장 큰 리스크"
+          body={briefing.biggestRisk}
+          accent="amber"
+        />
+        <BriefCard
+          title="오늘 추천"
+          body={`${hero.recommendedAction}\n\n예상 ${hero.minutesNeeded}분`}
+          accent="violet"
+          ctaHref={hero.ctaHref}
+          ctaLabel={hero.ctaLabel}
+        />
+      </div>
     </section>
   );
 }
 
 function BriefCard({
   title,
-  subtitle,
-  items,
+  body,
   accent,
+  ctaHref,
+  ctaLabel,
 }: {
   title: string;
-  subtitle: string;
-  items: string[];
+  body: string;
   accent: "emerald" | "amber" | "violet";
+  ctaHref?: string;
+  ctaLabel?: string;
 }) {
   const border =
     accent === "emerald"
@@ -38,13 +67,13 @@ function BriefCard({
 
   return (
     <div className={`rounded-2xl border p-5 ${border}`}>
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">{subtitle}</p>
-      <h2 className="mt-1 font-semibold">{title}</h2>
-      <ul className="mt-4 space-y-2">
-        {items.map((item) => (
-          <li key={item} className="text-sm text-muted-foreground">· {item}</li>
-        ))}
-      </ul>
+      <h3 className="font-semibold">{title}</h3>
+      <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground">{body}</p>
+      {ctaHref && ctaLabel ? (
+        <Link href={ctaHref} className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+          {ctaLabel} →
+        </Link>
+      ) : null}
     </div>
   );
 }
