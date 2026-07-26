@@ -297,3 +297,31 @@
     transform: translateY(-20px);
   }
 }
+
+@keyframes live-badge-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+  }
+}
+
+@keyframes live-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.live-badge-pulse {
+  animation: live-badge-pulse 2.4s ease-in-out infinite;
+}
+
+.live-dot-pulse {
+  animation: live-dot-pulse 2.4s ease-in-out infinite;
+}

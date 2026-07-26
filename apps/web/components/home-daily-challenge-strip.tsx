@@ -32,7 +32,13 @@ import { useMounted } from "@/lib/use-mounted";
 
 const GOAL_SEC = 5 * 60;
 
-export function HomeDailyChallengeStrip({ games }: { games: Game[] }) {
+export function HomeDailyChallengeStrip({
+  games,
+  compact = false,
+}: {
+  games: Game[];
+  compact?: boolean;
+}) {
   const mounted = useMounted();
   useSyncExternalStore(subscribeMissions, getDailyMission, getServerDailyMissionSnapshot);
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
@@ -59,6 +65,26 @@ export function HomeDailyChallengeStrip({ games }: { games: Game[] }) {
   const complete = isTodayMissionMixComplete();
   const todaySec = filterPlayHistory(history, "today").reduce((s, e) => s + e.durationSec, 0);
   const goalPct = Math.min(100, Math.round((todaySec / GOAL_SEC) * 100));
+
+  if (compact) {
+    return (
+      <Link
+        href={reason.href}
+        className="block rounded-xl border border-primary/20 bg-card/40 p-3 transition-colors hover:border-primary/35"
+      >
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Today&apos;s Mission
+        </p>
+        <div className="mt-1 flex items-end justify-between gap-2">
+          <p className="text-2xl font-bold tabular-nums text-primary">
+            {complete ? "✓" : `${progress.done}/${progress.total}`}
+          </p>
+          <p className="text-xs text-amber-400">{reason.rewardHint}</p>
+        </div>
+        <p className="mt-1 text-xs text-primary">이어하기 →</p>
+      </Link>
+    );
+  }
 
   return (
     <section className="py-4 sm:py-6">

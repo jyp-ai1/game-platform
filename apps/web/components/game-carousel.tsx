@@ -45,8 +45,8 @@ export function GameCarousel({
             <div
               key={game.id}
               className={cn(
-                "w-[calc((100%-1rem)/2)] shrink-0 snap-start sm:w-[calc((100%-2rem)/3)]",
-                large && "w-[72vw] sm:w-[280px]"
+                "w-[78vw] shrink-0 snap-start sm:w-[300px]",
+                large && "w-[78vw] sm:w-[300px]"
               )}
             >
               <GameCard game={game} isHot={hotSlugs?.has(game.slug)} compact={large} />

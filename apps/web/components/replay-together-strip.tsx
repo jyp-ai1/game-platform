@@ -2,37 +2,63 @@
 
 import { PartyJourneyFeed } from "@/components/party-journey-feed";
 import {
-  SnakeFriendJoinEntry,
-  SnakeMultiplayerEntry,
-} from "@/components/snake-multiplayer-entry";
+  SnakeLiveGameCard,
+  type SnakeFriendPresence,
+} from "@/components/snake-live-game-card";
 import {
+  fetchPresenceEntries,
   getGlobalWorldStatus,
+  presenceMinutesAgo,
   quickPlayGlobal,
 } from "@game-platform/multiplayer-sdk";
+import type { Game } from "@game-platform/shared";
+import type { PresenceEntry } from "@game-platform/shared";
 import {
   getMyParty,
   PartyJourneyEngine,
   PartyMissionEngine,
 } from "@game-platform/replay-engine/social";
-import { fetchPresenceEntries } from "@game-platform/multiplayer-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { Button } from "@game-platform/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-interface FriendWaiting {
-  nickname: string;
-  href: string;
-  label: string;
+/** Plausible mock score when presence has no score field yet. */
+function mockPresenceScore(nickname: string): number {
+  const n = nickname.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  return 800 + (n % 1200);
 }
 
-/** Home hero — Friend first, else Snake LIVE Quick Play (no URL typing) */
-export function ReplayTogetherStrip() {
+function presenceToFriend(entry: PresenceEntry): SnakeFriendPresence {
+  const slug = entry.gameSlug ?? "snake";
+  const room = entry.roomCode ?? "WORLD";
+  const isSnake = slug === "snake" || slug.includes("snake");
+  const playHref = isSnake
+    ? `/flagship/snake-io/play?room=${encodeURIComponent(room)}`
+    : entry.roomCode
+      ? `/games/${slug}?room=${encodeURIComponent(room)}`
+      : `/games/${slug}`;
+  const spectateHref =
+    entry.spectatable && entry.roomCode && isSnake
+      ? `/flagship/snake-io/play?room=${encodeURIComponent(room)}&spectate=1`
+      : undefined;
+
+  return {
+    nickname: entry.nickname,
+    playHref,
+    spectateHref,
+    joinedMinutesAgo: presenceMinutesAgo(entry),
+    score: mockPresenceScore(entry.nickname),
+  };
+}
+
+/** Home hero — LIVE Snake game card first; friend is secondary info on the card. */
+export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) {
   const router = useRouter();
-  const [friend, setFriend] = useState<FriendWaiting | null>(null);
+  const [friend, setFriend] = useState<SnakeFriendPresence | null>(null);
   const [party, setParty] = useState<Awaited<ReturnType<typeof getMyParty>>>(null);
-  const [tournament, setTournament] = useState<{ label: string; href: string } | null>(null);
+  const [tournament, setTournament] = useState<{ label: string } | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -41,13 +67,7 @@ export function ReplayTogetherStrip() {
       const presence = await fetchPresenceEntries();
       const playing = presence.filter((p) => p.status === "playing" || p.status === "lobby");
       const first = playing[0];
-      if (first) {
-        setFriend({
-          nickname: first.nickname,
-          href: first.roomCode ? `/p/${first.roomCode}` : "/flagship/snake-io/play?room=WORLD",
-          label: first.gameSlug ? `${first.gameSlug.replace(/-/g, " ")} · ${first.status === "lobby" ? "로비" : "플레이 중"}` : "같이 플레이",
-        });
-      }
+      if (first) setFriend(presenceToFriend(first));
 
       setParty(await getMyParty());
 
@@ -56,10 +76,19 @@ export function ReplayTogetherStrip() {
         const mins = Math.max(0, Math.round((new Date(t.startsAt).getTime() - Date.now()) / 60_000));
         setTournament({
           label: mins <= 2 ? "🏆 토너먼트 시작!" : `🏆 토너먼트 ${mins}분 후`,
-          href: "/flagship/snake-io/play?room=WORLD",
         });
       }
     })();
+
+    const presencePoll = window.setInterval(() => {
+      void fetchPresenceEntries().then((presence) => {
+        const playing = presence.filter((p) => p.status === "playing" || p.status === "lobby");
+        const first = playing[0];
+        setFriend(first ? presenceToFriend(first) : null);
+      });
+    }, 5000);
+
+    return () => window.clearInterval(presencePoll);
   }, []);
 
   async function handleTournamentJoin() {
@@ -75,17 +104,9 @@ export function ReplayTogetherStrip() {
   const badges = party ? PartyJourneyEngine.achievements(party) : [];
 
   return (
-    <section className="border-b border-primary/20 bg-gradient-to-b from-primary/10 to-transparent py-8">
-      <div className="mx-auto max-w-4xl px-4 space-y-4">
-        {friend ? (
-          <SnakeFriendJoinEntry
-            nickname={friend.nickname}
-            href={friend.href}
-            label={friend.label}
-          />
-        ) : (
-          <SnakeMultiplayerEntry variant="hero" />
-        )}
+    <section className="border-b border-primary/20 bg-gradient-to-b from-primary/10 to-transparent py-6 sm:py-8">
+      <div className="mx-auto max-w-4xl space-y-3 px-4">
+        <SnakeLiveGameCard game={snakeGame} friend={friend} />
 
         {tournament ? (
           <button
