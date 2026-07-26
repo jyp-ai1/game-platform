@@ -5,6 +5,7 @@ import {
   attachGoldenPathMonitors,
   expectGameReady,
   expectInputWorks,
+  triggerSnakeEndFlow,
 } from "./helpers/golden-path";
 
 test.describe("Golden Path — Stage 1 Entry", () => {
@@ -60,6 +61,45 @@ test.describe("Golden Path — Stage 1 Entry", () => {
     await page.waitForURL(/room=(WORLD|PRACTICE)/, { timeout: 30_000 });
     await expect(page.getByText(/문제가 발생|Application error/i)).not.toBeVisible();
     await expectGameReady(page, 30_000);
+    consoleMon.assertClean();
+  });
+});
+
+test.describe("Golden Path — Replay Flow", () => {
+  test("Play → End → Replay → Home", async ({ page }) => {
+    const { consoleMon } = attachGoldenPathMonitors(page);
+    await page.goto("/flagship/snake-io/play?room=PRACTICE");
+    await expectGameReady(page);
+    await triggerSnakeEndFlow(page);
+
+    await expect(page.getByRole("button", { name: /리매치/ }).first()).toBeVisible();
+    await expect(page.getByText(/같이 다음 게임/)).toBeVisible();
+    await expect(page.getByRole("button", { name: /홈으로/ })).toBeVisible();
+
+    await page.getByRole("button", { name: /리매치/ }).first().click();
+    await page.waitForURL(/\/flagship\/snake-io\/play/, { timeout: 15_000 });
+    await expectGameReady(page);
+
+    await triggerSnakeEndFlow(page);
+    await page.getByRole("button", { name: /홈으로/ }).click();
+    await page.waitForURL("/", { timeout: 15_000 });
+    await expect(page.getByTestId("home-hero-card")).toBeVisible({ timeout: 15_000 });
+    consoleMon.assertClean();
+  });
+
+  test("Play → End → Continue Together navigates", async ({ page }) => {
+    const { consoleMon } = attachGoldenPathMonitors(page);
+    await page.goto("/flagship/snake-io/play?room=PRACTICE");
+    await expectGameReady(page);
+    await triggerSnakeEndFlow(page);
+
+    const continueBtn = page
+      .getByTestId("viral-loop-result")
+      .getByRole("button", { name: "Mini Golf" });
+    if (await continueBtn.count()) {
+      await continueBtn.click();
+      await page.waitForURL(/\/games\/|\/flagship\//, { timeout: 15_000 });
+    }
     consoleMon.assertClean();
   });
 });

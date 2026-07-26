@@ -24,6 +24,8 @@ export function HomePeopleFirstStrip() {
     return () => clearInterval(id);
   }, []);
 
+  if (situations.length === 0) return null;
+
   return (
     <section className="border-b border-white/5 py-6">
       <div className="mx-auto max-w-4xl px-4">
@@ -32,10 +34,7 @@ export function HomePeopleFirstStrip() {
         <p className="mt-1 text-sm text-muted-foreground">게임이 아니라 상황을 추천합니다</p>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          {situations.length === 0 ? (
-            <p className="text-sm text-muted-foreground">친구가 온라인이면 여기서 바로 참가</p>
-          ) : (
-            situations.slice(0, 1).map((s) => (
+          {situations.slice(0, 1).map((s) => (
               <Link
                 key={s.id}
                 href={s.href}
@@ -45,8 +44,7 @@ export function HomePeopleFirstStrip() {
                 <span className="mt-0.5 block text-xs text-muted-foreground">{s.subtitle}</span>
                 <span className="mt-1 inline-block text-xs text-primary">{s.cta} →</span>
               </Link>
-            ))
-          )}
+          ))}
         </div>
       </div>
     </section>

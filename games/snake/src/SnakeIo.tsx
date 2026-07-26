@@ -257,25 +257,35 @@ export function SnakeIoGame({
     }
     let active = true;
     entryLog("CONNECTING", roomCode);
-    const connectTimeout = window.setTimeout(() => {
-      if (!active || worldRef.current) return;
-      entryLogFail("TIMEOUT", `connect ${roomCode}`, { room: roomCode });
-      onJoinTimeout?.();
-    }, 8000);
-    (async () => {
+    const CONNECT_TIMEOUT_MS = 3000;
+    const MAX_ATTEMPTS = 2;
+
+    const attemptConnect = async (attemptIndex: number): Promise<void> => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error("connect timeout")), CONNECT_TIMEOUT_MS);
+      });
+
       try {
-        await ensureRoom(roomCode);
-        await joinRoomAsync(roomCode);
+        await Promise.race([
+          (async () => {
+            await ensureRoom(roomCode);
+            await joinRoomAsync(roomCode);
+          })(),
+          timeoutPromise,
+        ]);
         const r = getRoom(roomCode);
         if (!r || !active) return;
         start(roomCode);
-        window.clearTimeout(connectTimeout);
         entryLog("CONNECTED", roomCode);
         entryLog("JOINED");
         startSnakeTelemetry(roomCode, { isGlobalWorld, quickPlay: isGlobalWorld });
         refreshWorldTuningFromTelemetry();
         Replay.multiplayer.analytics.start(roomCode, "snake", r.players.length);
-        Replay.multiplayer.team.create(roomCode, playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party", r.players.map((p) => p.deviceId));
+        Replay.multiplayer.team.create(
+          roomCode,
+          playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party",
+          r.players.map((p) => p.deviceId)
+        );
         setConnected(true);
         spawnTimeoutRef.current = window.setTimeout(() => {
           if (!active || worldRef.current) return;
@@ -283,14 +293,24 @@ export function SnakeIoGame({
           onJoinTimeout?.();
         }, 12_000);
       } catch (err) {
-        window.clearTimeout(connectTimeout);
-        entryLogFail("CONNECT", err instanceof Error ? err.message : String(err), { room: roomCode });
+        if (!active) return;
+        if (attemptIndex + 1 < MAX_ATTEMPTS) {
+          entryLog("RETRY", `${roomCode} attempt ${attemptIndex + 2}`);
+          await attemptConnect(attemptIndex + 1);
+          return;
+        }
+        entryLogFail(
+          "CONNECT",
+          err instanceof Error ? err.message : String(err),
+          { room: roomCode }
+        );
         onJoinTimeout?.();
       }
-    })();
+    };
+
+    void attemptConnect(0);
     return () => {
       active = false;
-      window.clearTimeout(connectTimeout);
       if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
     };
   }, [roomCode, playerCount, practiceMode, isGlobalWorld, deviceId, onJoinTimeout]);
@@ -638,7 +658,25 @@ export function SnakeIoGame({
     Replay.multiplayer.analytics.flush(roomCode, world.config.worldSize);
     const telem = flushSnakeTelemetry(roomCode);
     refreshWorldTuningFromTelemetry();
-    const room = getRoom(roomCode);
+    const room = getRoom(roomCode) ?? (practiceMode && world
+      ? {
+          code: roomCode,
+          gameSlug: "snake",
+          hostId: deviceId,
+          maxPlayers: 50 as const,
+          players: [{
+            deviceId,
+            nickname: getLastNickname() || "Player",
+            ready: true,
+            score: mySnake?.score ?? 0,
+          }],
+          spectators: [],
+          status: "finished" as const,
+          countdown: 0,
+          matchMode: "quick" as const,
+          createdAt: new Date().toISOString(),
+        }
+      : null);
     if (room) {
       recordSnakeSessionEnd({
         won: world.rankings[0]?.deviceId === deviceId,
@@ -933,13 +971,13 @@ export function SnakeIoGame({
                 setCheerMsg("🔥 응원!");
                 setTimeout(() => setCheerMsg(null), 2000);
               }}>응원 🔥</Button>
-              <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSnakeRematch(roomCode); emitGameRetry("snake"); }}>즉시 리매치</Button>
+              <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSnakeRematch(roomCode); emitGameRetry("snake"); handleEnd(); }}>즉시 리매치</Button>
               <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSpectatorRejoin(roomCode); handleEnd(); }}>한 판 더! →</Button>
             </>
           ) : (
             <Button variant="outline" onClick={() => { postDeath("replay"); emitGameRetry("snake"); }}>Retry</Button>
           )}
-          <Button onClick={() => { postDeath("exit"); handleEnd(); }}>End & Result</Button>
+          <Button data-testid="snake-end-result" onClick={() => { postDeath("exit"); handleEnd(); }}>End & Result</Button>
         </div>
       </div>
     </div>

@@ -16,7 +16,7 @@ export default function PartyLinkError({
   useEffect(() => {
     entryLogFail("JOIN", error.message, { room: "party" });
     entryLog("PRACTICE_FALLBACK", "party-error.tsx");
-    router.replace("/flagship/snake-io/play?room=PRACTICE");
+    router.replace("/flagship/snake-io/play?room=PRACTICE&fallback=1");
   }, [error, router]);
 
   return (

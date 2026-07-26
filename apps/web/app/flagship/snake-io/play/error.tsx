@@ -18,7 +18,7 @@ export default function SnakePlayError({
       room: new URLSearchParams(window.location.search).get("room") ?? undefined,
     });
     entryLog("PRACTICE_FALLBACK", "play-error.tsx");
-    router.replace("/flagship/snake-io/play?room=PRACTICE");
+    router.replace("/flagship/snake-io/play?room=PRACTICE&fallback=1");
   }, [error, router]);
 
   return (

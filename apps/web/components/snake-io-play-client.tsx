@@ -2,7 +2,7 @@
 
 import { GameErrorMonitor } from "@/components/game-error-monitor";
 import { ViralLoopResultPanel } from "@/components/viral-loop-result";
-import { GameSDKProvider } from "@game-platform/game-sdk";
+import { GameSDKProvider, emitEngagementEvent } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
 import { entryLog, entryLogFail } from "@game-platform/game-snake";
 import { EntryCrashLog, loadEntryCrashLog } from "@game-platform/multiplayer-sdk";
@@ -12,6 +12,10 @@ import { Component, Suspense, useCallback, useEffect, useState, type ReactNode }
 
 import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
+import { PRACTICE_URL } from "@/lib/snake-entry";
+
+const PRACTICE_FALLBACK_MSG =
+  "멀티플레이 연결이 지연되어 연습모드로 시작합니다.";
 
 const SnakeIoGame = dynamic(
   () => import("@game-platform/game-snake").then((mod) => mod.SnakeIoGame),
@@ -83,8 +87,19 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   useEffect(() => {
     if (practiceMode || room) return;
     entryLog("PRACTICE_FALLBACK", "no-room-param");
-    router.replace("/flagship/snake-io/play?room=PRACTICE");
+    router.replace(PRACTICE_URL);
   }, [practiceMode, room, router]);
+
+  useEffect(() => {
+    if (!practiceMode) return;
+    const fallback = params.get("fallback");
+    if (fallback === "1") {
+      emitEngagementEvent({
+        type: "practice-fallback",
+        message: PRACTICE_FALLBACK_MSG,
+      });
+    }
+  }, [practiceMode, params]);
 
   useEffect(() => {
     function onEnd(e: Event) {
@@ -97,7 +112,11 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
 
   const goPractice = useCallback(() => {
     entryLog("PRACTICE_FALLBACK");
-    router.replace("/flagship/snake-io/play?room=PRACTICE");
+    emitEngagementEvent({
+      type: "practice-fallback",
+      message: PRACTICE_FALLBACK_MSG,
+    });
+    router.replace(PRACTICE_URL);
   }, [router]);
 
   const handleRematch = useCallback(async () => {

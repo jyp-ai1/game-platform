@@ -8,6 +8,7 @@ export type EntryStep =
   | "PROVIDER_READY"
   | "ENGINE_READY"
   | "CONNECTING"
+  | "RETRY"
   | "CONNECTED"
   | "JOINED"
   | "SPAWNED"

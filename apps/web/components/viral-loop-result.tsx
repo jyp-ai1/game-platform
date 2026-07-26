@@ -68,7 +68,7 @@ export function ViralLoopResultPanel({
   const inviteHref = loop.partyId ? `/p/${loop.partyId}` : "/community";
 
   return (
-    <div className="mx-auto max-w-lg space-y-3 p-4">
+    <div className="mx-auto max-w-lg space-y-3 p-4" data-testid="viral-loop-result">
       <div className="text-center">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">다음은?</p>
         <h1 className="mt-1 text-xl font-bold">

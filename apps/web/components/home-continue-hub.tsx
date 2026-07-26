@@ -4,6 +4,7 @@ import { getBestScore } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button, Container } from "@game-platform/ui";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useSyncExternalStore } from "react";
 
 import {
@@ -18,6 +19,7 @@ import {
   getServerPlayHistorySnapshot,
   subscribePlayHistory,
 } from "@/lib/play-history";
+import { enterSnakeQuickPlay } from "@/lib/snake-entry";
 import { useMounted } from "@/lib/use-mounted";
 
 function formatSessionTime(iso: string): string {
@@ -49,7 +51,9 @@ function ContinueRow({
   startedAt: string;
   durationSec: number;
 }) {
-  const href = game.slug === "snake" ? "/flagship/snake-io/play?room=WORLD" : `/games/${game.slug}`;
+  const router = useRouter();
+  const href = game.slug === "snake" ? null : `/games/${game.slug}`;
+
   return (
     <div
       data-testid="home-continue-row"
@@ -66,25 +70,16 @@ function ContinueRow({
           {formatSurvival(durationSec)}
         </p>
       </div>
-      <Button size="sm" nativeButton={false} render={<Link href={href}>이어하기</Link>} />
-    </div>
-  );
-}
-
-function ContinueEmptyState() {
-  return (
-    <div
-      data-testid="home-continue-empty"
-      className="rounded-xl border border-dashed border-white/15 bg-card/30 px-4 py-5 text-center"
-    >
-      <p className="text-sm text-muted-foreground">플레이 기록이 없습니다.</p>
-      <p className="mt-1 font-medium">Snake를 시작해보세요.</p>
-      <Button
-        className="mt-3 gap-1.5 bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
-        size="sm"
-        nativeButton={false}
-        render={<Link href="/flagship/snake-io/play?room=WORLD">바로 참가</Link>}
-      />
+      {href ? (
+        <Button size="sm" nativeButton={false} render={<Link href={href}>이어하기</Link>} />
+      ) : (
+        <Button
+          size="sm"
+          onClick={() => void enterSnakeQuickPlay(router)}
+        >
+          이어하기
+        </Button>
+      )}
     </div>
   );
 }
@@ -124,7 +119,7 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
       .slice(0, 2);
   }, [slugs, bySlug, history, mounted]);
 
-  if (!mounted) return null;
+  if (!mounted || rows.length === 0) return null;
 
   return (
     <section data-testid="home-continue" className="py-4 sm:py-5">
@@ -132,21 +127,17 @@ export function HomeContinueHub({ games }: { games: Game[] }) {
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">
           Continue Playing
         </p>
-        {rows.length === 0 ? (
-          <ContinueEmptyState />
-        ) : (
-          <div className="space-y-2">
-            {rows.map(({ game, score, startedAt, durationSec }) => (
-              <ContinueRow
-                key={game.id}
-                game={game}
-                score={score}
-                startedAt={startedAt}
-                durationSec={durationSec}
-              />
-            ))}
-          </div>
-        )}
+        <div className="space-y-2">
+          {rows.map(({ game, score, startedAt, durationSec }) => (
+            <ContinueRow
+              key={game.id}
+              game={game}
+              score={score}
+              startedAt={startedAt}
+              durationSec={durationSec}
+            />
+          ))}
+        </div>
       </Container>
     </section>
   );

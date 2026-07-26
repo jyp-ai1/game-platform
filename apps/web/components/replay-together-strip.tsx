@@ -5,11 +5,11 @@ import {
   SnakeLiveGameCard,
   type SnakeFriendPresence,
 } from "@/components/snake-live-game-card";
+import { enterSnakeQuickPlay } from "@/lib/snake-entry";
 import {
   fetchPresenceEntries,
   getGlobalWorldStatus,
   presenceMinutesAgo,
-  quickPlayGlobal,
 } from "@game-platform/multiplayer-sdk";
 import type { Game } from "@game-platform/shared";
 import type { PresenceEntry } from "@game-platform/shared";
@@ -92,12 +92,7 @@ export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) 
   }, []);
 
   async function handleTournamentJoin() {
-    try {
-      const { href } = await quickPlayGlobal("snake");
-      router.push(href);
-    } catch {
-      router.push("/flagship/snake-io/play?room=PRACTICE");
-    }
+    await enterSnakeQuickPlay(router);
   }
 
   const mission = party ? PartyMissionEngine.active(party) : null;

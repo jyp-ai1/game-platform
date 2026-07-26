@@ -22,13 +22,16 @@ test.describe("Home Visual QA", () => {
       await expect(skeleton).toBeVisible({ timeout: 2000 }).catch(() => undefined);
       await expect(page.getByTestId("home-hero-card")).toBeVisible({ timeout: 15_000 });
 
-      // LIVE badge + continue section (row or empty CTA)
+      // LIVE badge + continue section (row or hidden)
       await expect(page.getByTestId("platform-live-badge")).toBeVisible();
-      await expect(page.getByTestId("home-continue")).toBeVisible();
 
       const continueRow = page.getByTestId("home-continue-row");
-      const continueEmpty = page.getByTestId("home-continue-empty");
-      await expect(continueRow.or(continueEmpty)).toBeVisible();
+      const continueSection = page.getByTestId("home-continue");
+      if (await continueRow.count()) {
+        await expect(continueSection).toBeVisible();
+      } else {
+        await expect(continueSection).toHaveCount(0);
+      }
 
       // No horizontal overflow
       const overflow = await page.evaluate(() => {
@@ -47,18 +50,19 @@ test.describe("Home Visual QA", () => {
     await expect(page.getByTestId("home-skeleton")).toBeHidden({ timeout: 15_000 });
   });
 
-  test("home empty continue shows CTA not blank box", async ({ page }) => {
+  test("home empty continue section hidden", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(800);
 
     const row = page.getByTestId("home-continue-row");
-    const empty = page.getByTestId("home-continue-empty");
+    const section = page.getByTestId("home-continue");
 
     if (await row.count()) {
+      await expect(section).toBeVisible();
       await expect(row.first()).toBeVisible();
     } else {
-      await expect(empty).toBeVisible();
-      await expect(empty.getByText("바로 참가")).toBeVisible();
+      await expect(section).toBeHidden();
+      await expect(page.getByTestId("home-continue-empty")).toBeHidden();
     }
   });
 });

@@ -1,10 +1,10 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
+import { enterSnakeQuickPlay, PRACTICE_URL } from "@/lib/snake-entry";
 import {
   getGlobalWorldStatus,
   GLOBAL_WORLD_TARGET,
-  quickPlayGlobal,
 } from "@game-platform/multiplayer-sdk";
 import { GlobalWorldPersist } from "@game-platform/game-snake";
 import { entryLog, entryLogFail } from "@game-platform/game-snake";
@@ -92,15 +92,8 @@ export function SnakeLiveGameCard({
 
   const handleQuickPlay = useCallback(async () => {
     setJoining(true);
-    entryLog("CLICK", "home-quick-play");
     try {
-      const { href } = await quickPlayGlobal("snake");
-      entryLog("ROUTE", href);
-      router.push(href);
-    } catch (err) {
-      entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
-      entryLog("PRACTICE_FALLBACK", "home-quick-play");
-      router.push("/flagship/snake-io/play?room=PRACTICE");
+      await enterSnakeQuickPlay(router);
     } finally {
       setJoining(false);
     }
@@ -115,7 +108,7 @@ export function SnakeLiveGameCard({
     } catch (err) {
       entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
       entryLog("PRACTICE_FALLBACK", "join-friend");
-      router.push("/flagship/snake-io/play?room=PRACTICE");
+      router.push(PRACTICE_URL);
     } finally {
       setJoiningFriend(false);
     }

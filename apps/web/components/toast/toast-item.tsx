@@ -47,6 +47,12 @@ function toastContent(event: EngagementEvent): {
           event.streakDay >= 7 ? "7일 연속 출석 보너스!" : "출석 보상 획득!",
         subtitle: `${event.streakDay}일차 · +${event.xp} XP`,
       };
+    case "practice-fallback":
+      return {
+        emoji: "🎮",
+        title: "연습 모드",
+        subtitle: event.message,
+      };
   }
 }
 

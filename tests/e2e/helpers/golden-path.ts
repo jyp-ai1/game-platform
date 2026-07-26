@@ -46,6 +46,13 @@ export function attachGoldenPathMonitors(page: Page) {
   return { consoleMon, entry };
 }
 
+/** End current snake session and open replay result panel. */
+export async function triggerSnakeEndFlow(page: Page): Promise<void> {
+  await expect(page.getByTestId("snake-end-result")).toBeVisible({ timeout: 25_000 });
+  await page.getByTestId("snake-end-result").click();
+  await expect(page.getByTestId("viral-loop-result")).toBeVisible({ timeout: 20_000 });
+}
+
 /** Regression routes — must load without 500 or crash. */
 export async function assertRegressionRoutes(page: Page): Promise<void> {
   const routes = [
