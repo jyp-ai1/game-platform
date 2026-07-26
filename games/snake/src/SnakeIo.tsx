@@ -1,8 +1,8 @@
 "use client";
 
 import { getDeviceId, useGameSDK, emitGameRetry } from "@game-platform/game-sdk";
+import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { Replay } from "@game-platform/replay-sdk";
-import { BalanceEngine } from "@game-platform/replay-engine/balance";
 import {
   buildMultiplayerResult,
   ensureRoom,
@@ -18,13 +18,14 @@ import { Button, cn, ScoreBox } from "@game-platform/ui";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import snakeBalance from "./balance";
 import {
+  applyBlackHolePull,
   createInitialWorld,
   getDeathPosition,
   getMyRank,
   getSpectatorTarget,
   setInput,
+  spawnEventFood,
   tickWorld,
   type Direction,
   type SnakeIoWorld,
@@ -36,39 +37,42 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 };
 
 const FOOD_COLORS: Record<string, string> = {
-  normal: "#fbbf24",
-  golden_apple: "#fde047",
-  meteor: "#f97316",
-  black_hole: "#6366f1",
+  normal: "#fbbf24", golden_apple: "#fde047", meteor: "#f97316", black_hole: "#6366f1",
 };
 
-const VIEWPORT_PX = 480;
-
-/** Flagship Snake.io — Balance Engine + Replay.multiplayer */
+/** Flagship Snake.io — Events · Teams · Objectives · Spectator 2.0 */
 export function SnakeIoGame() {
   const params = useSearchParams();
   const roomCode = params.get("room")?.toUpperCase() ?? "";
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<SnakeIoWorld | null>(null);
   const [connected, setConnected] = useState(false);
+  const [spectatorMode, setSpectatorMode] = useState<"top1" | "friend" | "free">("top1");
   const [spectatorTarget, setSpectatorTarget] = useState<string | null>(null);
   const worldRef = useRef<SnakeIoWorld | null>(null);
   const prevAliveRef = useRef(true);
+  const prevRankRef = useRef(99);
   const deviceId = getDeviceId();
 
   const room = getRoom(roomCode);
   const playerCount = room?.players.length ?? 1;
   const balance = useMemo(() => Replay.multiplayer.balance("snake", playerCount), [playerCount]);
+  const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
+  const season = useMemo(() => Replay.multiplayer.season.current(), []);
+  const seasonStyle = Replay.multiplayer.season.palette[season];
+  const stage = useMemo(
+    () => Replay.multiplayer.progression.stageFor(Replay.multiplayer.progression.snake, world?.snakes[deviceId]?.score ?? 0),
+    [world?.snakes[deviceId]?.score, deviceId]
+  );
   const isHost = room?.hostId === deviceId;
   const mySnake = world?.snakes[deviceId];
   const isSpectating = mySnake?.spectating && !mySnake?.alive;
   const watchId = spectatorTarget ?? (world ? getSpectatorTarget(world, deviceId) : null);
   const watchSnake = watchId && world ? world.snakes[watchId] : null;
   const cameraHead = isSpectating ? watchSnake?.segments[0] : mySnake?.segments[0];
-
   const top10 = world?.rankings.slice(0, 10) ?? [];
   const myRank = world ? getMyRank(world, deviceId) : 0;
-  const showMyRankOutsideTop10 = playerCount >= 20 && myRank > 10;
+  const activeEvent = world?.events[0];
 
   useEffect(() => {
     if (!roomCode) return;
@@ -79,25 +83,23 @@ export function SnakeIoGame() {
       const r = getRoom(roomCode);
       if (!r || !active) return;
       start(roomCode);
-      BalanceEngine.analytics.start(roomCode, "snake", r.players.length);
+      Replay.multiplayer.analytics.start(roomCode, "snake", r.players.length);
+      Replay.multiplayer.team.create(roomCode, playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party", r.players.map((p) => p.deviceId));
       setConnected(true);
     })();
     return () => { active = false; };
-  }, [roomCode]);
+  }, [roomCode, playerCount]);
 
   useEffect(() => {
     if (!roomCode || !connected) return;
     const unsub = subscribeRoom(roomCode, (r) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
-      if (state) {
-        worldRef.current = state;
-        setWorld(state);
-      } else if (!worldRef.current && r.players.length > 0) {
+      if (state) { worldRef.current = state; setWorld(state); }
+      else if (!worldRef.current && r.players.length > 0) {
         const cfg = Replay.multiplayer.balance("snake", r.players.length);
-        const initial = createInitialWorld(
-          r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname })),
-          cfg
-        );
+        const obj = Replay.multiplayer.objectives.create(Replay.multiplayer.objectives.pick(r.players.length));
+        const initial = createInitialWorld(r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname })), cfg);
+        initial.objective = obj;
         worldRef.current = initial;
         setWorld(initial);
         if (isHost) send(roomCode, "state", initial);
@@ -116,18 +118,46 @@ export function SnakeIoGame() {
       if (!worldRef.current) return;
 
       const before = structuredClone(worldRef.current);
-      const next = tickWorld(structuredClone(worldRef.current));
+      let next = tickWorld(structuredClone(worldRef.current));
+
+      if (ux.events) {
+        next.events = ExperienceEngine.events.expire(next.events);
+        const evt = ExperienceEngine.events.roll(playerCount, next.config.worldSize, next.tick, next.events);
+        if (evt) { next.events = [evt, ...next.events]; spawnEventFood(next, evt); }
+        for (const e of next.events) applyBlackHolePull(next, e);
+      }
+
+      const deaths = Object.keys(next.snakes).length;
+      const alive = Object.values(next.snakes).filter((s) => s.alive).length;
+      const director = Replay.multiplayer.director.run({
+        playerCount,
+        congestionScore: Math.round((deaths - alive) * 10),
+        foodShortageTicks: next.food.length < next.config.foodCount * 0.3 ? 1 : 0,
+        churnCount: 0,
+        deathRate: 1 - alive / Math.max(1, deaths),
+        avgFoodRatio: next.food.length / next.config.foodCount,
+      });
+      if (director.foodBoostPercent > 0 && next.tick % 60 === 0) {
+        spawnEventFood(next, { id: "dir", kind: "treasure_chest", x: Math.floor(next.config.worldSize / 2), y: Math.floor(next.config.worldSize / 2), radius: 4, startedAt: Date.now(), expiresAt: Date.now() + 5000, announced: false });
+      }
 
       for (const [id, snake] of Object.entries(next.snakes)) {
         const prev = before.snakes[id];
         if (prev?.alive && !snake.alive) {
           const pos = getDeathPosition(prev);
-          if (pos) BalanceEngine.analytics.death(roomCode, { deviceId: id, x: pos.x, y: pos.y, tick: next.tick, cause: "player" });
+          if (pos) Replay.multiplayer.analytics.death(roomCode, { deviceId: id, x: pos.x, y: pos.y, tick: next.tick, cause: "player" });
         }
-        if (!prev?.alive && snake.alive) BalanceEngine.analytics.respawn(roomCode);
+        if ((prev?.killStreak ?? 0) < 3 && (snake.killStreak ?? 0) >= 3) {
+          const m = Replay.multiplayer.moments.capture("triple_kill", id, snake.nickname, next.tick);
+          next.moments = [m, ...next.moments].slice(0, 5);
+        }
+        if (snake.score > 0) Replay.multiplayer.team.score(roomCode, id, snake.score - (prev?.score ?? 0));
       }
-      if (next.food.length < next.config.foodCount * 0.3) {
-        BalanceEngine.analytics.foodShortage(roomCode);
+
+      const rank = getMyRank(next, deviceId);
+      if (prevRankRef.current > 10 && rank <= 10) {
+        const m = Replay.multiplayer.moments.capture("top10_entry", deviceId, mySnake?.nickname ?? "Player", next.tick);
+        next.moments = [m, ...next.moments].slice(0, 5);
       }
 
       worldRef.current = next;
@@ -135,25 +165,23 @@ export function SnakeIoGame() {
       setWorld(next);
     }, tickMs);
     return () => clearInterval(id);
-  }, [roomCode, isHost, connected, balance.physicsTickMs]);
+  }, [roomCode, isHost, connected, balance.physicsTickMs, ux.events, playerCount, deviceId, mySnake?.nickname]);
 
   useEffect(() => {
     if (!mySnake) return;
     if (prevAliveRef.current && !mySnake.alive) {
-      setSpectatorTarget(worldRef.current ? getSpectatorTarget(worldRef.current) : null);
+      setSpectatorTarget(getSpectatorTarget(worldRef.current));
       spectator(roomCode);
     }
     prevAliveRef.current = mySnake.alive;
-  }, [mySnake?.alive, mySnake, roomCode]);
+    if (world) prevRankRef.current = getMyRank(world, deviceId);
+  }, [mySnake?.alive, mySnake, roomCode, world, deviceId]);
 
-  const handleDirection = useCallback(
-    (direction: Direction) => {
-      if (!roomCode || !worldRef.current || isSpectating) return;
-      if (isHost) setInput(worldRef.current, deviceId, direction);
-      else send(roomCode, "input", { deviceId, direction });
-    },
-    [roomCode, isHost, deviceId, isSpectating]
-  );
+  const handleDirection = useCallback((direction: Direction) => {
+    if (!roomCode || !worldRef.current || isSpectating) return;
+    if (isHost) setInput(worldRef.current, deviceId, direction);
+    else send(roomCode, "input", { deviceId, direction });
+  }, [roomCode, isHost, deviceId, isSpectating]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -168,83 +196,83 @@ export function SnakeIoGame() {
     if (!roomCode || !world) return;
     const scores: Record<string, number> = {};
     for (const s of Object.values(world.snakes)) scores[s.deviceId] = s.score;
-    const winner = world.rankings[0]?.deviceId ?? null;
-    finish(roomCode, { roomCode, gameSlug: "snake", winnerId: winner, scores, finishedAt: new Date().toISOString() });
+    finish(roomCode, { roomCode, gameSlug: "snake", winnerId: world.rankings[0]?.deviceId ?? null, scores, finishedAt: new Date().toISOString() });
     reportScore("snake", mySnake?.score ?? 0);
     buildMultiplayerResult(getRoom(roomCode)!);
-    BalanceEngine.analytics.flush(roomCode, world.config.worldSize);
+    Replay.multiplayer.analytics.flush(roomCode, world.config.worldSize);
   }
 
   if (!roomCode) return <p className="text-center text-muted-foreground">Room code required</p>;
-  if (!connected || !world) return <p className="text-center text-muted-foreground">Connecting… ({playerCount}P · map {balance.mapScale}x)</p>;
+  if (!connected || !world) return <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>;
 
   const worldSize = world.config.worldSize;
   const zoom = world.config.cameraZoom;
-  const cellSize = (VIEWPORT_PX / (world.config.viewportCells ?? 80)) * zoom;
-  const camX = cameraHead ? cameraHead.x * cellSize - VIEWPORT_PX / 2 : 0;
-  const camY = cameraHead ? cameraHead.y * cellSize - VIEWPORT_PX / 2 : 0;
+  const cellSize = (480 / (world.config.viewportCells ?? 80)) * zoom;
+  const camX = cameraHead ? cameraHead.x * cellSize - 240 : 0;
+  const camY = cameraHead ? cameraHead.y * cellSize - 240 : 0;
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex w-full max-w-lg flex-wrap items-center justify-between gap-2">
+      {activeEvent ? (
+        <div className="w-full max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-center text-sm font-medium animate-pulse">
+          {Replay.multiplayer.events.label(activeEvent.kind)}
+        </div>
+      ) : null}
+
+      <div className="flex w-full max-w-lg flex-wrap items-center gap-2 justify-between">
         <ScoreBox label="Score" value={mySnake?.score ?? 0} />
-        <ScoreBox label="Players" value={playerCount} />
-        <ScoreBox label="Map" value={worldSize} />
-        <ScoreBox label="Food" value={world.food.length} />
-        {isSpectating ? <span className="text-xs text-amber-400">Spectating {watchSnake?.nickname ?? "…"}</span> : null}
+        <ScoreBox label={ux.label} value={playerCount} />
+        <ScoreBox label="Stage" value={stage.id} />
+        <ScoreBox label="Goal" value={world.objective.target} />
       </div>
 
-      <div
-        className="relative overflow-hidden rounded-xl border border-white/10 bg-muted"
-        style={{ width: VIEWPORT_PX, height: VIEWPORT_PX }}
-      >
+      <div className="relative flex gap-3">
         <div
-          className="absolute origin-top-left"
-          style={{
-            width: worldSize * cellSize,
-            height: worldSize * cellSize,
-            transform: `translate(${-camX}px, ${-camY}px)`,
-          }}
+          className="relative overflow-hidden rounded-xl border border-white/10"
+          style={{ width: 480, height: 480, backgroundColor: seasonStyle.bg }}
         >
-          {world.features.map((f, i) => (
-            <div
-              key={`f-${i}`}
-              className={cn(
-                "absolute opacity-40",
-                f.type === "river" && "bg-sky-500/30",
-                f.type === "wall" && "bg-stone-600/50",
-                f.type === "boss_zone" && "border-2 border-dashed border-amber-400/50"
-              )}
-              style={{ left: f.x * cellSize, top: f.y * cellSize, width: (f.w ?? 1) * cellSize, height: (f.h ?? 1) * cellSize }}
-            />
-          ))}
-          {world.food.map((f, i) => (
-            <div
-              key={`food-${i}`}
-              className={cn("absolute rounded-full", f.kind !== "normal" && "animate-pulse ring-2 ring-white/30")}
-              style={{
-                left: f.x * cellSize, top: f.y * cellSize,
-                width: cellSize - 1, height: cellSize - 1,
-                backgroundColor: FOOD_COLORS[f.kind] ?? FOOD_COLORS.normal,
-              }}
-            />
-          ))}
-          {Object.values(world.snakes).map((snake) =>
-            snake.segments.map((seg, i) => (
-              <div
-                key={`${snake.deviceId}-${i}`}
-                className={cn("absolute rounded-[1px]", (!snake.alive || snake.spectating) && "opacity-25")}
-                style={{
-                  left: seg.x * cellSize, top: seg.y * cellSize,
-                  width: cellSize - 1, height: cellSize - 1,
-                  backgroundColor: i === 0 ? snake.color : `${snake.color}99`,
-                  boxShadow: snake.invincibleUntil && Date.now() < snake.invincibleUntil ? "0 0 6px white" : undefined,
-                }}
-              />
-            ))
-          )}
+          <div className="absolute left-2 top-2 z-10 rounded bg-black/40 px-2 py-0.5 text-[10px] text-white">
+            {seasonStyle.label} · {stage.name}
+          </div>
+          <div className="absolute origin-top-left" style={{ width: worldSize * cellSize, height: worldSize * cellSize, transform: `translate(${-camX}px, ${-camY}px)` }}>
+            {world.features.map((f, i) => (
+              <div key={i} className={cn("absolute opacity-40", f.type === "river" && "bg-sky-500/30", f.type === "wall" && "bg-stone-600/50", f.type === "boss_zone" && "border-2 border-dashed border-amber-400/40")}
+                style={{ left: f.x * cellSize, top: f.y * cellSize, width: (f.w ?? 1) * cellSize, height: (f.h ?? 1) * cellSize }} />
+            ))}
+            {world.events.map((e) => (
+              <div key={e.id} className="absolute animate-pulse rounded-full border-2 border-amber-300/60"
+                style={{ left: (e.x - e.radius) * cellSize, top: (e.y - e.radius) * cellSize, width: e.radius * 2 * cellSize, height: e.radius * 2 * cellSize }} />
+            ))}
+            {world.food.map((f, i) => (
+              <div key={i} className={cn("absolute rounded-full", f.kind !== "normal" && "ring-2 ring-white/40 animate-pulse")}
+                style={{ left: f.x * cellSize, top: f.y * cellSize, width: cellSize - 1, height: cellSize - 1, backgroundColor: FOOD_COLORS[f.kind] ?? FOOD_COLORS.normal }} />
+            ))}
+            {Object.values(world.snakes).map((snake) => snake.segments.map((seg, i) => (
+              <div key={`${snake.deviceId}-${i}`} className={cn("absolute rounded-[1px]", (!snake.alive || snake.spectating) && "opacity-25")}
+                style={{ left: seg.x * cellSize, top: seg.y * cellSize, width: cellSize - 1, height: cellSize - 1, backgroundColor: i === 0 ? snake.color : `${snake.color}99`, boxShadow: snake.invincibleUntil && Date.now() < snake.invincibleUntil ? "0 0 8px white" : undefined }} />
+            )))}
+          </div>
         </div>
+
+        {ux.minimap ? (
+          <div className="hidden w-24 shrink-0 rounded-xl border border-white/10 bg-black/40 p-1 sm:block">
+            <p className="mb-1 text-[8px] text-muted-foreground">MINIMAP</p>
+            <div className="relative aspect-square w-full">
+              {Object.values(world.snakes).map((s) => s.segments[0] ? (
+                <div key={s.deviceId} className="absolute size-1 rounded-full" style={{
+                  left: `${(s.segments[0].x / worldSize) * 100}%`, top: `${(s.segments[0].y / worldSize) * 100}%`, backgroundColor: s.color,
+                }} />
+              ) : null)}
+            </div>
+          </div>
+        ) : null}
       </div>
+
+      {world.moments.length > 0 ? (
+        <div className="w-full max-w-lg text-center text-xs text-primary">
+          {Replay.multiplayer.moments.labels[world.moments[0]!.kind]} — {world.moments[0]!.nickname}
+        </div>
+      ) : null}
 
       <div className="grid w-full max-w-lg grid-cols-2 gap-4 text-sm">
         <div>
@@ -256,18 +284,18 @@ export function SnakeIoGame() {
               </li>
             ))}
           </ol>
-          {showMyRankOutsideTop10 ? (
-            <p className="mt-2 text-primary">내 순위: #{myRank} — {mySnake?.score ?? 0}pt</p>
-          ) : null}
+          {playerCount >= 20 && myRank > 10 ? <p className="mt-2 text-primary">내 순위 #{myRank}</p> : null}
         </div>
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-muted-foreground">
-            Balance · map {balance.mapScale.toFixed(1)}x · food {balance.foodScale.toFixed(1)}x · tick {balance.physicsTickMs}ms
-          </p>
           {isSpectating ? (
             <>
-              <Button variant="outline" onClick={() => setSpectatorTarget(getSpectatorTarget(world))}>Watch TOP1</Button>
-              <Button variant="outline" onClick={() => emitGameRetry("snake")}>Retry</Button>
+              <select className="rounded border bg-background px-2 py-1 text-xs" value={spectatorMode} onChange={(e) => setSpectatorMode(e.target.value as typeof spectatorMode)}>
+                <option value="top1">TOP1 시점</option>
+                <option value="friend">친구 시점</option>
+                <option value="free">자유 카메라</option>
+              </select>
+              <Button variant="outline" size="sm" onClick={() => setSpectatorTarget(getSpectatorTarget(world))}>Watch TOP1</Button>
+              <Button variant="outline" size="sm" onClick={() => emitGameRetry("snake")}>Retry</Button>
             </>
           ) : (
             <Button variant="outline" onClick={() => emitGameRetry("snake")}>Retry</Button>

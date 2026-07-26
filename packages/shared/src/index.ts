@@ -24,3 +24,22 @@ export type {
   AiBalanceRecommendation,
   MatchSizeProfile,
 } from "./balance";
+export type {
+  WorldEventKind,
+  WorldEvent,
+  PowerUpKind,
+  ActivePowerUp,
+  MatchObjectiveKind,
+  MatchObjective,
+  TeamMode,
+  Team,
+  SeasonTheme,
+  MomentKind,
+  ReplayMoment,
+  SpectatorMode,
+  DirectorAdjustment,
+  ProgressionStage,
+  UxTier,
+  TournamentSlot,
+  CertificationResult,
+} from "./experience";

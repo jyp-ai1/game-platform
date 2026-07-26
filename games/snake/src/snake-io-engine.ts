@@ -1,5 +1,5 @@
 /** Snake.io world engine — balance-aware multi-snake realtime. */
-import type { ComputedBalance, FoodKind, WorldFeature } from "@game-platform/shared";
+import type { ActivePowerUp, ComputedBalance, FoodKind, MatchObjective, ReplayMoment, WorldEvent, WorldFeature } from "@game-platform/shared";
 
 export type Direction = "up" | "down" | "left" | "right";
 
@@ -27,6 +27,9 @@ export interface SnakeEntity {
   respawnAt?: number;
   invincibleUntil?: number;
   spectating?: boolean;
+  powerUp?: ActivePowerUp;
+  killStreak?: number;
+  foodEaten?: number;
 }
 
 export interface SnakeIoWorld {
@@ -37,6 +40,9 @@ export interface SnakeIoWorld {
   features: WorldFeature[];
   rankings: { deviceId: string; nickname: string; score: number }[];
   bossSpawned?: boolean;
+  events: WorldEvent[];
+  objective: MatchObjective;
+  moments: ReplayMoment[];
 }
 
 const DELTAS: Record<Direction, Vec> = {
@@ -160,6 +166,9 @@ export function createInitialWorld(
     food: [],
     features: config.features,
     rankings: [],
+    events: [],
+    objective: { kind: "score_race", target: 500, progress: {}, label: "최고 점수" },
+    moments: [],
   };
   players.forEach((p, i) => {
     world.snakes[p.deviceId] = createSnake(p.deviceId, p.nickname, i, world);
@@ -233,6 +242,16 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     );
 
     if (hitSelf || hitOther) {
+      if (hitOther) {
+        const killer = Object.values(world.snakes).find(
+          (o) => o.alive && o.deviceId !== snake.deviceId &&
+            o.segments.some((s) => s.x === next.x && s.y === next.y)
+        );
+        if (killer) {
+          killer.killStreak = (killer.killStreak ?? 0) + 1;
+          snake.killStreak = 0;
+        }
+      }
       killSnake(snake, world.config);
       continue;
     }
@@ -241,7 +260,12 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     if (foodIdx >= 0) {
       const food = world.food[foodIdx]!;
       world.food.splice(foodIdx, 1);
-      snake.score += Math.round(food.value * world.config.rewardRate);
+      let mult = world.config.rewardRate;
+      if (food.kind === "golden_apple") mult *= 5;
+      if (snake.powerUp?.kind === "double_score") mult *= 2;
+      snake.score += Math.round(food.value * mult);
+      snake.foodEaten = (snake.foodEaten ?? 0) + 1;
+      world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
       spawnFoodItems(world, 1);
     }
   }
@@ -268,6 +292,39 @@ export function getSpectatorTarget(world: SnakeIoWorld | null | undefined, prefe
   if (top && world.snakes[top.deviceId]?.alive) return top.deviceId;
   const alive = Object.values(world.snakes).find((s) => s.alive);
   return alive?.deviceId ?? null;
+}
+
+export function spawnEventFood(world: SnakeIoWorld, event: WorldEvent): void {
+  const kindMap: Record<string, FoodKind> = {
+    golden_apple: "golden_apple",
+    meteor_shower: "meteor",
+    black_hole: "black_hole",
+    boss_snake: "golden_apple",
+    treasure_chest: "normal",
+  };
+  const kind = kindMap[event.kind] ?? "normal";
+  const value = event.kind === "golden_apple" ? 50 : event.kind === "boss_snake" ? 40 : 25;
+  for (let i = 0; i < (event.kind === "meteor_shower" ? 5 : 3); i++) {
+    const x = event.x + Math.floor(Math.random() * event.radius * 2) - event.radius;
+    const y = event.y + Math.floor(Math.random() * event.radius * 2) - event.radius;
+    if (!occupied(world, { x, y }) && !isBlocked(world, { x, y })) {
+      world.food.push({ x, y, kind, value });
+    }
+  }
+}
+
+export function applyBlackHolePull(world: SnakeIoWorld, event: WorldEvent): void {
+  if (event.kind !== "black_hole") return;
+  for (const snake of Object.values(world.snakes)) {
+    if (!snake.alive || !snake.segments[0]) continue;
+    const head = snake.segments[0];
+    const dx = event.x - head.x;
+    const dy = event.y - head.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 0 && dist < event.radius * 2) {
+      snake.pendingDirection = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+    }
+  }
 }
 
 export function getDeathPosition(snake: SnakeEntity): Vec | null {

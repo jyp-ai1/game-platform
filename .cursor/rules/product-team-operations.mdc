@@ -11,13 +11,15 @@ Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# Phase: P0 Balance Engine + Realtime Multiplayer
+# Phase: P0 Flagship Experience
+
+> **"Slither.io보다 Replay Snake가 더 재미있다"** — Events · Teams · Objectives · AI Director
 
 ```
-Balance Engine → Realtime Engine → Snake.io → Analytics → AI Balance
+Dynamic Events → Team Mode → Match Objectives → Power-Ups → Seasons → AI Director → Moments → Spectator 2.0 → Tournament
 ```
 
-게임은 `balance.ts` + `game-profile.ts` 만 정의. Replay Engine이 자동 계산.
+People-first home: 친구/토너먼트/Quick Match before game pick.
 
 **Creator Platform freeze**
 

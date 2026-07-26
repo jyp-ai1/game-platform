@@ -32,6 +32,7 @@ import {
   shareRoom,
 } from "@game-platform/multiplayer-sdk";
 import { BalanceEngine, balanceFor } from "@game-platform/replay-engine/balance";
+import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 
 export interface ReplayInitOptions {
   gameSlug: string;
@@ -109,6 +110,23 @@ const multiplayer = {
   analytics: BalanceEngine.analytics,
   heatmap: BalanceEngine.heatmap,
   ai: BalanceEngine.ai,
+  events: ExperienceEngine.events,
+  team: {
+    create: ExperienceEngine.team.create,
+    join: ExperienceEngine.team.join,
+    score: ExperienceEngine.team.score,
+    get: ExperienceEngine.team.get,
+  },
+  objectives: ExperienceEngine.objectives,
+  powerups: ExperienceEngine.powerups,
+  season: ExperienceEngine.season,
+  director: ExperienceEngine.director,
+  moments: ExperienceEngine.moments,
+  spectator2: ExperienceEngine.spectator,
+  tournament: ExperienceEngine.tournament,
+  progression: ExperienceEngine.progression,
+  ux: (playerCount: number) => ExperienceEngine.ux.forPlayers(playerCount),
+  certify: ExperienceEngine.certify.run,
 };
 
 const reward = {

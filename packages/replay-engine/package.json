@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./balance": "./src/multiplayer/balance/index.ts"
+    "./balance": "./src/multiplayer/balance/index.ts",
+    "./experience": "./src/multiplayer/experience/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
