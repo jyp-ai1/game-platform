@@ -37,40 +37,66 @@ CEO Office · Company OS · Founder Memory · Company Score · Company Simulator
 ## 개발 우선순위
 
 ```
-P0 Platform Core → P1 Flagship MP → P2 Creator → P3 Growth/Viral → P4 Business → P5 AI → P6 Production
+P0 Flagship Snake (재미) → P1 Party Experience → P2 Player Home → P3 Creator Upload → P4 Viral Loop → P5 Marketplace
 ```
+
+**판단 기준:** "친구와 다시 한 판 하게 만드는가?"
+
+**절대 금지:** 새 Admin · Dashboard · AI PM 화면 · KPI · OS · Company 기능
 
 ---
 
-## P0 — Browser Game Engine
+## P0 — Flagship Multiplayer Snake (최우선)
+
+**목표:** Slither.io를 켜야 하는 이유가 없어지는 것. UI가 아니라 **재미**.
+
+손맛 · 이동감 · 충돌감 · 카메라 · 월드 이벤트 · 팀전 · 보스 · 시즌 · 랭킹 · 리벤지 · 관전 · 토너먼트 · Party · Continue Together
+
+**DoD:** Quick Match → 친구와 플레이 → 한 판 더 → 친구 초대 → 내일 재방문
+
+---
+
+## P1 — Party Experience
+
+같이 입장 → **같이 놀기:** Voice · Emoji · Ready · Leader Travel · Party XP · Mission · Level
+
+---
+
+## P2 — Player Home
+
+게임 목록 X · **사람 목록:** 친구 플레이중 · Tournament · Continue · Quick Match · Mission
+
+---
+
+## P3 — Creator Upload
+
+5분 등록: ZIP → AI QA → Publish
+
+---
+
+## P4 — Viral Loop
+
+Game End → Rematch → Continue Together → Invite → Next Game
+
+---
+
+## P5 — Creator Marketplace
+
+플랫폼 성장 후
+
+---
+
+## P0 — Browser Game Engine (뼈대 — 유지)
 
 SDK가 아닌 **Browser Game Engine**. 게임은 `Replay.Engine.enable()` 끝.
 
-Runtime · Save · Reward · Identity · Mission · Collection · Party · Friends · Voice · Tournament · Matchmaking · Balance · Moment · Leaderboard · AI Director · Analytics
+Runtime · Save · Reward · Identity · Mission · Collection · Party · Friends · Balance · Moment · Leaderboard · AI Director · Analytics
 
 ---
 
-## P1 — Flagship Multiplayer (Snake.io)
+## Flagship Snake — 재미 조립 체크리스트
 
-Slither + Agar + Brawl Stars + Fall Guys + Among Us + Vampire Survivors (좋은 점만)
-
-- Biome: Forest · Ice · Lava · Ocean · Sky · Space · City
-- Zone: Safe · Danger · Boss · Treasure · Portal · Fog
-- Weather: Rain · Snow · Meteor · Storm · Night · Wind
-- Day Cycle: Morning · Evening · Night
-- Scale: 1P→100P (20=Festival · 50=Mega · 100=World Event)
-- Boss: Dragon · Kraken · Titan Snake · Meteor Worm · King Food
-- World Events: Golden Apple · Treasure Rain · Meteor · Black Hole · Double EXP · Food Storm · Portal · Boss Spawn · Team Battle · Survival
-
----
-
-## P2–P6 (순서 고정, P0/P1 완성 후)
-
-- P2: Universal MP (Golf · UNO · Bomber · Kart…) · Party/Friends/Guild 강화
-- P3: Creator (AI Builder · No-Code · Marketplace · Revenue)
-- P4: Growth (Notification · Calendar · Wrapped)
-- P5: AI Ops (QA · Patch notes · PR Draft)
-- P6: Developer Platform (AI/No-Code/Pro Studio · 승인→Publish)
+Slither + Agar + Brawl Stars (좋은 점만) · Biome/Zone/Weather · 1P→100P · Boss · World Events · Death Food Drop · Kill Feed · Smooth Camera
 
 ---
 

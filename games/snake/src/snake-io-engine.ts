@@ -47,6 +47,15 @@ export interface SnakeIoWorld {
   objective: MatchObjective;
   moments: ReplayMoment[];
   deathZones: { x: number; y: number; at: number }[];
+  killFeed: KillFeedEntry[];
+}
+
+export interface KillFeedEntry {
+  killerId: string;
+  killerName: string;
+  victimId: string;
+  victimName: string;
+  tick: number;
 }
 
 const DELTAS: Record<Direction, Vec> = {
@@ -200,6 +209,7 @@ export function createInitialWorld(
     objective: { kind: "score_race", target: 500, progress: {}, label: "최고 점수" },
     moments: [],
     deathZones: [],
+    killFeed: [],
   };
   players.forEach((p, i) => {
     world.snakes[p.deviceId] = createSnake(p.deviceId, p.nickname, i, world);
@@ -216,10 +226,47 @@ export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direc
   snake.pendingDirection = direction;
 }
 
-function killSnake(snake: SnakeEntity, config: ComputedBalance, world: SnakeIoWorld): void {
+function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
+  if (snake.segments.length === 0) return;
+  const maxFood = Math.floor(world.config.foodCount * 1.8);
+  const step = Math.max(1, Math.floor(snake.segments.length / 24));
+  const valuePer = Math.max(
+    8,
+    Math.round(Math.min(snake.score + 20, 300) / Math.max(1, Math.ceil(snake.segments.length / step)))
+  );
+  const kind: FoodKind = snake.score >= 80 ? "golden_apple" : snake.score >= 30 ? "meteor" : "normal";
+
+  for (let i = 0; i < snake.segments.length; i += step) {
+    if (world.food.length >= maxFood) break;
+    const seg = snake.segments[i]!;
+    const taken = world.food.some((f) => f.x === seg.x && f.y === seg.y);
+    if (taken || isBlocked(world, seg)) continue;
+    world.food.push({ x: seg.x, y: seg.y, kind, value: valuePer });
+  }
+}
+
+function killSnake(
+  snake: SnakeEntity,
+  config: ComputedBalance,
+  world: SnakeIoWorld,
+  killer?: SnakeEntity
+): void {
   const head = snake.segments[0];
   if (head && config.antiCampEnabled) {
     world.deathZones = [...world.deathZones.filter((d) => Date.now() - d.at < 30_000), { x: head.x, y: head.y, at: Date.now() }].slice(-40);
+  }
+  dropFoodFromSnake(world, snake);
+  if (killer && killer.deviceId !== snake.deviceId) {
+    world.killFeed = [
+      {
+        killerId: killer.deviceId,
+        killerName: killer.nickname,
+        victimId: snake.deviceId,
+        victimName: snake.nickname,
+        tick: world.tick,
+      },
+      ...world.killFeed,
+    ].slice(0, 6);
   }
   snake.alive = false;
   snake.spectating = true;
@@ -252,9 +299,9 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
       if (snake.respawnAt && now >= snake.respawnAt) respawnSnake(world, snake, idx, now);
       continue;
     }
-    if (snake.invincibleUntil && now < snake.invincibleUntil) continue;
 
     snake.direction = snake.pendingDirection;
+    if (snake.invincibleUntil && now < snake.invincibleUntil) continue;
     const head = snake.segments[0]!;
     const delta = DELTAS[snake.direction];
     const next: Vec = { x: head.x + delta.x, y: head.y + delta.y };
@@ -277,8 +324,9 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     );
 
     if (hitSelf || hitOther) {
+      let killer: SnakeEntity | undefined;
       if (hitOther) {
-        const killer = Object.values(world.snakes).find(
+        killer = Object.values(world.snakes).find(
           (o) => o.alive && o.deviceId !== snake.deviceId &&
             o.segments.some((s) => s.x === next.x && s.y === next.y)
         );
@@ -287,7 +335,7 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
           snake.killStreak = 0;
         }
       }
-      killSnake(snake, world.config, world);
+      killSnake(snake, world.config, world, killer);
       continue;
     }
 

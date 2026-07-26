@@ -55,6 +55,7 @@ export function SnakeIoGame() {
   const worldRef = useRef<SnakeIoWorld | null>(null);
   const prevAliveRef = useRef(true);
   const prevRankRef = useRef(99);
+  const camRef = useRef({ x: 0, y: 0 });
   const deviceId = getDeviceId();
 
   const room = getRoom(roomCode);
@@ -76,6 +77,11 @@ export function SnakeIoGame() {
   const top10 = world?.rankings.slice(0, 10) ?? [];
   const myRank = world ? getMyRank(world, deviceId) : 0;
   const activeEvent = world?.events[0];
+  const teams = useMemo(
+    () => (roomCode ? Replay.multiplayer.team.get(roomCode) : []),
+    [roomCode, world?.tick]
+  );
+  const latestKill = world?.killFeed[0];
 
   useEffect(() => {
     Replay.Engine.enable({ gameSlug: "snake", multiplayer: true, party: true });
@@ -238,11 +244,33 @@ export function SnakeIoGame() {
   const worldSize = world.config.worldSize;
   const zoom = world.config.cameraZoom;
   const cellSize = (480 / (world.config.viewportCells ?? 80)) * zoom;
-  const camX = cameraHead ? cameraHead.x * cellSize - 240 : 0;
-  const camY = cameraHead ? cameraHead.y * cellSize - 240 : 0;
+  const targetCamX = cameraHead ? cameraHead.x * cellSize - 240 : camRef.current.x;
+  const targetCamY = cameraHead ? cameraHead.y * cellSize - 240 : camRef.current.y;
+  camRef.current.x += (targetCamX - camRef.current.x) * 0.18;
+  camRef.current.y += (targetCamY - camRef.current.y) * 0.18;
+  const camX = camRef.current.x;
+  const camY = camRef.current.y;
 
   return (
     <div className="flex flex-col items-center gap-4">
+      {latestKill ? (
+        <div className="w-full max-w-lg rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-center text-sm animate-in fade-in">
+          <span className="font-bold text-red-300">{latestKill.killerName}</span>
+          <span className="text-muted-foreground"> → </span>
+          <span>{latestKill.victimName}</span>
+        </div>
+      ) : null}
+
+      {teams.length > 1 ? (
+        <div className="flex w-full max-w-lg flex-wrap gap-2">
+          {teams.map((t) => (
+            <div key={t.id} className="rounded-lg border border-white/10 px-3 py-1 text-xs">
+              {t.name} · {t.score}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {activeEvent ? (
         <div className="w-full max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-center text-sm font-medium animate-pulse">
           {Replay.multiplayer.events.label(activeEvent.kind)}
@@ -295,8 +323,19 @@ export function SnakeIoGame() {
               </div>
             ) : null}
             {Object.values(world.snakes).map((snake) => snake.segments.map((seg, i) => (
-              <div key={`${snake.deviceId}-${i}`} className={cn("absolute rounded-[1px]", (!snake.alive || snake.spectating) && "opacity-25")}
-                style={{ left: seg.x * cellSize, top: seg.y * cellSize, width: cellSize - 1, height: cellSize - 1, backgroundColor: i === 0 ? snake.color : `${snake.color}99`, boxShadow: snake.invincibleUntil && Date.now() < snake.invincibleUntil ? "0 0 8px white" : undefined }} />
+              <div key={`${snake.deviceId}-${i}`} className={cn("absolute rounded-[1px]", (!snake.alive || snake.spectating) && "opacity-25", i === 0 && "z-10")}
+                style={{
+                  left: seg.x * cellSize, top: seg.y * cellSize,
+                  width: i === 0 ? cellSize : cellSize - 1,
+                  height: i === 0 ? cellSize : cellSize - 1,
+                  backgroundColor: i === 0 ? snake.color : `${snake.color}99`,
+                  boxShadow: i === 0
+                    ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
+                      ? "0 0 10px white"
+                      : `0 0 6px ${snake.color}`
+                    : undefined,
+                  borderRadius: i === 0 ? "40%" : "1px",
+                }} />
             )))}
           </div>
         </div>
@@ -338,6 +377,11 @@ export function SnakeIoGame() {
         <div className="flex flex-col gap-2">
           {isSpectating ? (
             <>
+              <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center">
+                <p className="text-sm font-bold">관전 중</p>
+                <p className="mt-1 text-xs text-muted-foreground">친구와 한 판 더?</p>
+                <Button className="mt-2 w-full" size="sm" onClick={handleEnd}>한 판 더! →</Button>
+              </div>
               <select className="rounded border bg-background px-2 py-1 text-xs" value={spectatorMode} onChange={(e) => setSpectatorMode(e.target.value as typeof spectatorMode)}>
                 <option value="top1">TOP1 시점</option>
                 <option value="friend">친구 시점</option>
