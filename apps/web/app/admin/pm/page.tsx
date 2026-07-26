@@ -1,11 +1,11 @@
-import { CeoOfficeExperience } from "@/components/ai-pm/ceo-office-experience";
+import { AiPmExperience } from "@/components/ai-pm/ai-pm-experience";
 
 export const metadata = {
-  title: "AI CEO Office — Company OS",
-  description: "AI와 함께 Replay를 운영하는 Company Operating System",
+  title: "AI PM — Co-Founder Experience",
+  description: "AI PM과 함께 Replay를 운영합니다",
 };
 
-/** AI CEO Office — Founder's daily first screen */
-export default function CeoOfficePage() {
-  return <CeoOfficeExperience />;
+/** AI PM Experience 2.0 — founder co-working hub (P0) */
+export default function AiPmPage() {
+  return <AiPmExperience />;
 }
