@@ -1,6 +1,6 @@
 /**
- * Replay SDK — unified platform API for all games.
- * Games import ONLY this package to get full platform integration.
+ * Replay SDK — unified namespace for all platform features.
+ * Games import ONLY `@game-platform/replay-sdk`.
  */
 import {
   recordScoreReport,
@@ -13,6 +13,8 @@ import {
   emitPlatformAnalyticsEvent,
   getDailyMission,
   recordMissionScoreReport,
+  getDeviceId,
+  getLastNickname,
 } from "@game-platform/game-sdk";
 import {
   createRoom,
@@ -22,37 +24,59 @@ import {
   start,
   finish,
   spectator,
+  getPartyLinkUrl,
+  shareRoom,
 } from "@game-platform/multiplayer-sdk";
 
-/** Submit score — triggers ranking, XP, missions, rewards. */
-export function submitScore(slug: string, score: number): void {
-  recordScoreReport(slug, score);
-  recordMissionScoreReport(slug, score);
+export interface ReplayInitOptions {
+  gameSlug: string;
+  categorySlug?: string | null;
 }
 
-/** Unlock / check achievement. */
-export function unlockAchievement(id: string): boolean {
-  return isAchievementUnlocked(id as Parameters<typeof isAchievementUnlocked>[0]);
+let _initialized = false;
+let _gameSlug = "";
+
+/** Initialize Replay SDK for a game session. */
+function init(options: ReplayInitOptions): void {
+  _initialized = true;
+  _gameSlug = options.gameSlug;
+  recordSessionStart(options.gameSlug, options.categorySlug ?? null);
 }
 
-export { getAchievements as getAchievements };
+function score(slug: string, value: number): void {
+  recordScoreReport(slug, value);
+  recordMissionScoreReport(slug, value);
+}
 
-/** Save / load game stage progress. */
-export function saveStage(slug: string, state: unknown): void {
+function stage(slug: string, state: unknown): void {
   saveGame(slug, state);
 }
 
-export function loadStage(slug: string): unknown {
+function loadStage(slug: string): unknown {
   return loadGame(slug);
 }
 
-/** Collection progress (via save envelope metadata). */
-export function saveCollection(slug: string, collection: Record<string, boolean>): void {
-  saveGame(slug, { collection });
-}
+const reward = {
+  coin: (slug: string, value: number) => recordScoreReport(slug, value),
+  newBest: (slug: string, value: number) => recordNewBest(slug, value),
+};
 
-/** Multiplayer room API. */
-export const multiplayer = {
+const collection = {
+  save: (slug: string, data: Record<string, boolean>) => saveGame(slug, { collection: data }),
+  load: (slug: string) => loadGame(slug),
+};
+
+const friend = {
+  deviceId: () => getDeviceId(),
+  nickname: () => getLastNickname(),
+};
+
+const challenge = {
+  /** Challenge URL param handled by web app — games emit score for compare. */
+  submit: (slug: string, value: number) => recordScoreReport(slug, value),
+};
+
+const multiplayer = {
   createRoom,
   joinRoom,
   send,
@@ -62,30 +86,89 @@ export const multiplayer = {
   spectator,
 };
 
-/** Reward hooks — score report triggers coin/XP via platform. */
-export const reward = {
-  coin: (slug: string, score: number) => recordScoreReport(slug, score),
-  newBest: (slug: string, score: number) => recordNewBest(slug, score),
-};
-
-/** Mission completion check. */
-export const mission = {
-  complete: (slug: string, score: number) => recordMissionScoreReport(slug, score),
-  getDaily: getDailyMission,
-};
-
-/** Analytics event tracking. */
-export const analytics = {
-  track: (event: "game-end" | "game-retry" | "save-created" | "save-resumed", slug: string, score?: number) => {
-    if (event === "game-end" && score != null) {
-      emitPlatformAnalyticsEvent({ type: "game-end", gameSlug: slug, score });
+const analytics = {
+  track: (event: "game-end" | "game-retry" | "save-created" | "save-resumed", slug: string, value?: number) => {
+    if (event === "game-end" && value != null) {
+      emitPlatformAnalyticsEvent({ type: "game-end", gameSlug: slug, score: value });
     } else if (event !== "game-end") {
       emitPlatformAnalyticsEvent({ type: event, gameSlug: slug });
     }
   },
-  sessionStart: (slug: string, categorySlug: string | null = null) => recordSessionStart(slug, categorySlug),
+  sessionStart: (slug: string, category: string | null = null) => recordSessionStart(slug, category),
 };
 
-// Re-export core providers for games
+const storage = {
+  save: saveGame,
+  load: loadGame,
+};
+
+const cloud = {
+  /** Cloud save — future Supabase sync. MVP: localStorage via storage. */
+  save: (slug: string, state: unknown) => saveGame(slug, state),
+  load: (slug: string) => loadGame(slug),
+  sync: async (_slug: string) => ({ synced: false, reason: "mvp-local-only" }),
+};
+
+const voice = {
+  /** Voice chat — future WebRTC. */
+  join: async (_roomCode: string) => ({ enabled: false }),
+};
+
+const ai = {
+  /** AI NPC / events — future integration. */
+  prompt: async (_text: string) => ({ response: "" }),
+};
+
+const share = {
+  partyLink: getPartyLinkUrl,
+  room: shareRoom,
+};
+
+const ads = {
+  /** Ad placement — future AdSense integration. */
+  show: (_placement: string) => ({ shown: false }),
+  rewarded: async (_placement: string) => ({ reward: 0 }),
+};
+
+/** Unified Replay namespace — `Replay.init()`, `Replay.score()`, etc. */
+export const Replay = {
+  init,
+  score,
+  stage,
+  loadStage,
+  reward,
+  collection,
+  friend,
+  challenge,
+  multiplayer,
+  analytics,
+  storage,
+  cloud,
+  voice,
+  ai,
+  share,
+  ads,
+  get initialized() {
+    return _initialized;
+  },
+  get gameSlug() {
+    return _gameSlug;
+  },
+};
+
+// Legacy flat exports (backward compat)
+export const submitScore = score;
+export function unlockAchievement(id: string): boolean {
+  return isAchievementUnlocked(id as Parameters<typeof isAchievementUnlocked>[0]);
+}
+export { getAchievements };
+export const saveStage = stage;
+export { loadStage };
+export const saveCollection = collection.save;
+export { multiplayer, reward, analytics };
+export const mission = {
+  complete: (s: string, v: number) => recordMissionScoreReport(s, v),
+  getDaily: getDailyMission,
+};
 export { GameSDKProvider, useGameSDK } from "@game-platform/game-sdk";
 export { MultiplayerProvider, useRoom } from "@game-platform/multiplayer-sdk";

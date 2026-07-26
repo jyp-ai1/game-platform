@@ -1,6 +1,8 @@
 /** AI QA Pipeline — automated game submission checks. */
 
-export type QACheckId = "loading" | "memory" | "fps" | "mobile" | "responsive" | "errors" | "buttons" | "difficulty";
+export type QACheckId =
+  | "loading" | "memory" | "fps" | "mobile" | "responsive" | "errors"
+  | "buttons" | "difficulty" | "ads" | "ux";
 
 export interface QACheckResult {
   id: QACheckId;
@@ -35,6 +37,8 @@ const CHECK_DEFS: { id: QACheckId; label: string }[] = [
   { id: "errors", label: "Error" },
   { id: "buttons", label: "Buttons" },
   { id: "difficulty", label: "Difficulty" },
+  { id: "ads", label: "Ad Placement" },
+  { id: "ux", label: "UX" },
 ];
 
 /** Run full AI QA pipeline (simulated). */

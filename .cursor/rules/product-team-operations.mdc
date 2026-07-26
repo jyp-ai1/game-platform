@@ -1,79 +1,109 @@
 ---
-description: Replay OS v8 — Creator Platform (Player + Creator)
+description: Replay Ecosystem — Player + Creator + Community + Platform
 alwaysApply: true
 ---
 
-# Replay OS v8 — Master Task
+# PROJECT: Replay Ecosystem
 
-> **Player + Creator Platform.** 웹게임판 Steam + Roblox + Scratch + GitHub.
+> **세계 최고의 웹게임 생태계.** 게임 생활 + 게임 제작 플랫폼.
 
 Branch: `content-factory` · Commit: `feat(phoenix): ...`
 
 ---
 
-# 최종 목표
-
-누구나 **만들고 · 올리고 · 플레이하고 · 성장**하는 플랫폼.
+# 최종 정체성
 
 ```
-Play → Journey → Community → Creator → Studio → Publish → AI QA → Marketplace → Revenue
+게임 사이트 → 게임 생활 플랫폼 → 게임 생활 + 게임 제작 플랫폼
 ```
 
----
-
-# Nav
-
-Home · Discover · Journey · Community · **Creators** · Passport
-
----
-
-# Creator Platform (13 layers)
-
-| # | Layer | Route |
-|---|-------|-------|
-| 1 | Creator Hub | `/creators` |
-| 2 | Developer Profile | `/creators/[id]` |
-| 3 | Creator Studio | `/studio` |
-| 4 | Upload Wizard | `/studio/upload` |
-| 5 | AI QA Pipeline | `/studio/qa` |
-| 6 | Replay SDK | `@game-platform/replay-sdk` |
-| 7 | Template Marketplace | `/studio/templates` |
-| 8 | Developer Analytics | `/studio/analytics` |
-| 9 | Creator Community | `/creators` (hub) |
-| 10 | AI Co-Developer | `/studio/qa` |
-| 11 | Revenue UI | `/studio/revenue` |
-| 12 | Creator Identity | Passport + Studio |
-| 13 | Marketplace | `/marketplace` |
-
----
-
-# Replay SDK (games import ONLY this)
-
 ```
-submitScore() · unlockAchievement() · saveStage() · saveCollection()
-multiplayer.join() · reward.coin() · mission.complete() · analytics.track()
+Player → Creator → Community → Platform → Ecosystem
 ```
 
 ---
 
-# Multiplayer Platform (v7 유지)
+# Creator Journey (자연스러운 흐름)
+
+```
+Guest → Player → Challenge → Community → Creator → Top Creator → Studio
+```
+
+---
+
+# Creator 종류
+
+| Type | 역할 |
+|------|------|
+| 🎮 Game Creator | 게임 제작 |
+| 🎨 Asset Creator | 이미지 · UI · 사운드 |
+| 🧩 Template Creator | Snake · 2048 · Puzzle 템플릿 |
+| 🤖 AI Creator | 프롬프트 · AI NPC · AI 이벤트 |
+| 🏆 Event Creator | 시즌 · 대회 · 챌린지 |
+
+---
+
+# Studio (No-Code → Advanced)
+
+**No-Code:** Template → 맵/이미지/속도 변경 → Publish
+
+**Advanced:** Github Import · HTML5 · React · Phaser · Godot · Unity WebGL
+
+---
+
+# Replay SDK (games import ONLY `@game-platform/replay-sdk`)
+
+```
+Replay.init() · score() · stage() · reward() · collection()
+friend() · challenge() · multiplayer() · analytics()
+storage() · cloud() · voice() · ai() · share() · ads()
+```
+
+---
+
+# Marketplace
+
+Games · Templates · Assets · Music · Sprites · UI Kit · AI Prompt · NPC · Effects · Background · Icons · Shaders
+
+---
+
+# Creator Growth
+
+Creator Lv · XP · Followers · Downloads · Play Time · Like · Retention · Revenue
+
+Badges: Top Creator · Rising Creator · Verified Creator · Official Creator
+
+---
+
+# Revenue (광고 의존 ↓)
+
+게임 판매 수수료 · 프리미엄 노출 · 템플릿/에셋 판매 · 후원 · 구독 · 토너먼트 · 브랜드 이벤트 · AI QA Pro · Analytics Pro · Cloud Save Pro
+
+---
+
+# Multiplayer + 7 Engines (유지)
 
 Tier1 Single · Tier2 Party · Tier3 Realtime (.io Flagship)
-
----
-
-# 7 Engines
 
 Identity · Motivation · Habit · Social · Growth · Reward · Operations
 
 ---
 
-# 검증
+# Cursor Autonomous Loop
 
-> **플레이어 Journey + Creator Journey가 하나로 이어지는가?**
+중간 승인/보고 없이 **제품 완성**까지 반복. 중단 조건: Build 불가 · 배포 불가 · 데이터 손실 · API Key 필수 · 보안 문제.
+
+```
+1. 현재 서비스 분석
+2. 재방문 이유 부족한 부분 찾기
+3. Creator 성장 어려운 부분 찾기
+4. 운영/업로드 어려운 부분 찾기
+5. 설계 → 구현 → 테스트 → QA → Commit → Push → Preview 확인
+6. 다음 개선 자동 분석 → 1번 반복
+```
 
 ---
 
-# 08:00 Report
+# 08:00 Report (유일한 보고)
 
-Creator uploads · QA pass rate · Template clones · Marketplace · Flagship progress
+제품 완성도(%) · 사용자/Creator/운영 가치 · Before/After · Preview/Production URL · Commit · RC Score · Top Risks · 다음 자동 진행

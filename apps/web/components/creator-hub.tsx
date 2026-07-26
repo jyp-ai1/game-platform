@@ -6,6 +6,7 @@ import { Flame, Plus, Sparkles, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 
 import { CreatorIdentityCard } from "@/components/creator-identity-card";
+import { CREATOR_TYPES } from "@/lib/creator/creator-types";
 import { FEATURED_CREATORS, getMyCreatorGames } from "@/lib/creator/creator-store";
 import { GAME_TEMPLATES } from "@/lib/creator/template-marketplace";
 
@@ -19,11 +20,24 @@ export function CreatorHub({ games }: { games: Game[] }) {
       <CreatorIdentityCard compact />
 
       <div className="flex flex-wrap gap-3">
-        <Button nativeButton={false} render={<Link href="/studio/upload"><Plus className="size-4" /> Create Game</Link>} />
+        <Button nativeButton={false} render={<Link href="/studio/create"><Plus className="size-4" /> Create Game</Link>} />
         <Button variant="outline" nativeButton={false} render={<Link href="/studio">Creator Studio</Link>} />
         <Button variant="outline" nativeButton={false} render={<Link href="/studio/templates">Templates</Link>} />
         <Button variant="outline" nativeButton={false} render={<Link href="/marketplace">Marketplace</Link>} />
       </div>
+
+      <section>
+        <h2 className="font-semibold">Creator Types</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {CREATOR_TYPES.map((t) => (
+            <Link key={t.id} href={t.studioHref} className="rounded-2xl border border-white/10 bg-card/50 p-4 transition hover:border-violet-500/30">
+              <p className="text-2xl">{t.emoji}</p>
+              <p className="mt-2 font-medium">{t.labelKo}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {myGames.length > 0 ? (
         <section>

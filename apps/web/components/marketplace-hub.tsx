@@ -9,9 +9,15 @@ const TABS: { id: MarketplaceItemType | "all"; label: string }[] = [
   { id: "game", label: "Games" },
   { id: "template", label: "Templates" },
   { id: "asset", label: "Assets" },
-  { id: "sound", label: "Sounds" },
+  { id: "music", label: "Music" },
+  { id: "sprite", label: "Sprites" },
+  { id: "ui", label: "UI Kit" },
+  { id: "ai-prompt", label: "AI Prompt" },
+  { id: "npc", label: "NPC" },
+  { id: "effect", label: "Effects" },
   { id: "background", label: "Backgrounds" },
   { id: "icon", label: "Icons" },
+  { id: "shader", label: "Shaders" },
 ];
 
 export function MarketplaceHub() {
@@ -22,7 +28,9 @@ export function MarketplaceHub() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Replay Marketplace</h1>
-        <p className="text-sm text-muted-foreground">게임 · 템플릿 · 에셋 · 사운드 · 배경 · 아이콘</p>
+        <p className="text-sm text-muted-foreground">
+          Games · Templates · Assets · Music · Sprites · UI · AI · NPC · Effects · Backgrounds · Icons · Shaders
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
 import { getCreatorIdentity, formatCreatorStats } from "@/lib/creator/creator-identity";
+import { getCreatorBadges, CREATOR_BADGES } from "@/lib/creator/creator-types";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Dual Player + Creator identity card. */
@@ -15,6 +16,7 @@ export function CreatorIdentityCard({ compact = false }: { compact?: boolean }) 
   if (!mounted) return null;
 
   const identity = getCreatorIdentity();
+  const badges = getCreatorBadges(identity.creatorLevel, identity.followers);
 
   if (compact) {
     return (
@@ -24,6 +26,15 @@ export function CreatorIdentityCard({ compact = false }: { compact?: boolean }) 
             <p className="text-xs uppercase tracking-widest text-violet-400">Creator</p>
             <p className="font-semibold">{identity.creatorTitle} · Lv{identity.creatorLevel}</p>
             <p className="text-xs text-muted-foreground">{formatCreatorStats(identity)}</p>
+            {badges.length > 0 ? (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {badges.map((b) => (
+                  <span key={b} className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-300">
+                    {CREATOR_BADGES.find((x) => x.id === b)?.labelKo}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
           <Link href="/studio" className="text-sm font-medium text-primary hover:underline">Studio →</Link>
         </div>
@@ -52,7 +63,7 @@ export function CreatorIdentityCard({ compact = false }: { compact?: boolean }) 
         <Stat label="Likes" value={identity.totalLikes.toLocaleString()} />
         <Stat label="Followers" value={String(identity.followers)} />
       </div>
-      <Link href="/studio/upload" className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white">
+      <Link href="/studio/create" className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white">
         + Create Game
       </Link>
     </div>
