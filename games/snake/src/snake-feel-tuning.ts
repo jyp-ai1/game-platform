@@ -2,7 +2,7 @@
 
 export const SNAKE_FEEL = {
   /** Path movement — float coords @ 20Hz, render @ 60fps */
-  baseSpeed: 4.2,
+  baseSpeed: 2.9,
   boostSpeedMult: 1.55,
   segmentSpacing: 0.42,
   turnLerp: 0.2,
