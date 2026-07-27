@@ -27,9 +27,10 @@ export function attachEntryLogCollector(page: Page): EntryLogCollector {
 
 /** Game HUD visible — WORLD or PRACTICE both acceptable for local E2E. */
 export async function expectGameReady(page: Page, timeoutMs = 25_000): Promise<void> {
-  const hud = page.getByText(/TOP 10|GLOBAL WORLD|50인 LIVE|SCORE/i).first();
+  const hud = page.getByText(/TOP\s*10|Global World|LIVE|Score/i).first();
   await expect(hud).toBeVisible({ timeout: timeoutMs });
   await expect(page.locator(".touch-none").first()).toBeVisible({ timeout: timeoutMs });
+  await expect(page.getByText(/^Connecting/i)).not.toBeVisible({ timeout: 8_000 });
 }
 
 /** First input — arrow key should not crash. */

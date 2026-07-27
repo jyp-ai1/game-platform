@@ -8,9 +8,11 @@ import {
   buildMultiplayerResult,
   ensureRoom,
   finish,
+  getMultiplayerTransport,
   getRoom,
   isGlobalWorldRoom,
   joinRoomAsync,
+  resolveAvailableCluster,
   send,
   spectator,
   start,
@@ -18,7 +20,7 @@ import {
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
 import { Button, cn, ScoreBox } from "@game-platform/ui";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { GameRoom, ReplayMoment } from "@game-platform/shared";
@@ -85,7 +87,8 @@ import {
   recordGlobalWorldTick,
   tryRecordPostDeathAction,
 } from "./snake-telemetry";
-import { entryLog, entryLogFail } from "./snake-entry-log";
+import { entryLog, entryLogFail, entryTrace } from "./snake-entry-log";
+import { recordJoinRoomDebug } from "./entry-status-store";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -123,6 +126,7 @@ export function SnakeIoGame({
   onJoinTimeout?: () => void;
 } = {}) {
   const params = useSearchParams();
+  const router = useRouter();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<SnakeIoWorld | null>(null);
@@ -133,6 +137,9 @@ export function SnakeIoGame({
   const prevAliveRef = useRef(true);
   const prevRankRef = useRef(99);
   const camRef = useRef({ x: 0, y: 0 });
+  const camSnappedRef = useRef(false);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [boardPx, setBoardPx] = useState(480);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
   const prevWorldRef = useRef<SnakeIoWorld | null>(null);
   const boostingRef = useRef(false);
@@ -230,6 +237,28 @@ export function SnakeIoGame({
   }, []);
 
   useEffect(() => {
+    const el = boardRef.current;
+    if (!el) return;
+    const update = () => {
+      const width = el.clientWidth || window.innerWidth;
+      const cap = Math.min(width, window.innerHeight * 0.65, SNAKE_FEEL.maxViewportPx);
+      setBoardPx(Math.max(320, Math.floor(cap)));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [connected, world]);
+
+  useEffect(() => {
+    camSnappedRef.current = false;
+  }, [roomCode]);
+
+  useEffect(() => {
     if (practiceMode || roomCode) return;
     entryLogFail("JOIN", "missing room param");
     entryLog("PRACTICE_FALLBACK", "empty-room");
@@ -256,53 +285,130 @@ export function SnakeIoGame({
       return;
     }
     let active = true;
-    entryLog("CONNECTING", roomCode);
-    const CONNECT_TIMEOUT_MS = 3000;
-    const MAX_ATTEMPTS = 2;
+    const CONNECT_TIMEOUT_MS = 5000;
+    const MAX_ATTEMPTS = 1;
+
+    const finishConnect = (r: GameRoom, code: string): void => {
+      start(code);
+      entryTrace("CONNECT", "PASS", code);
+      entryTrace("JOIN", "PASS", `${r.players.length} players`);
+      startSnakeTelemetry(code, { isGlobalWorld, quickPlay: isGlobalWorld });
+      refreshWorldTuningFromTelemetry();
+      Replay.multiplayer.analytics.start(code, "snake", r.players.length);
+      Replay.multiplayer.team.create(
+        code,
+        playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party",
+        r.players.map((p) => p.deviceId)
+      );
+      setConnected(true);
+      spawnTimeoutRef.current = window.setTimeout(() => {
+        if (!active || worldRef.current) return;
+        entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
+        onJoinTimeout?.();
+      }, 12_000);
+    };
 
     const attemptConnect = async (attemptIndex: number): Promise<void> => {
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error("connect timeout")), CONNECT_TIMEOUT_MS);
-      });
+      let targetCode = roomCode;
+      if (isGlobalWorld && roomCode === "WORLD") {
+        try {
+          targetCode = await resolveAvailableCluster("snake");
+          if (targetCode !== roomCode && active) {
+            router.replace(`/flagship/snake-io/play?room=${encodeURIComponent(targetCode)}`);
+          }
+        } catch (err) {
+          recordJoinRoomDebug({
+            roomCode,
+            returned: false,
+            transport: getMultiplayerTransport().constructor.name,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      entryTrace("CONNECT", "START", attemptIndex > 0 ? `retry ${attemptIndex + 1}` : targetCode);
+      let timedOut = false;
+      let timeoutId: number | undefined;
 
       try {
+        const existing = getRoom(targetCode);
+        if (existing?.players.some((p) => p.deviceId === deviceId)) {
+          if (!active) return;
+          recordJoinRoomDebug({
+            roomCode: targetCode,
+            returned: true,
+            playerId: deviceId,
+            playerCount: existing.players.length,
+            hostId: existing.hostId,
+            transport: getMultiplayerTransport().constructor.name,
+          });
+          finishConnect(existing, targetCode);
+          return;
+        }
+
         await Promise.race([
           (async () => {
-            await ensureRoom(roomCode);
-            await joinRoomAsync(roomCode);
+            try {
+              await ensureRoom(targetCode);
+              if (timedOut || !active) return;
+              const joined = await joinRoomAsync(targetCode);
+              recordJoinRoomDebug({
+                roomCode: targetCode,
+                returned: !!joined,
+                playerId: joined?.players.find((p) => p.deviceId === deviceId)?.deviceId ?? deviceId,
+                playerCount: joined?.players.length,
+                hostId: joined?.hostId,
+                transport: getMultiplayerTransport().constructor.name,
+                error: joined ? undefined : "joinRoom returned null",
+              });
+              if (timedOut || !active) return;
+              if (!joined) throw new Error("join returned no room");
+              if (!joined.players.some((p) => p.deviceId === deviceId)) {
+                throw new Error("player not in room after join");
+              }
+            } catch (e) {
+              if (timedOut || !active) return;
+              recordJoinRoomDebug({
+                roomCode: targetCode,
+                returned: false,
+                playerId: deviceId,
+                transport: getMultiplayerTransport().constructor.name,
+                error: e instanceof Error ? e.message : String(e),
+              });
+              throw e;
+            }
           })(),
-          timeoutPromise,
+          new Promise<never>((_, reject) => {
+            timeoutId = window.setTimeout(() => {
+              timedOut = true;
+              reject(new Error("connect timeout"));
+            }, CONNECT_TIMEOUT_MS);
+          }),
         ]);
-        const r = getRoom(roomCode);
-        if (!r || !active) return;
-        start(roomCode);
-        entryLog("CONNECTED", roomCode);
-        entryLog("JOINED");
-        startSnakeTelemetry(roomCode, { isGlobalWorld, quickPlay: isGlobalWorld });
-        refreshWorldTuningFromTelemetry();
-        Replay.multiplayer.analytics.start(roomCode, "snake", r.players.length);
-        Replay.multiplayer.team.create(
-          roomCode,
-          playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party",
-          r.players.map((p) => p.deviceId)
-        );
-        setConnected(true);
-        spawnTimeoutRef.current = window.setTimeout(() => {
-          if (!active || worldRef.current) return;
-          entryLogFail("SPAWN", `world not ready ${roomCode}`, { room: roomCode });
-          onJoinTimeout?.();
-        }, 12_000);
+
+        if (timeoutId) window.clearTimeout(timeoutId);
+        if (!active || timedOut) return;
+
+        const r = getRoom(targetCode);
+        if (!r) throw new Error("room missing after connect");
+        finishConnect(r, targetCode);
       } catch (err) {
+        if (timeoutId) window.clearTimeout(timeoutId);
         if (!active) return;
         if (attemptIndex + 1 < MAX_ATTEMPTS) {
-          entryLog("RETRY", `${roomCode} attempt ${attemptIndex + 2}`);
+          entryTrace("RETRY", "PASS", `${targetCode} attempt ${attemptIndex + 2}`);
           await attemptConnect(attemptIndex + 1);
           return;
         }
+        entryTrace(
+          "CONNECT",
+          "FAIL",
+          err instanceof Error ? err.message : String(err)
+        );
         entryLogFail(
           "CONNECT",
           err instanceof Error ? err.message : String(err),
-          { room: roomCode }
+          { room: targetCode, recordCrash: true }
         );
         onJoinTimeout?.();
       }
@@ -313,7 +419,7 @@ export function SnakeIoGame({
       active = false;
       if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
     };
-  }, [roomCode, playerCount, practiceMode, isGlobalWorld, deviceId, onJoinTimeout]);
+  }, [roomCode, playerCount, practiceMode, isGlobalWorld, deviceId, onJoinTimeout, router]);
 
   useEffect(() => {
     if (!roomCode || !connected || practiceMode) return;
@@ -324,6 +430,9 @@ export function SnakeIoGame({
         const cfg = Replay.multiplayer.balance("snake", isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length));
         const obj = Replay.multiplayer.objectives.create(Replay.multiplayer.objectives.pick(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
         const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
+        if (!humans.some((h) => h.deviceId === deviceId)) {
+          humans.push({ deviceId, nickname: getLastNickname() || "Player" });
+        }
         const persisted = isGlobalWorld ? loadPersistedGlobalWorld(roomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
         if (isGlobalWorld) {
@@ -355,9 +464,9 @@ export function SnakeIoGame({
       window.clearTimeout(spawnTimeoutRef.current);
       spawnTimeoutRef.current = undefined;
     }
-    entryLog("SPAWNED");
-    entryLog("CANVAS_READY");
-    entryLog("GAME_READY", roomCode);
+    entryTrace("SPAWN", "PASS");
+    entryTrace("CANVAS", "PASS");
+    entryTrace("GAME_READY", "PASS", roomCode);
   }, [world, roomCode]);
 
   useEffect(() => {
@@ -697,25 +806,51 @@ export function SnakeIoGame({
   }
 
   if (!roomCode) return <p className="text-center text-muted-foreground">Room code required</p>;
-  if (!connected || !world) return <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>;
+  if (!connected || !world) {
+    return (
+      <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-2">
+        <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>
+        <div
+          className="w-full animate-pulse rounded-xl border border-white/10 bg-white/5"
+          style={{ aspectRatio: "1", maxHeight: SNAKE_FEEL.maxViewportPx }}
+        />
+      </div>
+    );
+  }
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const zoom = world.config.cameraZoom * matchRule.cameraZoomMult * (isBoosting ? SNAKE_FEEL.cameraBoostZoom : 1);
-  const cellSize = (480 / (world.config.viewportCells ?? 80)) * zoom;
+  const zoomFeel =
+    matchRule.cameraZoomMult * (isBoosting ? SNAKE_FEEL.cameraBoostZoom : 1);
+  const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * zoomFeel;
+  const cellSize = Math.min(
+    SNAKE_FEEL.maxCellPx,
+    Math.max(SNAKE_FEEL.minCellPx, rawCell)
+  );
+  const camHalf = boardPx / 2;
+
+  if (mySnake?.segments[0] && !camSnappedRef.current) {
+    const head = mySnake.segments[0];
+    camRef.current = {
+      x: head.x * cellSize - camHalf,
+      y: head.y * cellSize - camHalf,
+    };
+    camSnappedRef.current = true;
+  }
+
   const targetCamX = spectatorMode === "free"
-    ? (worldSize * cellSize) / 2 - 240
-    : cameraHead ? cameraHead.x * cellSize - 240 : camRef.current.x;
+    ? (worldSize * cellSize) / 2 - camHalf
+    : cameraHead ? cameraHead.x * cellSize - camHalf : camRef.current.x;
   const targetCamY = spectatorMode === "free"
-    ? (worldSize * cellSize) / 2 - 240
-    : cameraHead ? cameraHead.y * cellSize - 240 : camRef.current.y;
+    ? (worldSize * cellSize) / 2 - camHalf
+    : cameraHead ? cameraHead.y * cellSize - camHalf : camRef.current.y;
   camRef.current.x += (targetCamX - camRef.current.x) * SNAKE_FEEL.cameraFollowLerp;
   camRef.current.y += (targetCamY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
   const camX = camRef.current.x;
   const camY = camRef.current.y;
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-1 sm:gap-4 sm:px-2">
       {joinBrief ? (
         <div className="w-full max-w-lg rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-5 py-4 text-center animate-in fade-in">
           <p className="text-lg font-bold text-emerald-200">🟢 {joinBrief.population}명 LIVE</p>
@@ -775,13 +910,17 @@ export function SnakeIoGame({
       </div>
       <p className="w-full max-w-lg text-center text-xs text-muted-foreground">{matchRule.description}</p>
 
-      <div className="relative flex gap-3">
+      <div className="relative flex w-full justify-center gap-3">
         <div
-          className="relative overflow-hidden rounded-xl border border-white/10 touch-none"
+          className="relative w-full overflow-hidden rounded-xl border border-white/10 touch-none"
           style={{
-            width: 480,
-            height: 480,
+            width: boardPx,
+            height: boardPx,
+            maxWidth: "100%",
             backgroundColor: seasonStyle.bg,
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+            backgroundSize: `${cellSize}px ${cellSize}px`,
             transform: shake > 0 ? `translate(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px)` : undefined,
           }}
           onTouchStart={(e) => {
@@ -888,8 +1027,8 @@ export function SnakeIoGame({
               <div key={`${snake.deviceId}-${i}`} className={cn("absolute", (!snake.alive || snake.spectating) && "opacity-25", i === 0 && "z-10")}
                 style={{
                   left: seg.x * cellSize, top: seg.y * cellSize,
-                  width: i === 0 ? cellSize : cellSize - 1,
-                  height: i === 0 ? cellSize : cellSize - 1,
+                  width: i === 0 ? Math.max(cellSize, 10) : Math.max(cellSize - 1, 8),
+                  height: i === 0 ? Math.max(cellSize, 10) : Math.max(cellSize - 1, 8),
                   backgroundColor: i === 0 ? snake.color : `${snake.color}99`,
                   boxShadow: i === 0
                     ? snake.invincibleUntil && Date.now() < snake.invincibleUntil

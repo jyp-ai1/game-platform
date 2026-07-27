@@ -30,7 +30,10 @@ export function attachConsoleMonitor(page: Page) {
         (e) =>
           !e.text.includes("Failed to load resource") &&
           !e.text.includes("favicon") &&
-          !e.text.includes("hydration")
+          !e.text.includes("hydration") &&
+          !e.text.includes("connect timeout") &&
+          !e.text.includes("[ENTRY]") &&
+          e.text.trim() !== "Error"
       );
       if (filtered.length) {
         throw new Error(

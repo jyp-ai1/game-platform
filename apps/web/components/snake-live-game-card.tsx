@@ -1,7 +1,7 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { enterSnakeQuickPlay, PRACTICE_URL } from "@/lib/snake-entry";
+import { enterSnakeQuickPlay, enterSnakeRoom, PRACTICE_URL } from "@/lib/snake-entry";
 import {
   getGlobalWorldStatus,
   GLOBAL_WORLD_TARGET,
@@ -15,6 +15,7 @@ import {
   PlatformGameCard,
   type PlatformGameCardFriend,
 } from "@/components/platform-game-card";
+import { useMounted } from "@/lib/use-mounted";
 
 export interface SnakeFriendPresence {
   nickname: string;
@@ -23,6 +24,16 @@ export interface SnakeFriendPresence {
   joinedMinutesAgo?: number;
   score?: number;
   statusLabel?: string;
+}
+
+function defaultLiveMeta() {
+  return {
+    players: GLOBAL_WORLD_TARGET,
+    maxPlayers: GLOBAL_WORLD_TARGET,
+    topScore: undefined as number | undefined,
+    topRankLabel: "TOP #1" as const,
+    animatePlayers: true,
+  };
 }
 
 function readLiveMeta() {
@@ -49,14 +60,18 @@ export function SnakeLiveGameCard({
   className?: string;
 }) {
   const router = useRouter();
+  const mounted = useMounted();
   const [joining, setJoining] = useState(false);
   const [joiningFriend, setJoiningFriend] = useState(false);
-  const [liveMeta, setLiveMeta] = useState(readLiveMeta);
+  const [liveMeta, setLiveMeta] = useState(defaultLiveMeta);
 
   useEffect(() => {
+    setLiveMeta(readLiveMeta());
     const id = window.setInterval(() => setLiveMeta(readLiveMeta()), 5000);
     return () => window.clearInterval(id);
   }, []);
+
+  const displayLive = mounted ? liveMeta : defaultLiveMeta();
 
   const displayGame: Game =
     game ??
@@ -81,14 +96,14 @@ export function SnakeLiveGameCard({
     } satisfies Game);
 
   const cardFriend: PlatformGameCardFriend | null = useMemo(() => {
-    if (!friend) return null;
+    if (!mounted || !friend) return null;
     return {
       nickname: friend.nickname,
       joinedMinutesAgo: friend.joinedMinutesAgo,
       score: friend.score,
       statusLabel: friend.statusLabel,
     };
-  }, [friend]);
+  }, [friend, mounted]);
 
   const handleQuickPlay = useCallback(async () => {
     setJoining(true);
@@ -102,12 +117,12 @@ export function SnakeLiveGameCard({
   const handleJoinFriend = useCallback(async () => {
     if (!friend) return;
     setJoiningFriend(true);
-    entryLog("CLICK", "home-join-friend");
     try {
-      router.push(friend.playHref);
+      const match = friend.playHref.match(/room=([^&]+)/);
+      const roomCode = match ? decodeURIComponent(match[1]!) : "WORLD";
+      await enterSnakeRoom(router, roomCode);
     } catch (err) {
       entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
-      entryLog("PRACTICE_FALLBACK", "join-friend");
       router.push(PRACTICE_URL);
     } finally {
       setJoiningFriend(false);
@@ -117,7 +132,7 @@ export function SnakeLiveGameCard({
   return (
     <PlatformGameCard
       game={displayGame}
-      live={liveMeta}
+      live={displayLive}
       friend={cardFriend}
       hero
       showFavorite={false}

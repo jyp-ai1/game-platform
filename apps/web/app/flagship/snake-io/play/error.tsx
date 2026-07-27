@@ -4,6 +4,8 @@ import { entryLog, entryLogFail } from "@game-platform/game-snake";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { EntryTracePanel } from "@/components/entry-trace-panel";
+
 /** Play route — never show global error page; redirect to Practice. */
 export default function SnakePlayError({
   error,
@@ -22,8 +24,10 @@ export default function SnakePlayError({
   }, [error, router]);
 
   return (
-    <p className="py-16 text-center text-sm text-muted-foreground">
-      Practice Mode로 전환 중…
-    </p>
+    <div className="flex flex-col items-center gap-2 py-16">
+      <EntryTracePanel />
+      <p className="text-center text-sm text-muted-foreground">Practice Mode로 전환 중…</p>
+      <p className="max-w-sm text-center font-mono text-xs text-red-400">{error.message}</p>
+    </div>
   );
 }

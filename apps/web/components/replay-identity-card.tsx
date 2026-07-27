@@ -2,7 +2,8 @@
 
 import type { Game } from "@game-platform/shared";
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import {
   getLastNickname,
@@ -13,11 +14,13 @@ import {
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getLivingIdentity, getLivingIdentityStatement } from "@/lib/living-identity";
 import { getPrimaryPlayHref } from "@/lib/motivation-engine";
+import { isSnakeQuickPlayHref, navigateSnakePlay } from "@/lib/snake-entry";
 import { buildFullReplayIdentity } from "@/lib/replay-identity";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Replay Identity — emotional first, stats second. */
 export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; compact?: boolean }) {
+  const router = useRouter();
   const mounted = useMounted();
   const nickname = useSyncExternalStore(
     subscribeNickname,
@@ -38,6 +41,15 @@ export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; 
 
   const statement = mounted ? getLivingIdentityStatement(games) : "";
   const playHref = mounted ? getPrimaryPlayHref(games) : "/games";
+
+  const onPlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isSnakeQuickPlayHref(playHref)) return;
+      e.preventDefault();
+      void navigateSnakePlay(playHref, router);
+    },
+    [playHref, router]
+  );
 
   if (!mounted || !identity) return null;
 
@@ -83,6 +95,7 @@ export function ReplayIdentityCard({ games, compact = false }: { games: Game[]; 
 
       <Link
         href={playHref}
+        onClick={onPlayClick}
         className="mt-6 inline-flex rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
       >
         Replay 시작 →

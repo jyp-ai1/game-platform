@@ -230,6 +230,12 @@ export function getGamePlayCounts(): Record<string, number> {
   return gamePlayCountsCache;
 }
 
+const EMPTY_GAME_PLAY_COUNTS: Record<string, number> = {};
+
+export function getServerGamePlayCountsSnapshot(): Record<string, number> {
+  return EMPTY_GAME_PLAY_COUNTS;
+}
+
 export function getMostPlayedGameSlug(): string | null {
   const entries = Object.entries(gamePlayCountsCache);
   if (entries.length === 0) {

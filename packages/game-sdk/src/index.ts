@@ -35,6 +35,7 @@ export {
   getCategoryPlayCounts,
   getDailyStreak,
   getGamePlayCounts,
+  getServerGamePlayCountsSnapshot,
   getLevel,
   getLevelProgress,
   getMostPlayedGameSlug,

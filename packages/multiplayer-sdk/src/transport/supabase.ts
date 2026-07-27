@@ -153,7 +153,8 @@ function ensureChannel(code: string): RealtimeChannel | null {
 
 function broadcastEvent(code: string, event: string, data: unknown, room?: GameRoom): void {
   const channel = ensureChannel(code);
-  channel?.send({ type: "broadcast", event: "game-event", payload: { event, data, room } });
+  if (!channel) return;
+  void channel.httpSend("game-event", { event, data, room });
 }
 
 async function upsertPresence(

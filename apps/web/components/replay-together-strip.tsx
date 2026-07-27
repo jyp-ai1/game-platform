@@ -25,6 +25,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { HomeEmptyLine } from "@/components/home-empty-line";
+import { useMounted } from "@/lib/use-mounted";
+
 /** Plausible mock score when presence has no score field yet. */
 function mockPresenceScore(nickname: string): number {
   const n = nickname.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -57,6 +60,7 @@ function presenceToFriend(entry: PresenceEntry): SnakeFriendPresence {
 /** Home hero — LIVE Snake game card first; friend is secondary info on the card. */
 export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) {
   const router = useRouter();
+  const mounted = useMounted();
   const [friend, setFriend] = useState<SnakeFriendPresence | null>(null);
   const [presenceLoaded, setPresenceLoaded] = useState(false);
   const [party, setParty] = useState<Awaited<ReturnType<typeof getMyParty>>>(null);
@@ -126,13 +130,13 @@ export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) 
         </h2>
         <SnakeLiveGameCard game={snakeGame} friend={friend} />
 
-        {presenceLoaded && !friend ? (
+        {presenceLoaded && mounted && !friend ? (
           <p data-testid="hero-friend-empty" className="text-sm text-muted-foreground">
             지금 플레이 중인 친구가 없습니다.
           </p>
         ) : null}
 
-        {tournament ? (
+        {mounted && tournament ? (
           <button
             type="button"
             aria-label="토너먼트 참가"

@@ -3,14 +3,17 @@
 import type { Game } from "@game-platform/shared";
 import { Container } from "@game-platform/ui";
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getSecondaryMotivations } from "@/lib/motivation-engine";
+import { isSnakeQuickPlayHref, navigateSnakePlay } from "@/lib/snake-entry";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Secondary motivations — top 1 is in greeting hero. */
 export function ReplayMotivationStrip({ games }: { games: Game[] }) {
+  const router = useRouter();
   const mounted = useMounted();
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
 
@@ -18,6 +21,15 @@ export function ReplayMotivationStrip({ games }: { games: Game[] }) {
     if (!mounted) return [];
     return getSecondaryMotivations(games, 3);
   }, [games, mounted]);
+
+  const onPlayClick = useCallback(
+    (href: string) => (e: React.MouseEvent) => {
+      if (!isSnakeQuickPlayHref(href)) return;
+      e.preventDefault();
+      void navigateSnakePlay(href, router);
+    },
+    [router]
+  );
 
   if (!mounted || motivations.length === 0) return null;
 
@@ -30,6 +42,7 @@ export function ReplayMotivationStrip({ games }: { games: Game[] }) {
             <li key={m.id}>
               <Link
                 href={m.ctaHref}
+                onClick={onPlayClick(m.ctaHref)}
                 className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-background/40 px-4 py-2.5 text-sm hover:border-primary/30"
               >
                 <span className="flex items-center gap-2">

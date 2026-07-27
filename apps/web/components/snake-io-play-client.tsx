@@ -1,14 +1,17 @@
 "use client";
 
 import { GameErrorMonitor } from "@/components/game-error-monitor";
+import { prefetchHomeShell } from "@/components/home-page-client";
 import { ViralLoopResultPanel } from "@/components/viral-loop-result";
 import { GameSDKProvider, emitEngagementEvent } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
-import { entryLog, entryLogFail } from "@game-platform/game-snake";
+import { entryLog, entryLogFail, entryTrace, resetEntryStatus } from "@game-platform/game-snake";
 import { EntryCrashLog, loadEntryCrashLog } from "@game-platform/multiplayer-sdk";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Component, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+
+import { EntryTracePanel } from "@/components/entry-trace-panel";
 
 import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
@@ -43,12 +46,12 @@ async function submitScore(
 
 class SnakePlayErrorBoundary extends Component<
   { children: ReactNode; onPracticeFallback: () => void },
-  { failed: boolean }
+  { failed: boolean; errorMessage: string | null }
 > {
-  state = { failed: false };
+  state = { failed: false, errorMessage: null as string | null };
 
-  static getDerivedStateFromError(): { failed: boolean } {
-    return { failed: true };
+  static getDerivedStateFromError(error: Error): { failed: boolean; errorMessage: string } {
+    return { failed: true, errorMessage: error.message };
   }
 
   componentDidCatch(error: Error): void {
@@ -61,9 +64,13 @@ class SnakePlayErrorBoundary extends Component<
   render(): ReactNode {
     if (this.state.failed) {
       return (
-        <p className="text-center text-sm text-muted-foreground">
-          Connecting to Practice Mode…
-        </p>
+        <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
+          <EntryTracePanel />
+          <p className="text-sm text-amber-300">RENDER FAIL — Practice Mode로 전환 중…</p>
+          {this.state.errorMessage ? (
+            <p className="max-w-sm font-mono text-xs text-red-400">{this.state.errorMessage}</p>
+          ) : null}
+        </div>
       );
     }
     return this.props.children;
@@ -77,8 +84,15 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
 
   useEffect(() => {
-    entryLog("PLAY_MOUNTED", practiceMode ? "PRACTICE" : room ?? "no-room");
-    entryLog("ROUTE", typeof window !== "undefined" ? window.location.pathname + window.location.search : "");
+    resetEntryStatus();
+    if (room && !practiceMode) {
+      entryTrace("CLICK", "PASS", "quick-play", 0);
+      entryTrace("ROUTE", "PASS", `/flagship/snake-io/play?room=${room}`, 0);
+    }
+    entryTrace("PROVIDER_READY", "PASS");
+    entryTrace("PLAY_MOUNTED", "PASS", practiceMode ? "PRACTICE" : room ?? "no-room");
+    if (!practiceMode && room) entryTrace("ENTRY", "PASS", room);
+    prefetchHomeShell();
     if (typeof window !== "undefined") {
       (window as Window & { EntryCrashLog?: typeof EntryCrashLog }).EntryCrashLog = EntryCrashLog;
     }
@@ -104,7 +118,10 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   useEffect(() => {
     function onEnd(e: Event) {
       const detail = (e as CustomEvent<ViralLoopResult>).detail;
-      if (detail) setLoop(detail);
+      if (detail) {
+        entryTrace("REPLAY", "PASS", detail.result.gameSlug);
+        setLoop(detail);
+      }
     }
     window.addEventListener("replay:viral-loop-complete", onEnd);
     return () => window.removeEventListener("replay:viral-loop-complete", onEnd);
@@ -138,10 +155,13 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   }
 
   return (
-    <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
-      <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} />
-      <EntryCrashReporter />
-    </SnakePlayErrorBoundary>
+    <>
+      <EntryTracePanel />
+      <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
+        <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} />
+        <EntryCrashReporter />
+      </SnakePlayErrorBoundary>
+    </>
   );
 }
 

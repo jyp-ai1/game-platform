@@ -16,7 +16,10 @@ export default function Error({
   const router = useRouter();
 
   useEffect(() => {
-    emitPlatformNoticeWithRetry("연결", "일시적으로 불안정합니다.");
+    if (typeof window === "undefined") return;
+    if (window.location.pathname.includes("/flagship/snake-io/play")) {
+      window.location.replace("/flagship/snake-io/play?room=PRACTICE&fallback=1");
+    }
   }, []);
 
   return (

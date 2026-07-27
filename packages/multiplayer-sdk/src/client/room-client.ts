@@ -1,3 +1,4 @@
+import { getDeviceId } from "@game-platform/game-sdk";
 import type { GameRoom, MatchMode, MatchResult, MaxPlayers } from "@game-platform/shared";
 
 import { getMultiplayerTransport, setMultiplayerTransport, initMultiplayerTransport } from "../transport/init";
@@ -7,6 +8,11 @@ import type { CreateRoomParams, JoinRoomOptions, MultiplayerTransport } from "..
 if (typeof window !== "undefined") initMultiplayerTransport();
 
 export { setMultiplayerTransport, getMultiplayerTransport, initMultiplayerTransport };
+
+function isWorldRoom(code: string): boolean {
+  const upper = code.toUpperCase();
+  return upper === "WORLD" || /^WORLD-\d+$/.test(upper);
+}
 
 export function createRoom(params: CreateRoomParams): GameRoom;
 export function createRoom(gameSlug: string, maxPlayers?: MaxPlayers, matchMode?: MatchMode): GameRoom;
@@ -26,9 +32,34 @@ export function joinRoom(code: string, options?: JoinRoomOptions): GameRoom | nu
   return getMultiplayerTransport().joinRoom(code, options);
 }
 
+/** Async join — waits for Supabase fetch and bootstraps WORLD if missing. */
 export async function joinRoomAsync(code: string, options?: JoinRoomOptions): Promise<GameRoom | null> {
-  await ensureRoom(code);
-  return getMultiplayerTransport().joinRoom(code, options);
+  const key = code.toUpperCase();
+  let room = await ensureRoom(key);
+
+  if (!room && isWorldRoom(key)) {
+    room = createRoom({
+      gameSlug: "snake",
+      maxPlayers: 50,
+      matchMode: "public",
+      code: key,
+    });
+  }
+
+  const deviceId = getDeviceId();
+  if (room?.players.some((p) => p.deviceId === deviceId)) {
+    return room;
+  }
+
+  const transport = getMultiplayerTransport();
+  let joined = room ? transport.joinRoom(key, options) : null;
+  if (joined) return joined;
+
+  joined = await supabaseJoinAsync(key, options);
+  if (joined) return joined;
+
+  await ensureRoomLoaded(key);
+  return transport.joinRoom(key, options);
 }
 
 export async function ensureRoom(code: string): Promise<GameRoom | null> {

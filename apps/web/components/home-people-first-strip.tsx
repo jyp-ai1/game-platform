@@ -3,10 +3,12 @@
 import { fetchSituations } from "@game-platform/replay-engine/social";
 import type { SituationRecommendation } from "@game-platform/shared";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 import { HomeEmptyLine } from "@/components/home-empty-line";
 import { emitPlatformNoticeWithRetry } from "@/lib/platform-notice";
+import { isSnakeQuickPlayHref, navigateSnakePlay } from "@/lib/snake-entry";
 
 const KIND_STYLES: Record<SituationRecommendation["kind"], string> = {
   join_friend: "border-primary/40 bg-primary/10",
@@ -19,8 +21,18 @@ const KIND_STYLES: Record<SituationRecommendation["kind"], string> = {
 
 /** People-first home — situation-based recommendations, not game lists. */
 export function HomePeopleFirstStrip() {
+  const router = useRouter();
   const [situations, setSituations] = useState<SituationRecommendation[]>([]);
   const [loaded, setLoaded] = useState(false);
+
+  const onPlayClick = useCallback(
+    (href: string) => (e: React.MouseEvent) => {
+      if (!isSnakeQuickPlayHref(href)) return;
+      e.preventDefault();
+      void navigateSnakePlay(href, router);
+    },
+    [router]
+  );
 
   useEffect(() => {
     const load = () =>
@@ -62,6 +74,7 @@ export function HomePeopleFirstStrip() {
               <Link
                 key={s.id}
                 href={s.href}
+                onClick={onPlayClick(s.href)}
                 className={`motion-base rounded-xl border px-4 py-3 text-sm transition hover:opacity-90 ${KIND_STYLES[s.kind]}`}
               >
                 <span className="font-medium">{s.title}</span>

@@ -6,9 +6,8 @@ import { JsonLdScript } from "@/components/json-ld-script";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { AnalyticsBridge } from "@/components/analytics-bridge";
-import { ProductMetricsBridge } from "@/components/product-metrics-bridge";
-import { MonitoringProvider } from "@/components/monitoring-provider";
+import { DeferredClientBridges } from "@/components/deferred-client-bridges";
+import { PolyfillInit } from "@/components/polyfill-init";
 import { PlatformFlagsSync } from "@/components/platform-flags-sync";
 import { getPlatformFlagsFromDb } from "@/lib/feature-flags";
 import { ToastHost } from "@/components/toast/toast-host";
@@ -20,11 +19,15 @@ import { siteUrl } from "@/lib/site";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 const description = `${siteConfig.tagline} ${siteConfig.subTagline}`;
@@ -89,10 +92,9 @@ export default async function RootLayout({
             during the very same initial commit, e.g. the "첫 게임 플레이"
             achievement on a hard-loaded game page). */}
         <ToastHost />
+        <PolyfillInit />
         <PlatformFlagsSync flags={platformFlags} />
-        <AnalyticsBridge />
-        <ProductMetricsBridge />
-        <MonitoringProvider />
+        <DeferredClientBridges />
         <JsonLdScript data={[organizationJsonLd(), webSiteJsonLd()]} />
         <Header />
         {children}

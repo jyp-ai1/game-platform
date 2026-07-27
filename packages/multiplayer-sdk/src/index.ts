@@ -89,7 +89,7 @@ export {
 } from "./transport/local-storage";
 
 // Transport
-export { isSupabaseRealtimeConfigured, getMultiplayerSupabase } from "./transport/supabase-client";
+export { isSupabaseRealtimeConfigured, getMultiplayerSupabase, registerMultiplayerSupabase } from "./transport/supabase-client";
 export { isSupabaseRealtimeAvailable } from "./transport/broadcast-channel";
 export { supabaseTransport } from "./transport/supabase";
 export { memoryTransport } from "./transport/memory";

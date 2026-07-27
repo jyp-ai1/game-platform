@@ -29,7 +29,7 @@ test.describe("Golden Path — Stage 1 Entry", () => {
       "PLAY_MOUNTED",
       "PROVIDER_READY",
       "ENGINE_READY",
-      "CONNECTING",
+      "CONNECT",
     ]);
     await expectInputWorks(page);
     const steps = entry.getSteps().join("\n");

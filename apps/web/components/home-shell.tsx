@@ -1,20 +1,51 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-
-import { HomeContinueHub } from "@/components/home-continue-hub";
-import { HomeDailyChallengeStrip } from "@/components/home-daily-challenge-strip";
-import { HomePageSkeleton } from "@/components/home-page-skeleton";
-import { HomePeopleFirstStrip } from "@/components/home-people-first-strip";
-import { HomeRuleRecommendations } from "@/components/home-rule-recommendations";
-import { NotificationCenter } from "@/components/notification-center";
-import { ReplayTimelineStrip } from "@/components/replay-timeline-strip";
-import { ReplayTogetherStrip } from "@/components/replay-together-strip";
+import dynamic from "next/dynamic";
 import { Container, cn } from "@game-platform/ui";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { HomePageSkeleton } from "@/components/home-page-skeleton";
+import { ReplayTogetherStrip } from "@/components/replay-together-strip";
 import { useHomeBootDelay } from "@/lib/use-home-boot-delay";
+
+const HomeContinueHub = dynamic(
+  () => import("@/components/home-continue-hub").then((m) => ({ default: m.HomeContinueHub })),
+  { ssr: false, loading: () => null }
+);
+const HomeRuleRecommendations = dynamic(
+  () =>
+    import("@/components/home-rule-recommendations").then((m) => ({
+      default: m.HomeRuleRecommendations,
+    })),
+  { ssr: false, loading: () => null }
+);
+const HomePeopleFirstStrip = dynamic(
+  () =>
+    import("@/components/home-people-first-strip").then((m) => ({
+      default: m.HomePeopleFirstStrip,
+    })),
+  { ssr: false, loading: () => null }
+);
+const HomeDailyChallengeStrip = dynamic(
+  () =>
+    import("@/components/home-daily-challenge-strip").then((m) => ({
+      default: m.HomeDailyChallengeStrip,
+    })),
+  { ssr: false, loading: () => null }
+);
+const NotificationCenter = dynamic(
+  () => import("@/components/notification-center").then((m) => ({ default: m.NotificationCenter })),
+  { ssr: false, loading: () => null }
+);
+const ReplayTimelineStrip = dynamic(
+  () =>
+    import("@/components/replay-timeline-strip").then((m) => ({
+      default: m.ReplayTimelineStrip,
+    })),
+  { ssr: false, loading: () => null }
+);
 
 export function HomeShell({
   games,
@@ -27,11 +58,22 @@ export function HomeShell({
 }) {
   const bootReady = useHomeBootDelay(500);
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [belowFold, setBelowFold] = useState(false);
 
   useEffect(() => {
     if (!bootReady) return;
     const id = window.setTimeout(() => setShowSkeleton(false), 220);
     return () => window.clearTimeout(id);
+  }, [bootReady]);
+
+  useEffect(() => {
+    if (!bootReady) return;
+    const ric = window.requestIdleCallback?.(() => setBelowFold(true), { timeout: 1500 });
+    if (ric != null) {
+      return () => window.cancelIdleCallback(ric);
+    }
+    const t = window.setTimeout(() => setBelowFold(true), 100);
+    return () => window.clearTimeout(t);
   }, [bootReady]);
 
   return (
@@ -57,23 +99,25 @@ export function HomeShell({
       >
         <ReplayTogetherStrip snakeGame={snakeGame} />
 
-        <HomeContinueHub games={games} />
+        {belowFold ? (
+          <>
+            <HomeContinueHub games={games} />
+            <HomeRuleRecommendations games={games} large />
+            <HomePeopleFirstStrip />
 
-        <HomeRuleRecommendations games={games} large />
+            <section
+              aria-labelledby="home-mission-heading"
+              className="border-t border-white/5 py-5 sm:py-6"
+            >
+              <Container className="grid gap-3 sm:grid-cols-2">
+                <HomeDailyChallengeStrip games={games} compact />
+                <NotificationCenter compact />
+              </Container>
+            </section>
 
-        <HomePeopleFirstStrip />
-
-        <section
-          aria-labelledby="home-mission-heading"
-          className="border-t border-white/5 py-5 sm:py-6"
-        >
-          <Container className="grid gap-3 sm:grid-cols-2">
-            <HomeDailyChallengeStrip games={games} compact />
-            <NotificationCenter compact />
-          </Container>
-        </section>
-
-        <ReplayTimelineStrip games={games} />
+            <ReplayTimelineStrip games={games} />
+          </>
+        ) : null}
 
         <section
           aria-labelledby="home-explore-heading"

@@ -8,6 +8,7 @@ import { listChallenges } from "@/lib/challenge-scores-store";
 import { getGenreCollections } from "@/lib/collection-engine";
 import { buildHabitState } from "@/lib/habit-engine";
 import { buildReplayIdentityProfile, getFriendBeatGap } from "@/lib/replay-identity";
+import { SNAKE_QUICK_PLAY_MARKER } from "@/lib/snake-entry";
 import { getTodayMissionMix, getTodayMissionProgress } from "@/lib/universal-mission-engine";
 
 export const MOTIVATION_SCORES = {
@@ -34,7 +35,7 @@ export interface PlayMotivation {
   isLoss: boolean;
 }
 
-const SNAKE_QUICK_PLAY = "/flagship/snake-io/play?room=WORLD";
+const SNAKE_QUICK_PLAY = SNAKE_QUICK_PLAY_MARKER;
 
 function playHrefForSlug(slug: string): string {
   return slug === "snake" ? SNAKE_QUICK_PLAY : `/games/${slug}`;
