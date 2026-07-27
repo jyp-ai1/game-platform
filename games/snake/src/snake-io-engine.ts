@@ -367,6 +367,12 @@ export function createInitialWorld(
   return world;
 }
 
+export function rehydrateWorldSnakes(world: SnakeIoWorld): void {
+  for (const snake of Object.values(world.snakes)) {
+    ensureSnakePath(snake);
+  }
+}
+
 export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direction): void {
   const snake = world.snakes[deviceId];
   if (!snake || !snake.alive || snake.spectating || isOpposite(direction, snake.direction)) return;

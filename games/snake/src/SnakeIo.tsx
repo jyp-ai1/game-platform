@@ -38,6 +38,7 @@ import {
   getSegmentCount,
   lerpSegments,
   restartPlayerSnake,
+  rehydrateWorldSnakes,
   setBoost,
   setInput,
   spawnEventFood,
@@ -93,6 +94,7 @@ import {
   tryRecordPostDeathAction,
 } from "./snake-telemetry";
 import { entryLog, entryLogFail, entryTrace } from "./snake-entry-log";
+import { appendLifecycle } from "./entry-status-store";
 import { recordJoinRoomDebug } from "./entry-status-store";
 import { claimEngineSession } from "./snake-play-session";
 import { resetGamePhase, transitionGamePhase } from "./snake-game-state";
@@ -470,14 +472,46 @@ export function SnakeIoGame({
 
   useEffect(() => {
     if (!effectiveRoomCode || !connected || practiceMode) return;
+
+    const humansForRoom = (r: GameRoom) => {
+      const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
+      if (!humans.some((h) => h.deviceId === deviceId)) {
+        humans.push({ deviceId, nickname: getLastNickname() || "Player" });
+      }
+      return humans;
+    };
+
+    const spawnTrace = (line: string) => {
+      appendLifecycle(line);
+      if (typeof console !== "undefined") console.info(`[SPAWN] ${line}`);
+    };
+
+    const attachLocalPlayer = (w: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
+      spawnTrace("GAME_INIT");
+      spawnTrace("PLAYER_REGISTER");
+      const humans = humansForRoom(r);
+      if (isGlobalWorld) {
+        syncSnakePopulation(w, humans, SNAKE_WORLD_TARGET);
+      }
+      rehydrateWorldSnakes(w);
+      const me = w.snakes[deviceId];
+      if (me) {
+        spawnTrace("PLAYER_CREATE");
+        spawnTrace(`SPAWN_SUCCESS len=${getSegmentCount(me)}`);
+      } else {
+        spawnTrace("PLAYER_CREATE FAIL — missing after syncSnakePopulation");
+      }
+      return w;
+    };
+
     const applyRoom = (r: GameRoom) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
-          if (!worldRef.current) {
-            worldRef.current = state;
-            setWorld(state);
-          }
+          const base = worldRef.current ?? structuredClone(state);
+          const next = attachLocalPlayer(base, r);
+          worldRef.current = next;
+          setWorld(next);
           return;
         }
         worldRef.current = state;
@@ -485,18 +519,14 @@ export function SnakeIoGame({
         return;
       }
       if (!worldRef.current && (isHost || isGlobalWorld)) {
+        spawnTrace("SPAWN_REQUEST");
         const cfg = Replay.multiplayer.balance("snake", isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length));
         const obj = Replay.multiplayer.objectives.create(Replay.multiplayer.objectives.pick(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
-        const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
-        if (!humans.some((h) => h.deviceId === deviceId)) {
-          humans.push({ deviceId, nickname: getLastNickname() || "Player" });
-        }
+        const humans = humansForRoom(r);
         const persisted = isGlobalWorld ? loadPersistedGlobalWorld(effectiveRoomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
-        if (isGlobalWorld) {
-          syncSnakePopulation(initial, humans, SNAKE_WORLD_TARGET);
-          if (!persisted) warmGlobalWorld(initial);
-        }
+        initial = attachLocalPlayer(initial, r);
+        if (isGlobalWorld && !persisted) warmGlobalWorld(initial);
         initial.objective = obj;
         initLivingWorld(initial, resolveSnakeMatchRule(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
         applyMatchIdentity(initial);
@@ -527,8 +557,9 @@ export function SnakeIoGame({
     entryTrace("SPAWN", "PASS");
     entryTrace("CANVAS", "PASS");
     entryTrace("GAME_READY", "PASS", activeRoom);
+    appendLifecycle("STATE_READY");
     const me = world.snakes[deviceId];
-    transitionGamePhase("READY", `alive=${me?.alive ?? "?"} room=${activeRoom}`);
+    transitionGamePhase("READY", `alive=${me?.alive ?? "?"} len=${me ? getSegmentCount(me) : 0}`);
     transitionGamePhase("COUNTDOWN");
     window.setTimeout(() => transitionGamePhase("PLAYING"), 800);
   }, [world, activeRoom, deviceId]);
@@ -556,7 +587,12 @@ export function SnakeIoGame({
       let next = structuredClone(worldRef.current);
 
       if (isGlobalWorld && r) {
-        syncSnakePopulation(next, r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname })), SNAKE_WORLD_TARGET);
+        const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
+        if (!humans.some((h) => h.deviceId === deviceId)) {
+          humans.push({ deviceId, nickname: getLastNickname() || "Player" });
+        }
+        syncSnakePopulation(next, humans, SNAKE_WORLD_TARGET);
+        rehydrateWorldSnakes(next);
         tickBotBrains(next);
         recordGlobalWorldTick(activeRoom, {
           humans: r.players.length,
