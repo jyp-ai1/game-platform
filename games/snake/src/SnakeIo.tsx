@@ -20,7 +20,7 @@ import {
   subscribeRoom,
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
-import { Button, cn } from "@game-platform/ui";
+import { cn, GameOverOverlay } from "@game-platform/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -57,6 +57,16 @@ import {
   tickLivingWorld,
 } from "./snake-living-world";
 import { resolveSnakeMatchRule } from "./snake-match-rules";
+import {
+  buildStageMatchRule,
+  getSnakeStage,
+  SNAKE_STAGE_COUNT,
+  stagePopulation,
+} from "./snake-stage-config";
+import {
+  loadSnakeStageSave,
+  persistSnakeStageSave,
+} from "./snake-stage-save";
 import {
   syncSnakePopulation,
   ensureLocalSnake,
@@ -166,6 +176,8 @@ export function SnakeIoGame({
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
+  const isStageMode = roomCode === "STAGE" || params.get("mode") === "stage";
+  const isLocalOnly = practiceMode || isStageMode;
   const { reportScore } = useGameSDK();
   const [sessionRoom, setSessionRoom] = useState(roomCode);
   const [world, setWorld] = useState<SnakeIoWorld | null>(null);
@@ -214,6 +226,14 @@ export function SnakeIoGame({
   const connectDoneRef = useRef(false);
   const tickEpochRef = useRef(0);
   const [tickEpoch, setTickEpoch] = useState(0);
+  /** Stage mode — current stage index (0-based), cumulative run score, overlay gate. */
+  const [stageIndex, setStageIndex] = useState(0);
+  const [runScore, setRunScore] = useState(0);
+  const [stageOverlay, setStageOverlay] = useState<"none" | "stage-clear" | "game-over" | "run-complete">("none");
+  const stageStartScoreRef = useRef(0);
+  const runScoreRef = useRef(0);
+  const stageOverlayRef = useRef<"none" | "stage-clear" | "game-over" | "run-complete">("none");
+  stageOverlayRef.current = stageOverlay;
   const playerCountRef = useRef(1);
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
   const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalf: 240 });
@@ -231,15 +251,20 @@ export function SnakeIoGame({
   const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
   const season = useMemo(() => Replay.multiplayer.season.current(), []);
   const seasonStyle = Replay.multiplayer.season.palette[season];
-  const stage = useMemo(
+  const progressionStage = useMemo(
     () => Replay.multiplayer.progression.stageFor(Replay.multiplayer.progression.snake, world?.snakes[deviceId]?.score ?? 0),
     [world?.snakes[deviceId]?.score, deviceId]
   );
-  const isHost = practiceMode || room?.hostId === deviceId;
-  const shouldTickWorld = practiceMode || isHost || isGlobalWorld;
+  void progressionStage;
+  const isHost = isLocalOnly || room?.hostId === deviceId;
+  const shouldTickWorld = isLocalOnly || isHost || isGlobalWorld;
   const mySnake = world?.snakes[deviceId];
-  const isSpectating = mySnake?.spectating && !mySnake?.alive;
-  const matchRule = useMemo(() => resolveSnakeMatchRule(playerCount), [playerCount]);
+  const isSpectating = !isStageMode && mySnake?.spectating && !mySnake?.alive;
+  const stageConfig = isStageMode ? getSnakeStage(stageIndex) : null;
+  const matchRule = useMemo(
+    () => (stageConfig ? buildStageMatchRule(stageConfig) : resolveSnakeMatchRule(playerCount)),
+    [stageConfig, playerCount]
+  );
   const friendIds = useMemo(() => getFriends().map((f) => f.deviceId), []);
   const watchId = spectatorMode === "boss" && world?.boss && !world.boss.defeated
     ? null
@@ -368,6 +393,84 @@ export function SnakeIoGame({
     if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current);
   }, [deviceId]);
 
+  const initStageWorld = useCallback(
+    (stageIdx: number): SnakeIoWorld => {
+      const stage = getSnakeStage(stageIdx);
+      const pop = stagePopulation(stage);
+      const cfg = Replay.multiplayer.balance("snake", pop);
+      const humans = [{ deviceId, nickname: getLastNickname() || "Player" }];
+      const initial = createInitialWorld(humans, cfg);
+      syncSnakePopulation(initial, humans, pop, deviceId);
+      const rule = buildStageMatchRule(stage);
+      initLivingWorld(initial, rule);
+      if (initial.living) initial.living.stageSpeedMult = stage.speedMult;
+      applyMatchIdentity(initial);
+      initial.objective = {
+        kind: "score_race",
+        target: stage.scoreTarget,
+        progress: {},
+        label: stage.label,
+      };
+      applyLocalHead(initial);
+      return initial;
+    },
+    [deviceId, applyLocalHead]
+  );
+
+  const currentStageScore = useCallback((): number => {
+    const me = worldRef.current?.snakes[deviceId];
+    if (!me) return runScoreRef.current;
+    return runScoreRef.current + Math.max(0, me.score - stageStartScoreRef.current);
+  }, [deviceId]);
+
+  const handleNextStage = useCallback(() => {
+    const me = worldRef.current?.snakes[deviceId];
+    const earned = me ? Math.max(0, me.score - stageStartScoreRef.current) : 0;
+    const nextRun = runScoreRef.current + earned;
+    runScoreRef.current = nextRun;
+    setRunScore(nextRun);
+
+    const nextIdx = stageIndex + 1;
+    if (nextIdx >= SNAKE_STAGE_COUNT) {
+      setStageOverlay("run-complete");
+      return;
+    }
+
+    setStageIndex(nextIdx);
+    setStageOverlay("none");
+    stageStartScoreRef.current = 0;
+
+    persistSnakeStageSave({
+      stageIndex: nextIdx,
+      runScore: nextRun,
+      bestRunScore: loadSnakeStageSave()?.bestRunScore ?? 0,
+    });
+
+    const initial = initStageWorld(nextIdx);
+    worldRef.current = initial;
+    setWorld(initial);
+    prevAliveRef.current = true;
+    boostingRef.current = false;
+    tickEpochRef.current += 1;
+    setTickEpoch(tickEpochRef.current);
+    beginSpawnReady();
+  }, [stageIndex, initStageWorld, beginSpawnReady]);
+
+  const handleStageRetry = useCallback(() => {
+    emitGameRetry("snake");
+    setStageOverlay("none");
+    prevAliveRef.current = true;
+    boostingRef.current = false;
+    stageStartScoreRef.current = 0;
+
+    const initial = initStageWorld(stageIndex);
+    worldRef.current = initial;
+    setWorld(initial);
+    tickEpochRef.current += 1;
+    setTickEpoch(tickEpochRef.current);
+    beginSpawnReady();
+  }, [initStageWorld, beginSpawnReady, stageIndex]);
+
   useEffect(() => {
     const measure = () => {
       const nativeFs = isViewportFullscreen(viewportRef.current);
@@ -404,6 +507,31 @@ export function SnakeIoGame({
   useEffect(() => {
     if (!roomCode) return;
     if (connectDoneRef.current) return;
+    if (isStageMode) {
+      connectDoneRef.current = true;
+      entryLog("CONNECTING", "STAGE");
+      const saved = loadSnakeStageSave();
+      const startIdx = saved?.stageIndex ?? 0;
+      const initial = initStageWorld(startIdx);
+      worldRef.current = initial;
+      setWorld(initial);
+      setConnected(true);
+      setStageIndex(startIdx);
+      const savedRun = saved?.runScore ?? 0;
+      setRunScore(savedRun);
+      runScoreRef.current = savedRun;
+      stageStartScoreRef.current = 0;
+      setStageOverlay("none");
+      persistSnakeStageSave({
+        stageIndex: startIdx,
+        runScore: savedRun,
+        bestRunScore: saved?.bestRunScore ?? 0,
+      });
+      entryLog("CONNECTED", "STAGE");
+      entryLog("SPAWNED");
+      entryLog("GAME_READY", `STAGE-${startIdx + 1}`);
+      return;
+    }
     if (practiceMode) {
       connectDoneRef.current = true;
       entryLog("CONNECTING", "PRACTICE");
@@ -559,10 +687,10 @@ export function SnakeIoGame({
       active = false;
       if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
     };
-  }, [roomCode, practiceMode, deviceId]);
+  }, [roomCode, practiceMode, isStageMode, deviceId, initStageWorld]);
 
   useEffect(() => {
-    if (!effectiveRoomCode || !connected || practiceMode) return;
+    if (!effectiveRoomCode || !connected || isLocalOnly) return;
 
     const humansForRoom = (r: GameRoom) => {
       const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
@@ -649,7 +777,7 @@ export function SnakeIoGame({
     const current = getRoom(effectiveRoomCode);
     if (current) applyRoom(current);
     return unsub;
-  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, practiceMode, deviceId]);
+  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId]);
 
   useEffect(() => {
     if (!world) return;
@@ -758,6 +886,7 @@ export function SnakeIoGame({
     diagTickMounted(tickMs);
     const id = setInterval(() => {
       try {
+      if (stageOverlayRef.current !== "none") return;
       if (epoch !== tickEpochRef.current) return;
       diagTick();
       const pc = playerCountRef.current;
@@ -791,6 +920,9 @@ export function SnakeIoGame({
           bots: countWorldSnakes(next) - r.players.length,
           population: countWorldSnakes(next),
         });
+      }
+      if (isStageMode && stageConfig && stageConfig.aiCount > 0) {
+        tickBotBrains(next);
       }
       next.config = {
         ...next.config,
@@ -937,6 +1069,13 @@ export function SnakeIoGame({
   useEffect(() => {
     if (!mySnake) return;
     if (prevAliveRef.current && !mySnake.alive) {
+      if (isStageMode) {
+        transitionGamePhase("DEAD", `score=${mySnake.score}`);
+        markPlayerDeath(activeRoom);
+        setStageOverlay("game-over");
+        prevAliveRef.current = mySnake.alive;
+        return;
+      }
       transitionGamePhase("DEAD", `score=${mySnake.score}`);
       markPlayerDeath(activeRoom);
       recordPlaytestExit(activeRoom, "death");
@@ -946,7 +1085,16 @@ export function SnakeIoGame({
     }
     prevAliveRef.current = mySnake.alive;
     if (world) prevRankRef.current = getMyRank(world, deviceId);
-  }, [mySnake?.alive, mySnake, activeRoom, world, deviceId, friendIds]);
+  }, [mySnake?.alive, mySnake, activeRoom, world, deviceId, friendIds, isStageMode]);
+
+  useEffect(() => {
+    if (!isStageMode || !mySnake?.alive || stageOverlay !== "none") return;
+    const stage = getSnakeStage(stageIndex);
+    const earned = mySnake.score - stageStartScoreRef.current;
+    if (earned >= stage.scoreTarget) {
+      setStageOverlay("stage-clear");
+    }
+  }, [isStageMode, mySnake?.score, mySnake?.alive, stageIndex, stageOverlay]);
 
   const postDeath = useCallback(
     (action: "exit" | "replay" | "spectator" | "invite") => {
@@ -954,6 +1102,27 @@ export function SnakeIoGame({
     },
     [activeRoom]
   );
+
+  const handleStageExit = useCallback(() => {
+    const finalScore = currentStageScore();
+    persistSnakeStageSave({
+      stageIndex,
+      runScore: runScoreRef.current,
+      bestRunScore: Math.max(finalScore, loadSnakeStageSave()?.bestRunScore ?? 0),
+    });
+    reportScore("snake", finalScore);
+    emitGameExit("snake");
+    postDeath("exit");
+  }, [currentStageScore, reportScore, postDeath, stageIndex]);
+
+  useEffect(() => {
+    if (!isStageMode || stageOverlay !== "none") return;
+    persistSnakeStageSave({
+      stageIndex,
+      runScore: runScoreRef.current,
+      bestRunScore: loadSnakeStageSave()?.bestRunScore ?? 0,
+    });
+  }, [isStageMode, stageIndex, runScore, stageOverlay, world?.tick]);
 
   const handleDirection = useCallback((direction: Direction) => {
     if (!activeRoom || !worldRef.current || isSpectating) return;
@@ -1206,7 +1375,7 @@ export function SnakeIoGame({
     Replay.multiplayer.analytics.flush(activeRoom, world.config.worldSize);
     const telem = flushSnakeTelemetry(activeRoom);
     refreshWorldTuningFromTelemetry();
-    const room = getRoom(activeRoom) ?? (practiceMode && world
+    const room = getRoom(activeRoom) ?? (isLocalOnly && world
       ? {
           code: activeRoom,
           gameSlug: "snake",
@@ -1626,44 +1795,82 @@ export function SnakeIoGame({
         {/* MVP HUD — bottom global rank bar */}
         <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 flex justify-center">
           <div className="rounded-lg border border-white/10 bg-black/55 px-4 py-1.5 text-center text-[11px] backdrop-blur-sm">
-            <p className="font-semibold tracking-wide text-amber-300">GLOBAL RANK #{myRank}</p>
-            <p className="mt-0.5 text-white/70">오늘 순위 #{myRank}</p>
-            <p className="mt-0.5 text-white/85">
-              Length <span className="font-bold text-emerald-300">{myLength}</span>
-              {" · "}
-              Kills <span className="font-bold text-amber-300">{myKills}</span>
-            </p>
+            {isStageMode && stageConfig ? (
+              <>
+                <p className="font-semibold tracking-wide text-violet-300">{stageConfig.label}</p>
+                <p className="mt-0.5 text-white/85">
+                  Goal <span className="font-bold text-amber-300">{stageConfig.scoreTarget}</span>
+                  {" · "}
+                  Speed <span className="font-bold text-sky-300">{stageConfig.speedMult.toFixed(2)}×</span>
+                  {stageConfig.aiCount > 0 ? (
+                    <>
+                      {" · "}
+                      AI <span className="font-bold text-rose-300">{stageConfig.aiCount}</span>
+                    </>
+                  ) : null}
+                </p>
+                <p className="mt-0.5 text-white/70">
+                  Score <span className="font-bold text-emerald-300">{currentStageScore()}</span>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold tracking-wide text-amber-300">GLOBAL RANK #{myRank}</p>
+                <p className="mt-0.5 text-white/70">오늘 순위 #{myRank}</p>
+                <p className="mt-0.5 text-white/85">
+                  Length <span className="font-bold text-emerald-300">{myLength}</span>
+                  {" · "}
+                  Kills <span className="font-bold text-amber-300">{myKills}</span>
+                </p>
+              </>
+            )}
           </div>
         </div>
         </div>
       </div>
 
-      {mySnake && !mySnake.alive ? (
+      {isStageMode && stageOverlay !== "none" ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/15 bg-black/90 px-6 py-8 text-center shadow-2xl">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Game Over
-            </p>
-            <p className="mt-3 text-xs uppercase tracking-widest text-muted-foreground">Score</p>
-            <p className="text-3xl font-bold tabular-nums text-white">
-              {Math.round(mySnake.score ?? 0).toLocaleString()}
-            </p>
-            <div className="mt-6 flex flex-row gap-2">
-              <Button size="lg" className="h-12 flex-1 font-semibold" onClick={handleRetry}>
-                Retry
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 flex-1"
-                onClick={() => {
-                  emitGameExit("snake");
-                  postDeath("exit");
-                }}
-              >
-                종료
-              </Button>
-            </div>
+          <div className="relative h-[min(100%,28rem)] w-full max-w-sm rounded-xl">
+            {stageOverlay === "stage-clear" ? (
+              <GameOverOverlay
+                variant="stage-clear"
+                stageLabel={`${stageConfig?.label ?? "Stage"} Clear!`}
+                score={currentStageScore()}
+                gameSlug="snake"
+                onRestart={() => {}}
+                onNextStage={handleNextStage}
+                onExit={handleStageExit}
+              />
+            ) : (
+              <GameOverOverlay
+                variant="game-over"
+                message={stageOverlay === "run-complete" ? "All Stages Clear!" : undefined}
+                score={currentStageScore()}
+                gameSlug="snake"
+                onRestart={() => {}}
+                onRetry={handleStageRetry}
+                onExit={handleStageExit}
+              />
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {!isStageMode && mySnake && !mySnake.alive ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
+          <div className="relative h-[min(100%,28rem)] w-full max-w-sm rounded-xl">
+            <GameOverOverlay
+              variant="game-over"
+              score={Math.round(mySnake.score ?? 0)}
+              gameSlug="snake"
+              onRestart={() => {}}
+              onRetry={handleRetry}
+              onExit={() => {
+                emitGameExit("snake");
+                postDeath("exit");
+              }}
+            />
           </div>
         </div>
       ) : null}

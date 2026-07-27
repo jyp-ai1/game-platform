@@ -33,11 +33,11 @@ const ROUND_GAMES = new Set([
 /** Per-game stage ladders — Sprint18 Epic2. */
 const GAME_OVERRIDES: Record<string, GameStage[]> = {
   snake: [
-    { index: 1, label: "Stage 1", target: 500 },
-    { index: 2, label: "Stage 2", target: 1000 },
-    { index: 3, label: "Stage 3", target: 2500 },
-    { index: 4, label: "Stage 4", target: 5000 },
-    { index: 5, label: "Boss", target: 9999 },
+    { index: 1, label: "Stage 1", target: 80 },
+    { index: 2, label: "Stage 2", target: 200 },
+    { index: 3, label: "Stage 3", target: 350 },
+    { index: 4, label: "Stage 4", target: 530 },
+    { index: 5, label: "Stage 5", target: 750 },
   ],
   "2048": [
     { index: 1, label: "256", target: 256 },

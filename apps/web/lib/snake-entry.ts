@@ -5,6 +5,7 @@ import { joinRoomAsync } from "@game-platform/multiplayer-sdk";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 const PRACTICE_URL = "/flagship/snake-io/play?room=PRACTICE&fallback=1";
+export const STAGE_PLAY_URL = "/flagship/snake-io/play?room=STAGE";
 
 /** Marker href — use navigateSnakePlay() instead of router.push. */
 export const SNAKE_QUICK_PLAY_MARKER = "#snake-quick-play";
@@ -60,6 +61,11 @@ export async function navigateSnakePlay(href: string, router: AppRouterInstance)
 export function enterSnakePractice(router: AppRouterInstance): void {
   entryTrace("PRACTICE_FALLBACK", "PASS", "direct-practice");
   router.push(PRACTICE_URL);
+}
+
+export function enterSnakeStage(router: AppRouterInstance): void {
+  entryTrace("CLICK", "START", "stage-mode");
+  router.push(STAGE_PLAY_URL);
 }
 
 export { PRACTICE_URL };

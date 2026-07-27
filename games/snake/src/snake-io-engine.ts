@@ -633,7 +633,9 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
 
     applyFoodMagnet(world, snake);
     const boostActive = snake.boosting && getSegmentCount(snake) > SNAKE_FEEL.boostMinSegments;
-    const speed = SNAKE_FEEL.baseSpeed * (boostActive ? SNAKE_FEEL.boostSpeedMult : 1);
+    const stageSpeed = world.living?.stageSpeedMult ?? 1;
+    const speed =
+      SNAKE_FEEL.baseSpeed * stageSpeed * (boostActive ? SNAKE_FEEL.boostSpeedMult : 1);
     moveSnakePath(world, snake, now, speed);
 
     if (boostActive && snake.alive) {

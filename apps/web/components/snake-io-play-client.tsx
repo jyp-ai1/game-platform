@@ -3,7 +3,10 @@
 import { GameErrorMonitor } from "@/components/game-error-monitor";
 import { prefetchHomeShell } from "@/components/home-page-client";
 import { ViralLoopResultPanel } from "@/components/viral-loop-result";
-import { GameSDKProvider, emitEngagementEvent } from "@game-platform/game-sdk";
+import { GameResultModal } from "@/components/game-result-modal";
+import { getGameFramework } from "@/lib/game-framework";
+import type { UniversalRewardBundle } from "@/lib/reward-engine";
+import { GameSDKProvider, emitEngagementEvent, subscribePlatformAnalyticsEvents } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
 import { entryLog, entryLogFail, entryTrace, resetEntryStatus, resetEngineSession } from "@game-platform/game-snake";
 import { EntryCrashLog } from "@game-platform/multiplayer-sdk";
@@ -87,9 +90,18 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   const debugMode = params.get("debug") === "1";
   const router = useRouter();
   const room = params.get("room");
+  const isStageMode = room?.toUpperCase() === "STAGE";
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
   const [headCharacter, setHeadCharacter] = useState<SnakeHeadId>(() => loadSnakeHeadCharacter());
   const [characterReady, setCharacterReady] = useState(false);
+  const [sessionSummary, setSessionSummary] = useState<{
+    score: number;
+    rewards: UniversalRewardBundle;
+  } | null>(null);
+  const pendingSessionRef = useMemo(
+    () => ({ current: null as { score: number; rewards: UniversalRewardBundle } | null }),
+    []
+  );
 
   useEffect(() => {
     resetEntryStatus();
@@ -130,6 +142,27 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
       });
     }
   }, [practiceMode, params]);
+
+  useEffect(() => {
+    if (!isStageMode) return;
+    const unsub = subscribePlatformAnalyticsEvents((event) => {
+      if (event.type === "game-end" && event.gameSlug === "snake") {
+        const rewards = getGameFramework("snake").onGameEnd(event.score);
+        pendingSessionRef.current = { score: event.score, rewards };
+      }
+    });
+    function onSessionExit(event: Event) {
+      const detail = (event as CustomEvent<{ gameSlug?: string }>).detail;
+      if (detail?.gameSlug !== "snake" || !pendingSessionRef.current) return;
+      setSessionSummary(pendingSessionRef.current);
+      pendingSessionRef.current = null;
+    }
+    window.addEventListener("replay:game-exit", onSessionExit);
+    return () => {
+      unsub();
+      window.removeEventListener("replay:game-exit", onSessionExit);
+    };
+  }, [isStageMode, pendingSessionRef]);
 
   useEffect(() => {
     function onEnd(e: Event) {
@@ -189,6 +222,17 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
       <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
         <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} headCharacter={headCharacter} />
       </SnakePlayErrorBoundary>
+      {sessionSummary ? (
+        <GameResultModal
+          slug="snake"
+          score={sessionSummary.score}
+          rewards={sessionSummary.rewards}
+          onClose={() => {
+            setSessionSummary(null);
+            router.push("/games/snake");
+          }}
+        />
+      ) : null}
     </>
   );
 }

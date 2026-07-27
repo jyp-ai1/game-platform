@@ -31,6 +31,8 @@ export interface LivingWorldState {
   announcements: WorldAnnouncement[];
   matchRule: MatchRuleConfig;
   tuning: SnakeWorldTuning;
+  /** Stage mode — movement speed multiplier (default 1). */
+  stageSpeedMult?: number;
 }
 
 const DELTAS: Record<Direction, Vec> = {
