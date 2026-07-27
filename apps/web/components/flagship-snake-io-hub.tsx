@@ -2,16 +2,19 @@
 
 import { SnakeMultiplayerEntry } from "@/components/snake-multiplayer-entry";
 
-/** Flagship — Global World entry (reuses home Quick Play) */
+/** Flagship — Global World entry */
 export function FlagshipSnakeIoHub() {
   return (
-    <div className="mx-auto max-w-2xl space-y-6 py-10 px-4">
+    <div className="mx-auto max-w-md space-y-6 px-4 py-10">
       <div className="text-center">
-        <p className="text-xs uppercase tracking-widest text-primary">Global World</p>
-        <h1 className="mt-2 text-4xl font-bold">Replay Snake.io</h1>
-        <p className="mt-2 text-muted-foreground">홈과 동일 · Quick Play · Party · Create Room</p>
+        <h1 className="text-3xl font-bold">🎮 Snake.io</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요.
+          <br />
+          보석을 먹고 성장하며 살아남으세요.
+        </p>
       </div>
-      <SnakeMultiplayerEntry variant="detail" />
+      <SnakeMultiplayerEntry variant="start" />
     </div>
   );
 }

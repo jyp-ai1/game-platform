@@ -9,7 +9,9 @@ export const SNAKE_FEEL = {
   headRadius: 0.38,
   bodyRadius: 0.3,
   tailRadius: 0.22,
-  foodPickupRadius: 0.55,
+  /** Slither-like pickup — food ~8px + head + ~7px margin (world units) */
+  foodPickupRadius: 1.75,
+  foodVisualRadiusPx: 8,
   collisionRadius: 0.32,
   /** Boost — speed up, tail drops food, min 3 segments */
   boostTailDropEvery: 4,
@@ -19,10 +21,12 @@ export const SNAKE_FEEL = {
   boostDrainPerTick: 2,
   boostRegenPerTick: 0.5,
   /** Food magnet — Slither-like pickup satisfaction */
-  magnetRadius: 3.4,
-  magnetRadiusBoost: 5.2,
+  magnetRadius: 4.2,
+  magnetRadiusBoost: 5.8,
+  magnetPull: 0.32,
+  magnetPullClose: 0.58,
   /** Camera — smooth lag follow only; no boost zoom/shake */
-  cameraFollowLerp: 0.14,
+  cameraFollowLerp: 0.17,
   /** Slither-like viewport — cells visible on screen (not world-size scaled) */
   viewportCellsVisible: 50,
   minCellPx: 8,

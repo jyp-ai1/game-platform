@@ -400,7 +400,12 @@ function applyFoodMagnet(world: SnakeIoWorld, snake: SnakeEntity): void {
   for (const food of world.food) {
     const d = dist(food, head);
     if (d <= 0.05 || d > radius) continue;
-    const pull = snake.boosting ? 0.35 : 0.22;
+    const close = d < radius * 0.35;
+    const pull = close
+      ? SNAKE_FEEL.magnetPullClose
+      : snake.boosting
+        ? SNAKE_FEEL.magnetPull * 1.15
+        : SNAKE_FEEL.magnetPull;
     food.x += (head.x - food.x) * pull;
     food.y += (head.y - food.y) * pull;
   }
@@ -413,14 +418,6 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
   const head = snake.segments[0];
   if (!head) return false;
-
-  const w = world.config.worldSize;
-  if (head.x < 0.2 || head.y < 0.2 || head.x >= w - 0.2 || head.y >= w - 0.2 || isBlocked(world, head)) {
-    if (!(snake.invincibleUntil && now < snake.invincibleUntil)) {
-      killSnake(snake, world.config, world);
-    }
-    return false;
-  }
 
   const cr = SNAKE_FEEL.collisionRadius;
   const pickup = SNAKE_FEEL.foodPickupRadius;
@@ -435,18 +432,16 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     }
   }
 
-  const bodyCheck = foodIdx >= 0 ? snake.segments : snake.segments.slice(0, -1);
-  const hitSelf = bodyCheck.slice(3).some((s) => dist(s, head) < cr * 1.6);
   let killer: SnakeEntity | undefined;
   const hitOther = Object.values(world.snakes).some((other) => {
     if (!other.alive || other.spectating || other.deviceId === snake.deviceId) return false;
     if (other.invincibleUntil && now < other.invincibleUntil) return false;
-    const hit = other.segments.some((s) => dist(s, head) < cr * 1.8);
+    const hit = other.segments.slice(1).some((s) => dist(s, head) < cr * 1.8);
     if (hit) killer = other;
     return hit;
   });
 
-  if ((hitSelf || hitOther) && !(snake.invincibleUntil && now < snake.invincibleUntil)) {
+  if (hitOther && !(snake.invincibleUntil && now < snake.invincibleUntil)) {
     if (killer) {
       killer.killStreak = (killer.killStreak ?? 0) + 1;
       killer.totalKills = (killer.totalKills ?? 0) + 1;

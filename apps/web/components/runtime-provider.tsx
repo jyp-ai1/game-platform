@@ -3,7 +3,7 @@
 import { subscribePlatformAnalyticsEvents } from "@game-platform/game-sdk";
 import type { Game } from "@game-platform/shared";
 import { Button } from "@game-platform/ui";
-import { Loader2, Pause, Play, Sparkles } from "lucide-react";
+import { Loader2, Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -147,24 +147,22 @@ export function RuntimeProvider({
 
   if (phase === "tutorial" && showTutorial) {
     return (
-      <div className="flex aspect-square w-full max-w-sm flex-col items-center justify-center gap-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/90 p-6 backdrop-blur animate-in fade-in">
-        <Sparkles className="size-8 text-primary" />
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Ready</p>
-        <p className="text-center text-sm">{config.tutorialHint}</p>
-        {config.boss ? (
-          <p className="text-xs text-amber-400">
-            Boss: {config.boss.name} @ {config.boss.threshold.toLocaleString()}
-          </p>
-        ) : null}
-        <Button size="sm" onClick={finishTutorial}>
-          Start
-        </Button>
-      </div>
+      <StartOverlay
+        title={games.find((g) => g.slug === slug)?.title ?? slug}
+        hint={config.tutorialHint}
+        onStart={finishTutorial}
+      />
     );
   }
 
   if (phase === "ready") {
-    return <CountdownOverlay onComplete={() => goPhase("playing")} />;
+    return (
+      <StartOverlay
+        title={games.find((g) => g.slug === slug)?.title ?? slug}
+        hint={config.tutorialHint}
+        onStart={() => goPhase("playing")}
+      />
+    );
   }
 
   return (
@@ -228,24 +226,28 @@ export function RuntimeProvider({
   );
 }
 
-function CountdownOverlay({ onComplete }: { onComplete: () => void }) {
-  const [count, setCount] = useState(3);
-
-  useEffect(() => {
-    if (count <= 0) {
-      onComplete();
-      return;
-    }
-    const t = window.setTimeout(() => setCount((c) => c - 1), 600);
-    return () => window.clearTimeout(t);
-  }, [count, onComplete]);
-
+function StartOverlay({
+  title,
+  hint,
+  onStart,
+}: {
+  title: string;
+  hint: string;
+  onStart: () => void;
+}) {
+  const shortHint = hint.length > 80 ? `${hint.slice(0, 77)}…` : hint;
   return (
-    <div className="flex aspect-square w-full max-w-sm flex-col items-center justify-center rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/20 to-card/80 backdrop-blur">
-      <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Countdown</p>
-      <p className="mt-2 text-6xl font-black tabular-nums text-primary transition-all">
-        {count > 0 ? count : "GO!"}
-      </p>
+    <div className="mx-auto flex aspect-square w-full max-w-sm flex-col items-center justify-center gap-4 rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/15 to-card/90 p-6 backdrop-blur animate-in fade-in">
+      <p className="text-2xl font-bold">🎮 {title}</p>
+      <p className="max-w-xs text-center text-sm text-muted-foreground">{shortHint}</p>
+      <Button
+        size="lg"
+        onClick={onStart}
+        className="h-14 min-w-[200px] scale-100 text-base font-bold shadow-lg shadow-violet-500/25 bg-violet-600 hover:bg-violet-500 hover:scale-[1.02] transition-transform"
+      >
+        게임 시작
+      </Button>
+      <p className="text-xs text-muted-foreground">Press Start</p>
     </div>
   );
 }

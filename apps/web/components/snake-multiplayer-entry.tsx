@@ -14,7 +14,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { createRoom } from "@/lib/multiplayer-rooms";
 
-type EntryVariant = "hero" | "detail" | "card";
+type EntryVariant = "hero" | "detail" | "card" | "start";
 
 export function SnakeMultiplayerEntry({
   variant = "detail",
@@ -46,6 +46,22 @@ export function SnakeMultiplayerEntry({
     const room = createRoom("snake", 4);
     setRoomCode(room.code);
     router.push(`/flagship/snake-io/play?room=${room.code}`);
+  }
+
+  if (variant === "start") {
+    return (
+      <div className={cn("mx-auto flex w-full max-w-sm flex-col items-center gap-3", className)}>
+        <Button
+          size="lg"
+          disabled={joining}
+          onClick={handleQuickPlay}
+          className="h-16 w-full max-w-xs scale-100 text-lg font-bold shadow-lg shadow-violet-500/25 transition-transform hover:scale-[1.02] bg-violet-600 hover:bg-violet-500"
+        >
+          {joining ? "입장 중…" : "🎮 게임 시작"}
+        </Button>
+        <p className="text-xs text-muted-foreground">Press Start · Global World 즉시 입장</p>
+      </div>
+    );
   }
 
   if (variant === "hero") {

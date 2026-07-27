@@ -179,6 +179,7 @@ export function SnakeIoGame({
   const awaitingInputRef = useRef(true);
   const [awaitingInput, setAwaitingInput] = useState(true);
   const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
+  const [goFlashUntil, setGoFlashUntil] = useState(0);
   const [renderAlpha, setRenderAlpha] = useState(1);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
@@ -912,6 +913,8 @@ export function SnakeIoGame({
     if (awaitingInputRef.current) {
       awaitingInputRef.current = false;
       setAwaitingInput(false);
+      setSpawnHighlightUntil(0);
+      setGoFlashUntil(Date.now() + 900);
       const snake = worldRef.current.snakes[deviceId];
       if (snake) {
         snake.awaitingInput = false;
@@ -1190,7 +1193,7 @@ export function SnakeIoGame({
   const top1Id = world.rankings[0]?.deviceId ?? null;
 
   return (
-    <div ref={boardRef} className="relative flex w-full max-w-3xl flex-col items-center overflow-hidden px-1 sm:px-2">
+    <div ref={boardRef} className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-1 sm:px-2">
       <div className="relative flex w-full justify-center overflow-hidden">
         {/* MVP HUD — Length / Kills / Boost */}
         <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
@@ -1309,22 +1312,30 @@ export function SnakeIoGame({
               const vis = getFoodVisual(tier);
               const size = Math.max(vis.sizePx, cellSize * (vis.sizePx / 18));
               const offset = (cellSize - size) / 2;
+              const myHead = resolveSnakeHead(mySnake ?? undefined);
+              const magnetR = isBoosting ? SNAKE_FEEL.magnetRadiusBoost : SNAKE_FEEL.magnetRadius;
+              const fd = myHead ? Math.hypot(f.x - myHead.x, f.y - myHead.y) : 999;
+              const magneted = fd < magnetR && fd > 0.05;
+              const magnetScale = magneted ? 1 + (1 - fd / magnetR) * 0.4 : 1;
+              const magnetOpacity = magneted ? 0.85 + (1 - fd / magnetR) * 0.15 : 1;
               return (
                 <div
                   key={i}
                   className={cn(
-                    "absolute rounded-full",
+                    "absolute rounded-full transition-transform duration-75",
                     tier === "epic" && "animate-pulse",
                     tier === "death" && "animate-pulse ring-2 ring-red-400/50",
-                    tier !== "small" && "ring-1 ring-white/30"
+                    tier !== "small" && "ring-1 ring-white/30",
+                    magneted && "z-10"
                   )}
                   style={{
-                    left: f.x * cellSize + offset,
-                    top: f.y * cellSize + offset,
-                    width: size,
-                    height: size,
+                    left: f.x * cellSize + offset - (size * (magnetScale - 1)) / 2,
+                    top: f.y * cellSize + offset - (size * (magnetScale - 1)) / 2,
+                    width: size * magnetScale,
+                    height: size * magnetScale,
                     backgroundColor: vis.color,
-                    boxShadow: vis.glow,
+                    boxShadow: magneted ? `${vis.glow}, 0 0 12px ${vis.color}` : vis.glow,
+                    opacity: magnetOpacity,
                   }}
                 />
               );
@@ -1459,9 +1470,20 @@ export function SnakeIoGame({
         </div>
 
         {awaitingInput && mySnake?.alive ? (
-          <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
+          <div className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center gap-2">
+            <p className="rounded-lg border border-yellow-300/40 bg-black/70 px-3 py-1 text-xs font-bold tracking-widest text-yellow-300 backdrop-blur-sm">
+              YOU
+            </p>
             <p className="animate-pulse rounded-lg border border-white/20 bg-black/70 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
               방향키를 누르면 시작
+            </p>
+          </div>
+        ) : null}
+
+        {goFlashUntil > Date.now() ? (
+          <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
+            <p className="animate-in zoom-in-95 text-5xl font-black tracking-wider text-emerald-300 drop-shadow-[0_0_24px_rgba(52,211,153,0.8)]">
+              GO!
             </p>
           </div>
         ) : null}
@@ -1485,10 +1507,11 @@ export function SnakeIoGame({
         <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 flex justify-center">
           <div className="rounded-lg border border-white/10 bg-black/55 px-4 py-1.5 text-center text-[11px] backdrop-blur-sm">
             <p className="font-semibold tracking-wide text-amber-300">GLOBAL RANK #{myRank}</p>
+            <p className="mt-0.5 text-white/70">오늘 순위 #{myRank}</p>
             <p className="mt-0.5 text-white/85">
               Length <span className="font-bold text-emerald-300">{myLength}</span>
               {" · "}
-              Score <span className="font-bold text-sky-300">{myScore}</span>
+              Kills <span className="font-bold text-amber-300">{myKills}</span>
             </p>
           </div>
         </div>
