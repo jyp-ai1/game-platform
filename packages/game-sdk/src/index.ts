@@ -99,6 +99,7 @@ export {
 export { useAutoSave, type SaveIndicatorStatus } from "./use-auto-save";
 export { useReadyCountdown, type UseReadyCountdownResult } from "./use-ready-countdown";
 export { emitGameRetry } from "./game-retry";
+export { emitGameExit } from "./game-exit";
 export {
   useResumableGame,
   type ResumePhase,

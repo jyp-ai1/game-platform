@@ -49,10 +49,8 @@ export function SaveIndicator({ status, slug }: SaveIndicatorProps) {
   }, [status, updatedAt]);
 
   let label: string | null = null;
-  if (status === "saving") {
-    label = "Saving...";
-  } else if (status === "saved") {
-    label = "Saved";
+  if (status === "saving" || status === "saved") {
+    return null;
   } else if (updatedAt) {
     label = `저장됨 · ${formatElapsed(updatedAt)}`;
   }

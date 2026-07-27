@@ -1,6 +1,6 @@
 "use client";
 
-import { getDeviceId, getLastNickname, useGameSDK, emitGameRetry } from "@game-platform/game-sdk";
+import { getDeviceId, getLastNickname, useGameSDK, emitGameExit, emitGameRetry } from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
@@ -1640,28 +1640,28 @@ export function SnakeIoGame({
 
       {mySnake && !mySnake.alive ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/15 bg-black/85 px-6 py-8 text-center shadow-2xl animate-in fade-in zoom-in-95">
-            <p className="text-2xl font-bold tracking-wide text-red-400">GAME OVER</p>
-            <p className="mt-2 text-sm text-muted-foreground">Retry 버튼을 눌러 새 게임을 시작하세요</p>
-            <div className="mt-6 flex flex-col gap-3">
-              <Button size="lg" className="w-full" onClick={handleRetry}>
+          <div className="w-full max-w-sm rounded-2xl border border-white/15 bg-black/90 px-6 py-8 text-center shadow-2xl">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              Game Over
+            </p>
+            <p className="mt-3 text-xs uppercase tracking-widest text-muted-foreground">Score</p>
+            <p className="text-3xl font-bold tabular-nums text-white">
+              {Math.round(mySnake.score ?? 0).toLocaleString()}
+            </p>
+            <div className="mt-6 flex flex-row gap-2">
+              <Button size="lg" className="h-12 flex-1 font-semibold" onClick={handleRetry}>
                 Retry
               </Button>
               <Button
-                variant="outline"
                 size="lg"
-                className="w-full"
-                onClick={() => setSpectatorTarget(getSpectatorTarget(worldRef.current, undefined, friendIds))}
+                variant="outline"
+                className="h-12 flex-1"
+                onClick={() => {
+                  emitGameExit("snake");
+                  postDeath("exit");
+                }}
               >
-                Spectate
-              </Button>
-              <Button variant="outline" size="lg" className="w-full" nativeButton={false} render={<Link href="/">Home</Link>} />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => { postDeath("exit"); handleEnd(); }}
-              >
-                Result
+                종료
               </Button>
             </div>
           </div>

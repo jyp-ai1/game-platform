@@ -15,7 +15,6 @@ export type SaveIndicatorStatus = "idle" | "saving" | "saved";
 // single Breakout frame would mean up to 60 localStorage writes/sec.
 const STATE_CHANGE_DEBOUNCE_MS = 300;
 const HARD_SAVE_INTERVAL_MS = 5000;
-const SAVED_BADGE_MS = 800;
 
 /**
  * Auto-saves `serialize()`'s return value under `slug` whenever any value in
@@ -28,11 +27,10 @@ export function useAutoSave<T>(
   serialize: () => T | null,
   deps: readonly unknown[]
 ): SaveIndicatorStatus {
-  const [status, setStatus] = useState<SaveIndicatorStatus>("idle");
+  const [status] = useState<SaveIndicatorStatus>("idle");
   const serializeRef = useRef(serialize);
   serializeRef.current = serialize;
   const lastSavedAtRef = useRef(0);
-  const savedBadgeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function performSave(): void {
     const state = serializeRef.current();
@@ -41,15 +39,7 @@ export function useAutoSave<T>(
     }
     saveGame(slug, state);
     lastSavedAtRef.current = Date.now();
-    if (savedBadgeTimeoutRef.current) {
-      clearTimeout(savedBadgeTimeoutRef.current);
-    }
-    setStatus("saving");
-    setStatus("saved");
-    savedBadgeTimeoutRef.current = setTimeout(
-      () => setStatus("idle"),
-      SAVED_BADGE_MS
-    );
+    // Background save — no Saving/Saved UI flash (Sprint 13.5).
   }
 
   useEffect(() => {
@@ -69,14 +59,6 @@ export function useAutoSave<T>(
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
-
-  useEffect(() => {
-    return () => {
-      if (savedBadgeTimeoutRef.current) {
-        clearTimeout(savedBadgeTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return status;
 }

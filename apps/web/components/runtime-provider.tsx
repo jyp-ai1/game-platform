@@ -6,7 +6,7 @@ import { Button } from "@game-platform/ui";
 import { Loader2, Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { GameResultModal } from "@/components/game-result-modal";
 import { RuntimeRewardFlash } from "@/components/runtime-reward-flash";
@@ -18,13 +18,6 @@ import {
 import { getDeviceId } from "@game-platform/game-sdk";
 import { getGameFramework } from "@/lib/game-framework";
 import { getDifficultyLabel, getRuntimeConfig } from "@/lib/game-runtime-config";
-import { selectRecommended } from "@/lib/game-sections";
-import {
-  getFavoritesSnapshot,
-  getRecentlyPlayedSnapshot,
-  getServerFavoritesSnapshot,
-  getServerRecentlyPlayedSnapshot,
-} from "@/lib/local-storage";
 import type { UniversalRewardBundle } from "@/lib/reward-engine";
 import { emitRuntimeEvent, type RuntimePhase } from "@/lib/runtime-events";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
@@ -49,6 +42,8 @@ export function RuntimeProvider({
   const [result, setResult] = useState<{ score: number; rewards: UniversalRewardBundle } | null>(null);
   const [showRewardFlash, setShowRewardFlash] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const resultRef = useRef(result);
+  resultRef.current = result;
 
   const goPhase = useCallback((next: RuntimePhase) => {
     setPhase(next);
@@ -96,17 +91,32 @@ export function RuntimeProvider({
         name: "game_end",
         payload: { score: event.score, coins: rewards.coins },
       });
+    });
+  }, [slug, goPhase, challengeId, games]);
+
+  useEffect(() => {
+    function onSessionExit(event: Event) {
+      const detail = (event as CustomEvent<{ gameSlug?: string }>).detail;
+      const pending = resultRef.current;
+      if (detail?.gameSlug !== slug || !pending) return;
 
       goPhase("reward");
       setShowRewardFlash(true);
-      emitRuntimeEvent({ type: "reward-shown", xp: rewards.xpDisplay, coins: rewards.coins });
+      emitRuntimeEvent({
+        type: "reward-shown",
+        xp: pending.rewards.xpDisplay,
+        coins: pending.rewards.coins,
+      });
 
       window.setTimeout(() => {
         setShowRewardFlash(false);
         setShowResult(true);
-      }, 1400);
-    });
-  }, [slug, goPhase, challengeId, games]);
+      }, 900);
+    }
+
+    window.addEventListener("replay:game-exit", onSessionExit);
+    return () => window.removeEventListener("replay:game-exit", onSessionExit);
+  }, [slug, goPhase]);
 
   function finishTutorial() {
     window.localStorage.setItem(`${TUTORIAL_SEEN_KEY}:${slug}`, "1");
@@ -127,13 +137,8 @@ export function RuntimeProvider({
   function handleResultClose() {
     setShowResult(false);
     setResult(null);
-    goPhase("continue");
+    goPhase("playing");
   }
-
-  const favorites = getFavoritesSnapshot();
-  const recent = getRecentlyPlayedSnapshot();
-  const recommend =
-    selectRecommended(games, recent, favorites, 1)[0] ?? games.find((g) => g.slug !== slug);
 
   if (phase === "loading") {
     return (
@@ -202,25 +207,8 @@ export function RuntimeProvider({
           slug={slug}
           score={result.score}
           rewards={result.rewards}
-          games={games}
-          recommend={recommend}
-          challengeId={challengeId}
           onClose={handleResultClose}
         />
-      ) : null}
-
-      {phase === "continue" && !showResult ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button nativeButton={false} render={<Link href={`/games/${slug}`}>Retry</Link>} />
-          {recommend ? (
-            <Button
-              variant="secondary"
-              nativeButton={false}
-              render={<Link href={`/games/${recommend.slug}`}>Next · {recommend.title}</Link>}
-            />
-          ) : null}
-          <Button variant="outline" nativeButton={false} render={<Link href="/">Continue</Link>} />
-        </div>
       ) : null}
     </>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 
+import { subscribePlatformAnalyticsEvents } from "./platform-analytics";
 import type { ResumePhase } from "./use-resumable-game";
 
 export interface UseReadyCountdownResult {
@@ -16,8 +17,9 @@ export interface UseReadyCountdownResult {
 /**
  * Gates gameplay behind a 3-2-1-GO countdown after the resume phase is "ready".
  * Resets when returning to resume-prompt (new save detected).
+ * Retry skips countdown for instant restart (Sprint 13.5).
  */
-export function useReadyCountdown(phase: ResumePhase): UseReadyCountdownResult {
+export function useReadyCountdown(phase: ResumePhase, gameSlug?: string): UseReadyCountdownResult {
   const [countdownDone, setCountdownDone] = useState(false);
 
   useEffect(() => {
@@ -25,6 +27,14 @@ export function useReadyCountdown(phase: ResumePhase): UseReadyCountdownResult {
       setCountdownDone(false);
     }
   }, [phase]);
+
+  useEffect(() => {
+    return subscribePlatformAnalyticsEvents((event) => {
+      if (event.type !== "game-retry") return;
+      if (gameSlug && event.gameSlug !== gameSlug) return;
+      setCountdownDone(true);
+    });
+  }, [gameSlug]);
 
   const canPlay = phase === "ready" && countdownDone;
   const canPlayRef = useRef(canPlay);
