@@ -128,27 +128,34 @@ export function advanceSnakePath(
   syncSegmentsFromPath(snake);
 }
 
+/** Smoothstep for render interpolation between physics ticks. */
+function smoothRenderAlpha(alpha: number): number {
+  const t = Math.max(0, Math.min(1, alpha));
+  return t * t * (3 - 2 * t);
+}
+
 /** Interpolate head + path for 60fps render between physics ticks. */
 export function interpolateSnakeRender(
   snake: SnakeEntity,
   prev: { headX: number; headY: number; angle: number; segmentCount: number; path: Vec[] } | undefined,
   alpha: number
 ): Vec[] {
-  if (!prev || alpha >= 1) return snake.segments.map((s) => ({ ...s }));
-  const hx = prev.headX + ((snake.headX ?? 0) - prev.headX) * alpha;
-  const hy = prev.headY + ((snake.headY ?? 0) - prev.headY) * alpha;
+  const blend = smoothRenderAlpha(alpha);
+  if (!prev || blend >= 1) return snake.segments.map((s) => ({ ...s }));
+  const hx = prev.headX + ((snake.headX ?? 0) - prev.headX) * blend;
+  const hy = prev.headY + ((snake.headY ?? 0) - prev.headY) * blend;
   const pa = prev.angle;
   let da = (snake.angle ?? pa) - pa;
   da = normalizeAngle(da);
-  const angle = pa + da * alpha;
+  const angle = pa + da * blend;
   const spacing = SNAKE_FEEL.segmentSpacing;
   const count = getSegmentCount(snake);
   const blendPath: Vec[] = [];
   const maxP = Math.max(prev.path.length, snake.path?.length ?? 0);
   for (let i = 0; i < maxP; i++) {
-    const a = prev.path[i] ?? prev.path[prev.path.length - 1] ?? { x: prev.headX, y: prev.headY };
-    const b = snake.path?.[i] ?? snake.path?.[(snake.path?.length ?? 1) - 1] ?? { x: snake.headX ?? 0, y: snake.headY ?? 0 };
-    blendPath.push({ x: a.x + (b.x - a.x) * alpha, y: a.y + (b.y - a.y) * alpha });
+    const p0 = prev.path[i] ?? prev.path[prev.path.length - 1] ?? { x: prev.headX, y: prev.headY };
+    const p1 = snake.path?.[i] ?? snake.path?.[(snake.path?.length ?? 1) - 1] ?? { x: snake.headX ?? 0, y: snake.headY ?? 0 };
+    blendPath.push({ x: p0.x + (p1.x - p0.x) * blend, y: p0.y + (p1.y - p0.y) * blend });
   }
   const segs: Vec[] = [];
   for (let i = 0; i < count; i++) {

@@ -10,8 +10,8 @@ export default async function SnakeIoPlayPage() {
 
   return (
     <main className="flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-background">
-      <div className="flex shrink-0 justify-center overflow-hidden px-2 pt-2">
-        <div className="w-full max-w-3xl">
+      <div className="flex min-h-0 shrink-0 justify-center overflow-hidden">
+        <div className="w-full max-w-4xl">
           <Suspense fallback={<p className="py-8 text-center text-muted-foreground">Loading…</p>}>
             <SnakeIoPlayClientRoot />
           </Suspense>

@@ -8,6 +8,15 @@ export {
 } from "./snake-engine-audit-store";
 export { SnakeGame } from "./Snake";
 export { SnakeIoGame } from "./SnakeIo";
+export { SnakeCharacterSelect } from "./SnakeCharacterSelect";
+export {
+  SNAKE_HEAD_CHARACTERS,
+  SNAKE_HEAD_IDS,
+  loadSnakeHeadCharacter,
+  saveSnakeHeadCharacter,
+  resolveHeadEmoji,
+  type SnakeHeadId,
+} from "./snake-characters";
 export { entryLog, entryLogFail, entryTrace, type EntryStep, type EntryFailStep } from "./snake-entry-log";
 export { claimEngineSession, resetEngineSession } from "./snake-play-session";
 export { getGamePhase, resetGamePhase, transitionGamePhase, type GamePhase } from "./snake-game-state";

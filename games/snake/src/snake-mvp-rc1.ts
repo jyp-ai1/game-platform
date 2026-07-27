@@ -14,7 +14,7 @@ export const SNAKE_MVP_RC1 = {
   /** 2 food pickups → +1 segment */
   growthFoodPerSegment: 2,
   growthAnimMs: 200,
-  cameraFollowLerp: 0.15,
+  cameraFollowLerp: 0.09,
   spawnHighlightMs: 2000,
   spawnSafeMs: 2000,
   /** Humans never auto-respawn — Retry button only */

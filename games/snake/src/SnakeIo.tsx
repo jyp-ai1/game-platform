@@ -122,6 +122,13 @@ import { refreshWorldTuningFromTelemetry } from "./snake-balance-tuner";
 import { recordSnakeSessionEnd } from "./snake-session-recap";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
+import { resolveHeadEmoji, type SnakeHeadId } from "./snake-characters";
+import {
+  enterViewportFullscreen,
+  exitViewportFullscreen,
+  isViewportFullscreen,
+  measureGameBoardPx,
+} from "./snake-fullscreen";
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
 import { SnakeMinimap } from "./snake-minimap";
 import { SnakeMobileControls } from "./snake-mobile-controls";
@@ -151,9 +158,11 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
+  headCharacter = "frog",
 }: {
   practiceMode?: boolean;
   onJoinTimeout?: () => void;
+  headCharacter?: SnakeHeadId;
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -181,7 +190,10 @@ export function SnakeIoGame({
   const [awaitingInput, setAwaitingInput] = useState(true);
   const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
   const [goFlashUntil, setGoFlashUntil] = useState(0);
+  const headCharacterRef = useRef<SnakeHeadId>(headCharacter);
+  const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isGameFullscreen = isFullscreen || pseudoFullscreen;
   const [renderAlpha, setRenderAlpha] = useState(1);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
@@ -345,22 +357,41 @@ export function SnakeIoGame({
   }, []);
 
   useEffect(() => {
-    const el = boardRef.current;
-    if (!el) return;
-    const update = () => {
-      const width = el.clientWidth || window.innerWidth;
-      const cap = Math.min(width, window.innerHeight * 0.65, SNAKE_FEEL.maxViewportPx);
-      setBoardPx(Math.max(320, Math.floor(cap)));
+    headCharacterRef.current = headCharacter;
+    const s = worldRef.current?.snakes[deviceId];
+    if (s && !isBotSnake(s)) s.headCharacter = headCharacter;
+  }, [headCharacter, deviceId]);
+
+  const applyLocalHead = useCallback((w: SnakeIoWorld) => {
+    const s = w.snakes[deviceId];
+    if (s && !isBotSnake(s)) s.headCharacter = headCharacterRef.current;
+  }, [deviceId]);
+
+  useEffect(() => {
+    const measure = () => {
+      const nativeFs = isViewportFullscreen(viewportRef.current);
+      const fs = nativeFs || pseudoFullscreen;
+      setBoardPx(
+        measureGameBoardPx({
+          fullscreen: fs,
+          containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
+        })
+      );
     };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener("resize", update);
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (viewportRef.current) ro.observe(viewportRef.current);
+    if (boardRef.current) ro.observe(boardRef.current);
+    window.visualViewport?.addEventListener("resize", measure);
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("resize", measure);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
     };
-  }, [connected, world]);
+  }, [connected, world, pseudoFullscreen, isFullscreen]);
 
   useEffect(() => {
     if (practiceMode || roomCode) return;
@@ -566,6 +597,7 @@ export function SnakeIoGame({
         recordSpawnAudit(`ensureLocalSnake len=${getSegmentCount(me)}`, true);
       }
       if (me) {
+        applyLocalHead(w);
         spawnTrace("PLAYER_CREATE");
         spawnTrace(`SPAWN_SUCCESS len=${getSegmentCount(me)}`);
         recordSpawnAudit(`PLAYER_CREATE len=${getSegmentCount(me)}`, true);
@@ -749,6 +781,7 @@ export function SnakeIoGame({
         if (!next.snakes[deviceId]) {
           const idx = humans.findIndex((h) => h.deviceId === deviceId);
           ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
+          applyLocalHead(next);
           camRef.current = { x: 0, y: 0 };
         }
         tickBotBrains(next);
@@ -997,6 +1030,7 @@ export function SnakeIoGame({
 
     const next = structuredClone(worldRef.current);
     restartPlayerSnake(next, deviceId, nickname);
+    applyLocalHead(next);
     worldRef.current = next;
     setWorld(next);
 
@@ -1069,29 +1103,35 @@ export function SnakeIoGame({
   const toggleFullscreen = useCallback(async () => {
     const el = viewportRef.current;
     if (!el) return;
-    try {
-      if (!document.fullscreenElement) {
-        await (
-          el.requestFullscreen?.() ??
-          (el as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen?.()
-        );
-      } else {
-        await document.exitFullscreen?.();
-      }
-    } catch {
-      /* unsupported or denied */
+    if (isGameFullscreen) {
+      await exitViewportFullscreen();
+      setPseudoFullscreen(false);
+      document.body.style.overflow = "";
+      setIsFullscreen(false);
+      return;
     }
-  }, []);
+    const mode = await enterViewportFullscreen(el);
+    if (mode === "pseudo") {
+      setPseudoFullscreen(true);
+      document.body.style.overflow = "hidden";
+    }
+    setIsFullscreen(mode === "native" || mode === "pseudo");
+  }, [isGameFullscreen]);
 
   useEffect(() => {
-    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", onChange);
-    document.addEventListener("webkitfullscreenchange", onChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onChange);
-      document.removeEventListener("webkitfullscreenchange", onChange);
+    const syncFs = () => {
+      const native = isViewportFullscreen(viewportRef.current);
+      setIsFullscreen(native || pseudoFullscreen);
+      if (!native && !pseudoFullscreen) document.body.style.overflow = "";
     };
-  }, []);
+    document.addEventListener("fullscreenchange", syncFs);
+    document.addEventListener("webkitfullscreenchange", syncFs);
+    return () => {
+      document.removeEventListener("fullscreenchange", syncFs);
+      document.removeEventListener("webkitfullscreenchange", syncFs);
+      document.body.style.overflow = "";
+    };
+  }, [pseudoFullscreen]);
 
   useEffect(() => {
     let frame = 0;
@@ -1233,10 +1273,15 @@ export function SnakeIoGame({
   const top1Id = world.rankings[0]?.deviceId ?? null;
 
   return (
-    <div ref={boardRef} className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-1 sm:px-2">
+    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", isGameFullscreen ? "max-w-none px-0" : "max-w-3xl px-1 sm:px-2")}>
       <div
         ref={viewportRef}
-        className="relative flex w-full justify-center overflow-hidden [&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center [&:fullscreen]:bg-black"
+        className={cn(
+          "relative flex w-full justify-center overflow-hidden bg-black",
+          isGameFullscreen
+            ? "fixed inset-0 z-[200] h-[100dvh] w-[100dvw] items-center justify-center"
+            : "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
+        )}
       >
         <button
           type="button"
@@ -1247,39 +1292,11 @@ export function SnakeIoGame({
           {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
         </button>
 
-        {/* MVP HUD — Length / Kills / Boost */}
-        <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
-          <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
-          <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
-          <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
-            {isBoosting ? "⚡ BOOST" : "Boost"}
-          </p>
-        </div>
-
-        {/* MVP HUD — Top10 */}
-        <div className="pointer-events-none absolute right-2 top-12 z-30 w-36 rounded-lg border border-white/10 bg-black/55 px-2 py-2 text-[10px] backdrop-blur-sm">
-          <p className="mb-1 font-semibold text-amber-300">TOP 10</p>
-          <ol className="space-y-0.5">
-            {top10.slice(0, 10).map((r, i) => (
-              <li
-                key={r.deviceId}
-                className={cn(
-                  "truncate",
-                  r.deviceId === deviceId ? "font-bold text-emerald-300" : "text-white/75"
-                )}
-              >
-                {i + 1}. {r.nickname.length > 8 ? r.nickname.slice(0, 7) + "…" : r.nickname}{" "}
-                <span className="text-white/50">L{world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?"}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
+        {/* Game canvas wrapper — square; fills viewport when fullscreen */}
+        <div className="relative" style={{ width: boardPx, height: boardPx, maxWidth: "min(100vw, 100dvh)", maxHeight: "min(100vw, 100dvh)" }}>
         <div
-          className="relative w-full overflow-hidden rounded-xl border border-white/10 touch-none transition-transform duration-200 ease-out"
+          className="relative h-full w-full touch-none overflow-hidden rounded-xl border border-white/10"
           style={{
-            width: boardPx,
-            height: boardPx,
-            maxWidth: "100%",
             backgroundColor: seasonStyle.bg,
             backgroundImage:
               "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px), radial-gradient(circle at 30% 20%, rgba(120,80,255,0.08), transparent 40%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.06), transparent 35%)",
@@ -1301,6 +1318,31 @@ export function SnakeIoGame({
             handleDirection(dir);
           }}
         >
+        {/* HUD — anchored to canvas */}
+        <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
+          <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
+          <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
+          <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
+            {isBoosting ? "⚡ BOOST" : "Boost"}
+          </p>
+        </div>
+        <div className="pointer-events-none absolute right-2 top-2 z-30 w-36 rounded-lg border border-white/10 bg-black/55 px-2 py-2 text-[10px] backdrop-blur-sm">
+          <p className="mb-1 font-semibold text-amber-300">TOP 10</p>
+          <ol className="space-y-0.5">
+            {top10.slice(0, 10).map((r, i) => (
+              <li
+                key={r.deviceId}
+                className={cn(
+                  "truncate",
+                  r.deviceId === deviceId ? "font-bold text-emerald-300" : "text-white/75"
+                )}
+              >
+                {i + 1}. {r.nickname.length > 8 ? r.nickname.slice(0, 7) + "…" : r.nickname}{" "}
+                <span className="text-white/50">L{world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?"}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
           <div
             className="absolute origin-top-left"
             style={{
@@ -1461,7 +1503,17 @@ export function SnakeIoGame({
                           : undefined,
                       transform: isHead ? `rotate(${headRad}deg)` : undefined,
                     }}
-                  />
+                  >
+                    {isHead && snake.headCharacter ? (
+                      <span
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                        style={{ fontSize: Math.max(8, size * 0.72), lineHeight: 1 }}
+                        aria-hidden
+                      >
+                        {resolveHeadEmoji(snake.headCharacter)}
+                      </span>
+                    ) : null}
+                  </div>
                 );
               });
             })}
@@ -1566,6 +1618,7 @@ export function SnakeIoGame({
               Kills <span className="font-bold text-amber-300">{myKills}</span>
             </p>
           </div>
+        </div>
         </div>
       </div>
 

@@ -15,6 +15,7 @@ import {
 } from "./snake-io-engine";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { PLAYTEST_AI } from "./snake-playtest-tuning";
+import { randomSnakeHeadId } from "./snake-characters";
 
 export { POPULATION_TARGET as SNAKE_WORLD_TARGET };
 
@@ -286,6 +287,7 @@ function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty:
   snake.botRole = role;
   snake.botPhase = seed % PLAYTEST_AI.thinkInterval;
   snake.botSeed = seed;
+  snake.headCharacter = randomSnakeHeadId(seed);
   return snake;
 }
 

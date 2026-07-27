@@ -81,6 +81,8 @@ export interface SnakeEntity {
   botState?: "search" | "chase" | "escape" | "boost" | "wander";
   /** RC5 — hold movement until first direction input (local human) */
   awaitingInput?: boolean;
+  /** Sprint 8 — head character id (emoji sprite on head segment) */
+  headCharacter?: string;
 }
 
 export interface SnakeIoWorld {

@@ -12,6 +12,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { SnakeDebugOverlay } from "@/components/snake-debug-overlay";
+import {
+  loadSnakeHeadCharacter,
+  saveSnakeHeadCharacter,
+  SnakeCharacterSelect,
+  type SnakeHeadId,
+} from "@game-platform/game-snake";
 
 import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
@@ -82,6 +88,8 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   const router = useRouter();
   const room = params.get("room");
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
+  const [headCharacter, setHeadCharacter] = useState<SnakeHeadId>(() => loadSnakeHeadCharacter());
+  const [characterReady, setCharacterReady] = useState(false);
 
   useEffect(() => {
     resetEntryStatus();
@@ -162,11 +170,24 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
     return <ViralLoopResultPanel loop={loop} onRematch={handleRematch} />;
   }
 
+  if (!characterReady) {
+    return (
+      <SnakeCharacterSelect
+        value={headCharacter}
+        onChange={setHeadCharacter}
+        onConfirm={() => {
+          saveSnakeHeadCharacter(headCharacter);
+          setCharacterReady(true);
+        }}
+      />
+    );
+  }
+
   return (
     <>
       {debugMode ? <SnakeDebugOverlay /> : null}
       <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
-        <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} />
+        <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} headCharacter={headCharacter} />
       </SnakePlayErrorBoundary>
     </>
   );
