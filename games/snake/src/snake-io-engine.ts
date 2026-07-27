@@ -300,6 +300,7 @@ export function createSnakeAt(
     totalKills: 0,
     isBot: opts?.isBot,
     botRole: opts?.botRole,
+    awaitingInput: opts?.isBot ? undefined : true,
   };
   return finalizeSnake(snake, pos, segmentCount, 0);
 }
@@ -326,6 +327,7 @@ export function createSnake(
     gemsEaten: 0,
     aliveSinceTick: world.tick,
     totalKills: 0,
+    awaitingInput: true,
   };
   return finalizeSnake(snake, pos, segmentCount, 0);
 }
@@ -563,7 +565,10 @@ export function restartPlayerSnake(
   let snake = world.snakes[deviceId];
   const now = Date.now();
   if (!snake) {
-    world.snakes[deviceId] = createSnake(deviceId, nickname, Math.max(0, idx), world);
+    const created = createSnake(deviceId, nickname, Math.max(0, idx), world);
+    created.awaitingInput = true;
+    created.invincibleUntil = now + SNAKE_MVP_RC1.spawnSafeMs;
+    world.snakes[deviceId] = created;
     updateRankings(world);
     return;
   }

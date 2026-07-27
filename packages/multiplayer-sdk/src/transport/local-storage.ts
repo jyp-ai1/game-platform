@@ -88,7 +88,13 @@ export const localStorageTransport: MultiplayerTransport = {
     const room = readRoom(code);
     if (!room || room.players.length >= room.maxPlayers) return null;
     const deviceId = getDeviceId();
-    if (room.players.some((p) => p.deviceId === deviceId)) return room;
+    if (room.players.some((p) => p.deviceId === deviceId)) {
+      if (room.spectators.includes(deviceId)) {
+        room.spectators = room.spectators.filter((id) => id !== deviceId);
+        saveRoom(room);
+      }
+      return room;
+    }
     const nickname = options?.nickname ?? getLastNickname() ?? "Guest";
     room.players.push({ deviceId, nickname, ready: false, isGuest: options?.isGuest });
     saveRoom(room);

@@ -227,7 +227,14 @@ export const supabaseTransport: MultiplayerTransport = {
       return null;
     }
     const deviceId = getDeviceId();
-    if (room.players.some((p) => p.deviceId === deviceId)) return room;
+    if (room.players.some((p) => p.deviceId === deviceId)) {
+      if (room.spectators.includes(deviceId)) {
+        room = { ...room, spectators: room.spectators.filter((id) => id !== deviceId) };
+        cacheSet(room);
+        void persistRoom(room);
+      }
+      return room;
+    }
     if (room.players.length >= room.maxPlayers) return null;
     const nickname = options?.nickname ?? getLastNickname() ?? "Guest";
     room = {

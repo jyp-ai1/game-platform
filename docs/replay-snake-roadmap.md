@@ -13,37 +13,50 @@
 
 ---
 
-## Sprint 7 — Gameplay Feel ✅ (in progress)
+## Sprint 7 — Gameplay Feel ✅ (deployed)
 
 | ID | Item | Spec |
 |----|------|------|
-| P0-1 | Camera lerp | 0.12–0.18, no snap, no shake |
-| P0-1 | Boost zoom | Smooth 5% zoom out, restore on release |
-| P0-2 | Base zoom | 1.3–1.5× (`baseCameraZoom: 1.4`) |
-| P0-3 | Full screen | ⛶ button, `requestFullscreen()` + mobile |
+| P0-1 | Camera lerp | 0.15, no snap, no shake |
+| P0-1 | Boost zoom | Smooth 5% CSS scale (camera decoupled) |
+| P0-2 | Base zoom | `baseCameraZoom: 1.4` |
+| P0-3 | Full screen | ⛶ button |
 
 ---
 
-## Sprint 8 — Character System
+## Sprint 7.1 — QA Gate ⏳ (current)
 
-- 입장 전 캐릭터 선택 (🐸🐼🦊🐱🐶🐧🐵🦈👽🤖)
-- Head sprite only; body 동일; 죽어도 유지
-- 귀여운 SD 스타일
+**Sprint 8 blocked until all checklist items PASS on Preview.**
 
----
+Checklist: [`docs/sprint-replay-snake-7.1-qa.md`](./sprint-replay-snake-7.1-qa.md)
 
-## Sprint 9 — Profile / Progression
+### Gate rule
 
-- 로그인 → Lv.1 Rookie Worm
-- EXP → Level (Egg → Larva → … → Replay Master @ Lv100)
-- 레벨업 시 테두리 / 닉네임 색 / 칭호 해금
+> New features **only after** previous sprint QA is all PASS.  
+> Any FAIL → stop features, fix, redeploy, re-test.
 
 ---
 
-## Sprint 10 — Season Themes
+## Sprint 8 — Character System (blocked)
 
-- 🍕 Pizza / 🎄 Christmas / 👻 Halloween 등
-- 먹이 스킨 + 맵 분위기
+**Animals:** 🐸 Frog · 🐱 Cat · 🐶 Dog · 🐼 Panda · 🦊 Fox  
+**Fantasy:** 🤖 Robot · 👽 Alien · 👻 Ghost · 🐉 Dragon · 😈 Devil
+
+Head sprite only · body shared · persists after death · SD style · select before START
+
+---
+
+## Sprint 9 — Replay Progression (blocked)
+
+Lv1 알 → Lv5 애벌레 → Lv10 꿈틀이 → Lv20 탐험가 → Lv30 사냥꾼 → Lv50 챔피언 → Lv80 전설 → Lv100 Replay Master
+
+프로필 테두리 · 닉네임 색 · 칭호 해금
+
+---
+
+## Sprint 10 — Instant Replay (blocked)
+
+Death → Killed by Player123 → ▶ 마지막 5초 보기 → Share Replay
 
 ---
 

@@ -39,7 +39,12 @@ export const memoryTransport: MultiplayerTransport = {
     const room = cacheGet(code);
     if (!room || room.players.length >= room.maxPlayers) return null;
     const deviceId = getDeviceId();
-    if (room.players.some((p) => p.deviceId === deviceId)) return room;
+    if (room.players.some((p) => p.deviceId === deviceId)) {
+      if (room.spectators.includes(deviceId)) {
+        cacheSet({ ...room, spectators: room.spectators.filter((id) => id !== deviceId) });
+      }
+      return room;
+    }
     const next = {
       ...room,
       players: [...room.players, {

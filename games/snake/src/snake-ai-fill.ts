@@ -5,6 +5,7 @@ import {
   createSnake,
   createSnakeAt,
   isOpposite,
+  restartPlayerSnake,
   retireSnakeNaturally,
   updateRankings,
   type Direction,
@@ -380,7 +381,13 @@ export function ensureLocalSnake(
 ): SnakeEntity {
   const existing = world.snakes[deviceId];
   if (existing && existing.alive && !existing.spectating) return existing;
-  return createLocalSnake(world, deviceId, nickname, playerIndex);
+  if (existing && !existing.alive) {
+    restartPlayerSnake(world, deviceId, nickname);
+    return world.snakes[deviceId]!;
+  }
+  const snake = createLocalSnake(world, deviceId, nickname, playerIndex);
+  snake.awaitingInput = true;
+  return snake;
 }
 
 export function tickBotBrains(world: SnakeIoWorld): void {

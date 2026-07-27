@@ -11,6 +11,7 @@ import {
   getMultiplayerTransport,
   getRoom,
   isGlobalWorldRoom,
+  joinRoom,
   joinRoomAsync,
   resolveAvailableCluster,
   send,
@@ -265,18 +266,25 @@ export function SnakeIoGame({
     setAwaitingInput(true);
     inputLoggedRef.current = false;
     setSpawnHighlightUntil(Date.now() + SNAKE_MVP_RC1.spawnHighlightMs);
+    setGoFlashUntil(0);
     const snake = worldRef.current?.snakes[deviceId];
-    if (snake) snake.awaitingInput = true;
-    const head = resolveSnakeHead(snake ?? undefined);
-    const layout = camLayoutRef.current;
-    if (head && layout.cellSize > 0) {
-      camRef.current = {
-        x: head.x * layout.cellSize - layout.camHalf,
-        y: head.y * layout.cellSize - layout.camHalf,
-      };
-    } else {
-      camRef.current = { x: 0, y: 0 };
+    if (snake) {
+      snake.awaitingInput = true;
+      snake.spectating = false;
     }
+    const snapCamera = () => {
+      const s = worldRef.current?.snakes[deviceId];
+      const head = resolveSnakeHead(s ?? undefined);
+      const layout = camLayoutRef.current;
+      if (head && layout.cellSize > 0) {
+        camRef.current = {
+          x: head.x * layout.cellSize - layout.camHalf,
+          y: head.y * layout.cellSize - layout.camHalf,
+        };
+      }
+    };
+    snapCamera();
+    requestAnimationFrame(snapCamera);
     transitionGamePhase("READY", "await-input");
     transitionGamePhase("COUNTDOWN", "await-input");
   }, [deviceId]);
@@ -546,6 +554,11 @@ export function SnakeIoGame({
       }
       rehydrateWorldSnakes(w);
       let me = w.snakes[deviceId];
+      if (me && !me.alive) {
+        restartPlayerSnake(w, deviceId, getLastNickname() || "Player");
+        me = w.snakes[deviceId];
+        spawnTrace("PLAYER_REVIVE dead→retry spawn");
+      }
       if (!me) {
         const idx = humans.findIndex((h) => h.deviceId === deviceId);
         me = ensureLocalSnake(w, deviceId, getLastNickname() || "Player", Math.max(0, idx));
@@ -972,14 +985,16 @@ export function SnakeIoGame({
     recordSnakeRematch(activeRoom);
     recordSpectatorRejoin(activeRoom);
 
+    const nickname = getLastNickname() || "Player";
+    joinRoom(activeRoom, { nickname });
+
     boostingRef.current = false;
     setParticles([]);
     setScorePopups([]);
     prevAliveRef.current = true;
-    camRef.current = { x: 0, y: 0 };
     prevTotalKillsRef.current = 0;
+    zoomMultRef.current = 1;
 
-    const nickname = getLastNickname() || "Player";
     const next = structuredClone(worldRef.current);
     restartPlayerSnake(next, deviceId, nickname);
     worldRef.current = next;
@@ -1197,21 +1212,21 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const fovMult = zoomMultRef.current;
-  const rawCell =
+  const boostVisualScale = zoomMultRef.current;
+  const baseCellRaw =
     (boardPx / SNAKE_FEEL.viewportCellsVisible) *
     matchRule.cameraZoomMult *
-    SNAKE_FEEL.baseCameraZoom *
-    fovMult;
-  const cellSize = Math.min(
+    SNAKE_FEEL.baseCameraZoom;
+  const baseCellSize = Math.min(
     SNAKE_FEEL.maxCellPx,
-    Math.max(SNAKE_FEEL.minCellPx, rawCell)
+    Math.max(SNAKE_FEEL.minCellPx, baseCellRaw)
   );
+  const cellSize = baseCellSize;
   const myLength = mySnake ? getSegmentCount(mySnake) : 0;
   const myKills = mySnake?.totalKills ?? 0;
   const myScore = mySnake?.score ?? 0;
   const camHalf = boardPx / 2;
-  camLayoutRef.current = { boardPx, cellSize, camHalf };
+  camLayoutRef.current = { boardPx, cellSize: baseCellSize, camHalf };
 
   const camX = camRef.current.x;
   const camY = camRef.current.y;
@@ -1287,11 +1302,12 @@ export function SnakeIoGame({
           }}
         >
           <div
-            className="absolute origin-top-left transition-transform duration-200 ease-out"
+            className="absolute origin-top-left"
             style={{
               width: worldSize * cellSize,
               height: worldSize * cellSize,
-              transform: `translate(${-camX}px, ${-camY}px)`,
+              transform: `translate(${-camX}px, ${-camY}px) scale(${boostVisualScale})`,
+              transformOrigin: `${boardPx / 2 + camX}px ${boardPx / 2 + camY}px`,
             }}
           >
             {world.living?.collapseRadius != null ? (
