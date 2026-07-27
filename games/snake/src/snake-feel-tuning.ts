@@ -1,10 +1,10 @@
 /** Snake Feel Final Polish — numbers only. No new systems. */
 
 export const SNAKE_FEEL = {
-  /** Path movement — float coords @ 20Hz, render @ 60fps */
-  baseSpeed: 2.9,
-  boostSpeedMult: 1.55,
-  segmentSpacing: 0.42,
+  /** Path movement — float coords @ 20Hz, render @ 60fps (RC1 values in snake-mvp-rc1.ts) */
+  baseSpeed: 3.2,
+  boostSpeedMult: 2.0,
+  segmentSpacing: 0.5,
   turnLerp: 0.2,
   headRadius: 0.38,
   bodyRadius: 0.3,
@@ -22,7 +22,7 @@ export const SNAKE_FEEL = {
   magnetRadius: 3.4,
   magnetRadiusBoost: 5.2,
   /** Camera — smooth lag follow only; no boost zoom/shake */
-  cameraFollowLerp: 0.1,
+  cameraFollowLerp: 0.14,
   /** Slither-like viewport — cells visible on screen (not world-size scaled) */
   viewportCellsVisible: 50,
   minCellPx: 8,

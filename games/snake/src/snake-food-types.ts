@@ -27,8 +27,8 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   medium: {
     tier: "medium",
     kind: "meteor",
-    score: 3,
-    sizePx: 10,
+    score: 2,
+    sizePx: 8,
     color: "#f97316",
     glow: "0 0 10px #fb923c",
     particleCount: 12,
@@ -37,8 +37,8 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   large: {
     tier: "large",
     kind: "meteor",
-    score: 8,
-    sizePx: 15,
+    score: 4,
+    sizePx: 12,
     color: "#22d3ee",
     glow: "0 0 14px #22d3ee",
     particleCount: 18,
@@ -66,13 +66,12 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   },
 };
 
-/** Weighted roll — mostly small, epic is special */
+/** Weighted roll — RC1: Small / Medium / Large only */
 export function rollFoodTier(): FoodTier {
   const r = Math.random();
-  if (r < 0.55) return "small";
-  if (r < 0.82) return "medium";
-  if (r < 0.96) return "large";
-  return "epic";
+  if (r < 0.6) return "small";
+  if (r < 0.85) return "medium";
+  return "large";
 }
 
 export function tierFromKind(kind: FoodKind, value: number): FoodTier {

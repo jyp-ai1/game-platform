@@ -120,6 +120,7 @@ import { PlaytestReport } from "./snake-playtest-report";
 import { refreshWorldTuningFromTelemetry } from "./snake-balance-tuner";
 import { recordSnakeSessionEnd } from "./snake-session-recap";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
+import { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
 import { SnakeMinimap } from "./snake-minimap";
 import { SnakeMobileControls } from "./snake-mobile-controls";
@@ -166,7 +167,6 @@ export function SnakeIoGame({
   const prevAliveRef = useRef(true);
   const prevRankRef = useRef(99);
   const camRef = useRef({ x: 0, y: 0 });
-  const camSnappedRef = useRef(false);
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardPx, setBoardPx] = useState(480);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
@@ -198,6 +198,7 @@ export function SnakeIoGame({
   const [tickEpoch, setTickEpoch] = useState(0);
   const playerCountRef = useRef(1);
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
+  const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalf: 240 });
   onJoinTimeoutRef.current = onJoinTimeout;
 
   const effectiveRoomCode = sessionRoom || roomCode;
@@ -235,14 +236,16 @@ export function SnakeIoGame({
     return { x: mid, y: mid };
   }, [world]);
 
+  const localHead = useMemo((): Vec | null => {
+    if (isSpectating || bossCam) return null;
+    return resolveSnakeHead(worldRef.current?.snakes[deviceId] ?? mySnake);
+  }, [world?.tick, mySnake, deviceId, isSpectating, bossCam]);
+
   const cameraHead = bossCam
     ? { x: bossCam.x, y: bossCam.y }
     : isSpectating
-      ? watchSnake?.segments[0]
-      : mySnake?.segments[0]
-        ?? worldRef.current?.snakes[deviceId]?.segments[0]
-        ?? cameraFallback
-        ?? undefined;
+      ? resolveSnakeHead(watchSnake ?? undefined)
+      : localHead ?? cameraFallback ?? undefined;
   const top10 = world ? getDisplayRankings(world, 10) : [];
   const myRank = world ? getMyRank(world, deviceId) : 0;
   const activeEvent = world?.events[0];
@@ -325,10 +328,6 @@ export function SnakeIoGame({
       window.removeEventListener("resize", update);
     };
   }, [connected, world]);
-
-  useEffect(() => {
-    camSnappedRef.current = false;
-  }, [roomCode]);
 
   useEffect(() => {
     if (practiceMode || roomCode) return;
@@ -713,7 +712,7 @@ export function SnakeIoGame({
         if (!next.snakes[deviceId]) {
           const idx = humans.findIndex((h) => h.deviceId === deviceId);
           ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
-          camSnappedRef.current = false;
+          camRef.current = { x: 0, y: 0 };
         }
         tickBotBrains(next);
         recordGlobalWorldTick(activeRoom, {
@@ -939,7 +938,7 @@ export function SnakeIoGame({
     setParticles([]);
     setScorePopups([]);
     prevAliveRef.current = true;
-    camSnappedRef.current = false;
+    camRef.current = { x: 0, y: 0 };
     prevTotalKillsRef.current = 0;
 
     const nickname = getLastNickname() || "Player";
@@ -957,18 +956,6 @@ export function SnakeIoGame({
     tickEpochRef.current += 1;
     setTickEpoch(tickEpochRef.current);
   }, [activeRoom, deviceId, postDeath, isHost, isGlobalWorld]);
-
-  useEffect(() => {
-    if (!mySnake || mySnake.alive) return;
-    function onEnter(e: KeyboardEvent) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        handleRetry();
-      }
-    }
-    window.addEventListener("keydown", onEnter);
-    return () => window.removeEventListener("keydown", onEnter);
-  }, [mySnake?.alive, handleRetry]);
 
   useEffect(() => {
     if (!world) return;
@@ -1034,6 +1021,23 @@ export function SnakeIoGame({
     let frame = 0;
     const loop = () => {
       diagFrame();
+      const snake = worldRef.current?.snakes[deviceId];
+      if (snake?.alive && !snake.spectating) {
+        const head = resolveSnakeHead(snake);
+        const layout = camLayoutRef.current;
+        if (head && layout.cellSize > 0) {
+          const targetX = head.x * layout.cellSize - layout.camHalf;
+          const targetY = head.y * layout.cellSize - layout.camHalf;
+          const dist = Math.hypot(targetX - camRef.current.x, targetY - camRef.current.y);
+          if (dist > layout.boardPx * 0.5) {
+            camRef.current.x = targetX;
+            camRef.current.y = targetY;
+          } else {
+            camRef.current.x += (targetX - camRef.current.x) * SNAKE_FEEL.cameraFollowLerp;
+            camRef.current.y += (targetY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
+          }
+        }
+      }
       setRenderAlpha((a) => Math.min(1, a + SNAKE_FEEL.segmentLerpStep));
       setParticles((p) => tickParticles(p));
       setScorePopups((pop) => tickScorePopups(pop));
@@ -1043,7 +1047,7 @@ export function SnakeIoGame({
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [deviceId]);
 
   useEffect(() => {
     if (!activeRoom) return;
@@ -1142,39 +1146,24 @@ export function SnakeIoGame({
   );
   const myLength = mySnake ? getSegmentCount(mySnake) : 0;
   const myKills = mySnake?.totalKills ?? 0;
+  const myScore = mySnake?.score ?? 0;
   const camHalf = boardPx / 2;
+  camLayoutRef.current = { boardPx, cellSize, camHalf };
 
-  if ((mySnake?.segments[0] ?? worldRef.current?.snakes[deviceId]?.segments[0]) && !camSnappedRef.current) {
-    const head = mySnake?.segments[0] ?? worldRef.current?.snakes[deviceId]?.segments[0] ?? cameraFallback;
-    if (head) {
-      camRef.current = {
-        x: head.x * cellSize - camHalf,
-        y: head.y * cellSize - camHalf,
-      };
-      camSnappedRef.current = true;
-    }
-  }
-
-  const targetCamX = spectatorMode === "free"
-    ? (worldSize * cellSize) / 2 - camHalf
-    : cameraHead ? cameraHead.x * cellSize - camHalf : camRef.current.x;
-  const targetCamY = spectatorMode === "free"
-    ? (worldSize * cellSize) / 2 - camHalf
-    : cameraHead ? cameraHead.y * cellSize - camHalf : camRef.current.y;
-  camRef.current.x += (targetCamX - camRef.current.x) * SNAKE_FEEL.cameraFollowLerp;
-  camRef.current.y += (targetCamY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
   const camX = camRef.current.x;
   const camY = camRef.current.y;
   const top1Id = world.rankings[0]?.deviceId ?? null;
 
   return (
-    <div ref={boardRef} className="relative flex w-full max-w-3xl flex-col items-center px-1 sm:px-2">
-      <div className="relative flex w-full justify-center">
-        {/* MVP HUD — Length / Kills */}
+    <div ref={boardRef} className="relative flex w-full max-w-3xl flex-col items-center overflow-hidden px-1 sm:px-2">
+      <div className="relative flex w-full justify-center overflow-hidden">
+        {/* MVP HUD — Length / Kills / Boost */}
         <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
           <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
           <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
-          {isBoosting ? <p className="mt-1 text-[10px] font-semibold text-amber-300">⚡ BOOST</p> : null}
+          <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
+            {isBoosting ? "⚡ BOOST" : "Boost"}
+          </p>
         </div>
 
         {/* MVP HUD — Top10 */}
@@ -1335,11 +1324,12 @@ export function SnakeIoGame({
               return segs.map((seg, i) => {
                 const isHead = i === 0;
                 const isTail = i === len - 1;
+              const segBase = cellSize * 0.72;
                 const segSize = isHead
-                  ? cellSize * 1.12
+                  ? segBase * SNAKE_MVP_RC1.headScale
                   : isTail
-                    ? cellSize * 0.72
-                    : cellSize * 0.88;
+                    ? segBase * SNAKE_MVP_RC1.tailScale
+                    : segBase * SNAKE_MVP_RC1.bodyScale;
                 const growthScale = growing && i >= len - 2 ? popScale : 1;
                 const size = segSize * growthScale;
                 return (
@@ -1404,7 +1394,7 @@ export function SnakeIoGame({
         </div>
 
         {ux.minimap ? (
-          <div className="pointer-events-none absolute bottom-2 right-2 z-30">
+          <div className="pointer-events-none absolute bottom-14 right-2 z-30">
             <SnakeMinimap
             snakes={Object.values(world.snakes)}
             worldSize={worldSize}
@@ -1417,16 +1407,28 @@ export function SnakeIoGame({
           />
           </div>
         ) : null}
+
+        {/* MVP HUD — bottom global rank bar */}
+        <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 flex justify-center">
+          <div className="rounded-lg border border-white/10 bg-black/55 px-4 py-1.5 text-center text-[11px] backdrop-blur-sm">
+            <p className="font-semibold tracking-wide text-amber-300">GLOBAL RANK #{myRank}</p>
+            <p className="mt-0.5 text-white/85">
+              Length <span className="font-bold text-emerald-300">{myLength}</span>
+              {" · "}
+              Score <span className="font-bold text-sky-300">{myScore}</span>
+            </p>
+          </div>
+        </div>
       </div>
 
       {mySnake && !mySnake.alive ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
           <div className="w-full max-w-sm rounded-2xl border border-white/15 bg-black/85 px-6 py-8 text-center shadow-2xl animate-in fade-in zoom-in-95">
-            <p className="text-2xl font-bold tracking-wide text-red-400">YOU DIED</p>
-            <p className="mt-2 text-sm text-muted-foreground">Retry to jump back in instantly</p>
+            <p className="text-2xl font-bold tracking-wide text-red-400">GAME OVER</p>
+            <p className="mt-2 text-sm text-muted-foreground">Retry 버튼을 눌러 새 게임을 시작하세요</p>
             <div className="mt-6 flex flex-col gap-3">
               <Button size="lg" className="w-full" onClick={handleRetry}>
-                Retry (ENTER)
+                Retry
               </Button>
               <Button
                 variant="outline"

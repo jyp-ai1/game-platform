@@ -4,6 +4,7 @@ import type { ActivePowerUp, ComputedBalance, FoodKind, MatchObjective, ReplayMo
 
 import type { LivingWorldState } from "./snake-living-world";
 import { FOOD_TIERS, rollFoodTier, type FoodTier } from "./snake-food-types";
+import { SNAKE_MVP_RC1 } from "./snake-mvp-rc1";
 import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
 import {
   advanceSnakePath,
@@ -15,6 +16,10 @@ import {
 } from "./snake-path-movement";
 
 export type { FoodKind };
+
+function isBotEntity(snake: SnakeEntity): boolean {
+  return !!snake.isBot || snake.deviceId.startsWith("bot:");
+}
 
 export type Direction = "up" | "down" | "left" | "right";
 
@@ -184,8 +189,8 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
 
 function applyGemGrowth(snake: SnakeEntity): void {
   snake.gemsEaten = (snake.gemsEaten ?? 0) + 1;
-  snake.growthBuffer = snake.gemsEaten % 2;
-  if (snake.gemsEaten % 2 === 0) {
+  snake.growthBuffer = snake.gemsEaten % SNAKE_MVP_RC1.growthFoodPerSegment;
+  if (snake.gemsEaten % SNAKE_MVP_RC1.growthFoodPerSegment === 0) {
     growSnakeSegments(snake, 1);
   }
 }
@@ -302,7 +307,7 @@ export function createSnake(
   nickname: string,
   index: number,
   world: SnakeIoWorld,
-  segmentCount = 3
+  segmentCount = SNAKE_MVP_RC1.startingSegments
 ): SnakeEntity {
   const pos = findSafePosition(world, deviceId);
   const snake: SnakeEntity = {
@@ -329,7 +334,7 @@ export function applyMatchIdentity(world: SnakeIoWorld): void {
   world.objective.target = rule.scoreTarget;
   for (const [i, snake] of Object.entries(world.snakes)) {
     const idx = Object.keys(world.snakes).indexOf(i);
-    const segs = rule.startingSegments;
+    const segs = SNAKE_MVP_RC1.startingSegments;
     if (getSegmentCount(snake) < segs) {
       snake.segmentCount = segs;
       syncSegmentsFromPath(snake);
@@ -516,7 +521,11 @@ function killSnake(
   }
   snake.alive = false;
   snake.spectating = true;
-  snake.respawnAt = Date.now() + config.respawnMs;
+  if (isBotEntity(snake)) {
+    snake.respawnAt = Date.now() + config.respawnMs;
+  } else {
+    snake.respawnAt = undefined;
+  }
 }
 
 /** Natural bot retirement — death + food drop, removed from world (no respawn) */
@@ -574,7 +583,7 @@ export function restartPlayerSnake(
   snake.foodEaten = 0;
   snake.lastKillerId = undefined;
   snake.nickname = nickname;
-  finalizeSnake(snake, pos, 3, 0);
+  finalizeSnake(snake, pos, SNAKE_MVP_RC1.startingSegments, 0);
   updateRankings(world);
 }
 
@@ -594,7 +603,7 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
   for (const [i, snake] of Object.entries(world.snakes)) {
     const idx = Object.keys(world.snakes).indexOf(i);
     if (!snake.alive) {
-      const canRespawn = world.living?.matchRule.respawnEnabled ?? true;
+      const canRespawn = isBotEntity(snake) && (world.living?.matchRule.respawnEnabled ?? true);
       if (canRespawn && snake.respawnAt && now >= snake.respawnAt) respawnSnake(world, snake, idx, now);
       continue;
     }

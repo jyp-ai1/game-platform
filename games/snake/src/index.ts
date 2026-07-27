@@ -1,4 +1,5 @@
 export { SnakeEngineAuditPanel } from "./SnakeEngineAuditPanel";
+export { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
 export {
   getEngineAuditSnapshot,
   isEngineAuditEnabled,
