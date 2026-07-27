@@ -6,12 +6,12 @@ import { ViralLoopResultPanel } from "@/components/viral-loop-result";
 import { GameSDKProvider, emitEngagementEvent } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
 import { entryLog, entryLogFail, entryTrace, resetEntryStatus, resetEngineSession } from "@game-platform/game-snake";
-import { EntryCrashLog, loadEntryCrashLog } from "@game-platform/multiplayer-sdk";
+import { EntryCrashLog } from "@game-platform/multiplayer-sdk";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { EntryTracePanel } from "@/components/entry-trace-panel";
+import { SnakeDebugOverlay } from "@/components/snake-debug-overlay";
 
 import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
@@ -65,7 +65,6 @@ class SnakePlayErrorBoundary extends Component<
     if (this.state.failed) {
       return (
         <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-          <EntryTracePanel />
           <p className="text-sm text-amber-300">RENDER FAIL — Practice Mode로 전환 중…</p>
           {this.state.errorMessage ? (
             <p className="max-w-sm font-mono text-xs text-red-400">{this.state.errorMessage}</p>
@@ -165,46 +164,11 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
 
   return (
     <>
-      {debugMode ? <EntryTracePanel /> : null}
+      {debugMode ? <SnakeDebugOverlay /> : null}
       <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
         <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} />
-        <EntryCrashReporter />
       </SnakePlayErrorBoundary>
     </>
-  );
-}
-
-function EntryCrashReporter() {
-  const [msg, setMsg] = useState<string | null>(null);
-  const count = loadEntryCrashLog().length;
-  const show =
-    count > 0 ||
-    (typeof window !== "undefined" && window.location.hostname.includes("vercel.app"));
-
-  const copy = useCallback(async () => {
-    const text = EntryCrashLog.export();
-    try {
-      await navigator.clipboard.writeText(text);
-      setMsg("복사됨");
-    } catch {
-      setMsg(text.slice(0, 200));
-    }
-    setTimeout(() => setMsg(null), 3000);
-  }, []);
-
-  if (!show) return null;
-
-  return (
-    <div className="mt-4 flex flex-col items-center gap-1 text-xs text-muted-foreground">
-      <button
-        type="button"
-        onClick={copy}
-        className="rounded-lg border border-white/15 px-3 py-1.5 hover:border-primary/40"
-      >
-        최근 오류 복사 {count > 0 ? `(${count})` : ""}
-      </button>
-      {msg ? <span>{msg}</span> : null}
-    </div>
   );
 }
 

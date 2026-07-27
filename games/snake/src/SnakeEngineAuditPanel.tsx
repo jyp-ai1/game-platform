@@ -74,7 +74,7 @@ export function SnakeEngineAuditPanel() {
   return (
     <aside
       data-testid="snake-engine-audit-panel"
-      className="w-52 shrink-0 rounded-lg border border-violet-500/30 bg-black/75 p-2 font-mono text-[10px] backdrop-blur-sm sm:w-56"
+      className="w-full rounded-lg border border-violet-500/30 bg-black/75 p-2 font-mono text-[10px] backdrop-blur-sm"
       aria-label="Snake engine state audit"
     >
       <p className="mb-2 border-b border-white/10 pb-1 text-[11px] font-bold text-violet-300">

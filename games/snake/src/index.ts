@@ -29,7 +29,7 @@ export {
   type SnakeDayMemory,
 } from "./snake-session-recap";
 export { GlobalWorldPersist, type GlobalWorldJoinBrief } from "./snake-global-world";
-export { SnakeAiFillEngine, SNAKE_WORLD_TARGET, isBotSnake, type BotRole } from "./snake-ai-fill";
+export { SnakeAiFillEngine, SNAKE_WORLD_TARGET, isBotSnake, createLocalSnake, ensureLocalSnake, type BotRole } from "./snake-ai-fill";
 export { PlaytestLog, appendPlaytestLog, evaluateMergeGates, type PlaytestLogEntry } from "./snake-playtest-log";
 export {
   PlaytestObservation,

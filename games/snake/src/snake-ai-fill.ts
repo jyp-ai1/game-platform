@@ -292,9 +292,10 @@ function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty:
 export function syncSnakePopulation(
   world: SnakeIoWorld,
   humans: { deviceId: string; nickname: string }[],
-  target = POPULATION_TARGET
+  target = POPULATION_TARGET,
+  localDeviceId?: string
 ): void {
-  const capped = humans.slice(0, 20);
+  const capped = capHumansForWorld(humans, localDeviceId, 20);
   const humanIds = new Set(capped.map((h) => h.deviceId));
 
   for (const id of Object.keys(world.snakes)) {
@@ -337,6 +338,49 @@ export function syncSnakePopulation(
   }
 
   updateRankings(world);
+}
+
+/** Always keep local human in capped set — room may have 30+ registered players. */
+function capHumansForWorld(
+  humans: { deviceId: string; nickname: string }[],
+  localDeviceId: string | undefined,
+  max: number
+): { deviceId: string; nickname: string }[] {
+  if (!localDeviceId) return humans.slice(0, max);
+  const local = humans.find((h) => h.deviceId === localDeviceId);
+  const rest = humans.filter((h) => h.deviceId !== localDeviceId);
+  if (local) return [local, ...rest.slice(0, max - 1)];
+  return humans.slice(0, max);
+}
+
+/** Force-create local human snake when registry gap detected. */
+export function createLocalSnake(
+  world: SnakeIoWorld,
+  deviceId: string,
+  nickname: string,
+  playerIndex = 0
+): SnakeEntity {
+  while (countWorldSnakes(world) >= POPULATION_TARGET) {
+    const retire = pickBotToRetire(world);
+    if (!retire) break;
+    retireSnakeNaturally(world, retire);
+  }
+  const snake = createSnake(deviceId, nickname, playerIndex, world);
+  snake.isBot = false;
+  world.snakes[deviceId] = snake;
+  updateRankings(world);
+  return snake;
+}
+
+export function ensureLocalSnake(
+  world: SnakeIoWorld,
+  deviceId: string,
+  nickname: string,
+  playerIndex = 0
+): SnakeEntity {
+  const existing = world.snakes[deviceId];
+  if (existing && existing.alive && !existing.spectating) return existing;
+  return createLocalSnake(world, deviceId, nickname, playerIndex);
 }
 
 export function tickBotBrains(world: SnakeIoWorld): void {
