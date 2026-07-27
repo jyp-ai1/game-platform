@@ -90,6 +90,7 @@ import {
 import { entryLog, entryLogFail, entryTrace } from "./snake-entry-log";
 import { recordJoinRoomDebug } from "./entry-status-store";
 import { claimEngineSession } from "./snake-play-session";
+import { resetGamePhase, transitionGamePhase } from "./snake-game-state";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -165,7 +166,8 @@ export function SnakeIoGame({
   onJoinTimeoutRef.current = onJoinTimeout;
 
   const effectiveRoomCode = sessionRoom || roomCode;
-  const room = getRoom(effectiveRoomCode);
+  const activeRoom = effectiveRoomCode;
+  const room = getRoom(activeRoom);
   const isGlobalWorld = isGlobalWorldRoom(effectiveRoomCode, "snake");
   const humanCount = room?.players.length ?? 1;
   const worldPopulation = world ? countWorldSnakes(world) : (isGlobalWorld ? SNAKE_WORLD_TARGET : humanCount);
@@ -179,6 +181,7 @@ export function SnakeIoGame({
     [world?.snakes[deviceId]?.score, deviceId]
   );
   const isHost = practiceMode || room?.hostId === deviceId;
+  const shouldTickWorld = practiceMode || isHost || isGlobalWorld;
   const mySnake = world?.snakes[deviceId];
   const isSpectating = mySnake?.spectating && !mySnake?.alive;
   const matchRule = useMemo(() => resolveSnakeMatchRule(playerCount), [playerCount]);
@@ -197,8 +200,8 @@ export function SnakeIoGame({
   const myRank = world ? getMyRank(world, deviceId) : 0;
   const activeEvent = world?.events[0];
   const teams = useMemo(
-    () => (roomCode ? Replay.multiplayer.team.get(roomCode) : []),
-    [roomCode, world?.tick]
+    () => (activeRoom ? Replay.multiplayer.team.get(activeRoom) : []),
+    [activeRoom, world?.tick]
   );
   const announcements = world ? getActiveAnnouncements(world) : [];
   const latestKill = world?.killFeed[0];
@@ -208,7 +211,7 @@ export function SnakeIoGame({
     const key = `${latestKill.tick}-${latestKill.killerId}-${latestKill.victimId}`;
     if (processedKillsRef.current.has(key)) return;
     processedKillsRef.current.add(key);
-    if (roomCode) markFirstFun(roomCode);
+    if (activeRoom) markFirstFun(activeRoom);
     if (latestKill.killerId === deviceId) {
       sessionKillsRef.current[latestKill.victimName] = (sessionKillsRef.current[latestKill.victimName] ?? 0) + 1;
     }
@@ -232,6 +235,8 @@ export function SnakeIoGame({
   }, [roomCode]);
 
   useEffect(() => {
+    resetGamePhase();
+    transitionGamePhase("INIT");
     entryLog("GAME_CREATE");
     if (claimEngineSession()) {
       entryLog("ENGINE_CREATE");
@@ -449,7 +454,18 @@ export function SnakeIoGame({
     if (!effectiveRoomCode || !connected || practiceMode) return;
     const applyRoom = (r: GameRoom) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
-      if (state) { worldRef.current = state; setWorld(state); return; }
+      if (state) {
+        if (isGlobalWorld) {
+          if (!worldRef.current) {
+            worldRef.current = state;
+            setWorld(state);
+          }
+          return;
+        }
+        worldRef.current = state;
+        setWorld(state);
+        return;
+      }
       if (!worldRef.current && (isHost || isGlobalWorld)) {
         const cfg = Replay.multiplayer.balance("snake", isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length));
         const obj = Replay.multiplayer.objectives.create(Replay.multiplayer.objectives.pick(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
@@ -492,14 +508,22 @@ export function SnakeIoGame({
     }
     entryTrace("SPAWN", "PASS");
     entryTrace("CANVAS", "PASS");
-    entryTrace("GAME_READY", "PASS", effectiveRoomCode);
-  }, [world, effectiveRoomCode]);
+    entryTrace("GAME_READY", "PASS", activeRoom);
+    const me = world.snakes[deviceId];
+    transitionGamePhase("READY", `alive=${me?.alive ?? "?"} room=${activeRoom}`);
+    transitionGamePhase("COUNTDOWN");
+    window.setTimeout(() => transitionGamePhase("PLAYING"), 800);
+  }, [world, activeRoom, deviceId]);
 
   useEffect(() => {
-    if (!roomCode || !isHost || !connected) return;
+    if (!connected || !world) transitionGamePhase("LOADING");
+  }, [connected, world]);
+
+  useEffect(() => {
+    if (!activeRoom || !shouldTickWorld || !connected) return;
     const tickMs = balance.physicsTickMs;
     const id = setInterval(() => {
-      const r = getRoom(roomCode);
+      const r = getRoom(activeRoom);
       const input = r?.gameState?.input as { deviceId: string; direction: Direction; boosting?: boolean } | undefined;
       if (input && worldRef.current && !isBotSnake(worldRef.current.snakes[input.deviceId])) {
         setInput(worldRef.current, input.deviceId, input.direction);
@@ -513,7 +537,7 @@ export function SnakeIoGame({
       if (isGlobalWorld && r) {
         syncSnakePopulation(next, r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname })), SNAKE_WORLD_TARGET);
         tickBotBrains(next);
-        recordGlobalWorldTick(roomCode, {
+        recordGlobalWorldTick(activeRoom, {
           humans: r.players.length,
           bots: countWorldSnakes(next) - r.players.length,
           population: countWorldSnakes(next),
@@ -532,7 +556,7 @@ export function SnakeIoGame({
       next = tickWorld(next);
       if (isGlobalWorld) {
         respawnDeadBots(next, SNAKE_WORLD_TARGET);
-        persistGlobalWorldState(roomCode, next);
+        persistGlobalWorldState(activeRoom, next);
       }
       tickLivingWorld(next, playerCount);
 
@@ -549,8 +573,8 @@ export function SnakeIoGame({
           spawnEventFood(next, scheduled);
           if (scheduled.kind === "boss_spawn") spawnWorldBoss(next);
           if (scheduled.kind === "food_storm") startFoodStorm(next);
-          recordSnakeEvent(roomCode, scheduled.kind);
-          recordSnakeEventLocation(roomCode, scheduled.x, scheduled.y, scheduled.kind);
+          recordSnakeEvent(activeRoom, scheduled.kind);
+          recordSnakeEventLocation(activeRoom, scheduled.x, scheduled.y, scheduled.kind);
         }
         for (const e of next.events) applyBlackHolePull(next, e);
       }
@@ -558,7 +582,7 @@ export function SnakeIoGame({
       if (before.boss && !before.boss.defeated && next.boss?.defeated) {
         const m = Replay.multiplayer.moments.capture("boss_slayer", deviceId, next.boss.label, next.tick, { boss: true });
         next.moments = [m, ...next.moments].slice(0, 5);
-        recordSnakeBossKill(roomCode);
+        recordSnakeBossKill(activeRoom);
       }
 
       const SURVIVAL_TICKS = Math.round(300_000 / balance.physicsTickMs);
@@ -577,18 +601,18 @@ export function SnakeIoGame({
       }
 
       if (next.food.length < next.config.foodCount * 0.3) {
-        recordFoodShortageTick(roomCode);
+        recordFoodShortageTick(activeRoom);
       }
       if (next.tick % 45 === 0) {
         const heads = Object.values(next.snakes)
           .filter((s) => s.alive && s.segments[0])
           .map((s) => s.segments[0]!);
-        recordCrowdSample(roomCode, heads, next.tick);
+        recordCrowdSample(activeRoom, heads, next.tick);
       }
       const feedHead = next.killFeed[0];
       const prevFeedHead = before.killFeed[0];
       if (feedHead && (!prevFeedHead || feedHead.tick !== prevFeedHead.tick)) {
-        recordKillFeedEvent(roomCode);
+        recordKillFeedEvent(activeRoom);
       }
 
       for (const [id, snake] of Object.entries(next.snakes)) {
@@ -597,8 +621,8 @@ export function SnakeIoGame({
         if (prev?.alive && !snake.alive) {
           const pos = getDeathPosition(prev);
           if (pos) {
-            Replay.multiplayer.analytics.death(roomCode, { deviceId: id, x: pos.x, y: pos.y, tick: next.tick, cause: "player" });
-            recordSnakeDeath(roomCode, pos.x, pos.y, "player");
+            Replay.multiplayer.analytics.death(activeRoom, { deviceId: id, x: pos.x, y: pos.y, tick: next.tick, cause: "player" });
+            recordSnakeDeath(activeRoom, pos.x, pos.y, "player");
           }
         }
         if (prev && (prev.totalKills ?? 0) < 1 && (snake.totalKills ?? 0) >= 1) {
@@ -628,8 +652,8 @@ export function SnakeIoGame({
             next.moments = [m, ...next.moments].slice(0, 5);
           }
         }
-        if (snake.boosting) recordSnakeBoost(roomCode);
-        if (snake.score > 0) Replay.multiplayer.team.score(roomCode, id, snake.score - (prev?.score ?? 0));
+        if (snake.boosting) recordSnakeBoost(activeRoom);
+        if (snake.score > 0) Replay.multiplayer.team.score(activeRoom, id, snake.score - (prev?.score ?? 0));
       }
 
       const rank = getMyRank(next, deviceId);
@@ -645,48 +669,50 @@ export function SnakeIoGame({
           ...sessionMomentsRef.current.filter((m) => !next.moments.some((n) => n.id === m.id)),
         ].slice(0, 20);
       }
-      send(roomCode, "state", next);
+      if (isHost) send(activeRoom, "state", next);
       setWorld(next);
     }, tickMs);
     return () => clearInterval(id);
-  }, [roomCode, isHost, connected, isGlobalWorld, balance.physicsTickMs, ux.events, playerCount, deviceId, mySnake?.nickname]);
+  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, playerCount, deviceId, mySnake?.nickname]);
 
   useEffect(() => {
     if (!mySnake) return;
     if (prevAliveRef.current && !mySnake.alive) {
-      markPlayerDeath(roomCode);
-      recordPlaytestExit(roomCode, "death");
+      transitionGamePhase("DEAD", `score=${mySnake.score}`);
+      markPlayerDeath(activeRoom);
+      recordPlaytestExit(activeRoom, "death");
       setSpectatorTarget(getSpectatorTarget(worldRef.current, undefined, friendIds));
-      spectator(roomCode);
-      recordPlaytestExit(roomCode, "spectator");
+      spectator(activeRoom);
+      recordPlaytestExit(activeRoom, "spectator");
     }
     prevAliveRef.current = mySnake.alive;
     if (world) prevRankRef.current = getMyRank(world, deviceId);
-  }, [mySnake?.alive, mySnake, roomCode, world, deviceId, friendIds]);
+  }, [mySnake?.alive, mySnake, activeRoom, world, deviceId, friendIds]);
 
   const postDeath = useCallback(
     (action: "exit" | "replay" | "spectator" | "invite") => {
-      if (roomCode) tryRecordPostDeathAction(roomCode, action);
+      if (activeRoom) tryRecordPostDeathAction(activeRoom, action);
     },
-    [roomCode]
+    [activeRoom]
   );
 
   const handleDirection = useCallback((direction: Direction) => {
-    if (!roomCode || !worldRef.current || isSpectating) return;
+    if (!activeRoom || !worldRef.current || isSpectating) return;
     if (!inputLoggedRef.current) {
       inputLoggedRef.current = true;
       entryLog("INPUT", direction);
-      entryLog("GAME_START", roomCode);
+      entryLog("GAME_START", activeRoom);
+      transitionGamePhase("PLAYING", `input=${direction}`);
     }
-    markFirstMove(roomCode);
+    markFirstMove(activeRoom);
     const payload = { deviceId, direction, boosting: boostingRef.current };
-    if (isHost) {
+    if (shouldTickWorld) {
       setInput(worldRef.current, deviceId, direction);
       setBoost(worldRef.current, deviceId, boostingRef.current);
     } else {
-      send(roomCode, "input", payload);
+      send(activeRoom, "input", payload);
     }
-  }, [roomCode, isHost, deviceId, isSpectating]);
+  }, [activeRoom, shouldTickWorld, deviceId, isSpectating]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -696,15 +722,15 @@ export function SnakeIoGame({
         e.preventDefault();
         if (!boostingRef.current) playBoostSound();
         boostingRef.current = true;
-        if (isHost && worldRef.current) setBoost(worldRef.current, deviceId, true);
-        else if (roomCode) send(roomCode, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: true });
+        if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, true);
+        else if (activeRoom) send(activeRoom, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: true });
       }
     }
     function onKeyUp(e: KeyboardEvent) {
       if (e.code === "Space") {
         boostingRef.current = false;
-        if (isHost && worldRef.current) setBoost(worldRef.current, deviceId, false);
-        else if (roomCode) send(roomCode, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: false });
+        if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, false);
+        else if (activeRoom) send(activeRoom, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: false });
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -713,7 +739,7 @@ export function SnakeIoGame({
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [handleDirection, isSpectating, isHost, deviceId, roomCode]);
+  }, [handleDirection, isSpectating, shouldTickWorld, deviceId, activeRoom]);
 
   useEffect(() => {
     if (!world) return;
@@ -727,7 +753,7 @@ export function SnakeIoGame({
       const prevMe = prev.snakes[deviceId];
       if (prevMe && me && me.score > prevMe.score && me.segments[0]) {
         playEatSound("normal");
-        markFirstFun(roomCode);
+        markFirstFun(activeRoom);
         setParticles((p) => spawnEatParticles(p, me.segments[0]!.x, me.segments[0]!.y, me.color));
       }
       if (prevMe?.alive && !me?.alive && prevMe.segments[0]) {
@@ -759,14 +785,14 @@ export function SnakeIoGame({
   }, []);
 
   useEffect(() => {
-    if (!roomCode) return;
+    if (!activeRoom) return;
     const onLeave = () => postDeath("exit");
     window.addEventListener("beforeunload", onLeave);
     return () => window.removeEventListener("beforeunload", onLeave);
-  }, [roomCode, postDeath]);
+  }, [activeRoom, postDeath]);
 
   useEffect(() => {
-    if (!isSpectating || !roomCode) return;
+    if (!isSpectating || !activeRoom) return;
     const onClick = (e: MouseEvent) => {
       const anchor = (e.target as HTMLElement).closest("a");
       const href = anchor?.getAttribute("href") ?? "";
@@ -776,26 +802,27 @@ export function SnakeIoGame({
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [isSpectating, roomCode, postDeath]);
+  }, [isSpectating, activeRoom, postDeath]);
 
   async function finishMatch() {
-    if (!roomCode || !world) return;
+    if (!activeRoom || !world) return;
+    transitionGamePhase("RESULT");
     const bots = Object.values(world.snakes).filter((s) => isBotSnake(s));
     if (bots.length > 0) {
-      setTuringPromptBot(roomCode, bots[Math.floor(Math.random() * bots.length)]!.nickname);
+      setTuringPromptBot(activeRoom, bots[Math.floor(Math.random() * bots.length)]!.nickname);
     }
-    recordPlaytestExit(roomCode, "end");
+    recordPlaytestExit(activeRoom, "end");
     postDeath("exit");
     const scores: Record<string, number> = {};
     for (const s of Object.values(world.snakes)) scores[s.deviceId] = s.score;
-    finish(roomCode, { roomCode, gameSlug: "snake", winnerId: world.rankings[0]?.deviceId ?? null, scores, finishedAt: new Date().toISOString() });
+    finish(activeRoom, { roomCode: activeRoom, gameSlug: "snake", winnerId: world.rankings[0]?.deviceId ?? null, scores, finishedAt: new Date().toISOString() });
     reportScore("snake", mySnake?.score ?? 0);
-    Replay.multiplayer.analytics.flush(roomCode, world.config.worldSize);
-    const telem = flushSnakeTelemetry(roomCode);
+    Replay.multiplayer.analytics.flush(activeRoom, world.config.worldSize);
+    const telem = flushSnakeTelemetry(activeRoom);
     refreshWorldTuningFromTelemetry();
-    const room = getRoom(roomCode) ?? (practiceMode && world
+    const room = getRoom(activeRoom) ?? (practiceMode && world
       ? {
-          code: roomCode,
+          code: activeRoom,
           gameSlug: "snake",
           hostId: deviceId,
           maxPlayers: 50 as const,
@@ -874,6 +901,7 @@ export function SnakeIoGame({
   camRef.current.y += (targetCamY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
   const camX = camRef.current.x;
   const camY = camRef.current.y;
+  const showResultActions = !mySnake?.alive || isSpectating;
 
   return (
     <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-1 sm:gap-4 sm:px-2">
@@ -1119,30 +1147,39 @@ export function SnakeIoGame({
           {myRank > 10 ? <p className="mt-2 text-primary">내 순위 #{myRank}</p> : null}
         </div>
         <div className="flex flex-col gap-2">
-          {isSpectating ? (
-            <>
-              <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center">
-                <p className="text-sm font-bold">관전 중</p>
-                <p className="mt-1 text-xs text-muted-foreground">한 판 더?</p>
-              </div>
-              <select className="rounded border bg-background px-2 py-1 text-xs" value={spectatorMode} onChange={(e) => { postDeath("spectator"); setSpectatorMode(e.target.value as typeof spectatorMode); }}>
-                <option value="top1">TOP1 시점</option>
-                <option value="friend">친구 시점</option>
-                <option value="boss">Boss 추적</option>
-                <option value="free">자유 카메라</option>
-              </select>
-              <Button variant="outline" size="sm" onClick={() => {
-                postDeath("spectator");
-                setCheerMsg("🔥 응원!");
-                setTimeout(() => setCheerMsg(null), 2000);
-              }}>응원 🔥</Button>
-              <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSnakeRematch(roomCode); emitGameRetry("snake"); handleEnd(); }}>즉시 리매치</Button>
-              <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSpectatorRejoin(roomCode); handleEnd(); }}>한 판 더! →</Button>
-            </>
+          {showResultActions ? (
+            isSpectating ? (
+              <>
+                <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center">
+                  <p className="text-sm font-bold">관전 중</p>
+                  <p className="mt-1 text-xs text-muted-foreground">한 판 더?</p>
+                </div>
+                <select className="rounded border bg-background px-2 py-1 text-xs" value={spectatorMode} onChange={(e) => { postDeath("spectator"); setSpectatorMode(e.target.value as typeof spectatorMode); }}>
+                  <option value="top1">TOP1 시점</option>
+                  <option value="friend">친구 시점</option>
+                  <option value="boss">Boss 추적</option>
+                  <option value="free">자유 카메라</option>
+                </select>
+                <Button variant="outline" size="sm" onClick={() => {
+                  postDeath("spectator");
+                  setCheerMsg("🔥 응원!");
+                  setTimeout(() => setCheerMsg(null), 2000);
+                }}>응원 🔥</Button>
+                <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSnakeRematch(activeRoom); emitGameRetry("snake"); handleEnd(); }}>즉시 리매치</Button>
+                <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSpectatorRejoin(activeRoom); handleEnd(); }}>한 판 더! →</Button>
+              </>
+            ) : (
+              <Button variant="outline" onClick={() => { postDeath("replay"); emitGameRetry("snake"); }}>Retry</Button>
+            )
           ) : (
-            <Button variant="outline" onClick={() => { postDeath("replay"); emitGameRetry("snake"); }}>Retry</Button>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+              <p className="text-sm font-semibold">플레이 중</p>
+              <p className="mt-1 text-xs text-muted-foreground">WASD · Space boost</p>
+            </div>
           )}
-          <Button data-testid="snake-end-result" onClick={() => { postDeath("exit"); handleEnd(); }}>End & Result</Button>
+          {showResultActions ? (
+            <Button data-testid="snake-end-result" onClick={() => { postDeath("exit"); handleEnd(); }}>End & Result</Button>
+          ) : null}
         </div>
       </div>
     </div>
