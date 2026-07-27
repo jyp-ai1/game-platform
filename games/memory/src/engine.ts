@@ -2,6 +2,7 @@ export const PAIR_SYMBOLS = ["🍎", "🍌", "🍇", "🍒", "🍉", "🍋", "�
 export const BASE_SCORE = 1000;
 export const PENALTY_PER_MOVE = 15;
 export const MIN_SCORE = 100;
+export const MAX_MOVES = 50;
 
 export interface Card {
   symbol: string;

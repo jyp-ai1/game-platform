@@ -14,7 +14,7 @@ import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-pla
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer, useRef } from "react";
 
-import { computeScore, createShuffledCards, type Card } from "./engine";
+import { computeScore, createShuffledCards, MAX_MOVES, type Card } from "./engine";
 
 const GAME_SLUG = "memory";
 const MISMATCH_DELAY_MS = 800;
@@ -64,6 +64,11 @@ function reducer(state: State, action: Action): State {
       const first = state.cards[firstIndex]!;
       const second = state.cards[secondIndex]!;
       const moves = state.moves + 1;
+
+      if (moves >= MAX_MOVES) {
+        const cards = state.cards.map((c) => ({ ...c, matched: true }));
+        return { cards, flipped: [], moves, status: "won" as const };
+      }
 
       if (first.symbol === second.symbol) {
         const cards = state.cards.map((c, i) =>

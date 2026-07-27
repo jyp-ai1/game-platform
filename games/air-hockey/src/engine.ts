@@ -13,7 +13,8 @@ export const PUCK_FRICTION_PER_SEC_AT_60FPS = 0.995; // per-frame decay at a 60f
 export const PUCK_MAX_SPEED = 900;
 export const MIN_HIT_SPEED = 200; // ensures a paddle hit never leaves the puck nearly stationary
 export const HIT_BOUNCE_MULTIPLIER = 1.15;
-export const WINNING_SCORE = 7;
+export const WINNING_SCORE = 5;
+export const MATCH_TIME_LIMIT_SECONDS = 180;
 export const RESET_DELAY_SECONDS = 1.2; // pause after a goal before the puck respawns
 
 const CENTER_X = FIELD_WIDTH / 2;
@@ -37,6 +38,7 @@ export interface AirHockeyState {
   status: Status;
   winner: Winner;
   resetTimer: number; // seconds remaining before the puck respawns after a goal; 0 = active play
+  elapsedSeconds: number;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -57,12 +59,13 @@ export function createInitialState(): AirHockeyState {
     playerPaddle: { x: CENTER_X, y: FIELD_HEIGHT - 80 },
     aiPaddle: { x: CENTER_X, y: 80 },
     puck: { x: CENTER_X, y: CENTER_Y },
-    puckVelocity: { x: 0, y: 0 },
+    puckVelocity: { x: 70, y: -160 },
     playerScore: 0,
     aiScore: 0,
     status: "playing",
     winner: null,
     resetTimer: 0,
+    elapsedSeconds: 0,
   };
 }
 
@@ -112,17 +115,20 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
     return state;
   }
 
+  const elapsedSeconds = (state.elapsedSeconds ?? 0) + dtSeconds;
+
   // Reset countdown after a goal — puck stays parked at center until it elapses.
   if (state.resetTimer > 0) {
     const resetTimer = state.resetTimer - dtSeconds;
     if (resetTimer > 0) {
-      return { ...state, resetTimer };
+      return { ...state, resetTimer, elapsedSeconds };
     }
     return {
       ...state,
       puck: { x: CENTER_X, y: CENTER_Y },
       puckVelocity: { x: 0, y: 0 },
       resetTimer: 0,
+      elapsedSeconds,
     };
   }
 
@@ -209,6 +215,10 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
   } else if (aiScore >= WINNING_SCORE) {
     status = "over";
     winner = "ai";
+  } else if (elapsedSeconds >= MATCH_TIME_LIMIT_SECONDS) {
+    status = "over";
+    winner =
+      playerScore > aiScore ? "player" : playerScore < aiScore ? "ai" : "player";
   }
 
   return {
@@ -221,5 +231,6 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
     status,
     winner,
     resetTimer,
+    elapsedSeconds,
   };
 }

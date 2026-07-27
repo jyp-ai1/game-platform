@@ -193,8 +193,8 @@ export function AirHockeyGame() {
       ) : null}
 
       <p className="text-xs text-muted-foreground">
-        드래그(또는 터치)로 패들을 움직여 퍽을 쳐내세요. 7점을 먼저 획득하면
-        승리합니다.
+        드래그(또는 터치)로 패들을 움직여 퍽을 쳐내세요. 5점을 먼저 획득하거나
+        3분이 지나면 승리합니다.
       </p>
     </div>
   );
