@@ -97,7 +97,22 @@ import { entryLog, entryLogFail, entryTrace } from "./snake-entry-log";
 import { appendLifecycle } from "./entry-status-store";
 import { recordJoinRoomDebug } from "./entry-status-store";
 import { claimEngineSession } from "./snake-play-session";
-import { resetGamePhase, transitionGamePhase } from "./snake-game-state";
+import { resetGamePhase, transitionGamePhase, getGamePhase } from "./snake-game-state";
+import {
+  diagFrame,
+  diagInput,
+  diagRender,
+  diagSimulation,
+  diagTick,
+  diagTickBlocked,
+  diagTickError,
+  diagTickMounted,
+  diagWorldSnakes,
+  initLoopDiag,
+  shutdownLoopDiag,
+} from "./snake-engine-diag";
+import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
+import { SnakeEngineAuditPanel } from "./SnakeEngineAuditPanel";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -140,6 +155,7 @@ export function SnakeIoGame({
   onJoinTimeout?: () => void;
 } = {}) {
   const params = useSearchParams();
+  const debugMode = params.get("debug") === "1";
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
   const { reportScore } = useGameSDK();
   const [sessionRoom, setSessionRoom] = useState(roomCode);
@@ -182,6 +198,7 @@ export function SnakeIoGame({
   const tickEpochRef = useRef(0);
   const [tickEpoch, setTickEpoch] = useState(0);
   const playerCountRef = useRef(1);
+  const prevWorldTickRef = useRef({ tick: 0, at: 0 });
   onJoinTimeoutRef.current = onJoinTimeout;
 
   const effectiveRoomCode = sessionRoom || roomCode;
@@ -498,8 +515,10 @@ export function SnakeIoGame({
       if (me) {
         spawnTrace("PLAYER_CREATE");
         spawnTrace(`SPAWN_SUCCESS len=${getSegmentCount(me)}`);
+        recordSpawnAudit(`PLAYER_CREATE len=${getSegmentCount(me)}`, true);
       } else {
         spawnTrace("PLAYER_CREATE FAIL — missing after syncSnakePopulation");
+        recordSpawnAudit("missing after syncSnakePopulation", false);
       }
       return w;
     };
@@ -569,11 +588,93 @@ export function SnakeIoGame({
   }, [connected, world]);
 
   useEffect(() => {
-    if (!activeRoom || !shouldTickWorld || !connected) return;
+    initLoopDiag();
+    return () => shutdownLoopDiag();
+  }, []);
+
+  useEffect(() => {
+    if (!isEngineAuditEnabled()) return;
+    const id = window.setInterval(() => {
+      const now = Date.now();
+      const wt = world?.tick ?? worldRef.current?.tick ?? 0;
+      const prev = prevWorldTickRef.current;
+      const worldTickAdvancing = wt > prev.tick && now - prev.at < 3000;
+      if (wt !== prev.tick) prevWorldTickRef.current = { tick: wt, at: now };
+
+      const wr = worldRef.current;
+      const me = world?.snakes[deviceId];
+      const snakes = world ? Object.values(world.snakes) : [];
+      let inputBlocked: string | null = null;
+      if (!activeRoom) inputBlocked = "no activeRoom";
+      else if (!wr) inputBlocked = "no worldRef";
+      else if (!wr.snakes[deviceId]) inputBlocked = "no snake in worldRef";
+      else if (isSpectating) inputBlocked = "spectating";
+
+      updateEngineAudit({
+        roomCode: activeRoom,
+        players: room?.players.length ?? 0,
+        connected,
+        shouldTickWorld,
+        isGlobalWorld,
+        isHost,
+        deviceId,
+        registeredInRoom: room?.players.some((p) => p.deviceId === deviceId) ?? false,
+        inWorldState: !!world?.snakes[deviceId],
+        inWorldRef: !!wr?.snakes[deviceId],
+        gamePhase: getGamePhase(),
+        snakeExists: !!me,
+        snakeAlive: me?.alive ?? false,
+        snakeSegments: me ? getSegmentCount(me) : 0,
+        snakeHead: me?.segments[0] ?? null,
+        snakeTail: me?.segments.length ? me.segments[me.segments.length - 1]! : null,
+        boost: boostingRef.current,
+        inputBlockedReason: inputBlocked,
+        tickHz: Math.round(1000 / balance.physicsTickMs),
+        worldTick: wt,
+        worldTickAdvancing,
+        snakesAlive: snakes.filter((s) => s.alive).length,
+        snakesTotal: snakes.length,
+        foods: world?.food.length ?? 0,
+        aiAlive: snakes.filter((s) => isBotSnake(s) && s.alive).length,
+      });
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [
+    world,
+    connected,
+    activeRoom,
+    room?.players.length,
+    deviceId,
+    shouldTickWorld,
+    isGlobalWorld,
+    isHost,
+    isSpectating,
+    balance.physicsTickMs,
+  ]);
+
+  useEffect(() => {
+    if (!world) return;
+    const alive = Object.values(world.snakes).filter((s) => s.alive).length;
+    diagRender(alive, !!world.snakes[deviceId]);
+    diagWorldSnakes(Object.keys(world.snakes).length, !!world.snakes[deviceId]);
+  }, [world, deviceId]);
+
+  useEffect(() => {
+    if (!activeRoom || !shouldTickWorld || !connected) {
+      const reasons: string[] = [];
+      if (!activeRoom) reasons.push("no activeRoom");
+      if (!shouldTickWorld) reasons.push("shouldTickWorld=false");
+      if (!connected) reasons.push("not connected");
+      diagTickBlocked(reasons.join(", ") || "unknown");
+      return;
+    }
     const epoch = tickEpoch;
     const tickMs = balance.physicsTickMs;
+    diagTickMounted(tickMs);
     const id = setInterval(() => {
+      try {
       if (epoch !== tickEpochRef.current) return;
+      diagTick();
       const pc = playerCountRef.current;
       const r = getRoom(activeRoom);
       const input = r?.gameState?.input as { deviceId: string; direction: Direction; boosting?: boolean } | undefined;
@@ -611,6 +712,7 @@ export function SnakeIoGame({
       }
 
       next = tickWorld(next);
+      diagSimulation();
       if (isGlobalWorld) {
         respawnDeadBots(next, SNAKE_WORLD_TARGET);
         persistGlobalWorldState(activeRoom, next);
@@ -729,6 +831,9 @@ export function SnakeIoGame({
       }
       if (isHost) send(activeRoom, "state", next);
       setWorld(next);
+      } catch (err) {
+        diagTickError(err);
+      }
     }, tickMs);
     return () => clearInterval(id);
   }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch]);
@@ -756,6 +861,7 @@ export function SnakeIoGame({
 
   const handleDirection = useCallback((direction: Direction) => {
     if (!activeRoom || !worldRef.current || isSpectating) return;
+    diagInput(direction);
     if (!inputLoggedRef.current) {
       inputLoggedRef.current = true;
       entryLog("INPUT", direction);
@@ -906,6 +1012,7 @@ export function SnakeIoGame({
   useEffect(() => {
     let frame = 0;
     const loop = () => {
+      diagFrame();
       setRenderAlpha((a) => Math.min(1, a + SNAKE_FEEL.segmentLerpStep));
       setParticles((p) => tickParticles(p));
       setScorePopups((pop) => tickScorePopups(pop));
@@ -994,12 +1101,15 @@ export function SnakeIoGame({
   if (!roomCode) return <p className="text-center text-muted-foreground">Room code required</p>;
   if (!connected || !world) {
     return (
-      <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-2">
-        <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>
-        <div
-          className="w-full animate-pulse rounded-xl border border-white/10 bg-white/5"
-          style={{ aspectRatio: "1", maxHeight: SNAKE_FEEL.maxViewportPx }}
-        />
+      <div className="flex w-full max-w-5xl flex-col items-center gap-2 px-2 sm:flex-row sm:items-start">
+        <div ref={boardRef} className="flex w-full max-w-3xl flex-1 flex-col items-center gap-3">
+          <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>
+          <div
+            className="w-full animate-pulse rounded-xl border border-white/10 bg-white/5"
+            style={{ aspectRatio: "1", maxHeight: SNAKE_FEEL.maxViewportPx }}
+          />
+        </div>
+        {debugMode ? <SnakeEngineAuditPanel /> : null}
       </div>
     );
   }
@@ -1038,7 +1148,8 @@ export function SnakeIoGame({
   const top1Id = world.rankings[0]?.deviceId ?? null;
 
   return (
-    <div ref={boardRef} className="relative flex w-full max-w-3xl flex-col items-center px-1 sm:px-2">
+    <div className="flex w-full max-w-5xl flex-col items-center gap-2 px-1 sm:flex-row sm:items-start sm:px-2">
+    <div ref={boardRef} className="relative flex w-full max-w-3xl flex-1 flex-col items-center">
       <div className="relative flex w-full justify-center">
         {/* MVP HUD — Length / Kills */}
         <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
@@ -1348,6 +1459,8 @@ export function SnakeIoGame({
           boostReady={getSegmentCount(mySnake) > SNAKE_FEEL.boostMinSegments}
         />
       ) : null}
+    </div>
+    {debugMode ? <SnakeEngineAuditPanel /> : null}
     </div>
   );
 }

@@ -1,3 +1,10 @@
+export { SnakeEngineAuditPanel } from "./SnakeEngineAuditPanel";
+export {
+  getEngineAuditSnapshot,
+  isEngineAuditEnabled,
+  subscribeEngineAudit,
+  type EngineAuditSnapshot,
+} from "./snake-engine-audit-store";
 export { SnakeGame } from "./Snake";
 export { SnakeIoGame } from "./SnakeIo";
 export { entryLog, entryLogFail, entryTrace, type EntryStep, type EntryFailStep } from "./snake-entry-log";
