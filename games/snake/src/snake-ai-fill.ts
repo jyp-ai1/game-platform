@@ -126,6 +126,7 @@ function pickDirectionWithJitter(
 ): Direction | null {
   const head = snake.segments[0];
   if (!head) return null;
+  const w = world.config.worldSize;
   const options: Direction[] = ["up", "down", "left", "right"];
   const valid = options.filter((d) => !isOpposite(d, snake.direction) && !wouldCollide(world, snake, d));
   if (valid.length === 0) return null;
@@ -134,10 +135,15 @@ function pickDirectionWithJitter(
     const db = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } }[b];
     const na = { x: head.x + da.x, y: head.y + da.y };
     const nb = { x: head.x + db.x, y: head.y + db.y };
-    return Math.hypot(target.x - na.x, target.y - na.y) - Math.hypot(target.x - nb.x, target.y - nb.y);
+    const distA = Math.hypot(target.x - na.x, target.y - na.y);
+    const distB = Math.hypot(target.x - nb.x, target.y - nb.y);
+    const wallA = Math.min(na.x, na.y, w - 1 - na.x, w - 1 - na.y);
+    const wallB = Math.min(nb.x, nb.y, w - 1 - nb.x, w - 1 - nb.y);
+    return distA + (wallA < 4 ? 8 : 0) - (distB + (wallB < 4 ? 8 : 0));
   });
   const jitter = ((seed + world.tick) % 100) / 100 < PLAYTEST_AI.directionJitterChance;
-  const idx = jitter && valid.length > 1 ? 1 : 0;
+  const wander = ((seed + world.tick * 3) % 100) / 100 < 0.08;
+  const idx = wander && valid.length > 1 ? Math.floor(Math.random() * valid.length) : jitter && valid.length > 1 ? 1 : 0;
   return valid[idx] ?? valid[0] ?? null;
 }
 
@@ -354,10 +360,23 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
     diff === "easy" ? 0.06 : diff === "normal" ? 0.04 : diff === "hunter" ? 0.02 : 0.01;
   const mistake = baseMistake + ((seed % 17) / 17) * PLAYTEST_AI.mistakeVariance;
 
-  const target = resolveTarget(world, snake, role);
+  let target = resolveTarget(world, snake, role);
+  const head = snake.segments[0];
+  if (!target && head) {
+    const food = nearestFood(world, head);
+    target = food ?? { x: head.x + ((seed % 5) - 2) * 6, y: head.y + ((seed % 7) - 3) * 6 };
+  }
   const dir = pickDirectionWithJitter(world, snake, target, seed);
   if (dir && Math.random() > mistake) {
     snake.pendingDirection = dir;
+  } else if (Math.random() < 0.12) {
+    const dirs: Direction[] = ["up", "down", "left", "right"];
+    const options = dirs.filter(
+      (d) => !isOpposite(d, snake.direction) && !wouldCollide(world, snake, d)
+    );
+    if (options.length > 0) {
+      snake.pendingDirection = options[Math.floor(Math.random() * options.length)]!;
+    }
   }
 
   const event = getEventTarget(world);

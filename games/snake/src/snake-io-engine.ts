@@ -3,6 +3,7 @@ import { BossEngine, type BossEncounter } from "@game-platform/replay-engine/bal
 import type { ActivePowerUp, ComputedBalance, FoodKind, MatchObjective, ReplayMoment, WorldEvent, WorldFeature } from "@game-platform/shared";
 
 import type { LivingWorldState } from "./snake-living-world";
+import { FOOD_TIERS, rollFoodTier, type FoodTier } from "./snake-food-types";
 import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
 
 export type { FoodKind };
@@ -19,6 +20,8 @@ export interface FoodItem {
   y: number;
   kind: FoodKind;
   value: number;
+  tier?: FoodTier;
+  growthSegments?: number;
 }
 
 export interface SnakeEntity {
@@ -47,6 +50,8 @@ export interface SnakeEntity {
   /** Per-bot desync — fake crowd prevention */
   botPhase?: number;
   botSeed?: number;
+  /** Client-side growth pulse timestamp (ms) — set on eat */
+  lastGrowthAt?: number;
 }
 
 export interface SnakeIoWorld {
@@ -126,8 +131,34 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
       pos = randPos(w);
       tries++;
     }
-    world.food.push({ x: pos.x, y: pos.y, kind: "normal", value: Math.round(10 * SNAKE_POLISH.eatValueMult) });
+    const tier = rollFoodTier();
+    const cfg = FOOD_TIERS[tier];
+    world.food.push({
+      x: pos.x,
+      y: pos.y,
+      kind: cfg.kind,
+      value: cfg.score,
+      tier,
+      growthSegments: cfg.segments,
+    });
   }
+}
+
+/** Append segments at tail — keeps spacing behind last segment */
+function growSnakeSegments(snake: SnakeEntity, extra: number): void {
+  if (extra <= 0) return;
+  const tail = snake.segments[snake.segments.length - 1];
+  const prev = snake.segments[snake.segments.length - 2] ?? tail;
+  if (!tail) return;
+  const dx = tail.x - (prev?.x ?? tail.x - 1);
+  const dy = tail.y - (prev?.y ?? tail.y);
+  const stepX = dx === 0 && dy === 0 ? -1 : Math.sign(dx) || 0;
+  const stepY = dy === 0 && dx === 0 ? 0 : Math.sign(dy) || 0;
+  for (let i = 0; i < extra; i++) {
+    const last = snake.segments[snake.segments.length - 1]!;
+    snake.segments.push({ x: last.x - stepX, y: last.y - stepY });
+  }
+  snake.lastGrowthAt = Date.now();
 }
 
 function spawnWorldBoss(world: SnakeIoWorld): void {
@@ -381,11 +412,15 @@ function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): bo
     const food = world.food[foodIdx]!;
     world.food.splice(foodIdx, 1);
     let mult = world.config.rewardRate * (world.expMultiplier ?? 1);
-    if (food.kind === "golden_apple") mult *= 5;
+    if (food.kind === "golden_apple") mult *= 1.5;
     if (snake.powerUp?.kind === "double_score") mult *= 2;
-    snake.score += Math.round(food.value * mult * SNAKE_POLISH.eatValueMult);
+    const baseScore = food.value || FOOD_TIERS.small.score;
+    snake.score += Math.round(baseScore * mult);
     snake.foodEaten = (snake.foodEaten ?? 0) + 1;
     world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
+    const growth = food.growthSegments ?? FOOD_TIERS[food.tier ?? "small"].segments;
+    if (growth > 1) growSnakeSegments(snake, growth - 1);
+    else snake.lastGrowthAt = Date.now();
     spawnFoodItems(world, 1);
   }
   return true;
@@ -490,15 +525,22 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     }
 
     applyFoodMagnet(world, snake);
-    const steps = snake.boosting && snake.score >= SNAKE_FEEL.boostMinScore ? SNAKE_FEEL.boostSteps : 1;
+    const boostActive = snake.boosting && snake.score >= SNAKE_FEEL.boostMinScore;
+    const steps = boostActive ? SNAKE_FEEL.boostSteps : 1;
     for (let step = 0; step < steps; step++) {
       if (!snake.alive) break;
       moveSnakeOnce(world, snake, now);
     }
-    if (snake.boosting && snake.alive) {
+    if (boostActive && snake.alive) {
       const costMult = world.living?.matchRule.boostCostMult ?? 1;
       const cost = Math.max(1, Math.round(SNAKE_FEEL.boostCostPerTick * costMult));
       snake.score = Math.max(0, snake.score - cost);
+      if (
+        world.tick % SNAKE_FEEL.boostTailShrinkEvery === 0 &&
+        snake.segments.length > 3
+      ) {
+        snake.segments.pop();
+      }
       if (snake.score < SNAKE_FEEL.boostMinScore) snake.boosting = false;
     }
   }
@@ -612,11 +654,29 @@ export function createScheduledEvent(world: SnakeIoWorld, playerCount: number): 
   };
 }
 
-export function lerpSegments(prev: Vec[] | undefined, curr: Vec[], alpha: number): Vec[] {
+export function lerpSegments(prev: Vec[] | undefined, curr: Vec[], alpha: number, headAlpha?: number): Vec[] {
+  const headMix = headAlpha ?? alpha;
   return curr.map((c, i) => {
     const p = prev?.[i] ?? c;
-    return { x: p.x + (c.x - p.x) * alpha, y: p.y + (c.y - p.y) * alpha };
+    const mix = i === 0 ? headMix : alpha;
+    const wave =
+      i > 0 && curr.length > 2
+        ? Math.sin((i + alpha * 10) * 0.45) * SNAKE_FEEL.tailWaveAmp * (i / curr.length)
+        : 0;
+    return {
+      x: p.x + (c.x - p.x) * mix + wave,
+      y: p.y + (c.y - p.y) * mix,
+    };
   });
+}
+
+export function directionAngle(dir: Direction): number {
+  switch (dir) {
+    case "up": return -90;
+    case "down": return 90;
+    case "left": return 180;
+    default: return 0;
+  }
 }
 
 export function getDeathPosition(snake: SnakeEntity): Vec | null {

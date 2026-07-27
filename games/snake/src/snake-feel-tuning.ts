@@ -1,10 +1,12 @@
 /** Snake Feel Final Polish — numbers only. No new systems. */
 
 export const SNAKE_FEEL = {
-  /** Boost — early access, punchy speed without drain frustration */
+  /** Boost — +40% speed feel, tail drain while active */
   boostSteps: 2,
   boostMinScore: 3,
   boostCostPerTick: 1,
+  boostTailShrinkEvery: 5,
+  boostSpeedMult: 1.4,
   /** Food magnet — Slither-like pickup satisfaction */
   magnetRadius: 3.4,
   magnetRadiusBoost: 5.2,
@@ -17,7 +19,10 @@ export const SNAKE_FEEL = {
   maxCellPx: 14,
   maxViewportPx: 720,
   /** Visual motion smoothness */
-  segmentLerpStep: 0.38,
+  segmentLerpStep: 0.32,
+  headLerpStep: 0.48,
+  growthAnimMs: 150,
+  tailWaveAmp: 0.12,
   /** Juice — eat / kill / death feedback */
   deathShakeImpulse: 16,
   killShakeImpulse: 11,
@@ -29,6 +34,8 @@ export const SNAKE_FEEL = {
   goldenEatHz: 980,
   boostSoundHz: 210,
   killSoundHz: 540,
+  rareFoodHz: 1040,
+  rankUpHz: 880,
 } as const;
 
 /** World / spawn polish — density & growth pacing */

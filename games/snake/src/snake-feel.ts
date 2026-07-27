@@ -43,8 +43,18 @@ function tone(freq: number, duration: number, type: OscillatorType = "sine", gai
   osc.stop(c.currentTime + duration);
 }
 
-export function playEatSound(kind: string): void {
-  tone(kind === "golden_apple" ? SNAKE_FEEL.goldenEatHz : SNAKE_FEEL.eatSoundBaseHz, 0.08, "sine", 0.08);
+export function playEatSound(kind: string, hz?: number): void {
+  tone(hz ?? (kind === "golden_apple" ? SNAKE_FEEL.goldenEatHz : SNAKE_FEEL.eatSoundBaseHz), 0.08, "sine", 0.08);
+}
+
+export function playRareFoodSound(): void {
+  tone(SNAKE_FEEL.rareFoodHz, 0.12, "sine", 0.1);
+  setTimeout(() => tone(SNAKE_FEEL.rareFoodHz + 180, 0.08, "triangle", 0.07), 60);
+}
+
+export function playRankUpSound(): void {
+  tone(SNAKE_FEEL.rankUpHz, 0.1, "square", 0.09);
+  setTimeout(() => tone(SNAKE_FEEL.rankUpHz + 220, 0.12, "sine", 0.08), 80);
 }
 
 export function playBoostSound(): void {
@@ -70,24 +80,76 @@ export function spawnEatParticles(
   x: number,
   y: number,
   color: string,
-  count = SNAKE_FEEL.eatParticleCount
+  count: number = SNAKE_FEEL.eatParticleCount
 ): Particle[] {
   const next = [...particles];
   for (let i = 0; i < count; i++) {
-    const angle = (Math.PI * 2 * i) / count;
+    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+    const speed = 1.8 + Math.random() * 2.2;
     next.push({
       id: ++particleId,
       x,
       y,
-      vx: Math.cos(angle) * 2.6,
-      vy: Math.sin(angle) * 2.6,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
       color,
       life: 1,
       maxLife: 1,
-      size: 4,
+      size: 3 + Math.random() * 4,
     });
   }
-  return next.slice(-80);
+  return next.slice(-100);
+}
+
+export function spawnBoostTrail(
+  particles: Particle[],
+  x: number,
+  y: number,
+  color: string
+): Particle[] {
+  const next = [...particles];
+  next.push({
+    id: ++particleId,
+    x,
+    y,
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: (Math.random() - 0.5) * 0.6,
+    color,
+    life: 0.7,
+    maxLife: 0.7,
+    size: 3,
+  });
+  return next.slice(-100);
+}
+
+export interface ScorePopup {
+  id: number;
+  x: number;
+  y: number;
+  text: string;
+  color: string;
+  life: number;
+}
+
+let popupId = 0;
+
+export function spawnScorePopup(
+  popups: ScorePopup[],
+  x: number,
+  y: number,
+  score: number,
+  color: string
+): ScorePopup[] {
+  return [
+    ...popups,
+    { id: ++popupId, x, y, text: `+${score}`, color, life: 1 },
+  ].slice(-12);
+}
+
+export function tickScorePopups(popups: ScorePopup[]): ScorePopup[] {
+  return popups
+    .map((p) => ({ ...p, y: p.y - 0.04, life: p.life - 0.025 }))
+    .filter((p) => p.life > 0);
 }
 
 export function spawnDeathBurst(
