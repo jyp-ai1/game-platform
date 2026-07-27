@@ -133,3 +133,13 @@ export function hasMovesAvailable(grid: Grid): boolean {
 export function hasWon(grid: Grid, target: number = WIN_VALUE): boolean {
   return grid.some((row) => row.some((value) => value >= target));
 }
+
+export function maxTile(grid: Grid): number {
+  let max = 0;
+  for (const row of grid) {
+    for (const value of row) {
+      if (value > max) max = value;
+    }
+  }
+  return max;
+}

@@ -3,11 +3,12 @@
 import {
   clearSave,
   getBestScore,
+  loadGameProgress,
   ResumeDialog,
   SaveIndicator,
   useAutoSave,
   useGameSDK,
-  emitGameRetry,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
@@ -16,11 +17,13 @@ import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
+import { TILE_STAGES } from "./2048-stage-config";
 import {
   addRandomTile,
   createInitialGrid,
   hasMovesAvailable,
   hasWon,
+  maxTile,
   move,
   type Direction,
   type Grid,
@@ -35,26 +38,41 @@ interface State {
   grid: Grid;
   score: number;
   best: number;
+  bestTile: number;
   status: Status;
+  winAcknowledged: boolean;
+  tileStagesReached: number[];
 }
 
-type Action = { type: "move"; direction: Direction } | { type: "restart" };
+type Action =
+  | { type: "move"; direction: Direction }
+  | { type: "restart" }
+  | { type: "continue" };
 
 function createInitialState(): State {
+  const progress = loadGameProgress(GAME_SLUG);
   return {
     grid: createInitialGrid(),
     score: 0,
-    best: getBestScore(GAME_SLUG),
+    best: Math.max(getBestScore(GAME_SLUG), progress.bestScore),
+    bestTile: progress.bestTile,
     status: "playing",
+    winAcknowledged: false,
+    tileStagesReached: [],
   };
 }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "restart":
-      return { ...createInitialState(), best: state.best };
+      return { ...createInitialState(), best: state.best, bestTile: state.bestTile };
+    case "continue":
+      return { ...state, status: "playing", winAcknowledged: true };
     case "move": {
       if (state.status === "over") {
+        return state;
+      }
+      if (state.status === "won" && !state.winAcknowledged) {
         return state;
       }
 
@@ -65,19 +83,25 @@ function reducer(state: State, action: Action): State {
 
       const grid = addRandomTile(result.grid);
       const score = state.score + result.scoreGained;
-      // Live display only — the SDK persists the real record on game end
-      // (see the reportScore effect below), so this reducer stays pure.
       const best = Math.max(state.best, score);
+      const tile = maxTile(grid);
+      const bestTile = Math.max(state.bestTile, tile);
 
-      let status: Status = state.status;
-      if (status === "playing" && hasWon(grid)) {
+      let status: Status = "playing";
+      if (!state.winAcknowledged && hasWon(grid)) {
         status = "won";
-      }
-      if (status === "playing" && !hasMovesAvailable(grid)) {
+      } else if (!hasMovesAvailable(grid)) {
         status = "over";
       }
 
-      return { grid, score, best, status };
+      const tileStagesReached = [...state.tileStagesReached];
+      for (const milestone of TILE_STAGES) {
+        if (tile >= milestone && !tileStagesReached.includes(milestone)) {
+          tileStagesReached.push(milestone);
+        }
+      }
+
+      return { grid, score, best, bestTile, status, winAcknowledged: state.winAcknowledged, tileStagesReached };
     }
     default:
       return state;
@@ -92,16 +116,17 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 };
 
 export function Game2048() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
+    useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const { reportScore } = useGameSDK();
+  const reportedTiles = useRef<Set<number>>(new Set());
 
-  // "won" isn't terminal for 2048 (play continues past the 2048 tile), so
-  // only "over" clears the save — clearing on "won" would discard progress
-  // a player who keeps playing still wants to resume.
   const saveStatus = useAutoSave(
     GAME_SLUG,
     () => (state.status === "over" ? null : state),
@@ -109,18 +134,27 @@ export function Game2048() {
   );
 
   useEffect(() => {
-    // Reports the session's score once the game ends (or won). Depends on
-    // score too, not just status, in case the score still changes after
-    // "won" (2048 allows continuing to play after reaching the win tile).
-    // reportScore itself only acts (persists + prompts for a nickname) when
-    // this beats the existing local best, so calling it repeatedly is safe.
-    if (state.status !== "playing") {
-      reportScore(GAME_SLUG, state.score);
+    for (const milestone of state.tileStagesReached) {
+      if (!reportedTiles.current.has(milestone)) {
+        reportedTiles.current.add(milestone);
+        const stageIndex = TILE_STAGES.indexOf(milestone as (typeof TILE_STAGES)[number]) + 1;
+        recordStageClear(stageIndex, state.score);
+      }
     }
+  }, [state.tileStagesReached, state.score, recordStageClear]);
+
+  useEffect(() => {
     if (state.status === "over") {
+      reportScore(GAME_SLUG, state.score);
+      recordGameEnd({
+        score: state.score,
+        outcome: "failure",
+        bestTile: state.bestTile,
+        stageReached: TILE_STAGES.filter((t) => state.bestTile >= t).length,
+      });
       clearSave(GAME_SLUG);
     }
-  }, [state.status, state.score, reportScore]);
+  }, [state.status, state.score, state.bestTile, reportScore, recordGameEnd]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -180,6 +214,16 @@ export function Game2048() {
     [canPlayRef]
   );
 
+  function handleRetry() {
+    recordGameRetry();
+    resetSession();
+    reportedTiles.current.clear();
+    dispatch({ type: "restart" });
+  }
+
+  const showOverlay =
+    state.status === "over" || (state.status === "won" && !state.winAcknowledged);
+
   return (
     <div className="relative flex flex-col items-center gap-4">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -213,13 +257,18 @@ export function Game2048() {
           </div>
         ))}
 
-        {state.status !== "playing" ? (
+        {showOverlay ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
+            onRetry={handleRetry}
             onRestart={() => dispatch({ type: "restart" })}
+            onContinue={
+              state.status === "won"
+                ? () => dispatch({ type: "continue" })
+                : undefined
+            }
           />
         ) : null}
 

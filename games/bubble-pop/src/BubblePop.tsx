@@ -2,11 +2,11 @@
 
 import {
   clearSave,
-  emitGameRetry,
   ResumeDialog,
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
@@ -30,6 +30,7 @@ import {
   SHOOTER_Y,
   step,
 } from "./engine";
+import { getBubbleStage } from "./bubble-stage-config";
 
 const GAME_SLUG = "bubble-pop";
 const MAX_DT = 0.05;
@@ -47,12 +48,15 @@ type Action =
   | { type: "step"; dt: number }
   | { type: "setAngle"; angle: number }
   | { type: "fire" }
-  | { type: "restart" };
+  | { type: "restart" }
+  | { type: "nextStage" };
 
 function reducer(state: BubblePopState, action: Action): BubblePopState {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "nextStage":
+      return createInitialState(state.stageIndex + 1, state.score);
     case "setAngle":
       return setShooterAngle(state, action.angle);
     case "fire":
@@ -86,6 +90,10 @@ export function BubblePopGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
+    useGameSession(GAME_SLUG, sessionActive);
+  const stageClearReported = useRef(false);
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -94,7 +102,7 @@ export function BubblePopGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status !== "playing" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -122,11 +130,33 @@ export function BubblePopGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
+    if (state.status === "stage-clear" && !stageClearReported.current) {
+      stageClearReported.current = true;
+      recordStageClear(state.stageIndex, state.score);
+      reportScore(GAME_SLUG, state.score);
+    }
+    if (state.status === "playing") {
+      stageClearReported.current = false;
+    }
+  }, [state.status, state.stageIndex, state.score, recordStageClear, reportScore]);
+
+  useEffect(() => {
     if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
+      recordGameEnd({
+        score: state.score,
+        outcome: state.status === "won" ? "clear" : "failure",
+        stageReached: state.stageIndex,
+      });
       clearSave(GAME_SLUG);
     }
-  }, [state.status, state.score, reportScore]);
+  }, [state.status, state.score, state.stageIndex, reportScore, recordGameEnd]);
+
+  function handleRetry() {
+    recordGameRetry();
+    resetSession();
+    dispatch({ type: "restart" });
+  }
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -177,6 +207,7 @@ export function BubblePopGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex items-center gap-2">
+          <ScoreBox label="Stage" value={state.stageIndex} />
           <ScoreBox label="Score" value={state.score} />
           <div className="flex flex-col items-center gap-1">
             <span className="text-[10px] font-medium uppercase text-muted-foreground">
@@ -272,12 +303,24 @@ export function BubblePopGame() {
           }}
         />
 
-        {state.status !== "playing" ? (
+        {state.status === "stage-clear" ? (
+          <GameOverOverlay
+            variant="stage-clear"
+            stageLabel={getBubbleStage(state.stageIndex).label}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "nextStage" })}
+          />
+        ) : null}
+
+        {state.status === "over" || state.status === "won" ? (
           <GameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
+            onRetry={handleRetry}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}

@@ -24,6 +24,7 @@ export function GameOverOverlay({
   isNewBest,
   stars = 5,
   onNextStage,
+  onContinue,
 }: {
   message?: string;
   onRestart: () => void;
@@ -31,6 +32,7 @@ export function GameOverOverlay({
   gameSlug?: string;
   onRetry?: () => void;
   onExit?: () => void;
+  onContinue?: () => void;
   variant?: GameOverVariant;
   stageLabel?: string;
   bestRecordDelta?: number;
@@ -131,6 +133,11 @@ export function GameOverOverlay({
         ) : null}
       </div>
       <div className="flex w-full max-w-sm flex-row gap-2">
+        {onContinue ? (
+          <Button onClick={onContinue} className="h-12 flex-1 font-semibold">
+            Continue
+          </Button>
+        ) : null}
         <Button onClick={handleRetry} className={cn("h-12 flex-1 gap-2 font-semibold")}>
           <RotateCcw className="size-4" />
           Retry

@@ -114,6 +114,7 @@ test.describe("Sprint 13 — Tier B full loop (collect)", () => {
                 gamePlayCounts: null,
                 replayMoments: null,
                 totalPlayCount: 0,
+                progress: null,
               },
             },
             { thrownError: message, screenshotPath, logPath, consoleLogs: [message] }

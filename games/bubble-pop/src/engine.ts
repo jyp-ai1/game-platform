@@ -1,3 +1,5 @@
+import { FINAL_BUBBLE_STAGE, getBubbleStage } from "./bubble-stage-config";
+
 export type BubbleColor = "red" | "blue" | "green" | "yellow" | "purple";
 
 export const COLORS: BubbleColor[] = ["red", "blue", "green", "yellow", "purple"];
@@ -28,9 +30,11 @@ export interface FlyingBubble {
   color: BubbleColor;
 }
 
-export type BubblePopStatus = "playing" | "over" | "won";
+export type BubblePopStatus = "playing" | "over" | "won" | "stage-clear";
 
 export interface BubblePopState {
+  stageIndex: number;
+  shotsPerCeilingDrop: number;
   grid: (BubbleColor | null)[][]; // [row][col], row 0 = top (attached to ceiling)
   shooterAngle: number; // radians, measured from straight-up
   currentColor: BubbleColor;
@@ -38,32 +42,44 @@ export interface BubblePopState {
   flyingBubble: FlyingBubble | null;
   score: number;
   shotsUntilCeilingDrop: number;
+  /** Applied after the current shot snaps — avoids pre-shot sudden game over. */
+  pendingCeilingDrop: boolean;
   status: BubblePopStatus;
 }
 
-function randomColor(): BubbleColor {
-  return COLORS[Math.floor(Math.random() * COLORS.length)]!;
+function paletteForStage(stageIndex: number): BubbleColor[] {
+  const stage = getBubbleStage(stageIndex);
+  return COLORS.slice(0, stage.colorCount);
+}
+
+function randomColor(stageIndex: number): BubbleColor {
+  const palette = paletteForStage(stageIndex);
+  return palette[Math.floor(Math.random() * palette.length)]!;
 }
 
 function createEmptyGrid(): (BubbleColor | null)[][] {
   return Array.from({ length: ROWS }, () => Array<BubbleColor | null>(COLS).fill(null));
 }
 
-export function createInitialState(): BubblePopState {
+export function createInitialState(stageIndex = 1, score = 0): BubblePopState {
+  const stage = getBubbleStage(stageIndex);
   const grid = createEmptyGrid();
-  for (let row = 0; row < INITIAL_FILLED_ROWS; row++) {
+  for (let row = 0; row < stage.initialRows; row++) {
     for (let col = 0; col < COLS; col++) {
-      grid[row]![col] = randomColor();
+      grid[row]![col] = randomColor(stageIndex);
     }
   }
   return {
+    stageIndex,
+    shotsPerCeilingDrop: stage.shotsPerCeilingDrop,
     grid,
     shooterAngle: 0,
-    currentColor: randomColor(),
-    nextColor: randomColor(),
+    currentColor: randomColor(stageIndex),
+    nextColor: randomColor(stageIndex),
     flyingBubble: null,
-    score: 0,
-    shotsUntilCeilingDrop: SHOTS_PER_CEILING_DROP,
+    score,
+    shotsUntilCeilingDrop: stage.shotsPerCeilingDrop,
+    pendingCeilingDrop: false,
     status: "playing",
   };
 }
@@ -204,35 +220,21 @@ export function fireBubble(state: BubblePopState): BubblePopState {
     color: state.currentColor,
   };
 
-  let grid = state.grid;
   let shotsUntilCeilingDrop = state.shotsUntilCeilingDrop - 1;
-  let status: BubblePopStatus = state.status;
+  let pendingCeilingDrop = state.pendingCeilingDrop;
 
   if (shotsUntilCeilingDrop <= 0) {
-    // Check whether shifting the grid down one row would push any bubble
-    // past the bottom of the playable area — if so, that's an immediate loss.
-    const wouldOverflow = grid[ROWS - 1]?.some((cell) => cell !== null) ?? false;
-    if (wouldOverflow) {
-      status = "over";
-    } else {
-      const shifted = createEmptyGrid();
-      for (let row = 0; row < ROWS - 1; row++) {
-        shifted[row + 1] = grid[row]!.slice();
-      }
-      // New row of empty cells appears at the ceiling.
-      grid = shifted;
-    }
-    shotsUntilCeilingDrop = SHOTS_PER_CEILING_DROP;
+    pendingCeilingDrop = true;
+    shotsUntilCeilingDrop = state.shotsPerCeilingDrop;
   }
 
   return {
     ...state,
-    grid,
     flyingBubble,
     currentColor: state.nextColor,
-    nextColor: randomColor(),
+    nextColor: randomColor(state.stageIndex),
     shotsUntilCeilingDrop,
-    status,
+    pendingCeilingDrop,
   };
 }
 
@@ -260,6 +262,21 @@ function findOpenCellNear(
     }
   }
   return [row, col];
+}
+
+function applyCeilingDrop(grid: (BubbleColor | null)[][]): {
+  grid: (BubbleColor | null)[][];
+  overflow: boolean;
+} {
+  const wouldOverflow = grid[ROWS - 1]?.some((cell) => cell !== null) ?? false;
+  if (wouldOverflow) {
+    return { grid, overflow: true };
+  }
+  const shifted = createEmptyGrid();
+  for (let row = 0; row < ROWS - 1; row++) {
+    shifted[row + 1] = grid[row]!.slice();
+  }
+  return { grid: shifted, overflow: false };
 }
 
 export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
@@ -332,12 +349,31 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
     score += POINTS_PER_FLOATING * floating.length;
   }
 
+  let pendingCeilingDrop = state.pendingCeilingDrop;
+  if (pendingCeilingDrop) {
+    pendingCeilingDrop = false;
+    const dropped = applyCeilingDrop(grid);
+    if (dropped.overflow) {
+      return {
+        ...state,
+        grid,
+        flyingBubble: null,
+        score,
+        pendingCeilingDrop: false,
+        status: "over",
+      };
+    }
+    for (let row = 0; row < ROWS; row++) {
+      grid[row] = dropped.grid[row]!.slice();
+    }
+  }
+
   let status: BubblePopStatus = state.status;
   const reachedBottom = grid[ROWS - 1]?.some((cell) => cell !== null) ?? false;
   if (reachedBottom) {
     status = "over";
   } else if (isGridEmpty(grid)) {
-    status = "won";
+    status = state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear";
   }
 
   return {
@@ -345,6 +381,7 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
     grid,
     flyingBubble: null,
     score,
+    pendingCeilingDrop,
     status,
   };
 }

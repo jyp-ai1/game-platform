@@ -96,6 +96,34 @@ export {
   subscribeSave,
   type SaveEnvelope,
 } from "./save";
+export {
+  clearGameProgress,
+  getOperationalMetrics,
+  loadGameProgress,
+  recordGameCrash,
+  recordGameEnd,
+  recordGameRetry,
+  recordGameRunEnd,
+  recordGameRunStart,
+  recordStageClear,
+  saveGameProgress,
+  type GameProgressStats,
+  type OperationalMetrics,
+} from "./game-progress";
+export {
+  BATCH_1_SLUGS,
+  BATCH_2_SLUGS,
+  GAME_STANDARD_REGISTRY,
+  getBatchSlugs,
+  getGameStandard,
+  type GameOutcome,
+  type GameRuleTaxonomy,
+  type GameStandardCapabilities,
+  type GameStandardDefinition,
+  type GameStandardPhase,
+} from "./game-standard";
+export { createGameSession, type GameEndPayload, type GameSession } from "./game-session";
+export { useGameSession, type UseGameSessionResult } from "./use-game-session";
 export { useAutoSave, type SaveIndicatorStatus } from "./use-auto-save";
 export { useReadyCountdown, type UseReadyCountdownResult } from "./use-ready-countdown";
 export { emitGameRetry } from "./game-retry";

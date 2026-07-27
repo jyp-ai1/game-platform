@@ -25,8 +25,24 @@ async function spamInputs(page: Page, rounds: number, delayMs: number): Promise<
 }
 
 async function playColorMatch(page: Page): Promise<void> {
-  // Let round timers expire — 3 lives × ~3s rounds
-  await page.waitForTimeout(12_000);
+  for (let i = 0; i < 40; i++) {
+    if (await page.getByRole("button", { name: /^Retry$/i }).isVisible().catch(() => false)) {
+      return;
+    }
+    const targetLabel = await page
+      .locator(`${STAGE} [aria-label^="목표 색상"]`)
+      .getAttribute("aria-label")
+      .catch(() => null);
+    const colorWord = targetLabel?.match(/목표 색상: (\S+)/)?.[1];
+    if (colorWord) {
+      const matchBtn = page.locator(`${STAGE} button[aria-label="${colorWord}"]`).first();
+      if (await matchBtn.isVisible().catch(() => false)) {
+        await matchBtn.click();
+      }
+    }
+    await page.waitForTimeout(400);
+  }
+  await page.waitForTimeout(8_000);
 }
 
 async function playBubblePop(page: Page): Promise<void> {
@@ -40,25 +56,22 @@ async function playBubblePop(page: Page): Promise<void> {
 }
 
 async function playMemory(page: Page): Promise<void> {
-  for (let round = 0; round < 80; round++) {
+  for (let round = 0; round < 120; round++) {
     if (await page.getByRole("button", { name: /^Retry$/i }).isVisible().catch(() => false)) {
       return;
     }
-
-    const movesLabel = page.locator(`${STAGE}`).locator("text=Moves").locator("xpath=..");
-    const movesText = await movesLabel.textContent().catch(() => "0");
-    const moves = Number((movesText ?? "0").replace(/[^\d]/g, "")) || 0;
-    if (moves >= 50) {
-      await page.waitForTimeout(1_500);
-      return;
+    if (await page.getByRole("button", { name: /다음 Stage/i }).isVisible().catch(() => false)) {
+      await page.getByRole("button", { name: /다음 Stage/i }).click();
+      await page.waitForTimeout(600);
+      continue;
     }
 
-    const cards = page.locator(`${STAGE} .grid.grid-cols-4 > button:not([disabled])`);
+    const cards = page.locator(`${STAGE} .grid > button:not([disabled])`);
     const open = await cards.count();
     if (open >= 2) {
       await cards.nth(0).click();
       await page.waitForTimeout(320);
-      const remaining = page.locator(`${STAGE} .grid.grid-cols-4 > button:not([disabled])`);
+      const remaining = page.locator(`${STAGE} .grid > button:not([disabled])`);
       if ((await remaining.count()) > 0) {
         await remaining.nth(0).click();
       }
@@ -113,7 +126,19 @@ async function playAirHockey(page: Page): Promise<void> {
 }
 
 async function play2048OrTetris(page: Page): Promise<void> {
-  await spamInputs(page, 120, 100);
+  const stage = page.locator(STAGE);
+  await stage.click({ force: true }).catch(() => {});
+  for (let i = 0; i < 350; i++) {
+    if (await page.getByRole("button", { name: /^Retry$/i }).isVisible().catch(() => false)) {
+      return;
+    }
+    if (await page.getByRole("button", { name: /^Continue$/i }).isVisible().catch(() => false)) {
+      await page.getByRole("button", { name: /^Continue$/i }).click();
+      await page.waitForTimeout(300);
+    }
+    await page.keyboard.press(i % 2 === 0 ? "ArrowLeft" : "ArrowDown");
+    await page.waitForTimeout(45);
+  }
 }
 
 export const TIER_B_FULL_LOOP_SLUGS = [
@@ -155,7 +180,7 @@ export const GAME_LOOP_PROFILES: Record<string, GameLoopProfile> = {
     playUntilGameOver: playAirHockey,
   },
   "2048": {
-    gameOverTimeoutMs: 90_000,
+    gameOverTimeoutMs: 120_000,
     playUntilGameOver: play2048OrTetris,
   },
   tetris: {

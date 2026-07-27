@@ -2,11 +2,11 @@
 
 import {
   clearSave,
-  emitGameRetry,
   ResumeDialog,
   SaveIndicator,
   useAutoSave,
   useGameSDK,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
@@ -69,6 +69,11 @@ export function ColorMatchGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordGameRetry, recordGameEnd, resetSession } = useGameSession(
+    GAME_SLUG,
+    sessionActive
+  );
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -90,10 +95,22 @@ export function ColorMatchGame() {
 
   useEffect(() => {
     if (state.status === "over") {
-      reportScore(GAME_SLUG, state.score);
+      const finalScore = Math.max(state.score, (state.round - 1) * 5);
+      reportScore(GAME_SLUG, finalScore);
+      recordGameEnd({
+        score: finalScore,
+        outcome: "failure",
+        stageReached: state.round,
+      });
       clearSave(GAME_SLUG);
     }
-  }, [state.status, state.score, reportScore]);
+  }, [state.status, state.score, state.round, reportScore, recordGameEnd]);
+
+  function handleRetry() {
+    recordGameRetry();
+    resetSession();
+    dispatch({ type: "restart" });
+  }
 
   const interactive = canPlay && state.status === "playing";
 
@@ -161,7 +178,7 @@ export function ColorMatchGame() {
             message={`Game Over — Score ${state.score} (Round ${state.round})`}
             score={state.score}
             gameSlug={GAME_SLUG}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
+            onRetry={handleRetry}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}

@@ -1,0 +1,605 @@
+{
+  "date": "2026-07-28",
+  "generatedAt": "2026-07-27T16:06:46.943Z",
+  "summary": {
+    "pass": 0,
+    "fail": 4,
+    "warn": 2
+  },
+  "backlog": {
+    "P0": [
+      {
+        "slug": "bubble-pop",
+        "step": "crash",
+        "cause": "Failed to load resource: the server responded with a status of 409 ()"
+      },
+      {
+        "slug": "2048",
+        "step": "crash",
+        "cause": "expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 120000ms exceeded while waiting on the predicate"
+      },
+      {
+        "slug": "memory",
+        "step": "crash",
+        "cause": "memory timed out after 180000ms"
+      },
+      {
+        "slug": "color-match",
+        "step": "crash",
+        "cause": "Failed to load resource: the server responded with a status of 409 ()"
+      }
+    ],
+    "P1": [],
+    "P2": [
+      {
+        "slug": "tetris",
+        "step": "Result",
+        "cause": "in-game overlay only"
+      },
+      {
+        "slug": "air-hockey",
+        "step": "Result",
+        "cause": "in-game overlay only"
+      }
+    ]
+  },
+  "games": [
+    {
+      "slug": "bubble-pop",
+      "steps": [
+        {
+          "id": "start",
+          "status": "pass"
+        },
+        {
+          "id": "tutorial",
+          "status": "pass",
+          "detail": "tutorial seen seeded"
+        },
+        {
+          "id": "stageClear",
+          "status": "skip",
+          "detail": "validated post-game via result modal"
+        },
+        {
+          "id": "nextStage",
+          "status": "skip",
+          "detail": "stage ladder checked on result score"
+        },
+        {
+          "id": "gameOver",
+          "status": "pass",
+          "detail": "score=0"
+        },
+        {
+          "id": "result",
+          "status": "warn",
+          "detail": "in-game overlay only"
+        },
+        {
+          "id": "scoreSave",
+          "status": "warn",
+          "detail": "game ended with zero score — best may be unchanged"
+        },
+        {
+          "id": "xp",
+          "status": "pass",
+          "detail": "0 → 85"
+        },
+        {
+          "id": "coin",
+          "status": "pass",
+          "detail": "0 → 1"
+        },
+        {
+          "id": "dailyMission",
+          "status": "pass",
+          "detail": "mission state updated"
+        },
+        {
+          "id": "journey",
+          "status": "pass",
+          "detail": "journey profile present"
+        },
+        {
+          "id": "replay",
+          "status": "pass",
+          "detail": "session recorded"
+        },
+        {
+          "id": "leaderboard",
+          "status": "pass"
+        },
+        {
+          "id": "retry",
+          "status": "pass",
+          "detail": "game restarted"
+        },
+        {
+          "id": "gameOver",
+          "status": "fail",
+          "detail": "console: Failed to load resource: the server responded with a status of 409 ()"
+        }
+      ],
+      "passed": false,
+      "score": 0,
+      "analyticsTypes": [
+        "session_start",
+        "game_start",
+        "perf_metric",
+        "save_created",
+        "game_end"
+      ],
+      "consoleErrors": 1,
+      "consoleLogs": [
+        "Failed to load resource: the server responded with a status of 409 ()"
+      ],
+      "durationMs": 22629,
+      "storageAfter": {
+        "xp": 85,
+        "coins": 1,
+        "bestScore": 0,
+        "dailyMission": "{\"date\":\"2026-07-28\",\"tier\":\"tier1\",\"missionIds\":[\"tier1-2048-play\",\"tier1-any-3\",\"tier1-puzzle-3\"],\"progress\":{\"tier1-2048-play\":{\"current\":0,\"target\":1},\"tier1-any-3\":{\"current\":1,\"target\":3},\"tier1-puzzle-3\":{\"current\":0,\"target\":3}},\"completed\":[]}",
+        "journey": "{\"schemaVersion\":1,\"guestId\":\"86094658-f8a1-4c8e-b482-904528cc4b02\",\"createdAt\":\"2026-07-27T15:56:32.589Z\",\"mergedAccountId\":null}",
+        "gamePlayCounts": "{\"bubble-pop\":1}",
+        "replayMoments": null,
+        "totalPlayCount": 1,
+        "progress": {
+          "bestStage": 1,
+          "bestScore": null,
+          "bestTile": null,
+          "retryCount": 1,
+          "playCount": 2,
+          "totalPlayTimeMs": 4253,
+          "totalScoreSum": 0,
+          "sessionCount": 1,
+          "lastCrashAt": null,
+          "avgPlayTimeMs": 4253,
+          "avgScore": 0,
+          "retryRate": 0.5
+        }
+      },
+      "operational": {
+        "bestStage": 1,
+        "bestScore": null,
+        "bestTile": null,
+        "retryCount": 1,
+        "playCount": 2,
+        "totalPlayTimeMs": 4253,
+        "totalScoreSum": 0,
+        "sessionCount": 1,
+        "lastCrashAt": null,
+        "avgPlayTimeMs": 4253,
+        "avgScore": 0,
+        "retryRate": 0.5
+      },
+      "displayName": "Bubble Pop",
+      "verdict": "FAIL",
+      "priority": "P0",
+      "failureStep": "crash",
+      "failureCause": "Failed to load resource: the server responded with a status of 409 ()",
+      "screenshotPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\bubble-pop.png",
+      "logPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\bubble-pop.log.json"
+    },
+    {
+      "slug": "tetris",
+      "steps": [
+        {
+          "id": "start",
+          "status": "pass"
+        },
+        {
+          "id": "tutorial",
+          "status": "pass",
+          "detail": "tutorial seen seeded"
+        },
+        {
+          "id": "stageClear",
+          "status": "skip",
+          "detail": "validated post-game via result modal"
+        },
+        {
+          "id": "nextStage",
+          "status": "skip",
+          "detail": "stage ladder checked on result score"
+        },
+        {
+          "id": "gameOver",
+          "status": "pass",
+          "detail": "score=0"
+        },
+        {
+          "id": "result",
+          "status": "warn",
+          "detail": "in-game overlay only"
+        },
+        {
+          "id": "scoreSave",
+          "status": "warn",
+          "detail": "game ended with zero score — best may be unchanged"
+        },
+        {
+          "id": "xp",
+          "status": "pass",
+          "detail": "85 → 100"
+        },
+        {
+          "id": "coin",
+          "status": "pass",
+          "detail": "1 → 2"
+        },
+        {
+          "id": "dailyMission",
+          "status": "pass",
+          "detail": "mission state updated"
+        },
+        {
+          "id": "journey",
+          "status": "pass",
+          "detail": "journey profile present"
+        },
+        {
+          "id": "replay",
+          "status": "pass",
+          "detail": "session recorded"
+        },
+        {
+          "id": "leaderboard",
+          "status": "pass"
+        },
+        {
+          "id": "retry",
+          "status": "pass",
+          "detail": "game restarted"
+        }
+      ],
+      "passed": true,
+      "score": 0,
+      "analyticsTypes": [
+        "perf_metric",
+        "session_start",
+        "game_start",
+        "save_created",
+        "game_end"
+      ],
+      "consoleErrors": 0,
+      "consoleLogs": [],
+      "durationMs": 24262,
+      "storageAfter": {
+        "xp": 100,
+        "coins": 2,
+        "bestScore": 0,
+        "dailyMission": "{\"date\":\"2026-07-28\",\"tier\":\"tier1\",\"missionIds\":[\"tier1-2048-play\",\"tier1-any-3\",\"tier1-puzzle-3\"],\"progress\":{\"tier1-2048-play\":{\"current\":0,\"target\":1},\"tier1-any-3\":{\"current\":2,\"target\":3},\"tier1-puzzle-3\":{\"current\":0,\"target\":3}},\"completed\":[]}",
+        "journey": "{\"schemaVersion\":1,\"guestId\":\"86094658-f8a1-4c8e-b482-904528cc4b02\",\"createdAt\":\"2026-07-27T15:56:32.589Z\",\"mergedAccountId\":null}",
+        "gamePlayCounts": "{\"bubble-pop\":1,\"tetris\":1}",
+        "replayMoments": null,
+        "totalPlayCount": 2,
+        "progress": null
+      },
+      "displayName": "Tetris",
+      "verdict": "WARN",
+      "priority": "P2",
+      "failureStep": "Result",
+      "failureCause": "in-game overlay only",
+      "screenshotPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\tetris.png",
+      "logPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\tetris.log.json"
+    },
+    {
+      "slug": "2048",
+      "steps": [
+        {
+          "id": "gameOver",
+          "status": "fail",
+          "detail": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 120000ms exceeded while waiting on the predicate"
+        }
+      ],
+      "passed": false,
+      "score": null,
+      "analyticsTypes": [],
+      "consoleErrors": 1,
+      "consoleLogs": [
+        "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 120000ms exceeded while waiting on the predicate"
+      ],
+      "durationMs": 0,
+      "storageAfter": {
+        "xp": 0,
+        "coins": 0,
+        "bestScore": 0,
+        "dailyMission": null,
+        "journey": null,
+        "gamePlayCounts": null,
+        "replayMoments": null,
+        "totalPlayCount": 0,
+        "progress": null
+      },
+      "displayName": "2048",
+      "verdict": "FAIL",
+      "priority": "P0",
+      "failureStep": "crash",
+      "failureCause": "expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 120000ms exceeded while waiting on the predicate",
+      "thrownError": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Timeout 120000ms exceeded while waiting on the predicate",
+      "screenshotPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\2048.png",
+      "logPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\2048.log.json"
+    },
+    {
+      "slug": "memory",
+      "steps": [
+        {
+          "id": "gameOver",
+          "status": "fail",
+          "detail": "memory timed out after 180000ms"
+        }
+      ],
+      "passed": false,
+      "score": null,
+      "analyticsTypes": [],
+      "consoleErrors": 1,
+      "consoleLogs": [
+        "memory timed out after 180000ms"
+      ],
+      "durationMs": 0,
+      "storageAfter": {
+        "xp": 0,
+        "coins": 0,
+        "bestScore": 0,
+        "dailyMission": null,
+        "journey": null,
+        "gamePlayCounts": null,
+        "replayMoments": null,
+        "totalPlayCount": 0,
+        "progress": null
+      },
+      "displayName": "Memory",
+      "verdict": "FAIL",
+      "priority": "P0",
+      "failureStep": "crash",
+      "failureCause": "memory timed out after 180000ms",
+      "thrownError": "memory timed out after 180000ms",
+      "screenshotPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\memory.png",
+      "logPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\memory.log.json"
+    },
+    {
+      "slug": "color-match",
+      "steps": [
+        {
+          "id": "start",
+          "status": "pass"
+        },
+        {
+          "id": "tutorial",
+          "status": "pass",
+          "detail": "tutorial seen seeded"
+        },
+        {
+          "id": "stageClear",
+          "status": "skip",
+          "detail": "validated post-game via result modal"
+        },
+        {
+          "id": "nextStage",
+          "status": "skip",
+          "detail": "stage ladder checked on result score"
+        },
+        {
+          "id": "gameOver",
+          "status": "pass",
+          "detail": "score=0"
+        },
+        {
+          "id": "result",
+          "status": "warn",
+          "detail": "in-game overlay only"
+        },
+        {
+          "id": "scoreSave",
+          "status": "pass",
+          "detail": "best=938"
+        },
+        {
+          "id": "xp",
+          "status": "pass",
+          "detail": "170 → 210"
+        },
+        {
+          "id": "coin",
+          "status": "pass",
+          "detail": "2 → 12"
+        },
+        {
+          "id": "dailyMission",
+          "status": "pass",
+          "detail": "play count 0 → 1"
+        },
+        {
+          "id": "journey",
+          "status": "pass",
+          "detail": "journey profile present"
+        },
+        {
+          "id": "replay",
+          "status": "pass",
+          "detail": "session recorded"
+        },
+        {
+          "id": "leaderboard",
+          "status": "pass"
+        },
+        {
+          "id": "retry",
+          "status": "pass",
+          "detail": "game restarted"
+        },
+        {
+          "id": "gameOver",
+          "status": "fail",
+          "detail": "console: Failed to load resource: the server responded with a status of 409 ()"
+        }
+      ],
+      "passed": false,
+      "score": 0,
+      "analyticsTypes": [
+        "perf_metric",
+        "session_start",
+        "game_start",
+        "save_created",
+        "game_end",
+        "score_submit"
+      ],
+      "consoleErrors": 1,
+      "consoleLogs": [
+        "Failed to load resource: the server responded with a status of 409 ()"
+      ],
+      "durationMs": 44368,
+      "storageAfter": {
+        "xp": 210,
+        "coins": 12,
+        "bestScore": 938,
+        "dailyMission": "{\"date\":\"2026-07-28\",\"tier\":\"tier1\",\"missionIds\":[\"tier1-2048-play\",\"tier1-any-3\",\"tier1-puzzle-3\"],\"progress\":{\"tier1-2048-play\":{\"current\":1,\"target\":1},\"tier1-any-3\":{\"current\":3,\"target\":3},\"tier1-puzzle-3\":{\"current\":1,\"target\":3}},\"completed\":[\"tier1-2048-play\",\"tier1-any-3\"]}",
+        "journey": "{\"schemaVersion\":1,\"guestId\":\"86094658-f8a1-4c8e-b482-904528cc4b02\",\"createdAt\":\"2026-07-27T15:56:32.589Z\",\"mergedAccountId\":null}",
+        "gamePlayCounts": "{\"2048\":1,\"bubble-pop\":1,\"tetris\":1,\"memory\":1,\"color-match\":1}",
+        "replayMoments": null,
+        "totalPlayCount": 5,
+        "progress": {
+          "bestStage": 43,
+          "bestScore": 938,
+          "bestTile": null,
+          "retryCount": 2,
+          "playCount": 3,
+          "totalPlayTimeMs": 31611,
+          "totalScoreSum": 948,
+          "sessionCount": 2,
+          "lastCrashAt": null,
+          "avgPlayTimeMs": 15806,
+          "avgScore": 474,
+          "retryRate": 0.6666666666666666
+        }
+      },
+      "operational": {
+        "bestStage": 43,
+        "bestScore": 938,
+        "bestTile": null,
+        "retryCount": 2,
+        "playCount": 3,
+        "totalPlayTimeMs": 31611,
+        "totalScoreSum": 948,
+        "sessionCount": 2,
+        "lastCrashAt": null,
+        "avgPlayTimeMs": 15806,
+        "avgScore": 474,
+        "retryRate": 0.6666666666666666
+      },
+      "displayName": "Color Match",
+      "verdict": "FAIL",
+      "priority": "P0",
+      "failureStep": "crash",
+      "failureCause": "Failed to load resource: the server responded with a status of 409 ()",
+      "screenshotPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\color-match.png",
+      "logPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\color-match.log.json"
+    },
+    {
+      "slug": "air-hockey",
+      "steps": [
+        {
+          "id": "start",
+          "status": "pass"
+        },
+        {
+          "id": "tutorial",
+          "status": "pass",
+          "detail": "tutorial seen seeded"
+        },
+        {
+          "id": "stageClear",
+          "status": "skip",
+          "detail": "validated post-game via result modal"
+        },
+        {
+          "id": "nextStage",
+          "status": "skip",
+          "detail": "stage ladder checked on result score"
+        },
+        {
+          "id": "gameOver",
+          "status": "pass",
+          "detail": "score=0"
+        },
+        {
+          "id": "result",
+          "status": "warn",
+          "detail": "in-game overlay only"
+        },
+        {
+          "id": "scoreSave",
+          "status": "warn",
+          "detail": "game ended with zero score — best may be unchanged"
+        },
+        {
+          "id": "xp",
+          "status": "pass",
+          "detail": "210 → 225"
+        },
+        {
+          "id": "coin",
+          "status": "pass",
+          "detail": "12 → 13"
+        },
+        {
+          "id": "dailyMission",
+          "status": "pass",
+          "detail": "play count 0 → 1"
+        },
+        {
+          "id": "journey",
+          "status": "pass",
+          "detail": "journey profile present"
+        },
+        {
+          "id": "replay",
+          "status": "pass",
+          "detail": "session recorded"
+        },
+        {
+          "id": "leaderboard",
+          "status": "pass"
+        },
+        {
+          "id": "retry",
+          "status": "pass",
+          "detail": "game restarted"
+        }
+      ],
+      "passed": true,
+      "score": 0,
+      "analyticsTypes": [
+        "perf_metric",
+        "session_start",
+        "game_start",
+        "save_created",
+        "game_end"
+      ],
+      "consoleErrors": 0,
+      "consoleLogs": [],
+      "durationMs": 189302,
+      "storageAfter": {
+        "xp": 225,
+        "coins": 13,
+        "bestScore": 0,
+        "dailyMission": "{\"date\":\"2026-07-28\",\"tier\":\"tier1\",\"missionIds\":[\"tier1-2048-play\",\"tier1-any-3\",\"tier1-puzzle-3\"],\"progress\":{\"tier1-2048-play\":{\"current\":1,\"target\":1},\"tier1-any-3\":{\"current\":3,\"target\":3},\"tier1-puzzle-3\":{\"current\":1,\"target\":3}},\"completed\":[\"tier1-2048-play\",\"tier1-any-3\"]}",
+        "journey": "{\"schemaVersion\":1,\"guestId\":\"86094658-f8a1-4c8e-b482-904528cc4b02\",\"createdAt\":\"2026-07-27T15:56:32.589Z\",\"mergedAccountId\":null}",
+        "gamePlayCounts": "{\"2048\":1,\"bubble-pop\":1,\"tetris\":1,\"memory\":1,\"color-match\":1,\"air-hockey\":1}",
+        "replayMoments": null,
+        "totalPlayCount": 6,
+        "progress": null
+      },
+      "displayName": "Air Hockey",
+      "verdict": "WARN",
+      "priority": "P2",
+      "failureStep": "Result",
+      "failureCause": "in-game overlay only",
+      "screenshotPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\air-hockey.png",
+      "logPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\artifacts\\air-hockey.log.json"
+    }
+  ],
+  "markdownPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\2026-07-28.md",
+  "jsonPath": "C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\reports\\full-loop\\2026-07-28\\results.json"
+}

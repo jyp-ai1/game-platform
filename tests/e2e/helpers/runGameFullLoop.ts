@@ -47,6 +47,7 @@ export type GameFullLoopResult = {
   consoleLogs: string[];
   durationMs: number;
   storageAfter: GameLoopStorageSnapshot;
+  operational?: GameLoopStorageSnapshot["progress"];
 };
 
 export type RunGameFullLoopOptions = {
@@ -250,6 +251,7 @@ export async function runGameFullLoop(
         gamePlayCounts: null,
         replayMoments: null,
         totalPlayCount: 0,
+        progress: null,
       },
     };
   }
@@ -351,6 +353,7 @@ export async function runGameFullLoop(
     consoleLogs,
     durationMs: Date.now() - started,
     storageAfter,
+    operational: storageAfter.progress ?? undefined,
   };
 }
 

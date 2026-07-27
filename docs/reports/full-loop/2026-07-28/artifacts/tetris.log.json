@@ -1,0 +1,85 @@
+{
+  "slug": "tetris",
+  "verdict": "WARN",
+  "priority": "P2",
+  "steps": [
+    {
+      "id": "start",
+      "status": "pass"
+    },
+    {
+      "id": "tutorial",
+      "status": "pass",
+      "detail": "tutorial seen seeded"
+    },
+    {
+      "id": "stageClear",
+      "status": "skip",
+      "detail": "validated post-game via result modal"
+    },
+    {
+      "id": "nextStage",
+      "status": "skip",
+      "detail": "stage ladder checked on result score"
+    },
+    {
+      "id": "gameOver",
+      "status": "pass",
+      "detail": "score=0"
+    },
+    {
+      "id": "result",
+      "status": "warn",
+      "detail": "in-game overlay only"
+    },
+    {
+      "id": "scoreSave",
+      "status": "warn",
+      "detail": "game ended with zero score — best may be unchanged"
+    },
+    {
+      "id": "xp",
+      "status": "pass",
+      "detail": "85 → 100"
+    },
+    {
+      "id": "coin",
+      "status": "pass",
+      "detail": "1 → 2"
+    },
+    {
+      "id": "dailyMission",
+      "status": "pass",
+      "detail": "mission state updated"
+    },
+    {
+      "id": "journey",
+      "status": "pass",
+      "detail": "journey profile present"
+    },
+    {
+      "id": "replay",
+      "status": "pass",
+      "detail": "session recorded"
+    },
+    {
+      "id": "leaderboard",
+      "status": "pass"
+    },
+    {
+      "id": "retry",
+      "status": "pass",
+      "detail": "game restarted"
+    }
+  ],
+  "score": 0,
+  "analyticsTypes": [
+    "perf_metric",
+    "session_start",
+    "game_start",
+    "save_created",
+    "game_end"
+  ],
+  "consoleLogs": [],
+  "durationMs": 24262
+}

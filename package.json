@@ -35,6 +35,7 @@
     "test:e2e:games": "playwright test tests/e2e/games --config tests/e2e/playwright.config.ts",
     "test:e2e:full-loop": "playwright test tests/e2e/games/full-loop-tier-b.spec.ts --config tests/e2e/playwright.config.ts --grep \"collect all Tier B\"",
     "qa:full-loop": "node tools/qa/run-full-loop.mjs",
+    "qa:release-gate": "node tools/qa/run-release-gate.mjs",
     "test:e2e:golden-path": "playwright test tests/e2e/golden-path.spec.ts --config tests/e2e/playwright.config.ts",
     "test:e2e:home-visual": "playwright test tests/e2e/home-visual-qa.spec.ts --config tests/e2e/playwright.config.ts",
     "test:e2e:rc2": "playwright test tests/e2e/rc2-polish.spec.ts --config tests/e2e/playwright.config.ts",

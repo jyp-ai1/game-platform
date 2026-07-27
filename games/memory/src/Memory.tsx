@@ -6,7 +6,7 @@ import {
   SaveIndicator,
   useAutoSave,
   useGameSDK,
-  emitGameRetry,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
 } from "@game-platform/game-sdk";
@@ -14,40 +14,60 @@ import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-pla
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer, useRef } from "react";
 
-import { computeScore, createShuffledCards, MAX_MOVES, type Card } from "./engine";
+import { computeScore, createShuffledCards, type Card } from "./engine";
+import {
+  FINAL_MEMORY_STAGE,
+  getMemoryStage,
+  type MemoryStageDef,
+} from "./memory-stage-config";
 
 const GAME_SLUG = "memory";
 const MISMATCH_DELAY_MS = 800;
 
 interface State {
+  stageIndex: number;
+  stage: MemoryStageDef;
   cards: Card[];
   flipped: number[];
   moves: number;
-  status: "playing" | "won";
+  status: "playing" | "stage-clear" | "won";
 }
 
 type Action =
   | { type: "flip"; index: number }
   | { type: "resolve" }
-  | { type: "restart" };
+  | { type: "restart" }
+  | { type: "nextStage" };
 
-function createInitialState(): State {
+function buildStageState(stageIndex: number): State {
+  const stage = getMemoryStage(stageIndex);
   return {
-    cards: createShuffledCards(),
+    stageIndex,
+    stage,
+    cards: createShuffledCards(stage.pairs),
     flipped: [],
     moves: 0,
     status: "playing",
   };
 }
 
+function createInitialState(): State {
+  return buildStageState(1);
+}
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "nextStage":
+      if (state.stageIndex >= FINAL_MEMORY_STAGE) {
+        return { ...state, status: "won" };
+      }
+      return buildStageState(state.stageIndex + 1);
     case "resolve":
       return { ...state, flipped: [] };
     case "flip": {
-      if (state.status === "won" || state.flipped.length >= 2) {
+      if (state.status !== "playing" || state.flipped.length >= 2) {
         return state;
       }
       const card = state.cards[action.index];
@@ -65,21 +85,24 @@ function reducer(state: State, action: Action): State {
       const second = state.cards[secondIndex]!;
       const moves = state.moves + 1;
 
-      if (moves >= MAX_MOVES) {
-        const cards = state.cards.map((c) => ({ ...c, matched: true }));
-        return { cards, flipped: [], moves, status: "won" as const };
-      }
-
       if (first.symbol === second.symbol) {
         const cards = state.cards.map((c, i) =>
           i === firstIndex || i === secondIndex ? { ...c, matched: true } : c
         );
-        const won = cards.every((c) => c.matched);
-        return { cards, flipped: [], moves, status: won ? "won" : "playing" };
+        const allMatched = cards.every((c) => c.matched);
+        return {
+          ...state,
+          cards,
+          flipped: [],
+          moves,
+          status: allMatched
+            ? state.stageIndex >= FINAL_MEMORY_STAGE
+              ? "won"
+              : "stage-clear"
+            : "playing",
+        };
       }
 
-      // Leave both mismatched cards visible; the component schedules a
-      // "resolve" dispatch after a short delay so the player can see them.
       return { ...state, flipped, moves };
     }
     default:
@@ -88,16 +111,20 @@ function reducer(state: State, action: Action): State {
 }
 
 export function MemoryGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
+    useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stageClearReported = useRef(false);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "won" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -116,11 +143,29 @@ export function MemoryGame() {
   }, [state.flipped]);
 
   useEffect(() => {
+    if (state.status === "stage-clear" && !stageClearReported.current) {
+      stageClearReported.current = true;
+      const score = computeScore(state.moves, state.stageIndex);
+      recordStageClear(state.stageIndex, score);
+      reportScore(GAME_SLUG, score);
+    }
+    if (state.status === "playing") {
+      stageClearReported.current = false;
+    }
+  }, [state.status, state.moves, state.stageIndex, recordStageClear, reportScore]);
+
+  useEffect(() => {
     if (state.status === "won") {
-      reportScore(GAME_SLUG, computeScore(state.moves));
+      const score = computeScore(state.moves, state.stageIndex);
+      reportScore(GAME_SLUG, score);
+      recordGameEnd({
+        score,
+        outcome: "clear",
+        stageReached: state.stageIndex,
+      });
       clearSave(GAME_SLUG);
     }
-  }, [state.status, state.moves, reportScore]);
+  }, [state.status, state.moves, state.stageIndex, reportScore, recordGameEnd]);
 
   function handleFlip(index: number) {
     if (!canPlayRef.current) {
@@ -129,11 +174,28 @@ export function MemoryGame() {
     dispatch({ type: "flip", index });
   }
 
+  function handleRetry() {
+    recordGameRetry();
+    resetSession();
+    dispatch({ type: "restart" });
+  }
+
+  const score = computeScore(state.moves, state.stageIndex);
+  const gridColsClass =
+    state.stage.cols === 6
+      ? "grid-cols-6"
+      : state.stage.cols === 5
+        ? "grid-cols-5"
+        : "grid-cols-4";
+
   return (
     <div className="relative flex flex-col items-center gap-4">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Moves" value={state.moves} />
+        <div className="flex gap-2">
+          <ScoreBox label="Stage" value={state.stageIndex} />
+          <ScoreBox label="Moves" value={state.moves} />
+        </div>
         <Button
           variant="outline"
           size="icon"
@@ -144,7 +206,7 @@ export function MemoryGame() {
         </Button>
       </div>
 
-      <div className="relative grid w-full max-w-sm grid-cols-4 gap-2">
+      <div className={cn("relative grid w-full max-w-sm gap-2", gridColsClass)}>
         {state.cards.map((card, index) => {
           const isFaceUp = card.matched || state.flipped.includes(index);
           return (
@@ -164,12 +226,24 @@ export function MemoryGame() {
           );
         })}
 
+        {state.status === "stage-clear" ? (
+          <GameOverOverlay
+            variant="stage-clear"
+            stageLabel={`Stage ${state.stageIndex} Clear`}
+            score={score}
+            gameSlug={GAME_SLUG}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "nextStage" })}
+          />
+        ) : null}
+
         {state.status === "won" ? (
           <GameOverOverlay
             message="Complete!"
-            score={computeScore(state.moves)}
+            score={score}
             gameSlug={GAME_SLUG}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
+            onRetry={handleRetry}
             onRestart={() => dispatch({ type: "restart" })}
           />
         ) : null}
