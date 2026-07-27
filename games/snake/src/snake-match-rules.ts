@@ -148,7 +148,7 @@ export function resolveGlobalWorldRule(): MatchRuleConfig {
     respawnEnabled: false,
     foodDensityMult: 1.38,
     boostCostMult: 0.75,
-    startingSegments: 10,
+    startingSegments: 12,
     cameraZoomMult: 0.9,
     safeZoneRadiusMult: 1.2,
     scoreTarget: 1200,

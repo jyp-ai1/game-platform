@@ -2,8 +2,8 @@
 
 export const SNAKE_FEEL = {
   /** Path movement — float coords @ 20Hz, render @ 60fps (RC1 values in snake-mvp-rc1.ts) */
-  baseSpeed: 3.2,
-  boostSpeedMult: 2.0,
+  baseSpeed: 1.0,
+  boostSpeedMult: 1.2,
   segmentSpacing: 0.5,
   turnLerp: 0.2,
   headRadius: 0.38,
@@ -31,7 +31,7 @@ export const SNAKE_FEEL = {
   /** Visual motion smoothness */
   segmentLerpStep: 0.32,
   headLerpStep: 0.48,
-  growthAnimMs: 150,
+  growthAnimMs: 200,
   growthThreshold: 2,
   tailWaveAmp: 0.12,
   tailWaveAmpBoost: 0.04,

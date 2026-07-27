@@ -79,6 +79,8 @@ export interface SnakeEntity {
   segmentCount?: number;
   /** Bot FSM state */
   botState?: "search" | "chase" | "escape" | "boost" | "wander";
+  /** RC5 — hold movement until first direction input (local human) */
+  awaitingInput?: boolean;
 }
 
 export interface SnakeIoWorld {
@@ -291,7 +293,7 @@ export function createSnakeAt(
     score: opts?.score ?? 0,
     alive: true,
     color: COLORS[index % COLORS.length]!,
-    invincibleUntil: Date.now() + world.config.spawnShieldMs,
+    invincibleUntil: Date.now() + SNAKE_MVP_RC1.spawnSafeMs,
     hp: 100,
     gemsEaten: 0,
     aliveSinceTick: world.tick,
@@ -319,7 +321,7 @@ export function createSnake(
     score: 0,
     alive: true,
     color: COLORS[index % COLORS.length]!,
-    invincibleUntil: Date.now() + world.config.spawnShieldMs,
+    invincibleUntil: Date.now() + SNAKE_MVP_RC1.spawnSafeMs,
     hp: 100,
     gemsEaten: 0,
     aliveSinceTick: world.tick,
@@ -414,7 +416,9 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
   const w = world.config.worldSize;
   if (head.x < 0.2 || head.y < 0.2 || head.x >= w - 0.2 || head.y >= w - 0.2 || isBlocked(world, head)) {
-    killSnake(snake, world.config, world);
+    if (!(snake.invincibleUntil && now < snake.invincibleUntil)) {
+      killSnake(snake, world.config, world);
+    }
     return false;
   }
 
@@ -442,7 +446,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     return hit;
   });
 
-  if (hitSelf || hitOther) {
+  if ((hitSelf || hitOther) && !(snake.invincibleUntil && now < snake.invincibleUntil)) {
     if (killer) {
       killer.killStreak = (killer.killStreak ?? 0) + 1;
       killer.totalKills = (killer.totalKills ?? 0) + 1;
@@ -577,7 +581,8 @@ export function restartPlayerSnake(
   snake.gemsEaten = 0;
   snake.growthBuffer = 0;
   snake.respawnAt = undefined;
-  snake.invincibleUntil = now + Math.min(world.config.spawnShieldMs, 800);
+  snake.invincibleUntil = now + SNAKE_MVP_RC1.spawnSafeMs;
+  snake.awaitingInput = true;
   snake.aliveSinceTick = world.tick;
   snake.killStreak = 0;
   snake.foodEaten = 0;
@@ -607,6 +612,8 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
       if (canRespawn && snake.respawnAt && now >= snake.respawnAt) respawnSnake(world, snake, idx, now);
       continue;
     }
+
+    if (snake.awaitingInput) continue;
 
     applyFoodMagnet(world, snake);
     const boostActive = snake.boosting && getSegmentCount(snake) > SNAKE_FEEL.boostMinSegments;

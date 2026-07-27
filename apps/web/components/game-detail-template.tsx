@@ -51,7 +51,6 @@ export function GameDetailTemplate({
     <main className="flex flex-1 flex-col">
       <Container className="max-w-4xl space-y-5 py-5 sm:py-6">
         <GameDetailHero game={game} />
-        <GameDetailTrailer game={game} />
 
         {slug === "snake" ? <SnakeMultiplayerEntry variant="detail" /> : null}
 
@@ -68,6 +67,14 @@ export function GameDetailTemplate({
               </GameDetailStage>
             </RuntimeProvider>
 
+            <GameDetailTrailer game={game} />
+          </>
+        ) : null}
+
+        {slug !== "snake" ? <GameDetailTrailer game={game} /> : null}
+
+        {isPlayable ? (
+          <>
             {rankingEnabled ? (
               <>
                 <GameDetailTop3 gameSlug={slug} />

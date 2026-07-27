@@ -176,6 +176,9 @@ export function SnakeIoGame({
   const shakeRef = useRef(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const inputLoggedRef = useRef(false);
+  const awaitingInputRef = useRef(true);
+  const [awaitingInput, setAwaitingInput] = useState(true);
+  const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
   const [renderAlpha, setRenderAlpha] = useState(1);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
@@ -255,6 +258,27 @@ export function SnakeIoGame({
   );
   const announcements = world ? getActiveAnnouncements(world) : [];
   const latestKill = world?.killFeed[0];
+
+  const beginSpawnReady = useCallback(() => {
+    awaitingInputRef.current = true;
+    setAwaitingInput(true);
+    inputLoggedRef.current = false;
+    setSpawnHighlightUntil(Date.now() + SNAKE_MVP_RC1.spawnHighlightMs);
+    const snake = worldRef.current?.snakes[deviceId];
+    if (snake) snake.awaitingInput = true;
+    const head = resolveSnakeHead(snake ?? undefined);
+    const layout = camLayoutRef.current;
+    if (head && layout.cellSize > 0) {
+      camRef.current = {
+        x: head.x * layout.cellSize - layout.camHalf,
+        y: head.y * layout.cellSize - layout.camHalf,
+      };
+    } else {
+      camRef.current = { x: 0, y: 0 };
+    }
+    transitionGamePhase("READY", "await-input");
+    transitionGamePhase("COUNTDOWN", "await-input");
+  }, [deviceId]);
 
   useEffect(() => {
     if (!latestKill) return;
@@ -594,9 +618,8 @@ export function SnakeIoGame({
     appendLifecycle("STATE_READY");
     const me = world.snakes[deviceId];
     transitionGamePhase("READY", `alive=${me?.alive ?? "?"} len=${me ? getSegmentCount(me) : 0}`);
-    transitionGamePhase("COUNTDOWN");
-    window.setTimeout(() => transitionGamePhase("PLAYING"), 800);
-  }, [world, activeRoom, deviceId]);
+    beginSpawnReady();
+  }, [world, activeRoom, deviceId, beginSpawnReady]);
 
   useEffect(() => {
     if (!connected || !world) transitionGamePhase("LOADING");
@@ -725,6 +748,11 @@ export function SnakeIoGame({
         ...next.config,
         environment: EnvironmentEngine.resolve(pc, next.tick + 1),
       };
+
+      const localSnake = next.snakes[deviceId];
+      if (localSnake) {
+        localSnake.awaitingInput = awaitingInputRef.current;
+      }
 
       if (ux.events) {
         next.events = ExperienceEngine.events.expire(next.events);
@@ -881,6 +909,15 @@ export function SnakeIoGame({
 
   const handleDirection = useCallback((direction: Direction) => {
     if (!activeRoom || !worldRef.current || isSpectating) return;
+    if (awaitingInputRef.current) {
+      awaitingInputRef.current = false;
+      setAwaitingInput(false);
+      const snake = worldRef.current.snakes[deviceId];
+      if (snake) {
+        snake.awaitingInput = false;
+        snake.invincibleUntil = undefined;
+      }
+    }
     diagInput(direction);
     if (!inputLoggedRef.current) {
       inputLoggedRef.current = true;
@@ -902,7 +939,7 @@ export function SnakeIoGame({
     function onKeyDown(e: KeyboardEvent) {
       const dir = DIRECTION_KEYS[e.key];
       if (dir) { e.preventDefault(); handleDirection(dir); return; }
-      if (e.code === "Space" && !isSpectating) {
+      if (e.code === "Space" && !isSpectating && !awaitingInputRef.current) {
         e.preventDefault();
         if (!boostingRef.current) playBoostSound();
         boostingRef.current = true;
@@ -949,13 +986,11 @@ export function SnakeIoGame({
 
     if (isHost || isGlobalWorld) send(activeRoom, "state", next);
 
-    resetGamePhase();
-    transitionGamePhase("COUNTDOWN", "retry");
-    window.setTimeout(() => transitionGamePhase("PLAYING"), 400);
+    beginSpawnReady();
 
     tickEpochRef.current += 1;
     setTickEpoch(tickEpochRef.current);
-  }, [activeRoom, deviceId, postDeath, isHost, isGlobalWorld]);
+  }, [activeRoom, deviceId, postDeath, isHost, isGlobalWorld, beginSpawnReady]);
 
   useEffect(() => {
     if (!world) return;
@@ -1321,6 +1356,8 @@ export function SnakeIoGame({
                 : 1;
               const len = segs.length;
               const headRad = ((snake.angle ?? 0) * 180) / Math.PI;
+              const isMe = snake.deviceId === deviceId;
+              const highlight = isMe && spawnHighlightUntil > Date.now();
               return segs.map((seg, i) => {
                 const isHead = i === 0;
                 const isTail = i === len - 1;
@@ -1332,6 +1369,7 @@ export function SnakeIoGame({
                     : segBase * SNAKE_MVP_RC1.bodyScale;
                 const growthScale = growing && i >= len - 2 ? popScale : 1;
                 const size = segSize * growthScale;
+                const pulse = highlight ? 1 + Math.sin(Date.now() / 120) * 0.12 : 1;
                 return (
                   <div
                     key={`${snake.deviceId}-${i}`}
@@ -1339,27 +1377,54 @@ export function SnakeIoGame({
                       "absolute rounded-full origin-center",
                       (!snake.alive || snake.spectating) && "opacity-25",
                       isHead && "z-10",
+                      isMe && snake.alive && "ring-2 ring-white/90",
                       snake.boosting && isHead && "ring-2 ring-amber-300/60"
                     )}
                     style={{
-                      left: seg.x * cellSize + (cellSize - size) / 2,
-                      top: seg.y * cellSize + (cellSize - size) / 2,
-                      width: size,
-                      height: size,
+                      left: seg.x * cellSize + (cellSize - size * pulse) / 2,
+                      top: seg.y * cellSize + (cellSize - size * pulse) / 2,
+                      width: size * pulse,
+                      height: size * pulse,
                       backgroundColor: snake.color,
                       opacity: isTail ? 0.75 : isHead ? 1 : 0.92,
-                      boxShadow: isHead
-                        ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
-                          ? "0 0 10px white"
-                          : snake.boosting
-                            ? `0 0 14px ${snake.color}, 0 0 20px #fbbf2488`
-                            : `0 0 8px ${snake.color}`
-                        : undefined,
+                      boxShadow: highlight
+                        ? "0 0 18px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.45)"
+                        : isHead
+                          ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
+                            ? "0 0 10px white"
+                            : snake.boosting
+                              ? `0 0 14px ${snake.color}, 0 0 20px #fbbf2488`
+                              : `0 0 8px ${snake.color}`
+                          : undefined,
                       transform: isHead ? `rotate(${headRad}deg)` : undefined,
                     }}
                   />
                 );
               });
+            })}
+            {Object.values(world.snakes).map((snake) => {
+              if (!snake.alive || !snake.segments[0]) return null;
+              const head = resolveSnakeHead(snake);
+              if (!head) return null;
+              const isMe = snake.deviceId === deviceId;
+              const myHead = resolveSnakeHead(worldRef.current?.snakes[deviceId] ?? mySnake);
+              const dist = myHead ? Math.hypot(head.x - myHead.x, head.y - myHead.y) : 999;
+              if (!isMe && dist > 14) return null;
+              const label = isMe ? "YOU" : snake.nickname.slice(0, 8);
+              return (
+                <div
+                  key={`label-${snake.deviceId}`}
+                  className="pointer-events-none absolute z-20 whitespace-nowrap text-[9px] font-bold"
+                  style={{
+                    left: head.x * cellSize,
+                    top: head.y * cellSize - cellSize * 1.1,
+                    color: isMe ? "#fde047" : "rgba(255,255,255,0.75)",
+                    textShadow: "0 1px 3px rgba(0,0,0,0.9)",
+                  }}
+                >
+                  {label}
+                </div>
+              );
             })}
             {scorePopups.map((pop) => (
               <div
@@ -1392,6 +1457,14 @@ export function SnakeIoGame({
             ))}
           </div>
         </div>
+
+        {awaitingInput && mySnake?.alive ? (
+          <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
+            <p className="animate-pulse rounded-lg border border-white/20 bg-black/70 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+              방향키를 누르면 시작
+            </p>
+          </div>
+        ) : null}
 
         {ux.minimap ? (
           <div className="pointer-events-none absolute bottom-14 right-2 z-30">
@@ -1451,7 +1524,7 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {!isSpectating && mySnake?.alive ? (
+      {!isSpectating && mySnake?.alive && !awaitingInput ? (
         <SnakeMobileControls
           onDirection={handleDirection}
           onBoostStart={() => {
