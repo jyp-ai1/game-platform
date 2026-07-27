@@ -9,14 +9,20 @@ import {
   useGameSession,
   useReadyCountdown,
   useResumableGame,
+  playClickSound,
+  playFailSound,
+  playGameOverSound,
+  playPopSound,
+  playStartSound,
 } from "@game-platform/game-sdk";
 import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   BUBBLE_SIZE,
+  COLORS,
   type BubbleColor,
   type BubblePopState,
   createInitialState,
@@ -35,6 +41,14 @@ import { getBubbleStage } from "./bubble-stage-config";
 const GAME_SLUG = "bubble-pop";
 const MAX_DT = 0.05;
 const AIM_LINE_LENGTH = 60;
+
+interface PopParticle {
+  id: number;
+  xPct: number;
+  yPct: number;
+  color: BubbleColor;
+  life: number;
+}
 
 const COLOR_CLASSES: Record<BubbleColor, string> = {
   red: "bg-red-500",
@@ -94,6 +108,10 @@ export function BubblePopGame() {
   const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const stageClearReported = useRef(false);
+  const prevScoreRef = useRef(0);
+  const particleIdRef = useRef(0);
+  const [particles, setParticles] = useState<PopParticle[]>([]);
+  const [popFlash, setPopFlash] = useState(false);
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -128,6 +146,51 @@ export function BubblePopGame() {
       }
     };
   }, [canPlayRef]);
+
+  useEffect(() => {
+    if (sessionActive) {
+      playStartSound();
+    }
+  }, [sessionActive]);
+
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playPopSound();
+      setPopFlash(true);
+      const burst: PopParticle[] = Array.from({ length: 8 }, (_, i) => ({
+        id: particleIdRef.current++,
+        xPct: 35 + Math.random() * 30,
+        yPct: 15 + Math.random() * 45,
+        color: COLORS[i % COLORS.length]!,
+        life: 1,
+      }));
+      setParticles((p) => [...p, ...burst].slice(-40));
+      window.setTimeout(() => setPopFlash(false), 120);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
+  useEffect(() => {
+    if (particles.length === 0) return;
+    const id = window.setInterval(() => {
+      setParticles((p) =>
+        p
+          .map((pt) => ({ ...pt, life: pt.life - 0.12 }))
+          .filter((pt) => pt.life > 0)
+      );
+    }, 32);
+    return () => window.clearInterval(id);
+  }, [particles.length]);
+
+  useEffect(() => {
+    if (state.status === "over") {
+      playFailSound();
+      playGameOverSound();
+    }
+    if (state.status === "won" || state.status === "stage-clear") {
+      playStartSound();
+    }
+  }, [state.status]);
 
   useEffect(() => {
     if (state.status === "stage-clear" && !stageClearReported.current) {
@@ -196,6 +259,7 @@ export function BubblePopGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playClickSound();
     dispatch({ type: "fire" });
   }, [canPlayRef]);
 
@@ -203,7 +267,7 @@ export function BubblePopGame() {
   const aimY2 = SHOOTER_Y - Math.cos(state.shooterAngle) * AIM_LINE_LENGTH;
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="relative flex w-full max-w-full flex-col items-center gap-4 overflow-hidden">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex items-center gap-2">
@@ -233,8 +297,15 @@ export function BubblePopGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
-        style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
+        className={cn(
+          "relative mx-auto w-full touch-none select-none overflow-hidden rounded-xl bg-muted",
+          popFlash && "ring-2 ring-primary/40"
+        )}
+        style={{
+          aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}`,
+          maxWidth: "min(100%, 20rem)",
+          maxHeight: "min(70vh, 28rem)",
+        }}
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
       >
@@ -249,7 +320,7 @@ export function BubblePopGame() {
               <div
                 key={`${row}-${col}`}
                 className={cn(
-                  "absolute rounded-full",
+                  "absolute rounded-full transition-transform duration-150",
                   COLOR_CLASSES[color]
                 )}
                 style={bubbleStyle(row, col)}
@@ -272,6 +343,21 @@ export function BubblePopGame() {
             }}
           />
         ) : null}
+
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className={cn("pointer-events-none absolute rounded-full", COLOR_CLASSES[p.color])}
+            style={{
+              left: `${p.xPct}%`,
+              top: `${p.yPct}%`,
+              width: "6%",
+              height: "6%",
+              opacity: p.life,
+              transform: `scale(${1 + (1 - p.life) * 1.5})`,
+            }}
+          />
+        ))}
 
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full"

@@ -5,7 +5,8 @@ export const SNAKE_FEEL = {
   baseSpeed: 1.0,
   boostSpeedMult: 1.2,
   segmentSpacing: 0.5,
-  turnLerp: 0.2,
+  /** Sprint 13.7 — ~50% snappier turn (Slither-like tight arcs) */
+  turnLerp: 0.3,
   headRadius: 0.38,
   bodyRadius: 0.3,
   tailRadius: 0.22,
@@ -29,7 +30,8 @@ export const SNAKE_FEEL = {
   magnetPull: 0.32,
   magnetPullClose: 0.58,
   /** Camera — smooth lag follow; never snap or shake (Sprint 7.2: 0.08–0.10) */
-  cameraFollowLerp: 0.09,
+  /** Smoother lag — avoids sudden camera snaps */
+  cameraFollowLerp: 0.075,
   /** Base zoom-in — worm reads larger, eating feels satisfying (1.3–1.5) */
   baseCameraZoom: 1.4,
   /** Slither-like viewport — cells visible on screen (not world-size scaled) */

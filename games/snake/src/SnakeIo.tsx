@@ -20,7 +20,7 @@ import {
   subscribeRoom,
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
-import { cn, GameOverOverlay } from "@game-platform/ui";
+import { cn, GameOverOverlay, Button } from "@game-platform/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -192,6 +192,8 @@ export function SnakeIoGame({
   const boardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const [boardPx, setBoardPx] = useState(480);
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
   const prevSnakeSnapRef = useRef<Record<string, ReturnType<typeof captureSnakeSnapshot>>>({});
   const prevWorldRef = useRef<SnakeIoWorld | null>(null);
@@ -887,6 +889,7 @@ export function SnakeIoGame({
     const id = setInterval(() => {
       try {
       if (stageOverlayRef.current !== "none") return;
+      if (isPausedRef.current) return;
       if (epoch !== tickEpochRef.current) return;
       diagTick();
       const pc = playerCountRef.current;
@@ -1124,7 +1127,21 @@ export function SnakeIoGame({
     });
   }, [isStageMode, stageIndex, runScore, stageOverlay, world?.tick]);
 
+  const handleQuitGame = useCallback(() => {
+    setIsPaused(false);
+    emitGameExit("snake");
+    postDeath("exit");
+    if (typeof window !== "undefined") {
+      window.location.assign("/");
+    }
+  }, [postDeath]);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
   const handleDirection = useCallback((direction: Direction) => {
+    if (isPausedRef.current) return;
     if (!activeRoom || !worldRef.current || isSpectating) return;
     if (awaitingInputRef.current) {
       awaitingInputRef.current = false;
@@ -1156,6 +1173,12 @@ export function SnakeIoGame({
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !isSpectating && !awaitingInputRef.current) {
+        e.preventDefault();
+        setIsPaused((p) => !p);
+        return;
+      }
+      if (isPausedRef.current) return;
       const dir = DIRECTION_KEYS[e.key];
       if (dir) { e.preventDefault(); handleDirection(dir); return; }
       if (e.code === "Space" && !isSpectating && !awaitingInputRef.current) {
@@ -1494,8 +1517,43 @@ export function SnakeIoGame({
             handleDirection(dir);
           }}
         >
+        {mySnake?.alive && !isSpectating && !awaitingInput ? (
+          <div className="pointer-events-auto absolute left-2 top-2 z-40 flex gap-1.5">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-8 border-white/20 bg-black/70 px-2.5 text-xs text-white hover:bg-black/90"
+              onClick={handleQuitGame}
+            >
+              나가기
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-8 border-white/20 bg-black/70 px-2.5 text-xs text-white hover:bg-black/90"
+              onClick={() => setIsPaused(true)}
+            >
+              Pause
+            </Button>
+          </div>
+        ) : null}
+
+        {isPaused ? (
+          <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 rounded-xl bg-black/75 backdrop-blur-sm">
+            <p className="text-lg font-semibold text-white">Paused</p>
+            <Button type="button" size="sm" onClick={() => setIsPaused(false)}>
+              Resume
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={handleQuitGame}>
+              Exit
+            </Button>
+          </div>
+        ) : null}
+
         {/* HUD — anchored to canvas */}
-        <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
+        <div className="pointer-events-none absolute left-2 top-12 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
           <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
           <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
           <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
@@ -1875,7 +1933,7 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {!isSpectating && mySnake?.alive && !awaitingInput ? (
+      {!isSpectating && mySnake?.alive && !awaitingInput && !isPaused ? (
         <SnakeMobileControls
           onDirection={handleDirection}
           onBoostStart={() => {

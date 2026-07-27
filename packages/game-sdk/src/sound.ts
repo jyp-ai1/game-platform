@@ -62,3 +62,22 @@ export function playStartSound(): void {
   playTone(523.25, 90, { volume: 0.12 });
   playTone(783.99, 140, { volume: 0.12, delayMs: 90 });
 }
+
+export function playSuccessSound(): void {
+  playTone(784, 90, { volume: 0.1 });
+  playTone(988, 70, { volume: 0.08, delayMs: 60 });
+}
+
+export function playFailSound(): void {
+  playTone(220, 140, { type: "triangle", volume: 0.09 });
+}
+
+export function playGameOverSound(): void {
+  playTone(330, 180, { type: "triangle", volume: 0.1 });
+  playTone(196, 260, { type: "triangle", volume: 0.08, delayMs: 100 });
+}
+
+export function playPopSound(): void {
+  playTone(520, 55, { volume: 0.08 });
+  playTone(780, 45, { volume: 0.06, delayMs: 25 });
+}

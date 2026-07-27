@@ -27,7 +27,15 @@ export {
   subscribeNickname,
   subscribeSoundEnabled,
 } from "./local-storage";
-export { playClickSound, playHoverSound, playStartSound } from "./sound";
+export {
+  playClickSound,
+  playFailSound,
+  playGameOverSound,
+  playHoverSound,
+  playPopSound,
+  playStartSound,
+  playSuccessSound,
+} from "./sound";
 export {
   ACHIEVEMENTS,
   getAchievementRate,
