@@ -21,7 +21,7 @@ export interface FoodItem {
   kind: FoodKind;
   value: number;
   tier?: FoodTier;
-  growthSegments?: number;
+  growthCredits?: number;
 }
 
 export interface SnakeEntity {
@@ -50,6 +50,8 @@ export interface SnakeEntity {
   /** Per-bot desync — fake crowd prevention */
   botPhase?: number;
   botSeed?: number;
+  /** Growth credits toward next body segment (2 credits = +1 segment) */
+  growthBuffer?: number;
   /** Client-side growth pulse timestamp (ms) — set on eat */
   lastGrowthAt?: number;
 }
@@ -139,7 +141,7 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
       kind: cfg.kind,
       value: cfg.score,
       tier,
-      growthSegments: cfg.segments,
+      growthCredits: cfg.growthCredits,
     });
   }
 }
@@ -159,6 +161,15 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
     snake.segments.push({ x: last.x - stepX, y: last.y - stepY });
   }
   snake.lastGrowthAt = Date.now();
+}
+
+function applyGrowthCredits(snake: SnakeEntity, credits: number): void {
+  if (credits <= 0) return;
+  snake.growthBuffer = (snake.growthBuffer ?? 0) + credits;
+  while ((snake.growthBuffer ?? 0) >= SNAKE_FEEL.growthThreshold) {
+    growSnakeSegments(snake, 1);
+    snake.growthBuffer = (snake.growthBuffer ?? 0) - SNAKE_FEEL.growthThreshold;
+  }
 }
 
 function spawnWorldBoss(world: SnakeIoWorld): void {
@@ -407,7 +418,7 @@ function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): bo
     return false;
   }
 
-  snake.segments = foodIdx >= 0 ? [next, ...snake.segments] : [next, ...snake.segments.slice(0, -1)];
+  snake.segments = [next, ...snake.segments.slice(0, -1)];
   if (foodIdx >= 0) {
     const food = world.food[foodIdx]!;
     world.food.splice(foodIdx, 1);
@@ -418,9 +429,8 @@ function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): bo
     snake.score += Math.round(baseScore * mult);
     snake.foodEaten = (snake.foodEaten ?? 0) + 1;
     world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
-    const growth = food.growthSegments ?? FOOD_TIERS[food.tier ?? "small"].segments;
-    if (growth > 1) growSnakeSegments(snake, growth - 1);
-    else snake.lastGrowthAt = Date.now();
+    const credits = food.growthCredits ?? FOOD_TIERS[food.tier ?? "small"].growthCredits;
+    applyGrowthCredits(snake, credits);
     spawnFoodItems(world, 1);
   }
   return true;
@@ -654,14 +664,20 @@ export function createScheduledEvent(world: SnakeIoWorld, playerCount: number): 
   };
 }
 
-export function lerpSegments(prev: Vec[] | undefined, curr: Vec[], alpha: number, headAlpha?: number): Vec[] {
+export function lerpSegments(
+  prev: Vec[] | undefined,
+  curr: Vec[],
+  alpha: number,
+  headAlpha?: number,
+  waveAmp: number = SNAKE_FEEL.tailWaveAmp
+): Vec[] {
   const headMix = headAlpha ?? alpha;
   return curr.map((c, i) => {
     const p = prev?.[i] ?? c;
     const mix = i === 0 ? headMix : alpha;
     const wave =
       i > 0 && curr.length > 2
-        ? Math.sin((i + alpha * 10) * 0.45) * SNAKE_FEEL.tailWaveAmp * (i / curr.length)
+        ? Math.sin((i + alpha * 10) * 0.45) * waveAmp * (i / curr.length)
         : 0;
     return {
       x: p.x + (c.x - p.x) * mix + wave,

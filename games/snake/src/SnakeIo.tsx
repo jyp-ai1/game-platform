@@ -20,6 +20,7 @@ import {
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
 import { Button, cn, ScoreBox } from "@game-platform/ui";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -100,6 +101,7 @@ import { refreshWorldTuningFromTelemetry } from "./snake-balance-tuner";
 import { recordSnakeSessionEnd } from "./snake-session-recap";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
+import { SnakeMinimap } from "./snake-minimap";
 import { SnakeMobileControls } from "./snake-mobile-controls";
 import {
   playBoostSound,
@@ -749,6 +751,23 @@ export function SnakeIoGame({
     };
   }, [handleDirection, isSpectating, shouldTickWorld, deviceId, activeRoom]);
 
+  const handleRetry = useCallback(() => {
+    postDeath("replay");
+    emitGameRetry("snake");
+  }, [postDeath]);
+
+  useEffect(() => {
+    if (!mySnake || mySnake.alive) return;
+    function onEnter(e: KeyboardEvent) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleRetry();
+      }
+    }
+    window.addEventListener("keydown", onEnter);
+    return () => window.removeEventListener("keydown", onEnter);
+  }, [mySnake?.alive, handleRetry]);
+
   useEffect(() => {
     if (!world) return;
     const prev = prevWorldRef.current;
@@ -776,9 +795,17 @@ export function SnakeIoGame({
         markFirstFun(activeRoom);
         setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, vis.particleCount));
         setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y, delta, vis.color));
+        const buf = me.growthBuffer ?? 0;
+        setScorePopups((pop) =>
+          spawnScorePopup(pop, head.x, head.y - 0.8, `${buf}/${SNAKE_FEEL.growthThreshold}`, "#94a3b8")
+        );
         if (me.boosting) {
           setParticles((p) => spawnBoostTrail(p, head.x, head.y, me.color));
         }
+      }
+      if (me && prevMe && me.segments.length > prevMe.segments.length && me.segments[0]) {
+        const head = me.segments[0]!;
+        setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y - 1.2, "Grow!", "#22c55e"));
       }
       if (prevMe && me && getMyRank(world, deviceId) < getMyRank(prev, deviceId) && me.segments[0]) {
         playRankUpSound();
@@ -901,14 +928,15 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const zoomFeel =
-    matchRule.cameraZoomMult * (isBoosting ? SNAKE_FEEL.cameraBoostZoom : 1);
-  const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * zoomFeel;
+  const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * matchRule.cameraZoomMult;
   const cellSize = Math.min(
     SNAKE_FEEL.maxCellPx,
     Math.max(SNAKE_FEEL.minCellPx, rawCell)
   );
+  const boostScale = isBoosting ? SNAKE_FEEL.cameraBoostScale : 1;
   const camHalf = boardPx / 2;
+  const top1Id = world.rankings[0]?.deviceId ?? null;
+  const growthBuffer = mySnake?.growthBuffer ?? 0;
 
   if (mySnake?.segments[0] && !camSnappedRef.current) {
     const head = mySnake.segments[0];
@@ -929,7 +957,6 @@ export function SnakeIoGame({
   camRef.current.y += (targetCamY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
   const camX = camRef.current.x;
   const camY = camRef.current.y;
-  const showResultActions = !mySnake?.alive || isSpectating;
 
   return (
     <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-1 sm:gap-4 sm:px-2">
@@ -990,11 +1017,11 @@ export function SnakeIoGame({
         <ScoreBox label="Combo" value={mySnake?.killStreak ?? 0} />
         <ScoreBox label="Rank" value={myRank} />
       </div>
-      <div className="flex w-full max-w-lg items-center gap-2">
+      <div className="flex w-full max-w-lg items-center gap-3">
         <div className="flex-1">
           <div className="mb-1 flex justify-between text-[10px] text-muted-foreground">
             <span>Boost</span>
-            <span>{isBoosting ? "⚡ ACTIVE" : mySnake && mySnake.score >= SNAKE_FEEL.boostMinScore ? "Space / 버튼" : "점수 3+ 필요"}</span>
+            <span>{isBoosting ? "⚡ ACTIVE" : mySnake && mySnake.score >= SNAKE_FEEL.boostMinScore ? "Space" : "3+ 필요"}</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/10">
             <div
@@ -1005,16 +1032,22 @@ export function SnakeIoGame({
             />
           </div>
         </div>
+        <div className="w-24 text-center">
+          <p className="text-[10px] text-muted-foreground">Growth</p>
+          <p className="text-sm font-bold tabular-nums text-emerald-300">
+            {growthBuffer} / {SNAKE_FEEL.growthThreshold}
+          </p>
+        </div>
         <div className="text-right text-[10px] text-muted-foreground">
           <p>목표 · {world.objective.label}</p>
-          <p className="font-semibold text-primary">{world.objective.target - (world.objective.progress[deviceId] ?? 0)} left</p>
+          <p className="font-semibold text-primary">#{myRank}</p>
         </div>
       </div>
       <p className="w-full max-w-lg text-center text-xs text-muted-foreground">{matchRule.description}</p>
 
       <div className="relative flex w-full justify-center gap-3">
         <div
-          className="relative w-full overflow-hidden rounded-xl border border-white/10 touch-none"
+          className="relative w-full overflow-hidden rounded-xl border border-white/10 touch-none transition-transform duration-200 ease-out"
           style={{
             width: boardPx,
             height: boardPx,
@@ -1060,7 +1093,17 @@ export function SnakeIoGame({
             </ol>
           </div>
         ) : null}
-          <div className="absolute origin-top-left" style={{ width: worldSize * cellSize, height: worldSize * cellSize, transform: `translate(${-camX}px, ${-camY}px)` }}>
+          <div
+            className="absolute origin-top-left transition-transform duration-200 ease-out"
+            style={{
+              width: worldSize * cellSize,
+              height: worldSize * cellSize,
+              transform: `translate(${-camX}px, ${-camY}px) scale(${boostScale})`,
+              transformOrigin: cameraHead
+                ? `${cameraHead.x * cellSize}px ${cameraHead.y * cellSize}px`
+                : "center center",
+            }}
+          >
             {world.living?.collapseRadius != null ? (
               <div className="absolute rounded-full border-2 border-orange-500/40 pointer-events-none"
                 style={{
@@ -1145,7 +1188,14 @@ export function SnakeIoGame({
             ) : null}
             {Object.values(world.snakes).map((snake) => {
               const headAlpha = Math.min(1, renderAlpha * (SNAKE_FEEL.headLerpStep / SNAKE_FEEL.segmentLerpStep));
-              const segs = lerpSegments(prevSegmentsRef.current[snake.deviceId], snake.segments, renderAlpha, headAlpha);
+              const waveAmp = snake.boosting ? SNAKE_FEEL.tailWaveAmpBoost : SNAKE_FEEL.tailWaveAmp;
+              const segs = lerpSegments(
+                prevSegmentsRef.current[snake.deviceId],
+                snake.segments,
+                renderAlpha,
+                headAlpha,
+                waveAmp
+              );
               const growing = (growthUntilRef.current[snake.deviceId] ?? 0) > Date.now();
               const len = segs.length;
               return segs.map((seg, i) => {
@@ -1220,18 +1270,42 @@ export function SnakeIoGame({
         </div>
 
         {ux.minimap ? (
-          <div className="hidden w-24 shrink-0 rounded-xl border border-white/10 bg-black/40 p-1 sm:block">
-            <p className="mb-1 text-[8px] text-muted-foreground">MINIMAP</p>
-            <div className="relative aspect-square w-full">
-              {Object.values(world.snakes).map((s) => s.segments[0] ? (
-                <div key={s.deviceId} className="absolute size-1 rounded-full" style={{
-                  left: `${(s.segments[0].x / worldSize) * 100}%`, top: `${(s.segments[0].y / worldSize) * 100}%`, backgroundColor: s.color,
-                }} />
-              ) : null)}
-            </div>
-          </div>
+          <SnakeMinimap
+            snakes={Object.values(world.snakes)}
+            worldSize={worldSize}
+            deviceId={deviceId}
+            top1Id={top1Id}
+            camX={camX}
+            camY={camY}
+            viewPx={boardPx}
+            cellSize={cellSize}
+          />
         ) : null}
       </div>
+
+      {mySnake && !mySnake.alive ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/15 bg-black/85 px-6 py-8 text-center shadow-2xl animate-in fade-in zoom-in-95">
+            <p className="text-2xl font-bold tracking-wide text-red-400">YOU DIED</p>
+            <p className="mt-2 text-sm text-muted-foreground">Retry to jump back in instantly</p>
+            <div className="mt-6 flex flex-col gap-3">
+              <Button size="lg" className="w-full" onClick={handleRetry}>
+                Retry (ENTER)
+              </Button>
+              <Button variant="outline" size="lg" className="w-full" nativeButton={false} render={<Link href="/">Home</Link>} />
+              {isSpectating ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { postDeath("exit"); handleEnd(); }}
+                >
+                  View Results
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {cheerMsg ? (
         <div className="w-full max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/20 px-4 py-2 text-center text-lg font-bold animate-pulse">
@@ -1283,39 +1357,12 @@ export function SnakeIoGame({
           {myRank > 10 ? <p className="mt-2 text-primary">내 순위 #{myRank}</p> : null}
         </div>
         <div className="flex flex-col gap-2">
-          {showResultActions ? (
-            isSpectating ? (
-              <>
-                <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center">
-                  <p className="text-sm font-bold">관전 중</p>
-                  <p className="mt-1 text-xs text-muted-foreground">한 판 더?</p>
-                </div>
-                <select className="rounded border bg-background px-2 py-1 text-xs" value={spectatorMode} onChange={(e) => { postDeath("spectator"); setSpectatorMode(e.target.value as typeof spectatorMode); }}>
-                  <option value="top1">TOP1 시점</option>
-                  <option value="friend">친구 시점</option>
-                  <option value="boss">Boss 추적</option>
-                  <option value="free">자유 카메라</option>
-                </select>
-                <Button variant="outline" size="sm" onClick={() => {
-                  postDeath("spectator");
-                  setCheerMsg("🔥 응원!");
-                  setTimeout(() => setCheerMsg(null), 2000);
-                }}>응원 🔥</Button>
-                <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSnakeRematch(activeRoom); emitGameRetry("snake"); handleEnd(); }}>즉시 리매치</Button>
-                <Button variant="outline" size="sm" onClick={() => { postDeath("replay"); recordSpectatorRejoin(activeRoom); handleEnd(); }}>한 판 더! →</Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={() => { postDeath("replay"); emitGameRetry("snake"); }}>Retry</Button>
-            )
-          ) : (
+          {!mySnake?.alive ? null : (
             <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
               <p className="text-sm font-semibold">플레이 중</p>
               <p className="mt-1 text-xs text-muted-foreground">WASD · Space boost</p>
             </div>
           )}
-          {showResultActions ? (
-            <Button data-testid="snake-end-result" onClick={() => { postDeath("exit"); handleEnd(); }}>End & Result</Button>
-          ) : null}
         </div>
       </div>
     </div>

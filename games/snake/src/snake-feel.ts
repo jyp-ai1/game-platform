@@ -137,12 +137,12 @@ export function spawnScorePopup(
   popups: ScorePopup[],
   x: number,
   y: number,
-  score: number,
+  text: string | number,
   color: string
 ): ScorePopup[] {
   return [
     ...popups,
-    { id: ++popupId, x, y, text: `+${score}`, color, life: 1 },
+    { id: ++popupId, x, y, text: typeof text === "number" ? `+${text}` : text, color, life: 1 },
   ].slice(-12);
 }
 

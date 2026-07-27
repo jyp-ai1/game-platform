@@ -6,7 +6,8 @@ export interface FoodTierConfig {
   tier: FoodTier;
   kind: FoodKind;
   score: number;
-  segments: number;
+  /** Growth credits toward next segment (threshold = 2) */
+  growthCredits: number;
   sizePx: number;
   color: string;
   glow: string;
@@ -19,7 +20,7 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
     tier: "small",
     kind: "normal",
     score: 1,
-    segments: 1,
+    growthCredits: 1,
     sizePx: 6,
     color: "#fbbf24",
     glow: "0 0 6px #fbbf24",
@@ -30,7 +31,7 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
     tier: "medium",
     kind: "meteor",
     score: 3,
-    segments: 1,
+    growthCredits: 1,
     sizePx: 10,
     color: "#f97316",
     glow: "0 0 10px #fb923c",
@@ -41,7 +42,7 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
     tier: "large",
     kind: "meteor",
     score: 7,
-    segments: 2,
+    growthCredits: 2,
     sizePx: 14,
     color: "#22d3ee",
     glow: "0 0 14px #22d3ee",
@@ -52,7 +53,7 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
     tier: "rare",
     kind: "golden_apple",
     score: 15,
-    segments: 3,
+    growthCredits: 4,
     sizePx: 18,
     color: "#a855f7",
     glow: "0 0 18px #c084fc",
