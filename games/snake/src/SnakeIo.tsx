@@ -122,7 +122,7 @@ import { refreshWorldTuningFromTelemetry } from "./snake-balance-tuner";
 import { recordSnakeSessionEnd } from "./snake-session-recap";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
-import { resolveHeadEmoji, type SnakeHeadId } from "./snake-characters";
+import { applyCharacterToSnake, resolveHeadEmoji, segmentBodyColor, type SnakeHeadId } from "./snake-characters";
 import {
   enterViewportFullscreen,
   exitViewportFullscreen,
@@ -199,6 +199,7 @@ export function SnakeIoGame({
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
   const prevSegCountRef = useRef<Record<string, number>>({});
   const growthUntilRef = useRef<Record<string, number>>({});
+  const eatPopUntilRef = useRef<Record<string, number>>({});
   const [cheerMsg, setCheerMsg] = useState<string | null>(null);
   const [joinBrief, setJoinBrief] = useState<GlobalWorldJoinBrief | null>(null);
   const sessionMomentsRef = useRef<ReplayMoment[]>([]);
@@ -359,12 +360,12 @@ export function SnakeIoGame({
   useEffect(() => {
     headCharacterRef.current = headCharacter;
     const s = worldRef.current?.snakes[deviceId];
-    if (s && !isBotSnake(s)) s.headCharacter = headCharacter;
+    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacter);
   }, [headCharacter, deviceId]);
 
   const applyLocalHead = useCallback((w: SnakeIoWorld) => {
     const s = w.snakes[deviceId];
-    if (s && !isBotSnake(s)) s.headCharacter = headCharacterRef.current;
+    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current);
   }, [deviceId]);
 
   useEffect(() => {
@@ -1053,6 +1054,12 @@ export function SnakeIoGame({
         Object.entries(prev.snakes).map(([id, s]) => [id, captureSnakeSnapshot(s)])
       );
       setRenderAlpha(0);
+      for (const [id, s] of Object.entries(world.snakes)) {
+        const prevS = prev.snakes[id];
+        if (prevS && s && s.score > prevS.score) {
+          eatPopUntilRef.current[id] = Date.now() + SNAKE_FEEL.eatPopAnimMs;
+        }
+      }
       const me = world.snakes[deviceId];
       const prevMe = prev.snakes[deviceId];
       if (me) {
@@ -1456,9 +1463,17 @@ export function SnakeIoGame({
                   );
               const growing = (growthUntilRef.current[snake.deviceId] ?? 0) > Date.now();
               const growthLeft = (growthUntilRef.current[snake.deviceId] ?? 0) - Date.now();
-              const popScale = growing
+              const tailPopScale = growing
                 ? 0.9 + Math.sin((1 - Math.max(0, growthLeft) / SNAKE_FEEL.growthAnimMs) * Math.PI) * 0.2
                 : 1;
+              const eatPopLeft = (eatPopUntilRef.current[snake.deviceId] ?? 0) - Date.now();
+              const eatPopScale =
+                eatPopLeft > 0
+                  ? 1 +
+                    (SNAKE_FEEL.eatPopPeak - 1) *
+                      Math.sin((1 - Math.max(0, eatPopLeft) / SNAKE_FEEL.eatPopAnimMs) * Math.PI)
+                  : 1;
+              const radiusScale = snake.bodyRadiusScale ?? 1;
               const len = segs.length;
               const headRad = ((snake.angle ?? 0) * 180) / Math.PI;
               const isMe = snake.deviceId === deviceId;
@@ -1472,9 +1487,10 @@ export function SnakeIoGame({
                   : isTail
                     ? segBase * SNAKE_MVP_RC1.tailScale
                     : segBase * SNAKE_MVP_RC1.bodyScale;
-                const growthScale = growing && i >= len - 2 ? popScale : 1;
-                const size = segSize * growthScale;
+                const growthScale = growing && i >= len - 2 ? tailPopScale : 1;
+                const size = segSize * radiusScale * eatPopScale * growthScale;
                 const pulse = highlight ? 1 + Math.sin(Date.now() / 120) * 0.12 : 1;
+                const fill = segmentBodyColor(snake, i);
                 return (
                   <div
                     key={`${snake.deviceId}-${i}`}
@@ -1490,7 +1506,7 @@ export function SnakeIoGame({
                       top: seg.y * cellSize + (cellSize - size * pulse) / 2,
                       width: size * pulse,
                       height: size * pulse,
-                      backgroundColor: snake.color,
+                      backgroundColor: fill,
                       opacity: isTail ? 0.75 : isHead ? 1 : 0.92,
                       boxShadow: highlight
                         ? "0 0 18px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.45)"
@@ -1498,8 +1514,8 @@ export function SnakeIoGame({
                           ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
                             ? "0 0 10px white"
                             : snake.boosting
-                              ? `0 0 14px ${snake.color}, 0 0 20px #fbbf2488`
-                              : `0 0 8px ${snake.color}`
+                              ? `0 0 14px ${fill}, 0 0 20px #fbbf2488`
+                              : `0 0 8px ${fill}`
                           : undefined,
                       transform: isHead ? `rotate(${headRad}deg)` : undefined,
                     }}

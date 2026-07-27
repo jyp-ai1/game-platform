@@ -66,12 +66,13 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   },
 };
 
-/** Weighted roll — RC1: Small / Medium / Large only */
+/** Weighted roll — Sprint 8.1: Small 55% / Medium 25% / Large 15% / Epic 5% */
 export function rollFoodTier(): FoodTier {
   const r = Math.random();
-  if (r < 0.6) return "small";
-  if (r < 0.85) return "medium";
-  return "large";
+  if (r < 0.55) return "small";
+  if (r < 0.8) return "medium";
+  if (r < 0.95) return "large";
+  return "epic";
 }
 
 export function tierFromKind(kind: FoodKind, value: number): FoodTier {

@@ -83,6 +83,12 @@ export interface SnakeEntity {
   awaitingInput?: boolean;
   /** Sprint 8 — head character id (emoji sprite on head segment) */
   headCharacter?: string;
+  /** Sprint 8.2 — body appearance (pattern unlocks later via progression) */
+  bodyColor?: string;
+  bodyColorAlt?: string;
+  bodyPattern?: string;
+  /** Sprint 8.1 — cumulative thickness from eating (1.0 … 1.4) */
+  bodyRadiusScale?: number;
 }
 
 export interface SnakeIoWorld {
@@ -194,6 +200,11 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
 function applyGemGrowth(snake: SnakeEntity): void {
   snake.gemsEaten = (snake.gemsEaten ?? 0) + 1;
   snake.growthBuffer = snake.gemsEaten % SNAKE_MVP_RC1.growthFoodPerSegment;
+  const scale = snake.bodyRadiusScale ?? 1;
+  snake.bodyRadiusScale = Math.min(
+    SNAKE_MVP_RC1.bodyRadiusMax,
+    scale + SNAKE_MVP_RC1.bodyRadiusPerFood
+  );
   if (snake.gemsEaten % SNAKE_MVP_RC1.growthFoodPerSegment === 0) {
     growSnakeSegments(snake, 1);
   }
@@ -298,6 +309,7 @@ export function createSnakeAt(
     invincibleUntil: Date.now() + SNAKE_MVP_RC1.spawnSafeMs,
     hp: 100,
     gemsEaten: 0,
+    bodyRadiusScale: 1,
     aliveSinceTick: world.tick,
     totalKills: 0,
     isBot: opts?.isBot,
@@ -327,6 +339,7 @@ export function createSnake(
     invincibleUntil: Date.now() + SNAKE_MVP_RC1.spawnSafeMs,
     hp: 100,
     gemsEaten: 0,
+    bodyRadiusScale: 1,
     aliveSinceTick: world.tick,
     totalKills: 0,
     awaitingInput: true,
@@ -582,6 +595,7 @@ export function restartPlayerSnake(
   snake.boosting = false;
   snake.gemsEaten = 0;
   snake.growthBuffer = 0;
+  snake.bodyRadiusScale = 1;
   snake.respawnAt = undefined;
   snake.invincibleUntil = now + SNAKE_MVP_RC1.spawnSafeMs;
   snake.awaitingInput = true;

@@ -40,7 +40,9 @@ export const SNAKE_FEEL = {
   /** Visual motion smoothness — lower step = longer blend between 20Hz ticks */
   segmentLerpStep: 0.18,
   headLerpStep: 0.52,
-  growthAnimMs: 200,
+  growthAnimMs: 150,
+  eatPopAnimMs: 150,
+  eatPopPeak: 1.08,
   growthThreshold: 2,
   tailWaveAmp: 0.12,
   tailWaveAmpBoost: 0.04,
@@ -61,7 +63,7 @@ export const SNAKE_FEEL = {
 
 /** World / spawn polish — density & growth pacing */
 export const SNAKE_POLISH = {
-  foodDensityMult: 1.14,
+  foodDensityMult: 2.0,
   bossHpMult: 0.85,
   bossDamagePerHit: 10,
   safeZoneRadiusMult: 1.12,

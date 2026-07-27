@@ -13,7 +13,13 @@ export const SNAKE_MVP_RC1 = {
   boostSpeedMult: 1.2,
   /** 2 food pickups → +1 segment */
   growthFoodPerSegment: 2,
-  growthAnimMs: 200,
+  /** Per-food body thickness gain (max 140%) */
+  bodyRadiusPerFood: 0.004,
+  bodyRadiusMax: 1.4,
+  /** Eat pop: 1.0 → 1.08 → 1.0 */
+  eatPopAnimMs: 150,
+  eatPopPeak: 1.08,
+  growthAnimMs: 150,
   cameraFollowLerp: 0.09,
   spawnHighlightMs: 2000,
   spawnSafeMs: 2000,
