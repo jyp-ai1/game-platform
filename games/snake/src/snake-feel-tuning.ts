@@ -11,6 +11,11 @@ export const SNAKE_FEEL = {
   /** Camera — snappy follow, subtle boost zoom */
   cameraFollowLerp: 0.34,
   cameraBoostZoom: 1.1,
+  /** Slither-like viewport — cells visible on screen (not world-size scaled) */
+  viewportCellsVisible: 50,
+  minCellPx: 8,
+  maxCellPx: 14,
+  maxViewportPx: 720,
   /** Visual motion smoothness */
   segmentLerpStep: 0.38,
   /** Juice — eat / kill / death feedback */
