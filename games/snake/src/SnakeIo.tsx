@@ -34,6 +34,7 @@ import {
   getMyRank,
   getSpectatorTarget,
   lerpSegments,
+  restartPlayerSnake,
   setBoost,
   setInput,
   spawnEventFood,
@@ -173,6 +174,9 @@ export function SnakeIoGame({
   const onJoinTimeoutRef = useRef(onJoinTimeout);
   const gameReadyRef = useRef(false);
   const connectDoneRef = useRef(false);
+  const tickEpochRef = useRef(0);
+  const [tickEpoch, setTickEpoch] = useState(0);
+  const playerCountRef = useRef(1);
   onJoinTimeoutRef.current = onJoinTimeout;
 
   const effectiveRoomCode = sessionRoom || roomCode;
@@ -182,6 +186,7 @@ export function SnakeIoGame({
   const humanCount = room?.players.length ?? 1;
   const worldPopulation = world ? countWorldSnakes(world) : (isGlobalWorld ? SNAKE_WORLD_TARGET : humanCount);
   const playerCount = worldPopulation;
+  playerCountRef.current = playerCount;
   const balance = useMemo(() => Replay.multiplayer.balance("snake", playerCount), [playerCount]);
   const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
   const season = useMemo(() => Replay.multiplayer.season.current(), []);
@@ -531,8 +536,11 @@ export function SnakeIoGame({
 
   useEffect(() => {
     if (!activeRoom || !shouldTickWorld || !connected) return;
+    const epoch = tickEpoch;
     const tickMs = balance.physicsTickMs;
     const id = setInterval(() => {
+      if (epoch !== tickEpochRef.current) return;
+      const pc = playerCountRef.current;
       const r = getRoom(activeRoom);
       const input = r?.gameState?.input as { deviceId: string; direction: Direction; boosting?: boolean } | undefined;
       if (input && worldRef.current && !isBotSnake(worldRef.current.snakes[input.deviceId])) {
@@ -555,7 +563,7 @@ export function SnakeIoGame({
       }
       next.config = {
         ...next.config,
-        environment: EnvironmentEngine.resolve(playerCount, next.tick + 1),
+        environment: EnvironmentEngine.resolve(pc, next.tick + 1),
       };
 
       if (ux.events) {
@@ -568,16 +576,16 @@ export function SnakeIoGame({
         respawnDeadBots(next, SNAKE_WORLD_TARGET);
         persistGlobalWorldState(activeRoom, next);
       }
-      tickLivingWorld(next, playerCount);
+      tickLivingWorld(next, pc);
 
       if (ux.events) {
-        const evt = ExperienceEngine.events.roll(playerCount, next.config.worldSize, next.tick, next.events);
+        const evt = ExperienceEngine.events.roll(pc, next.config.worldSize, next.tick, next.events);
         if (evt) {
           next.events = [evt, ...next.events];
           spawnEventFood(next, evt);
           if (evt.kind === "boss_spawn") spawnWorldBoss(next);
         }
-        const scheduled = createScheduledEvent(next, playerCount);
+        const scheduled = createScheduledEvent(next, pc);
         if (scheduled) {
           next.events = [scheduled, ...next.events];
           spawnEventFood(next, scheduled);
@@ -599,7 +607,7 @@ export function SnakeIoGame({
       const deaths = Object.keys(next.snakes).length;
       const alive = Object.values(next.snakes).filter((s) => s.alive).length;
       const director = Replay.multiplayer.director.run({
-        playerCount,
+        playerCount: pc,
         congestionScore: Math.round((deaths - alive) * 10),
         foodShortageTicks: next.food.length < next.config.foodCount * 0.3 ? 1 : 0,
         churnCount: 0,
@@ -668,7 +676,8 @@ export function SnakeIoGame({
 
       const rank = getMyRank(next, deviceId);
       if (prevRankRef.current > 10 && rank <= 10) {
-        const m = Replay.multiplayer.moments.capture("top10_entry", deviceId, mySnake?.nickname ?? "Player", next.tick);
+        const me = next.snakes[deviceId];
+        const m = Replay.multiplayer.moments.capture("top10_entry", deviceId, me?.nickname ?? "Player", next.tick);
         next.moments = [m, ...next.moments].slice(0, 5);
       }
 
@@ -683,7 +692,7 @@ export function SnakeIoGame({
       setWorld(next);
     }, tickMs);
     return () => clearInterval(id);
-  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, playerCount, deviceId, mySnake?.nickname]);
+  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch]);
 
   useEffect(() => {
     if (!mySnake) return;
@@ -752,9 +761,36 @@ export function SnakeIoGame({
   }, [handleDirection, isSpectating, shouldTickWorld, deviceId, activeRoom]);
 
   const handleRetry = useCallback(() => {
+    if (!activeRoom || !worldRef.current) return;
     postDeath("replay");
     emitGameRetry("snake");
-  }, [postDeath]);
+    recordSnakeRematch(activeRoom);
+    recordSpectatorRejoin(activeRoom);
+
+    boostingRef.current = false;
+    shakeRef.current = 0;
+    setShake(0);
+    setParticles([]);
+    setScorePopups([]);
+    prevAliveRef.current = true;
+    camSnappedRef.current = false;
+    prevTotalKillsRef.current = 0;
+
+    const nickname = getLastNickname() || "Player";
+    const next = structuredClone(worldRef.current);
+    restartPlayerSnake(next, deviceId, nickname);
+    worldRef.current = next;
+    setWorld(next);
+
+    if (isHost || isGlobalWorld) send(activeRoom, "state", next);
+
+    resetGamePhase();
+    transitionGamePhase("COUNTDOWN", "retry");
+    window.setTimeout(() => transitionGamePhase("PLAYING"), 400);
+
+    tickEpochRef.current += 1;
+    setTickEpoch(tickEpochRef.current);
+  }, [activeRoom, deviceId, postDeath, isHost, isGlobalWorld]);
 
   useEffect(() => {
     if (!mySnake || mySnake.alive) return;
@@ -795,9 +831,9 @@ export function SnakeIoGame({
         markFirstFun(activeRoom);
         setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, vis.particleCount));
         setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y, delta, vis.color));
-        const buf = me.growthBuffer ?? 0;
+        const buf = me.gemsEaten ?? 0;
         setScorePopups((pop) =>
-          spawnScorePopup(pop, head.x, head.y - 0.8, `${buf}/${SNAKE_FEEL.growthThreshold}`, "#94a3b8")
+          spawnScorePopup(pop, head.x, head.y - 0.8, `${buf % 2}/2`, "#94a3b8")
         );
         if (me.boosting) {
           setParticles((p) => spawnBoostTrail(p, head.x, head.y, me.color));
@@ -928,15 +964,16 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
+  const boostEnergy = mySnake?.boostEnergy ?? SNAKE_FEEL.boostMaxEnergy;
   const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * matchRule.cameraZoomMult;
   const cellSize = Math.min(
     SNAKE_FEEL.maxCellPx,
     Math.max(SNAKE_FEEL.minCellPx, rawCell)
   );
-  const boostScale = isBoosting ? SNAKE_FEEL.cameraBoostScale : 1;
-  const camHalf = boardPx / 2;
   const top1Id = world.rankings[0]?.deviceId ?? null;
-  const growthBuffer = mySnake?.growthBuffer ?? 0;
+  const gemsEaten = mySnake?.gemsEaten ?? 0;
+  const growthProgress = gemsEaten % 2;
+  const camHalf = boardPx / 2;
 
   if (mySnake?.segments[0] && !camSnappedRef.current) {
     const head = mySnake.segments[0];
@@ -1020,14 +1057,14 @@ export function SnakeIoGame({
       <div className="flex w-full max-w-lg items-center gap-3">
         <div className="flex-1">
           <div className="mb-1 flex justify-between text-[10px] text-muted-foreground">
-            <span>Boost</span>
-            <span>{isBoosting ? "⚡ ACTIVE" : mySnake && mySnake.score >= SNAKE_FEEL.boostMinScore ? "Space" : "3+ 필요"}</span>
+            <span>BOOST</span>
+            <span>{isBoosting ? "⚡ ACTIVE" : boostEnergy > 0 ? "Space" : "Recharging…"}</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/10">
             <div
               className={cn("h-full transition-all", isBoosting ? "bg-amber-400" : "bg-primary/70")}
               style={{
-                width: `${Math.min(100, ((mySnake?.score ?? 0) / Math.max(SNAKE_FEEL.boostMinScore, 1)) * 100)}%`,
+                width: `${Math.min(100, (boostEnergy / SNAKE_FEEL.boostMaxEnergy) * 100)}%`,
               }}
             />
           </div>
@@ -1035,7 +1072,7 @@ export function SnakeIoGame({
         <div className="w-24 text-center">
           <p className="text-[10px] text-muted-foreground">Growth</p>
           <p className="text-sm font-bold tabular-nums text-emerald-300">
-            {growthBuffer} / {SNAKE_FEEL.growthThreshold}
+            {growthProgress} / 2
           </p>
         </div>
         <div className="text-right text-[10px] text-muted-foreground">
@@ -1098,10 +1135,7 @@ export function SnakeIoGame({
             style={{
               width: worldSize * cellSize,
               height: worldSize * cellSize,
-              transform: `translate(${-camX}px, ${-camY}px) scale(${boostScale})`,
-              transformOrigin: cameraHead
-                ? `${cameraHead.x * cellSize}px ${cameraHead.y * cellSize}px`
-                : "center center",
+              transform: `translate(${-camX}px, ${-camY}px)`,
             }}
           >
             {world.living?.collapseRadius != null ? (
@@ -1163,7 +1197,7 @@ export function SnakeIoGame({
                   key={i}
                   className={cn(
                     "absolute rounded-full",
-                    tier === "rare" && "animate-pulse",
+                    tier === "huge" && "animate-pulse",
                     tier !== "small" && "ring-1 ring-white/30"
                   )}
                   style={{
@@ -1293,15 +1327,13 @@ export function SnakeIoGame({
                 Retry (ENTER)
               </Button>
               <Button variant="outline" size="lg" className="w-full" nativeButton={false} render={<Link href="/">Home</Link>} />
-              {isSpectating ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { postDeath("exit"); handleEnd(); }}
-                >
-                  View Results
-                </Button>
-              ) : null}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { postDeath("exit"); handleEnd(); }}
+              >
+                Result
+              </Button>
             </div>
           </div>
         </div>
@@ -1317,7 +1349,7 @@ export function SnakeIoGame({
         <SnakeMobileControls
           onDirection={handleDirection}
           onBoostStart={() => {
-            if ((mySnake?.score ?? 0) < SNAKE_FEEL.boostMinScore) return;
+            if ((mySnake?.boostEnergy ?? 0) <= 0) return;
             if (!boostingRef.current) playBoostSound();
             boostingRef.current = true;
             if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, true);
@@ -1339,7 +1371,7 @@ export function SnakeIoGame({
             });
           }}
           boosting={!!isBoosting}
-          boostReady={(mySnake?.score ?? 0) >= SNAKE_FEEL.boostMinScore}
+          boostReady={(mySnake?.boostEnergy ?? 0) > 0}
         />
       ) : null}
 

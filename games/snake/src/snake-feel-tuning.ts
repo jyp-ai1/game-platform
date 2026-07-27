@@ -1,18 +1,17 @@
 /** Snake Feel Final Polish — numbers only. No new systems. */
 
 export const SNAKE_FEEL = {
-  /** Boost — +40% speed feel, tail drain while active */
+  /** Boost — 2 steps/tick (~5→8 speed), drains boostEnergy only */
   boostSteps: 2,
-  boostMinScore: 3,
-  boostCostPerTick: 1,
-  boostTailShrinkEvery: 5,
+  boostMaxEnergy: 100,
+  boostDrainPerTick: 2,
+  boostRegenPerTick: 0.5,
   boostSpeedMult: 1.4,
   /** Food magnet — Slither-like pickup satisfaction */
   magnetRadius: 3.4,
   magnetRadiusBoost: 5.2,
-  /** Camera — smooth lag follow; boost uses FOV scale only (no position jitter) */
+  /** Camera — smooth lag follow only; no boost zoom/shake */
   cameraFollowLerp: 0.1,
-  cameraBoostScale: 0.95,
   /** Slither-like viewport — cells visible on screen (not world-size scaled) */
   viewportCellsVisible: 50,
   minCellPx: 8,

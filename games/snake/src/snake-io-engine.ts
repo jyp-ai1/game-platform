@@ -21,7 +21,6 @@ export interface FoodItem {
   kind: FoodKind;
   value: number;
   tier?: FoodTier;
-  growthCredits?: number;
 }
 
 export interface SnakeEntity {
@@ -50,7 +49,11 @@ export interface SnakeEntity {
   /** Per-bot desync — fake crowd prevention */
   botPhase?: number;
   botSeed?: number;
-  /** Growth credits toward next body segment (2 credits = +1 segment) */
+  /** Gems eaten — every 2 gems = +1 body segment */
+  gemsEaten?: number;
+  /** Boost energy gauge (0–100) */
+  boostEnergy?: number;
+  /** @deprecated use gemsEaten % 2 for HUD */
   growthBuffer?: number;
   /** Client-side growth pulse timestamp (ms) — set on eat */
   lastGrowthAt?: number;
@@ -141,7 +144,6 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
       kind: cfg.kind,
       value: cfg.score,
       tier,
-      growthCredits: cfg.growthCredits,
     });
   }
 }
@@ -163,12 +165,11 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
   snake.lastGrowthAt = Date.now();
 }
 
-function applyGrowthCredits(snake: SnakeEntity, credits: number): void {
-  if (credits <= 0) return;
-  snake.growthBuffer = (snake.growthBuffer ?? 0) + credits;
-  while ((snake.growthBuffer ?? 0) >= SNAKE_FEEL.growthThreshold) {
+function applyGemGrowth(snake: SnakeEntity): void {
+  snake.gemsEaten = (snake.gemsEaten ?? 0) + 1;
+  snake.growthBuffer = snake.gemsEaten % 2;
+  if (snake.gemsEaten % 2 === 0) {
     growSnakeSegments(snake, 1);
-    snake.growthBuffer = (snake.growthBuffer ?? 0) - SNAKE_FEEL.growthThreshold;
   }
 }
 
@@ -263,6 +264,8 @@ export function createSnakeAt(
     color: COLORS[index % COLORS.length]!,
     invincibleUntil: Date.now() + world.config.spawnShieldMs,
     hp: 100,
+    boostEnergy: SNAKE_FEEL.boostMaxEnergy,
+    gemsEaten: 0,
     aliveSinceTick: world.tick,
     totalKills: 0,
     isBot: opts?.isBot,
@@ -293,6 +296,8 @@ export function createSnake(
     color: COLORS[index % COLORS.length]!,
     invincibleUntil: Date.now() + world.config.spawnShieldMs,
     hp: 100,
+    boostEnergy: SNAKE_FEEL.boostMaxEnergy,
+    gemsEaten: 0,
     aliveSinceTick: world.tick,
     totalKills: 0,
   };
@@ -354,7 +359,7 @@ export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direc
 export function setBoost(world: SnakeIoWorld, deviceId: string, boosting: boolean): void {
   const snake = world.snakes[deviceId];
   if (!snake || !snake.alive || snake.spectating) return;
-  snake.boosting = boosting && snake.score >= SNAKE_FEEL.boostMinScore;
+  snake.boosting = boosting && (snake.boostEnergy ?? SNAKE_FEEL.boostMaxEnergy) > 0;
 }
 
 function applyFoodMagnet(world: SnakeIoWorld, snake: SnakeEntity): void {
@@ -429,8 +434,7 @@ function moveSnakeOnce(world: SnakeIoWorld, snake: SnakeEntity, now: number): bo
     snake.score += Math.round(baseScore * mult);
     snake.foodEaten = (snake.foodEaten ?? 0) + 1;
     world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
-    const credits = food.growthCredits ?? FOOD_TIERS[food.tier ?? "small"].growthCredits;
-    applyGrowthCredits(snake, credits);
+    applyGemGrowth(snake);
     spawnFoodItems(world, 1);
   }
   return true;
@@ -505,7 +509,47 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   snake.respawnAt = undefined;
   snake.invincibleUntil = now + world.config.spawnShieldMs;
   snake.hp = 100;
+  snake.boostEnergy = SNAKE_FEEL.boostMaxEnergy;
+  snake.gemsEaten = snake.gemsEaten ?? 0;
+  snake.boosting = false;
   snake.aliveSinceTick = world.tick;
+}
+
+/** Full player restart — Retry: reset score/hp/snake, respawn, ready to play */
+export function restartPlayerSnake(
+  world: SnakeIoWorld,
+  deviceId: string,
+  nickname: string
+): void {
+  const keys = Object.keys(world.snakes);
+  const idx = keys.indexOf(deviceId);
+  let snake = world.snakes[deviceId];
+  const now = Date.now();
+  if (!snake) {
+    world.snakes[deviceId] = createSnake(deviceId, nickname, Math.max(0, idx), world);
+    updateRankings(world);
+    return;
+  }
+  const pos = findSafePosition(world, deviceId);
+  snake.segments = [pos, { x: pos.x - 1, y: pos.y }, { x: pos.x - 2, y: pos.y }];
+  snake.direction = "right";
+  snake.pendingDirection = "right";
+  snake.score = 0;
+  snake.hp = 100;
+  snake.alive = true;
+  snake.spectating = false;
+  snake.boosting = false;
+  snake.boostEnergy = SNAKE_FEEL.boostMaxEnergy;
+  snake.gemsEaten = 0;
+  snake.growthBuffer = 0;
+  snake.respawnAt = undefined;
+  snake.invincibleUntil = now + Math.min(world.config.spawnShieldMs, 800);
+  snake.aliveSinceTick = world.tick;
+  snake.killStreak = 0;
+  snake.foodEaten = 0;
+  snake.lastKillerId = undefined;
+  snake.nickname = nickname;
+  updateRankings(world);
 }
 
 export function damageSnake(world: SnakeIoWorld, snake: SnakeEntity, amount: number): void {
@@ -529,29 +573,21 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
       continue;
     }
 
-    if (snake.invincibleUntil && now < snake.invincibleUntil) {
-      snake.direction = snake.pendingDirection;
-      continue;
-    }
-
     applyFoodMagnet(world, snake);
-    const boostActive = snake.boosting && snake.score >= SNAKE_FEEL.boostMinScore;
+    const boostActive = snake.boosting && (snake.boostEnergy ?? 0) > 0;
     const steps = boostActive ? SNAKE_FEEL.boostSteps : 1;
     for (let step = 0; step < steps; step++) {
       if (!snake.alive) break;
       moveSnakeOnce(world, snake, now);
     }
     if (boostActive && snake.alive) {
-      const costMult = world.living?.matchRule.boostCostMult ?? 1;
-      const cost = Math.max(1, Math.round(SNAKE_FEEL.boostCostPerTick * costMult));
-      snake.score = Math.max(0, snake.score - cost);
-      if (
-        world.tick % SNAKE_FEEL.boostTailShrinkEvery === 0 &&
-        snake.segments.length > 3
-      ) {
-        snake.segments.pop();
-      }
-      if (snake.score < SNAKE_FEEL.boostMinScore) snake.boosting = false;
+      snake.boostEnergy = Math.max(0, (snake.boostEnergy ?? SNAKE_FEEL.boostMaxEnergy) - SNAKE_FEEL.boostDrainPerTick);
+      if (snake.boostEnergy <= 0) snake.boosting = false;
+    } else if (!snake.boosting && snake.alive && (snake.boostEnergy ?? 0) < SNAKE_FEEL.boostMaxEnergy) {
+      snake.boostEnergy = Math.min(
+        SNAKE_FEEL.boostMaxEnergy,
+        (snake.boostEnergy ?? SNAKE_FEEL.boostMaxEnergy) + SNAKE_FEEL.boostRegenPerTick
+      );
     }
   }
 

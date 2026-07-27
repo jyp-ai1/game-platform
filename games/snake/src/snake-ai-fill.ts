@@ -381,7 +381,7 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
 
   const event = getEventTarget(world);
   const chasing = event || role === "aggressive" || role === "hunter";
-  if (snake.score >= SNAKE_FEEL.boostMinScore && chasing) {
+  if ((snake.boostEnergy ?? 0) > 10 && chasing) {
     const phase = snake.botPhase ?? 0;
     if ((world.tick + phase) % PLAYTEST_AI.boostCadence !== 0) return;
     const boostChance = diff === "legend" ? 0.1 : diff === "hunter" ? 0.06 : 0.03;

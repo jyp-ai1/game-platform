@@ -2,6 +2,7 @@
 
 import { cn } from "@game-platform/ui";
 
+import { isBotSnake } from "./snake-ai-fill";
 import type { SnakeEntity } from "./snake-io-engine";
 
 interface SnakeMinimapProps {
@@ -15,7 +16,7 @@ interface SnakeMinimapProps {
   cellSize: number;
 }
 
-/** Minimap — self highlight, TOP1 crown, viewport rect. No food dots. */
+/** Minimap — self ★ green, leader yellow, human blue, bot gray. */
 export function SnakeMinimap({
   snakes,
   worldSize,
@@ -50,41 +51,42 @@ export function SnakeMinimap({
           if (!head || !s.alive) return null;
           const isMe = s.deviceId === deviceId;
           const isTop1 = s.deviceId === top1Id;
+          const isBot = isBotSnake(s);
           const left = `${(head.x / worldSize) * 100}%`;
           const top = `${(head.y / worldSize) * 100}%`;
           if (isMe) {
             return (
               <div
                 key={s.deviceId}
-                className="absolute z-20 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full border-2 border-white bg-blue-500 shadow-[0_0_6px_#3b82f6]"
-                style={{ left, top, width: 8, height: 8 }}
-                title="You"
-              />
-            );
-          }
-          if (isTop1) {
-            return (
-              <span
-                key={s.deviceId}
-                className="absolute z-10 -translate-x-1/2 -translate-y-1/2 text-[9px] leading-none"
+                className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
                 style={{ left, top }}
-                title={s.nickname}
+                title="You"
               >
-                👑
-              </span>
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] leading-none text-yellow-200">★</span>
+                <div
+                  className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_8px_#22c55e]"
+                  style={{ width: 8, height: 8 }}
+                />
+              </div>
             );
           }
+          const dotColor = isTop1 ? "#eab308" : isBot ? "#9ca3af" : "#3b82f6";
           return (
             <div
               key={s.deviceId}
-              className={cn("absolute -translate-x-1/2 -translate-y-1/2 rounded-full opacity-80")}
+              className={cn(
+                "absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
+                isTop1 ? "z-10" : "opacity-90"
+              )}
               style={{
                 left,
                 top,
-                width: 4,
-                height: 4,
-                backgroundColor: s.color,
+                width: isTop1 ? 6 : 4,
+                height: isTop1 ? 6 : 4,
+                backgroundColor: dotColor,
+                boxShadow: isTop1 ? "0 0 4px #eab308" : undefined,
               }}
+              title={s.nickname}
             />
           );
         })}
