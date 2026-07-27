@@ -56,6 +56,16 @@ export function EntryTracePanel({ compact = false }: { compact?: boolean }) {
           </li>
         ))}
       </ul>
+      {status.lifecycle.length > 0 ? (
+        <ul className="mt-2 space-y-0.5 border-t border-white/10 pt-2 text-[10px] text-violet-300/90">
+          {status.lifecycle.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+      {status.gameReadyCount > 1 ? (
+        <p className="mt-2 text-red-400">GAME_READY fired {status.gameReadyCount}x — remount bug</p>
+      ) : null}
       {status.joinDebug ? (
         <div
           data-testid="join-room-debug"

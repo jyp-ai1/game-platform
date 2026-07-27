@@ -1,6 +1,7 @@
 export { SnakeGame } from "./Snake";
 export { SnakeIoGame } from "./SnakeIo";
 export { entryLog, entryLogFail, entryTrace, type EntryStep, type EntryFailStep } from "./snake-entry-log";
+export { claimEngineSession, resetEngineSession } from "./snake-play-session";
 export {
   getEntryStatusSnapshot,
   recordJoinRoomDebug,

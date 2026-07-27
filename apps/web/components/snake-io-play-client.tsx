@@ -5,11 +5,11 @@ import { prefetchHomeShell } from "@/components/home-page-client";
 import { ViralLoopResultPanel } from "@/components/viral-loop-result";
 import { GameSDKProvider, emitEngagementEvent } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
-import { entryLog, entryLogFail, entryTrace, resetEntryStatus } from "@game-platform/game-snake";
+import { entryLog, entryLogFail, entryTrace, resetEntryStatus, resetEngineSession } from "@game-platform/game-snake";
 import { EntryCrashLog, loadEntryCrashLog } from "@game-platform/multiplayer-sdk";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Component, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { EntryTracePanel } from "@/components/entry-trace-panel";
 
@@ -85,6 +85,14 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
 
   useEffect(() => {
     resetEntryStatus();
+    entryLog("PLAY_PAGE_MOUNT");
+    return () => {
+      entryLog("PLAY_PAGE_UNMOUNT");
+      resetEngineSession();
+    };
+  }, []);
+
+  useEffect(() => {
     if (room && !practiceMode) {
       entryTrace("CLICK", "PASS", "quick-play", 0);
       entryTrace("ROUTE", "PASS", `/flagship/snake-io/play?room=${room}`, 0);
@@ -203,13 +211,14 @@ function EntryCrashReporter() {
 export function SnakeIoPlayClient() {
   const params = useSearchParams();
   const practiceMode = params.get("room")?.toUpperCase() === "PRACTICE";
+  const sdk = useMemo(() => ({ submitScore }), []);
 
   useEffect(() => {
     entryLog("PROVIDER_READY");
   }, []);
 
   return (
-    <GameSDKProvider sdk={{ submitScore }}>
+    <GameSDKProvider sdk={sdk}>
       <GameErrorMonitor gameSlug="snake" />
       <SnakeIoPlayInner practiceMode={practiceMode} />
     </GameSDKProvider>

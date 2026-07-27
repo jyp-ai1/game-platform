@@ -32,11 +32,13 @@ export interface JoinRoomDebug {
 
 export interface EntryStatusSnapshot {
   steps: TraceStep[];
+  lifecycle: string[];
   headline: string;
   joinDebug: JoinRoomDebug | null;
   lastError: string | null;
   failedStep: TraceStepId | EntryFailStep | null;
   gameReady: boolean;
+  gameReadyCount: number;
 }
 
 const TRACE_ORDER: TraceStepId[] = [
@@ -53,8 +55,14 @@ const TRACE_ORDER: TraceStepId[] = [
 const STEP_MAP: Partial<Record<EntryStep | EntryFailStep, TraceStepId>> = {
   CLICK: "CLICK",
   ROUTE: "ROUTE",
+  PLAY_PAGE_MOUNT: "SDK",
+  PLAY_PAGE_UNMOUNT: "SDK",
   PROVIDER_READY: "SDK",
   PLAY_MOUNTED: "SDK",
+  GAME_CREATE: "ENGINE",
+  GAME_DESTROY: "ENGINE",
+  ENGINE_CREATE: "ENGINE",
+  ENGINE_DESTROY: "ENGINE",
   ENGINE_READY: "ENGINE",
   CONNECT: "CONNECT",
   CONNECTING: "CONNECT",
@@ -75,11 +83,13 @@ function defaultSteps(): TraceStep[] {
 
 let snapshot: EntryStatusSnapshot = {
   steps: defaultSteps(),
+  lifecycle: [],
   headline: "Connecting…",
   joinDebug: null,
   lastError: null,
   failedStep: null,
   gameReady: false,
+  gameReadyCount: 0,
 };
 
 const listeners = new Set<() => void>();
@@ -100,12 +110,19 @@ export function getEntryStatusSnapshot(): EntryStatusSnapshot {
 export function resetEntryStatus(): void {
   snapshot = {
     steps: defaultSteps(),
+    lifecycle: [],
     headline: "Connecting…",
     joinDebug: null,
     lastError: null,
     failedStep: null,
     gameReady: false,
+    gameReadyCount: 0,
   };
+  emit();
+}
+
+export function appendLifecycle(line: string): void {
+  snapshot = { ...snapshot, lifecycle: [...snapshot.lifecycle, line] };
   emit();
 }
 
@@ -137,7 +154,13 @@ export function recordEntryTrace(
   if (status === "PASS") {
     setStep(mapped, "ok", detail, ms);
     if (mapped === "GAME_READY") {
-      snapshot = { ...snapshot, gameReady: true, headline: "GAME_READY" };
+      const count = snapshot.gameReadyCount + 1;
+      snapshot = {
+        ...snapshot,
+        gameReady: true,
+        gameReadyCount: count,
+        headline: count > 1 ? `GAME_READY x${count}` : "GAME_READY",
+      };
     } else {
       snapshot = { ...snapshot, headline: `${mapped} OK` };
     }

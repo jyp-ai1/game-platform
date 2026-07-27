@@ -20,7 +20,7 @@ import {
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
 import { Button, cn, ScoreBox } from "@game-platform/ui";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { GameRoom, ReplayMoment } from "@game-platform/shared";
@@ -89,6 +89,7 @@ import {
 } from "./snake-telemetry";
 import { entryLog, entryLogFail, entryTrace } from "./snake-entry-log";
 import { recordJoinRoomDebug } from "./entry-status-store";
+import { claimEngineSession } from "./snake-play-session";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -126,9 +127,9 @@ export function SnakeIoGame({
   onJoinTimeout?: () => void;
 } = {}) {
   const params = useSearchParams();
-  const router = useRouter();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
   const { reportScore } = useGameSDK();
+  const [sessionRoom, setSessionRoom] = useState(roomCode);
   const [world, setWorld] = useState<SnakeIoWorld | null>(null);
   const [connected, setConnected] = useState(false);
   const [spectatorMode, setSpectatorMode] = useState<"top1" | "friend" | "free" | "boss">("top1");
@@ -158,9 +159,14 @@ export function SnakeIoGame({
   const processedKillsRef = useRef<Set<string>>(new Set());
   const deviceId = getDeviceId();
   const spawnTimeoutRef = useRef<number | undefined>(undefined);
+  const onJoinTimeoutRef = useRef(onJoinTimeout);
+  const gameReadyRef = useRef(false);
+  const connectDoneRef = useRef(false);
+  onJoinTimeoutRef.current = onJoinTimeout;
 
-  const room = getRoom(roomCode);
-  const isGlobalWorld = isGlobalWorldRoom(roomCode, "snake");
+  const effectiveRoomCode = sessionRoom || roomCode;
+  const room = getRoom(effectiveRoomCode);
+  const isGlobalWorld = isGlobalWorldRoom(effectiveRoomCode, "snake");
   const humanCount = room?.players.length ?? 1;
   const worldPopulation = world ? countWorldSnakes(world) : (isGlobalWorld ? SNAKE_WORLD_TARGET : humanCount);
   const playerCount = worldPopulation;
@@ -220,8 +226,18 @@ export function SnakeIoGame({
   }, [spectatorMode, world?.tick, friendIds]);
 
   useEffect(() => {
-    entryLog("ENGINE_READY");
-    Replay.Engine.enable({ gameSlug: "snake", multiplayer: true, party: true });
+    setSessionRoom(roomCode);
+    gameReadyRef.current = false;
+    connectDoneRef.current = false;
+  }, [roomCode]);
+
+  useEffect(() => {
+    entryLog("GAME_CREATE");
+    if (claimEngineSession()) {
+      entryLog("ENGINE_CREATE");
+      entryLog("ENGINE_READY");
+      Replay.Engine.enable({ gameSlug: "snake", multiplayer: true, party: true });
+    }
     if (typeof window !== "undefined") {
       const w = window as Window & {
         PlaytestLog?: typeof PlaytestLog;
@@ -234,6 +250,10 @@ export function SnakeIoGame({
       w.PlaytestObservation = PlaytestObservation;
       w.PlaytestReport = PlaytestReport;
     }
+    return () => {
+      entryLog("GAME_DESTROY");
+      entryLog("ENGINE_DESTROY");
+    };
   }, []);
 
   useEffect(() => {
@@ -262,12 +282,14 @@ export function SnakeIoGame({
     if (practiceMode || roomCode) return;
     entryLogFail("JOIN", "missing room param");
     entryLog("PRACTICE_FALLBACK", "empty-room");
-    onJoinTimeout?.();
-  }, [roomCode, practiceMode, onJoinTimeout]);
+    onJoinTimeoutRef.current?.();
+  }, [roomCode, practiceMode]);
 
   useEffect(() => {
     if (!roomCode) return;
+    if (connectDoneRef.current) return;
     if (practiceMode) {
+      connectDoneRef.current = true;
       entryLog("CONNECTING", "PRACTICE");
       const cfg = Replay.multiplayer.balance("snake", SNAKE_WORLD_TARGET);
       const humans = [{ deviceId, nickname: getLastNickname() || "Player" }];
@@ -284,38 +306,39 @@ export function SnakeIoGame({
       entryLog("GAME_READY", "PRACTICE");
       return;
     }
+    connectDoneRef.current = true;
+
     let active = true;
     const CONNECT_TIMEOUT_MS = 5000;
     const MAX_ATTEMPTS = 1;
 
     const finishConnect = (r: GameRoom, code: string): void => {
+      if (code !== sessionRoom) setSessionRoom(code);
       start(code);
       entryTrace("CONNECT", "PASS", code);
       entryTrace("JOIN", "PASS", `${r.players.length} players`);
+      const pop = isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length);
       startSnakeTelemetry(code, { isGlobalWorld, quickPlay: isGlobalWorld });
       refreshWorldTuningFromTelemetry();
       Replay.multiplayer.analytics.start(code, "snake", r.players.length);
       Replay.multiplayer.team.create(
         code,
-        playerCount <= 2 ? "1v1" : playerCount <= 4 ? "2v2" : "party",
+        pop <= 2 ? "1v1" : pop <= 4 ? "2v2" : "party",
         r.players.map((p) => p.deviceId)
       );
       setConnected(true);
       spawnTimeoutRef.current = window.setTimeout(() => {
         if (!active || worldRef.current) return;
         entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
-        onJoinTimeout?.();
+        onJoinTimeoutRef.current?.();
       }, 12_000);
     };
 
     const attemptConnect = async (attemptIndex: number): Promise<void> => {
       let targetCode = roomCode;
-      if (isGlobalWorld && roomCode === "WORLD") {
+      if (isGlobalWorldRoom(roomCode, "snake") && roomCode === "WORLD") {
         try {
           targetCode = await resolveAvailableCluster("snake");
-          if (targetCode !== roomCode && active) {
-            router.replace(`/flagship/snake-io/play?room=${encodeURIComponent(targetCode)}`);
-          }
         } catch (err) {
           recordJoinRoomDebug({
             roomCode,
@@ -410,7 +433,8 @@ export function SnakeIoGame({
           err instanceof Error ? err.message : String(err),
           { room: targetCode, recordCrash: true }
         );
-        onJoinTimeout?.();
+        connectDoneRef.current = false;
+        onJoinTimeoutRef.current?.();
       }
     };
 
@@ -419,10 +443,10 @@ export function SnakeIoGame({
       active = false;
       if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
     };
-  }, [roomCode, playerCount, practiceMode, isGlobalWorld, deviceId, onJoinTimeout, router]);
+  }, [roomCode, practiceMode, deviceId]);
 
   useEffect(() => {
-    if (!roomCode || !connected || practiceMode) return;
+    if (!effectiveRoomCode || !connected || practiceMode) return;
     const applyRoom = (r: GameRoom) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) { worldRef.current = state; setWorld(state); return; }
@@ -433,7 +457,7 @@ export function SnakeIoGame({
         if (!humans.some((h) => h.deviceId === deviceId)) {
           humans.push({ deviceId, nickname: getLastNickname() || "Player" });
         }
-        const persisted = isGlobalWorld ? loadPersistedGlobalWorld(roomCode) : null;
+        const persisted = isGlobalWorld ? loadPersistedGlobalWorld(effectiveRoomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
         if (isGlobalWorld) {
           syncSnakePopulation(initial, humans, SNAKE_WORLD_TARGET);
@@ -449,25 +473,27 @@ export function SnakeIoGame({
           setJoinBrief(buildJoinBrief(initial));
           setTimeout(() => setJoinBrief(null), 4500);
         }
-        if (isHost) send(roomCode, "state", initial);
+        if (isHost) send(effectiveRoomCode, "state", initial);
       }
     };
-    const unsub = subscribeRoom(roomCode, applyRoom);
-    const current = getRoom(roomCode);
+    const unsub = subscribeRoom(effectiveRoomCode, applyRoom);
+    const current = getRoom(effectiveRoomCode);
     if (current) applyRoom(current);
     return unsub;
-  }, [roomCode, connected, isHost, isGlobalWorld, practiceMode]);
+  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, practiceMode, deviceId]);
 
   useEffect(() => {
     if (!world) return;
+    if (gameReadyRef.current) return;
+    gameReadyRef.current = true;
     if (spawnTimeoutRef.current) {
       window.clearTimeout(spawnTimeoutRef.current);
       spawnTimeoutRef.current = undefined;
     }
     entryTrace("SPAWN", "PASS");
     entryTrace("CANVAS", "PASS");
-    entryTrace("GAME_READY", "PASS", roomCode);
-  }, [world, roomCode]);
+    entryTrace("GAME_READY", "PASS", effectiveRoomCode);
+  }, [world, effectiveRoomCode]);
 
   useEffect(() => {
     if (!roomCode || !isHost || !connected) return;
