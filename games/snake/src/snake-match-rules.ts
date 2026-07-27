@@ -149,7 +149,7 @@ export function resolveGlobalWorldRule(): MatchRuleConfig {
     foodDensityMult: 1.38,
     boostCostMult: 0.75,
     startingSegments: 12,
-    cameraZoomMult: 0.9,
+    cameraZoomMult: 1.0,
     safeZoneRadiusMult: 1.2,
     scoreTarget: 1200,
   };

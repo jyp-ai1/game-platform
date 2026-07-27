@@ -17,6 +17,8 @@ export const SNAKE_FEEL = {
   boostTailDropEvery: 4,
   boostMinSegments: 3,
   boostFovScale: 0.95,
+  /** Smooth boost zoom transition (no snap) */
+  cameraZoomLerp: 0.12,
   boostMaxEnergy: 100,
   boostDrainPerTick: 2,
   boostRegenPerTick: 0.5,
@@ -25,8 +27,10 @@ export const SNAKE_FEEL = {
   magnetRadiusBoost: 5.8,
   magnetPull: 0.32,
   magnetPullClose: 0.58,
-  /** Camera — smooth lag follow only; no boost zoom/shake */
-  cameraFollowLerp: 0.17,
+  /** Camera — smooth lag follow; never snap or shake */
+  cameraFollowLerp: 0.15,
+  /** Base zoom-in — worm reads larger, eating feels satisfying (1.3–1.5) */
+  baseCameraZoom: 1.4,
   /** Slither-like viewport — cells visible on screen (not world-size scaled) */
   viewportCellsVisible: 50,
   minCellPx: 8,
@@ -39,9 +43,9 @@ export const SNAKE_FEEL = {
   growthThreshold: 2,
   tailWaveAmp: 0.12,
   tailWaveAmpBoost: 0.04,
-  /** Juice — eat / kill / death feedback */
-  deathShakeImpulse: 16,
-  killShakeImpulse: 11,
+  /** Juice — eat / kill feedback (camera never shakes) */
+  deathShakeImpulse: 0,
+  killShakeImpulse: 0,
   eatParticleCount: 16,
   deathParticleCount: 40,
   mobileSwipeThreshold: 14,

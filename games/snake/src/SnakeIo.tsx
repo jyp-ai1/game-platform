@@ -131,7 +131,6 @@ import {
   playKillSound,
   playRareFoodSound,
   playRankUpSound,
-  shakeIntensity,
   spawnBoostTrail,
   spawnDeathBurst,
   spawnEatParticles,
@@ -167,23 +166,24 @@ export function SnakeIoGame({
   const prevAliveRef = useRef(true);
   const prevRankRef = useRef(99);
   const camRef = useRef({ x: 0, y: 0 });
+  const zoomMultRef = useRef(1);
   const boardRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const [boardPx, setBoardPx] = useState(480);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
   const prevSnakeSnapRef = useRef<Record<string, ReturnType<typeof captureSnakeSnapshot>>>({});
   const prevWorldRef = useRef<SnakeIoWorld | null>(null);
   const boostingRef = useRef(false);
-  const shakeRef = useRef(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const inputLoggedRef = useRef(false);
   const awaitingInputRef = useRef(true);
   const [awaitingInput, setAwaitingInput] = useState(true);
   const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
   const [goFlashUntil, setGoFlashUntil] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [renderAlpha, setRenderAlpha] = useState(1);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
-  const [shake, setShake] = useState(0);
   const prevSegCountRef = useRef<Record<string, number>>({});
   const growthUntilRef = useRef<Record<string, number>>({});
   const [cheerMsg, setCheerMsg] = useState<string | null>(null);
@@ -973,8 +973,6 @@ export function SnakeIoGame({
     recordSpectatorRejoin(activeRoom);
 
     boostingRef.current = false;
-    shakeRef.current = 0;
-    setShake(0);
     setParticles([]);
     setScorePopups([]);
     prevAliveRef.current = true;
@@ -1043,44 +1041,67 @@ export function SnakeIoGame({
       if (prevMe?.alive && !me?.alive && prevMe.segments[0]) {
         playDeathSound();
         setParticles((p) => spawnDeathBurst(p, prevMe.segments[0]!.x, prevMe.segments[0]!.y, prevMe.color));
-        shakeRef.current = SNAKE_FEEL.deathShakeImpulse;
       }
       const kills = me?.totalKills ?? 0;
       if (kills > prevTotalKillsRef.current && me?.segments[0]) {
         playKillSound(prevTotalKillsRef.current === 0);
-        shakeRef.current = SNAKE_FEEL.killShakeImpulse;
       }
       prevTotalKillsRef.current = kills;
     }
     prevWorldRef.current = world;
   }, [world, deviceId, activeRoom]);
 
+  const toggleFullscreen = useCallback(async () => {
+    const el = viewportRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        await (
+          el.requestFullscreen?.() ??
+          (el as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen?.()
+        );
+      } else {
+        await document.exitFullscreen?.();
+      }
+    } catch {
+      /* unsupported or denied */
+    }
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
+
   useEffect(() => {
     let frame = 0;
     const loop = () => {
       diagFrame();
       const snake = worldRef.current?.snakes[deviceId];
+      const boosting = !!(snake?.alive && !snake.spectating && snake.boosting);
+      const targetFov = boosting ? SNAKE_FEEL.boostFovScale : 1;
+      zoomMultRef.current +=
+        (targetFov - zoomMultRef.current) * SNAKE_FEEL.cameraZoomLerp;
+
       if (snake?.alive && !snake.spectating) {
         const head = resolveSnakeHead(snake);
         const layout = camLayoutRef.current;
         if (head && layout.cellSize > 0) {
           const targetX = head.x * layout.cellSize - layout.camHalf;
           const targetY = head.y * layout.cellSize - layout.camHalf;
-          const dist = Math.hypot(targetX - camRef.current.x, targetY - camRef.current.y);
-          if (dist > layout.boardPx * 0.5) {
-            camRef.current.x = targetX;
-            camRef.current.y = targetY;
-          } else {
-            camRef.current.x += (targetX - camRef.current.x) * SNAKE_FEEL.cameraFollowLerp;
-            camRef.current.y += (targetY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
-          }
+          const lerp = SNAKE_FEEL.cameraFollowLerp;
+          camRef.current.x += (targetX - camRef.current.x) * lerp;
+          camRef.current.y += (targetY - camRef.current.y) * lerp;
         }
       }
       setRenderAlpha((a) => Math.min(1, a + SNAKE_FEEL.segmentLerpStep));
       setParticles((p) => tickParticles(p));
       setScorePopups((pop) => tickScorePopups(pop));
-      shakeRef.current = shakeIntensity(shakeRef.current);
-      setShake(shakeRef.current);
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
@@ -1176,8 +1197,12 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const fovMult = isBoosting ? SNAKE_FEEL.boostFovScale : 1;
-  const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * matchRule.cameraZoomMult * fovMult;
+  const fovMult = zoomMultRef.current;
+  const rawCell =
+    (boardPx / SNAKE_FEEL.viewportCellsVisible) *
+    matchRule.cameraZoomMult *
+    SNAKE_FEEL.baseCameraZoom *
+    fovMult;
   const cellSize = Math.min(
     SNAKE_FEEL.maxCellPx,
     Math.max(SNAKE_FEEL.minCellPx, rawCell)
@@ -1194,7 +1219,19 @@ export function SnakeIoGame({
 
   return (
     <div ref={boardRef} className="relative mx-auto flex w-full max-w-3xl flex-col items-center overflow-hidden px-1 sm:px-2">
-      <div className="relative flex w-full justify-center overflow-hidden">
+      <div
+        ref={viewportRef}
+        className="relative flex w-full justify-center overflow-hidden [&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center [&:fullscreen]:bg-black"
+      >
+        <button
+          type="button"
+          onClick={() => void toggleFullscreen()}
+          className="absolute right-2 top-2 z-40 rounded-lg border border-white/15 bg-black/60 px-2.5 py-1.5 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/80"
+          aria-label={isFullscreen ? "Exit full screen" : "Full screen"}
+        >
+          {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
+        </button>
+
         {/* MVP HUD — Length / Kills / Boost */}
         <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
           <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
@@ -1205,7 +1242,7 @@ export function SnakeIoGame({
         </div>
 
         {/* MVP HUD — Top10 */}
-        <div className="pointer-events-none absolute right-2 top-2 z-30 w-36 rounded-lg border border-white/10 bg-black/55 px-2 py-2 text-[10px] backdrop-blur-sm">
+        <div className="pointer-events-none absolute right-2 top-12 z-30 w-36 rounded-lg border border-white/10 bg-black/55 px-2 py-2 text-[10px] backdrop-blur-sm">
           <p className="mb-1 font-semibold text-amber-300">TOP 10</p>
           <ol className="space-y-0.5">
             {top10.slice(0, 10).map((r, i) => (
@@ -1232,7 +1269,6 @@ export function SnakeIoGame({
             backgroundImage:
               "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px), radial-gradient(circle at 30% 20%, rgba(120,80,255,0.08), transparent 40%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.06), transparent 35%)",
             backgroundSize: `${cellSize}px ${cellSize}px`,
-            transform: shake > 0 ? `translate(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px)` : undefined,
           }}
           onTouchStart={(e) => {
             const t = e.touches[0];
