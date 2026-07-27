@@ -1,12 +1,23 @@
 /** Snake Feel Final Polish — numbers only. No new systems. */
 
 export const SNAKE_FEEL = {
-  /** Boost — 2 steps/tick (~5→8 speed), drains boostEnergy only */
-  boostSteps: 2,
+  /** Path movement — float coords @ 20Hz, render @ 60fps */
+  baseSpeed: 4.2,
+  boostSpeedMult: 1.55,
+  segmentSpacing: 0.42,
+  turnLerp: 0.2,
+  headRadius: 0.38,
+  bodyRadius: 0.3,
+  tailRadius: 0.22,
+  foodPickupRadius: 0.55,
+  collisionRadius: 0.32,
+  /** Boost — speed up, tail drops food, min 3 segments */
+  boostTailDropEvery: 4,
+  boostMinSegments: 3,
+  boostFovScale: 0.95,
   boostMaxEnergy: 100,
   boostDrainPerTick: 2,
   boostRegenPerTick: 0.5,
-  boostSpeedMult: 1.4,
   /** Food magnet — Slither-like pickup satisfaction */
   magnetRadius: 3.4,
   magnetRadiusBoost: 5.2,

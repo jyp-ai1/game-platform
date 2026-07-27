@@ -78,8 +78,9 @@ class SnakePlayErrorBoundary extends Component<
 }
 
 function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) {
-  const router = useRouter();
   const params = useSearchParams();
+  const debugMode = params.get("debug") === "1";
+  const router = useRouter();
   const room = params.get("room");
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
 
@@ -164,7 +165,7 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
 
   return (
     <>
-      <EntryTracePanel />
+      {debugMode ? <EntryTracePanel /> : null}
       <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
         <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} />
         <EntryCrashReporter />

@@ -1,6 +1,6 @@
 import type { FoodKind } from "@game-platform/shared";
 
-export type FoodTier = "small" | "medium" | "large" | "huge";
+export type FoodTier = "small" | "medium" | "large" | "epic" | "death";
 
 export interface FoodTierConfig {
   tier: FoodTier;
@@ -37,38 +37,47 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   large: {
     tier: "large",
     kind: "meteor",
-    score: 5,
-    sizePx: 14,
+    score: 8,
+    sizePx: 15,
     color: "#22d3ee",
     glow: "0 0 14px #22d3ee",
     particleCount: 18,
     soundHz: 820,
   },
-  huge: {
-    tier: "huge",
+  epic: {
+    tier: "epic",
     kind: "golden_apple",
-    score: 10,
-    sizePx: 20,
+    score: 20,
+    sizePx: 22,
     color: "#a855f7",
-    glow: "0 0 18px #c084fc",
+    glow: "0 0 20px #c084fc",
     particleCount: 24,
     soundHz: 980,
   },
+  death: {
+    tier: "death",
+    kind: "golden_apple",
+    score: 20,
+    sizePx: 12,
+    color: "#ef4444",
+    glow: "0 0 12px #f87171",
+    particleCount: 20,
+    soundHz: 900,
+  },
 };
 
-/** Weighted roll — mostly small, rare is special */
+/** Weighted roll — mostly small, epic is special */
 export function rollFoodTier(): FoodTier {
   const r = Math.random();
-  if (r < 0.58) return "small";
-  if (r < 0.84) return "medium";
-  if (r < 0.97) return "large";
-  return "huge";
+  if (r < 0.55) return "small";
+  if (r < 0.82) return "medium";
+  if (r < 0.96) return "large";
+  return "epic";
 }
 
 export function tierFromKind(kind: FoodKind, value: number): FoodTier {
-  if (kind === "golden_apple" || value >= 10) return "huge";
-  if (kind === "meteor" || value >= 5) return value >= 5 ? "large" : "medium";
-  if (value >= 5) return "large";
+  if (value >= 18 || kind === "golden_apple" && value >= 15) return value >= 18 ? "death" : "epic";
+  if (value >= 8) return "large";
   if (value >= 3) return "medium";
   return "small";
 }

@@ -1,5 +1,7 @@
-/** Population Fill Engine — reusable for Global World games */
-export const POPULATION_TARGET = 50;
+/** Population Fill Engine — 20 humans + 30 bots max */
+export const HUMAN_MAX = 20;
+export const BOT_MAX = 30;
+export const POPULATION_TARGET = HUMAN_MAX + BOT_MAX;
 
 export type BotDifficulty = "easy" | "normal" | "hunter" | "legend";
 

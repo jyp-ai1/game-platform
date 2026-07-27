@@ -19,7 +19,7 @@ import {
   subscribeRoom,
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
-import { Button, cn, ScoreBox } from "@game-platform/ui";
+import { Button, cn } from "@game-platform/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +33,9 @@ import {
   getDeathPosition,
   getMyRank,
   getSpectatorTarget,
+  captureSnakeSnapshot,
+  interpolateSnakeRender,
+  getSegmentCount,
   lerpSegments,
   restartPlayerSnake,
   setBoost,
@@ -40,7 +43,6 @@ import {
   spawnEventFood,
   spawnWorldBoss,
   tickWorld,
-  directionAngle,
   type Direction,
   type SnakeIoWorld,
   type Vec,
@@ -151,6 +153,7 @@ export function SnakeIoGame({
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardPx, setBoardPx] = useState(480);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
+  const prevSnakeSnapRef = useRef<Record<string, ReturnType<typeof captureSnakeSnapshot>>>({});
   const prevWorldRef = useRef<SnakeIoWorld | null>(null);
   const boostingRef = useRef(false);
   const shakeRef = useRef(0);
@@ -811,15 +814,18 @@ export function SnakeIoGame({
       prevSegmentsRef.current = Object.fromEntries(
         Object.entries(prev.snakes).map(([id, s]) => [id, s.segments.map((v) => ({ ...v }))])
       );
+      prevSnakeSnapRef.current = Object.fromEntries(
+        Object.entries(prev.snakes).map(([id, s]) => [id, captureSnakeSnapshot(s)])
+      );
       setRenderAlpha(0);
       const me = world.snakes[deviceId];
       const prevMe = prev.snakes[deviceId];
       if (me) {
-        const prevLen = prevSegCountRef.current[deviceId] ?? me.segments.length;
-        if (me.segments.length > prevLen) {
+        const prevLen = prevSegCountRef.current[deviceId] ?? getSegmentCount(me);
+        if (getSegmentCount(me) > prevLen) {
           growthUntilRef.current[deviceId] = Date.now() + SNAKE_FEEL.growthAnimMs;
         }
-        prevSegCountRef.current[deviceId] = me.segments.length;
+        prevSegCountRef.current[deviceId] = getSegmentCount(me);
       }
       if (prevMe && me && me.score > prevMe.score && me.segments[0]) {
         const delta = me.score - prevMe.score;
@@ -839,7 +845,7 @@ export function SnakeIoGame({
           setParticles((p) => spawnBoostTrail(p, head.x, head.y, me.color));
         }
       }
-      if (me && prevMe && me.segments.length > prevMe.segments.length && me.segments[0]) {
+      if (me && prevMe && getSegmentCount(me) > getSegmentCount(prevMe) && me.segments[0]) {
         const head = me.segments[0]!;
         setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y - 1.2, "Grow!", "#22c55e"));
       }
@@ -964,15 +970,14 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const boostEnergy = mySnake?.boostEnergy ?? SNAKE_FEEL.boostMaxEnergy;
-  const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * matchRule.cameraZoomMult;
+  const fovMult = isBoosting ? SNAKE_FEEL.boostFovScale : 1;
+  const rawCell = (boardPx / SNAKE_FEEL.viewportCellsVisible) * matchRule.cameraZoomMult * fovMult;
   const cellSize = Math.min(
     SNAKE_FEEL.maxCellPx,
     Math.max(SNAKE_FEEL.minCellPx, rawCell)
   );
-  const top1Id = world.rankings[0]?.deviceId ?? null;
-  const gemsEaten = mySnake?.gemsEaten ?? 0;
-  const growthProgress = gemsEaten % 2;
+  const myLength = mySnake ? getSegmentCount(mySnake) : 0;
+  const myKills = mySnake?.totalKills ?? 0;
   const camHalf = boardPx / 2;
 
   if (mySnake?.segments[0] && !camSnappedRef.current) {
@@ -994,95 +999,36 @@ export function SnakeIoGame({
   camRef.current.y += (targetCamY - camRef.current.y) * SNAKE_FEEL.cameraFollowLerp;
   const camX = camRef.current.x;
   const camY = camRef.current.y;
+  const top1Id = world.rankings[0]?.deviceId ?? null;
 
   return (
-    <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-1 sm:gap-4 sm:px-2">
-      {joinBrief ? (
-        <div className="w-full max-w-lg rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-5 py-4 text-center animate-in fade-in">
-          <p className="text-lg font-bold text-emerald-200">🟢 {joinBrief.population}명 LIVE</p>
-          {joinBrief.eventHint ? (
-            <p className="mt-1 text-sm text-amber-200">⚠ {joinBrief.eventHint}</p>
-          ) : null}
-          <p className="mt-1 text-sm text-muted-foreground">
-            TOP1 · {joinBrief.topName} ({joinBrief.topScore.toLocaleString()}점)
-          </p>
-          <p className="mt-2 text-xs text-emerald-300/80">바로 투입됩니다…</p>
+    <div ref={boardRef} className="relative flex w-full max-w-3xl flex-col items-center px-1 sm:px-2">
+      <div className="relative flex w-full justify-center">
+        {/* MVP HUD — Length / Kills */}
+        <div className="pointer-events-none absolute left-2 top-2 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
+          <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
+          <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
+          {isBoosting ? <p className="mt-1 text-[10px] font-semibold text-amber-300">⚡ BOOST</p> : null}
         </div>
-      ) : null}
 
-      {announcements[0] ? (
-        <div className={cn(
-          "w-full max-w-lg rounded-xl border px-4 py-2 text-center text-sm font-bold animate-in fade-in",
-          announcements[0].kind === "golden" && "border-yellow-400/50 bg-yellow-400/15 text-yellow-200",
-          announcements[0].kind === "boss" && "border-red-500/50 bg-red-500/15 text-red-200",
-          announcements[0].kind === "storm" && "border-sky-400/50 bg-sky-400/15 text-sky-200",
-          announcements[0].kind === "collapse" && "border-orange-500/50 bg-orange-500/15 text-orange-200",
-          announcements[0].kind === "safe" && "border-emerald-400/50 bg-emerald-400/15 text-emerald-200",
-          !["golden", "boss", "storm", "collapse", "safe"].includes(announcements[0].kind) && "border-white/20 bg-white/5",
-        )}>
-          {announcements[0].message}
+        {/* MVP HUD — Top10 */}
+        <div className="pointer-events-none absolute right-2 top-2 z-30 w-36 rounded-lg border border-white/10 bg-black/55 px-2 py-2 text-[10px] backdrop-blur-sm">
+          <p className="mb-1 font-semibold text-amber-300">TOP 10</p>
+          <ol className="space-y-0.5">
+            {top10.slice(0, 10).map((r, i) => (
+              <li
+                key={r.deviceId}
+                className={cn(
+                  "truncate",
+                  r.deviceId === deviceId ? "font-bold text-emerald-300" : "text-white/75"
+                )}
+              >
+                {i + 1}. {r.nickname.length > 8 ? r.nickname.slice(0, 7) + "…" : r.nickname}{" "}
+                <span className="text-white/50">L{world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?"}</span>
+              </li>
+            ))}
+          </ol>
         </div>
-      ) : null}
-
-      {latestKill ? (
-        <div className="w-full max-w-lg rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-center text-sm animate-in fade-in">
-          <span className="font-bold text-red-300">{latestKill.killerName}</span>
-          <span className="text-muted-foreground"> → </span>
-          <span>{latestKill.victimName}</span>
-        </div>
-      ) : null}
-
-      {teams.length > 1 ? (
-        <div className="flex w-full max-w-lg flex-wrap gap-2">
-          {teams.map((t) => (
-            <div key={t.id} className="rounded-lg border border-white/10 px-3 py-1 text-xs">
-              {t.name} · {t.score}
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      {activeEvent ? (
-        <div className="w-full max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-center text-sm font-medium animate-pulse">
-          {Replay.multiplayer.events.label(activeEvent.kind)}
-        </div>
-      ) : null}
-
-      <div className="flex w-full max-w-lg flex-wrap items-center gap-2 justify-between">
-        <ScoreBox label="Score" value={mySnake?.score ?? 0} />
-        <ScoreBox label="Length" value={mySnake?.segments.length ?? 0} />
-        <ScoreBox label="Combo" value={mySnake?.killStreak ?? 0} />
-        <ScoreBox label="Rank" value={myRank} />
-      </div>
-      <div className="flex w-full max-w-lg items-center gap-3">
-        <div className="flex-1">
-          <div className="mb-1 flex justify-between text-[10px] text-muted-foreground">
-            <span>BOOST</span>
-            <span>{isBoosting ? "⚡ ACTIVE" : boostEnergy > 0 ? "Space" : "Recharging…"}</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div
-              className={cn("h-full transition-all", isBoosting ? "bg-amber-400" : "bg-primary/70")}
-              style={{
-                width: `${Math.min(100, (boostEnergy / SNAKE_FEEL.boostMaxEnergy) * 100)}%`,
-              }}
-            />
-          </div>
-        </div>
-        <div className="w-24 text-center">
-          <p className="text-[10px] text-muted-foreground">Growth</p>
-          <p className="text-sm font-bold tabular-nums text-emerald-300">
-            {growthProgress} / 2
-          </p>
-        </div>
-        <div className="text-right text-[10px] text-muted-foreground">
-          <p>목표 · {world.objective.label}</p>
-          <p className="font-semibold text-primary">#{myRank}</p>
-        </div>
-      </div>
-      <p className="w-full max-w-lg text-center text-xs text-muted-foreground">{matchRule.description}</p>
-
-      <div className="relative flex w-full justify-center gap-3">
         <div
           className="relative w-full overflow-hidden rounded-xl border border-white/10 touch-none transition-transform duration-200 ease-out"
           style={{
@@ -1111,25 +1057,6 @@ export function SnakeIoGame({
             handleDirection(dir);
           }}
         >
-        <div className="absolute left-2 top-2 z-10 rounded bg-black/60 px-2 py-1 text-[10px] text-white">
-          {isGlobalWorld ? (
-            <span className="font-bold text-emerald-300">🟢 LIVE · {worldPopulation} / {SNAKE_WORLD_TARGET}</span>
-          ) : (
-            <span>{seasonStyle.label} · {balance.environment.weather} · {isBoosting ? "⚡ BOOST" : balance.environment.scaleTier}</span>
-          )}
-        </div>
-        {isGlobalWorld ? (
-          <div className="absolute right-2 top-2 z-10 w-28 rounded bg-black/60 px-2 py-1 text-[9px] text-white">
-            <p className="font-semibold text-amber-300">TOP10</p>
-            <ol className="mt-0.5 space-y-0.5">
-            {top10.slice(0, 5).map((r, i) => (
-              <li key={r.deviceId} className={r.deviceId === deviceId ? "text-primary font-bold" : r.isBot ? "text-white/60" : "text-white/80"}>
-                {i + 1}. {r.nickname.length > 10 ? r.nickname.slice(0, 9) + "…" : r.nickname}
-              </li>
-            ))}
-            </ol>
-          </div>
-        ) : null}
           <div
             className="absolute origin-top-left transition-transform duration-200 ease-out"
             style={{
@@ -1197,7 +1124,8 @@ export function SnakeIoGame({
                   key={i}
                   className={cn(
                     "absolute rounded-full",
-                    tier === "huge" && "animate-pulse",
+                    tier === "epic" && "animate-pulse",
+                    tier === "death" && "animate-pulse ring-2 ring-red-400/50",
                     tier !== "small" && "ring-1 ring-white/30"
                   )}
                   style={{
@@ -1221,51 +1149,57 @@ export function SnakeIoGame({
               </div>
             ) : null}
             {Object.values(world.snakes).map((snake) => {
-              const headAlpha = Math.min(1, renderAlpha * (SNAKE_FEEL.headLerpStep / SNAKE_FEEL.segmentLerpStep));
-              const waveAmp = snake.boosting ? SNAKE_FEEL.tailWaveAmpBoost : SNAKE_FEEL.tailWaveAmp;
-              const segs = lerpSegments(
-                prevSegmentsRef.current[snake.deviceId],
-                snake.segments,
-                renderAlpha,
-                headAlpha,
-                waveAmp
-              );
+              const snap = prevSnakeSnapRef.current[snake.deviceId];
+              const segs = snap
+                ? interpolateSnakeRender(snake, snap, renderAlpha)
+                : lerpSegments(
+                    prevSegmentsRef.current[snake.deviceId],
+                    snake.segments,
+                    renderAlpha,
+                    Math.min(1, renderAlpha * (SNAKE_FEEL.headLerpStep / SNAKE_FEEL.segmentLerpStep)),
+                    snake.boosting ? SNAKE_FEEL.tailWaveAmpBoost : SNAKE_FEEL.tailWaveAmp
+                  );
               const growing = (growthUntilRef.current[snake.deviceId] ?? 0) > Date.now();
+              const growthLeft = (growthUntilRef.current[snake.deviceId] ?? 0) - Date.now();
+              const popScale = growing
+                ? 0.9 + Math.sin((1 - Math.max(0, growthLeft) / SNAKE_FEEL.growthAnimMs) * Math.PI) * 0.2
+                : 1;
               const len = segs.length;
+              const headRad = ((snake.angle ?? 0) * 180) / Math.PI;
               return segs.map((seg, i) => {
                 const isHead = i === 0;
                 const isTail = i === len - 1;
                 const segSize = isHead
-                  ? Math.max(cellSize * 1.05, 11)
+                  ? cellSize * 1.12
                   : isTail
-                    ? Math.max(cellSize * 0.72, 7)
-                    : Math.max(cellSize * 0.88, 8);
-                const growthScale = growing && i >= len - 2 ? 1 + (1 - renderAlpha) * 0.35 : 1;
+                    ? cellSize * 0.72
+                    : cellSize * 0.88;
+                const growthScale = growing && i >= len - 2 ? popScale : 1;
+                const size = segSize * growthScale;
                 return (
                   <div
                     key={`${snake.deviceId}-${i}`}
                     className={cn(
-                      "absolute origin-center",
+                      "absolute rounded-full origin-center",
                       (!snake.alive || snake.spectating) && "opacity-25",
                       isHead && "z-10",
-                      snake.boosting && isHead && "animate-pulse"
+                      snake.boosting && isHead && "ring-2 ring-amber-300/60"
                     )}
                     style={{
-                      left: seg.x * cellSize + (cellSize - segSize) / 2,
-                      top: seg.y * cellSize + (cellSize - segSize) / 2,
-                      width: segSize * growthScale,
-                      height: segSize * growthScale,
-                      backgroundColor: isHead ? snake.color : isTail ? `${snake.color}55` : `${snake.color}99`,
+                      left: seg.x * cellSize + (cellSize - size) / 2,
+                      top: seg.y * cellSize + (cellSize - size) / 2,
+                      width: size,
+                      height: size,
+                      backgroundColor: snake.color,
+                      opacity: isTail ? 0.75 : isHead ? 1 : 0.92,
                       boxShadow: isHead
                         ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
                           ? "0 0 10px white"
                           : snake.boosting
-                            ? `0 0 14px ${snake.color}, 0 0 24px #fbbf2488`
-                            : `0 0 6px ${snake.color}`
+                            ? `0 0 14px ${snake.color}, 0 0 20px #fbbf2488`
+                            : `0 0 8px ${snake.color}`
                         : undefined,
-                      borderRadius: isHead ? "45%" : isTail ? "50%" : "2px",
-                      transform: isHead ? `rotate(${directionAngle(snake.direction)}deg)` : undefined,
-                      transition: "box-shadow 0.1s, width 0.15s ease-out, height 0.15s ease-out",
+                      transform: isHead ? `rotate(${headRad}deg)` : undefined,
                     }}
                   />
                 );
@@ -1304,7 +1238,8 @@ export function SnakeIoGame({
         </div>
 
         {ux.minimap ? (
-          <SnakeMinimap
+          <div className="pointer-events-none absolute bottom-2 right-2 z-30">
+            <SnakeMinimap
             snakes={Object.values(world.snakes)}
             worldSize={worldSize}
             deviceId={deviceId}
@@ -1314,6 +1249,7 @@ export function SnakeIoGame({
             viewPx={boardPx}
             cellSize={cellSize}
           />
+          </div>
         ) : null}
       </div>
 
@@ -1325,6 +1261,14 @@ export function SnakeIoGame({
             <div className="mt-6 flex flex-col gap-3">
               <Button size="lg" className="w-full" onClick={handleRetry}>
                 Retry (ENTER)
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={() => setSpectatorTarget(getSpectatorTarget(worldRef.current, undefined, friendIds))}
+              >
+                Spectate
               </Button>
               <Button variant="outline" size="lg" className="w-full" nativeButton={false} render={<Link href="/">Home</Link>} />
               <Button
@@ -1339,17 +1283,11 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {cheerMsg ? (
-        <div className="w-full max-w-lg rounded-xl border border-amber-400/40 bg-amber-400/20 px-4 py-2 text-center text-lg font-bold animate-pulse">
-          {cheerMsg}
-        </div>
-      ) : null}
-
       {!isSpectating && mySnake?.alive ? (
         <SnakeMobileControls
           onDirection={handleDirection}
           onBoostStart={() => {
-            if ((mySnake?.boostEnergy ?? 0) <= 0) return;
+            if (getSegmentCount(mySnake) <= SNAKE_FEEL.boostMinSegments) return;
             if (!boostingRef.current) playBoostSound();
             boostingRef.current = true;
             if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, true);
@@ -1371,32 +1309,9 @@ export function SnakeIoGame({
             });
           }}
           boosting={!!isBoosting}
-          boostReady={(mySnake?.boostEnergy ?? 0) > 0}
+          boostReady={getSegmentCount(mySnake) > SNAKE_FEEL.boostMinSegments}
         />
       ) : null}
-
-      <div className="grid w-full max-w-lg grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="mb-2 font-semibold">{isGlobalWorld ? "GLOBAL RANK" : "TOP 10"}</p>
-          <ol className="space-y-1">
-            {top10.map((r, i) => (
-              <li key={r.deviceId} className={r.deviceId === deviceId ? "font-medium text-primary" : r.isBot ? "text-muted-foreground/70" : "text-muted-foreground"}>
-                {i + 1}. {r.nickname} — {r.score.toLocaleString()}
-                {r.deviceId === deviceId ? " (YOU)" : ""}
-              </li>
-            ))}
-          </ol>
-          {myRank > 10 ? <p className="mt-2 text-primary">내 순위 #{myRank}</p> : null}
-        </div>
-        <div className="flex flex-col gap-2">
-          {!mySnake?.alive ? null : (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
-              <p className="text-sm font-semibold">플레이 중</p>
-              <p className="mt-1 text-xs text-muted-foreground">WASD · Space boost</p>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

@@ -288,13 +288,14 @@ function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty:
   return snake;
 }
 
-/** Sync population — natural bot retirement when humans join */
+/** Sync population — natural bot retirement when humans join (max 20 humans) */
 export function syncSnakePopulation(
   world: SnakeIoWorld,
   humans: { deviceId: string; nickname: string }[],
   target = POPULATION_TARGET
 ): void {
-  const humanIds = new Set(humans.map((h) => h.deviceId));
+  const capped = humans.slice(0, 20);
+  const humanIds = new Set(capped.map((h) => h.deviceId));
 
   for (const id of Object.keys(world.snakes)) {
     const s = world.snakes[id];
@@ -302,10 +303,10 @@ export function syncSnakePopulation(
     if (!humanIds.has(id)) delete world.snakes[id];
   }
 
-  const difficulty = pickBotDifficulty(humans.length);
+  const difficulty = pickBotDifficulty(capped.length);
 
-  for (let i = 0; i < humans.length; i++) {
-    const h = humans[i]!;
+  for (let i = 0; i < capped.length; i++) {
+    const h = capped[i]!;
     if (!world.snakes[h.deviceId]) {
       while (countWorldSnakes(world) >= target) {
         const retire = pickBotToRetire(world);
@@ -324,7 +325,7 @@ export function syncSnakePopulation(
   while (countWorldSnakes(world) < target && botSlot < 80) {
     const id = botDeviceId(botSlot);
     if (!world.snakes[id]) {
-      world.snakes[id] = spawnBot(world, botSlot, humans.length, difficulty);
+      world.snakes[id] = spawnBot(world, botSlot, capped.length, difficulty);
     }
     botSlot += 1;
   }
@@ -356,20 +357,48 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   const role = snake.botRole ?? "farmer";
   const diff: BotDifficulty = snake.botDifficulty ?? "easy";
   const seed = snake.botSeed ?? 0;
-  const baseMistake =
-    diff === "easy" ? 0.06 : diff === "normal" ? 0.04 : diff === "hunter" ? 0.02 : 0.01;
-  const mistake = baseMistake + ((seed % 17) / 17) * PLAYTEST_AI.mistakeVariance;
-
-  let target = resolveTarget(world, snake, role);
   const head = snake.segments[0];
-  if (!target && head) {
-    const food = nearestFood(world, head);
-    target = food ?? { x: head.x + ((seed % 5) - 2) * 6, y: head.y + ((seed % 7) - 3) * 6 };
+  if (!head) return;
+
+  const flee = pickFleeTarget(world, snake);
+  const food = nearestFood(world, head);
+  const threatNear = flee != null;
+  const chasing = role === "aggressive" || role === "hunter";
+  const segCount = snake.segmentCount ?? snake.segments.length;
+
+  let state: NonNullable<SnakeEntity["botState"]> = "search";
+  if (threatNear && snake.score < 50) state = "escape";
+  else if (food && (role === "farmer" || role === "scavenger" || role === "explorer")) state = "chase";
+  else if (chasing && pickPrey(world, snake, { humansOnly: role === "hunter", botsOk: role === "aggressive" })) state = "chase";
+  else if ((seed + world.tick) % 47 < 6) state = "wander";
+  else state = "search";
+  snake.botState = state;
+
+  let target: Vec;
+  switch (state) {
+    case "escape":
+      target = flee!;
+      break;
+    case "wander":
+      target = {
+        x: head.x + Math.cos((seed + world.tick) * 0.07) * 12,
+        y: head.y + Math.sin((seed + world.tick) * 0.09) * 12,
+      };
+      break;
+    case "chase":
+      target = resolveTarget(world, snake, role);
+      break;
+    default:
+      target = food ?? { x: head.x + ((seed % 5) - 2) * 8, y: head.y + ((seed % 7) - 3) * 8 };
   }
+
+  const baseMistake =
+    diff === "easy" ? 0.08 : diff === "normal" ? 0.05 : diff === "hunter" ? 0.03 : 0.015;
+  const mistake = baseMistake + ((seed % 17) / 17) * PLAYTEST_AI.mistakeVariance;
   const dir = pickDirectionWithJitter(world, snake, target, seed);
   if (dir && Math.random() > mistake) {
     snake.pendingDirection = dir;
-  } else if (Math.random() < 0.12) {
+  } else if (Math.random() < 0.15) {
     const dirs: Direction[] = ["up", "down", "left", "right"];
     const options = dirs.filter(
       (d) => !isOpposite(d, snake.direction) && !wouldCollide(world, snake, d)
@@ -379,14 +408,14 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
     }
   }
 
-  const event = getEventTarget(world);
-  const chasing = event || role === "aggressive" || role === "hunter";
-  if ((snake.boostEnergy ?? 0) > 10 && chasing) {
-    const phase = snake.botPhase ?? 0;
-    if ((world.tick + phase) % PLAYTEST_AI.boostCadence !== 0) return;
-    const boostChance = diff === "legend" ? 0.1 : diff === "hunter" ? 0.06 : 0.03;
-    if (Math.random() < boostChance) snake.boosting = true;
-    else if (snake.boosting && Math.random() < 0.25) snake.boosting = false;
+  if (segCount > 5 && chasing) {
+    if ((world.tick + (snake.botPhase ?? 0)) % PLAYTEST_AI.boostCadence === 0) {
+      const boostChance = diff === "legend" ? 0.12 : diff === "hunter" ? 0.08 : 0.04;
+      if (Math.random() < boostChance && segCount > 3) snake.boosting = true;
+      else if (snake.boosting && Math.random() < 0.3) snake.boosting = false;
+    }
+  } else if (state === "escape" && segCount > 4 && Math.random() < 0.06) {
+    snake.boosting = true;
   }
 }
 
