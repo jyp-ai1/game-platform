@@ -6,13 +6,16 @@ import {
   loadGameProgress,
   ResumeDialog,
   SaveIndicator,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
   useGameSession,
   useReadyCountdown,
   useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -125,6 +128,9 @@ export function Game2048() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const reportedTiles = useRef<Set<number>>(new Set());
 
   const saveStatus = useAutoSave(
@@ -225,7 +231,7 @@ export function Game2048() {
     state.status === "over" || (state.status === "won" && !state.winAcknowledged);
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -258,10 +264,13 @@ export function Game2048() {
         ))}
 
         {showOverlay ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={handleRetry}
             onRestart={() => dispatch({ type: "restart" })}
             onContinue={

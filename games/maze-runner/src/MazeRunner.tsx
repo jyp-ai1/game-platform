@@ -5,12 +5,15 @@ import {
   emitGameRetry,
   ResumeDialog,
   SaveIndicator,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
 import { useEffect, useReducer, useRef } from "react";
@@ -61,6 +64,9 @@ export function MazeRunnerGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -136,7 +142,7 @@ export function MazeRunnerGame() {
   }
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -196,10 +202,13 @@ export function MazeRunnerGame() {
         )}
 
         {state.status !== "playing" ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />

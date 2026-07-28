@@ -11,11 +11,15 @@ import { emitGameRetry } from "./game-retry";
 import {
   loadGameProgress,
   recordGameRetry as persistRetry,
-  recordGameRunEnd,
-  recordGameRunStart,
   recordStageClear as persistStageClear,
   type GameProgressStats,
 } from "./game-progress";
+import {
+  endTrackedSession,
+  resetTrackedSession,
+  startTrackedSession,
+  updateTrackedScore,
+} from "./session-tracker";
 import type { GameOutcome } from "./game-standard";
 
 export interface GameEndPayload {
@@ -39,24 +43,24 @@ export interface GameSession {
 /** Create a run session — call once when gameplay begins (after countdown). */
 export function createGameSession(gameSlug: string): GameSession {
   const startedAt = Date.now();
-  recordGameRunStart(gameSlug);
+  startTrackedSession(gameSlug);
 
   return {
     slug: gameSlug,
     elapsedMs: () => Date.now() - startedAt,
     recordStageClear(stageIndex: number, score: number) {
+      updateTrackedScore(gameSlug, score, stageIndex + 1);
       return persistStageClear(gameSlug, stageIndex, score);
     },
     recordGameRetry() {
       emitGameRetry(gameSlug);
+      resetTrackedSession(gameSlug);
       return persistRetry(gameSlug);
     },
     recordGameEnd(payload: GameEndPayload) {
-      return recordGameRunEnd(gameSlug, payload.score, {
-        elapsedMs: payload.elapsedMs ?? Date.now() - startedAt,
-        stageReached: payload.stageReached,
-        bestTile: payload.bestTile,
-      });
+      updateTrackedScore(gameSlug, payload.score, payload.stageReached);
+      endTrackedSession(gameSlug, payload.score, payload.stageReached);
+      return loadGameProgress(gameSlug);
     },
     getProgress: () => loadGameProgress(gameSlug),
   };

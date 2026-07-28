@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 
 import { subscribePlatformAnalyticsEvents } from "./platform-analytics";
+import { useGameSlug } from "./game-slug-context";
+import { startTrackedSession } from "./session-tracker";
+import { playStartSound } from "./sound";
 import type { ResumePhase } from "./use-resumable-game";
 
 export interface UseReadyCountdownResult {
@@ -20,11 +23,15 @@ export interface UseReadyCountdownResult {
  * Retry skips countdown for instant restart (Sprint 13.5).
  */
 export function useReadyCountdown(phase: ResumePhase, gameSlug?: string): UseReadyCountdownResult {
+  const contextSlug = useGameSlug();
+  const slug = gameSlug ?? contextSlug ?? undefined;
   const [countdownDone, setCountdownDone] = useState(false);
+  const sessionStarted = useRef(false);
 
   useEffect(() => {
     if (phase === "ready") {
       setCountdownDone(false);
+      sessionStarted.current = false;
     }
   }, [phase]);
 
@@ -44,6 +51,13 @@ export function useReadyCountdown(phase: ResumePhase, gameSlug?: string): UseRea
     canPlay,
     canPlayRef,
     showCountdown: phase === "ready" && !countdownDone,
-    completeCountdown: () => setCountdownDone(true),
+    completeCountdown: () => {
+      setCountdownDone(true);
+      if (slug && !sessionStarted.current) {
+        sessionStarted.current = true;
+        startTrackedSession(slug);
+        playStartSound();
+      }
+    },
   };
 }

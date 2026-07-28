@@ -1,6 +1,6 @@
 "use client";
 
-import { GameSDKProvider } from "@game-platform/game-sdk";
+import { GameSDKProvider, GameSlugProvider } from "@game-platform/game-sdk";
 
 import { GameErrorMonitor } from "@/components/game-error-monitor";
 import { Loader2 } from "lucide-react";
@@ -333,8 +333,10 @@ export function GamePlayer({
 
   return (
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
-      <GameErrorMonitor gameSlug={slug} />
-      <Component />
+      <GameSlugProvider slug={slug}>
+        <GameErrorMonitor gameSlug={slug} />
+        <Component />
+      </GameSlugProvider>
     </GameSDKProvider>
   );
 }

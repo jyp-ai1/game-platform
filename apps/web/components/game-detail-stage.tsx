@@ -6,6 +6,12 @@ export function GameDetailStage({ children }: { children: React.ReactNode }) {
     <div
       className={[
         "game-detail-stage w-full",
+        "[&_.standard-game-shell]:mx-auto [&_.standard-game-shell]:w-full",
+        "[&_.standard-game-shell]:max-w-[min(100%,20rem)]",
+        "sm:[&_.standard-game-shell]:max-w-[min(100%,24rem)]",
+        "lg:[&_.standard-game-shell]:max-w-[min(100%,28rem)]",
+        "xl:[&_.standard-game-shell]:max-w-[min(100%,32rem)]",
+        "[&_.standard-game-canvas]:mx-auto [&_.standard-game-canvas]:w-full",
         "[&_.max-w-sm]:mx-auto [&_.max-w-sm]:w-full",
         "[&_.max-w-sm]:max-w-[min(100%,24rem)]",
         "sm:[&_.max-w-sm]:max-w-[min(100%,26rem)]",

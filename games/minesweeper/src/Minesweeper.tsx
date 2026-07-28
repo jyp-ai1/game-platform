@@ -2,15 +2,18 @@
 
 import {
   clearSave,
+  emitGameRetry,
   ResumeDialog,
   SaveIndicator,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
-  emitGameRetry,
   useReadyCountdown,
   useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
 import type { MouseEvent } from "react";
 import { useEffect, useReducer, useState } from "react";
@@ -113,6 +116,9 @@ export function MinesweeperGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const [elapsed, setElapsed] = useState(0);
 
   // "waiting" (before the first click places mines) is indistinguishable
@@ -172,7 +178,7 @@ export function MinesweeperGame() {
   }
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
@@ -233,10 +239,13 @@ export function MinesweeperGame() {
         )}
 
         {state.status === "won" || state.status === "lost" ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.status === "won" ? Math.max(MIN_SCORE, MAX_SCORE - elapsed * SCORE_PER_SECOND) : undefined}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />

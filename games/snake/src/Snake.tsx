@@ -4,13 +4,16 @@ import {
   clearSave,
   ResumeDialog,
   SaveIndicator,
+  standardFeelFromState,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
   emitGameRetry,
   useReadyCountdown,
   useResumableGame,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
 import { useEffect, useReducer, useRef } from "react";
@@ -104,6 +107,9 @@ export function SnakeGame() {
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const saveStatus = useAutoSave(
@@ -221,10 +227,13 @@ export function SnakeGame() {
         })}
 
         {state.status === "over" ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             message="Game Over"
             score={state.score}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />

@@ -81,3 +81,15 @@ export function playPopSound(): void {
   playTone(520, 55, { volume: 0.08 });
   playTone(780, 45, { volume: 0.06, delayMs: 25 });
 }
+
+export function playStageClearSound(): void {
+  playTone(523.25, 100, { volume: 0.11 });
+  playTone(659.25, 100, { volume: 0.1, delayMs: 80 });
+  playTone(783.99, 140, { volume: 0.09, delayMs: 160 });
+}
+
+export function playComboSound(): void {
+  playTone(880, 60, { volume: 0.09 });
+  playTone(1108, 60, { volume: 0.08, delayMs: 50 });
+  playTone(1318, 80, { volume: 0.07, delayMs: 100 });
+}

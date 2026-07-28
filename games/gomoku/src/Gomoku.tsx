@@ -2,15 +2,18 @@
 
 import {
   clearSave,
+  emitGameRetry,
   ResumeDialog,
   SaveIndicator,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
-  emitGameRetry,
   useReadyCountdown,
   useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -39,6 +42,9 @@ export function GomokuGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const humanTurn =
     canPlayRef.current && state.current === 1 && state.winner === null;
 
@@ -64,7 +70,7 @@ export function GomokuGame() {
   const msg = state.winner === 1 ? "You Win!" : state.winner === 2 ? "CPU Wins!" : humanTurn ? "돌을 놓으세요 (5목)" : "CPU...";
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm text-muted-foreground">{msg}</p>
@@ -94,10 +100,13 @@ export function GomokuGame() {
         )}
       </div>
       {state.winner !== null ? (
-        <GameOverOverlay
+        <StandardGameOverOverlay
           message={msg}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />

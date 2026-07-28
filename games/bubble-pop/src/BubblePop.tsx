@@ -2,20 +2,23 @@
 
 import {
   clearSave,
-  ResumeDialog,
-  SaveIndicator,
-  useAutoSave,
-  useGameSDK,
-  useGameSession,
-  useReadyCountdown,
-  useResumableGame,
   playClickSound,
   playFailSound,
   playGameOverSound,
   playPopSound,
   playStartSound,
+  ResumeDialog,
+  SaveIndicator,
+  StandardGameOverOverlay,
+  useAutoSave,
+  useGameSDK,
+  useGameSession,
+  useReadyCountdown,
+  useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
@@ -103,6 +106,9 @@ export function BubblePopGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
@@ -390,11 +396,14 @@ export function BubblePopGame() {
         />
 
         {state.status === "stage-clear" ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             variant="stage-clear"
             stageLabel={getBubbleStage(state.stageIndex).label}
             score={state.score}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
             onNextStage={() => dispatch({ type: "nextStage" })}
@@ -402,10 +411,13 @@ export function BubblePopGame() {
         ) : null}
 
         {state.status === "over" || state.status === "won" ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={handleRetry}
             onRestart={() => dispatch({ type: "restart" })}
           />

@@ -20,6 +20,7 @@ import { isRankingEnabled } from "./platform-flags";
 import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 import { recordSeasonNewBest, recordSeasonScoreReport } from "./season";
 import { recordWeeklyMissionScoreReport } from "./weekly-missions";
+import { endTrackedSession, updateTrackedScore } from "./session-tracker";
 
 // The one thing that's genuinely platform-specific (the actual network
 // call). Everything else — "is this a new personal best?", the nickname
@@ -54,6 +55,8 @@ export function GameSDKProvider({
 
   const reportScore = useCallback((gameSlug: string, score: number) => {
     emitPlatformAnalyticsEvent({ type: "game-end", gameSlug, score });
+    updateTrackedScore(gameSlug, score);
+    endTrackedSession(gameSlug, score);
     // Engagement side effects (XP, achievement checks) run on every round,
     // not just personal bests — the best-score gate below only controls
     // "is this worth a nickname prompt + leaderboard submission?".

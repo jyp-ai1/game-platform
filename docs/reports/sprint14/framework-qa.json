@@ -1,0 +1,1027 @@
+{
+  "generatedAt": "2026-07-28T00:54:33.642Z",
+  "sprint": "14",
+  "platform": {
+    "slug_provider": true,
+    "session_tracker": true,
+    "rule_groups": true
+  },
+  "summary": {
+    "total": 50,
+    "pass": 1,
+    "warn": 49,
+    "fail": 0,
+    "frameworkAutoImproved": 50
+  },
+  "frameworks": {
+    "progress": true,
+    "result": true,
+    "stage": true,
+    "sound": true,
+    "effect": true,
+    "exit": true,
+    "save": true
+  },
+  "games": [
+    {
+      "slug": "2048",
+      "status": "WARN",
+      "missing": [
+        "sound",
+        "effect",
+        "retry"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": true,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": false
+      }
+    },
+    {
+      "slug": "snake",
+      "status": "PASS",
+      "missing": [
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": true,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "breakout",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "arkanoid-dx",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "memory",
+      "status": "WARN",
+      "missing": [
+        "sound",
+        "effect",
+        "retry"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": true,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": false
+      }
+    },
+    {
+      "slug": "minesweeper",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "samegame",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "maze-runner",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "tank-battle",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "galaxy-defender",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "space-defender",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "bubble-pop",
+      "status": "WARN",
+      "missing": [
+        "effect",
+        "retry"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": true,
+        "sound": true,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": false
+      }
+    },
+    {
+      "slug": "sudoku",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "tic-tac-toe",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "simon",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "hangman",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "color-match",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect",
+        "retry"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": false
+      }
+    },
+    {
+      "slug": "air-hockey",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "tetris",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "gold-miner",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "space-impact",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "stack-tower",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "ball-sort",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "color-sort",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "penalty-shootout",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "darts",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "bubble-shooter",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "merge-blocks",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "connect4",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "reversi",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "gomoku",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "bowling",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "archery",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "sliding-puzzle",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "whack-a-mole",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "chess",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "checkers",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "jigsaw",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "mancala",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "mini-golf",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "billiards",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "basketball",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "table-tennis",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "domino",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "crossword",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "chess960",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "shuffleboard",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "kakuro",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "nonogram",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    },
+    {
+      "slug": "word-search",
+      "status": "WARN",
+      "missing": [
+        "stage",
+        "sound",
+        "effect"
+      ],
+      "checks": {
+        "progress": true,
+        "result": true,
+        "stage": false,
+        "sound": false,
+        "effect": false,
+        "exit": true,
+        "save": true,
+        "start": true,
+        "retry": true
+      }
+    }
+  ],
+  "gameP0": []
+}

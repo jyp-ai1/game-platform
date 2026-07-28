@@ -55,6 +55,9 @@ export function GameOverOverlay({
   function handleRetry() {
     onRetry?.();
     onRestart();
+    if (gameSlug && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("replay:game-retry", { detail: { gameSlug } }));
+    }
   }
 
   function handleExit() {

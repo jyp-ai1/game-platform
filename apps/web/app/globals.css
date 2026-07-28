@@ -358,3 +358,26 @@
     opacity: 0;
   }
 }
+
+/* Sprint 14 — Effect Framework */
+@keyframes game-effect-flash-keyframes {
+  0% { filter: brightness(1); }
+  40% { filter: brightness(1.35); }
+  100% { filter: brightness(1); }
+}
+
+.game-effect-flash {
+  animation: game-effect-flash-keyframes 180ms ease-out;
+}
+
+@keyframes game-effect-shake-keyframes {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+.game-effect-shake {
+  animation: game-effect-shake-keyframes 320ms ease-in-out;
+}

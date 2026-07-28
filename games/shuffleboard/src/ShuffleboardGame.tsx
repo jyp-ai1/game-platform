@@ -2,15 +2,18 @@
 
 import {
   clearSave,
+  emitGameRetry,
   ResumeDialog,
   SaveIndicator,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
-  emitGameRetry,
   useReadyCountdown,
   useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -52,6 +55,9 @@ export function ShuffleboardGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -73,7 +79,7 @@ export function ShuffleboardGame() {
   }, [state.status, state.score, reportScore]);
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="Score" value={state.score} />
@@ -110,10 +116,13 @@ export function ShuffleboardGame() {
         </div>
       ) : null}
       {state.status === "over" ? (
-        <GameOverOverlay
+        <StandardGameOverOverlay
           message={`Total ${state.score} points`}
           score={state.score}
           gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />

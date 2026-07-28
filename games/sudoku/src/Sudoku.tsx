@@ -5,12 +5,15 @@ import {
   emitGameRetry,
   ResumeDialog,
   SaveIndicator,
+  StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
+  standardFeelFromState,
+  useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, GameOverOverlay, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { Eraser, RotateCcw } from "lucide-react";
 import { useEffect, useReducer } from "react";
 
@@ -58,6 +61,9 @@ export function SudokuGame() {
   );
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  });
   const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
   const saveStatus = useAutoSave(
@@ -78,7 +84,7 @@ export function SudokuGame() {
   const interactive = canPlay && state.status === "playing";
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Mistakes" value={state.mistakes} />
@@ -139,10 +145,13 @@ export function SudokuGame() {
         )}
 
         {state.status !== "playing" ? (
-          <GameOverOverlay
+          <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.status === "won" ? computeScore(state.mistakes) : undefined}
             gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={feel.handleExit}
             onRetry={() => emitGameRetry(GAME_SLUG)}
             onRestart={() => dispatch({ type: "restart" })}
           />

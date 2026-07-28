@@ -29,13 +29,56 @@ export {
 } from "./local-storage";
 export {
   playClickSound,
+  playComboSound,
   playFailSound,
   playGameOverSound,
   playHoverSound,
   playPopSound,
+  playStageClearSound,
   playStartSound,
   playSuccessSound,
 } from "./sound";
+export {
+  createEffectBurst,
+  tickEffects,
+  triggerEffect,
+  triggerScreenShake,
+  type EffectBurst,
+  type EffectKind,
+} from "./effects";
+export {
+  createStageManager,
+  StageManager,
+  type StageDefinition,
+  type StageManagerOptions,
+} from "./stage-manager";
+export {
+  GAME_RULE_GROUPS,
+  getAllGroupedSlugs,
+  getGameRuleGroup,
+  getGroupSlugs,
+  type GameRuleGroup,
+  type GameRuleGroupDef,
+} from "./game-rule-groups";
+export { GameSlugProvider, useGameSlug } from "./game-slug-context";
+export { FrameworkResultOverlay, type FrameworkResultOverlayProps } from "./framework-overlays";
+export {
+  useGameFramework,
+  type GameFrameworkResultFlow,
+  type UseGameFrameworkOptions,
+  type UseGameFrameworkResult,
+} from "./use-game-framework";
+export {
+  endTrackedSession,
+  getTrackedSession,
+  resetTrackedSession,
+  startTrackedSession,
+  updateTrackedScore,
+} from "./session-tracker";
+export { useStandardGameFeel, standardFeelFromState, type StandardGameFeelOptions } from "./use-standard-game-feel";
+export { StandardGameOverOverlay } from "./standard-game-over-overlay";
+export { StandardGameShell } from "./standard-game-shell";
+export { getGroupDifficulty, type GroupDifficulty } from "./game-difficulty";
 export {
   ACHIEVEMENTS,
   getAchievementRate,
