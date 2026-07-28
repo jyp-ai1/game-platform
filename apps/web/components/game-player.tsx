@@ -3,6 +3,7 @@
 import { GameSDKProvider, GameSlugProvider } from "@game-platform/game-sdk";
 
 import { GameErrorMonitor } from "@/components/game-error-monitor";
+import { GameProgressBar } from "@/components/game-progress-bar";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
@@ -335,6 +336,7 @@ export function GamePlayer({
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
       <GameSlugProvider slug={slug}>
         <GameErrorMonitor gameSlug={slug} />
+        <GameProgressBar slug={slug} />
         <Component />
       </GameSlugProvider>
     </GameSDKProvider>

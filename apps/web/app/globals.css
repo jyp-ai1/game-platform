@@ -381,3 +381,16 @@
 .game-effect-shake {
   animation: game-effect-shake-keyframes 320ms ease-in-out;
 }
+
+/* Sprint 14 — mobile touch + canvas scaling */
+.standard-game-shell,
+.game-detail-stage .standard-game-shell {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 640px) {
+  .game-detail-stage [class*="max-w-"] {
+    max-width: min(100%, 100vw - 2rem) !important;
+  }
+}

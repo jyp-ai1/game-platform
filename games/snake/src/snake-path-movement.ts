@@ -110,7 +110,13 @@ export function advanceSnakePath(
   const desired = snake.desiredAngle ?? directionToAngle(snake.pendingDirection);
   let angle = snake.angle ?? desired;
   let diff = normalizeAngle(desired - angle);
-  angle += diff * SNAKE_FEEL.turnLerp;
+  const boosting = !!snake.boosting;
+  const maxTurn =
+    SNAKE_FEEL.maxTurnRadiansPerTick * (boosting ? SNAKE_FEEL.boostTurnMult : 1);
+  if (Math.abs(diff) > maxTurn) {
+    diff = Math.sign(diff) * maxTurn;
+  }
+  angle += diff;
   snake.angle = angle;
   snake.direction = angleToDirection(angle);
   snake.desiredAngle = desired;
