@@ -6,7 +6,7 @@ export const SNAKE_FEEL = {
   boostSpeedMult: 1.2,
   segmentSpacing: 0.5,
   /** Sprint 14 — Slither-like: cap angular step per tick (immediate, small, fast). */
-  maxTurnRadiansPerTick: 0.58,
+  maxTurnRadiansPerTick: 0.48,
   boostTurnMult: 0.82,
   /** @deprecated — use maxTurnRadiansPerTick */
   turnLerp: 0.3,

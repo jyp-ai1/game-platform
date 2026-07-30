@@ -3,8 +3,7 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 
 import { recordGameRetry } from "./game-progress";
-import { emitGameRetry } from "./game-retry";
-import { endTrackedSession, resetTrackedSession } from "./session-tracker";
+import { endTrackedSession, resetTrackedSession, startTrackedSession } from "./session-tracker";
 
 const GameSlugContext = createContext<string | null>(null);
 
@@ -20,8 +19,8 @@ export function GameSlugProvider({ slug, children }: { slug: string; children: R
       const detail = (event as CustomEvent<{ gameSlug?: string }>).detail;
       if (detail?.gameSlug !== slug) return;
       recordGameRetry(slug);
-      emitGameRetry(slug);
       resetTrackedSession(slug);
+      startTrackedSession(slug);
     }
     window.addEventListener("replay:game-exit", onExit);
     window.addEventListener("replay:game-retry", onRetry);

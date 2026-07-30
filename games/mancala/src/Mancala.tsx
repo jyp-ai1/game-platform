@@ -97,7 +97,7 @@ export function MancalaGame() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">{msg}</p>
-      <div className="flex w-full max-w-md flex-col gap-3 rounded-xl border border-border p-3">
+      <div className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-border p-3">
         <div className="grid grid-cols-6 gap-2">
           {Array.from({ length: 6 }, (_, i) => 12 - i).map((pit) => (
             <button

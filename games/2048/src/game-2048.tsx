@@ -123,7 +123,7 @@ export function Game2048() {
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
-  const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
+  const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -224,7 +224,6 @@ export function Game2048() {
   );
 
   function handleRetry() {
-    recordGameRetry();
     resetSession();
     reportedTiles.current.clear();
     dispatch({ type: "restart" });

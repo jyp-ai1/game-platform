@@ -120,7 +120,7 @@ export function MemoryGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
-  const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
+  const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
@@ -193,7 +193,6 @@ export function MemoryGame() {
   }
 
   function handleRetry() {
-    recordGameRetry();
     resetSession();
     dispatch({ type: "restart" });
   }

@@ -113,7 +113,7 @@ export function BubblePopGame() {
   });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
-  const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
+  const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const stageClearReported = useRef(false);
   const particleIdRef = useRef(0);
@@ -220,7 +220,6 @@ export function BubblePopGame() {
   }, [state.status, state.score, state.stageIndex, reportScore, recordGameEnd]);
 
   function handleRetry() {
-    recordGameRetry();
     resetSession();
     dispatch({ type: "restart" });
   }
@@ -271,7 +270,7 @@ export function BubblePopGame() {
   const aimY2 = SHOOTER_Y - Math.cos(state.shooterAngle) * AIM_LINE_LENGTH;
 
   return (
-    <div className="relative flex w-full max-w-full flex-col items-center gap-4 overflow-hidden">
+    <div className="relative flex w-full max-w-sm flex-col items-center gap-4 overflow-hidden">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex items-center gap-2">

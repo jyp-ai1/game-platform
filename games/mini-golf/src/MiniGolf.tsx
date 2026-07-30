@@ -91,7 +91,7 @@ export function MiniGolfGame() {
         </Button>
       </div>
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-xl border border-green-800/50 bg-green-900/40"
+        className="relative w-full max-w-sm overflow-hidden rounded-xl border border-green-800/50 bg-green-900/40"
         style={{ aspectRatio: `${MINI_GOLF_W}/${MINI_GOLF_H}` }}
       >
         <div

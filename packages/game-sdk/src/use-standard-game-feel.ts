@@ -10,9 +10,10 @@ import {
   type EffectBurst,
 } from "./effects";
 import { getGroupDifficulty, type GroupDifficulty } from "./game-difficulty";
-import { loadGameProgress, type GameProgressStats } from "./game-progress";
+import { loadGameProgress, recordStageClear, type GameProgressStats } from "./game-progress";
 import { emitGameExit } from "./game-exit";
 import { clearSave } from "./save";
+import { endTrackedSession, updateTrackedScore } from "./session-tracker";
 import {
   playComboSound,
   playFailSound,
@@ -121,6 +122,7 @@ export function useStandardGameFeel(
   const difficulty = getGroupDifficulty(slug, stageIdx);
   const prevStatus = useRef(options.status);
   const prevScore = useRef(options.score);
+  const sessionEndedRef = useRef(false);
   const burstsRef = useRef<EffectBurst[]>([]);
   const burstStateRef = useRef(0);
 
@@ -133,6 +135,13 @@ export function useStandardGameFeel(
       : undefined;
 
   useEffect(() => {
+    if (isPlaying(options.status)) {
+      updateTrackedScore(slug, options.score, options.stageIndex);
+      sessionEndedRef.current = false;
+    }
+  }, [slug, options.score, options.stageIndex, options.status]);
+
+  useEffect(() => {
     if (prevStatus.current === options.status) return;
     const next = normalizeStatus(options.status);
     const field = options.fieldRef?.current ?? null;
@@ -141,17 +150,29 @@ export function useStandardGameFeel(
       playStageClearSound();
       playSuccessSound();
       triggerEffect("success", field);
+      if (options.stageIndex != null) {
+        recordStageClear(slug, options.stageIndex, options.score);
+        updateTrackedScore(slug, options.score, options.stageIndex + 1);
+      }
     } else if (next === "won") {
       playStageClearSound();
       playSuccessSound();
       triggerEffect("combo", field);
+      if (!sessionEndedRef.current) {
+        sessionEndedRef.current = true;
+        endTrackedSession(slug, options.score, options.stageIndex);
+      }
     } else if (next === "over") {
       playFailSound();
       playGameOverSound();
       triggerScreenShake(field);
+      if (!sessionEndedRef.current) {
+        sessionEndedRef.current = true;
+        endTrackedSession(slug, options.score, options.stageIndex);
+      }
     }
     prevStatus.current = options.status;
-  }, [options.status, options.fieldRef]);
+  }, [options.status, options.fieldRef, options.score, options.stageIndex, slug]);
 
   useEffect(() => {
     if (options.muteScoreGain || !isPlaying(options.status)) {

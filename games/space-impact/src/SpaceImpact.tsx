@@ -187,7 +187,7 @@ export function SpaceImpactGame() {
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-md items-center justify-between">
+      <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Lives" value={state.lives} />
@@ -204,7 +204,7 @@ export function SpaceImpactGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-md touch-none select-none overflow-hidden rounded-xl bg-slate-950"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-slate-950"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}

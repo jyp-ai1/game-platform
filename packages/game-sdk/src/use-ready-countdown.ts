@@ -40,8 +40,11 @@ export function useReadyCountdown(phase: ResumePhase, gameSlug?: string): UseRea
       if (event.type !== "game-retry") return;
       if (gameSlug && event.gameSlug !== gameSlug) return;
       setCountdownDone(true);
+      if (slug) {
+        startTrackedSession(slug);
+      }
     });
-  }, [gameSlug]);
+  }, [gameSlug, slug]);
 
   const canPlay = phase === "ready" && countdownDone;
   const canPlayRef = useRef(canPlay);

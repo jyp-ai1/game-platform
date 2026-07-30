@@ -80,7 +80,7 @@ export function ColorMatchGame() {
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
-  const { recordGameRetry, recordGameEnd, resetSession } = useGameSession(
+  const { recordGameEnd, resetSession } = useGameSession(
     GAME_SLUG,
     sessionActive
   );
@@ -117,7 +117,6 @@ export function ColorMatchGame() {
   }, [state.status, state.score, state.round, reportScore, recordGameEnd]);
 
   function handleRetry() {
-    recordGameRetry();
     resetSession();
     dispatch({ type: "restart" });
   }

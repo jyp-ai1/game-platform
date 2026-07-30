@@ -86,7 +86,7 @@ export function BilliardsGame() {
         </Button>
       </div>
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-xl border-4 border-amber-900 bg-green-800"
+        className="relative w-full max-w-sm overflow-hidden rounded-xl border-4 border-amber-900 bg-green-800"
         style={{ aspectRatio: `${BILLIARDS_W}/${BILLIARDS_H}` }}
       >
         {state.balls
