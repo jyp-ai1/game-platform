@@ -9,6 +9,7 @@ import {
   triggerScreenShake,
   type EffectBurst,
 } from "./effects";
+import { getGroupDifficulty, type GroupDifficulty } from "./game-difficulty";
 import { loadGameProgress, type GameProgressStats } from "./game-progress";
 import { emitGameExit } from "./game-exit";
 import { clearSave } from "./save";
@@ -48,8 +49,6 @@ export function standardFeelFromState(state: Record<string, unknown>): {
   let score = 0;
   if (typeof state.score === "number") {
     score = state.score;
-  } else if (typeof state.playerScore === "number") {
-    score = state.playerScore;
   } else if (typeof state.playerScore === "number") {
     score = state.playerScore;
   } else if (typeof state.points === "number") {
@@ -114,9 +113,12 @@ export function useStandardGameFeel(
   isNewBest: boolean;
   bestRecordDelta: number | undefined;
   bursts: EffectBurst[];
+  difficulty: GroupDifficulty;
   handleExit: () => void;
 } {
   const progress = loadGameProgress(slug);
+  const stageIdx = options.stageIndex ?? progress.currentStage ?? 1;
+  const difficulty = getGroupDifficulty(slug, stageIdx);
   const prevStatus = useRef(options.status);
   const prevScore = useRef(options.score);
   const burstsRef = useRef<EffectBurst[]>([]);
@@ -190,6 +192,7 @@ export function useStandardGameFeel(
     isNewBest,
     bestRecordDelta,
     bursts: burstsRef.current,
+    difficulty,
     handleExit,
   };
 }
