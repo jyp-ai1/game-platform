@@ -50,6 +50,7 @@ interface State {
   tileStagesReached: number[];
   blockedPulse: number;
   mergePulse: number;
+  mergeHighlight: number[];
 }
 
 type Action =
@@ -69,7 +70,22 @@ function createInitialState(): State {
     tileStagesReached: [],
     blockedPulse: 0,
     mergePulse: 0,
+    mergeHighlight: [],
   };
+}
+
+function mergeHighlightIndices(before: Grid, after: Grid): number[] {
+  const indices: number[] = [];
+  for (let r = 0; r < before.length; r++) {
+    for (let c = 0; c < before[r]!.length; c++) {
+      const prev = before[r]![c]!;
+      const next = after[r]![c]!;
+      if (prev > 0 && next === prev * 2) {
+        indices.push(r * before.length + c);
+      }
+    }
+  }
+  return indices;
 }
 
 function reducer(state: State, action: Action): State {
@@ -96,6 +112,7 @@ function reducer(state: State, action: Action): State {
       const best = Math.max(state.best, score);
       const tile = maxTile(grid);
       const bestTile = Math.max(state.bestTile, tile);
+      const mergeHighlight = mergeHighlightIndices(state.grid, result.grid);
 
       let status: Status = "playing";
       if (!state.winAcknowledged && hasWon(grid)) {
@@ -120,7 +137,8 @@ function reducer(state: State, action: Action): State {
         winAcknowledged: state.winAcknowledged,
         tileStagesReached,
         blockedPulse: 0,
-        mergePulse: state.mergePulse + (result.scoreGained > 0 ? 1 : 0),
+        mergePulse: state.mergePulse + (mergeHighlight.length > 0 ? 1 : 0),
+        mergeHighlight,
       };
     }
     default:
@@ -313,7 +331,9 @@ export function Game2048() {
             key={`${index}-${value}-${state.mergePulse}`}
             className={cn(
               "flex items-center justify-center rounded-lg text-lg font-bold transition-transform duration-150 sm:text-2xl",
-              value !== 0 && "game-effect-merge"
+              value !== 0 &&
+                state.mergeHighlight.includes(index) &&
+                "game-effect-merge scale-110"
             )}
             style={tileStyle(value)}
           >

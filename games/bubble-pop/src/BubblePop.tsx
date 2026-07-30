@@ -449,7 +449,7 @@ export function BubblePopGame() {
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
             onRetry={handleRetry}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRestart={handleRetry}
           />
         ) : null}
 

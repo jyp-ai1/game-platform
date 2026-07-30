@@ -183,7 +183,6 @@ export function MemoryGame() {
       const score = computeScore(state.moves, state.stageIndex);
       recordStageClear(state.stageIndex, score);
       reportScore(GAME_SLUG, score);
-      clearSave(GAME_SLUG);
     }
     if (state.status === "playing") {
       stageClearReported.current = false;
@@ -236,7 +235,7 @@ export function MemoryGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -305,7 +304,7 @@ export function MemoryGame() {
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
             onRetry={handleRetry}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRestart={handleRetry}
           />
         ) : null}
 
