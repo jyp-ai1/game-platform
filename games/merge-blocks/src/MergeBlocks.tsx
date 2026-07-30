@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -69,6 +70,7 @@ export function MergeBlocksGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current && state.status === "playing") {
+                  playClickSound();
                   dispatch({ type: "drop", col: ci });
                 }
               }}

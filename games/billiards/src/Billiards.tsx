@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -118,7 +119,10 @@ export function BilliardsGame() {
       </div>
       <Button
         disabled={state.status !== "aiming" || !canPlayRef.current}
-        onClick={() => dispatch({ type: "shoot" })}
+        onClick={() => {
+          playClickSound();
+          dispatch({ type: "shoot" });
+        }}
       >
         Shoot!
       </Button>

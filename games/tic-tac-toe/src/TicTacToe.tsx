@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -115,7 +116,10 @@ export function TicTacToeGame() {
             <button
               key={index}
               type="button"
-              onClick={() => dispatch({ type: "playMove", index })}
+              onClick={() => {
+                playClickSound();
+                dispatch({ type: "playMove", index });
+              }}
               disabled={!isHumanTurn || cell !== null}
               aria-label={cell ? `칸 ${index + 1}: ${cell}` : `칸 ${index + 1}`}
               className={cn(

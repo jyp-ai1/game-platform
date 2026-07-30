@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -96,7 +97,10 @@ export function ReversiGame() {
                 key={`${ri}-${ci}`}
                 type="button"
                 disabled={!valid}
-                onClick={() => dispatch({ type: "place", row: ri, col: ci })}
+                onClick={() => {
+                  playClickSound();
+                  dispatch({ type: "place", row: ri, col: ci });
+                }}
                 className={cn(
                   "aspect-square rounded-sm bg-green-700/50",
                   valid && "ring-1 ring-primary",

@@ -32,9 +32,16 @@ export interface FlyingBubble {
 
 export type BubblePopStatus = "playing" | "over" | "won" | "stage-clear";
 
+export interface PopEvent {
+  row: number;
+  col: number;
+  color: BubbleColor;
+}
+
 export interface BubblePopState {
   stageIndex: number;
   shotsPerCeilingDrop: number;
+  flyingSpeed: number;
   grid: (BubbleColor | null)[][]; // [row][col], row 0 = top (attached to ceiling)
   shooterAngle: number; // radians, measured from straight-up
   currentColor: BubbleColor;
@@ -45,6 +52,8 @@ export interface BubblePopState {
   /** Applied after the current shot snaps — avoids pre-shot sudden game over. */
   pendingCeilingDrop: boolean;
   status: BubblePopStatus;
+  /** Pop positions from the latest snap — consumed by UI for particles. */
+  lastPops: PopEvent[];
 }
 
 function paletteForStage(stageIndex: number): BubbleColor[] {
@@ -72,6 +81,7 @@ export function createInitialState(stageIndex = 1, score = 0): BubblePopState {
   return {
     stageIndex,
     shotsPerCeilingDrop: stage.shotsPerCeilingDrop,
+    flyingSpeed: stage.flyingSpeed,
     grid,
     shooterAngle: 0,
     currentColor: randomColor(stageIndex),
@@ -81,6 +91,7 @@ export function createInitialState(stageIndex = 1, score = 0): BubblePopState {
     shotsUntilCeilingDrop: stage.shotsPerCeilingDrop,
     pendingCeilingDrop: false,
     status: "playing",
+    lastPops: [],
   };
 }
 
@@ -212,11 +223,12 @@ export function fireBubble(state: BubblePopState): BubblePopState {
   }
 
   const angle = state.shooterAngle;
+  const speed = state.flyingSpeed;
   const flyingBubble: FlyingBubble = {
     x: SHOOTER_X,
     y: SHOOTER_Y,
-    vx: Math.sin(angle) * FLYING_SPEED,
-    vy: -Math.cos(angle) * FLYING_SPEED,
+    vx: Math.sin(angle) * speed,
+    vy: -Math.cos(angle) * speed,
     color: state.currentColor,
   };
 
@@ -281,6 +293,9 @@ function applyCeilingDrop(grid: (BubbleColor | null)[][]): {
 
 export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   if (!state.flyingBubble) {
+    if (state.lastPops.length > 0) {
+      return { ...state, lastPops: [] };
+    }
     return state;
   }
 
@@ -332,10 +347,15 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   grid[row]![col] = color;
 
   let score = state.score;
+  const lastPops: PopEvent[] = [];
 
   const group = floodFillSameColor(grid, row, col);
   if (group.length >= MIN_MATCH_SIZE) {
     for (const [r, c] of group) {
+      const popped = grid[r]![c];
+      if (popped) {
+        lastPops.push({ row: r, col: c, color: popped });
+      }
       grid[r]![c] = null;
     }
     score += POINTS_PER_POP * group.length;
@@ -344,6 +364,10 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   const floating = findFloatingBubbles(grid);
   if (floating.length > 0) {
     for (const [r, c] of floating) {
+      const popped = grid[r]![c];
+      if (popped) {
+        lastPops.push({ row: r, col: c, color: popped });
+      }
       grid[r]![c] = null;
     }
     score += POINTS_PER_FLOATING * floating.length;
@@ -361,6 +385,7 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
         score,
         pendingCeilingDrop: false,
         status: "over",
+        lastPops,
       };
     }
     for (let row = 0; row < ROWS; row++) {
@@ -383,5 +408,6 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
     score,
     pendingCeilingDrop,
     status,
+    lastPops,
   };
 }

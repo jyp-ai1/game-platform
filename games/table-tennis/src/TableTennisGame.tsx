@@ -3,6 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
+  playSuccessSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -68,10 +70,14 @@ export function TableTennisGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const stage = state.playerScore + state.cpuScore + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: stage,
+    fieldRef,
   });
-  const fieldRef = useRef<HTMLDivElement>(null);
+  const diff = getGroupDifficulty(GAME_SLUG, stage);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -86,14 +92,22 @@ export function TableTennisGame() {
     let raf = 0;
     function loop(t: number) {
       if (last !== null && stateRef.current.status === "playing") {
-        dispatch({ type: "step", dt: Math.min(MAX_DT, (t - last) / 1000) });
+        dispatch({ type: "step", dt: Math.min(MAX_DT, (t - last) / 1000) * diff.speedMult });
       }
       last = t;
       raf = requestAnimationFrame(loop);
     }
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [diff.speedMult]);
+
+  const prevPlayerScore = useRef(state.playerScore);
+  useEffect(() => {
+    if (state.playerScore > prevPlayerScore.current) {
+      playSuccessSound();
+    }
+    prevPlayerScore.current = state.playerScore;
+  }, [state.playerScore]);
 
   useEffect(() => {
     if (state.status === "over") {

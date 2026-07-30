@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -105,7 +106,10 @@ export function ShuffleboardGame() {
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
       </div>
       {state.status === "aiming" ? (
-        <Button disabled={!canPlayRef.current} onClick={() => dispatch({ type: "slide" })}>
+        <Button disabled={!canPlayRef.current} onClick={() => {
+          playClickSound();
+          dispatch({ type: "slide" });
+        }}>
           Slide!
         </Button>
       ) : null}

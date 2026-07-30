@@ -3,6 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -45,7 +47,11 @@ export function StackTowerGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.stack.length,
   });
+
+  const diff = getGroupDifficulty(GAME_SLUG, state.stack.length);
+  const tickMs = Math.max(16, TICK_MS / diff.speedMult);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -55,9 +61,9 @@ export function StackTowerGame() {
 
   useEffect(() => {
     if (state.status !== "playing") return;
-    const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
+    const id = setInterval(() => dispatch({ type: "tick" }), tickMs);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, tickMs]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -81,6 +87,7 @@ export function StackTowerGame() {
         className="relative h-72 w-full max-w-sm overflow-hidden rounded-xl bg-muted"
         onClick={() => {
           if (canPlayRef.current && state.status === "playing") {
+            playClickSound();
             dispatch({ type: "place" });
           }
         }}

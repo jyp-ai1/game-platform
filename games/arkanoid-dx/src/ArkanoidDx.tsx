@@ -10,6 +10,7 @@ import {
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
+  getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
@@ -73,11 +74,14 @@ export function ArkanoidDxGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.stage + 1,
+    fieldRef,
   });
+  const diff = getGroupDifficulty(GAME_SLUG, state.stage + 1);
   const keysRef = useRef<Set<string>>(new Set());
-  const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -111,7 +115,7 @@ export function ArkanoidDxGame() {
             x: stateRef.current.paddleX + dx * PADDLE_KEY_SPEED * dt,
           });
         }
-        dispatch({ type: "step", dt });
+        dispatch({ type: "step", dt: dt * diff.speedMult });
       }
 
       rafRef.current = requestAnimationFrame(loop);

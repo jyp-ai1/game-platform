@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -67,7 +68,12 @@ export function SimonGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...standardFeelFromState({
+      ...(state as unknown as Record<string, unknown>),
+      status: state.phase === "over" ? "over" : "playing",
+      round: state.round,
+    }),
+    stageIndex: state.round,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
@@ -101,13 +107,14 @@ export function SimonGame() {
     if (!canPlayRef.current || state.phase !== "playback") {
       return;
     }
+    const playbackMs = Math.max(280, PLAYBACK_STEP_MS - state.round * 28);
     const interval = setInterval(() => {
       if (canPlayRef.current) {
         dispatch({ type: "advancePlayback" });
       }
-    }, PLAYBACK_STEP_MS);
+    }, playbackMs);
     return () => clearInterval(interval);
-  }, [state.phase, canPlay]);
+  }, [state.phase, state.round, canPlay]);
 
   useEffect(() => {
     if (state.phase === "over") {
@@ -148,7 +155,10 @@ export function SimonGame() {
               type="button"
               aria-label={pad.label}
               disabled={disabled}
-              onClick={() => dispatch({ type: "submitInput", color: pad.color })}
+              onClick={() => {
+                playClickSound();
+                dispatch({ type: "submitInput", color: pad.color });
+              }}
               className={cn(
                 "aspect-square rounded-xl transition-transform",
                 isActive ? pad.activeClassName : pad.className,

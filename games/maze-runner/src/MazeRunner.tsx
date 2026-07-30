@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -33,7 +34,7 @@ const TICK_MS = 130;
 const SWIPE_THRESHOLD = 24;
 
 type Action =
-  | { type: "tick" }
+  | { type: "tick"; dt: number }
   | { type: "setDirection"; direction: Direction }
   | { type: "restart" };
 
@@ -44,7 +45,7 @@ function reducer(state: MazeState, action: Action): MazeState {
     case "setDirection":
       return setQueuedDirection(state, action.direction);
     case "tick":
-      return step(state, TICK_MS / 1000);
+      return step(state, action.dt);
     default:
       return state;
   }
@@ -66,7 +67,11 @@ export function MazeRunnerGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: Math.floor(state.score / 200) + 1,
   });
+
+  const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 200) + 1);
+  const tickMs = Math.max(80, TICK_MS / diff.speedMult);
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -80,9 +85,9 @@ export function MazeRunnerGame() {
     if (state.status !== "playing" || !canPlay) {
       return;
     }
-    const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
+    const id = setInterval(() => dispatch({ type: "tick", dt: tickMs / 1000 }), tickMs);
     return () => clearInterval(id);
-  }, [state.status, canPlay]);
+  }, [state.status, canPlay, tickMs]);
 
   useEffect(() => {
     if (state.status === "over" || state.status === "won") {

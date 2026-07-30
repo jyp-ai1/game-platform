@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -10,6 +11,7 @@ import {
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
+  getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
@@ -73,7 +75,9 @@ export function GoldMinerGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: Math.floor(state.score / 500) + 1,
   });
+  const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 500) + 1);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -94,7 +98,7 @@ export function GoldMinerGame() {
       lastTimeRef.current = time;
 
       if (canPlayRef.current && stateRef.current.status === "playing") {
-        dispatch({ type: "step", dt });
+        dispatch({ type: "step", dt: dt * diff.speedMult });
       }
 
       rafRef.current = requestAnimationFrame(loop);
@@ -132,6 +136,7 @@ export function GoldMinerGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playClickSound();
     dispatch({ type: "fire" });
   }
 

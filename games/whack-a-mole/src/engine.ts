@@ -8,6 +8,10 @@ export interface WhackAMoleState {
 const GRID = 9;
 const DURATION = 30;
 
+function spawnChance(score: number): number {
+  return Math.min(0.82, 0.48 + Math.floor(score / 40) * 0.04);
+}
+
 export function createInitialState(): WhackAMoleState {
   return { active: null, score: 0, timeLeft: DURATION, status: "playing" };
 }
@@ -16,7 +20,11 @@ export function tick(state: WhackAMoleState): WhackAMoleState {
   if (state.status !== "playing") return state;
   const timeLeft = Math.max(0, state.timeLeft - 1);
   const active =
-    timeLeft <= 0 ? null : Math.random() < 0.55 ? Math.floor(Math.random() * GRID) : state.active;
+    timeLeft <= 0
+      ? null
+      : Math.random() < spawnChance(state.score)
+        ? Math.floor(Math.random() * GRID)
+        : state.active;
   return {
     active,
     score: state.score,

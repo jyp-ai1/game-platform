@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -162,6 +163,7 @@ export function MinesweeperGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playClickSound();
     dispatch(
       state.flagMode
         ? { type: "toggleFlag", row, col }

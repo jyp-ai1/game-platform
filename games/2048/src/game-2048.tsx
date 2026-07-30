@@ -20,7 +20,7 @@ import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
-import { TILE_STAGES } from "./2048-stage-config";
+import { TILE_STAGES, tileStageIndex, tileStageLabel } from "./2048-stage-config";
 import {
   addRandomTile,
   createInitialGrid,
@@ -130,6 +130,9 @@ export function Game2048() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: tileStageIndex(state.bestTile),
+    score: state.score,
+    status: state.status,
   });
   const reportedTiles = useRef<Set<number>>(new Set());
 
@@ -236,6 +239,8 @@ export function Game2048() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Tile" value={state.bestTile || 2} />
+          <ScoreBox label="Stage" value={tileStageIndex(state.bestTile)} />
           <ScoreBox label="Best" value={state.best} />
         </div>
         <Button
@@ -293,7 +298,8 @@ export function Game2048() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        방향키 또는 스와이프로 타일을 움직여 같은 숫자를 합치세요.
+        목표: {tileStageLabel(state.bestTile)} → 다음{" "}
+        {TILE_STAGES[tileStageIndex(state.bestTile)] ?? 2048} · 방향키 또는 스와이프
       </p>
     </div>
   );

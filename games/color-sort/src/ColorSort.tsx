@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -73,7 +74,10 @@ export function ColorSortGame() {
             key={ti}
             type="button"
             onClick={() => {
-              if (canPlayRef.current) dispatch({ type: "tap", index: ti });
+              if (canPlayRef.current) {
+                playClickSound();
+                dispatch({ type: "tap", index: ti });
+              }
             }}
             className={cn(
               "flex h-40 w-14 flex-col-reverse items-center rounded-b-lg border-2 border-foreground/20 bg-muted/50 p-1",

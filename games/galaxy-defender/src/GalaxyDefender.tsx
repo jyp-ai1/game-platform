@@ -10,6 +10,7 @@ import {
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
+  getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
@@ -98,8 +99,10 @@ export function GalaxyDefenderGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.wave,
   });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const diff = getGroupDifficulty(GAME_SLUG, state.wave);
   const keysRef = useRef<Set<string>>(new Set());
   const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
@@ -135,7 +138,7 @@ export function GalaxyDefenderGame() {
             x: stateRef.current.playerX + dx * PLAYER_KEY_SPEED * dt,
           });
         }
-        dispatch({ type: "step", dt });
+        dispatch({ type: "step", dt: dt * diff.speedMult });
       }
 
       rafRef.current = requestAnimationFrame(loop);

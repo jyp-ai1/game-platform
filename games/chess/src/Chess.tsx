@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -82,6 +83,7 @@ export function ChessGame() {
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
+    playClickSound();
     const move = selected
       ? legal.find(
           (m) =>

@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -57,6 +58,7 @@ export function BasketballGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.shot,
   });
 
   const saveStatus = useAutoSave(
@@ -110,7 +112,10 @@ export function BasketballGame() {
       {state.status === "aiming" ? (
         <Button
           disabled={!canPlayRef.current}
-          onClick={() => dispatch({ type: "shoot" })}
+          onClick={() => {
+            playClickSound();
+            dispatch({ type: "shoot" });
+          }}
         >
           Shoot!
         </Button>

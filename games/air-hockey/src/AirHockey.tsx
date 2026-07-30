@@ -3,6 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
+  playSuccessSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -66,11 +68,14 @@ export function AirHockeyGame() {
   );
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.playerScore + state.aiScore + 1,
+    fieldRef,
   });
+  const diff = getGroupDifficulty(GAME_SLUG, state.playerScore + state.aiScore + 1);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
-  const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -91,7 +96,7 @@ export function AirHockeyGame() {
       lastTimeRef.current = time;
 
       if (stateRef.current.status === "playing" && canPlayRef.current) {
-        dispatch({ type: "step", dt });
+        dispatch({ type: "step", dt: dt * diff.speedMult });
       }
 
       rafRef.current = requestAnimationFrame(loop);
@@ -103,7 +108,15 @@ export function AirHockeyGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
+  }, [canPlayRef, diff.speedMult]);
+
+  const prevPlayerScore = useRef(state.playerScore);
+  useEffect(() => {
+    if (state.playerScore > prevPlayerScore.current) {
+      playSuccessSound();
+    }
+    prevPlayerScore.current = state.playerScore;
+  }, [state.playerScore]);
 
   useEffect(() => {
     if (state.status !== "playing") {

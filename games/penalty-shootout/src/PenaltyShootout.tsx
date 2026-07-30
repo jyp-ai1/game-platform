@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -59,6 +60,7 @@ export function PenaltyShootoutGame() {
 
   function handleShoot(dir: Direction) {
     if (!canPlayRef.current || state.status !== "playing") return;
+    playClickSound();
     dispatch({ type: "shoot", dir });
   }
 

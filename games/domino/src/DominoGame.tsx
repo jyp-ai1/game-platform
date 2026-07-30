@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -111,7 +112,10 @@ export function DominoGame() {
               key={i}
               type="button"
               disabled={!canPlay}
-              onClick={() => dispatch({ type: "play", index: i })}
+              onClick={() => {
+                playClickSound();
+                dispatch({ type: "play", index: i });
+              }}
               className={cn(
                 "rounded-lg border-2 px-3 py-2 font-mono text-sm",
                 canPlay ? "border-primary bg-primary/10 hover:bg-primary/20" : "opacity-50"
@@ -123,7 +127,10 @@ export function DominoGame() {
         })}
       </div>
       {humanTurn && playable.length === 0 && state.boneyard.length > 0 ? (
-        <Button onClick={() => dispatch({ type: "draw" })}>Draw tile</Button>
+        <Button onClick={() => {
+          playClickSound();
+          dispatch({ type: "draw" });
+        }}>Draw tile</Button>
       ) : null}
       {state.winner ? (
         <StandardGameOverOverlay

@@ -3,6 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
+  playPopSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -44,6 +46,7 @@ export function WhackAMoleGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: Math.floor(state.score / 30) + 1,
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
@@ -76,11 +79,14 @@ export function WhackAMoleGame() {
             key={i}
             type="button"
             onClick={() => {
-              if (canPlayRef.current) dispatch({ type: "whack", index: i });
+              if (!canPlayRef.current) return;
+              playClickSound();
+              if (state.active === i) playPopSound();
+              dispatch({ type: "whack", index: i });
             }}
             className={cn(
               "aspect-square rounded-xl border-2 border-amber-900/30 bg-amber-100/20",
-              state.active === i && "bg-amber-600 scale-105"
+              state.active === i && "bg-amber-600 scale-110 shadow-lg transition-transform duration-100"
             )}
             aria-label={`구멍 ${i + 1}`}
           />

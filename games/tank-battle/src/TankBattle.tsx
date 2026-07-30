@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -260,7 +261,10 @@ export function TankBattleGame() {
         variant="secondary"
         className="w-full max-w-sm"
         disabled={!canPlay}
-        onClick={() => dispatch({ type: "fire" })}
+        onClick={() => {
+          playClickSound();
+          dispatch({ type: "fire" });
+        }}
       >
         발사 (Space)
       </Button>

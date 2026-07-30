@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -103,9 +104,10 @@ export function TetrisGame() {
     if (state.status !== "playing" || !canPlay) {
       return;
     }
+    const diff = getGroupDifficulty(GAME_SLUG, state.level);
     const id = setInterval(
       () => dispatch({ type: "tick" }),
-      gravityIntervalMs(state.level)
+      gravityIntervalMs(state.level) / diff.speedMult
     );
     return () => clearInterval(id);
   }, [state.status, state.level, canPlay]);

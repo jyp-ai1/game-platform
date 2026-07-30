@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -81,6 +82,7 @@ export function BubbleShooterGame() {
                 type="button"
                 onClick={() => {
                   if (canPlayRef.current && state.status === "playing") {
+                    playClickSound();
                     dispatch({ type: "shoot", col: ci });
                   }
                 }}

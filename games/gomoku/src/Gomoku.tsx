@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -87,7 +88,10 @@ export function GomokuGame() {
                 key={`${ri}-${ci}`}
                 type="button"
                 disabled={!humanTurn || cell !== 0}
-                onClick={() => dispatch({ type: "place", row: ri, col: ci })}
+                onClick={() => {
+                  playClickSound();
+                  dispatch({ type: "place", row: ri, col: ci });
+                }}
                 className={cn(
                   "aspect-square rounded-sm bg-amber-100/20",
                   cell === 1 && "bg-neutral-900",

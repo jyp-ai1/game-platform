@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -61,6 +62,7 @@ export function DartsGame() {
 
   function handleBoardClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (!canPlayRef.current || state.status !== "playing") return;
+    playClickSound();
     const rect = e.currentTarget.getBoundingClientRect();
     const xPct = ((e.clientX - rect.left) / rect.width) * 100;
     const yPct = ((e.clientY - rect.top) / rect.height) * 100;

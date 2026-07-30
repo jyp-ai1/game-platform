@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -128,7 +129,10 @@ export function SudokuGame() {
                 key={`${row}-${col}`}
                 type="button"
                 disabled={!interactive}
-                onClick={() => dispatch({ type: "select", row, col })}
+                onClick={() => {
+                  playClickSound();
+                  dispatch({ type: "select", row, col });
+                }}
                 className={cn(
                   "flex aspect-square items-center justify-center text-sm font-semibold sm:text-base",
                   isGiven ? "bg-muted-foreground/20" : "bg-background hover:bg-muted-foreground/10",
@@ -165,7 +169,10 @@ export function SudokuGame() {
             key={digit}
             variant="outline"
             disabled={!interactive}
-            onClick={() => dispatch({ type: "enter", value: digit })}
+            onClick={() => {
+              playClickSound();
+              dispatch({ type: "enter", value: digit });
+            }}
           >
             {digit}
           </Button>

@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -77,7 +78,10 @@ export function BowlingGame() {
       </div>
       <Button
         disabled={state.status !== "aiming" || !canPlayRef.current}
-        onClick={() => dispatch({ type: "roll" })}
+        onClick={() => {
+          playClickSound();
+          dispatch({ type: "roll" });
+        }}
       >
         Roll!
       </Button>

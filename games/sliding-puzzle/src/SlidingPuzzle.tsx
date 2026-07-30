@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -62,7 +63,10 @@ export function SlidingPuzzleGame() {
             type="button"
             disabled={tile === 0}
             onClick={() => {
-              if (canPlayRef.current) dispatch({ type: "tap", index: i });
+              if (canPlayRef.current) {
+                playClickSound();
+                dispatch({ type: "tap", index: i });
+              }
             }}
             className={cn(
               "flex aspect-square items-center justify-center rounded-lg text-lg font-bold",

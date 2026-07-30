@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -35,6 +36,7 @@ export function ArcheryGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: 10 - state.arrowsLeft + 1,
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
@@ -47,6 +49,7 @@ export function ArcheryGame() {
 
   function onTargetClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (!canPlayRef.current || state.status !== "playing") return;
+    playClickSound();
     const rect = e.currentTarget.getBoundingClientRect();
     dispatch({
       type: "shoot",

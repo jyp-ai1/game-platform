@@ -2,6 +2,8 @@
 
 import {
   clearSave,
+  playClickSound,
+  playSuccessSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -127,6 +129,15 @@ export function MemoryGame() {
   });
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stageClearReported = useRef(false);
+  const prevMatchedRef = useRef(0);
+
+  useEffect(() => {
+    const matched = state.cards.filter((c) => c.matched).length;
+    if (matched > prevMatchedRef.current) {
+      playSuccessSound();
+    }
+    prevMatchedRef.current = matched;
+  }, [state.cards]);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -177,6 +188,7 @@ export function MemoryGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playClickSound();
     dispatch({ type: "flip", index });
   }
 
@@ -223,8 +235,8 @@ export function MemoryGame() {
               disabled={isFaceUp}
               aria-label={isFaceUp ? card.symbol : "카드 뒤집기"}
               className={cn(
-                "flex aspect-square items-center justify-center rounded-lg text-2xl transition-colors",
-                isFaceUp ? "bg-primary/20" : "bg-muted hover:bg-muted-foreground/20"
+                "flex aspect-square items-center justify-center rounded-lg text-2xl transition-all duration-200",
+                isFaceUp ? "scale-100 bg-primary/20" : "scale-95 bg-muted hover:scale-100 hover:bg-muted-foreground/20"
               )}
             >
               {isFaceUp ? card.symbol : null}

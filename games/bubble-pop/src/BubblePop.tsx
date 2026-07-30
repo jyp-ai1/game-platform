@@ -3,10 +3,9 @@
 import {
   clearSave,
   playClickSound,
-  playFailSound,
-  playGameOverSound,
   playPopSound,
   playStartSound,
+  playSuccessSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -24,8 +23,8 @@ import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
+  BUBBLE_RADIUS,
   BUBBLE_SIZE,
-  COLORS,
   type BubbleColor,
   type BubblePopState,
   createInitialState,
@@ -106,19 +105,20 @@ export function BubblePopGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    muteScoreGain: true,
+    fieldRef,
   });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordStageClear, recordGameRetry, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const stageClearReported = useRef(false);
-  const prevScoreRef = useRef(0);
   const particleIdRef = useRef(0);
   const [particles, setParticles] = useState<PopParticle[]>([]);
   const [popFlash, setPopFlash] = useState(false);
-  const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -160,21 +160,29 @@ export function BubblePopGame() {
   }, [sessionActive]);
 
   useEffect(() => {
-    if (state.score > prevScoreRef.current) {
-      playPopSound();
-      setPopFlash(true);
-      const burst: PopParticle[] = Array.from({ length: 8 }, (_, i) => ({
+    if (state.lastPops.length === 0) {
+      return;
+    }
+    playPopSound();
+    if (state.lastPops.length >= 5) {
+      playSuccessSound();
+    }
+    setPopFlash(true);
+    const burst: PopParticle[] = state.lastPops.flatMap((pop) => {
+      const isOdd = pop.row % 2 === 1;
+      const cx = pop.col * BUBBLE_SIZE + BUBBLE_RADIUS + (isOdd ? BUBBLE_RADIUS : 0);
+      const cy = pop.row * BUBBLE_SIZE + BUBBLE_RADIUS;
+      return Array.from({ length: 3 }, () => ({
         id: particleIdRef.current++,
-        xPct: 35 + Math.random() * 30,
-        yPct: 15 + Math.random() * 45,
-        color: COLORS[i % COLORS.length]!,
+        xPct: ((cx + (Math.random() - 0.5) * 8) / FIELD_WIDTH) * 100,
+        yPct: ((cy + (Math.random() - 0.5) * 8) / FIELD_HEIGHT) * 100,
+        color: pop.color,
         life: 1,
       }));
-      setParticles((p) => [...p, ...burst].slice(-40));
-      window.setTimeout(() => setPopFlash(false), 120);
-    }
-    prevScoreRef.current = state.score;
-  }, [state.score]);
+    });
+    setParticles((p) => [...p, ...burst].slice(-48));
+    window.setTimeout(() => setPopFlash(false), 120);
+  }, [state.lastPops]);
 
   useEffect(() => {
     if (particles.length === 0) return;
@@ -187,16 +195,6 @@ export function BubblePopGame() {
     }, 32);
     return () => window.clearInterval(id);
   }, [particles.length]);
-
-  useEffect(() => {
-    if (state.status === "over") {
-      playFailSound();
-      playGameOverSound();
-    }
-    if (state.status === "won" || state.status === "stage-clear") {
-      playStartSound();
-    }
-  }, [state.status]);
 
   useEffect(() => {
     if (state.status === "stage-clear" && !stageClearReported.current) {

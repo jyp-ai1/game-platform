@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -116,7 +117,10 @@ export function MancalaGame() {
               key={pit}
               type="button"
               disabled={!humanTurn || state.pits[pit] === 0}
-              onClick={() => dispatch({ type: "pick", pit })}
+              onClick={() => {
+                playClickSound();
+                dispatch({ type: "pick", pit });
+              }}
               className={cn(
                 "flex aspect-[2/1] flex-col items-center justify-center rounded-lg bg-primary/20 text-sm",
                 humanTurn && state.pits[pit]! > 0 && "hover:bg-primary/40"

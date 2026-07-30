@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -83,6 +84,7 @@ export function CheckersGame() {
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
+    playClickSound();
     if (state.mustContinue) {
       const jump = legal.find((m) => m.to[0] === r && m.to[1] === c);
       if (jump) {

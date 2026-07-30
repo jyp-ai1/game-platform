@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -103,7 +104,10 @@ export function CrosswordGame() {
               key={i}
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
-              onClick={() => dispatch({ type: "select", row: r, col: c })}
+              onClick={() => {
+                playClickSound();
+                dispatch({ type: "select", row: r, col: c });
+              }}
               className={cn(
                 "aspect-square border text-lg font-bold uppercase",
                 sel ? "border-primary bg-primary/10" : "border-border bg-background"

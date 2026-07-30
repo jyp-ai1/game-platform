@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -128,7 +129,10 @@ export function MiniGolfGame() {
       </div>
       <Button
         disabled={state.status !== "aiming" || !canPlayRef.current}
-        onClick={() => dispatch({ type: "putt" })}
+        onClick={() => {
+          playClickSound();
+          dispatch({ type: "putt" });
+        }}
       >
         Putt!
       </Button>

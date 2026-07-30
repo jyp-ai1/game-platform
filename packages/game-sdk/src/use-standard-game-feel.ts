@@ -50,11 +50,38 @@ export function standardFeelFromState(state: Record<string, unknown>): {
     score = state.score;
   } else if (typeof state.playerScore === "number") {
     score = state.playerScore;
+  } else if (typeof state.playerScore === "number") {
+    score = state.playerScore;
   } else if (typeof state.points === "number") {
     score = state.points;
   }
 
-  const stageIndex = typeof state.stageIndex === "number" ? state.stageIndex : undefined;
+  const stageIndex =
+    typeof state.stageIndex === "number"
+      ? state.stageIndex
+      : typeof state.level === "number"
+        ? state.level
+        : typeof state.frame === "number"
+          ? state.frame
+          : typeof state.round === "number"
+            ? Math.max(1, state.round)
+            : typeof state.wave === "number"
+              ? state.wave
+              : typeof state.shots === "number"
+                ? state.shots + 1
+                : typeof state.strokes === "number"
+                  ? state.strokes + 1
+                  : typeof state.enemiesDefeated === "number"
+                    ? state.enemiesDefeated + 1
+                    : typeof state.moves === "number" && state.moves > 0
+                      ? state.moves
+                      : typeof state.throwsLeft === "number"
+                        ? Math.max(1, 10 - state.throwsLeft)
+                        : typeof state.mistakes === "number"
+                          ? state.mistakes + 1
+                          : typeof state.wrongGuesses === "number"
+                            ? state.wrongGuesses + 1
+                            : undefined;
   return { status, score, stageIndex };
 }
 

@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -98,7 +99,10 @@ export function NonogramGame() {
                   key={`${r}-${c}`}
                   type="button"
                   disabled={!canPlayRef.current || state.status === "won"}
-                  onClick={() => dispatch({ type: "fill", row: r, col: c })}
+                  onClick={() => {
+                    playClickSound();
+                    dispatch({ type: "fill", row: r, col: c });
+                  }}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     dispatch({ type: "empty", row: r, col: c });

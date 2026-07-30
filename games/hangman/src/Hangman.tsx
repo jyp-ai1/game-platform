@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -134,7 +135,10 @@ export function HangmanGame() {
                     key={letter}
                     type="button"
                     disabled={guessed || !interactive}
-                    onClick={() => dispatch({ type: "guess", letter })}
+                    onClick={() => {
+                      playClickSound();
+                      dispatch({ type: "guess", letter });
+                    }}
                     aria-label={`${letter} 추측`}
                     className={cn(
                       "flex size-8 items-center justify-center rounded-md text-sm font-semibold transition-colors disabled:pointer-events-none",

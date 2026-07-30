@@ -2,6 +2,9 @@
 
 import {
   clearSave,
+  playClickSound,
+  playFailSound,
+  playSuccessSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -73,6 +76,7 @@ export function ColorMatchGame() {
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.round,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
@@ -119,6 +123,20 @@ export function ColorMatchGame() {
   }
 
   const interactive = canPlay && state.status === "playing";
+
+  function handleSelect(color: ColorName) {
+    if (!interactive) {
+      return;
+    }
+    playClickSound();
+    const wasCorrect = color === state.targetColor;
+    dispatch({ type: "select", color });
+    if (wasCorrect) {
+      playSuccessSound();
+    } else {
+      playFailSound();
+    }
+  }
 
   const progress = Math.max(
     0,
@@ -169,7 +187,7 @@ export function ColorMatchGame() {
               key={`${color}-${index}`}
               type="button"
               disabled={!interactive}
-              onClick={() => dispatch({ type: "select", color })}
+              onClick={() => handleSelect(color)}
               aria-label={COLOR_LABELS[color]}
               className={cn(
                 "aspect-square w-full rounded-lg shadow transition-transform active:scale-95 disabled:pointer-events-none disabled:opacity-50",

@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -104,7 +105,10 @@ export function Connect4Game() {
             type="button"
             disabled={!humanTurn}
             aria-label={`열 ${col + 1}`}
-            onClick={() => dispatch({ type: "drop", col })}
+            onClick={() => {
+              playClickSound();
+              dispatch({ type: "drop", col });
+            }}
             className="flex-1 rounded bg-muted py-2 text-xs hover:bg-primary/20 disabled:opacity-40"
           >
             ▼

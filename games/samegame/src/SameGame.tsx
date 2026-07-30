@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -92,6 +93,7 @@ export function SameGameGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playClickSound();
     dispatch({ type: "clear", row, col });
   }
 
