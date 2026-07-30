@@ -130,14 +130,15 @@ export function Game2048() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const { reportScore } = useGameSDK();
+  const gridRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: tileStageIndex(state.bestTile),
     score: state.score,
-    status: state.status,
+    muteScoreGain: true,
+    fieldRef: gridRef,
   });
   const reportedTiles = useRef<Set<number>>(new Set());
-  const gridRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
 
   const saveStatus = useAutoSave(

@@ -12,7 +12,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
-  GameFeelLayer,
+  feelWithScore,
+  PuzzlePlayField,
   playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
@@ -124,8 +125,9 @@ export function MemoryGame() {
     useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const score = computeScore(state.moves, state.stageIndex);
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, score),
   });
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stageClearReported = useRef(false);
@@ -209,7 +211,6 @@ export function MemoryGame() {
     dispatch({ type: "restart" });
   }
 
-  const score = computeScore(state.moves, state.stageIndex);
   const gridColsClass =
     state.stage.cols === 6
       ? "grid-cols-6"
@@ -235,7 +236,8 @@ export function MemoryGame() {
         </Button>
       </div>
 
-      <div className={cn("relative grid w-full max-w-sm gap-2", gridColsClass)}>
+      <PuzzlePlayField bursts={feel.bursts}>
+      <div className={cn("relative grid w-full gap-2", gridColsClass)}>
         {state.cards.map((card, index) => {
           const isFaceUp = card.matched || state.flipped.includes(index);
           return (
@@ -292,9 +294,8 @@ export function MemoryGame() {
             onNewGame={onNewGame}
           />
         ) : null}
-
-        <GameFeelLayer bursts={feel.bursts} />
       </div>
+      </PuzzlePlayField>
 
       <p className="text-xs text-muted-foreground">
         카드를 두 장씩 뒤집어 같은 그림을 찾으세요.

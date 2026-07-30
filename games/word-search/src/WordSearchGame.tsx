@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   clearSelection,
@@ -56,9 +58,20 @@ export function WordSearchGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevFoundRef = useRef(state.found.length);
+  const score = computeScore(state);
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    fieldRef,
   });
+
+  useEffect(() => {
+    if (state.found.length > prevFoundRef.current) {
+      playGameFeel("match", fieldRef.current);
+    }
+    prevFoundRef.current = state.found.length;
+  }, [state.found.length]);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -96,7 +109,8 @@ export function WordSearchGame() {
         ))}
       </ul>
       <p className="text-xs text-muted-foreground">Tap start cell, then end cell along a straight line</p>
-      <div className="grid w-full max-w-sm grid-cols-8 gap-0.5">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <div className="grid w-full grid-cols-8 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);
           const c = i % SIZE;
@@ -107,7 +121,7 @@ export function WordSearchGame() {
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
               onClick={() => {
-                playClickSound();
+                playGameFeel("button");
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
@@ -122,6 +136,7 @@ export function WordSearchGame() {
           );
         })}
       </div>
+      </PuzzlePlayField>
       {state.anchor ? (
         <Button variant="ghost" size="sm" onClick={() => dispatch({ type: "clear" })}>
           Clear selection
@@ -130,7 +145,7 @@ export function WordSearchGame() {
       {state.status === "won" ? (
         <StandardGameOverOverlay
           message="All words found!"
-          score={computeScore(state)}
+          score={score}
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}

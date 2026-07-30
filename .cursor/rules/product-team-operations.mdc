@@ -253,35 +253,46 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 
 ---
 
-## Sprint 14.2 — Closed Alpha Final (50개 싱글 일괄 완성 · 최우선)
+## Sprint 14 — 게임 완성률 기준 (Framework ≠ 완성)
 
-**목표:** Closed Alpha용 싱글 50종 전체를 한 번에 운영 가능 수준까지. **Framework 적용 ≠ 게임 완성.**
+**금지 보고:** PASS1/PASS2 · Framework 완료 · Sound API · SDK 완료 · 게임 1개 완료
 
-**완료:** 50개 전부 START→PLAY→원작규칙→난이도→Stage→Retry→Exit→Progress→Sound→Effect→모바일 PASS 후에만 `=== Sprint COMPLETE ===`
+**작업 단위:** 게임 1개 ❌ · **게임군 ⭕** (Puzzle 15 · Shooter 9 · Arcade · Sports · Reaction)
 
-### PASS 순서
+**금지 루프:** 게임 1개 → Commit → QA (50개면 수개월)
 
-1. Framework / Progress / Stage / Result / Retry / Exit / Save / Responsive
-2. 원작 조사 → Rule / Difficulty / Victory / Failure / Score / Progress
-3. Game Feel (게임별 손맛)
-4. Sound (Start/Button/Success/Fail/GameOver/StageClear/Combo)
-5. Stage (있는 게임만 — 없는 게임 Endless 유지)
-6. Mobile / Tablet / PC
-7. QA 50/50 PASS
+### Sprint 14.x 순서
 
-### 절대 금지 보고
+| Sprint | 게임군 |
+| --- | --- |
+| 14.3 | Puzzle 15개 전부 |
+| 14.4 | Shooter 9개 전부 |
+| 14.5 | Arcade 전부 |
+| 14.6 | Sports 전부 |
+| 14.7 | Reaction 전부 |
+| 14.8 | Mobile 전부 |
+| 14.9 | 50개 QA |
+| 15 | Closed Alpha |
 
-`Bubble 완료` / `2048 완료` / `Batch1 완료` / `Framework 완료` / `SDK 완료` / 중간 완료 보고
-
-### 매 Push 보고 (Preview URL 필수)
+### 매 Push 보고 형식 (Preview URL 필수 — 없으면 미완료)
 
 ```
-Commit / Branch / Preview URL / Production / 이번 변경사항 / PM QA 체크list / Known Issues / 다음 작업
+===========================
+Sprint 14.x Preview
+===========================
+Commit / Branch / Preview URL / Production
+이번 수정된 게임군 ✅ Puzzle (15/15)
+이번 수정사항 Rule·Difficulty·Stage·Progress·Sound·Effect·Mobile
+PM 확인 게임 1. 2. 3. ... (5~10개)
+QA 체크리스트 □ START □ PLAY □ Stage □ Retry □ Exit □ Save □ Mobile
+Known Issues
+전체 진행률 (게임군별 % + 전체 %)
+===========================
 ```
 
-### Sprint Complete (50개 후에만)
+### Sprint COMPLETE (50/50 후에만)
 
-Progress·Sound·Effect·Difficulty·Rule·Responsive 각 50/50 · QA 50 PASS 0 FAIL · Closed Alpha READY
+Progress·Sound·Effect·Difficulty·Rule·Responsive 50/50 · QA 50 PASS · Closed Alpha READY
 
 ---
 

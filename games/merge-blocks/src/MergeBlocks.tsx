@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, dropColumn, type MergeBlocksState } from "./engine";
 
@@ -35,8 +37,12 @@ export function MergeBlocksGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, state.score),
+    fieldRef,
+    muteScoreGain: true,
   });
 
   const saveStatus = useAutoSave(
@@ -52,6 +58,13 @@ export function MergeBlocksGame() {
     }
   }, [state.status, state.score, reportScore]);
 
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("merge", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -62,7 +75,8 @@ export function MergeBlocksGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="grid grid-cols-4 gap-1 rounded-xl bg-muted p-2">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <div className="grid w-full grid-cols-4 gap-1 rounded-xl bg-muted p-2">
         {state.grid.map((row, ri) =>
           row.map((cell, ci) => (
             <button
@@ -70,12 +84,12 @@ export function MergeBlocksGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current && state.status === "playing") {
-                  playClickSound();
+                  playGameFeel("button");
                   dispatch({ type: "drop", col: ci });
                 }
               }}
               className={cn(
-                "flex h-12 w-12 items-center justify-center rounded text-sm font-bold",
+                "flex aspect-square w-full items-center justify-center rounded text-sm font-bold",
                 cell ? "bg-primary/80 text-primary-foreground" : "bg-background/50"
               )}
             >
@@ -84,6 +98,7 @@ export function MergeBlocksGame() {
           ))
         )}
       </div>
+      </PuzzlePlayField>
       {state.status === "over" ? (
         <StandardGameOverOverlay
           message={`Score ${state.score}`}

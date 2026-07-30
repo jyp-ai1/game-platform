@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -11,12 +13,11 @@ import {
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   computeScore,
@@ -37,13 +38,16 @@ function reducer(state: ColorSortState, action: Action): ColorSortState {
 }
 
 export function ColorSortGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const score = computeScore(state.moves);
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -54,13 +58,14 @@ export function ColorSortGame() {
 
   useEffect(() => {
     if (state.status === "won") {
-      reportScore(GAME_SLUG, computeScore(state.moves));
+      playGameFeel("correct", fieldRef.current);
+      reportScore(GAME_SLUG, score);
       clearSave(GAME_SLUG);
     }
-  }, [state.status, state.moves, reportScore]);
+  }, [state.status, score, reportScore]);
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
+    <div className="standard-game-shell relative mx-auto flex w-full flex-col items-center gap-4">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Moves" value={state.moves} />
@@ -68,37 +73,39 @@ export function ColorSortGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="flex justify-center gap-3">
-        {state.tubes.map((tube, ti) => (
-          <button
-            key={ti}
-            type="button"
-            onClick={() => {
-              if (canPlayRef.current) {
-                playClickSound();
-                dispatch({ type: "tap", index: ti });
-              }
-            }}
-            className={cn(
-              "flex h-40 w-14 flex-col-reverse items-center rounded-b-lg border-2 border-foreground/20 bg-muted/50 p-1",
-              state.selected === ti && "ring-2 ring-primary"
-            )}
-            aria-label={`튜브 ${ti + 1}`}
-          >
-            {tube.map((c, bi) => (
-              <span key={bi} className={cn("mb-0.5 h-7 w-full rounded", COLORS[c])} />
-            ))}
-          </button>
-        ))}
-      </div>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+        <div className="flex w-full justify-center gap-2">
+          {state.tubes.map((tube, ti) => (
+            <button
+              key={ti}
+              type="button"
+              onClick={() => {
+                if (canPlayRef.current) {
+                  playGameFeel("button");
+                  dispatch({ type: "tap", index: ti });
+                }
+              }}
+              className={cn(
+                "flex h-36 w-11 flex-col-reverse items-center rounded-b-lg border-2 border-foreground/20 bg-muted/50 p-1 sm:h-40 sm:w-14",
+                state.selected === ti && "ring-2 ring-primary"
+              )}
+              aria-label={`튜브 ${ti + 1}`}
+            >
+              {tube.map((c, bi) => (
+                <span key={bi} className={cn("mb-0.5 h-6 w-full rounded sm:h-7", COLORS[c])} />
+              ))}
+            </button>
+          ))}
+        </div>
+      </PuzzlePlayField>
       {state.status === "won" ? (
         <StandardGameOverOverlay
           message="Sorted!"
-          score={computeScore(state.moves)}
+          score={score}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />

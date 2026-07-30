@@ -82,11 +82,13 @@ export {
   startTrackedSession,
   updateTrackedScore,
 } from "./session-tracker";
-export { useStandardGameFeel, standardFeelFromState, type StandardGameFeelOptions } from "./use-standard-game-feel";
+export { useStandardGameFeel, standardFeelFromState, feelWithScore, type StandardGameFeelOptions } from "./use-standard-game-feel";
 export { StandardGameOverOverlay } from "./standard-game-over-overlay";
 export { StandardGameShell } from "./standard-game-shell";
 export { GameFeelLayer } from "./game-feel-layer";
 export { playGameFeel, type GameFeelEvent } from "./game-feel-events";
+export { PuzzlePlayField } from "./puzzle-play-field";
+export { getPuzzleStage, type PuzzleStageParams } from "./puzzle-stage-config";
 export { getGroupDifficulty, type GroupDifficulty } from "./game-difficulty";
 export {
   ACHIEVEMENTS,

@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,7 +15,6 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
-  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { Eraser, RotateCcw } from "lucide-react";
@@ -64,7 +65,7 @@ export function SudokuGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, computeScore(state.mistakes)),
   });
   const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const prevMistakesRef = useRef(0);
@@ -145,7 +146,7 @@ export function SudokuGame() {
                 type="button"
                 disabled={!interactive}
                 onClick={() => {
-                  playClickSound();
+                  playGameFeel("button");
                   dispatch({ type: "select", row, col });
                 }}
                 className={cn(
@@ -185,7 +186,7 @@ export function SudokuGame() {
             variant="outline"
             disabled={!interactive}
             onClick={() => {
-              playClickSound();
+              playGameFeel("button");
               dispatch({ type: "enter", value: digit });
             }}
           >

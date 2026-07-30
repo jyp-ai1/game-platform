@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { computeScore, createInitialState, tapTile, type SlidingPuzzleState } from "./engine";
 
@@ -35,8 +37,11 @@ export function SlidingPuzzleGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const score = computeScore(state.moves);
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    fieldRef,
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "won" ? null : state), [state]);
 
@@ -56,7 +61,8 @@ export function SlidingPuzzleGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="grid w-full max-w-sm grid-cols-4 gap-1 rounded-xl bg-muted p-2">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <div className="grid w-full grid-cols-4 gap-1 rounded-xl bg-muted p-2">
         {state.tiles.map((tile, i) => (
           <button
             key={i}
@@ -64,7 +70,7 @@ export function SlidingPuzzleGame() {
             disabled={tile === 0}
             onClick={() => {
               if (canPlayRef.current) {
-                playClickSound();
+                playGameFeel("button");
                 dispatch({ type: "tap", index: i });
               }
             }}
@@ -77,10 +83,11 @@ export function SlidingPuzzleGame() {
           </button>
         ))}
       </div>
+      </PuzzlePlayField>
       {state.status === "won" ? (
         <StandardGameOverOverlay
           message={`Clear! ${computeScore(state.moves)} pts (${state.moves} moves)`}
-          score={computeScore(state.moves)}
+          score={score}
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}

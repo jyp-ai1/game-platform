@@ -118,12 +118,17 @@ export function MinesweeperGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
-  });
   const [elapsed, setElapsed] = useState(0);
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    score:
+      state.status === "won"
+        ? Math.max(MIN_SCORE, MAX_SCORE - elapsed * SCORE_PER_SECOND)
+        : 0,
+    fieldRef,
+  });
 
   // "waiting" (before the first click places mines) is indistinguishable
   // from "no save" — skip saving until there's actually progress worth

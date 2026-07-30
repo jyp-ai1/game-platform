@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   clearGroup,
@@ -72,8 +74,10 @@ export function SameGameGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -93,7 +97,7 @@ export function SameGameGame() {
     if (!canPlayRef.current) {
       return;
     }
-    playClickSound();
+    playGameFeel("pop", fieldRef.current);
     dispatch({ type: "clear", row, col });
   }
 
@@ -112,8 +116,9 @@ export function SameGameGame() {
         </Button>
       </div>
 
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
       <div
-        className="relative grid w-full max-w-sm gap-1"
+        className="grid w-full gap-1 rounded-xl bg-muted p-1"
         style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
       >
         {state.board.map((rowCells, row) =>
@@ -153,6 +158,7 @@ export function SameGameGame() {
           />
         ) : null}
       </div>
+      </PuzzlePlayField>
 
       <p className="text-xs text-muted-foreground">
         같은 색 타일이 2개 이상 인접하면 클릭해 제거하세요. 더 이상 지울 수

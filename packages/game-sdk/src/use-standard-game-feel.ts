@@ -85,6 +85,16 @@ export function standardFeelFromState(state: Record<string, unknown>): {
   return { status, score, stageIndex };
 }
 
+/** Build feel options with explicit score (puzzle games often compute score outside state.score). */
+export function feelWithScore(
+  state: Record<string, unknown>,
+  score: number,
+  extras?: Partial<Omit<StandardGameFeelOptions, "score" | "status">>
+): StandardGameFeelOptions {
+  const base = standardFeelFromState(state);
+  return { ...base, ...extras, score, status: base.status };
+}
+
 type NormalizedStatus = "playing" | "over" | "won" | "stage-clear";
 
 function normalizeStatus(raw: string): NormalizedStatus {
