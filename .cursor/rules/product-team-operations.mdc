@@ -265,8 +265,8 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 
 | Sprint | 게임군 |
 | --- | --- |
-| 14.3 | Puzzle 15개 전부 |
-| 14.4 | Shooter 9개 전부 |
+| 14.3 | Puzzle 15 — **PM QA PASS 15/15** (코드 완료 ≠ 종료) |
+| 14.4 | Shooter 9 — **14.3 PM PASS 후에만** |
 | 14.5 | Arcade 전부 |
 | 14.6 | Sports 전부 |
 | 14.7 | Reaction 전부 |
@@ -282,6 +282,14 @@ Sprint 14.x Preview
 ===========================
 Commit / Branch / Preview URL / Production
 
+이번 Preview 목표
+□ Puzzle Playable PM PASS
+완료 시 → Sprint 14.3 종료
+미완료 시 → Puzzle 계속 (Shooter 금지)
+
+이번 Preview에서는
+Shooter 수정 안함 · Arcade 수정 안함 · Sports 수정 안함
+
 이번 Preview — PM이 꼭 봐야 하는 게임 5개
 1. ...
 2. ...
@@ -292,14 +300,23 @@ Commit / Branch / Preview URL / Production
 QA □ START □ PLAY □ GAMEOVER/CLEAR □ RETRY □ EXIT □ SAVE □ Mobile
 Known Issues
 
-P0 Playable     X / 50  (또는 게임군 X / 15)
-Rule            X / 50
-Difficulty      X / 50
-Sound           X / 50
-Effect          X / 50
-Original Feel   X / 50
+P0 Playable (PM QA)   X / 15 Puzzle · X / 50 전체
+P0 Playable (코드)    — PM QA와 별도 표기 금지 (혼동 방지)
+Rule / Difficulty / Sound / Effect / Original Feel  X / 50
+
+PM QA 결과 (PASS 건드리지 않음 · FAIL만 수정)
+[PASS] ...
+[FAIL] ...
 ===========================
 ```
+
+### Sprint 14.3 종료 조건 (필수)
+
+- **종료:** Puzzle **15/15 PM QA PASS** (Playable: START·PLAY·GAMEOVER/CLEAR·RETRY·EXIT·SAVE)
+- **코드 15/15 ≠ 종료** — PM 플레이 OK만 인정
+- **루프:** Puzzle → PM QA → FAIL 수정 → PM QA → PASS → (그때) Shooter
+- **절대:** PM QA 전 Shooter/Arcade/Sports 수정 금지
+- **수정 규칙:** PM `[PASS]` 게임 건드리지 않음 · `[FAIL]`만 수정
 
 ### 우선순위 (Playable First — 손맛은 마지막)
 
@@ -312,9 +329,9 @@ Original Feel   X / 50
 
 **게임군 내부:** 15개 전부 P0 Playable 100% → Rule/Difficulty → Feel/Sound
 
-**Sprint 14.3 종료:** Puzzle 15/15 Playable 100% (Sound 70% · Effect 60% OK)
+**Sprint 14.3 종료:** Puzzle **15/15 PM QA PASS** (Sound 70% · Effect 60% OK)
 
-**주의:** Puzzle 75% ≠ 서비스 75% (사용자는 게임군 무관 랜덤 플레이)
+**주의:** Puzzle 코드 OK ≠ 서비스 OK · PM QA PASS만 카운트
 
 ### Sprint COMPLETE (50/50 Playable + PM QA 후에만)
 
