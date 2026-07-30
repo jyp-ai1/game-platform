@@ -259,7 +259,19 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 
 **작업 단위:** 게임 1개 ❌ · **게임군 ⭕** (Puzzle 15 · Shooter 9 · Arcade · Sports · Reaction)
 
-**금지 루프:** 게임 1개 → Commit → QA (50개면 수개월)
+**금지:** 게임 5개씩 PM QA · 게임 1개씩 Preview QA (50개 = 10번 QA 비효율)
+
+### PM QA Batch (5 Preview = 50개)
+
+| Preview | 게임군 | 개수 |
+| --- | --- | --- |
+| 1 | Puzzle | 15 전부 |
+| 2 | Shooter | 9 전부 |
+| 3 | Arcade | 7 전부 |
+| 4 | Sports | 3 전부 |
+| 5 | Reaction | 6 전부 (+ Board 등 잔여) |
+
+**PM QA 종료 = 게임군 15/15 PASS → LOCK** (버그 발견 전까지 절대 수정 금지)
 
 ### Sprint 14.x 순서
 
@@ -282,41 +294,49 @@ Sprint 14.x Preview
 ===========================
 Commit / Branch / Preview URL / Production
 
+이번 Preview
+Puzzle · 15개 · 전부 QA
+
 이번 Preview 목표
-□ Puzzle Playable PM PASS
-완료 시 → Sprint 14.3 종료
-미완료 시 → Puzzle 계속 (Shooter 금지)
+□ Puzzle Playable PM PASS 15/15
+완료 시 → Sprint 14.3 종료 · Puzzle LOCK
+미완료 시 → Puzzle FAIL만 수정 (Shooter 금지)
 
 이번 Preview에서는
 Shooter 수정 안함 · Arcade 수정 안함 · Sports 수정 안함
 
-이번 Preview — PM이 꼭 봐야 하는 게임 5개
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...
+Puzzle PM QA
+PASS   X
+FAIL   Y
+
+FAIL 목록
+- (slug)
+- ...
+
+QA 대상 15개 (전부)
+2048 · Memory · Sudoku · Minesweeper · Color Match · SameGame ·
+Sliding Puzzle · Nonogram · Kakuro · Crossword · Word Search ·
+Jigsaw · Ball Sort · Color Sort · Merge Blocks
 
 QA □ START □ PLAY □ GAMEOVER/CLEAR □ RETRY □ EXIT □ SAVE □ Mobile
+
+다음 Preview 예정
+Shooter · 9개 (조건: Puzzle 15/15 PASS)
+
 Known Issues
-
-P0 Playable (PM QA)   X / 15 Puzzle · X / 50 전체
-P0 Playable (코드)    — PM QA와 별도 표기 금지 (혼동 방지)
+P0 Playable (PM QA)   X / 15 Puzzle
 Rule / Difficulty / Sound / Effect / Original Feel  X / 50
-
-PM QA 결과 (PASS 건드리지 않음 · FAIL만 수정)
-[PASS] ...
-[FAIL] ...
 ===========================
 ```
 
 ### Sprint 14.3 종료 조건 (필수)
 
-- **종료:** Puzzle **15/15 PM QA PASS** (Playable: START·PLAY·GAMEOVER/CLEAR·RETRY·EXIT·SAVE)
+- **종료:** Puzzle **15/15 PM QA PASS** → **Puzzle LOCK**
 - **코드 15/15 ≠ 종료** — PM 플레이 OK만 인정
-- **루프:** Puzzle → PM QA → FAIL 수정 → PM QA → PASS → (그때) Shooter
-- **절대:** PM QA 전 Shooter/Arcade/Sports 수정 금지
-- **수정 규칙:** PM `[PASS]` 게임 건드리지 않음 · `[FAIL]`만 수정
+- **루프:** Puzzle 15 QA → FAIL 수정 → 재QA → 15/15 PASS → LOCK → Shooter
+- **절대:** Puzzle LOCK 전 Shooter/Arcade/Sports 수정 금지
+- **수정:** `[PASS]` / LOCK 게임 건드리지 않음 · **FAIL만** 수정
+- **금지:** 게임 5개씩 PM QA
 
 ### 우선순위 (Playable First — 손맛은 마지막)
 
