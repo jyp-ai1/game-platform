@@ -202,6 +202,18 @@ export function MinesweeperGame() {
     dispatch({ type: "toggleFlag", row, col });
   }
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    setElapsed(0);
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    setElapsed(0);
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -277,8 +289,8 @@ export function MinesweeperGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
 
@@ -289,7 +301,7 @@ export function MinesweeperGame() {
           <ResumeDialog
             gameTitle="Minesweeper"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
       </div>

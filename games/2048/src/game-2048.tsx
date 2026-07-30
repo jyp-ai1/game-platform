@@ -297,6 +297,13 @@ export function Game2048() {
     dispatch({ type: "restart" });
   }
 
+  function handleNewGame() {
+    onNewGame();
+    resetSession();
+    reportedTiles.current.clear();
+    dispatch({ type: "restart" });
+  }
+
   const showOverlay =
     state.status === "over" || (state.status === "won" && !state.winAcknowledged);
 
@@ -365,7 +372,7 @@ export function Game2048() {
           <ResumeDialog
             gameTitle="2048"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
 

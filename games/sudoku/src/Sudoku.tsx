@@ -120,6 +120,16 @@ export function SudokuGame() {
 
   const interactive = canPlay && state.status === "playing";
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -131,6 +141,7 @@ export function SudokuGame() {
               key={difficulty}
               variant="outline"
               size="sm"
+              disabled={state.status === "playing"}
               onClick={() => dispatch({ type: "restart", difficulty })}
             >
               {difficulty}
@@ -193,8 +204,8 @@ export function SudokuGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
@@ -238,7 +249,7 @@ export function SudokuGame() {
       </div>
 
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Sudoku" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Sudoku" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
 
       <p className="text-xs text-muted-foreground">

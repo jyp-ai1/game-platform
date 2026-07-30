@@ -245,6 +245,12 @@ export function BubblePopGame() {
     dispatch({ type: "restart" });
   }
 
+  function handleNewGame() {
+    onNewGame();
+    resetSession();
+    dispatch({ type: "restart" });
+  }
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (!canPlayRef.current) {
@@ -457,7 +463,7 @@ export function BubblePopGame() {
           <ResumeDialog
             gameTitle="Bubble Pop"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
 

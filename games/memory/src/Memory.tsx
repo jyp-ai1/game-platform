@@ -216,6 +216,12 @@ export function MemoryGame() {
     dispatch({ type: "restart" });
   }
 
+  function handleNewGame() {
+    onNewGame();
+    resetSession();
+    dispatch({ type: "restart" });
+  }
+
   const gridColsClass =
     state.stage.cols === 6
       ? "grid-cols-6"
@@ -314,7 +320,7 @@ export function MemoryGame() {
           <ResumeDialog
             gameTitle="Memory"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
       </div>
