@@ -253,6 +253,46 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 
 ---
 
+## Sprint 14 — Closed Alpha 운영 (최우선 · Sprint 14 동안 이 규칙이 Release Rule v2보다 우선)
+
+**목표:** 50개 싱글게임을 Closed Alpha에 올릴 수 있는 수준까지 완성. Preview에서 PM이 실제 플레이하며 피드백.
+
+### 운영 루프 (폐기: QA PASS → Commit)
+
+```
+작업 → Commit → Push → Preview 자동배포 → PM 확인 → 피드백 → 수정 → Commit → Preview (반복)
+```
+
+**Preview는 QA용이다.** QA가 끝난 후 Preview를 만드는 것이 아니다.  
+**로컬 QA PASS를 Commit/Push 조건으로 삼지 않는다.**
+
+### 작업 완료 보고 (6항목 필수 — Preview URL 없으면 미완료)
+
+```
+Commit:
+Push:
+Branch:
+Preview: https://....
+QA Checklist
+Known Issues
+Closed Alpha READY / NOT READY
+```
+
+### 보고 단위
+
+- 게임 하나 완료 × · Batch 완료 △ · **50개 전체 완료 ○** (이때만 Sprint Complete 보고)
+- `Bubble 완료` / `2048 완료` / `Batch1 완료` / `Framework 완료` 금지
+
+### 우선순위 (Sprint 14)
+
+| P | 항목 |
+| --- | --- |
+| **P0** | 50개 싱글게임 — 원작 느낌·룰·난이도 · Stage · Progress · Sound · Effect · Save · Retry · Exit |
+| **P1** | Snake WORLD 운영 안정화 (회전·Quit·Pause·Mobile·Camera·FPS) |
+| **P2** | Diep.io SOON 유지 · 개발 금지 |
+
+---
+
 ## 배포 · QA · 보고 규칙 (고정)
 
 ### URL 구분
