@@ -281,18 +281,42 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 Sprint 14.x Preview
 ===========================
 Commit / Branch / Preview URL / Production
-이번 수정된 게임군 ✅ Puzzle (15/15)
-이번 수정사항 Rule·Difficulty·Stage·Progress·Sound·Effect·Mobile
-PM 확인 게임 1. 2. 3. ... (5~10개)
-QA 체크리스트 □ START □ PLAY □ Stage □ Retry □ Exit □ Save □ Mobile
+
+이번 Preview — PM이 꼭 봐야 하는 게임 5개
+1. ...
+2. ...
+3. ...
+4. ...
+5. ...
+
+QA □ START □ PLAY □ GAMEOVER/CLEAR □ RETRY □ EXIT □ SAVE □ Mobile
 Known Issues
-전체 진행률 (게임군별 % + 전체 %)
+
+P0 Playable     X / 50  (또는 게임군 X / 15)
+Rule            X / 50
+Difficulty      X / 50
+Sound           X / 50
+Effect          X / 50
+Original Feel   X / 50
 ===========================
 ```
 
-### Sprint COMPLETE (50/50 후에만)
+### 우선순위 (Playable First — 손맛은 마지막)
 
-Progress·Sound·Effect·Difficulty·Rule·Responsive 50/50 · QA 50 PASS · Closed Alpha READY
+| P | 항목 |
+| --- | --- |
+| **P0** | Playable — START · PLAY · RULE · GAMEOVER/CLEAR · RETRY · EXIT · SAVE |
+| **P1** | Rule · Difficulty |
+| **P2** | Feel · Sound · Effect |
+| **P3** | 원작 90% |
+
+**게임군 내부:** 15개 전부 P0 Playable 100% → Rule/Difficulty → Feel/Sound
+
+**Sprint 14.3 종료:** Puzzle 15/15 Playable 100% (Sound 70% · Effect 60% OK)
+
+**주의:** Puzzle 75% ≠ 서비스 75% (사용자는 게임군 무관 랜덤 플레이)
+
+### Sprint COMPLETE (50/50 Playable + PM QA 후에만)
 
 ---
 

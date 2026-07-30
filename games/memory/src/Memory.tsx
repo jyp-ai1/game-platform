@@ -179,6 +179,7 @@ export function MemoryGame() {
       const score = computeScore(state.moves, state.stageIndex);
       recordStageClear(state.stageIndex, score);
       reportScore(GAME_SLUG, score);
+      clearSave(GAME_SLUG);
     }
     if (state.status === "playing") {
       stageClearReported.current = false;

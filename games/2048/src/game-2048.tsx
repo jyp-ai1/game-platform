@@ -143,7 +143,11 @@ export function Game2048() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "over" ? null : state),
+    () =>
+      state.status === "playing" ||
+      (state.status === "won" && state.winAcknowledged)
+        ? state
+        : null,
     [state]
   );
 
@@ -175,7 +179,10 @@ export function Game2048() {
       });
       clearSave(GAME_SLUG);
     }
-  }, [state.status, state.score, state.bestTile, reportScore, recordGameEnd]);
+    if (state.status === "won" && !state.winAcknowledged) {
+      clearSave(GAME_SLUG);
+    }
+  }, [state.status, state.score, state.bestTile, state.winAcknowledged, reportScore, recordGameEnd]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
