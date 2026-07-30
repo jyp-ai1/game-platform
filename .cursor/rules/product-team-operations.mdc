@@ -253,54 +253,35 @@ Branch: `content-factory` · 08:00 Daily = **제품이 얼마나 좋아졌는지
 
 ---
 
-## Sprint 14.1 — Closed Alpha Final (50개 싱글 일괄 안정화 · 최우선)
+## Sprint 14.2 — Closed Alpha Final (50개 싱글 일괄 완성 · 최우선)
 
-**목표:** 50개 전체를 동시에 Closed Alpha 수준까지. Sprint 종료 시 Preview URL 하나만 전달.
+**목표:** Closed Alpha용 싱글 50종 전체를 한 번에 운영 가능 수준까지. **Framework 적용 ≠ 게임 완성.**
 
-### 운영 루프
-
-```
-작업 → Commit → Push → Preview → PM 확인 → 피드백 → 수정 (반복)
-```
-
-**로컬 QA PASS를 Commit/Push 조건으로 삼지 않는다.**
+**완료:** 50개 전부 START→PLAY→원작규칙→난이도→Stage→Retry→Exit→Progress→Sound→Effect→모바일 PASS 후에만 `=== Sprint COMPLETE ===`
 
 ### PASS 순서
 
-1. **PASS 1** — 50개 전부: 원작 조사 → Rule/Difficulty/Stage/Progress/Sound/Effect/GameOver/Retry/Exit/Save/Responsive/Mobile
-2. **PASS 2** — 50개 전부: 실제 플레이 → 버그 수정 반복
-3. **PASS 3** — 50개 전부: Mobile/PC/Tablet 확인
+1. Framework / Progress / Stage / Result / Retry / Exit / Save / Responsive
+2. 원작 조사 → Rule / Difficulty / Victory / Failure / Score / Progress
+3. Game Feel (게임별 손맛)
+4. Sound (Start/Button/Success/Fail/GameOver/StageClear/Combo)
+5. Stage (있는 게임만 — 없는 게임 Endless 유지)
+6. Mobile / Tablet / PC
+7. QA 50/50 PASS
 
 ### 절대 금지 보고
 
-`Bubble 완료` / `2048 완료` / `Batch1 완료` / `다음 게임 진행` — **50개 완료 전 중간 완료 보고 금지**
+`Bubble 완료` / `2048 완료` / `Batch1 완료` / `Framework 완료` / `SDK 완료` / 중간 완료 보고
 
-### 매 작업 보고 (Preview URL 필수)
-
-```
-Commit: xxxxxxxx
-Branch: content-factory
-Preview: https://xxxx.vercel.app
-Production: 배포 안함
-이번 수정 내용
-PM QA 체크list
-Known Issues
-```
-
-### Sprint Complete 보고 (50개 완료 후에만)
+### 매 Push 보고 (Preview URL 필수)
 
 ```
-=== Sprint 14.1 COMPLETE ===
-Commit / Preview URL / QA PASS 50 / WARN 0 / FAIL 0 / Closed Alpha READY
+Commit / Branch / Preview URL / Production / 이번 변경사항 / PM QA 체크list / Known Issues / 다음 작업
 ```
 
-### 우선순위
+### Sprint Complete (50개 후에만)
 
-| P | 항목 |
-| --- | --- |
-| **P0** | 50개 싱글 — 원작 Rule/Difficulty/Goal/Failure/Score/Stage + Save/Retry/Exit + Event/Effect/Layout/Responsive/Progress |
-| **P1** | Snake WORLD — 회전·Camera·Quit·Pause·Mobile Joystick·FPS |
-| **P2** | Diep.io SOON · 개발 금지 |
+Progress·Sound·Effect·Difficulty·Rule·Responsive 각 50/50 · QA 50 PASS 0 FAIL · Closed Alpha READY
 
 ---
 

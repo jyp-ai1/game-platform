@@ -30,6 +30,13 @@ export {
 export {
   playClickSound,
   playComboSound,
+  playCorrectSound,
+  playExplosionSound,
+  playFlagSound,
+  playFlipSound,
+  playGoalSound,
+  playLineClearSound,
+  playMergeSound,
   playFailSound,
   playGameOverSound,
   playHoverSound,
@@ -78,6 +85,8 @@ export {
 export { useStandardGameFeel, standardFeelFromState, type StandardGameFeelOptions } from "./use-standard-game-feel";
 export { StandardGameOverOverlay } from "./standard-game-over-overlay";
 export { StandardGameShell } from "./standard-game-shell";
+export { GameFeelLayer } from "./game-feel-layer";
+export { playGameFeel, type GameFeelEvent } from "./game-feel-events";
 export { getGroupDifficulty, type GroupDifficulty } from "./game-difficulty";
 export {
   ACHIEVEMENTS,

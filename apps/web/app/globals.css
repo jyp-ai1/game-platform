@@ -382,6 +382,26 @@
   animation: game-effect-shake-keyframes 320ms ease-in-out;
 }
 
+@keyframes game-effect-merge-keyframes {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.game-effect-merge {
+  animation: game-effect-merge-keyframes 220ms ease-out;
+}
+
+@keyframes game-effect-flip-keyframes {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+.game-effect-flip {
+  animation: game-effect-flip-keyframes 280ms ease-in-out;
+}
+
 /* Sprint 14 — mobile touch + canvas scaling */
 .standard-game-shell,
 .game-detail-stage .standard-game-shell {

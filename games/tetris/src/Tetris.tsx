@@ -13,6 +13,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  GameFeelLayer,
+  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -93,6 +95,8 @@ export function TetrisGame() {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevLinesRef = useRef(0);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -118,6 +122,13 @@ export function TetrisGame() {
       clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
+
+  useEffect(() => {
+    if (state.linesCleared > prevLinesRef.current) {
+      playGameFeel("line-clear", fieldRef.current);
+    }
+    prevLinesRef.current = state.linesCleared;
+  }, [state.linesCleared]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -215,6 +226,7 @@ export function TetrisGame() {
       </div>
 
       <div
+        ref={fieldRef}
         className="relative grid aspect-[1/2] w-full max-w-xs touch-none select-none gap-px rounded-xl bg-muted p-1"
         style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
         onTouchStart={handleTouchStart}
@@ -259,6 +271,8 @@ export function TetrisGame() {
             onNewGame={onNewGame}
           />
         ) : null}
+
+        <GameFeelLayer bursts={feel.bursts} />
       </div>
 
       <p className="text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   createEffectBurst,
@@ -123,7 +123,7 @@ export function useStandardGameFeel(
   const prevStatus = useRef(options.status);
   const prevScore = useRef(options.score);
   const sessionEndedRef = useRef(false);
-  const burstsRef = useRef<EffectBurst[]>([]);
+  const [bursts, setBursts] = useState<EffectBurst[]>([]);
   const burstStateRef = useRef(0);
 
   const normalized = normalizeStatus(options.status);
@@ -192,10 +192,9 @@ export function useStandardGameFeel(
         playPopSound();
         triggerEffect("pop", field);
       }
-      burstsRef.current = [
-        ...burstsRef.current,
-        createEffectBurst(gain >= 30 ? "combo" : "pop", 50, 40),
-      ].slice(-20);
+      setBursts((prev) =>
+        [...prev, createEffectBurst(gain >= 30 ? "combo" : "pop", 50, 40)].slice(-20)
+      );
       burstStateRef.current += 1;
     }
     prevScore.current = options.score;
@@ -212,7 +211,7 @@ export function useStandardGameFeel(
     bestStage: Math.max(progress.bestStage, options.stageIndex ?? progress.currentStage),
     isNewBest,
     bestRecordDelta,
-    bursts: burstsRef.current,
+    bursts,
     difficulty,
     handleExit,
   };

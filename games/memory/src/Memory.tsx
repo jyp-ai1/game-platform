@@ -2,8 +2,6 @@
 
 import {
   clearSave,
-  playClickSound,
-  playSuccessSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -14,6 +12,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  GameFeelLayer,
+  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -134,10 +134,22 @@ export function MemoryGame() {
   useEffect(() => {
     const matched = state.cards.filter((c) => c.matched).length;
     if (matched > prevMatchedRef.current) {
-      playSuccessSound();
+      playGameFeel("match");
     }
     prevMatchedRef.current = matched;
   }, [state.cards]);
+
+  useEffect(() => {
+    if (state.flipped.length !== 2) {
+      return;
+    }
+    const [firstIndex, secondIndex] = state.flipped as [number, number];
+    const first = state.cards[firstIndex];
+    const second = state.cards[secondIndex];
+    if (first && second && first.symbol !== second.symbol) {
+      playGameFeel("wrong");
+    }
+  }, [state.flipped, state.cards]);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -188,7 +200,7 @@ export function MemoryGame() {
     if (!canPlayRef.current) {
       return;
     }
-    playClickSound();
+    playGameFeel("flip");
     dispatch({ type: "flip", index });
   }
 
@@ -280,6 +292,8 @@ export function MemoryGame() {
             onNewGame={onNewGame}
           />
         ) : null}
+
+        <GameFeelLayer bursts={feel.bursts} />
       </div>
 
       <p className="text-xs text-muted-foreground">

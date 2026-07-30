@@ -336,7 +336,7 @@ export function GamePlayer({
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
       <GameSlugProvider slug={slug}>
         <GameErrorMonitor gameSlug={slug} />
-        <div className="mx-auto w-full max-w-[min(100%,24rem)] overflow-hidden px-2 sm:max-w-[min(100%,28rem)]">
+        <div className="mx-auto w-full max-w-[min(100%,24rem)] overflow-hidden px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-[max(0.25rem,env(safe-area-inset-top))] sm:max-w-[min(100%,28rem)]">
           <GameProgressBar slug={slug} />
           <Component />
         </div>

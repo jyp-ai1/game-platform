@@ -13,10 +13,11 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { Eraser, RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -66,6 +67,20 @@ export function SudokuGame() {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
   });
   const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const prevMistakesRef = useRef(0);
+
+  useEffect(() => {
+    if (state.mistakes > prevMistakesRef.current) {
+      playGameFeel("wrong");
+    }
+    prevMistakesRef.current = state.mistakes;
+  }, [state.mistakes]);
+
+  useEffect(() => {
+    if (state.status === "won") {
+      playGameFeel("correct");
+    }
+  }, [state.status]);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,

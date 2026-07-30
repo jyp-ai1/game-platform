@@ -4,7 +4,7 @@ import {
   clearSave,
   emitGameRetry,
   getGroupDifficulty,
-  playSuccessSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -113,7 +113,7 @@ export function AirHockeyGame() {
   const prevPlayerScore = useRef(state.playerScore);
   useEffect(() => {
     if (state.playerScore > prevPlayerScore.current) {
-      playSuccessSound();
+      playGameFeel("goal", fieldRef.current);
     }
     prevPlayerScore.current = state.playerScore;
   }, [state.playerScore]);

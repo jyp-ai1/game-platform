@@ -2,9 +2,7 @@
 
 import {
   clearSave,
-  playClickSound,
-  playFailSound,
-  playSuccessSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -127,13 +125,13 @@ export function ColorMatchGame() {
     if (!interactive) {
       return;
     }
-    playClickSound();
+    playGameFeel("button");
     const wasCorrect = color === state.targetColor;
     dispatch({ type: "select", color });
     if (wasCorrect) {
-      playSuccessSound();
+      playGameFeel("correct");
     } else {
-      playFailSound();
+      playGameFeel("wrong");
     }
   }
 

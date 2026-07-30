@@ -4,17 +4,22 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "@game-platform/ui";
 
+import type { EffectBurst } from "./effects";
+import { GameFeelLayer } from "./game-feel-layer";
+
 /** Responsive canvas wrapper — applied to all single-player games. */
 export function StandardGameShell({
   children,
   className,
   style,
   aspectRatio,
+  bursts,
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
   aspectRatio?: string;
+  bursts?: readonly EffectBurst[];
 }) {
   return (
     <div
@@ -31,6 +36,7 @@ export function StandardGameShell({
           style={{ aspectRatio, maxHeight: "min(56vh, 26rem)" }}
         >
           {children}
+          {bursts?.length ? <GameFeelLayer bursts={bursts} /> : null}
         </div>
       ) : (
         children

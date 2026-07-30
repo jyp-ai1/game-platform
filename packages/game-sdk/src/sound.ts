@@ -93,3 +93,40 @@ export function playComboSound(): void {
   playTone(1108, 60, { volume: 0.08, delayMs: 50 });
   playTone(1318, 80, { volume: 0.07, delayMs: 100 });
 }
+
+export function playMergeSound(): void {
+  playTone(440, 70, { volume: 0.1 });
+  playTone(660, 90, { volume: 0.09, delayMs: 40 });
+  playTone(880, 60, { volume: 0.07, delayMs: 90 });
+}
+
+export function playFlipSound(): void {
+  playTone(740, 50, { type: "triangle", volume: 0.07 });
+  playTone(520, 40, { type: "triangle", volume: 0.05, delayMs: 35 });
+}
+
+export function playCorrectSound(): void {
+  playTone(880, 80, { volume: 0.09 });
+  playTone(1174, 60, { volume: 0.07, delayMs: 70 });
+}
+
+export function playLineClearSound(): void {
+  playTone(523, 80, { volume: 0.1 });
+  playTone(784, 80, { volume: 0.09, delayMs: 60 });
+  playTone(1046, 100, { volume: 0.08, delayMs: 120 });
+}
+
+export function playExplosionSound(): void {
+  playTone(180, 200, { type: "sawtooth", volume: 0.08 });
+  playTone(120, 280, { type: "sawtooth", volume: 0.06, delayMs: 80 });
+}
+
+export function playFlagSound(): void {
+  playTone(620, 60, { volume: 0.07 });
+}
+
+export function playGoalSound(): void {
+  playTone(660, 100, { volume: 0.11 });
+  playTone(880, 120, { volume: 0.1, delayMs: 90 });
+  playTone(1108, 140, { volume: 0.08, delayMs: 180 });
+}

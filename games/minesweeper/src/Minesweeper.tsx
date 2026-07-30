@@ -13,11 +13,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
 import type { MouseEvent } from "react";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 
 import {
   checkWin,
@@ -121,6 +122,8 @@ export function MinesweeperGame() {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
   });
   const [elapsed, setElapsed] = useState(0);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
 
   // "waiting" (before the first click places mines) is indistinguishable
   // from "no save" — skip saving until there's actually progress worth
@@ -159,11 +162,25 @@ export function MinesweeperGame() {
     }
   }, [state.status]);
 
+  useEffect(() => {
+    if (state.status === "lost" && prevStatusRef.current !== "lost") {
+      playGameFeel("explosion", fieldRef.current);
+    }
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playGameFeel("correct", fieldRef.current);
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
   function handleClick(row: number, col: number) {
     if (!canPlayRef.current) {
       return;
     }
-    playClickSound();
+    if (state.flagMode) {
+      playGameFeel("flag");
+    } else {
+      playClickSound();
+    }
     dispatch(
       state.flagMode
         ? { type: "toggleFlag", row, col }
@@ -210,7 +227,7 @@ export function MinesweeperGame() {
         </div>
       </div>
 
-      <div className="relative grid w-full max-w-sm grid-cols-9 gap-0.5 rounded-xl bg-muted p-1">
+      <div ref={fieldRef} className="relative grid w-full max-w-sm grid-cols-9 gap-0.5 rounded-xl bg-muted p-1">
         {state.board.map((rowCells, row) =>
           rowCells.map((cell, col) => (
             <button

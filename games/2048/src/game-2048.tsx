@@ -14,6 +14,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  GameFeelLayer,
+  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -135,6 +137,8 @@ export function Game2048() {
     status: state.status,
   });
   const reportedTiles = useRef<Set<number>>(new Set());
+  const gridRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -151,6 +155,13 @@ export function Game2048() {
       }
     }
   }, [state.tileStagesReached, state.score, recordStageClear]);
+
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("merge", gridRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -253,6 +264,7 @@ export function Game2048() {
       </div>
 
       <div
+        ref={gridRef}
         className="relative grid aspect-square w-full max-w-sm touch-none select-none grid-cols-4 gap-3 rounded-xl bg-muted p-3"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -294,6 +306,8 @@ export function Game2048() {
             onNewGame={onNewGame}
           />
         ) : null}
+
+        <GameFeelLayer bursts={feel.bursts} />
       </div>
 
       <p className="text-xs text-muted-foreground">
