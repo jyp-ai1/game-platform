@@ -1,0 +1,576 @@
+{
+  "generatedAt": "2026-07-30T14:48:56.719Z",
+  "total": 50,
+  "summary": {
+    "rule": 50,
+    "feel": 50,
+    "retry": 50,
+    "exit": 50,
+    "mobile": 50
+  },
+  "modified": 50,
+  "rcReady": true,
+  "fails": [],
+  "rows": [
+    {
+      "slug": "2048",
+      "modified": [
+        "games/2048/src/game-2048.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "snake",
+      "modified": [
+        "games/snake/src/Snake.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "breakout",
+      "modified": [
+        "games/breakout/src/Breakout.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "modified": [
+        "games/arkanoid-dx/src/ArkanoidDx.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "memory",
+      "modified": [
+        "games/memory/src/Memory.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "minesweeper",
+      "modified": [
+        "games/minesweeper/src/Minesweeper.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "samegame",
+      "modified": [
+        "games/samegame/src/SameGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "maze-runner",
+      "modified": [
+        "games/maze-runner/src/MazeRunner.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "tank-battle",
+      "modified": [
+        "games/tank-battle/src/TankBattle.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "galaxy-defender",
+      "modified": [
+        "games/galaxy-defender/src/GalaxyDefender.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "space-defender",
+      "modified": [
+        "games/space-defender/src/SpaceDefender.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "bubble-pop",
+      "modified": [
+        "games/bubble-pop/src/BubblePop.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "sudoku",
+      "modified": [
+        "games/sudoku/src/Sudoku.tsx",
+        "games/sudoku/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "tic-tac-toe",
+      "modified": [
+        "games/tic-tac-toe/src/TicTacToe.tsx",
+        "games/tic-tac-toe/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "simon",
+      "modified": [
+        "games/simon/src/Simon.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "hangman",
+      "modified": [
+        "games/hangman/src/Hangman.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "color-match",
+      "modified": [
+        "games/color-match/src/ColorMatch.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "air-hockey",
+      "modified": [
+        "games/air-hockey/src/AirHockey.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "tetris",
+      "modified": [
+        "games/tetris/src/Tetris.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "gold-miner",
+      "modified": [
+        "games/gold-miner/src/GoldMiner.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "space-impact",
+      "modified": [
+        "games/space-impact/src/SpaceImpact.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "stack-tower",
+      "modified": [
+        "games/stack-tower/src/StackTower.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "ball-sort",
+      "modified": [
+        "games/ball-sort/src/BallSort.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "color-sort",
+      "modified": [
+        "games/color-sort/src/ColorSort.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "penalty-shootout",
+      "modified": [
+        "games/penalty-shootout/src/PenaltyShootout.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "darts",
+      "modified": [
+        "games/darts/src/Darts.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "bubble-shooter",
+      "modified": [
+        "games/bubble-shooter/src/BubbleShooter.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "merge-blocks",
+      "modified": [
+        "games/merge-blocks/src/MergeBlocks.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "connect4",
+      "modified": [
+        "games/connect4/src/Connect4.tsx",
+        "games/connect4/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "reversi",
+      "modified": [
+        "games/reversi/src/Reversi.tsx",
+        "games/reversi/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "gomoku",
+      "modified": [
+        "games/gomoku/src/Gomoku.tsx",
+        "games/gomoku/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "bowling",
+      "modified": [
+        "games/bowling/src/Bowling.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "archery",
+      "modified": [
+        "games/archery/src/Archery.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "modified": [
+        "games/sliding-puzzle/src/SlidingPuzzle.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "whack-a-mole",
+      "modified": [
+        "games/whack-a-mole/src/WhackAMole.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "chess",
+      "modified": [
+        "games/chess/src/Chess.tsx",
+        "games/chess/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "checkers",
+      "modified": [
+        "games/checkers/src/Checkers.tsx",
+        "games/checkers/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "jigsaw",
+      "modified": [
+        "games/jigsaw/src/Jigsaw.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "mancala",
+      "modified": [
+        "games/mancala/src/Mancala.tsx",
+        "games/mancala/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "mini-golf",
+      "modified": [
+        "games/mini-golf/src/MiniGolf.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "billiards",
+      "modified": [
+        "games/billiards/src/Billiards.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "basketball",
+      "modified": [
+        "games/basketball/src/BasketballGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "table-tennis",
+      "modified": [
+        "games/table-tennis/src/TableTennisGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "domino",
+      "modified": [
+        "games/domino/src/DominoGame.tsx",
+        "games/domino/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "crossword",
+      "modified": [
+        "games/crossword/src/CrosswordGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "chess960",
+      "modified": [
+        "games/chess960/src/Chess960Game.tsx",
+        "games/chess960/src/engine.ts"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "shuffleboard",
+      "modified": [
+        "games/shuffleboard/src/ShuffleboardGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "kakuro",
+      "modified": [
+        "games/kakuro/src/KakuroGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "nonogram",
+      "modified": [
+        "games/nonogram/src/NonogramGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    },
+    {
+      "slug": "word-search",
+      "modified": [
+        "games/word-search/src/WordSearchGame.tsx"
+      ],
+      "rule": "PASS",
+      "feel": "PASS",
+      "retry": "PASS",
+      "exit": "PASS",
+      "mobile": "PASS"
+    }
+  ]
+}

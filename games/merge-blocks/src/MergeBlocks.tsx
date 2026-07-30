@@ -53,6 +53,7 @@ export function MergeBlocksGame() {
 
   useEffect(() => {
     if (state.status === "over") {
+      playGameFeel("wrong", fieldRef.current);
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
     }
@@ -65,6 +66,11 @@ export function MergeBlocksGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -75,7 +81,7 @@ export function MergeBlocksGame() {
           <RotateCcw />
         </Button>
       </div>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
       <div className="grid w-full grid-cols-4 gap-1 rounded-xl bg-muted p-2">
         {state.grid.map((row, ri) =>
           row.map((cell, ci) => (
@@ -84,7 +90,7 @@ export function MergeBlocksGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current && state.status === "playing") {
-                  playGameFeel("button");
+                  playGameFeel("button", fieldRef.current);
                   dispatch({ type: "drop", col: ci });
                 }
               }}
@@ -107,8 +113,8 @@ export function MergeBlocksGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

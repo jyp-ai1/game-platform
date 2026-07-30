@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   computeRankingScore,
@@ -41,8 +42,19 @@ export function PenaltyShootoutGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -60,7 +72,7 @@ export function PenaltyShootoutGame() {
 
   function handleShoot(dir: Direction) {
     if (!canPlayRef.current || state.status !== "playing") return;
-    playClickSound();
+    playGameFeel("button", fieldRef.current);
     dispatch({ type: "shoot", dir });
   }
 
@@ -79,7 +91,7 @@ export function PenaltyShootoutGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="relative flex w-full max-w-sm flex-col gap-2 rounded-xl border-2 border-primary/30 bg-muted p-4">
+      <div ref={fieldRef} className="relative flex w-full max-w-sm touch-none select-none flex-col gap-2 rounded-xl border-2 border-primary/30 bg-muted p-4">
         <div className="mx-auto h-2 w-3/4 rounded bg-background" aria-hidden />
         <p className="text-center text-sm font-medium">
           {state.lastResult === "goal"
@@ -101,6 +113,7 @@ export function PenaltyShootoutGame() {
             </Button>
           ))}
         </div>
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
       {state.status === "over" ? (
         <StandardGameOverOverlay

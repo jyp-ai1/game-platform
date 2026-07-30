@@ -13,6 +13,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -65,9 +67,20 @@ export function MazeRunnerGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: Math.floor(state.score / 200) + 1,
+    fieldRef,
   });
 
   const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 200) + 1);
@@ -106,6 +119,7 @@ export function MazeRunnerGame() {
         return;
       }
       event.preventDefault();
+      playGameFeel("button", fieldRef.current);
       dispatch({ type: "setDirection", direction });
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -166,6 +180,7 @@ export function MazeRunnerGame() {
 
       <div
         className="relative grid w-full max-w-sm touch-none select-none gap-0 rounded-xl bg-muted p-1"
+        ref={fieldRef}
         style={{
           gridTemplateColumns: `repeat(${COLS}, 1fr)`,
           aspectRatio: `${COLS} / ${ROWS}`,
@@ -228,6 +243,8 @@ export function MazeRunnerGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

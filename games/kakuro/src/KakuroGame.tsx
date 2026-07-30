@@ -3,7 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   clearCell,
@@ -59,8 +60,10 @@ export function KakuroGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -73,8 +76,14 @@ export function KakuroGame() {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      playGameFeel("goal", fieldRef.current);
     }
   }, [state.status, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
@@ -85,7 +94,8 @@ export function KakuroGame() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">Fill digits 1–9 to match sum clues</p>
-      <div className="grid w-full max-w-sm grid-cols-4 gap-0.5">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <div className="grid w-full grid-cols-4 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);
           const c = i % SIZE;
@@ -112,7 +122,7 @@ export function KakuroGame() {
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
               onClick={() => {
-                playClickSound();
+                playGameFeel("button", fieldRef.current);
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
@@ -125,19 +135,31 @@ export function KakuroGame() {
           );
         })}
       </div>
-      <div className="flex flex-wrap justify-center gap-1">
+      </PuzzlePlayField>
+      <div className="flex max-w-sm flex-wrap justify-center gap-1">
         {DIGITS.map((n) => (
           <Button
             key={n}
             variant="outline"
             size="sm"
             disabled={!state.selected || state.status === "won"}
-            onClick={() => dispatch({ type: "digit", n })}
+            onClick={() => {
+              playGameFeel("button", fieldRef.current);
+              dispatch({ type: "digit", n });
+            }}
           >
             {n}
           </Button>
         ))}
-        <Button variant="ghost" size="sm" disabled={!state.selected} onClick={() => dispatch({ type: "clear" })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={!state.selected}
+          onClick={() => {
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "clear" });
+          }}
+        >
           Clear
         </Button>
       </div>
@@ -149,8 +171,8 @@ export function KakuroGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

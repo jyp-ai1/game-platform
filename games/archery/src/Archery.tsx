@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, shoot, type ArcheryState } from "./engine";
 
@@ -34,9 +35,20 @@ export function ArcheryGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLButtonElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: 10 - state.arrowsLeft + 1,
+    fieldRef,
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
@@ -49,7 +61,7 @@ export function ArcheryGame() {
 
   function onTargetClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (!canPlayRef.current || state.status !== "playing") return;
-    playClickSound();
+    playGameFeel("button", fieldRef.current);
     const rect = e.currentTarget.getBoundingClientRect();
     dispatch({
       type: "shoot",
@@ -70,8 +82,9 @@ export function ArcheryGame() {
       </div>
       <button
         type="button"
+        ref={fieldRef}
         onClick={onTargetClick}
-        className="relative aspect-square w-full max-w-sm rounded-full border-4 border-amber-600/50 bg-muted"
+        className="relative aspect-square w-full max-w-sm touch-none select-none rounded-full border-4 border-amber-600/50 bg-muted"
         aria-label="과녁"
       >
         {[40, 30, 20, 10].map((r) => (
@@ -82,6 +95,7 @@ export function ArcheryGame() {
           />
         ))}
         <span className="pointer-events-none absolute left-1/2 top-1/2 size-[10%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600" />
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </button>
       {state.lastPoints !== null ? <p className="text-sm font-bold">+{state.lastPoints}</p> : null}
       {state.status === "over" ? (

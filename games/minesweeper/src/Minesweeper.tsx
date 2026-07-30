@@ -3,7 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  GameFeelLayer,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,7 +14,6 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
-  playGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
@@ -182,9 +182,9 @@ export function MinesweeperGame() {
       return;
     }
     if (state.flagMode) {
-      playGameFeel("flag");
+      playGameFeel("flag", fieldRef.current);
     } else {
-      playClickSound();
+      playGameFeel("button", fieldRef.current);
     }
     dispatch(
       state.flagMode
@@ -198,6 +198,7 @@ export function MinesweeperGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playGameFeel("flag", fieldRef.current);
     dispatch({ type: "toggleFlag", row, col });
   }
 
@@ -232,7 +233,13 @@ export function MinesweeperGame() {
         </div>
       </div>
 
-      <div ref={fieldRef} className="relative grid w-full max-w-sm grid-cols-9 gap-0.5 rounded-xl bg-muted p-1">
+      <div
+        ref={fieldRef}
+        className={cn(
+          "relative grid w-full max-w-sm grid-cols-9 gap-0.5 rounded-xl bg-muted p-1",
+          state.status === "lost" && "ring-2 ring-destructive/60"
+        )}
+      >
         {state.board.map((rowCells, row) =>
           rowCells.map((cell, col) => (
             <button
@@ -276,6 +283,7 @@ export function MinesweeperGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

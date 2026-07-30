@@ -2,17 +2,18 @@
 
 import {
   clearSave,
+  CpuDifficultyPicker,
   emitGameRetry,
-  playClickSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useHumanVsCpuFeel,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
-  useStandardGameFeel,
+  type CpuDifficulty,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -31,14 +32,17 @@ import {
 
 const GAME_SLUG = "chess";
 
-type Action = { type: "move"; move: Move } | { type: "cpu" } | { type: "restart" };
+type Action =
+  | { type: "move"; move: Move }
+  | { type: "cpu"; difficulty: CpuDifficulty }
+  | { type: "restart" };
 
 function reducer(state: ChessState, action: Action): ChessState {
   switch (action.type) {
     case "restart":
       return createInitialState();
     case "cpu":
-      return cpuMove(state);
+      return cpuMove(state, action.difficulty);
     case "move":
       return applyMove(state, action.move);
     default:
@@ -47,14 +51,19 @@ function reducer(state: ChessState, action: Action): ChessState {
 }
 
 export function ChessGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const [selected, setSelected] = useState<[number, number] | null>(null);
+  const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
+    winner: state.winner,
+    humanSide: "w",
+    cpuSide: "b",
+    difficulty,
+    score: computeScore(state),
   });
 
   const saveStatus = useAutoSave(
@@ -65,9 +74,9 @@ export function ChessGame() {
 
   useEffect(() => {
     if (state.winner !== null || state.current !== "b") return;
-    const id = setTimeout(() => dispatch({ type: "cpu" }), 600);
+    const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 600);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.board]);
+  }, [state.current, state.winner, state.board, difficulty]);
 
   useEffect(() => {
     if (state.winner !== null) {
@@ -83,7 +92,8 @@ export function ChessGame() {
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
-    playClickSound();
+    playGameFeel("button");
+    feelTap();
     const move = selected
       ? legal.find(
           (m) =>
@@ -138,7 +148,15 @@ export function ChessGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="grid w-full max-w-sm grid-cols-8 gap-0.5 rounded-xl border border-border p-1">
+      <CpuDifficultyPicker
+        value={difficulty}
+        onChange={setDifficulty}
+        disabled={state.winner !== null}
+      />
+      <div
+        ref={fieldRef}
+        className="relative grid w-full max-w-sm grid-cols-8 gap-0.5 rounded-xl border border-border p-1"
+      >
         {state.board.map((row, r) =>
           row.map((cell, c) => {
             const light = (r + c) % 2 === 0;
@@ -162,15 +180,16 @@ export function ChessGame() {
             );
           })
         )}
+        <FeelLayer />
       </div>
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => {
             dispatch({ type: "restart" });

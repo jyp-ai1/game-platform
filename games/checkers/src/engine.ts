@@ -161,10 +161,18 @@ export function applyMove(state: CheckersState, move: Move): CheckersState {
   return { board, current: winner ? player : next, winner, mustContinue: null };
 }
 
-export function cpuMove(state: CheckersState): CheckersState {
+export function cpuMove(
+  state: CheckersState,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): CheckersState {
   if (state.winner !== null || state.current !== 2) return state;
   const moves = getLegalMoves(state, 2);
   if (moves.length === 0) return state;
+
+  if (difficulty === "easy") {
+    return applyMove(state, moves[Math.floor(Math.random() * moves.length)]!);
+  }
+
   const captures = moves.filter((m) => m.captured);
   const pick = (captures.length ? captures : moves)[Math.floor(Math.random() * (captures.length || moves.length))]!;
   return applyMove(state, pick);

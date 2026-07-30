@@ -91,6 +91,15 @@ export { PuzzlePlayField } from "./puzzle-play-field";
 export { getPuzzleStage, type PuzzleStageParams } from "./puzzle-stage-config";
 export { getGroupDifficulty, type GroupDifficulty } from "./game-difficulty";
 export {
+  DIFFICULTY_STAGE,
+  humanVsCpuStatus,
+  pickCpuMove,
+  type BoardGameStatus,
+  type CpuDifficulty,
+} from "./board-game-status";
+export { CpuDifficultyPicker } from "./cpu-difficulty-picker";
+export { useHumanVsCpuFeel } from "./use-human-vs-cpu-feel";
+export {
   ACHIEVEMENTS,
   getAchievementRate,
   getAchievements,

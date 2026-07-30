@@ -3,7 +3,9 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  feelWithScore,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -11,12 +13,11 @@ import {
   useGameSDK,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   computeScore,
@@ -42,8 +43,11 @@ export function JigsawGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const score = computeScore(state.moves);
   const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    fieldRef,
   });
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -55,8 +59,14 @@ export function JigsawGame() {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.moves));
       clearSave(GAME_SLUG);
+      playGameFeel("goal", fieldRef.current);
     }
   }, [state.status, state.moves, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
@@ -73,8 +83,9 @@ export function JigsawGame() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">조각을 탭해 빈 칸과 맞바꾸세요</p>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
       <div
-        className="grid w-full max-w-xs gap-1 rounded-xl p-2"
+        className="grid w-full gap-1 rounded-xl p-2"
         style={{
           gridTemplateColumns: `repeat(${JIGSAW_SIZE}, 1fr)`,
           background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
@@ -87,7 +98,7 @@ export function JigsawGame() {
             disabled={tile === 0}
             onClick={() => {
               if (canPlayRef.current) {
-                playClickSound();
+                playGameFeel("button", fieldRef.current);
                 dispatch({ type: "tap", index: i });
               }
             }}
@@ -101,6 +112,7 @@ export function JigsawGame() {
           </button>
         ))}
       </div>
+      </PuzzlePlayField>
       {state.status === "won" ? (
         <StandardGameOverOverlay
           message={`Complete! ${computeScore(state.moves)} pts`}
@@ -109,8 +121,8 @@ export function JigsawGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

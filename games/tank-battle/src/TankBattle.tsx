@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,6 +12,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -92,8 +93,19 @@ export function TankBattleGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const lastTimeRef = useRef<number | null>(null);
@@ -180,6 +192,7 @@ export function TankBattleGame() {
 
       <div
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
+        ref={fieldRef}
         style={{ aspectRatio: "1 / 1" }}
       >
         {state.grid.map((row, rowIndex) =>
@@ -255,6 +268,8 @@ export function TankBattleGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       <Button
@@ -262,7 +277,7 @@ export function TankBattleGame() {
         className="w-full max-w-sm"
         disabled={!canPlay}
         onClick={() => {
-          playClickSound();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "fire" });
         }}
       >

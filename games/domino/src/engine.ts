@@ -134,7 +134,10 @@ export function playerDraw(state: DominoState): DominoState {
   return { ...state, playerHand, boneyard, message: moves.length ? "Play or draw again" : "Drew a tile" };
 }
 
-export function cpuMove(state: DominoState): DominoState {
+export function cpuMove(
+  state: DominoState,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): DominoState {
   if (state.winner || state.current !== "cpu") return state;
   let s = state;
   let hand = [...s.cpuHand];
@@ -148,6 +151,7 @@ export function cpuMove(state: DominoState): DominoState {
   if (moves.length === 0) {
     return { ...s, current: "player", message: "CPU passed — your turn" };
   }
+
   const idx = moves[Math.floor(Math.random() * moves.length)]!;
   return playTile(s, "cpuHand", idx);
 }

@@ -2,21 +2,22 @@
 
 import {
   clearSave,
+  CpuDifficultyPicker,
   emitGameRetry,
-  playClickSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useHumanVsCpuFeel,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
-  useStandardGameFeel,
+  type CpuDifficulty,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import {
   cpuMove,
@@ -31,7 +32,7 @@ const WIN_SCORE = 100;
 
 type Action =
   | { type: "playMove"; index: number }
-  | { type: "cpuMove" }
+  | { type: "cpuMove"; difficulty: CpuDifficulty }
   | { type: "restart" };
 
 function reducer(state: TicTacToeState, action: Action): TicTacToeState {
@@ -41,7 +42,7 @@ function reducer(state: TicTacToeState, action: Action): TicTacToeState {
     case "playMove":
       return playMove(state, action.index);
     case "cpuMove":
-      return cpuMove(state);
+      return cpuMove(state, action.difficulty);
     default:
       return state;
   }
@@ -60,9 +61,14 @@ export function TicTacToeGame() {
     createInitialState
   );
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
+    winner: state.winner,
+    humanSide: "X",
+    cpuSide: "O",
+    difficulty,
+    score: state.winner === "X" ? WIN_SCORE : 0,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
@@ -76,9 +82,12 @@ export function TicTacToeGame() {
     if (!canPlayRef.current || state.winner !== null || state.currentPlayer !== "O") {
       return;
     }
-    const id = setTimeout(() => dispatch({ type: "cpuMove" }), CPU_MOVE_DELAY_MS);
+    const id = setTimeout(
+      () => dispatch({ type: "cpuMove", difficulty }),
+      CPU_MOVE_DELAY_MS
+    );
     return () => clearTimeout(id);
-  }, [state.currentPlayer, state.winner, canPlay]);
+  }, [state.currentPlayer, state.winner, canPlay, difficulty]);
 
   useEffect(() => {
     if (state.winner === "X") {
@@ -109,7 +118,16 @@ export function TicTacToeGame() {
         </Button>
       </div>
 
-      <div className="relative grid aspect-square w-full max-w-sm grid-cols-3 gap-2 rounded-xl bg-muted p-2">
+      <CpuDifficultyPicker
+        value={difficulty}
+        onChange={setDifficulty}
+        disabled={state.winner !== null}
+      />
+
+      <div
+        ref={fieldRef}
+        className="relative grid aspect-square w-full max-w-sm grid-cols-3 gap-2 rounded-xl bg-muted p-2"
+      >
         {state.board.map((cell, index) => {
           const isWinningCell = state.winningLine?.includes(index) ?? false;
           return (
@@ -117,7 +135,8 @@ export function TicTacToeGame() {
               key={index}
               type="button"
               onClick={() => {
-                playClickSound();
+                playGameFeel("button");
+                feelTap();
                 dispatch({ type: "playMove", index });
               }}
               disabled={!isHumanTurn || cell !== null}
@@ -148,6 +167,7 @@ export function TicTacToeGame() {
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        <FeelLayer />
       </div>
 
       {phase === "resume-prompt" ? (

@@ -13,6 +13,8 @@ import {
   getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -80,6 +82,15 @@ export function SpaceImpactGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: Math.floor(state.score / 150) + 1,
@@ -181,6 +192,7 @@ export function SpaceImpactGame() {
     if (!canPlayRef.current) {
       return;
     }
+    playGameFeel("button", fieldRef.current);
     dispatch({ type: "fire" });
   }, [canPlayRef]);
 
@@ -249,6 +261,8 @@ export function SpaceImpactGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

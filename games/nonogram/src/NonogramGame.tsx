@@ -3,7 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { Fragment, useEffect, useReducer } from "react";
+import { Fragment, useEffect, useReducer, useRef } from "react";
 
 import {
   computeScore,
@@ -54,8 +55,10 @@ export function NonogramGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -68,8 +71,14 @@ export function NonogramGame() {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      playGameFeel("goal", fieldRef.current);
     }
   }, [state.status, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
@@ -80,46 +89,53 @@ export function NonogramGame() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">Tap to fill — right-click to mark empty</p>
-      <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: `auto repeat(${SIZE}, 2rem)` }}>
-        <div />
-        {state.colHints.map((h, i) => (
-          <div key={`c${i}`} className="flex h-8 items-end justify-center text-xs font-mono">
-            {formatHint(h)}
-          </div>
-        ))}
-        {state.rowHints.map((h, r) => (
-          <Fragment key={`row-${r}`}>
-            <div className="flex w-8 items-center justify-end pr-1 text-xs font-mono">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <div className="w-full max-w-sm">
+        <div
+          className="grid gap-0.5"
+          style={{ gridTemplateColumns: `auto repeat(${SIZE}, minmax(0, 1fr))` }}
+        >
+          <div />
+          {state.colHints.map((h, i) => (
+            <div key={`c${i}`} className="flex aspect-square items-end justify-center text-[10px] font-mono sm:text-xs">
               {formatHint(h)}
             </div>
-            {Array.from({ length: SIZE }, (_, c) => {
-              const mark = state.marks[r]![c];
-              return (
-                <button
-                  key={`${r}-${c}`}
-                  type="button"
-                  disabled={!canPlayRef.current || state.status === "won"}
-                  onClick={() => {
-                    playClickSound();
-                    dispatch({ type: "fill", row: r, col: c });
-                  }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    dispatch({ type: "empty", row: r, col: c });
-                  }}
-                  className={cn(
-                    "size-8 border border-border",
-                    mark === true && "bg-primary",
-                    mark === false && "text-muted-foreground"
-                  )}
-                >
-                  {mark === false ? "×" : ""}
-                </button>
-              );
-            })}
-          </Fragment>
-        ))}
+          ))}
+          {state.rowHints.map((h, r) => (
+            <Fragment key={`row-${r}`}>
+              <div className="flex aspect-square items-center justify-end pr-0.5 text-[10px] font-mono sm:text-xs">
+                {formatHint(h)}
+              </div>
+              {Array.from({ length: SIZE }, (_, c) => {
+                const mark = state.marks[r]![c];
+                return (
+                  <button
+                    key={`${r}-${c}`}
+                    type="button"
+                    disabled={!canPlayRef.current || state.status === "won"}
+                    onClick={() => {
+                      playGameFeel("button", fieldRef.current);
+                      dispatch({ type: "fill", row: r, col: c });
+                    }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      dispatch({ type: "empty", row: r, col: c });
+                    }}
+                    className={cn(
+                      "aspect-square w-full border border-border text-[10px] sm:text-xs",
+                      mark === true && "bg-primary",
+                      mark === false && "text-muted-foreground"
+                    )}
+                  >
+                    {mark === false ? "×" : ""}
+                  </button>
+                );
+              })}
+            </Fragment>
+          ))}
+        </div>
       </div>
+      </PuzzlePlayField>
       {state.status === "won" ? (
         <StandardGameOverOverlay
           message="Picture complete!"
@@ -128,8 +144,8 @@ export function NonogramGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

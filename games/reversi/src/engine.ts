@@ -96,10 +96,19 @@ function advance(state: ReversiState): ReversiState {
   return { ...state, winner: endGame(state.board), passStreak: 0 };
 }
 
-export function cpuMove(state: ReversiState): ReversiState {
+export function cpuMove(
+  state: ReversiState,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): ReversiState {
   if (state.winner !== null || state.current !== 2) return state;
   const moves = validMoves(state.board, 2);
   if (moves.length === 0) return advance(state);
+
+  if (difficulty === "easy") {
+    const [r, c] = moves[Math.floor(Math.random() * moves.length)]!;
+    return placeDisc(state, r, c);
+  }
+
   let best = moves[0]!;
   let bestFlips = 0;
   for (const [r, c] of moves) {

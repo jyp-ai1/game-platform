@@ -2,17 +2,18 @@
 
 import {
   clearSave,
+  CpuDifficultyPicker,
   emitGameRetry,
-  playClickSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useHumanVsCpuFeel,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
-  useStandardGameFeel,
+  type CpuDifficulty,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -31,7 +32,7 @@ const GAME_SLUG = "checkers";
 
 type Action =
   | { type: "move"; move: ReturnType<typeof getLegalMoves>[number] }
-  | { type: "cpu" }
+  | { type: "cpu"; difficulty: CpuDifficulty }
   | { type: "restart" };
 
 function reducer(state: CheckersState, action: Action): CheckersState {
@@ -39,7 +40,7 @@ function reducer(state: CheckersState, action: Action): CheckersState {
     case "restart":
       return createInitialState();
     case "cpu":
-      return cpuMove(state);
+      return cpuMove(state, action.difficulty);
     case "move":
       return applyMove(state, action.move);
     default:
@@ -48,14 +49,19 @@ function reducer(state: CheckersState, action: Action): CheckersState {
 }
 
 export function CheckersGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const [selected, setSelected] = useState<[number, number] | null>(null);
+  const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
+    winner: state.winner,
+    humanSide: 1,
+    cpuSide: 2,
+    difficulty,
+    score: computeScore(state),
   });
 
   const saveStatus = useAutoSave(
@@ -66,9 +72,9 @@ export function CheckersGame() {
 
   useEffect(() => {
     if (state.winner !== null || state.current !== 2) return;
-    const id = setTimeout(() => dispatch({ type: "cpu" }), 500);
+    const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 500);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.board, state.mustContinue]);
+  }, [state.current, state.winner, state.board, state.mustContinue, difficulty]);
 
   useEffect(() => {
     if (state.winner !== null) {
@@ -84,7 +90,8 @@ export function CheckersGame() {
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
-    playClickSound();
+    playGameFeel("button");
+    feelTap();
     if (state.mustContinue) {
       const jump = legal.find((m) => m.to[0] === r && m.to[1] === c);
       if (jump) {
@@ -147,7 +154,15 @@ export function CheckersGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="grid w-full max-w-sm grid-cols-8 gap-0.5 rounded-xl border border-border p-1">
+      <CpuDifficultyPicker
+        value={difficulty}
+        onChange={setDifficulty}
+        disabled={state.winner !== null}
+      />
+      <div
+        ref={fieldRef}
+        className="relative grid w-full max-w-sm grid-cols-8 gap-0.5 rounded-xl border border-border p-1"
+      >
         {state.board.map((row, r) =>
           row.map((cell, c) => {
             const dark = (r + c) % 2 === 1;
@@ -185,15 +200,16 @@ export function CheckersGame() {
             );
           })
         )}
+        <FeelLayer />
       </div>
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => {
             dispatch({ type: "restart" });

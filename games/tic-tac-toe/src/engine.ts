@@ -91,7 +91,10 @@ function minimax(board: CellValue[], player: Player): number {
   return player === "O" ? Math.max(...scores) : Math.min(...scores);
 }
 
-export function cpuMove(state: TicTacToeState): TicTacToeState {
+export function cpuMove(
+  state: TicTacToeState,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): TicTacToeState {
   if (state.winner !== null || state.currentPlayer !== "O") {
     return state;
   }
@@ -101,6 +104,12 @@ export function cpuMove(state: TicTacToeState): TicTacToeState {
     if (state.board[i] === null) {
       availableIndices.push(i);
     }
+  }
+
+  if (difficulty === "easy") {
+    const chosen =
+      availableIndices[Math.floor(Math.random() * availableIndices.length)]!;
+    return playMove(state, chosen);
   }
 
   let bestScore = -Infinity;

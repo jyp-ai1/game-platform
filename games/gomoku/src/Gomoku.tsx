@@ -2,27 +2,31 @@
 
 import {
   clearSave,
+  CpuDifficultyPicker,
   emitGameRetry,
-  playClickSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useHumanVsCpuFeel,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
-  useStandardGameFeel,
+  type CpuDifficulty,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import { computeScore, cpuMove, createInitialState, placeStone, type GomokuState } from "./engine";
 
 const GAME_SLUG = "gomoku";
 
-type Action = { type: "place"; row: number; col: number } | { type: "cpu" } | { type: "restart" };
+type Action =
+  | { type: "place"; row: number; col: number }
+  | { type: "cpu"; difficulty: CpuDifficulty }
+  | { type: "restart" };
 
 function reducer(state: GomokuState, action: Action): GomokuState {
   switch (action.type) {
@@ -31,20 +35,25 @@ function reducer(state: GomokuState, action: Action): GomokuState {
     case "place":
       return placeStone(state, action.row, action.col);
     case "cpu":
-      return cpuMove(state);
+      return cpuMove(state, action.difficulty);
     default:
       return state;
   }
 }
 
 export function GomokuGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
+    winner: state.winner,
+    humanSide: 1,
+    cpuSide: 2,
+    difficulty,
+    score: computeScore(state),
   });
   const humanTurn =
     canPlayRef.current && state.current === 1 && state.winner === null;
@@ -57,29 +66,49 @@ export function GomokuGame() {
 
   useEffect(() => {
     if (state.winner !== null || state.current !== 2) return;
-    const id = setTimeout(() => dispatch({ type: "cpu" }), 400);
+    const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 400);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.board]);
+  }, [state.current, state.winner, state.board, difficulty]);
 
   useEffect(() => {
-    if (state.winner === 1) {
+    if (state.winner !== null) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
     }
   }, [state.winner, reportScore]);
 
-  const msg = state.winner === 1 ? "You Win!" : state.winner === 2 ? "CPU Wins!" : humanTurn ? "돌을 놓으세요 (5목)" : "CPU...";
+  const msg =
+    state.winner === 1
+      ? "You Win!"
+      : state.winner === 2
+        ? "CPU Wins!"
+        : humanTurn
+          ? "돌을 놓으세요 (5목)"
+          : "CPU...";
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm text-muted-foreground">{msg}</p>
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="새 게임"
+          onClick={() => dispatch({ type: "restart" })}
+        >
           <RotateCcw />
         </Button>
       </div>
-      <div className="grid w-full max-w-sm grid-cols-9 gap-px rounded bg-amber-900/40 p-1">
+      <CpuDifficultyPicker
+        value={difficulty}
+        onChange={setDifficulty}
+        disabled={state.winner !== null}
+      />
+      <div
+        ref={fieldRef}
+        className="relative grid w-full max-w-sm grid-cols-9 gap-px rounded bg-amber-900/40 p-1"
+      >
         {state.board.map((row, ri) =>
           row.map((cell, ci) => {
             const win = state.winningCells.some(([r, c]) => r === ri && c === ci);
@@ -89,7 +118,8 @@ export function GomokuGame() {
                 type="button"
                 disabled={!humanTurn || cell !== 0}
                 onClick={() => {
-                  playClickSound();
+                  playGameFeel("button");
+                  feelTap();
                   dispatch({ type: "place", row: ri, col: ci });
                 }}
                 className={cn(
@@ -102,15 +132,16 @@ export function GomokuGame() {
             );
           })
         )}
+        <FeelLayer />
       </div>
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />

@@ -85,12 +85,20 @@ function wouldWin(board: Cell[][], col: number, player: 1 | 2): boolean {
   return checkWin(next, row, col, player).length >= 4;
 }
 
-export function cpuMove(state: Connect4State): Connect4State {
+export function cpuMove(
+  state: Connect4State,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): Connect4State {
   if (state.winner !== null || state.current !== 2) return state;
   const cols = Array.from({ length: COLS }, (_, i) => i).filter(
     (c) => dropRow(state.board, c) >= 0
   );
   if (cols.length === 0) return state;
+
+  if (difficulty === "easy") {
+    return dropDisc(state, cols[Math.floor(Math.random() * cols.length)]!);
+  }
+
   for (const c of cols) {
     if (wouldWin(state.board, c, 2)) return dropDisc(state, c);
   }

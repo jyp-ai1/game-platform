@@ -264,10 +264,18 @@ export function applyMove(state: Chess960State, move: Move): Chess960State {
   return { board, current: winner ? color : next, winner };
 }
 
-export function cpuMove(state: Chess960State): Chess960State {
+export function cpuMove(
+  state: Chess960State,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): Chess960State {
   if (state.winner !== null || state.current !== "b") return state;
   const moves = getLegalMoves(state, "b");
   if (moves.length === 0) return state;
+
+  if (difficulty === "easy") {
+    return applyMove(state, moves[Math.floor(Math.random() * moves.length)]!);
+  }
+
   const captures = moves.filter((m) => state.board[m.to[0]!]![m.to[1]!]);
   const pool = captures.length ? captures : moves;
   return applyMove(state, pool[Math.floor(Math.random() * pool.length)]!);

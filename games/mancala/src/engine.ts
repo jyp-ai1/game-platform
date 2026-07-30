@@ -96,12 +96,16 @@ export function playerMove(state: MancalaState, pit: number): MancalaState {
   return sow(state, pit);
 }
 
-export function cpuMove(state: MancalaState): MancalaState {
+export function cpuMove(
+  state: MancalaState,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): MancalaState {
   if (state.winner !== null || state.current !== 2) return state;
   const options = Array.from({ length: 6 }, (_, i) => i + CPU_START).filter(
     (p) => state.pits[p]! > 0
   );
   if (options.length === 0) return state;
+
   const pit = options[Math.floor(Math.random() * options.length)]!;
   return sow(state, pit);
 }

@@ -4,7 +4,6 @@ import {
   clearSave,
   emitGameRetry,
   getGroupDifficulty,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -14,10 +13,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, placeBlock, tick, type StackTowerState } from "./engine";
 
@@ -45,9 +46,20 @@ export function StackTowerGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLButtonElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: state.stack.length,
+    fieldRef,
   });
 
   const diff = getGroupDifficulty(GAME_SLUG, state.stack.length);
@@ -84,10 +96,11 @@ export function StackTowerGame() {
       </div>
       <button
         type="button"
-        className="relative h-72 w-full max-w-sm overflow-hidden rounded-xl bg-muted"
+        className="relative h-72 w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
+        ref={fieldRef}
         onClick={() => {
           if (canPlayRef.current && state.status === "playing") {
-            playClickSound();
+            playGameFeel("button", fieldRef.current);
             dispatch({ type: "place" });
           }
         }}
@@ -115,6 +128,7 @@ export function StackTowerGame() {
             }}
           />
         ) : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </button>
       {state.status === "over" ? (
         <StandardGameOverOverlay

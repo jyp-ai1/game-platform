@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   BALL_R,
@@ -54,8 +55,20 @@ export function MiniGolfGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+
+  useEffect(() => {
+    const score = computeScore(state);
+    if (score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = score;
+  }, [state.strokes, state.status]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -91,7 +104,8 @@ export function MiniGolfGame() {
         </Button>
       </div>
       <div
-        className="relative w-full max-w-sm overflow-hidden rounded-xl border border-green-800/50 bg-green-900/40"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border border-green-800/50 bg-green-900/40"
+        ref={fieldRef}
         style={{ aspectRatio: `${MINI_GOLF_W}/${MINI_GOLF_H}` }}
       >
         <div
@@ -123,6 +137,7 @@ export function MiniGolfGame() {
             }}
           />
         ) : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
       <div className="h-2 w-full max-w-sm overflow-hidden rounded-full bg-muted">
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
@@ -130,7 +145,7 @@ export function MiniGolfGame() {
       <Button
         disabled={state.status !== "aiming" || !canPlayRef.current}
         onClick={() => {
-          playClickSound();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "putt" });
         }}
       >

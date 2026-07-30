@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, roll, tickPower, type BowlingState } from "./engine";
 
@@ -43,8 +44,19 @@ export function BowlingGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
@@ -73,19 +85,22 @@ export function BowlingGame() {
           <RotateCcw />
         </Button>
       </div>
+      <div ref={fieldRef} className="relative w-full max-w-sm touch-none select-none">
       <div className="h-4 w-full max-w-sm overflow-hidden rounded-full bg-muted">
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
       </div>
       <Button
         disabled={state.status !== "aiming" || !canPlayRef.current}
         onClick={() => {
-          playClickSound();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "roll" });
         }}
       >
         Roll!
       </Button>
       {state.lastKnock > 0 ? <p className="text-sm">+{state.lastKnock} pins!</p> : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
+      </div>
       {state.status === "over" ? (
         <StandardGameOverOverlay
           message={`Score ${state.score}`}

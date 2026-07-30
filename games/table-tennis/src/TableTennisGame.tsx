@@ -14,6 +14,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -72,6 +74,15 @@ export function TableTennisGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const stage = state.playerScore + state.cpuScore + 1;
+  const prevScoreRef = useRef(0);
+
+  useEffect(() => {
+    if (state.playerScore > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.playerScore;
+  }, [state.playerScore]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: stage,
@@ -119,6 +130,9 @@ export function TableTennisGame() {
   const onPointer = useCallback((e: PointerEvent) => {
     const el = fieldRef.current;
     if (!el || !canPlayRef.current) return;
+    if (e.type === "pointerdown") {
+      playGameFeel("button", el);
+    }
     const rect = el.getBoundingClientRect();
     const y = ((e.clientY - rect.top) / rect.height) * FIELD_H;
     dispatch({ type: "move", y });
@@ -166,6 +180,8 @@ export function TableTennisGame() {
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Table Tennis" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

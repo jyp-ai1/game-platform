@@ -88,10 +88,16 @@ export function SameGameGame() {
 
   useEffect(() => {
     if (state.status === "over") {
+      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
     }
   }, [state.status, state.score, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   function handleClick(row: number, col: number) {
     if (!canPlayRef.current) {
@@ -116,7 +122,7 @@ export function SameGameGame() {
         </Button>
       </div>
 
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
       <div
         className="grid w-full gap-1 rounded-xl bg-muted p-1"
         style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
@@ -143,8 +149,8 @@ export function SameGameGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
 

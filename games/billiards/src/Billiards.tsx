@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   BILLIARDS_H,
@@ -52,8 +53,19 @@ export function BilliardsGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -86,7 +98,8 @@ export function BilliardsGame() {
         </Button>
       </div>
       <div
-        className="relative w-full max-w-sm overflow-hidden rounded-xl border-4 border-amber-900 bg-green-800"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border-4 border-amber-900 bg-green-800"
+        ref={fieldRef}
         style={{ aspectRatio: `${BILLIARDS_W}/${BILLIARDS_H}` }}
       >
         {state.balls
@@ -113,6 +126,7 @@ export function BilliardsGame() {
             }}
           />
         ) : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
       <div className="h-2 w-full max-w-sm overflow-hidden rounded-full bg-muted">
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
@@ -120,7 +134,7 @@ export function BilliardsGame() {
       <Button
         disabled={state.status !== "aiming" || !canPlayRef.current}
         onClick={() => {
-          playClickSound();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "shoot" });
         }}
       >

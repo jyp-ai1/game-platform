@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -56,8 +57,19 @@ export function ShuffleboardGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -89,7 +101,7 @@ export function ShuffleboardGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="relative h-20 w-full max-w-sm overflow-hidden rounded-xl border border-border">
+      <div ref={fieldRef} className="relative h-20 w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border border-border">
         <div className="absolute inset-y-0 left-[30%] w-0.5 bg-muted-foreground/30" />
         <div className="absolute inset-y-0 left-[52%] w-0.5 bg-muted-foreground/30" />
         <div className="absolute inset-y-0 left-[72%] w-0.5 bg-muted-foreground/30" />
@@ -98,6 +110,7 @@ export function ShuffleboardGame() {
           className="absolute top-1/2 size-10 -translate-y-1/2 rounded-full bg-sky-500 shadow-md transition-all duration-500"
           style={{ left: `${state.discX}%` }}
         />
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
       <div className="flex w-full max-w-sm justify-between text-xs text-muted-foreground">
         <span>0</span><span>1pt</span><span>2pt</span><span>3pt</span><span>4pt</span>
@@ -107,7 +120,7 @@ export function ShuffleboardGame() {
       </div>
       {state.status === "aiming" ? (
         <Button disabled={!canPlayRef.current} onClick={() => {
-          playClickSound();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "slide" });
         }}>
           Slide!

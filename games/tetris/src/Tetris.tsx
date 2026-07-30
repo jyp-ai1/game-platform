@@ -91,11 +91,12 @@ export function TetrisGame() {
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const fieldRef = useRef<HTMLDivElement>(null);
   const prevLinesRef = useRef(0);
 
   const saveStatus = useAutoSave(
@@ -138,22 +139,27 @@ export function TetrisGame() {
       switch (event.key) {
         case "ArrowLeft":
           event.preventDefault();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "move", dCol: -1 });
           break;
         case "ArrowRight":
           event.preventDefault();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "move", dCol: 1 });
           break;
         case "ArrowDown":
           event.preventDefault();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "softDrop" });
           break;
         case "ArrowUp":
           event.preventDefault();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "rotate" });
           break;
         case " ":
           event.preventDefault();
+          playGameFeel("button", fieldRef.current);
           dispatch({ type: "hardDrop" });
           break;
         default:
@@ -189,6 +195,7 @@ export function TetrisGame() {
     if (maxAbs < TAP_THRESHOLD) {
       return;
     }
+    playGameFeel("button", fieldRef.current);
     if (maxAbs < SWIPE_THRESHOLD) {
       dispatch({ type: "rotate" });
       return;
@@ -272,7 +279,7 @@ export function TetrisGame() {
           />
         ) : null}
 
-        <GameFeelLayer bursts={feel.bursts} />
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

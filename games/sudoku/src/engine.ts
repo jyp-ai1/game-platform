@@ -233,3 +233,31 @@ export function enterValue(state: SudokuState, value: number | null): SudokuStat
   const won = boardsMatch(board, state.solution);
   return { ...state, board, mistakes, status: won ? "won" : "playing" };
 }
+
+/** Reveal one empty cell (original sudoku hint). */
+export function applyHint(state: SudokuState): SudokuState {
+  if (state.status !== "playing") {
+    return state;
+  }
+  const empty: Array<{ row: number; col: number }> = [];
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (state.puzzle[r]![c] === null && state.board[r]![c] === null) {
+        empty.push({ row: r, col: c });
+      }
+    }
+  }
+  if (empty.length === 0) {
+    return state;
+  }
+  const pick = empty[Math.floor(Math.random() * empty.length)]!;
+  const board = cloneBoard(state.board);
+  board[pick.row]![pick.col] = state.solution[pick.row]![pick.col]!;
+  const won = boardsMatch(board, state.solution);
+  return {
+    ...state,
+    board,
+    selectedCell: pick,
+    status: won ? "won" : "playing",
+  };
+}

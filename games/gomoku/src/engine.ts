@@ -45,7 +45,10 @@ export function placeStone(state: GomokuState, row: number, col: number): Gomoku
   return { board, current: state.current === 1 ? 2 : 1, winner: null, winningCells: [] };
 }
 
-export function cpuMove(state: GomokuState): GomokuState {
+export function cpuMove(
+  state: GomokuState,
+  difficulty: "easy" | "normal" | "hard" = "normal"
+): GomokuState {
   if (state.winner !== null || state.current !== 2) return state;
   const candidates: Array<[number, number]> = [];
   for (let r = 0; r < SIZE; r++) {
@@ -63,6 +66,12 @@ export function cpuMove(state: GomokuState): GomokuState {
     }
   }
   if (candidates.length === 0) return state;
+
+  if (difficulty === "easy") {
+    const [r, c] = candidates[Math.floor(Math.random() * candidates.length)]!;
+    return placeStone(state, r, c);
+  }
+
   // Block player win
   for (const [r, c] of candidates) {
     const b = state.board.map((row) => [...row]);

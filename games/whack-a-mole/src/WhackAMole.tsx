@@ -3,8 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
-  playPopSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -14,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, tick, whack, type WhackAMoleState } from "./engine";
 
@@ -44,9 +44,20 @@ export function WhackAMoleGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: Math.floor(state.score / 30) + 1,
+    fieldRef,
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
@@ -73,15 +84,15 @@ export function WhackAMoleGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="grid w-full max-w-sm grid-cols-3 gap-2">
+      <div ref={fieldRef} className="grid w-full max-w-sm touch-none select-none grid-cols-3 gap-2">
         {Array.from({ length: 9 }, (_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => {
               if (!canPlayRef.current) return;
-              playClickSound();
-              if (state.active === i) playPopSound();
+              playGameFeel("button", fieldRef.current);
+              if (state.active === i) playGameFeel("pop", fieldRef.current);
               dispatch({ type: "whack", index: i });
             }}
             className={cn(
@@ -105,6 +116,8 @@ export function WhackAMoleGame() {
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Whack-a-Mole" onResume={onResume} onNewGame={onNewGame} />
       ) : null}

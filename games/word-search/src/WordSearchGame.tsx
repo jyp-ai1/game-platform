@@ -81,10 +81,16 @@ export function WordSearchGame() {
 
   useEffect(() => {
     if (state.status === "won") {
+      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
     }
   }, [state.status, state.found.length, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
@@ -109,7 +115,7 @@ export function WordSearchGame() {
         ))}
       </ul>
       <p className="text-xs text-muted-foreground">Tap start cell, then end cell along a straight line</p>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
       <div className="grid w-full grid-cols-8 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);
@@ -121,7 +127,7 @@ export function WordSearchGame() {
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
               onClick={() => {
-                playGameFeel("button");
+                playGameFeel("button", fieldRef.current);
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
@@ -150,8 +156,8 @@ export function WordSearchGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

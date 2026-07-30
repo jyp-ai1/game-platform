@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -14,6 +13,8 @@ import {
   getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -73,9 +74,20 @@ export function GoldMinerGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: Math.floor(state.score / 500) + 1,
+    fieldRef,
   });
   const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 500) + 1);
   const lastTimeRef = useRef<number | null>(null);
@@ -125,6 +137,7 @@ export function GoldMinerGame() {
       }
       if (event.key === " ") {
         event.preventDefault();
+        playGameFeel("button", fieldRef.current);
         dispatch({ type: "fire" });
       }
     }
@@ -136,7 +149,7 @@ export function GoldMinerGame() {
     if (!canPlayRef.current) {
       return;
     }
-    playClickSound();
+    playGameFeel("button", fieldRef.current);
     dispatch({ type: "fire" });
   }
 
@@ -162,6 +175,7 @@ export function GoldMinerGame() {
 
       <div
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-amber-950/30"
+        ref={fieldRef}
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerDown={handleFire}
       >
@@ -218,6 +232,8 @@ export function GoldMinerGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

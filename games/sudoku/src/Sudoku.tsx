@@ -22,6 +22,7 @@ import { useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
+  applyHint,
   enterValue,
   selectCell,
   type Difficulty,
@@ -38,6 +39,7 @@ const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
 type Action =
   | { type: "select"; row: number; col: number }
   | { type: "enter"; value: number | null }
+  | { type: "hint" }
   | { type: "restart"; difficulty?: Difficulty };
 
 function reducer(state: SudokuState, action: Action): SudokuState {
@@ -46,6 +48,8 @@ function reducer(state: SudokuState, action: Action): SudokuState {
       return createInitialState(action.difficulty);
     case "select":
       return selectCell(state, action.row, action.col);
+    case "hint":
+      return applyHint(state);
     case "enter":
       return enterValue(state, action.value);
     default:
@@ -69,6 +73,22 @@ export function SudokuGame() {
   });
   const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const prevMistakesRef = useRef(0);
+  const prevBoardRef = useRef<string>("");
+
+  useEffect(() => {
+    const boardKey = state.board.map((r) => r.join(",")).join("|");
+    if (prevBoardRef.current && boardKey !== prevBoardRef.current && state.status === "playing") {
+      const changed = state.selectedCell;
+      if (changed) {
+        const { row, col } = changed;
+        const val = state.board[row]?.[col];
+        if (val !== null && val === state.solution[row]?.[col]) {
+          playGameFeel("correct");
+        }
+      }
+    }
+    prevBoardRef.current = boardKey;
+  }, [state.board, state.selectedCell, state.solution, state.status]);
 
   useEffect(() => {
     if (state.mistakes > prevMistakesRef.current) {
@@ -127,6 +147,7 @@ export function SudokuGame() {
         </Button>
       </div>
 
+      <PuzzlePlayField bursts={feel.bursts}>
       <div
         className="relative grid aspect-square w-full max-w-sm gap-px rounded-xl bg-muted p-1"
         style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}
@@ -178,8 +199,20 @@ export function SudokuGame() {
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+      </PuzzlePlayField>
 
       <div className="grid w-full max-w-sm grid-cols-5 gap-2">
+        <Button
+          variant="secondary"
+          className="col-span-5"
+          disabled={!interactive}
+          onClick={() => {
+            playGameFeel("button");
+            dispatch({ type: "hint" });
+          }}
+        >
+          Hint
+        </Button>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
           <Button
             key={digit}

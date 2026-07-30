@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   advancePlayback,
@@ -67,6 +68,16 @@ export function SimonGame() {
   );
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState({
       ...(state as unknown as Record<string, unknown>),
@@ -74,6 +85,7 @@ export function SimonGame() {
       round: state.round,
     }),
     stageIndex: state.round,
+    fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
@@ -145,7 +157,7 @@ export function SimonGame() {
         </Button>
       </div>
 
-      <div className="relative grid w-full max-w-sm grid-cols-2 gap-2">
+      <div ref={fieldRef} className="relative grid w-full max-w-sm touch-none select-none grid-cols-2 gap-2">
         {PADS.map((pad) => {
           const isActive = highlightedColor === pad.color;
           const disabled = !canPlay || state.phase !== "input";
@@ -156,7 +168,7 @@ export function SimonGame() {
               aria-label={pad.label}
               disabled={disabled}
               onClick={() => {
-                playClickSound();
+                playGameFeel("button", fieldRef.current);
                 dispatch({ type: "submitInput", color: pad.color });
               }}
               className={cn(
@@ -182,6 +194,8 @@ export function SimonGame() {
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       {phase === "resume-prompt" ? (

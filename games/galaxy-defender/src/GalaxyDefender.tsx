@@ -13,6 +13,8 @@ import {
   getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -97,14 +99,24 @@ export function GalaxyDefenderGame() {
     useResumableGame(GAME_SLUG, createInitialState);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: state.wave,
+    fieldRef,
   });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const diff = getGroupDifficulty(GAME_SLUG, state.wave);
   const keysRef = useRef<Set<string>>(new Set());
-  const fieldRef = useRef<HTMLDivElement>(null);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -220,6 +232,7 @@ export function GalaxyDefenderGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
+        onPointerDown={() => playGameFeel("button", fieldRef.current)}
       >
         {state.enemies.map((enemy) => (
           <div
@@ -264,6 +277,8 @@ export function GalaxyDefenderGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

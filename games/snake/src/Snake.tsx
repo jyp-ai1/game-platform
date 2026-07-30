@@ -12,6 +12,8 @@ import {
   useReadyCountdown,
   useResumableGame,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -107,8 +109,19 @@ export function SnakeGame() {
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -143,6 +156,7 @@ export function SnakeGame() {
         return;
       }
       event.preventDefault();
+      playGameFeel("button", fieldRef.current);
       dispatch({ type: "setDirection", direction });
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -180,6 +194,7 @@ export function SnakeGame() {
         : dy > 0
           ? "down"
           : "up";
+    playGameFeel("button", fieldRef.current);
     dispatch({ type: "setDirection", direction });
   }
 
@@ -187,7 +202,7 @@ export function SnakeGame() {
   const head = state.snake[0]!;
 
   return (
-    <div className="relative flex flex-col items-center gap-4">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
@@ -203,6 +218,7 @@ export function SnakeGame() {
 
       <div
         className="relative grid aspect-square w-full max-w-sm touch-none select-none gap-px rounded-xl bg-muted p-1"
+        ref={fieldRef}
         style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)` }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -240,6 +256,8 @@ export function SnakeGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

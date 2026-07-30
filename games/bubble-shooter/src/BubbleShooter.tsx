@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   computeScore,
@@ -46,8 +47,19 @@ export function BubbleShooterGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -73,7 +85,7 @@ export function BubbleShooterGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="rounded-xl bg-muted p-2">
+      <div ref={fieldRef} className="relative w-full max-w-sm touch-none select-none rounded-xl bg-muted p-2">
         {state.grid.map((row, ri) => (
           <div key={ri} className="flex gap-1">
             {row.map((cell, ci) => (
@@ -82,7 +94,7 @@ export function BubbleShooterGame() {
                 type="button"
                 onClick={() => {
                   if (canPlayRef.current && state.status === "playing") {
-                    playClickSound();
+                    playGameFeel("button", fieldRef.current);
                     dispatch({ type: "shoot", col: ci });
                   }
                 }}
@@ -98,6 +110,7 @@ export function BubbleShooterGame() {
         <div className="mt-2 flex justify-center">
           <span className={cn("size-10 rounded-full border-2 border-foreground/30", COLORS[state.next])} />
         </div>
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
       {state.status !== "playing" ? (
         <StandardGameOverOverlay

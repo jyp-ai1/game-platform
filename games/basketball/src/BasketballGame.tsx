@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -56,9 +57,20 @@ export function BasketballGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: state.shot,
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -96,12 +108,13 @@ export function BasketballGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="relative h-48 w-full max-w-sm rounded-xl bg-gradient-to-b from-sky-900/40 to-orange-900/30 p-4">
+      <div ref={fieldRef} className="relative h-48 w-full max-w-sm touch-none select-none rounded-xl bg-gradient-to-b from-sky-900/40 to-orange-900/30 p-4">
         <div className="absolute left-1/2 top-4 h-16 w-24 -translate-x-1/2 rounded-b-lg border-4 border-orange-400 bg-transparent" />
         <div
           className="absolute bottom-6 size-8 rounded-full bg-orange-500 transition-all duration-300"
           style={{ left: `${20 + state.power * 0.6}%` }}
         />
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
       <div className="h-4 w-full max-w-sm overflow-hidden rounded-full bg-muted">
         <div
@@ -113,7 +126,7 @@ export function BasketballGame() {
         <Button
           disabled={!canPlayRef.current}
           onClick={() => {
-            playClickSound();
+            playGameFeel("button", fieldRef.current);
             dispatch({ type: "shoot" });
           }}
         >

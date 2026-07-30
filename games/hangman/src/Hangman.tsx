@@ -3,7 +3,6 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -13,10 +12,12 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   computeScore,
@@ -53,8 +54,19 @@ export function HangmanGame() {
   );
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const prevGuessedRef = useRef(0);
+  useEffect(() => {
+    const correct = state.guessedLetters.filter((l) => state.word.includes(l)).length;
+    if (correct > prevGuessedRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevGuessedRef.current = correct;
+  }, [state.guessedLetters, state.word]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
 
@@ -83,6 +95,7 @@ export function HangmanGame() {
       if (event.key.length !== 1 || !/^[a-zA-Z]$/.test(event.key)) {
         return;
       }
+      playGameFeel("button", fieldRef.current);
       dispatch({ type: "guess", letter: event.key });
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -119,7 +132,7 @@ export function HangmanGame() {
         ))}
       </div>
 
-      <div className="relative flex w-full max-w-sm flex-col items-center gap-6 rounded-xl bg-muted p-6">
+      <div ref={fieldRef} className="relative flex w-full max-w-sm touch-none select-none flex-col items-center gap-6 rounded-xl bg-muted p-6">
         <p className="text-center text-2xl font-bold tracking-widest tabular-nums">
           {state.status === "lost" ? state.word.split("").join(" ") : getDisplayWord(state)}
         </p>
@@ -136,7 +149,7 @@ export function HangmanGame() {
                     type="button"
                     disabled={guessed || !interactive}
                     onClick={() => {
-                      playClickSound();
+                      playGameFeel("button", fieldRef.current);
                       dispatch({ type: "guess", letter });
                     }}
                     aria-label={`${letter} 추측`}
@@ -172,6 +185,8 @@ export function HangmanGame() {
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       {phase === "resume-prompt" ? (

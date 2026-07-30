@@ -58,11 +58,16 @@ export function BallSortGame() {
 
   useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("correct", fieldRef.current);
+      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, score);
       clearSave(GAME_SLUG);
     }
   }, [state.status, score, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative mx-auto flex w-full flex-col items-center gap-4">
@@ -73,7 +78,7 @@ export function BallSortGame() {
           <RotateCcw />
         </Button>
       </div>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
         <div className="flex w-full justify-center gap-1 sm:gap-2">
           {state.tubes.map((tube, ti) => (
             <button
@@ -81,7 +86,7 @@ export function BallSortGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current) {
-                  playGameFeel("button");
+                  playGameFeel("button", fieldRef.current);
                   dispatch({ type: "tap", index: ti });
                 }
               }}
@@ -107,8 +112,8 @@ export function BallSortGame() {
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
           onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

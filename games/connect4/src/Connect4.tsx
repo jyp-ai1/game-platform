@@ -2,21 +2,22 @@
 
 import {
   clearSave,
+  CpuDifficultyPicker,
   emitGameRetry,
-  playClickSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useHumanVsCpuFeel,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
-  useStandardGameFeel,
+  type CpuDifficulty,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import {
   computeScore,
@@ -31,7 +32,7 @@ const CPU_DELAY = 450;
 
 type Action =
   | { type: "drop"; col: number }
-  | { type: "cpu" }
+  | { type: "cpu"; difficulty: CpuDifficulty }
   | { type: "restart" };
 
 function reducer(state: Connect4State, action: Action): Connect4State {
@@ -41,7 +42,7 @@ function reducer(state: Connect4State, action: Action): Connect4State {
     case "drop":
       return dropDisc(state, action.col);
     case "cpu":
-      return cpuMove(state);
+      return cpuMove(state, action.difficulty);
     default:
       return state;
   }
@@ -52,9 +53,14 @@ export function Connect4Game() {
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
+    winner: state.winner,
+    humanSide: 1,
+    cpuSide: 2,
+    difficulty,
+    score: computeScore(state),
   });
 
   const saveStatus = useAutoSave(
@@ -65,9 +71,9 @@ export function Connect4Game() {
 
   useEffect(() => {
     if (state.winner !== null || state.current !== 2) return;
-    const id = setTimeout(() => dispatch({ type: "cpu" }), CPU_DELAY);
+    const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), CPU_DELAY);
     return () => clearTimeout(id);
-  }, [state.current, state.winner]);
+  }, [state.current, state.winner, difficulty]);
 
   useEffect(() => {
     if (state.winner !== null) {
@@ -98,49 +104,58 @@ export function Connect4Game() {
           <RotateCcw />
         </Button>
       </div>
-      <div className="flex w-full max-w-sm gap-1">
-        {Array.from({ length: 7 }, (_, col) => (
-          <button
-            key={col}
-            type="button"
-            disabled={!humanTurn}
-            aria-label={`열 ${col + 1}`}
-            onClick={() => {
-              playClickSound();
-              dispatch({ type: "drop", col });
-            }}
-            className="flex-1 rounded bg-muted py-2 text-xs hover:bg-primary/20 disabled:opacity-40"
-          >
-            ▼
-          </button>
-        ))}
-      </div>
-      <div className="grid w-full max-w-sm grid-cols-7 gap-1 rounded-xl bg-primary/20 p-2">
-        {state.board.map((row, ri) =>
-          row.map((cell, ci) => {
-            const win = state.winningCells.some(([r, c]) => r === ri && c === ci);
-            return (
-              <div
-                key={`${ri}-${ci}`}
-                className={cn(
-                  "aspect-square rounded-full bg-background/80",
-                  cell === 1 && "bg-primary",
-                  cell === 2 && "bg-destructive",
-                  win && "ring-2 ring-amber-400"
-                )}
-              />
-            );
-          })
-        )}
+      <CpuDifficultyPicker
+        value={difficulty}
+        onChange={setDifficulty}
+        disabled={state.winner !== null}
+      />
+      <div ref={fieldRef} className="flex w-full max-w-sm flex-col gap-1">
+        <div className="flex gap-1">
+          {Array.from({ length: 7 }, (_, col) => (
+            <button
+              key={col}
+              type="button"
+              disabled={!humanTurn}
+              aria-label={`열 ${col + 1}`}
+              onClick={() => {
+                playGameFeel("button");
+                feelTap();
+                dispatch({ type: "drop", col });
+              }}
+              className="flex-1 rounded bg-muted py-2 text-xs hover:bg-primary/20 disabled:opacity-40"
+            >
+              ▼
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1 rounded-xl bg-primary/20 p-2">
+          {state.board.map((row, ri) =>
+            row.map((cell, ci) => {
+              const win = state.winningCells.some(([r, c]) => r === ri && c === ci);
+              return (
+                <div
+                  key={`${ri}-${ci}`}
+                  className={cn(
+                    "aspect-square rounded-full bg-background/80",
+                    cell === 1 && "bg-primary",
+                    cell === 2 && "bg-destructive",
+                    win && "ring-2 ring-amber-400"
+                  )}
+                />
+              );
+            })
+          )}
+        </div>
+        <FeelLayer />
       </div>
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />

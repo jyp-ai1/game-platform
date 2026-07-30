@@ -13,6 +13,8 @@ import {
   getGroupDifficulty,
   standardFeelFromState,
   useStandardGameFeel,
+  playGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -74,6 +76,15 @@ export function BreakoutGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevScoreRef = useRef(0);
+  
+  useEffect(() => {
+    if (state.score > prevScoreRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevScoreRef.current = state.score;
+  }, [state.score]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: Math.floor(state.score / 70) + 1,
@@ -196,6 +207,7 @@ export function BreakoutGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
+        onPointerDown={() => playGameFeel("button", fieldRef.current)}
       >
         {state.bricks.map((alive, index) =>
           alive ? (
@@ -241,6 +253,8 @@ export function BreakoutGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

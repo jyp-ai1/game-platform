@@ -14,6 +14,7 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
+  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -167,6 +168,7 @@ export function AirHockeyGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
+        onPointerDown={() => playGameFeel("button", fieldRef.current)}
       >
         <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/20" />
         <div
@@ -208,6 +210,7 @@ export function AirHockeyGame() {
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       {phase === "resume-prompt" ? (

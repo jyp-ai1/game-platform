@@ -2,6 +2,7 @@
 
 import {
   clearSave,
+  emitGameRetry,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -18,7 +19,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 
 import { computeScore, createShuffledCards, type Card } from "./engine";
 import {
@@ -132,6 +133,7 @@ export function MemoryGame() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stageClearReported = useRef(false);
   const prevMatchedRef = useRef(0);
+  const [wrongFlash, setWrongFlash] = useState(false);
 
   useEffect(() => {
     const matched = state.cards.filter((c) => c.matched).length;
@@ -150,6 +152,8 @@ export function MemoryGame() {
     const second = state.cards[secondIndex];
     if (first && second && first.symbol !== second.symbol) {
       playGameFeel("wrong");
+      setWrongFlash(true);
+      window.setTimeout(() => setWrongFlash(false), 400);
     }
   }, [state.flipped, state.cards]);
 
@@ -208,6 +212,7 @@ export function MemoryGame() {
   }
 
   function handleRetry() {
+    emitGameRetry(GAME_SLUG);
     resetSession();
     dispatch({ type: "restart" });
   }
@@ -238,7 +243,14 @@ export function MemoryGame() {
       </div>
 
       <PuzzlePlayField bursts={feel.bursts}>
-      <div className={cn("relative grid w-full gap-2", gridColsClass)}>
+      <div
+        className={cn(
+          "relative grid w-full gap-2",
+          gridColsClass,
+          wrongFlash && "animate-[shake_0.35s_ease-in-out]"
+        )}
+        style={{ perspective: "800px" }}
+      >
         {state.cards.map((card, index) => {
           const isFaceUp = card.matched || state.flipped.includes(index);
           return (
@@ -246,14 +258,25 @@ export function MemoryGame() {
               key={index}
               type="button"
               onClick={() => handleFlip(index)}
-              disabled={isFaceUp}
+              disabled={isFaceUp || card.matched}
               aria-label={isFaceUp ? card.symbol : "카드 뒤집기"}
-              className={cn(
-                "flex aspect-square items-center justify-center rounded-lg text-2xl transition-all duration-200",
-                isFaceUp ? "scale-100 bg-primary/20" : "scale-95 bg-muted hover:scale-100 hover:bg-muted-foreground/20"
-              )}
+              className="aspect-square [transform-style:preserve-3d]"
             >
-              {isFaceUp ? card.symbol : null}
+              <span
+                className={cn(
+                  "flex h-full w-full items-center justify-center rounded-lg text-2xl transition-transform duration-300",
+                  isFaceUp
+                    ? "rotate-y-0 bg-primary/20 scale-100"
+                    : "rotate-y-180 bg-muted hover:bg-muted-foreground/20",
+                  card.matched && "ring-2 ring-primary/50"
+                )}
+                style={{
+                  transform: isFaceUp ? "rotateY(0deg)" : "rotateY(180deg)",
+                  backfaceVisibility: "hidden",
+                }}
+              >
+                {isFaceUp ? card.symbol : "?"}
+              </span>
             </button>
           );
         })}

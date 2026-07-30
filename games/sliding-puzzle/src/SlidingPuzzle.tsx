@@ -47,10 +47,16 @@ export function SlidingPuzzleGame() {
 
   useEffect(() => {
     if (state.status === "won") {
+      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, computeScore(state.moves));
       clearSave(GAME_SLUG);
     }
   }, [state.status, state.moves, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
@@ -61,7 +67,7 @@ export function SlidingPuzzleGame() {
           <RotateCcw />
         </Button>
       </div>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts}>
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
       <div className="grid w-full grid-cols-4 gap-1 rounded-xl bg-muted p-2">
         {state.tiles.map((tile, i) => (
           <button
@@ -70,7 +76,7 @@ export function SlidingPuzzleGame() {
             disabled={tile === 0}
             onClick={() => {
               if (canPlayRef.current) {
-                playGameFeel("button");
+                playGameFeel("button", fieldRef.current);
                 dispatch({ type: "tap", index: i });
               }
             }}
@@ -92,8 +98,8 @@ export function SlidingPuzzleGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

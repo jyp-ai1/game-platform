@@ -2,6 +2,7 @@
 
 import {
   clearSave,
+  emitGameRetry,
   getBestScore,
   loadGameProgress,
   ResumeDialog,
@@ -17,7 +18,7 @@ import {
   GameFeelLayer,
   playGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -47,6 +48,8 @@ interface State {
   status: Status;
   winAcknowledged: boolean;
   tileStagesReached: number[];
+  blockedPulse: number;
+  mergePulse: number;
 }
 
 type Action =
@@ -64,6 +67,8 @@ function createInitialState(): State {
     status: "playing",
     winAcknowledged: false,
     tileStagesReached: [],
+    blockedPulse: 0,
+    mergePulse: 0,
   };
 }
 
@@ -83,7 +88,7 @@ function reducer(state: State, action: Action): State {
 
       const result = move(state.grid, action.direction);
       if (!result.moved) {
-        return state;
+        return { ...state, blockedPulse: state.blockedPulse + 1 };
       }
 
       const grid = addRandomTile(result.grid);
@@ -106,7 +111,17 @@ function reducer(state: State, action: Action): State {
         }
       }
 
-      return { grid, score, best, bestTile, status, winAcknowledged: state.winAcknowledged, tileStagesReached };
+      return {
+        grid,
+        score,
+        best,
+        bestTile,
+        status,
+        winAcknowledged: state.winAcknowledged,
+        tileStagesReached,
+        blockedPulse: 0,
+        mergePulse: state.mergePulse + (result.scoreGained > 0 ? 1 : 0),
+      };
     }
     default:
       return state;
@@ -140,6 +155,7 @@ export function Game2048() {
   });
   const reportedTiles = useRef<Set<number>>(new Set());
   const prevScoreRef = useRef(0);
+  const lastBlockedRef = useRef(0);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -167,6 +183,20 @@ export function Game2048() {
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
+
+  useEffect(() => {
+    if (state.blockedPulse <= lastBlockedRef.current) return;
+    lastBlockedRef.current = state.blockedPulse;
+    playGameFeel("wrong", gridRef.current);
+  }, [state.blockedPulse]);
+
+  useEffect(() => {
+    if (state.status === "over") {
+      playGameFeel("wrong", gridRef.current);
+    } else if (state.status === "won" && !state.winAcknowledged) {
+      playGameFeel("goal", gridRef.current);
+    }
+  }, [state.status, state.winAcknowledged]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -243,6 +273,7 @@ export function Game2048() {
   );
 
   function handleRetry() {
+    emitGameRetry(GAME_SLUG);
     resetSession();
     reportedTiles.current.clear();
     dispatch({ type: "restart" });
@@ -279,8 +310,11 @@ export function Game2048() {
       >
         {state.grid.flat().map((value, index) => (
           <div
-            key={index}
-            className="flex items-center justify-center rounded-lg text-lg font-bold transition-colors sm:text-2xl"
+            key={`${index}-${value}-${state.mergePulse}`}
+            className={cn(
+              "flex items-center justify-center rounded-lg text-lg font-bold transition-transform duration-150 sm:text-2xl",
+              value !== 0 && "game-effect-merge"
+            )}
             style={tileStyle(value)}
           >
             {value !== 0 ? value : null}

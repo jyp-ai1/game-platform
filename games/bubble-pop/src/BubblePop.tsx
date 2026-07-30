@@ -2,10 +2,9 @@
 
 import {
   clearSave,
-  playClickSound,
-  playPopSound,
-  playStartSound,
-  playSuccessSound,
+  emitGameRetry,
+  GameFeelLayer,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -118,6 +117,7 @@ export function BubblePopGame() {
   const stageClearReported = useRef(false);
   const particleIdRef = useRef(0);
   const [particles, setParticles] = useState<PopParticle[]>([]);
+  const [comboLabel, setComboLabel] = useState<string | null>(null);
   const [popFlash, setPopFlash] = useState(false);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -155,7 +155,7 @@ export function BubblePopGame() {
 
   useEffect(() => {
     if (sessionActive) {
-      playStartSound();
+      playGameFeel("button", fieldRef.current);
     }
   }, [sessionActive]);
 
@@ -163,16 +163,23 @@ export function BubblePopGame() {
     if (state.lastPops.length === 0) {
       return;
     }
-    playPopSound();
     if (state.lastPops.length >= 5) {
-      playSuccessSound();
+      playGameFeel("combo", fieldRef.current);
+      setComboLabel(`${state.lastPops.length}x COMBO!`);
+    } else if (state.lastPops.length >= 3) {
+      playGameFeel("combo", fieldRef.current);
+      setComboLabel(`${state.lastPops.length}x Combo`);
+    } else {
+      playGameFeel("pop", fieldRef.current);
+      setComboLabel(null);
     }
     setPopFlash(true);
+    const particleCount = state.lastPops.length >= 5 ? 6 : state.lastPops.length >= 3 ? 4 : 3;
     const burst: PopParticle[] = state.lastPops.flatMap((pop) => {
       const isOdd = pop.row % 2 === 1;
       const cx = pop.col * BUBBLE_SIZE + BUBBLE_RADIUS + (isOdd ? BUBBLE_RADIUS : 0);
       const cy = pop.row * BUBBLE_SIZE + BUBBLE_RADIUS;
-      return Array.from({ length: 3 }, () => ({
+      return Array.from({ length: particleCount }, () => ({
         id: particleIdRef.current++,
         xPct: ((cx + (Math.random() - 0.5) * 8) / FIELD_WIDTH) * 100,
         yPct: ((cy + (Math.random() - 0.5) * 8) / FIELD_HEIGHT) * 100,
@@ -181,7 +188,10 @@ export function BubblePopGame() {
       }));
     });
     setParticles((p) => [...p, ...burst].slice(-48));
-    window.setTimeout(() => setPopFlash(false), 120);
+    window.setTimeout(() => {
+      setPopFlash(false);
+      setComboLabel(null);
+    }, 120);
   }, [state.lastPops]);
 
   useEffect(() => {
@@ -195,6 +205,16 @@ export function BubblePopGame() {
     }, 32);
     return () => window.clearInterval(id);
   }, [particles.length]);
+
+  useEffect(() => {
+    if (state.status === "over") {
+      playGameFeel("wrong", fieldRef.current);
+    } else if (state.status === "won") {
+      playGameFeel("goal", fieldRef.current);
+    } else if (state.status === "stage-clear") {
+      playGameFeel("correct", fieldRef.current);
+    }
+  }, [state.status]);
 
   useEffect(() => {
     if (state.status === "stage-clear" && !stageClearReported.current) {
@@ -220,6 +240,7 @@ export function BubblePopGame() {
   }, [state.status, state.score, state.stageIndex, reportScore, recordGameEnd]);
 
   function handleRetry() {
+    emitGameRetry(GAME_SLUG);
     resetSession();
     dispatch({ type: "restart" });
   }
@@ -262,7 +283,7 @@ export function BubblePopGame() {
     if (!canPlayRef.current) {
       return;
     }
-    playClickSound();
+    playGameFeel("button", fieldRef.current);
     dispatch({ type: "fire" });
   }, [canPlayRef]);
 
@@ -270,11 +291,14 @@ export function BubblePopGame() {
   const aimY2 = SHOOTER_Y - Math.cos(state.shooterAngle) * AIM_LINE_LENGTH;
 
   return (
-    <div className="relative flex w-full max-w-sm flex-col items-center gap-4 overflow-hidden">
+    <div className="standard-game-shell relative flex w-full flex-col items-center gap-3 overflow-hidden mx-auto">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <ScoreBox label="Stage" value={state.stageIndex} />
+          <span className="text-xs text-muted-foreground">
+            {getBubbleStage(state.stageIndex).label}
+          </span>
           <ScoreBox label="Score" value={state.score} />
           <div className="flex flex-col items-center gap-1">
             <span className="text-[10px] font-medium uppercase text-muted-foreground">
@@ -306,12 +330,21 @@ export function BubblePopGame() {
         )}
         style={{
           aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}`,
-          maxWidth: "min(100%, 20rem)",
-          maxHeight: "min(70vh, 28rem)",
+          maxWidth: "min(100%, 22rem)",
+          maxHeight: "min(72vh, 32rem)",
+          touchAction: "none",
         }}
         onPointerMove={handlePointerMove}
-        onPointerDown={handlePointerDown}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          handlePointerDown();
+        }}
       >
+        {comboLabel ? (
+          <div className="pointer-events-none absolute inset-x-0 top-[18%] z-20 text-center text-lg font-bold text-primary drop-shadow">
+            {comboLabel}
+          </div>
+        ) : null}
         <div
           className="absolute inset-x-0 border-t-2 border-dashed border-destructive/60"
           style={{ top: toPercent((ROWS - 1) * BUBBLE_SIZE, FIELD_HEIGHT) }}
@@ -429,6 +462,7 @@ export function BubblePopGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
       <p className="text-xs text-muted-foreground">

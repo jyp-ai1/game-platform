@@ -2,21 +2,22 @@
 
 import {
   clearSave,
+  CpuDifficultyPicker,
   emitGameRetry,
-  playClickSound,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useHumanVsCpuFeel,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
-  useStandardGameFeel,
+  type CpuDifficulty,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import {
   computeScore,
@@ -28,14 +29,17 @@ import {
 
 const GAME_SLUG = "mancala";
 
-type Action = { type: "pick"; pit: number } | { type: "cpu" } | { type: "restart" };
+type Action =
+  | { type: "pick"; pit: number }
+  | { type: "cpu"; difficulty: CpuDifficulty }
+  | { type: "restart" };
 
 function reducer(state: MancalaState, action: Action): MancalaState {
   switch (action.type) {
     case "restart":
       return createInitialState();
     case "cpu":
-      return cpuMove(state);
+      return cpuMove(state, action.difficulty);
     case "pick":
       return playerMove(state, action.pit);
     default:
@@ -44,13 +48,18 @@ function reducer(state: MancalaState, action: Action): MancalaState {
 }
 
 export function MancalaGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
+  const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
+    winner: state.winner,
+    humanSide: 1,
+    cpuSide: 2,
+    difficulty,
+    score: computeScore(state),
   });
 
   const saveStatus = useAutoSave(
@@ -61,9 +70,9 @@ export function MancalaGame() {
 
   useEffect(() => {
     if (state.winner !== null || state.current !== 2) return;
-    const id = setTimeout(() => dispatch({ type: "cpu" }), 550);
+    const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 550);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.pits]);
+  }, [state.current, state.winner, state.pits, difficulty]);
 
   useEffect(() => {
     if (state.winner !== null) {
@@ -92,12 +101,25 @@ export function MancalaGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="You" value={state.pits[6]!} />
         <ScoreBox label="CPU" value={state.pits[13]!} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="새 게임"
+          onClick={() => dispatch({ type: "restart" })}
+        >
           <RotateCcw />
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">{msg}</p>
-      <div className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-border p-3">
+      <CpuDifficultyPicker
+        value={difficulty}
+        onChange={setDifficulty}
+        disabled={state.winner !== null}
+      />
+      <div
+        ref={fieldRef}
+        className="relative flex w-full max-w-sm flex-col gap-3 rounded-xl border border-border p-3"
+      >
         <div className="grid grid-cols-6 gap-2">
           {Array.from({ length: 6 }, (_, i) => 12 - i).map((pit) => (
             <button
@@ -118,7 +140,8 @@ export function MancalaGame() {
               type="button"
               disabled={!humanTurn || state.pits[pit] === 0}
               onClick={() => {
-                playClickSound();
+                playGameFeel("button");
+                feelTap();
                 dispatch({ type: "pick", pit });
               }}
               className={cn(
@@ -130,15 +153,16 @@ export function MancalaGame() {
             </button>
           ))}
         </div>
+        <FeelLayer />
       </div>
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={feel.handleExit}
           onRetry={() => emitGameRetry(GAME_SLUG)}
           onRestart={() => dispatch({ type: "restart" })}
         />

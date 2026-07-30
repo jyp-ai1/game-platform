@@ -3,7 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
-  playClickSound,
+  PuzzlePlayField,
+  playGameFeel,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -16,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   clearCell,
@@ -59,8 +60,10 @@ export function CrosswordGame() {
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    fieldRef,
   });
 
   const saveStatus = useAutoSave(
@@ -73,8 +76,14 @@ export function CrosswordGame() {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      playGameFeel("goal", fieldRef.current);
     }
   }, [state.status, reportScore]);
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
@@ -91,7 +100,8 @@ export function CrosswordGame() {
           </li>
         ))}
       </ul>
-      <div className="grid w-full max-w-sm grid-cols-5 gap-0.5">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <div className="grid w-full grid-cols-5 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);
           const c = i % SIZE;
@@ -105,7 +115,7 @@ export function CrosswordGame() {
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
               onClick={() => {
-                playClickSound();
+                playGameFeel("button", fieldRef.current);
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
@@ -118,6 +128,7 @@ export function CrosswordGame() {
           );
         })}
       </div>
+      </PuzzlePlayField>
       <div className="flex max-w-sm flex-wrap justify-center gap-1">
         {LETTERS.map((L) => (
           <Button
@@ -125,12 +136,23 @@ export function CrosswordGame() {
             variant="outline"
             size="sm"
             disabled={!state.selected || state.status === "won"}
-            onClick={() => dispatch({ type: "letter", letter: L })}
+            onClick={() => {
+              playGameFeel("button", fieldRef.current);
+              dispatch({ type: "letter", letter: L });
+            }}
           >
             {L}
           </Button>
         ))}
-        <Button variant="ghost" size="sm" disabled={!state.selected} onClick={() => dispatch({ type: "clear" })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={!state.selected}
+          onClick={() => {
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "clear" });
+          }}
+        >
           Clear
         </Button>
       </div>
@@ -142,8 +164,8 @@ export function CrosswordGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}

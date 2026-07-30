@@ -2,6 +2,7 @@
 
 import {
   clearSave,
+  emitGameRetry,
   playGameFeel,
   ResumeDialog,
   SaveIndicator,
@@ -11,12 +12,13 @@ import {
   useGameSession,
   useReadyCountdown,
   useResumableGame,
+  PuzzlePlayField,
   standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -72,9 +74,11 @@ export function ColorMatchGame() {
   );
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: state.round,
+    fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const sessionActive = phase === "ready" && !showCountdown;
@@ -115,9 +119,16 @@ export function ColorMatchGame() {
   }, [state.status, state.score, state.round, reportScore, recordGameEnd]);
 
   function handleRetry() {
+    emitGameRetry(GAME_SLUG);
     resetSession();
     dispatch({ type: "restart" });
   }
+
+  useEffect(() => {
+    if (state.status === "over") {
+      playGameFeel("wrong", fieldRef.current);
+    }
+  }, [state.status]);
 
   const interactive = canPlay && state.status === "playing";
 
@@ -125,13 +136,13 @@ export function ColorMatchGame() {
     if (!interactive) {
       return;
     }
-    playGameFeel("button");
+    playGameFeel("button", fieldRef.current);
     const wasCorrect = color === state.targetColor;
     dispatch({ type: "select", color });
     if (wasCorrect) {
-      playGameFeel("correct");
+      playGameFeel("correct", fieldRef.current);
     } else {
-      playGameFeel("wrong");
+      playGameFeel("wrong", fieldRef.current);
     }
   }
 
@@ -158,7 +169,8 @@ export function ColorMatchGame() {
         </Button>
       </div>
 
-      <div className="relative flex w-full max-w-sm flex-col items-center gap-4 rounded-xl bg-muted p-4">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <div className="relative flex w-full flex-col items-center gap-4 rounded-xl bg-muted p-4">
         <p className="text-xs font-medium uppercase text-muted-foreground">
           Round {state.round}
         </p>
@@ -203,11 +215,12 @@ export function ColorMatchGame() {
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
             onRetry={handleRetry}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRestart={handleRetry}
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       </div>
+      </PuzzlePlayField>
 
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Color Match" onResume={onResume} onNewGame={onNewGame} />
