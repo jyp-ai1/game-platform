@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   BILLIARDS_H,
@@ -50,7 +50,12 @@ function reducer(state: BilliardsState, action: Action): BilliardsState {
 export function BilliardsGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -75,10 +80,10 @@ export function BilliardsGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "aiming") return;
+    if (state.status !== "aiming" || !canPlay) return;
     const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -145,7 +150,7 @@ export function BilliardsGame() {
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
       </div>
       <Button
-        disabled={state.status !== "aiming" || !canPlayRef.current}
+        disabled={state.status !== "aiming" || !canPlay}
         onClick={() => {
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "shoot" });
@@ -165,7 +170,7 @@ export function BilliardsGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Billiards" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

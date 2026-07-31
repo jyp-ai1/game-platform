@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -54,11 +54,16 @@ function reducer(state: BasketballState, action: Action): BasketballState {
 export function BasketballGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -80,10 +85,10 @@ export function BasketballGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "aiming") return;
+    if (state.status !== "aiming" || !canPlay) return;
     const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -137,7 +142,7 @@ export function BasketballGame() {
       </div>
       {state.status === "aiming" ? (
         <Button
-          disabled={!canPlayRef.current}
+          disabled={!canPlay}
           onClick={() => {
             playGameFeel("button", fieldRef.current);
             dispatch({ type: "shoot" });
@@ -168,7 +173,7 @@ export function BasketballGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog
           gameTitle="Basketball"

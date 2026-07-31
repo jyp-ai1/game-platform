@@ -18,7 +18,7 @@ import {
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
 import type { MouseEvent } from "react";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   checkWin,
@@ -116,6 +116,12 @@ export function MinesweeperGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const [elapsed, setElapsed] = useState(0);
@@ -204,6 +210,7 @@ export function MinesweeperGame() {
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    clearSave(GAME_SLUG);
     setElapsed(0);
     dispatch({ type: "restart" });
   }
@@ -238,7 +245,7 @@ export function MinesweeperGame() {
             variant="outline"
             size="icon"
             aria-label="새 게임"
-            onClick={() => dispatch({ type: "restart" })}
+            onClick={handleRetry}
           >
             <RotateCcw />
           </Button>
@@ -294,17 +301,17 @@ export function MinesweeperGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
-
-        {phase === "resume-prompt" ? (
-          <ResumeDialog
-            gameTitle="Minesweeper"
-            onResume={onResume}
-            onNewGame={handleNewGame}
-          />
-        ) : null}
       </div>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog
+          gameTitle="Minesweeper"
+          onResume={onResume}
+          onNewGame={handleNewGame}
+        />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         칸을 클릭해 열고, 우클릭(모바일은 깃발 모드)으로 지뢰를 표시하세요.

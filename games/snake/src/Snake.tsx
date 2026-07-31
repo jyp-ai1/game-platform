@@ -18,7 +18,7 @@ import {
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialSnake,
@@ -107,6 +107,12 @@ export function SnakeGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -268,7 +274,7 @@ export function SnakeGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 

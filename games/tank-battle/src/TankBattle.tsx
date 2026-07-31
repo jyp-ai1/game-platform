@@ -18,7 +18,7 @@ import {
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties } from "react";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useCallback, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -108,6 +108,12 @@ export function TankBattleGame() {
     fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -279,7 +285,7 @@ export function TankBattleGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>

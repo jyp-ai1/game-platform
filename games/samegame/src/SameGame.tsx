@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   clearGroup,
@@ -41,7 +41,11 @@ interface State {
 type Action = { type: "clear"; row: number; col: number } | { type: "restart" };
 
 function createInitialState(): State {
-  return { board: createRandomBoard(), score: 0, status: "playing" };
+  let board = createRandomBoard();
+  while (!hasValidMove(board)) {
+    board = createRandomBoard();
+  }
+  return { board, score: 0, status: "playing" };
 }
 
 function reducer(state: State, action: Action): State {
@@ -72,6 +76,12 @@ export function SameGameGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -159,17 +169,17 @@ export function SameGameGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
-
-        {phase === "resume-prompt" ? (
-          <ResumeDialog
-            gameTitle="SameGame"
-            onResume={onResume}
-            onNewGame={handleNewGame}
-          />
-        ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       </div>
       </PuzzlePlayField>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog
+          gameTitle="SameGame"
+          onResume={onResume}
+          onNewGame={handleNewGame}
+        />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         같은 색 타일이 2개 이상 인접하면 클릭해 제거하세요. 더 이상 지울 수

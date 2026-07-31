@@ -96,13 +96,20 @@ function advance(state: ReversiState): ReversiState {
   return { ...state, winner: endGame(state.board), passStreak: 0 };
 }
 
+/** Auto-pass when the active player has no legal moves (prevents turn freeze). */
+export function resolvePass(state: ReversiState): ReversiState {
+  if (state.winner !== null) return state;
+  if (validMoves(state.board, state.current).length > 0) return state;
+  return advance(state);
+}
+
 export function cpuMove(
   state: ReversiState,
   difficulty: "easy" | "normal" | "hard" = "normal"
 ): ReversiState {
   if (state.winner !== null || state.current !== 2) return state;
   const moves = validMoves(state.board, 2);
-  if (moves.length === 0) return advance(state);
+  if (moves.length === 0) return resolvePass(state);
 
   if (difficulty === "easy") {
     const [r, c] = moves[Math.floor(Math.random() * moves.length)]!;

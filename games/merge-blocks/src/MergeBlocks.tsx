@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, dropColumn, type MergeBlocksState } from "./engine";
 
@@ -35,6 +35,12 @@ export function MergeBlocksGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -124,7 +130,7 @@ export function MergeBlocksGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Merge Blocks" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

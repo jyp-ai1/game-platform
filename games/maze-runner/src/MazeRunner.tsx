@@ -19,7 +19,7 @@ import {
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { TouchEvent } from "react";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useCallback, useReducer, useRef } from "react";
 
 import {
   COLS,
@@ -86,6 +86,12 @@ export function MazeRunnerGame() {
   const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 200) + 1);
   const tickMs = Math.max(80, TICK_MS / diff.speedMult);
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const saveStatus = useAutoSave(
@@ -255,7 +261,7 @@ export function MazeRunnerGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>

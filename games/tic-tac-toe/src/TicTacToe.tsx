@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   cpuMove,
@@ -71,6 +71,12 @@ export function TicTacToeGame() {
     score: state.winner === "X" ? WIN_SCORE : 0,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -176,7 +182,7 @@ export function TicTacToeGame() {
             onRestart={handleRetry}
           />
         ) : null}
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
         <FeelLayer />
       </div>
 

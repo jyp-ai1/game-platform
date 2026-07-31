@@ -8,7 +8,8 @@ export interface BallSortState {
   status: "playing" | "won";
 }
 
-const CAP = 4;
+const TUBE_CAPACITY = 4;
+const BALLS_PER_COLOR = 3;
 
 function makeTubes(): BallId[][] {
   const balls: BallId[] = [];
@@ -34,7 +35,9 @@ export function createInitialState(): BallSortState {
 
 function isSorted(tubes: BallId[][]): boolean {
   return tubes.every(
-    (t) => t.length === 0 || (t.length === CAP && t.every((b) => b === t[0]))
+    (t) =>
+      t.length === 0 ||
+      (t.length === BALLS_PER_COLOR && t.every((b) => b === t[0]))
   );
 }
 
@@ -51,7 +54,7 @@ export function tapTube(state: BallSortState, index: number): BallSortState {
   const dst = tubes[index]!;
   if (src.length === 0) return { ...state, selected: null };
   const ball = src[src.length - 1]!;
-  if (dst.length >= CAP) return { ...state, selected: null };
+  if (dst.length >= TUBE_CAPACITY) return { ...state, selected: null };
   if (dst.length > 0 && dst[dst.length - 1] !== ball) {
     return { ...state, selected: index };
   }

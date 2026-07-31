@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useCallback, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -72,6 +72,12 @@ export function GoldMinerGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -244,7 +250,7 @@ export function GoldMinerGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
 

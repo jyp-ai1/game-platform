@@ -19,7 +19,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { computeScore, createShuffledCards, type Card } from "./engine";
 import {
@@ -121,6 +121,12 @@ export function MemoryGame() {
   const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
@@ -288,8 +294,7 @@ export function MemoryGame() {
 
         {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
-            variant="stage-clear"
-            stageLabel={`Stage ${state.stageIndex} Clear`}
+            message={`Stage ${state.stageIndex} Clear`}
             score={score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
@@ -297,7 +302,7 @@ export function MemoryGame() {
             onExit={feel.handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
-            onNextStage={() => dispatch({ type: "nextStage" })}
+            onContinue={() => dispatch({ type: "nextStage" })}
           />
         ) : null}
 
@@ -314,17 +319,17 @@ export function MemoryGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
-
-        {phase === "resume-prompt" ? (
-          <ResumeDialog
-            gameTitle="Memory"
-            onResume={onResume}
-            onNewGame={handleNewGame}
-          />
-        ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       </div>
       </PuzzlePlayField>
+
+      {phase === "resume-prompt" ? (
+        <ResumeDialog
+          gameTitle="Memory"
+          onResume={onResume}
+          onNewGame={handleNewGame}
+        />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         카드를 두 장씩 뒤집어 같은 그림을 찾으세요.

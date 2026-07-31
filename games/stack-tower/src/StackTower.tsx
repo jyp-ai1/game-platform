@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, placeBlock, tick, type StackTowerState } from "./engine";
 
@@ -43,7 +43,12 @@ function reducer(state: StackTowerState, action: Action): StackTowerState {
 export function StackTowerGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLButtonElement>(null);
@@ -72,10 +77,10 @@ export function StackTowerGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "playing") return;
+    if (state.status !== "playing" || !canPlay) return;
     const id = setInterval(() => dispatch({ type: "tick" }), tickMs);
     return () => clearInterval(id);
-  }, [state.status, tickMs]);
+  }, [state.status, canPlay, tickMs]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -155,7 +160,7 @@ export function StackTowerGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Stack Tower" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

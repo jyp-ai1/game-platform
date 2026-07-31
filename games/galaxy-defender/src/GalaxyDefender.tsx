@@ -115,6 +115,12 @@ export function GalaxyDefenderGame() {
     fieldRef,
   });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const diff = getGroupDifficulty(GAME_SLUG, state.wave);
   const keysRef = useRef<Set<string>>(new Set());
   const lastTimeRef = useRef<number | null>(null);
@@ -289,7 +295,7 @@ export function GalaxyDefenderGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>

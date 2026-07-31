@@ -76,11 +76,16 @@ export function AirHockeyGame() {
     fieldRef,
   });
   const diff = getGroupDifficulty(GAME_SLUG, state.playerScore + state.aiScore + 1);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -219,7 +224,7 @@ export function AirHockeyGame() {
             onRestart={handleRetry}
           />
         ) : null}
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 

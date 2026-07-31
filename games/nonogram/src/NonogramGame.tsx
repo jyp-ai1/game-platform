@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { Fragment, useEffect, useReducer, useRef } from "react";
+import { Fragment, useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   computeScore,
@@ -53,6 +53,12 @@ export function NonogramGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -153,7 +159,7 @@ export function NonogramGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Nonogram" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

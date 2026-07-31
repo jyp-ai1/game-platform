@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, throwDart, type DartsState } from "./engine";
 
@@ -41,11 +41,16 @@ function reducer(state: DartsState, action: Action): DartsState {
 export function DartsGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLButtonElement>(null);
   const prevScoreRef = useRef(0);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -115,7 +120,7 @@ export function DartsGame() {
         type="button"
         ref={fieldRef}
         onClick={handleBoardClick}
-        disabled={state.status !== "playing" || !canPlayRef.current}
+        disabled={state.status !== "playing" || !canPlay}
         aria-label="다트판 — 클릭하여 던지기"
         className="relative aspect-square w-full max-w-sm touch-none select-none rounded-full border-4 border-primary/30 bg-muted"
       >
@@ -151,7 +156,7 @@ export function DartsGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Darts" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

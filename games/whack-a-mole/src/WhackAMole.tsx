@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, tick, whack, type WhackAMoleState } from "./engine";
 
@@ -41,11 +41,16 @@ function reducer(state: WhackAMoleState, action: Action): WhackAMoleState {
 export function WhackAMoleGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -62,10 +67,10 @@ export function WhackAMoleGame() {
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
   useEffect(() => {
-    if (state.status !== "playing") return;
+    if (state.status !== "playing" || !canPlay) return;
     const id = setInterval(() => dispatch({ type: "tick" }), 1000);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -128,7 +133,7 @@ export function WhackAMoleGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       {phase === "resume-prompt" ? (

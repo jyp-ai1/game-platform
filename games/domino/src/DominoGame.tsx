@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   computeScore,
@@ -26,6 +26,7 @@ import {
   getPlayableIndices,
   playerDraw,
   playerPlay,
+  resolvePlayerTurn,
   type DominoState,
 } from "./engine";
 
@@ -35,6 +36,7 @@ const CPU_DELAY = 500;
 type Action =
   | { type: "play"; index: number }
   | { type: "draw" }
+  | { type: "resolve" }
   | { type: "cpu"; difficulty: CpuDifficulty }
   | { type: "restart" };
 
@@ -46,6 +48,8 @@ function reducer(state: DominoState, action: Action): DominoState {
       return playerPlay(state, action.index);
     case "draw":
       return playerDraw(state);
+    case "resolve":
+      return resolvePlayerTurn(state);
     case "cpu":
       return cpuMove(state, action.difficulty);
     default:
@@ -56,7 +60,13 @@ function reducer(state: DominoState, action: Action): DominoState {
 export function DominoGame() {
   const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
@@ -78,10 +88,15 @@ export function DominoGame() {
   );
 
   useEffect(() => {
-    if (state.winner || state.current !== "cpu") return;
+    if (!canPlayRef.current || state.winner || state.current !== "cpu") return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), CPU_DELAY);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.chain.length, difficulty]);
+  }, [state.current, state.winner, state.chain.length, difficulty, canPlay]);
+
+  useEffect(() => {
+    if (!canPlayRef.current || state.winner || state.current !== "player") return;
+    dispatch({ type: "resolve" });
+  }, [state.current, state.winner, state.playerHand, state.boneyard.length, state.chain.length, canPlay]);
 
   useEffect(() => {
     if (state.winner) {
@@ -180,7 +195,7 @@ export function DominoGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Domino" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

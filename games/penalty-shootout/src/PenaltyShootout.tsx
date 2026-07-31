@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   computeRankingScore,
@@ -39,11 +39,16 @@ function reducer(state: PenaltyState, action: Action): PenaltyState {
 export function PenaltyShootoutGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -118,7 +123,7 @@ export function PenaltyShootoutGame() {
             <Button
               key={dir}
               variant="secondary"
-              disabled={state.status !== "playing" || !canPlayRef.current}
+              disabled={state.status !== "playing" || !canPlay}
               onClick={() => handleShoot(dir)}
               className={cn(state.lastResult && "opacity-80")}
             >
@@ -140,7 +145,7 @@ export function PenaltyShootoutGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Penalty Shootout" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

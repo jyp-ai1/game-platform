@@ -104,7 +104,7 @@ export function cpuMove(
   const options = Array.from({ length: 6 }, (_, i) => i + CPU_START).filter(
     (p) => state.pits[p]! > 0
   );
-  if (options.length === 0) return state;
+  if (options.length === 0) return resolveTurn(state);
 
   const pit = options[Math.floor(Math.random() * options.length)]!;
   return sow(state, pit);
@@ -114,4 +114,32 @@ export function computeScore(state: MancalaState): number {
   if (state.winner === 1) return state.pits[PLAYER_STORE]! * 10;
   if (state.winner === "draw") return state.pits[PLAYER_STORE]! * 5;
   return state.pits[PLAYER_STORE]! * 2;
+}
+
+function finalizeBoard(pits: number[]): { pits: number[]; winner: 1 | 2 | "draw" } {
+  const next = [...pits];
+  for (let i = 0; i < 6; i++) {
+    next[PLAYER_STORE]! += next[i]!;
+    next[i] = 0;
+    next[CPU_STORE]! += next[i + CPU_START]!;
+    next[i + CPU_START] = 0;
+  }
+  const ps = next[PLAYER_STORE]!;
+  const cs = next[CPU_STORE]!;
+  const winner = ps > cs ? 1 : cs > ps ? 2 : "draw";
+  return { pits: next, winner };
+}
+
+/** End the game when the active side has no seeds left to move. */
+export function resolveTurn(state: MancalaState): MancalaState {
+  if (state.winner !== null) return state;
+  if (state.current === 1 && state.pits.slice(PLAYER_START, 6).every((n) => n === 0)) {
+    const { pits, winner } = finalizeBoard(state.pits);
+    return { ...state, pits, winner };
+  }
+  if (state.current === 2 && state.pits.slice(CPU_START, 13).every((n) => n === 0)) {
+    const { pits, winner } = finalizeBoard(state.pits);
+    return { ...state, pits, winner };
+  }
+  return state;
 }

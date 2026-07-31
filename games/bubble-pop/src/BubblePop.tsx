@@ -111,6 +111,12 @@ export function BubblePopGame() {
     fieldRef,
   });
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
@@ -322,7 +328,7 @@ export function BubblePopGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -433,8 +439,7 @@ export function BubblePopGame() {
 
         {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
-            variant="stage-clear"
-            stageLabel={getBubbleStage(state.stageIndex).label}
+            message={`${getBubbleStage(state.stageIndex).label} — Stage ${state.stageIndex} Clear`}
             score={state.score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
@@ -442,7 +447,7 @@ export function BubblePopGame() {
             onExit={feel.handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
-            onNextStage={() => dispatch({ type: "nextStage" })}
+            onContinue={() => dispatch({ type: "nextStage" })}
           />
         ) : null}
 
@@ -467,7 +472,7 @@ export function BubblePopGame() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 

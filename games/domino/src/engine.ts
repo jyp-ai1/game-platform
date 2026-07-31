@@ -173,3 +173,11 @@ export function playerCanAct(state: DominoState): boolean {
 export function getPlayableIndices(state: DominoState): number[] {
   return validMoves(state.playerHand, state.leftEnd, state.rightEnd);
 }
+
+/** Pass to CPU when the player has no playable tile and the boneyard is empty. */
+export function resolvePlayerTurn(state: DominoState): DominoState {
+  if (state.winner || state.current !== "player") return state;
+  if (validMoves(state.playerHand, state.leftEnd, state.rightEnd).length > 0) return state;
+  if (state.boneyard.length > 0) return state;
+  return { ...state, current: "cpu", message: "Pass — CPU turn" };
+}

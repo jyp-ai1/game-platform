@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -81,6 +81,12 @@ export function ColorMatchGame() {
     fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordGameEnd, resetSession } = useGameSession(
     GAME_SLUG,
@@ -224,7 +230,7 @@ export function ColorMatchGame() {
             onRestart={handleRetry}
           />
         ) : null}
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       </div>
       </PuzzlePlayField>
 

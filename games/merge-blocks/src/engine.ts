@@ -22,7 +22,7 @@ function randomVal(): number {
   return Math.random() < 0.9 ? 2 : 4;
 }
 
-function mergeLine(cells: number[]): { cells: number[]; gained: number } {
+function mergeColumn(cells: number[]): { cells: number[]; gained: number } {
   const filtered = cells.filter((c) => c > 0);
   const out: number[] = [];
   let gained = 0;
@@ -36,8 +36,8 @@ function mergeLine(cells: number[]): { cells: number[]; gained: number } {
       out.push(filtered[i]!);
     }
   }
-  while (out.length < COLS) out.unshift(0);
-  return { cells: out.slice(-COLS), gained };
+  while (out.length < ROWS) out.unshift(0);
+  return { cells: out.slice(-ROWS), gained };
 }
 
 export function dropColumn(state: MergeBlocksState, col: number): MergeBlocksState {
@@ -50,7 +50,7 @@ export function dropColumn(state: MergeBlocksState, col: number): MergeBlocksSta
   let score = state.score + state.next;
   // merge vertically in column only (simplified merge blocks)
   const colVals = grid.map((r) => r[col]!);
-  const merged = mergeLine(colVals);
+  const merged = mergeColumn(colVals);
   let gained = merged.gained;
   for (let r = 0; r < ROWS; r++) {
     grid[r]![col] = merged.cells[r] ?? 0;

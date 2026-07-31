@@ -157,6 +157,12 @@ export function Game2048() {
   const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
@@ -321,7 +327,7 @@ export function Game2048() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -357,7 +363,7 @@ export function Game2048() {
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
             onRetry={handleRetry}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRestart={handleRetry}
             onContinue={
               state.status === "won"
                 ? () => dispatch({ type: "continue" })
@@ -366,7 +372,7 @@ export function Game2048() {
           />
         ) : null}
 
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {phase === "resume-prompt" ? (
           <ResumeDialog

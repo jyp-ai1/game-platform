@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, roll, tickPower, type BowlingState } from "./engine";
 
@@ -41,7 +41,12 @@ function reducer(state: BowlingState, action: Action): BowlingState {
 
 export function BowlingGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } = useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -62,10 +67,10 @@ export function BowlingGame() {
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
   useEffect(() => {
-    if (state.status !== "aiming") return;
+    if (state.status !== "aiming" || !canPlay) return;
     const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
     return () => clearInterval(id);
-  }, [state.status]);
+  }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -103,7 +108,7 @@ export function BowlingGame() {
         <div className="h-full bg-primary transition-all" style={{ width: `${state.power}%` }} />
       </div>
       <Button
-        disabled={state.status !== "aiming" || !canPlayRef.current}
+        disabled={state.status !== "aiming" || !canPlay}
         onClick={() => {
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "roll" });
@@ -126,7 +131,7 @@ export function BowlingGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Bowling" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

@@ -17,7 +17,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   applyMove,
@@ -53,7 +53,13 @@ function reducer(state: ChessState, action: Action): ChessState {
 export function ChessGame() {
   const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
@@ -73,10 +79,10 @@ export function ChessGame() {
   );
 
   useEffect(() => {
-    if (state.winner !== null || state.current !== "b") return;
+    if (!canPlayRef.current || state.winner !== null || state.current !== "b") return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 600);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.board, difficulty]);
+  }, [state.current, state.winner, state.board, difficulty, canPlay]);
 
   useEffect(() => {
     if (state.winner !== null) {
@@ -204,7 +210,7 @@ export function ChessGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Chess" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

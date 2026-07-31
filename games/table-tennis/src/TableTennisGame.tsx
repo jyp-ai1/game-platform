@@ -69,12 +69,17 @@ function pct(x: number, y: number, w: number, h: number): CSSProperties {
 export function TableTennisGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const stage = state.playerScore + state.cpuScore + 1;
   const prevScoreRef = useRef(0);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
 
   useEffect(() => {
     if (state.playerScore > prevScoreRef.current) {
@@ -102,7 +107,7 @@ export function TableTennisGame() {
     let last: number | null = null;
     let raf = 0;
     function loop(t: number) {
-      if (last !== null && stateRef.current.status === "playing") {
+      if (last !== null && stateRef.current.status === "playing" && canPlayRef.current) {
         dispatch({ type: "step", dt: Math.min(MAX_DT, (t - last) / 1000) * diff.speedMult });
       }
       last = t;
@@ -110,7 +115,7 @@ export function TableTennisGame() {
     }
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [diff.speedMult]);
+  }, [canPlayRef, diff.speedMult]);
 
   const prevPlayerScore = useRef(state.playerScore);
   useEffect(() => {
@@ -194,7 +199,7 @@ export function TableTennisGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       {phase === "resume-prompt" ? (

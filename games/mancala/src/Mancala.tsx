@@ -17,13 +17,14 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   computeScore,
   cpuMove,
   createInitialState,
   playerMove,
+  resolveTurn,
   type MancalaState,
 } from "./engine";
 
@@ -32,6 +33,7 @@ const GAME_SLUG = "mancala";
 type Action =
   | { type: "pick"; pit: number }
   | { type: "cpu"; difficulty: CpuDifficulty }
+  | { type: "resolve" }
   | { type: "restart" };
 
 function reducer(state: MancalaState, action: Action): MancalaState {
@@ -42,6 +44,8 @@ function reducer(state: MancalaState, action: Action): MancalaState {
       return cpuMove(state, action.difficulty);
     case "pick":
       return playerMove(state, action.pit);
+    case "resolve":
+      return resolveTurn(state);
     default:
       return state;
   }
@@ -50,7 +54,13 @@ function reducer(state: MancalaState, action: Action): MancalaState {
 export function MancalaGame() {
   const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const { reportScore } = useGameSDK();
@@ -69,10 +79,15 @@ export function MancalaGame() {
   );
 
   useEffect(() => {
-    if (state.winner !== null || state.current !== 2) return;
+    if (!canPlayRef.current || state.winner !== null || state.current !== 2) return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 550);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.pits, difficulty]);
+  }, [state.current, state.winner, state.pits, difficulty, canPlay]);
+
+  useEffect(() => {
+    if (!canPlayRef.current || state.winner !== null) return;
+    dispatch({ type: "resolve" });
+  }, [state.current, state.winner, state.pits, canPlay]);
 
   useEffect(() => {
     if (state.winner !== null) {
@@ -178,7 +193,7 @@ export function MancalaGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Mancala" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}

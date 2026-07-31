@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { Eraser, RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   createInitialState,
@@ -72,6 +72,12 @@ export function SudokuGame() {
     ...feelWithScore(state as unknown as Record<string, unknown>, computeScore(state.mistakes)),
   });
   const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
+
   const prevMistakesRef = useRef(0);
   const prevBoardRef = useRef<string>("");
 
@@ -120,9 +126,12 @@ export function SudokuGame() {
 
   const interactive = canPlay && state.status === "playing";
 
-  function handleRetry() {
+  function handleRetry(difficulty?: (typeof DIFFICULTIES)[number]) {
     emitGameRetry(GAME_SLUG);
-    dispatch({ type: "restart" });
+    clearSave(GAME_SLUG);
+    dispatch(
+      difficulty ? { type: "restart", difficulty } : { type: "restart" }
+    );
   }
 
   function handleNewGame() {
@@ -142,7 +151,7 @@ export function SudokuGame() {
               variant="outline"
               size="sm"
               disabled={state.status === "playing"}
-              onClick={() => dispatch({ type: "restart", difficulty })}
+              onClick={() => handleRetry(difficulty)}
             >
               {difficulty}
             </Button>
@@ -152,7 +161,7 @@ export function SudokuGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={() => handleRetry()}
         >
           <RotateCcw />
         </Button>
@@ -208,7 +217,7 @@ export function SudokuGame() {
             onRestart={handleRetry}
           />
         ) : null}
-        {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       </div>
       </PuzzlePlayField>
 

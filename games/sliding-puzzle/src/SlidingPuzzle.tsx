@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { computeScore, createInitialState, tapTile, type SlidingPuzzleState } from "./engine";
 
@@ -34,11 +34,16 @@ function reducer(state: SlidingPuzzleState, action: Action): SlidingPuzzleState 
 export function SlidingPuzzleGame() {
   const { phase, initialState, phaseRef, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const score = computeScore(state.moves);
+  const completeCountdownRef = useRef(completeCountdown);
+  completeCountdownRef.current = completeCountdown;
+  const onCountdownComplete = useCallback(() => {
+    completeCountdownRef.current();
+  }, []);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
     fieldRef,
@@ -107,7 +112,7 @@ export function SlidingPuzzleGame() {
           onRestart={handleRetry}
         />
       ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
+      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Sliding Puzzle" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
