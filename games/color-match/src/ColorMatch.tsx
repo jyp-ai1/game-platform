@@ -124,6 +124,12 @@ export function ColorMatchGame() {
     dispatch({ type: "restart" });
   }
 
+  function handleNewGame() {
+    onNewGame();
+    resetSession();
+    dispatch({ type: "restart" });
+  }
+
   useEffect(() => {
     if (state.status === "over") {
       playGameFeel("wrong", fieldRef.current);
@@ -163,7 +169,7 @@ export function ColorMatchGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -223,7 +229,7 @@ export function ColorMatchGame() {
       </PuzzlePlayField>
 
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Color Match" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Color Match" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
 
       <p className="text-xs text-muted-foreground">

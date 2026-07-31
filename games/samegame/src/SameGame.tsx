@@ -99,6 +99,11 @@ export function SameGameGame() {
     dispatch({ type: "restart" });
   }
 
+  function handleNewGame() {
+    onNewGame();
+    dispatch({ type: "restart" });
+  }
+
   function handleClick(row: number, col: number) {
     if (!canPlayRef.current) {
       return;
@@ -116,7 +121,7 @@ export function SameGameGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -160,7 +165,7 @@ export function SameGameGame() {
           <ResumeDialog
             gameTitle="SameGame"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
       </div>

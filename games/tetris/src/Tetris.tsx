@@ -209,6 +209,18 @@ export function TetrisGame() {
     }
   }
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevLinesRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevLinesRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   const activeCellSet = new Set(
     activeCells(state.active).map(({ row, col }) => `${row},${col}`)
   );
@@ -226,7 +238,7 @@ export function TetrisGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -264,8 +276,8 @@ export function TetrisGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
 
@@ -275,7 +287,7 @@ export function TetrisGame() {
           <ResumeDialog
             gameTitle="Tetris"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
 

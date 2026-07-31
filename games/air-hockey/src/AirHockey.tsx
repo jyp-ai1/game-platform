@@ -126,6 +126,16 @@ export function AirHockeyGame() {
     }
   }, [state.status, state.playerScore, reportScore]);
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    dispatch({ type: "restart" });
+  }
+
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
       if (!canPlayRef.current || stateRef.current.status !== "playing") {
@@ -157,7 +167,7 @@ export function AirHockeyGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -205,8 +215,8 @@ export function AirHockeyGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
@@ -214,7 +224,7 @@ export function AirHockeyGame() {
       </div>
 
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Air Hockey" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Air Hockey" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
 
       <p className="text-xs text-muted-foreground">
