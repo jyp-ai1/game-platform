@@ -84,13 +84,26 @@ export function StackTowerGame() {
     }
   }, [state.status, state.score, reportScore]);
 
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Height" value={state.stack.length} />
         <ScoreBox label="Score" value={state.score} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
@@ -138,13 +151,13 @@ export function StackTowerGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Stack Tower" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Stack Tower" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
       <p className="text-xs text-muted-foreground">움직이는 블록을 탭해서 쌓으세요.</p>
     </div>

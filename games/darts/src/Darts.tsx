@@ -81,6 +81,19 @@ export function DartsGame() {
     dispatch({ type: "throw", xPct, yPct });
   }
 
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -93,7 +106,7 @@ export function DartsGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -134,13 +147,13 @@ export function DartsGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Darts" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Darts" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
       <p className="text-xs text-muted-foreground">다트판을 탭해서 10번 던지세요.</p>
     </div>

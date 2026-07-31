@@ -137,6 +137,19 @@ export function CheckersGame() {
         .map((m) => m.to)
     : [];
 
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    setSelected(null);
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    setSelected(null);
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -146,10 +159,7 @@ export function CheckersGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => {
-            dispatch({ type: "restart" });
-            setSelected(null);
-          }}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -210,16 +220,13 @@ export function CheckersGame() {
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
           onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => {
-            dispatch({ type: "restart" });
-            setSelected(null);
-          }}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Checkers" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Checkers" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
     </div>
   );

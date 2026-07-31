@@ -94,12 +94,25 @@ export function MiniGolfGame() {
     Math.hypot(state.ballX - state.holeX, state.ballY - state.holeY) <=
     HOLE_R + BALL_R;
 
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="Strokes" value={state.strokes} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
@@ -159,13 +172,13 @@ export function MiniGolfGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Mini Golf" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Mini Golf" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
     </div>
   );

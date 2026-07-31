@@ -68,6 +68,11 @@ export function JigsawGame() {
     dispatch({ type: "restart" });
   }
 
+  function handleNewGame() {
+    onNewGame();
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -77,7 +82,7 @@ export function JigsawGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -127,7 +132,7 @@ export function JigsawGame() {
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Jigsaw" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Jigsaw" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
     </div>
   );

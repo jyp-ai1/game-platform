@@ -145,13 +145,28 @@ export function TableTennisGame() {
         ? "CPU Wins!"
         : "Move paddle — first to 5";
 
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevScoreRef.current = 0;
+    prevPlayerScore.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevScoreRef.current = 0;
+    prevPlayerScore.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="You" value={state.playerScore} />
         <ScoreBox label="CPU" value={state.cpuScore} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
@@ -175,15 +190,15 @@ export function TableTennisGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Table Tennis" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Table Tennis" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
     </div>
   );

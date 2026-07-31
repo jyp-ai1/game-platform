@@ -95,6 +95,17 @@ export function MancalaGame() {
             ? "Pick a pit"
             : "CPU...";
 
+
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -105,7 +116,7 @@ export function MancalaGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -163,13 +174,13 @@ export function MancalaGame() {
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
           onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Mancala" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Mancala" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
     </div>
   );

@@ -68,6 +68,13 @@ export function MergeBlocksGame() {
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
@@ -77,7 +84,7 @@ export function MergeBlocksGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
         <ScoreBox label="Next" value={state.next} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
@@ -119,7 +126,7 @@ export function MergeBlocksGame() {
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Merge Blocks" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Merge Blocks" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
       <p className="text-xs text-muted-foreground">열을 탭해 블록을 떨어뜨리고 합치세요.</p>
     </div>
