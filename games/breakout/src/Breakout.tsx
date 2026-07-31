@@ -184,6 +184,18 @@ export function BreakoutGame() {
     [canPlayRef]
   );
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevScoreRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -196,7 +208,7 @@ export function BreakoutGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -247,8 +259,8 @@ export function BreakoutGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
 
@@ -260,7 +272,7 @@ export function BreakoutGame() {
           <ResumeDialog
             gameTitle="Breakout"
             onResume={onResume}
-            onNewGame={onNewGame}
+            onNewGame={handleNewGame}
           />
         ) : null}
       </div>

@@ -95,12 +95,22 @@ export function Connect4Game() {
             ? "열을 탭해 디스크를 놓으세요"
             : "CPU 차례...";
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">{msg}</p>
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => dispatch({ type: "restart" })}>
+        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
@@ -156,13 +166,13 @@ export function Connect4Game() {
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
           onExit={feel.handleExit}
-          onRetry={() => emitGameRetry(GAME_SLUG)}
-          onRestart={() => dispatch({ type: "restart" })}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
         />
       ) : null}
       {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Connect 4" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Connect 4" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
     </div>
   );

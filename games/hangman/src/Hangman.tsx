@@ -105,6 +105,18 @@ export function HangmanGame() {
   const livesLeft = state.maxWrongGuesses - state.wrongGuesses;
   const interactive = canPlay && state.status === "playing";
 
+  function handleRetry() {
+    emitGameRetry(GAME_SLUG);
+    prevGuessedRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
+  function handleNewGame() {
+    onNewGame();
+    prevGuessedRef.current = 0;
+    dispatch({ type: "restart" });
+  }
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -114,7 +126,7 @@ export function HangmanGame() {
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={() => dispatch({ type: "restart" })}
+          onClick={handleRetry}
         >
           <RotateCcw />
         </Button>
@@ -180,8 +192,8 @@ export function HangmanGame() {
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={feel.handleExit}
-            onRetry={() => emitGameRetry(GAME_SLUG)}
-            onRestart={() => dispatch({ type: "restart" })}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={completeCountdown} /> : null}
@@ -190,7 +202,7 @@ export function HangmanGame() {
       </div>
 
       {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Hangman" onResume={onResume} onNewGame={onNewGame} />
+        <ResumeDialog gameTitle="Hangman" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
 
       <p className="text-xs text-muted-foreground">
