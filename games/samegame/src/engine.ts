@@ -127,3 +127,7 @@ export function hasValidMove(board: Board): boolean {
   }
   return false;
 }
+
+export function isBoardEmpty(board: Board): boolean {
+  return board.every((row) => row.every((cell) => cell === null));
+}

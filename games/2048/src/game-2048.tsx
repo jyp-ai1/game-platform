@@ -183,11 +183,7 @@ export function Game2048() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () =>
-      state.status === "playing" ||
-      (state.status === "won" && state.winAcknowledged)
-        ? state
-        : null,
+    () => (state.status !== "over" ? state : null),
     [state]
   );
 
@@ -314,7 +310,7 @@ export function Game2048() {
     state.status === "over" || (state.status === "won" && !state.winAcknowledged);
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">

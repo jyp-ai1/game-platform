@@ -161,7 +161,7 @@ export function AirHockeyGame() {
   );
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -214,7 +214,13 @@ export function AirHockeyGame() {
 
         {state.status !== "playing" ? (
           <StandardGameOverOverlay
-            message={state.winner === "player" ? "You Win!" : "Game Over"}
+            message={
+              state.winner === "player"
+                ? "You Win!"
+                : state.winner === "draw"
+                  ? "Draw!"
+                  : "Game Over"
+            }
             score={state.playerScore}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}

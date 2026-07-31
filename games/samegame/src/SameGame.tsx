@@ -26,6 +26,7 @@ import {
   COLS,
   createRandomBoard,
   hasValidMove,
+  isBoardEmpty,
   computeGroupScore,
   type Board,
 } from "./engine";
@@ -35,7 +36,7 @@ const GAME_SLUG = "samegame";
 interface State {
   board: Board;
   score: number;
-  status: "playing" | "over";
+  status: "playing" | "over" | "won";
 }
 
 type Action = { type: "clear"; row: number; col: number } | { type: "restart" };
@@ -61,10 +62,13 @@ function reducer(state: State, action: Action): State {
         return state;
       }
       const score = state.score + computeGroupScore(cleared);
+      if (hasValidMove(board)) {
+        return { board, score, status: "playing" };
+      }
       return {
         board,
         score,
-        status: hasValidMove(board) ? "playing" : "over",
+        status: isBoardEmpty(board) ? "won" : "over",
       };
     }
     default:
@@ -92,13 +96,13 @@ export function SameGameGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "over" ? null : state),
+    () => (state.status === "over" || state.status === "won" ? null : state),
     [state]
   );
 
   useEffect(() => {
-    if (state.status === "over") {
-      playGameFeel("goal", fieldRef.current);
+    if (state.status === "over" || state.status === "won") {
+      playGameFeel(state.status === "won" ? "goal" : "wrong", fieldRef.current);
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
     }
@@ -123,7 +127,7 @@ export function SameGameGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
@@ -156,9 +160,9 @@ export function SameGameGame() {
           ))
         )}
 
-        {state.status === "over" ? (
+        {(state.status === "won" || state.status === "over") ? (
           <StandardGameOverOverlay
-            message="Game Over"
+            message={state.status === "won" ? "Board Clear!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}

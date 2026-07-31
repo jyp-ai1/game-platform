@@ -121,6 +121,34 @@ function validMoves(hand: Tile[], left: number | null, right: number | null): nu
     .filter((i) => i >= 0);
 }
 
+function pipCount(hand: Tile[]): number {
+  return hand.reduce((sum, [a, b]) => sum + a + b, 0);
+}
+
+/** Both sides stuck with tiles left — lowest pip count wins (standard blocked-game rule). */
+function neitherCanPlay(state: DominoState): boolean {
+  return (
+    validMoves(state.playerHand, state.leftEnd, state.rightEnd).length === 0 &&
+    validMoves(state.cpuHand, state.leftEnd, state.rightEnd).length === 0 &&
+    state.boneyard.length === 0
+  );
+}
+
+function finalizeBlockedGame(state: DominoState): DominoState {
+  const playerPips = pipCount(state.playerHand);
+  const cpuPips = pipCount(state.cpuHand);
+  const winner: "player" | "cpu" =
+    playerPips <= cpuPips ? "player" : "cpu";
+  return {
+    ...state,
+    winner,
+    message:
+      winner === "player"
+        ? `Blocked — you win (${playerPips} vs ${cpuPips} pips)`
+        : `Blocked — CPU wins (${cpuPips} vs ${playerPips} pips)`,
+  };
+}
+
 export function playerDraw(state: DominoState): DominoState {
   if (state.winner || state.current !== "player" || state.boneyard.length === 0)
     return state;
@@ -129,7 +157,17 @@ export function playerDraw(state: DominoState): DominoState {
   const playerHand = [...state.playerHand, drawn];
   const moves = validMoves(playerHand, state.leftEnd, state.rightEnd);
   if (moves.length === 0 && boneyard.length === 0) {
-    return { ...state, playerHand, boneyard, current: "cpu", message: "CPU turn" };
+    const next = {
+      ...state,
+      playerHand,
+      boneyard,
+      current: "cpu" as const,
+      message: "CPU turn",
+    };
+    if (neitherCanPlay(next)) {
+      return finalizeBlockedGame(next);
+    }
+    return next;
   }
   return { ...state, playerHand, boneyard, message: moves.length ? "Play or draw again" : "Drew a tile" };
 }
@@ -149,6 +187,9 @@ export function cpuMove(
   }
   s = { ...s, cpuHand: hand, boneyard };
   if (moves.length === 0) {
+    if (neitherCanPlay(s)) {
+      return finalizeBlockedGame(s);
+    }
     return { ...s, current: "player", message: "CPU passed — your turn" };
   }
 
@@ -179,5 +220,8 @@ export function resolvePlayerTurn(state: DominoState): DominoState {
   if (state.winner || state.current !== "player") return state;
   if (validMoves(state.playerHand, state.leftEnd, state.rightEnd).length > 0) return state;
   if (state.boneyard.length > 0) return state;
+  if (neitherCanPlay(state)) {
+    return finalizeBlockedGame(state);
+  }
   return { ...state, current: "cpu", message: "Pass — CPU turn" };
 }

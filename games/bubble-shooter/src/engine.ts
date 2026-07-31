@@ -75,7 +75,7 @@ export function shootColumn(state: BubbleShooterState, col: number): BubbleShoot
   if (landRow < 0) return { ...state, status: "over" };
 
   grid[landRow]![col] = state.next;
-  let score = state.score + 5;
+  let score = state.score;
   const group = flood(grid, landRow, col, state.next);
   if (group.length >= 3) {
     for (const [r, c] of group) grid[r]![c] = 0;

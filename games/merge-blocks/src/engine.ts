@@ -47,7 +47,7 @@ export function dropColumn(state: MergeBlocksState, col: number): MergeBlocksSta
   while (row >= 0 && grid[row]![col] !== 0) row--;
   if (row < 0) return { ...state, status: "over" };
   grid[row]![col] = state.next;
-  let score = state.score + state.next;
+  let score = state.score;
   // merge vertically in column only (simplified merge blocks)
   const colVals = grid.map((r) => r[col]!);
   const merged = mergeColumn(colVals);

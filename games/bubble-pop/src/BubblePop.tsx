@@ -132,7 +132,10 @@ export function BubblePopGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "playing" ? state : null),
+    () =>
+      state.status === "playing" || state.status === "stage-clear"
+        ? state
+        : null,
     [state]
   );
 
@@ -303,7 +306,7 @@ export function BubblePopGame() {
   const aimY2 = SHOOTER_Y - Math.cos(state.shooterAngle) * AIM_LINE_LENGTH;
 
   return (
-    <div className="standard-game-shell relative flex w-full flex-col items-center gap-3 overflow-hidden mx-auto">
+    <div className="standard-game-shell relative flex w-full flex-col items-center gap-3 overflow-hidden mx-auto max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">

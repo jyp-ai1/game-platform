@@ -26,7 +26,7 @@ export interface Vec2 {
 }
 
 export type Status = "playing" | "over";
-export type Winner = "player" | "ai" | null;
+export type Winner = "player" | "ai" | "draw" | null;
 
 export interface AirHockeyState {
   playerPaddle: Vec2; // bottom half of the table
@@ -218,7 +218,11 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
   } else if (elapsedSeconds >= MATCH_TIME_LIMIT_SECONDS) {
     status = "over";
     winner =
-      playerScore > aiScore ? "player" : playerScore < aiScore ? "ai" : "player";
+      playerScore > aiScore
+        ? "player"
+        : playerScore < aiScore
+          ? "ai"
+          : "draw";
   }
 
   return {

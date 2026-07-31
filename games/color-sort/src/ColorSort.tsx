@@ -81,7 +81,7 @@ export function ColorSortGame() {
   }
 
   return (
-    <div className="standard-game-shell relative mx-auto flex w-full flex-col items-center gap-4">
+    <div className="standard-game-shell relative mx-auto flex w-full flex-col items-center gap-4 max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Moves" value={state.moves} />

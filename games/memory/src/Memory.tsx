@@ -165,7 +165,10 @@ export function MemoryGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "playing" ? state : null),
+    () =>
+      state.status === "playing" || state.status === "stage-clear"
+        ? state
+        : null,
     [state]
   );
 
@@ -236,7 +239,7 @@ export function MemoryGame() {
         : "grid-cols-4";
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">

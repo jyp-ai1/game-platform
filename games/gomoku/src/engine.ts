@@ -3,7 +3,7 @@ export type Cell = 0 | 1 | 2;
 export interface GomokuState {
   board: Cell[][];
   current: 1 | 2;
-  winner: 1 | 2 | null;
+  winner: 1 | 2 | "draw" | null;
   winningCells: Array<[number, number]>;
 }
 
@@ -34,6 +34,10 @@ function checkWin(board: Cell[][], row: number, col: number, p: 1 | 2): Array<[n
   return [];
 }
 
+function boardFull(board: Cell[][]): boolean {
+  return board.every((row) => row.every((cell) => cell !== 0));
+}
+
 export function placeStone(state: GomokuState, row: number, col: number): GomokuState {
   if (state.winner !== null || state.board[row]?.[col] !== 0) return state;
   const board = state.board.map((r) => [...r]);
@@ -41,6 +45,9 @@ export function placeStone(state: GomokuState, row: number, col: number): Gomoku
   const win = checkWin(board, row, col, state.current);
   if (win.length >= 5) {
     return { board, current: state.current, winner: state.current, winningCells: win };
+  }
+  if (boardFull(board)) {
+    return { board, current: state.current, winner: "draw", winningCells: [] };
   }
   return { board, current: state.current === 1 ? 2 : 1, winner: null, winningCells: [] };
 }
@@ -88,5 +95,7 @@ export function cpuMove(
 }
 
 export function computeScore(state: GomokuState): number {
-  return state.winner === 1 ? 100 : 0;
+  if (state.winner === 1) return 100;
+  if (state.winner === "draw") return 25;
+  return 0;
 }

@@ -88,9 +88,11 @@ export function GomokuGame() {
       ? "You Win!"
       : state.winner === 2
         ? "CPU Wins!"
-        : humanTurn
-          ? "돌을 놓으세요 (5목)"
-          : "CPU...";
+        : state.winner === "draw"
+          ? "Draw!"
+          : humanTurn
+            ? "돌을 놓으세요 (5목)"
+            : "CPU...";
 
 
   function handleRetry() {
@@ -104,7 +106,7 @@ export function GomokuGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm text-muted-foreground">{msg}</p>
