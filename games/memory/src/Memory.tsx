@@ -189,6 +189,7 @@ export function MemoryGame() {
   useEffect(() => {
     if (state.status === "stage-clear" && !stageClearReported.current) {
       stageClearReported.current = true;
+      playGameFeel("goal");
       const score = computeScore(state.moves, state.stageIndex);
       recordStageClear(state.stageIndex, score);
       reportScore(GAME_SLUG, score);
@@ -274,7 +275,7 @@ export function MemoryGame() {
               onClick={() => handleFlip(index)}
               disabled={isFaceUp || card.matched}
               aria-label={isFaceUp ? card.symbol : "카드 뒤집기"}
-              className="aspect-square [transform-style:preserve-3d]"
+              className="aspect-square min-h-11 [transform-style:preserve-3d]"
             >
               <span
                 className={cn(

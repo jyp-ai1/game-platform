@@ -142,6 +142,7 @@ import {
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
 import { SnakeMinimap } from "./snake-minimap";
 import { SnakeMobileControls } from "./snake-mobile-controls";
+import { SnakeRankingPanel } from "./snake-ranking-panel";
 import {
   playBoostSound,
   playDeathSound,
@@ -1470,9 +1471,30 @@ export function SnakeIoGame({
   const camX = camRef.current.x;
   const camY = camRef.current.y;
   const top1Id = world.rankings[0]?.deviceId ?? null;
+  const rankingEntries = top10.slice(0, 10).map((r) => ({
+    deviceId: r.deviceId,
+    nickname: r.nickname,
+    length: world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?",
+  }));
 
   return (
-    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", isGameFullscreen ? "max-w-none px-0" : "max-w-3xl px-1 sm:px-2")}>
+    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", isGameFullscreen ? "max-w-none px-0" : "max-w-6xl px-1 sm:px-2")}>
+      <div
+        className={cn(
+          "flex w-full items-start justify-center gap-3",
+          isGameFullscreen && "h-full"
+        )}
+      >
+        <aside className="hidden w-40 shrink-0 pt-10 lg:block">
+          <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
+        </aside>
+
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col items-center",
+          "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+        )}
+      >
       <div
         ref={viewportRef}
         className={cn(
@@ -1559,23 +1581,6 @@ export function SnakeIoGame({
           <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
             {isBoosting ? "⚡ BOOST" : "Boost"}
           </p>
-        </div>
-        <div className="pointer-events-none absolute right-2 top-2 z-30 w-36 rounded-lg border border-white/10 bg-black/55 px-2 py-2 text-[10px] backdrop-blur-sm">
-          <p className="mb-1 font-semibold text-amber-300">TOP 10</p>
-          <ol className="space-y-0.5">
-            {top10.slice(0, 10).map((r, i) => (
-              <li
-                key={r.deviceId}
-                className={cn(
-                  "truncate",
-                  r.deviceId === deviceId ? "font-bold text-emerald-300" : "text-white/75"
-                )}
-              >
-                {i + 1}. {r.nickname.length > 8 ? r.nickname.slice(0, 7) + "…" : r.nickname}{" "}
-                <span className="text-white/50">L{world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?"}</span>
-              </li>
-            ))}
-          </ol>
         </div>
           <div
             className="absolute origin-top-left"
@@ -1835,23 +1840,9 @@ export function SnakeIoGame({
           </div>
         ) : null}
 
-        {ux.minimap ? (
-          <div className="pointer-events-none absolute bottom-14 right-2 z-30">
-            <SnakeMinimap
-            snakes={Object.values(world.snakes)}
-            worldSize={worldSize}
-            deviceId={deviceId}
-            top1Id={top1Id}
-            camX={camX}
-            camY={camY}
-            viewPx={boardPx}
-            cellSize={cellSize}
-          />
-          </div>
-        ) : null}
 
-        {/* MVP HUD — bottom global rank bar */}
-        <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 flex justify-center">
+        {/* MVP HUD — bottom global rank bar (desktop in-canvas) */}
+        <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 hidden justify-center lg:flex">
           <div className="rounded-lg border border-white/10 bg-black/55 px-4 py-1.5 text-center text-[11px] backdrop-blur-sm">
             {isStageMode && stageConfig ? (
               <>
@@ -1885,6 +1876,45 @@ export function SnakeIoGame({
           </div>
         </div>
         </div>
+      </div>
+
+        <div className="mt-2 flex w-full max-w-sm items-start gap-2 px-1 lg:hidden">
+          <SnakeRankingPanel
+            compact
+            entries={rankingEntries}
+            deviceId={deviceId}
+            className="min-w-0 flex-1"
+          />
+          {ux.minimap ? (
+            <SnakeMinimap
+              compact
+              snakes={Object.values(world.snakes)}
+              worldSize={worldSize}
+              deviceId={deviceId}
+              top1Id={top1Id}
+              camX={camX}
+              camY={camY}
+              viewPx={boardPx}
+              cellSize={cellSize}
+            />
+          ) : null}
+        </div>
+      </div>
+
+        <aside className="hidden w-28 shrink-0 pt-10 lg:block">
+          {ux.minimap ? (
+            <SnakeMinimap
+              snakes={Object.values(world.snakes)}
+              worldSize={worldSize}
+              deviceId={deviceId}
+              top1Id={top1Id}
+              camX={camX}
+              camY={camY}
+              viewPx={boardPx}
+              cellSize={cellSize}
+            />
+          ) : null}
+        </aside>
       </div>
 
       {isStageMode && stageOverlay !== "none" ? (

@@ -51,6 +51,8 @@ interface State {
   blockedPulse: number;
   mergePulse: number;
   mergeHighlight: number[];
+  slideDirection: Direction | null;
+  slidePulse: number;
 }
 
 type Action =
@@ -71,6 +73,8 @@ function createInitialState(): State {
     blockedPulse: 0,
     mergePulse: 0,
     mergeHighlight: [],
+    slideDirection: null,
+    slidePulse: 0,
   };
 }
 
@@ -139,6 +143,8 @@ function reducer(state: State, action: Action): State {
         blockedPulse: 0,
         mergePulse: state.mergePulse + (mergeHighlight.length > 0 ? 1 : 0),
         mergeHighlight,
+        slideDirection: action.direction,
+        slidePulse: state.slidePulse + 1,
       };
     }
     default:
@@ -256,6 +262,7 @@ export function Game2048() {
         return;
       }
       event.preventDefault();
+      playGameFeel("button", gridRef.current);
       dispatch({ type: "move", direction });
     }
 
@@ -300,9 +307,21 @@ export function Game2048() {
             : "up";
 
       dispatch({ type: "move", direction });
+      playGameFeel("button", gridRef.current);
     },
     [canPlayRef]
   );
+
+  const slideNudgeClass =
+    state.slideDirection === "left"
+      ? "-translate-x-1"
+      : state.slideDirection === "right"
+        ? "translate-x-1"
+        : state.slideDirection === "up"
+          ? "-translate-y-1"
+          : state.slideDirection === "down"
+            ? "translate-y-1"
+            : "";
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
@@ -334,6 +353,7 @@ export function Game2048() {
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11"
           aria-label="새 게임"
           onClick={handleRetry}
         >
@@ -343,7 +363,11 @@ export function Game2048() {
 
       <div
         ref={gridRef}
-        className="relative grid aspect-square w-full max-w-sm touch-none select-none grid-cols-4 gap-3 rounded-xl bg-muted p-3"
+        className={cn(
+          "relative grid aspect-square w-full max-w-sm touch-none select-none grid-cols-4 gap-3 rounded-xl bg-muted p-3 transition-transform duration-100",
+          slideNudgeClass
+        )}
+        key={`slide-${state.slidePulse}`}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >

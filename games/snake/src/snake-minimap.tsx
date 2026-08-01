@@ -14,6 +14,7 @@ interface SnakeMinimapProps {
   camY: number;
   viewPx: number;
   cellSize: number;
+  compact?: boolean;
 }
 
 /** Minimap — self ★ green, leader yellow, human blue, bot gray. */
@@ -26,6 +27,7 @@ export function SnakeMinimap({
   camY,
   viewPx,
   cellSize,
+  compact = false,
 }: SnakeMinimapProps) {
   const worldPx = worldSize * cellSize;
   const viewLeft = Math.max(0, Math.min(100, (camX / worldPx) * 100));
@@ -34,8 +36,20 @@ export function SnakeMinimap({
   const viewH = Math.min(100 - viewTop, (viewPx / worldPx) * 100);
 
   return (
-    <div className="hidden w-28 shrink-0 rounded-xl border border-white/15 bg-black/50 p-1.5 sm:block">
-      <p className="mb-1 text-[8px] font-semibold uppercase tracking-wide text-muted-foreground">Minimap</p>
+    <div
+      className={cn(
+        "shrink-0 rounded-xl border border-white/15 bg-black/50 p-1.5",
+        compact ? "w-20 p-1" : "w-28"
+      )}
+    >
+      <p
+        className={cn(
+          "font-semibold uppercase tracking-wide text-muted-foreground",
+          compact ? "mb-0.5 text-[7px]" : "mb-1 text-[8px]"
+        )}
+      >
+        Minimap
+      </p>
       <div className="relative aspect-square w-full overflow-hidden rounded-md bg-black/30">
         <div
           className="pointer-events-none absolute border border-white/50 bg-white/5"
