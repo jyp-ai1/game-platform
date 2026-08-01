@@ -1,10 +1,7 @@
 "use client";
 
 import { PartyJourneyFeed } from "@/components/party-journey-feed";
-import {
-  SnakeLiveGameCard,
-  type SnakeFriendPresence,
-} from "@/components/snake-live-game-card";
+import type { SnakeFriendPresence } from "@/components/snake-live-game-card";
 import { enterSnakeQuickPlay } from "@/lib/snake-entry";
 import { emitPlatformNoticeWithRetry } from "@/lib/platform-notice";
 import {
@@ -12,7 +9,6 @@ import {
   getGlobalWorldStatus,
   presenceMinutesAgo,
 } from "@game-platform/multiplayer-sdk";
-import type { Game } from "@game-platform/shared";
 import type { PresenceEntry } from "@game-platform/shared";
 import {
   getMyParty,
@@ -25,7 +21,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-import { HomeEmptyLine } from "@/components/home-empty-line";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Plausible mock score when presence has no score field yet. */
@@ -57,8 +52,8 @@ function presenceToFriend(entry: PresenceEntry): SnakeFriendPresence {
   };
 }
 
-/** Home hero — LIVE Snake game card first; friend is secondary info on the card. */
-export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) {
+/** Party / tournament strip below brand hero (Snake moved to Multiplayer section). */
+export function ReplayTogetherStrip() {
   const router = useRouter();
   const mounted = useMounted();
   const [friend, setFriend] = useState<SnakeFriendPresence | null>(null);
@@ -119,16 +114,29 @@ export function ReplayTogetherStrip({ snakeGame }: { snakeGame?: Game | null }) 
   const mission = party ? PartyMissionEngine.active(party) : null;
   const badges = party ? PartyJourneyEngine.achievements(party) : [];
 
+  const hasPartyContent =
+    friend || tournament || party || mission || badges.length > 0;
+
+  if (!hasPartyContent && presenceLoaded && mounted) {
+    return null;
+  }
+
   return (
     <section
-      aria-labelledby="home-hero-heading"
-      className="border-b border-primary/20 bg-gradient-to-b from-primary/10 to-transparent py-5 sm:py-6"
+      aria-labelledby="home-party-heading"
+      className="border-b border-white/5 py-4 sm:py-5"
     >
       <div className="mx-auto max-w-4xl space-y-3 px-4">
-        <h2 id="home-hero-heading" className="sr-only">
-          LIVE Snake
+        <h2 id="home-party-heading" className="sr-only">
+          Party &amp; Friends
         </h2>
-        <SnakeLiveGameCard game={snakeGame} friend={friend} />
+
+        {friend && mounted ? (
+          <p className="text-sm">
+            <span className="text-muted-foreground">친구 플레이 중 · </span>
+            <span className="font-medium">{friend.nickname}</span>
+          </p>
+        ) : null}
 
         {presenceLoaded && mounted && !friend ? (
           <p data-testid="hero-friend-empty" className="text-sm text-muted-foreground">

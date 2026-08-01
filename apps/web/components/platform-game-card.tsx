@@ -11,6 +11,7 @@ import { GameCardPlayLink } from "@/components/game-card-play-link";
 import { difficultyLabel, formatDifficulty } from "@/lib/difficulty";
 import { IMAGE_BLUR_PLACEHOLDER } from "@/lib/image-placeholder";
 import { useLivePlayerCount } from "@/lib/use-live-player-count";
+import { useMounted } from "@/lib/use-mounted";
 
 /** Stable display rating for platform cards (no DB field yet). */
 export function platformGameRating(slug: string): string {
@@ -125,10 +126,12 @@ export function PlatformGameCard({
 }) {
   const isComingSoon = game.status === "COMING_SOON";
   const isMaintenance = game.status === "MAINTENANCE";
+  const mounted = useMounted();
   const rating = platformGameRating(game.slug);
   const basePlayers = live?.players ?? 0;
   const animatedPlayers = useLivePlayerCount(basePlayers, 5000);
-  const playerCount = live?.animatePlayers !== false && live ? animatedPlayers : basePlayers;
+  const playerCount =
+    !mounted || live?.animatePlayers === false || !live ? basePlayers : animatedPlayers;
   const playerLabel = live ? `${playerCount} Players` : `${Math.max(1, Math.round(game.playCount / 1000))}k plays`;
   const diffBadge = difficultyBadgeVariant(game.difficulty);
 
@@ -157,8 +160,8 @@ export function PlatformGameCard({
                 : "group-hover:scale-[1.02]"
             )}
             sizes="(max-width:640px) 85vw, 320px"
-            priority={!!live}
-            loading={live ? undefined : "lazy"}
+            priority={!!live || hero}
+            loading={live || hero ? undefined : "lazy"}
             placeholder="blur"
             blurDataURL={IMAGE_BLUR_PLACEHOLDER}
           />
@@ -173,17 +176,6 @@ export function PlatformGameCard({
           <FavoriteButton slug={game.slug} className="absolute left-2 top-2 z-10" />
         ) : null}
 
-        {/* Unified badges — difficulty / HOT / NEW (non-LIVE cards) */}
-        {!live && (isHot || isNew || !isComingSoon) ? (
-          <div className="absolute left-2 top-12 z-10 flex flex-wrap gap-1 sm:top-14">
-            {!isComingSoon && !isMaintenance ? (
-              <PlatformBadge variant={diffBadge}>{difficultyLabel[game.difficulty]}</PlatformBadge>
-            ) : null}
-            {isHot ? <PlatformBadge variant="hot">HOT</PlatformBadge> : null}
-            {isNew ? <PlatformBadge variant="new">NEW</PlatformBadge> : null}
-          </div>
-        ) : null}
-
         {live ? (
           <div
             data-testid="platform-live-badge"
@@ -196,7 +188,7 @@ export function PlatformGameCard({
             <p className="text-sm font-semibold tabular-nums motion-base transition-all">
               {playerLabel}
             </p>
-            {live.topScore != null && live.topScore > 0 ? (
+            {live.topScore != null && live.topScore > 0 && mounted ? (
               <p className="mt-0.5 text-[10px] text-amber-300/90">
                 {live.topRankLabel ?? "TOP #1"} {live.topScore.toLocaleString()}
               </p>
@@ -210,6 +202,13 @@ export function PlatformGameCard({
         <div>
           <h3 className="text-lg font-bold leading-tight">{game.title}</h3>
           <p className="mt-0.5 text-sm text-muted-foreground">{genreLabel(game)}</p>
+          {!live && !isComingSoon && !isMaintenance ? (
+            <div className="mt-2 flex flex-wrap gap-1">
+              <PlatformBadge variant={diffBadge}>{difficultyLabel[game.difficulty]}</PlatformBadge>
+              {isHot ? <PlatformBadge variant="hot">HOT</PlatformBadge> : null}
+              {isNew ? <PlatformBadge variant="new">NEW</PlatformBadge> : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -223,7 +222,7 @@ export function PlatformGameCard({
           </span>
         </div>
 
-        {friend ? (
+        {friend && mounted ? (
           <p className="text-sm leading-snug">
             <span className="text-muted-foreground">👤 </span>
             <span className="font-medium">{friend.nickname}</span>

@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { HomePageSkeleton } from "@/components/home-page-skeleton";
+import { HomeBrandHero } from "@/components/home-brand-hero";
+import { HomeMultiplayerSection } from "@/components/home-multiplayer-section";
 import { ReplayTogetherStrip } from "@/components/replay-together-strip";
 import { useHomeBootDelay } from "@/lib/use-home-boot-delay";
 
@@ -97,7 +99,8 @@ export function HomeShell({
         )}
         aria-hidden={!bootReady}
       >
-        <ReplayTogetherStrip snakeGame={snakeGame} />
+        <HomeBrandHero />
+        <ReplayTogetherStrip />
 
         {belowFold ? (
           <>
@@ -151,6 +154,8 @@ export function HomeShell({
             </div>
           </Container>
         </section>
+
+        <HomeMultiplayerSection snakeGame={snakeGame} />
       </div>
     </div>
   );

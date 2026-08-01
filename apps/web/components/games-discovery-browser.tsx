@@ -2,21 +2,17 @@
 
 import type { Game } from "@game-platform/shared";
 import { Button, cn } from "@game-platform/ui";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { GameGrid } from "@/components/game-grid";
 import {
   discoverGames,
-  DISCOVERY_PRESETS,
   GAME_CATEGORY_FILTERS,
   GAME_SORT_OPTIONS,
-  GAME_VIEW_FILTERS,
-  presetDefaultSort,
-  type DiscoveryPreset,
   type GameCategoryFilter,
   type GameSortOption,
-  type GameViewFilter,
 } from "@/lib/games-discovery";
 import { selectHotSlugs, selectNew } from "@/lib/game-sections";
 import {
@@ -33,6 +29,7 @@ import {
   getGamePlayCounts,
   getServerDailyMissionSnapshot,
   getServerDailyStreakSnapshot,
+  getServerGamePlayCountsSnapshot,
   isDailyChallengeComplete,
   subscribeEngagement,
   subscribeMissions,
@@ -46,14 +43,13 @@ import { LIBRARY_COLLECTIONS } from "@/lib/library-store";
 import { getOnlineFriends } from "@/lib/social-store";
 import Link from "next/link";
 
-const CATEGORY_EMOJI: Partial<Record<GameCategoryFilter, string>> = {
-  puzzle: "🧩",
-  arcade: "🕹️",
-  board: "♟️",
-  sports: "⚽",
-  casual: "🎮",
-  new: "✨",
-};
+type PlayerFilter = "all" | "solo" | "multiplayer";
+
+const PLAYER_FILTERS: Array<{ value: PlayerFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "solo", label: "1 Player" },
+  { value: "multiplayer", label: "Multiplayer" },
+];
 
 export function GamesDiscoveryBrowser({
   games,
@@ -63,13 +59,11 @@ export function GamesDiscoveryBrowser({
   hotSlugs?: Set<string>;
 }) {
   const [category, setCategory] = useState<GameCategoryFilter>("all");
-  const [view, setView] = useState<GameViewFilter>("all");
   const [sort, setSort] = useState<GameSortOption>("popular");
-  const [preset, setPreset] = useState<DiscoveryPreset | null>(null);
-  const [mood, setMood] = useState<"all" | "chill" | "intense" | "quick">("all");
+  const [query, setQuery] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [difficulty, setDifficulty] = useState<"all" | "EASY" | "MEDIUM" | "HARD">("all");
-  const [tag, setTag] = useState<string>("all");
-  const [length, setLength] = useState<"all" | "short" | "medium" | "long">("all");
+  const [players, setPlayers] = useState<PlayerFilter>("all");
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,
@@ -94,21 +88,16 @@ export function GamesDiscoveryBrowser({
   const playCounts = useSyncExternalStore(
     subscribeEngagement,
     getGamePlayCounts,
-    () => ({})
+    getServerGamePlayCountsSnapshot
   );
 
   const resolvedHotSlugs = hotSlugs ?? selectHotSlugs(games);
 
-  const popularTags = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const g of games) {
-      for (const t of g.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
-    }
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([t]) => t);
-  }, [games]);
+  const activeFilterCount =
+    (category !== "all" ? 1 : 0) +
+    (difficulty !== "all" ? 1 : 0) +
+    (players !== "all" ? 1 : 0) +
+    (sort !== "popular" ? 1 : 0);
 
   const aiPicks = useMemo(
     () =>
@@ -148,50 +137,18 @@ export function GamesDiscoveryBrowser({
         sort,
         favorites,
         recentlyPlayed,
-        "",
-        view,
-        preset,
+        query,
+        "all",
+        null,
         resolvedHotSlugs
       );
-      if (mood === "chill") list = list.filter((g) => g.difficulty === "EASY");
-      if (mood === "intense") list = list.filter((g) => g.difficulty === "HARD");
-      if (mood === "quick") {
-        list = list.filter(
-          (g) => g.category?.slug === "casual" || g.category?.slug === "puzzle"
-        );
-      }
       if (difficulty !== "all") list = list.filter((g) => g.difficulty === difficulty);
-      if (tag !== "all") list = list.filter((g) => g.tags.includes(tag));
-      if (length === "short") list = list.filter((g) => g.tags.includes("quick-play") || g.difficulty === "EASY");
-      if (length === "medium") list = list.filter((g) => g.difficulty === "MEDIUM");
-      if (length === "long") list = list.filter((g) => g.difficulty === "HARD" || g.tags.includes("long-play"));
+      if (players === "multiplayer") list = list.filter((g) => g.slug === "snake");
+      if (players === "solo") list = list.filter((g) => g.slug !== "snake");
       return list;
     },
-    [
-      games,
-      category,
-      sort,
-      favorites,
-      recentlyPlayed,
-      view,
-      preset,
-      resolvedHotSlugs,
-      mood,
-      difficulty,
-      tag,
-      length,
-    ]
+    [games, category, sort, favorites, recentlyPlayed, query, resolvedHotSlugs, difficulty, players]
   );
-
-  function selectPreset(next: DiscoveryPreset) {
-    setPreset(next);
-    setSort(presetDefaultSort(next));
-    if (next === "new") {
-      setCategory("new");
-    } else if (category === "new") {
-      setCategory("all");
-    }
-  }
 
   const continueGames = useMemo(() => {
     const bySlug = new Map(games.map((g) => [g.slug, g]));
@@ -295,199 +252,139 @@ export function GamesDiscoveryBrowser({
         </section>
       ) : null}
 
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Discover
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {DISCOVERY_PRESETS.map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={preset === item.value ? "default" : "outline"}
-              onClick={() => selectPreset(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-          {preset ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setPreset(null);
-                setCategory("all");
-                setSort("popular");
-              }}
-            >
-              Clear preset
-            </Button>
+      <section className="flex flex-col gap-4" aria-labelledby="discover-heading">
+        <div>
+          <h2 id="discover-heading" className="text-lg font-semibold">
+            Discover
+          </h2>
+          <p className="text-sm text-muted-foreground">{visible.length}개 게임</p>
+        </div>
+
+        <label className="relative block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="게임 검색"
+            className="h-11 w-full rounded-xl border border-white/10 bg-card/60 pl-10 pr-4 text-sm outline-none ring-primary/30 transition focus:ring-2"
+            aria-label="Search games"
+          />
+        </label>
+
+        <div className="rounded-xl border border-white/10 bg-card/40">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <span className="inline-flex items-center gap-2">
+              <SlidersHorizontal className="size-4 text-muted-foreground" />
+              Filters
+              {activeFilterCount > 0 ? (
+                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
+                  {activeFilterCount}
+                </span>
+              ) : null}
+            </span>
+            <ChevronDown
+              className={cn(
+                "size-4 text-muted-foreground transition-transform",
+                filtersOpen && "rotate-180"
+              )}
+            />
+          </button>
+
+          {filtersOpen ? (
+            <div className="space-y-5 border-t border-white/10 px-4 py-4">
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Genre
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {GAME_CATEGORY_FILTERS.map((item) => (
+                    <Button
+                      key={item.value}
+                      type="button"
+                      size="sm"
+                      variant={category === item.value ? "default" : "outline"}
+                      onClick={() => setCategory(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Difficulty
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      { value: "all", label: "All" },
+                      { value: "EASY", label: "Easy" },
+                      { value: "MEDIUM", label: "Medium" },
+                      { value: "HARD", label: "Hard" },
+                    ] as const
+                  ).map((item) => (
+                    <Button
+                      key={item.value}
+                      type="button"
+                      size="sm"
+                      variant={difficulty === item.value ? "default" : "outline"}
+                      onClick={() => setDifficulty(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Players
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {PLAYER_FILTERS.map((item) => (
+                    <Button
+                      key={item.value}
+                      type="button"
+                      size="sm"
+                      variant={players === item.value ? "default" : "outline"}
+                      onClick={() => setPlayers(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Sort
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {GAME_SORT_OPTIONS.map((item) => (
+                    <Button
+                      key={item.value}
+                      type="button"
+                      size="sm"
+                      variant={sort === item.value ? "secondary" : "outline"}
+                      className={cn(sort === item.value && "ring-1 ring-border")}
+                      onClick={() => setSort(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : null}
         </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Mood</p>
-        <div className="flex flex-wrap gap-2">
-          {(
-            [
-              { value: "all", label: "All" },
-              { value: "chill", label: "Chill 🧘" },
-              { value: "intense", label: "Intense 🔥" },
-              { value: "quick", label: "5 Min ⚡" },
-            ] as const
-          ).map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={mood === item.value ? "default" : "outline"}
-              onClick={() => setMood(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          View
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {GAME_VIEW_FILTERS.map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={view === item.value ? "default" : "outline"}
-              onClick={() => setView(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Category
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {GAME_CATEGORY_FILTERS.map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={category === item.value ? "default" : "outline"}
-              onClick={() => setCategory(item.value)}
-            >
-              {CATEGORY_EMOJI[item.value] ? `${CATEGORY_EMOJI[item.value]} ` : ""}
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Difficulty
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {(
-            [
-              { value: "all", label: "All" },
-              { value: "EASY", label: "Easy" },
-              { value: "MEDIUM", label: "Medium" },
-              { value: "HARD", label: "Hard" },
-            ] as const
-          ).map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={difficulty === item.value ? "default" : "outline"}
-              onClick={() => setDifficulty(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Play Length</p>
-        <div className="flex flex-wrap gap-2">
-          {(
-            [
-              { value: "all", label: "All" },
-              { value: "short", label: "≤5 min" },
-              { value: "medium", label: "5–15 min" },
-              { value: "long", label: "15+ min" },
-            ] as const
-          ).map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={length === item.value ? "default" : "outline"}
-              onClick={() => setLength(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {popularTags.length > 0 ? (
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tags</p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant={tag === "all" ? "default" : "outline"}
-              onClick={() => setTag("all")}
-            >
-              All
-            </Button>
-            {popularTags.map((t) => (
-              <Button
-                key={t}
-                type="button"
-                size="sm"
-                variant={tag === t ? "default" : "outline"}
-                onClick={() => setTag(t)}
-              >
-                {t}
-              </Button>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          {visible.length}개 게임
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Sort</span>
-          {GAME_SORT_OPTIONS.map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={sort === item.value ? "secondary" : "ghost"}
-              className={cn(sort === item.value && "ring-1 ring-border")}
-              onClick={() => setSort(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+      </section>
 
       {visible.length === 0 ? (
         <EmptyState message="조건에 맞는 게임이 없습니다." />
