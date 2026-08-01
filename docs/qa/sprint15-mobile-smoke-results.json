@@ -1,0 +1,5982 @@
+{
+  "generatedAt": "2026-08-01T07:27:25.874Z",
+  "baseUrl": "http://localhost:3003",
+  "playMs": 4000,
+  "total": 50,
+  "pass": 49,
+  "fail": 0,
+  "knownIssue": 1,
+  "games": [
+    {
+      "slug": "2048",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "snake",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 375,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 5,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          },
+          "snakeKnown": true
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 390,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 5,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          },
+          "snakeKnown": true
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 430,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 5,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          },
+          "snakeKnown": true
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 844,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          },
+          "snakeKnown": true
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 768,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          },
+          "snakeKnown": true
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 1024,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          },
+          "snakeKnown": true
+        },
+        {
+          "viewport": "fold-717",
+          "ok": false,
+          "bugs": [
+            "shell-missing-prestart"
+          ],
+          "taps": 0,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 717,
+            "h1": true,
+            "shell": false,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          },
+          "snakeKnown": true
+        }
+      ],
+      "verdict": "KNOWN_ISSUE",
+      "failCount": 7
+    },
+    {
+      "slug": "breakout",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "arkanoid-dx",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "memory",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 0,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "minesweeper",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "samegame",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "maze-runner",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "tank-battle",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "galaxy-defender",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "space-defender",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "bubble-pop",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "sudoku",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "tic-tac-toe",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "simon",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "hangman",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "color-match",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "air-hockey",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 24,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "tetris",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "gold-miner",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "space-impact",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "stack-tower",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "ball-sort",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "color-sort",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "penalty-shootout",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "darts",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "bubble-shooter",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "merge-blocks",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "connect4",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "reversi",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "gomoku",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "bowling",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 24,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "archery",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 4,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "sliding-puzzle",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "whack-a-mole",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "chess",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "checkers",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "jigsaw",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "mancala",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "mini-golf",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 24,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "billiards",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 26,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "basketball",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "table-tennis",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "domino",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "crossword",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 36,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "chess960",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 4,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "shuffleboard",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 28,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 2,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "kakuro",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "nonogram",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    },
+    {
+      "slug": "word-search",
+      "viewports": [
+        {
+          "viewport": "portrait-375",
+          "ok": true,
+          "bugs": [],
+          "taps": 2,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 343,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 667
+          }
+        },
+        {
+          "viewport": "portrait-390",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 358,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 844
+          }
+        },
+        {
+          "viewport": "portrait-430",
+          "ok": true,
+          "bugs": [],
+          "taps": 34,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 398,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 932
+          }
+        },
+        {
+          "viewport": "landscape-844",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 390
+          }
+        },
+        {
+          "viewport": "tablet-768",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 720,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 1024
+          }
+        },
+        {
+          "viewport": "ipad-1024",
+          "ok": true,
+          "bugs": [],
+          "taps": 32,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 704,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 768
+          }
+        },
+        {
+          "viewport": "fold-717",
+          "ok": true,
+          "bugs": [],
+          "taps": 30,
+          "layout": {
+            "overflowX": false,
+            "scrollWidth": 669,
+            "h1": true,
+            "shell": true,
+            "smallTouch": 1,
+            "hasSafeArea": true,
+            "clippedBottom": false,
+            "viewportH": 512
+          }
+        }
+      ],
+      "verdict": "PASS",
+      "failCount": 0
+    }
+  ]
+}

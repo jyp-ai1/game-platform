@@ -240,7 +240,7 @@ export function MemoryGame() {
         : "grid-cols-4";
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 max-h-[700px]:gap-2 max-h-[520px]:gap-1 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -250,6 +250,7 @@ export function MemoryGame() {
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >
@@ -260,7 +261,7 @@ export function MemoryGame() {
       <PuzzlePlayField bursts={feel.bursts}>
       <div
         className={cn(
-          "relative grid w-full gap-2",
+          "relative grid w-full gap-2 max-h-[520px]:gap-1 landscape:max-h-[55vh] landscape:overflow-y-auto",
           gridColsClass,
           wrongFlash && "animate-[shake_0.35s_ease-in-out]"
         )}
