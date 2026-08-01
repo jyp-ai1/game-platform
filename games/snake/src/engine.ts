@@ -33,7 +33,7 @@ function isSnakeCell(snake: Position[], pos: Position): boolean {
   return snake.some((segment) => segment.x === pos.x && segment.y === pos.y);
 }
 
-export function placeFood(snake: Position[]): Position {
+export function placeFood(snake: Position[]): Position | null {
   const emptyCells: Position[] = [];
   for (let y = 0; y < GRID_SIZE; y++) {
     for (let x = 0; x < GRID_SIZE; x++) {
@@ -42,6 +42,9 @@ export function placeFood(snake: Position[]): Position {
         emptyCells.push(pos);
       }
     }
+  }
+  if (emptyCells.length === 0) {
+    return null;
   }
   return emptyCells[Math.floor(Math.random() * emptyCells.length)]!;
 }

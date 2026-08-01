@@ -96,6 +96,13 @@ export function playerMove(state: MancalaState, pit: number): MancalaState {
   return sow(state, pit);
 }
 
+function scoreCpuMove(state: MancalaState, pit: number): number {
+  const after = sow(state, pit);
+  if (after.winner === 2) return 1000;
+  if (after.winner === 1) return -1000;
+  return after.pits[CPU_STORE]! - state.pits[CPU_STORE]!;
+}
+
 export function cpuMove(
   state: MancalaState,
   difficulty: "easy" | "normal" | "hard" = "normal"
@@ -106,8 +113,24 @@ export function cpuMove(
   );
   if (options.length === 0) return resolveTurn(state);
 
-  const pit = options[Math.floor(Math.random() * options.length)]!;
-  return sow(state, pit);
+  if (difficulty === "easy") {
+    const pit = options[Math.floor(Math.random() * options.length)]!;
+    return sow(state, pit);
+  }
+
+  let bestPit = options[0]!;
+  let bestScore = -Infinity;
+  for (const pit of options) {
+    let score = scoreCpuMove(state, pit);
+    if (difficulty === "hard") {
+      score += pit === CPU_START + 2 ? 2 : 0;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestPit = pit;
+    }
+  }
+  return sow(state, bestPit);
 }
 
 export function computeScore(state: MancalaState): number {

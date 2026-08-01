@@ -151,12 +151,10 @@ export function applyMove(state: CheckersState, move: Move): CheckersState {
 
   const next: 1 | 2 = player === 1 ? 2 : 1;
   const nextMoves = getLegalMoves({ board, current: next, winner: null, mustContinue: null }, next);
-  const humanMoves = getLegalMoves({ board, current: 1, winner: null, mustContinue: null }, 1);
-  const cpuMoves = getLegalMoves({ board, current: 2, winner: null, mustContinue: null }, 2);
   let winner: CheckersState["winner"] = null;
-  if (humanMoves.length === 0 && cpuMoves.length === 0) winner = "draw";
-  else if (humanMoves.length === 0) winner = 2;
-  else if (cpuMoves.length === 0) winner = 1;
+  if (nextMoves.length === 0) {
+    winner = next === 1 ? 2 : 1;
+  }
 
   return { board, current: winner ? player : next, winner, mustContinue: null };
 }

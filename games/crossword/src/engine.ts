@@ -77,7 +77,7 @@ export function enterLetter(state: CrosswordState, letter: string): CrosswordSta
 }
 
 export function clearCell(state: CrosswordState): CrosswordState {
-  if (!state.selected) return state;
+  if (state.status === "won" || !state.selected) return state;
   const [row, col] = state.selected;
   const entries = state.entries.map((r) => [...r]);
   entries[row]![col] = "";

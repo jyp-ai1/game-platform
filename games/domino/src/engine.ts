@@ -172,6 +172,40 @@ export function playerDraw(state: DominoState): DominoState {
   return { ...state, playerHand, boneyard, message: moves.length ? "Play or draw again" : "Drew a tile" };
 }
 
+function pickCpuMoveIndex(
+  hand: Tile[],
+  moves: number[],
+  difficulty: "easy" | "normal" | "hard"
+): number {
+  if (difficulty === "easy") {
+    return moves[Math.floor(Math.random() * moves.length)]!;
+  }
+  if (difficulty === "normal") {
+    let best = moves[0]!;
+    let bestPips = hand[best]![0] + hand[best]![1];
+    for (const idx of moves) {
+      const pips = hand[idx]![0] + hand[idx]![1];
+      if (pips > bestPips) {
+        bestPips = pips;
+        best = idx;
+      }
+    }
+    return best;
+  }
+  let best = moves[0]!;
+  let bestRemaining = Infinity;
+  for (const idx of moves) {
+    const remaining = hand
+      .filter((_, i) => i !== idx)
+      .reduce((sum, [a, b]) => sum + a + b, 0);
+    if (remaining < bestRemaining) {
+      bestRemaining = remaining;
+      best = idx;
+    }
+  }
+  return best;
+}
+
 export function cpuMove(
   state: DominoState,
   difficulty: "easy" | "normal" | "hard" = "normal"
@@ -193,7 +227,7 @@ export function cpuMove(
     return { ...s, current: "player", message: "CPU passed — your turn" };
   }
 
-  const idx = moves[Math.floor(Math.random() * moves.length)]!;
+  const idx = pickCpuMoveIndex(hand, moves, difficulty);
   return playTile(s, "cpuHand", idx);
 }
 

@@ -276,6 +276,22 @@ export function cpuMove(
     return applyMove(state, moves[Math.floor(Math.random() * moves.length)]!);
   }
 
+  if (difficulty === "hard") {
+    let best = moves[0]!;
+    let bestScore = -Infinity;
+    for (const move of moves) {
+      const after = applyMove(state, move);
+      const opponentMoves = getLegalMoves(after, "w").length;
+      const captured = state.board[move.to[0]!]![move.to[1]!] ? 12 : 0;
+      const score = captured - opponentMoves;
+      if (score > bestScore) {
+        bestScore = score;
+        best = move;
+      }
+    }
+    return applyMove(state, best);
+  }
+
   const captures = moves.filter((m) => state.board[m.to[0]!]![m.to[1]!]);
   const pool = captures.length ? captures : moves;
   return applyMove(state, pool[Math.floor(Math.random() * pool.length)]!);

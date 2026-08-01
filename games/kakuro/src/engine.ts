@@ -86,7 +86,7 @@ export function enterDigit(state: KakuroState, digit: number): KakuroState {
 }
 
 export function clearCell(state: KakuroState): KakuroState {
-  if (!state.selected) return state;
+  if (state.status === "won" || !state.selected) return state;
   const [row, col] = state.selected;
   const entries = state.entries.map((r) => [...r]);
   entries[row]![col] = null;

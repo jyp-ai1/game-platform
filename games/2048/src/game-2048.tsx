@@ -218,6 +218,8 @@ export function Game2048() {
     }
   }, [state.status, state.winAcknowledged]);
 
+  const reportedWinRef = useRef(false);
+
   useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
@@ -229,8 +231,18 @@ export function Game2048() {
       });
       clearSave(GAME_SLUG);
     }
-    if (state.status === "won" && !state.winAcknowledged) {
-      clearSave(GAME_SLUG);
+    if (state.status === "won" && !state.winAcknowledged && !reportedWinRef.current) {
+      reportedWinRef.current = true;
+      reportScore(GAME_SLUG, state.score);
+      recordGameEnd({
+        score: state.score,
+        outcome: "clear",
+        bestTile: state.bestTile,
+        stageReached: TILE_STAGES.filter((t) => state.bestTile >= t).length,
+      });
+    }
+    if (state.status === "playing") {
+      reportedWinRef.current = false;
     }
   }, [state.status, state.score, state.bestTile, state.winAcknowledged, reportScore, recordGameEnd]);
 

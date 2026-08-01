@@ -113,10 +113,9 @@ export function ColorMatchGame() {
 
   useEffect(() => {
     if (state.status === "over") {
-      const finalScore = Math.max(state.score, (state.round - 1) * 5);
-      reportScore(GAME_SLUG, finalScore);
+      reportScore(GAME_SLUG, state.score);
       recordGameEnd({
-        score: finalScore,
+        score: state.score,
         outcome: "failure",
         stageReached: state.round,
       });

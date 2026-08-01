@@ -356,7 +356,6 @@ export function step(state: MazeState, dtSeconds: number): MazeState {
 
   // (4) Frightened timer countdown.
   let modeTimer = state.modeTimer;
-  const wasFrightened = frightenedTimer > 0;
   if (frightenedTimer > 0) {
     frightenedTimer = Math.max(0, frightenedTimer - dtSeconds);
     if (frightenedTimer === 0) {
@@ -367,17 +366,15 @@ export function step(state: MazeState, dtSeconds: number): MazeState {
   }
 
   // (5) Scatter/chase alternation (only when not frightened).
-  if (!wasFrightened || frightenedTimer === 0) {
-    if (frightenedTimer === 0) {
-      modeTimer -= dtSeconds;
-      if (modeTimer <= 0) {
-        const currentlyScatter = chasers.some((c) => c.mode === "scatter");
-        const nextMode: ChaserMode = currentlyScatter ? "chase" : "scatter";
-        modeTimer = currentlyScatter ? CHASE_DURATION : SCATTER_DURATION;
-        chasers = chasers.map((c) =>
-          c.mode === "frightened" ? c : { ...c, mode: nextMode }
-        );
-      }
+  if (frightenedTimer === 0) {
+    modeTimer -= dtSeconds;
+    if (modeTimer <= 0) {
+      const currentlyScatter = chasers.some((c) => c.mode === "scatter");
+      const nextMode: ChaserMode = currentlyScatter ? "chase" : "scatter";
+      modeTimer = currentlyScatter ? CHASE_DURATION : SCATTER_DURATION;
+      chasers = chasers.map((c) =>
+        c.mode === "frightened" ? c : { ...c, mode: nextMode }
+      );
     }
   }
 

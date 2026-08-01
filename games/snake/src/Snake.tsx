@@ -57,7 +57,7 @@ function createInitialState(): State {
     snake,
     direction: "right",
     pendingDirection: "right",
-    food: placeFood(snake),
+    food: placeFood(snake) ?? { x: 0, y: 0 },
     score: 0,
     status: "playing",
   };
@@ -82,12 +82,29 @@ function reducer(state: State, action: Action): State {
         return { ...state, status: "over" };
       }
       const score = result.ateFood ? state.score + POINTS_PER_FOOD : state.score;
-      const food = result.ateFood ? placeFood(result.snake) : state.food;
+      if (result.ateFood) {
+        const nextFood = placeFood(result.snake);
+        if (nextFood === null) {
+          return {
+            ...state,
+            snake: result.snake,
+            direction: state.pendingDirection,
+            score,
+            status: "over",
+          };
+        }
+        return {
+          ...state,
+          snake: result.snake,
+          direction: state.pendingDirection,
+          food: nextFood,
+          score,
+        };
+      }
       return {
         ...state,
         snake: result.snake,
         direction: state.pendingDirection,
-        food,
         score,
       };
     }
