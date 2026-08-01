@@ -54,7 +54,7 @@ export function WhackAMoleGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      playGameFeel("combo", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -110,12 +110,16 @@ export function WhackAMoleGame() {
             onClick={() => {
               if (!canPlayRef.current) return;
               playGameFeel("button", fieldRef.current);
-              if (state.active === i) playGameFeel("pop", fieldRef.current);
+              if (state.active === i) {
+                playGameFeel("pop", fieldRef.current);
+              } else {
+                playGameFeel("wrong", fieldRef.current);
+              }
               dispatch({ type: "whack", index: i });
             }}
             className={cn(
-              "aspect-square rounded-xl border-2 border-amber-900/30 bg-amber-100/20",
-              state.active === i && "bg-amber-600 scale-110 shadow-lg transition-transform duration-100"
+              "aspect-square min-h-11 min-w-11 rounded-xl border-2 border-amber-900/30 bg-amber-100/20 transition-transform duration-150 active:scale-95",
+              state.active === i && "scale-110 bg-amber-600 shadow-lg"
             )}
             aria-label={`구멍 ${i + 1}`}
           />

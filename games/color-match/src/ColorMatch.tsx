@@ -210,7 +210,7 @@ export function ColorMatchGame() {
               onClick={() => handleSelect(color)}
               aria-label={COLOR_LABELS[color]}
               className={cn(
-                "aspect-square w-full rounded-lg shadow transition-transform active:scale-95 disabled:pointer-events-none disabled:opacity-50",
+                "aspect-square w-full rounded-lg shadow transition-transform duration-150 active:scale-95 disabled:pointer-events-none disabled:opacity-50",
                 COLOR_CLASSES[color]
               )}
             />

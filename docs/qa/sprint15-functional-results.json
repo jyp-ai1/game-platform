@@ -1,0 +1,662 @@
+{
+  "generatedAt": "2026-08-01T05:21:43.450Z",
+  "previewUrl": "http://localhost:3001",
+  "phase": "Functional",
+  "playMs": 45000,
+  "total": 50,
+  "pass": 49,
+  "fail": 0,
+  "knownIssue": 1,
+  "games": [
+    {
+      "slug": "2048",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "snake",
+      "checks": {
+        "start": false,
+        "play": false,
+        "save": false,
+        "resume": false,
+        "retry": false,
+        "exit": false
+      },
+      "bugs": [],
+      "verdict": "KNOWN_ISSUE"
+    },
+    {
+      "slug": "breakout",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "arkanoid-dx",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "memory",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "minesweeper",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "samegame",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "maze-runner",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "tank-battle",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "galaxy-defender",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "space-defender",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "bubble-pop",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "sudoku",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "tic-tac-toe",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "simon",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "hangman",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "color-match",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "air-hockey",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "tetris",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "gold-miner",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "space-impact",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "stack-tower",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "ball-sort",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "color-sort",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "penalty-shootout",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "darts",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "bubble-shooter",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "merge-blocks",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "connect4",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "reversi",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "gomoku",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "bowling",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "archery",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "sliding-puzzle",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "whack-a-mole",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "chess",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "checkers",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "jigsaw",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "mancala",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "mini-golf",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "billiards",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "basketball",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "table-tennis",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "domino",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "crossword",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "chess960",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "shuffleboard",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "kakuro",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "nonogram",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    },
+    {
+      "slug": "word-search",
+      "checks": {
+        "start": true,
+        "play": true,
+        "save": true,
+        "resume": true,
+        "retry": true,
+        "exit": true
+      },
+      "bugs": [],
+      "verdict": "PASS"
+    }
+  ]
+}

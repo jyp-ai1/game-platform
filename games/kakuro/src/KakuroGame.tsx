@@ -137,7 +137,7 @@ export function KakuroGame() {
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
-                "aspect-square border text-lg font-bold",
+                "aspect-square min-h-11 min-w-11 border text-lg font-bold transition-transform duration-150 active:scale-95",
                 sel ? "border-primary bg-primary/10" : "border-border bg-background"
               )}
             >

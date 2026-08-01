@@ -142,7 +142,7 @@ export function WordSearchGame() {
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
-                "aspect-square text-sm font-bold uppercase",
+                "aspect-square min-h-11 min-w-11 text-sm font-bold uppercase transition-transform duration-150 active:scale-95",
                 isHighlighted(state, r, c) && "bg-primary text-primary-foreground",
                 isAnchor(state, r, c) && "ring-2 ring-amber-400",
                 !isHighlighted(state, r, c) && "bg-background border border-border"

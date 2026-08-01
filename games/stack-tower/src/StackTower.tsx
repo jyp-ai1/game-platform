@@ -56,7 +56,8 @@ export function StackTowerGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 25 ? "combo" : "explosion", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -114,7 +115,7 @@ export function StackTowerGame() {
       </div>
       <button
         type="button"
-        className="relative h-72 w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
+        className="relative h-72 w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         ref={fieldRef}
         onClick={() => {
           if (canPlayRef.current && state.status === "playing") {

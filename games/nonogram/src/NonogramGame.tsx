@@ -133,7 +133,7 @@ export function NonogramGame() {
                       dispatch({ type: "empty", row: r, col: c });
                     }}
                     className={cn(
-                      "aspect-square w-full border border-border text-[10px] sm:text-xs",
+                "aspect-square w-full min-h-11 min-w-11 border border-border text-[10px] transition-transform duration-150 active:scale-95 sm:text-xs",
                       mark === true && "bg-primary",
                       mark === false && "text-muted-foreground"
                     )}

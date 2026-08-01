@@ -92,7 +92,8 @@ export function SpaceImpactGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 25 ? "combo" : "explosion", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -235,7 +236,7 @@ export function SpaceImpactGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-slate-950"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-slate-950 transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}

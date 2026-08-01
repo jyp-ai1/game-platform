@@ -114,7 +114,7 @@ export function JigsawGame() {
               }
             }}
             className={cn(
-              "flex aspect-square items-center justify-center rounded-lg border-2 border-white/20 text-lg font-bold text-white shadow-inner",
+              "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded-lg border-2 border-white/20 text-lg font-bold text-white shadow-inner transition-transform duration-150 active:scale-95",
               tile === 0 && "border-transparent bg-transparent shadow-none"
             )}
             style={tile ? { backgroundColor: tileColor(tile) } : undefined}

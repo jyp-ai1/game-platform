@@ -191,7 +191,7 @@ export function CheckersGame() {
                 disabled={!dark || !humanTurn}
                 onClick={() => onCell(r, c)}
                 className={cn(
-                  "aspect-square rounded-sm",
+                  "aspect-square min-h-11 min-w-11 rounded-sm transition-transform duration-150 active:scale-95",
                   dark ? "bg-amber-900/40" : "bg-muted/30",
                   isSel && "ring-2 ring-primary",
                   isTarget && "ring-2 ring-green-400"

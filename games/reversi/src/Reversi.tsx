@@ -160,7 +160,7 @@ export function ReversiGame() {
                   dispatch({ type: "place", row: ri, col: ci });
                 }}
                 className={cn(
-                  "aspect-square rounded-sm bg-green-700/50",
+                  "aspect-square min-h-11 min-w-11 rounded-sm bg-green-700/50 transition-transform duration-150 active:scale-95",
                   valid && "ring-1 ring-primary",
                   cell === 1 && "bg-neutral-900",
                   cell === 2 && "bg-neutral-100"

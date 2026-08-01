@@ -154,7 +154,7 @@ export function SameGameGame() {
               onClick={() => handleClick(row, col)}
               disabled={!color}
               aria-label={color ? `${color} 타일 (${row}, ${col})` : "빈 칸"}
-              className="aspect-square rounded-sm transition-transform hover:scale-95 disabled:cursor-default"
+              className="aspect-square min-h-11 min-w-11 rounded-sm transition-transform duration-150 active:scale-95 hover:scale-95 disabled:cursor-default"
               style={{ backgroundColor: color ? COLOR_HEX[color] : "transparent" }}
             />
           ))

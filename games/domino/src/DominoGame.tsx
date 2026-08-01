@@ -161,7 +161,7 @@ export function DominoGame() {
                   dispatch({ type: "play", index: i });
                 }}
                 className={cn(
-                  "rounded-lg border-2 px-3 py-2 font-mono text-sm",
+                  "min-h-11 rounded-lg border-2 px-3 py-3 font-mono text-sm transition-transform duration-150 active:scale-95",
                   canPlay ? "border-primary bg-primary/10 hover:bg-primary/20" : "opacity-50"
                 )}
               >

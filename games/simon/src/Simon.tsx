@@ -73,10 +73,16 @@ export function SimonGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      playGameFeel("combo", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
+
+  useEffect(() => {
+    if (state.phase === "over") {
+      playGameFeel("wrong", fieldRef.current);
+    }
+  }, [state.phase]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState({
@@ -190,7 +196,7 @@ export function SimonGame() {
                 dispatch({ type: "submitInput", color: pad.color });
               }}
               className={cn(
-                "aspect-square rounded-xl transition-transform",
+                "aspect-square min-h-11 min-w-11 rounded-xl transition-transform duration-150 active:scale-95",
                 isActive ? pad.activeClassName : pad.className,
                 isActive ? "scale-95" : "scale-100",
                 disabled ? "cursor-not-allowed" : "cursor-pointer"

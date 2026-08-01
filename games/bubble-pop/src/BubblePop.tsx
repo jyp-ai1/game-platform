@@ -340,7 +340,7 @@ export function BubblePopGame() {
       <div
         ref={fieldRef}
         className={cn(
-          "relative mx-auto w-full touch-none select-none overflow-hidden rounded-xl bg-muted",
+          "relative mx-auto w-full touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]",
           popFlash && "ring-2 ring-primary/40"
         )}
         style={{

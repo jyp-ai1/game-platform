@@ -66,7 +66,7 @@ export function MiniGolfGame() {
   useEffect(() => {
     const score = computeScore(state);
     if (score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      playGameFeel("goal", fieldRef.current);
     }
     prevScoreRef.current = score;
   }, [state.strokes, state.status]);

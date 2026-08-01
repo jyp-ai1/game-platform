@@ -70,6 +70,14 @@ export function ColorSortGame() {
     }
   }, [state.status, score, reportScore]);
 
+  const prevMovesRef = useRef(0);
+  useEffect(() => {
+    if (state.moves > prevMovesRef.current && state.status === "playing") {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevMovesRef.current = state.moves;
+  }, [state.moves, state.status]);
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     dispatch({ type: "restart" });
@@ -102,7 +110,7 @@ export function ColorSortGame() {
                 }
               }}
               className={cn(
-                "flex h-36 w-11 flex-col-reverse items-center rounded-b-lg border-2 border-foreground/20 bg-muted/50 p-1 sm:h-40 sm:w-14",
+                "flex h-36 min-h-11 w-11 min-w-11 flex-col-reverse items-center rounded-b-lg border-2 border-foreground/20 bg-muted/50 p-1 transition-transform duration-150 active:scale-95 sm:h-40 sm:w-14",
                 state.selected === ti && "ring-2 ring-primary"
               )}
               aria-label={`튜브 ${ti + 1}`}

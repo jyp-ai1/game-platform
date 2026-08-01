@@ -180,7 +180,7 @@ export function AirHockeyGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={() => playGameFeel("button", fieldRef.current)}

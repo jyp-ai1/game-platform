@@ -58,10 +58,19 @@ export function BubbleShooterGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 15 ? "combo" : "pop", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
+
+  useEffect(() => {
+    if (state.status === "won") {
+      playGameFeel("goal", fieldRef.current);
+    } else if (state.status === "over") {
+      playGameFeel("wrong", fieldRef.current);
+    }
+  }, [state.status]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
@@ -118,7 +127,7 @@ export function BubbleShooterGame() {
                   }
                 }}
                 className={cn(
-                  "m-0.5 size-8 rounded-full border border-background/30",
+                  "m-0.5 min-h-11 min-w-11 rounded-full border border-background/30 transition-transform duration-150 active:scale-95",
                   cell ? COLORS[cell] : "bg-background/20"
                 )}
                 aria-label={cell ? `열 ${ci + 1}` : `빈 칸 열 ${ci + 1}`}

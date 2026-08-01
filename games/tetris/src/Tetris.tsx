@@ -252,7 +252,7 @@ export function TetrisGame() {
 
       <div
         ref={fieldRef}
-        className="relative grid aspect-[1/2] w-full max-w-xs touch-none select-none gap-px rounded-xl bg-muted p-1"
+        className="relative grid aspect-[1/2] w-full max-w-xs touch-none select-none gap-px rounded-xl bg-muted p-1 transition-transform duration-150"
         style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}

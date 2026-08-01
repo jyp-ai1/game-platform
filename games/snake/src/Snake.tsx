@@ -142,6 +142,12 @@ export function SnakeGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  useEffect(() => {
+    if (state.status === "over") {
+      playGameFeel("explosion", fieldRef.current);
+    }
+  }, [state.status]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     fieldRef,
@@ -253,7 +259,7 @@ export function SnakeGame() {
       </div>
 
       <div
-        className="relative grid aspect-square w-full max-w-sm touch-none select-none gap-px rounded-xl bg-muted p-1"
+        className="relative grid aspect-square w-full max-w-sm touch-none select-none gap-px rounded-xl bg-muted p-1 transition-transform duration-150"
         ref={fieldRef}
         style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)` }}
         onTouchStart={handleTouchStart}

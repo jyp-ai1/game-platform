@@ -54,7 +54,8 @@ export function BowlingGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 25 ? "combo" : "explosion", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);

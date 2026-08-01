@@ -67,7 +67,8 @@ export function MergeBlocksGame() {
 
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("merge", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 20 ? "combo" : "merge", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -108,7 +109,7 @@ export function MergeBlocksGame() {
                 }
               }}
               className={cn(
-                "flex aspect-square w-full items-center justify-center rounded text-sm font-bold",
+                "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded text-sm font-bold transition-transform duration-150 active:scale-95",
                 cell ? "bg-primary/80 text-primary-foreground" : "bg-background/50"
               )}
             >

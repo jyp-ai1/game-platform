@@ -138,7 +138,7 @@ export function Connect4Game() {
                 feelTap();
                 dispatch({ type: "drop", col });
               }}
-              className="flex-1 rounded bg-muted py-2 text-xs hover:bg-primary/20 disabled:opacity-40"
+              className="flex min-h-11 min-w-11 flex-1 items-center justify-center rounded bg-muted py-3 text-xs transition-transform duration-150 active:scale-95 hover:bg-primary/20 disabled:opacity-40"
             >
               ▼
             </button>

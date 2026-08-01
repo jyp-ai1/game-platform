@@ -142,7 +142,7 @@ export function GomokuGame() {
                   dispatch({ type: "place", row: ri, col: ci });
                 }}
                 className={cn(
-                  "aspect-square rounded-sm bg-amber-100/20",
+                  "aspect-square min-h-11 min-w-11 rounded-sm bg-amber-100/20 transition-transform duration-150 active:scale-95",
                   cell === 1 && "bg-neutral-900",
                   cell === 2 && "bg-neutral-100",
                   win && "ring-2 ring-amber-400"

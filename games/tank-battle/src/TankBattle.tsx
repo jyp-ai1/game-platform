@@ -98,7 +98,8 @@ export function TankBattleGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 25 ? "combo" : "explosion", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -209,7 +210,7 @@ export function TankBattleGame() {
       </div>
 
       <div
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         ref={fieldRef}
         style={{ aspectRatio: "1 / 1" }}
       >

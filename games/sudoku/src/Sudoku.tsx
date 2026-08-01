@@ -105,7 +105,7 @@ export function SudokuGame() {
 
   useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("correct");
+      playGameFeel("goal");
     }
   }, [state.status]);
 
@@ -191,7 +191,7 @@ export function SudokuGame() {
                   dispatch({ type: "select", row, col });
                 }}
                 className={cn(
-                  "flex aspect-square items-center justify-center text-sm font-semibold sm:text-base",
+                  "flex aspect-square min-h-11 min-w-11 items-center justify-center text-sm font-semibold transition-transform duration-150 active:scale-95 sm:text-base",
                   isGiven ? "bg-muted-foreground/20" : "bg-background hover:bg-muted-foreground/10",
                   isSelected && "bg-primary/30",
                   isWrong ? "text-destructive" : "text-foreground",
@@ -224,7 +224,7 @@ export function SudokuGame() {
       <div className="grid w-full max-w-sm grid-cols-5 gap-2">
         <Button
           variant="secondary"
-          className="col-span-5"
+          className="col-span-5 min-h-11 py-3 transition-transform duration-150 active:scale-95"
           disabled={!interactive}
           onClick={() => {
             playGameFeel("button");
@@ -237,6 +237,7 @@ export function SudokuGame() {
           <Button
             key={digit}
             variant="outline"
+            className="min-h-11 py-3 transition-transform duration-150 active:scale-95"
             disabled={!interactive}
             onClick={() => {
               playGameFeel("button");

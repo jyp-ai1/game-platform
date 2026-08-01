@@ -158,7 +158,7 @@ export function TicTacToeGame() {
               disabled={!isHumanTurn || cell !== null}
               aria-label={cell ? `칸 ${index + 1}: ${cell}` : `칸 ${index + 1}`}
               className={cn(
-                "flex items-center justify-center rounded-lg bg-background text-4xl font-bold transition-colors",
+                "flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-background text-4xl font-bold transition-transform duration-150 active:scale-95",
                 !cell && isHumanTurn && "hover:bg-muted-foreground/20",
                 isWinningCell && "bg-primary/30",
                 cell === "X" && "text-primary",

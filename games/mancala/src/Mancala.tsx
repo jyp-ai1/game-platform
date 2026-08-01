@@ -171,7 +171,7 @@ export function MancalaGame() {
                 dispatch({ type: "pick", pit });
               }}
               className={cn(
-                "flex aspect-[2/1] flex-col items-center justify-center rounded-lg bg-primary/20 text-sm",
+                "flex min-h-11 aspect-[2/1] flex-col items-center justify-center rounded-lg bg-primary/20 py-3 text-sm transition-transform duration-150 active:scale-95",
                 humanTurn && state.pits[pit]! > 0 && "hover:bg-primary/40"
               )}
             >

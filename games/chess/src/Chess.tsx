@@ -185,7 +185,7 @@ export function ChessGame() {
                 disabled={!humanTurn}
                 onClick={() => onCell(r, c)}
                 className={cn(
-                  "flex aspect-square items-center justify-center text-2xl",
+                  "flex aspect-square min-h-11 min-w-11 items-center justify-center text-2xl transition-transform duration-150 active:scale-95",
                   light ? "bg-muted/50" : "bg-amber-900/30",
                   isSel && "ring-2 ring-primary",
                   isTarget && "ring-2 ring-green-400"

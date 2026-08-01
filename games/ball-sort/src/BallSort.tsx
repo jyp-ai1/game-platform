@@ -70,6 +70,14 @@ export function BallSortGame() {
     }
   }, [state.status, score, reportScore]);
 
+  const prevMovesRef = useRef(0);
+  useEffect(() => {
+    if (state.moves > prevMovesRef.current && state.status === "playing") {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevMovesRef.current = state.moves;
+  }, [state.moves, state.status]);
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     dispatch({ type: "restart" });
@@ -102,7 +110,7 @@ export function BallSortGame() {
                 }
               }}
               className={cn(
-                "flex h-32 w-[2.25rem] flex-col-reverse items-center rounded-b-full border-2 border-foreground/20 bg-muted/30 sm:h-36 sm:w-12",
+                "flex h-32 min-h-11 w-11 min-w-11 flex-col-reverse items-center rounded-b-full border-2 border-foreground/20 bg-muted/30 transition-transform duration-150 active:scale-95 sm:h-36 sm:w-12",
                 state.selected === ti && "ring-2 ring-primary"
               )}
             >

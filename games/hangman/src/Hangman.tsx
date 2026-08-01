@@ -56,13 +56,27 @@ export function HangmanGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevGuessedRef = useRef(0);
+  const prevWrongRef = useRef(0);
   useEffect(() => {
     const correct = state.guessedLetters.filter((l) => state.word.includes(l)).length;
     if (correct > prevGuessedRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      playGameFeel("correct", fieldRef.current);
     }
     prevGuessedRef.current = correct;
   }, [state.guessedLetters, state.word]);
+
+  useEffect(() => {
+    if (state.wrongGuesses > prevWrongRef.current) {
+      playGameFeel("wrong", fieldRef.current);
+    }
+    prevWrongRef.current = state.wrongGuesses;
+  }, [state.wrongGuesses]);
+
+  useEffect(() => {
+    if (state.status === "won") {
+      playGameFeel("goal", fieldRef.current);
+    }
+  }, [state.status]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
@@ -172,7 +186,7 @@ export function HangmanGame() {
                     }}
                     aria-label={`${letter} 추측`}
                     className={cn(
-                      "flex size-8 items-center justify-center rounded-md text-sm font-semibold transition-colors disabled:pointer-events-none",
+                      "flex min-h-11 min-w-11 items-center justify-center rounded-md text-sm font-semibold transition-transform duration-150 active:scale-95 disabled:pointer-events-none",
                       !guessed && "bg-background hover:bg-primary/20",
                       guessed && correct && "bg-primary text-primary-foreground",
                       guessed && !correct && "bg-destructive/20 text-destructive"

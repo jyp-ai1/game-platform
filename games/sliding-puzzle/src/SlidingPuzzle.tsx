@@ -50,6 +50,14 @@ export function SlidingPuzzleGame() {
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "won" ? null : state), [state]);
 
+  const prevMovesRef = useRef(0);
+  useEffect(() => {
+    if (state.moves > prevMovesRef.current && state.status === "playing") {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevMovesRef.current = state.moves;
+  }, [state.moves, state.status]);
+
   useEffect(() => {
     if (state.status === "won") {
       playGameFeel("goal", fieldRef.current);
@@ -91,7 +99,7 @@ export function SlidingPuzzleGame() {
               }
             }}
             className={cn(
-              "flex aspect-square items-center justify-center rounded-lg text-lg font-bold",
+              "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded-lg text-lg font-bold transition-transform duration-150 active:scale-95",
               tile ? "bg-primary text-primary-foreground" : "bg-transparent"
             )}
           >

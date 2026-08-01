@@ -83,7 +83,8 @@ export function TableTennisGame() {
 
   useEffect(() => {
     if (state.playerScore > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.playerScore - prevScoreRef.current;
+      playGameFeel(gain >= 25 ? "combo" : "goal", fieldRef.current);
     }
     prevScoreRef.current = state.playerScore;
   }, [state.playerScore]);

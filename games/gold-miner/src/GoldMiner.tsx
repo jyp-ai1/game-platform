@@ -85,7 +85,8 @@ export function GoldMinerGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      const gain = state.score - prevScoreRef.current;
+      playGameFeel(gain >= 25 ? "combo" : "explosion", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -193,7 +194,7 @@ export function GoldMinerGame() {
       </div>
 
       <div
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-amber-950/30"
+        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-amber-950/30 transition-transform duration-150 active:scale-[0.99]"
         ref={fieldRef}
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerDown={handleFire}

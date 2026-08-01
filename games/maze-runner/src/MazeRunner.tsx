@@ -72,7 +72,7 @@ export function MazeRunnerGame() {
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("pop", fieldRef.current);
+      playGameFeel("goal", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
@@ -198,7 +198,7 @@ export function MazeRunnerGame() {
       </div>
 
       <div
-        className="relative grid w-full max-w-sm touch-none select-none gap-0 rounded-xl bg-muted p-1"
+        className="relative grid w-full max-w-sm touch-none select-none gap-0 rounded-xl bg-muted p-1 transition-transform duration-150"
         ref={fieldRef}
         style={{
           gridTemplateColumns: `repeat(${COLS}, 1fr)`,

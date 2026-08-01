@@ -267,7 +267,7 @@ export function MinesweeperGame() {
               onClick={() => handleClick(row, col)}
               onContextMenu={(event) => handleContextMenu(event, row, col)}
               className={cn(
-                "flex aspect-square items-center justify-center rounded-[3px] text-[10px] font-bold sm:text-xs",
+                "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded-[3px] text-[10px] font-bold transition-transform duration-150 active:scale-95 sm:text-xs",
                 cell.revealed
                   ? cell.mine
                     ? "bg-destructive/20"
