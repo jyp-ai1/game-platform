@@ -49,6 +49,44 @@ const ReplayTimelineStrip = dynamic(
   { ssr: false, loading: () => null }
 );
 
+function HomePopularSection({ games, popular }: { games: Game[]; popular: Game[] }) {
+  return (
+    <section
+      aria-labelledby="home-popular-heading"
+      className="border-t border-white/5 py-5 sm:py-6"
+      data-testid="home-popular-section"
+    >
+      <Container>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 id="home-popular-heading" className="text-base font-semibold">
+              Popular
+            </h2>
+            <p className="text-xs text-muted-foreground">{games.length}개 게임</p>
+          </div>
+          <Link
+            href="/games"
+            className="motion-base shrink-0 rounded-xl border border-white/15 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/40"
+          >
+            Browse All →
+          </Link>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {popular.map((g) => (
+            <Link
+              key={g.slug}
+              href={`/games/${g.slug}`}
+              className="motion-base rounded-full border border-white/10 bg-card/60 px-4 py-2 text-sm transition-colors hover:border-primary/40"
+            >
+              {g.title}
+            </Link>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 export function HomeShell({
   games,
   snakeGame,
@@ -102,10 +140,17 @@ export function HomeShell({
         <HomeBrandHero />
         <ReplayTogetherStrip />
 
-        {belowFold ? (
+        {bootReady ? (
           <>
             <HomeContinueHub games={games} />
             <HomeRuleRecommendations games={games} large />
+            <HomePopularSection games={games} popular={popular} />
+            <HomeMultiplayerSection snakeGame={snakeGame} />
+          </>
+        ) : null}
+
+        {belowFold ? (
+          <>
             <HomePeopleFirstStrip />
 
             <section
@@ -121,41 +166,6 @@ export function HomeShell({
             <ReplayTimelineStrip games={games} />
           </>
         ) : null}
-
-        <section
-          aria-labelledby="home-explore-heading"
-          className="border-t border-white/5 py-5 sm:py-6 opacity-80"
-        >
-          <Container>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 id="home-explore-heading" className="text-base font-semibold text-muted-foreground">
-                  혼자 탐험
-                </h2>
-                <p className="text-xs text-muted-foreground">{games.length}개 게임 · Party 없을 때</p>
-              </div>
-              <Link
-                href="/games"
-                className="motion-base shrink-0 rounded-xl border border-white/15 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/40"
-              >
-                Browse All →
-              </Link>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {popular.map((g) => (
-                <Link
-                  key={g.slug}
-                  href={`/games/${g.slug}`}
-                  className="motion-base rounded-full border border-white/10 bg-card/60 px-4 py-2 text-sm transition-colors hover:border-primary/40"
-                >
-                  {g.title}
-                </Link>
-              ))}
-            </div>
-          </Container>
-        </section>
-
-        <HomeMultiplayerSection snakeGame={snakeGame} />
       </div>
     </div>
   );
