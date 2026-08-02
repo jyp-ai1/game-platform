@@ -394,6 +394,14 @@ export function createInitialWorld(
 export function rehydrateWorldSnakes(world: SnakeIoWorld): void {
   for (const snake of Object.values(world.snakes)) {
     ensureSnakePath(snake);
+    if (snake.segments.length === 0 && snake.headX != null && snake.headY != null) {
+      syncSegmentsFromPath(snake);
+    }
+    if (snake.alive && snake.segments.length === 0) {
+      const cx = world.config.worldSize / 2;
+      const cy = world.config.worldSize / 2;
+      initSnakePath(snake, snake.headX ?? cx, snake.headY ?? cy, snake.angle ?? 0);
+    }
   }
 }
 

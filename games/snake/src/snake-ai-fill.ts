@@ -390,6 +390,7 @@ export function ensureLocalSnake(
   }
   const snake = createLocalSnake(world, deviceId, nickname, playerIndex);
   snake.awaitingInput = world.living?.matchRule.humanAutoRespawn ? false : true;
+  snake.spectating = false;
   return snake;
 }
 

@@ -172,6 +172,16 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 
 type PlayerInputPayload = { deviceId: string; direction: Direction; boosting?: boolean };
 
+function rc014Debug(
+  tag: "SPAWN" | "RENDER" | "CAMERA" | "PLAYER",
+  message: string,
+  detail?: Record<string, unknown>
+): void {
+  if (typeof console === "undefined") return;
+  if (detail) console.debug(`[${tag}]`, message, detail);
+  else console.debug(`[${tag}]`, message);
+}
+
 function sendPlayerInput(roomCode: string, globalWorld: boolean, payload: PlayerInputPayload): void {
   send(roomCode, globalWorld ? `input:${payload.deviceId}` : "input", payload);
 }
@@ -293,7 +303,11 @@ export function SnakeIoGame({
   );
   void progressionStage;
   const isHost = isLocalOnly || room?.hostId === deviceId;
-  const shouldTickWorld = isLocalOnly || isHost;
+  const isSoloWorldPlayer =
+    isGlobalWorld &&
+    room?.players.length === 1 &&
+    room.players[0]?.deviceId === deviceId;
+  const shouldTickWorld = isLocalOnly || isHost || isSoloWorldPlayer;
   const mySnake = world?.snakes[deviceId];
   const isSpectating = !isStageMode && mySnake?.spectating && !mySnake?.alive;
   const stageConfig = isStageMode ? getSnakeStage(stageIndex) : null;
@@ -317,6 +331,29 @@ export function SnakeIoGame({
   const announcements = world ? getActiveAnnouncements(world) : [];
   const latestKill = world?.killFeed[0];
 
+  const snapCameraToLocalSnake = useCallback((reason: string): boolean => {
+    const s = worldRef.current?.snakes[deviceId];
+    const head = resolveSnakeHead(s ?? undefined);
+    const layout = camLayoutRef.current;
+    if (!head || layout.cellSize <= 0) {
+      rc014Debug("CAMERA", `snap skipped (${reason})`, {
+        hasHead: !!head,
+        cellSize: layout.cellSize,
+      });
+      return false;
+    }
+    camRef.current = {
+      x: head.x * layout.cellSize - layout.camHalfX,
+      y: head.y * layout.cellSize - layout.camHalfY,
+    };
+    rc014Debug("CAMERA", `snap ok (${reason})`, {
+      head,
+      cam: { x: camRef.current.x, y: camRef.current.y },
+      cellSize: layout.cellSize,
+    });
+    return true;
+  }, [deviceId]);
+
   const beginSpawnReady = useCallback(() => {
     awaitingInputRef.current = true;
     setAwaitingInput(true);
@@ -329,21 +366,14 @@ export function SnakeIoGame({
       snake.spectating = false;
     }
     const snapCamera = () => {
-      const s = worldRef.current?.snakes[deviceId];
-      const head = resolveSnakeHead(s ?? undefined);
-      const layout = camLayoutRef.current;
-      if (head && layout.cellSize > 0) {
-        camRef.current = {
-          x: head.x * layout.cellSize - layout.camHalfX,
-          y: head.y * layout.cellSize - layout.camHalfY,
-        };
+      if (!snapCameraToLocalSnake("beginSpawnReady")) {
+        requestAnimationFrame(() => snapCameraToLocalSnake("beginSpawnReady-rAF"));
       }
     };
     snapCamera();
-    requestAnimationFrame(snapCamera);
     transitionGamePhase("READY", "await-input");
     transitionGamePhase("COUNTDOWN", "await-input");
-  }, [deviceId]);
+  }, [deviceId, snapCameraToLocalSnake]);
 
   /** WORLD immersive — skip wait gate; player snake visible and active immediately. */
   const beginSpawnActive = useCallback(() => {
@@ -358,20 +388,13 @@ export function SnakeIoGame({
       snake.spectating = false;
     }
     const snapCamera = () => {
-      const s = worldRef.current?.snakes[deviceId];
-      const head = resolveSnakeHead(s ?? undefined);
-      const layout = camLayoutRef.current;
-      if (head && layout.cellSize > 0) {
-        camRef.current = {
-          x: head.x * layout.cellSize - layout.camHalfX,
-          y: head.y * layout.cellSize - layout.camHalfY,
-        };
+      if (!snapCameraToLocalSnake("beginSpawnActive")) {
+        requestAnimationFrame(() => snapCameraToLocalSnake("beginSpawnActive-rAF"));
       }
     };
     snapCamera();
-    requestAnimationFrame(snapCamera);
     transitionGamePhase("PLAYING", "auto-start");
-  }, [deviceId]);
+  }, [deviceId, snapCameraToLocalSnake]);
 
   useEffect(() => {
     if (!latestKill) return;
@@ -799,19 +822,32 @@ export function SnakeIoGame({
 
     const spawnTrace = (line: string) => {
       appendLifecycle(line);
-      if (typeof console !== "undefined") console.info(`[SPAWN] ${line}`);
+      rc014Debug("SPAWN", line);
     };
 
-    const attachLocalPlayer = (w: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
+    const bindLocalPlayerSnake = (
+      w: SnakeIoWorld,
+      r: GameRoom,
+      opts: { populationSync?: boolean; reviveDead?: boolean }
+    ): SnakeIoWorld => {
       spawnTrace("GAME_INIT");
       spawnTrace("PLAYER_REGISTER");
       const humans = humansForRoom(r);
-      if (isGlobalWorld) {
+      if (opts.populationSync && isGlobalWorld) {
         syncSnakePopulation(w, humans, SNAKE_WORLD_TARGET, deviceId);
       }
       rehydrateWorldSnakes(w);
+
       let me = w.snakes[deviceId];
-      if (me && !me.alive) {
+      rc014Debug("PLAYER", "lookup", {
+        deviceId,
+        found: !!me,
+        alive: me?.alive,
+        segments: me ? getSegmentCount(me) : 0,
+        renderSegs: me?.segments.length ?? 0,
+      });
+
+      if (me && !me.alive && opts.reviveDead) {
         restartPlayerSnake(w, deviceId, getLastNickname() || "Player");
         me = w.snakes[deviceId];
         spawnTrace("PLAYER_REVIVE dead→retry spawn");
@@ -819,17 +855,22 @@ export function SnakeIoGame({
       if (!me) {
         const idx = humans.findIndex((h) => h.deviceId === deviceId);
         me = ensureLocalSnake(w, deviceId, getLastNickname() || "Player", Math.max(0, idx));
-        spawnTrace("PLAYER_CREATE retry ensureLocalSnake");
+        spawnTrace("PLAYER_CREATE ensureLocalSnake");
         recordSpawnAudit(`ensureLocalSnake len=${getSegmentCount(me)}`, true);
       }
       if (me) {
+        if (isGlobalWorld || immersiveWorld) {
+          me.awaitingInput = false;
+          me.spectating = false;
+        }
         applyLocalHead(w);
+        rehydrateWorldSnakes(w);
         spawnTrace("PLAYER_CREATE");
         spawnTrace(`SPAWN_SUCCESS len=${getSegmentCount(me)}`);
         recordSpawnAudit(`PLAYER_CREATE len=${getSegmentCount(me)}`, true);
       } else {
-        spawnTrace("PLAYER_CREATE FAIL — missing after syncSnakePopulation");
-        recordSpawnAudit("missing after syncSnakePopulation", false);
+        spawnTrace("PLAYER_CREATE FAIL — missing after bind");
+        recordSpawnAudit("missing after bindLocalPlayerSnake", false);
       }
       return w;
     };
@@ -838,20 +879,17 @@ export function SnakeIoGame({
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
-          // Host-authoritative WORLD: non-host clients render shared simulation.
-          if (!isHost) {
-            worldRef.current = structuredClone(state);
-            setWorld(structuredClone(state));
-            return;
-          }
-          if (!worldRef.current) {
-            const next = attachLocalPlayer(structuredClone(state), r);
-            worldRef.current = next;
-            setWorld(next);
-            return;
-          }
-          worldRef.current = structuredClone(state);
-          setWorld(structuredClone(state));
+          const next = bindLocalPlayerSnake(structuredClone(state), r, {
+            populationSync: isHost && !state.snakes[deviceId],
+            reviveDead: isHost,
+          });
+          worldRef.current = next;
+          setWorld(next);
+          rc014Debug("SPAWN", "applyRoom global state", {
+            isHost,
+            localBound: !!next.snakes[deviceId],
+            totalSnakes: Object.keys(next.snakes).length,
+          });
           return;
         }
         worldRef.current = state;
@@ -865,7 +903,7 @@ export function SnakeIoGame({
         const humans = humansForRoom(r);
         const persisted = isGlobalWorld ? loadPersistedGlobalWorld(effectiveRoomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
-        initial = attachLocalPlayer(initial, r);
+        initial = bindLocalPlayerSnake(initial, r, { populationSync: true, reviveDead: true });
         if (isGlobalWorld && !persisted) warmGlobalWorld(initial);
         initial.objective = obj;
         initLivingWorld(initial, resolveSnakeMatchRule(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
@@ -884,7 +922,7 @@ export function SnakeIoGame({
     const current = getRoom(effectiveRoomCode);
     if (current) applyRoom(current);
     return unsub;
-  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId]);
+  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId, applyLocalHead, immersiveWorld]);
 
   useEffect(() => {
     if (!world) return;
@@ -906,6 +944,91 @@ export function SnakeIoGame({
       beginSpawnReady();
     }
   }, [world, activeRoom, deviceId, beginSpawnReady, beginSpawnActive, immersiveWorld]);
+
+  useEffect(() => {
+    if (!world || !isGlobalWorld) return;
+    const me = world.snakes[deviceId];
+    if (!me?.alive || me.spectating) return;
+    if (!snapCameraToLocalSnake("mySnake-ready")) {
+      requestAnimationFrame(() => snapCameraToLocalSnake("mySnake-ready-rAF"));
+    }
+  }, [
+    world?.snakes[deviceId]?.alive,
+    world?.snakes[deviceId]?.spectating,
+    deviceId,
+    isGlobalWorld,
+    viewportSize.w,
+    viewportSize.h,
+    boardPx,
+    snapCameraToLocalSnake,
+  ]);
+
+  useEffect(() => {
+    if (!connected || !isGlobalWorld || isLocalOnly) return;
+    const started = Date.now();
+    const id = window.setInterval(() => {
+      if (Date.now() - started > 5000) {
+        window.clearInterval(id);
+        return;
+      }
+      const wr = worldRef.current;
+      const r = getRoom(activeRoom);
+      if (!wr || !r) return;
+      const me = wr.snakes[deviceId];
+      if (me?.alive && me.segments.length > 0) return;
+
+      rc014Debug("SPAWN", "recovery tick", {
+        hasMe: !!me,
+        alive: me?.alive,
+        segs: me?.segments.length ?? 0,
+      });
+      const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
+      if (!humans.some((h) => h.deviceId === deviceId)) {
+        humans.push({ deviceId, nickname: getLastNickname() || "Player" });
+      }
+      const next = structuredClone(wr);
+      if (isHost) syncSnakePopulation(next, humans, SNAKE_WORLD_TARGET, deviceId);
+      rehydrateWorldSnakes(next);
+      if (!next.snakes[deviceId]?.alive) {
+        const idx = humans.findIndex((h) => h.deviceId === deviceId);
+        ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
+      }
+      const bound = next.snakes[deviceId];
+      if (bound) {
+        bound.awaitingInput = false;
+        bound.spectating = false;
+        applyLocalHead(next);
+        rehydrateWorldSnakes(next);
+      }
+      worldRef.current = next;
+      setWorld(next);
+      snapCameraToLocalSnake("recovery");
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [
+    connected,
+    isGlobalWorld,
+    isLocalOnly,
+    activeRoom,
+    deviceId,
+    isHost,
+    applyLocalHead,
+    snapCameraToLocalSnake,
+  ]);
+
+  useEffect(() => {
+    if (!world) return;
+    const me = world.snakes[deviceId];
+    if (me?.alive && me.segments.length > 0) return;
+    rc014Debug("RENDER", "local snake missing or empty", {
+      totalSnakes: Object.keys(world.snakes).length,
+      localBound: !!me,
+      localAlive: me?.alive,
+      localSegs: me?.segments.length ?? 0,
+      renderAlpha,
+      cellSize: camLayoutRef.current.cellSize,
+    });
+  }, [world, deviceId, renderAlpha]);
 
   useEffect(() => {
     if (!connected || !world) transitionGamePhase("LOADING");
@@ -1039,16 +1162,16 @@ export function SnakeIoGame({
         rehydrateWorldSnakes(next);
         if (!next.snakes[deviceId]) {
           const idx = humans.findIndex((h) => h.deviceId === deviceId);
-          ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
+          const created = ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
+          created.awaitingInput = false;
+          created.spectating = false;
           applyLocalHead(next);
-          const head = resolveSnakeHead(next.snakes[deviceId]);
-          const layout = camLayoutRef.current;
-          if (head && layout.cellSize > 0) {
-            camRef.current = {
-              x: head.x * layout.cellSize - layout.camHalfX,
-              y: head.y * layout.cellSize - layout.camHalfY,
-            };
-          }
+          rehydrateWorldSnakes(next);
+          rc014Debug("SPAWN", "host tick ensureLocalSnake", {
+            len: getSegmentCount(created),
+            head: resolveSnakeHead(created),
+          });
+          snapCameraToLocalSnake("host-tick");
         }
         tickBotBrains(next);
         recordGlobalWorldTick(activeRoom, {
@@ -1207,7 +1330,7 @@ export function SnakeIoGame({
       }
     }, tickMs);
     return () => clearInterval(id);
-  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch]);
+  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch, applyLocalHead, snapCameraToLocalSnake]);
 
   useEffect(() => {
     if (!mySnake) return;
