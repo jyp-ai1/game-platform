@@ -1,5 +1,4 @@
 import { SnakeIoPlayClientRoot } from "@/components/snake-io-play-client";
-import { SnakeIoPlayMeta } from "@/components/snake-io-play-meta";
 import { getGameBySlug } from "@/lib/supabase/games";
 import { Suspense } from "react";
 
@@ -9,19 +8,10 @@ export default async function SnakeIoPlayPage() {
   const game = await getGameBySlug("snake");
 
   return (
-    <main className="flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-background">
-      <div className="flex min-h-0 shrink-0 justify-center overflow-hidden">
-        <div className="w-full max-w-4xl">
-          <Suspense fallback={<p className="py-8 text-center text-muted-foreground">Loading…</p>}>
-            <SnakeIoPlayClientRoot />
-          </Suspense>
-        </div>
-      </div>
-      {game ? (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <SnakeIoPlayMeta game={game} />
-        </div>
-      ) : null}
+    <main className="fixed inset-0 z-[100] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black">
+      <Suspense fallback={<p className="py-8 text-center text-muted-foreground">Loading…</p>}>
+        <SnakeIoPlayClientRoot showMetaAfterExit={!!game} game={game ?? undefined} />
+      </Suspense>
     </main>
   );
 }

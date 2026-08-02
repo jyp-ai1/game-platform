@@ -216,7 +216,20 @@ function findFloatingBubbles(
 }
 
 function isGridEmpty(grid: (BubbleColor | null)[][]): boolean {
-  return grid.every((row) => row.every((cell) => cell === null));
+  return countGridBubbles(grid) === 0;
+}
+
+/** Bubbles remaining on the playfield — stage clear requires zero. */
+export function countGridBubbles(grid: (BubbleColor | null)[][]): number {
+  let count = 0;
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      if (grid[row]?.[col]) {
+        count += 1;
+      }
+    }
+  }
+  return count;
 }
 
 export function fireBubble(state: BubblePopState): BubblePopState {
@@ -398,10 +411,14 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   let status: BubblePopStatus = state.status;
   const reachedDangerLine =
     grid.slice(DANGER_ROW).some((row) => row.some((cell) => cell !== null));
+  const bubblesRemaining = countGridBubbles(grid);
   if (reachedDangerLine) {
     status = "over";
-  } else if (isGridEmpty(grid)) {
+  } else if (bubblesRemaining === 0 && state.flyingBubble === null) {
     status = state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear";
+  } else if (status === "stage-clear" || status === "won") {
+    // Never hold a clear state while bubbles remain (e.g. after ceiling drop).
+    status = "playing";
   }
 
   return {

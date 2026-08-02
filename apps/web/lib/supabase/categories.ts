@@ -1,5 +1,7 @@
 import type { Category } from "@game-platform/shared";
 
+import { getFallbackCategory } from "@/lib/category-fallbacks";
+
 import { supabase } from "./client";
 
 interface CategoryRow {
@@ -51,5 +53,5 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
     throw new Error(`Failed to fetch category "${slug}": ${error.message}`);
   }
 
-  return data ? mapCategoryRow(data) : null;
+  return data ? mapCategoryRow(data) : getFallbackCategory(slug);
 }

@@ -14,7 +14,9 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Component, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
+import { SnakeIoPlayMeta } from "@/components/snake-io-play-meta";
 import { SnakeDebugOverlay } from "@/components/snake-debug-overlay";
+import type { Game } from "@game-platform/shared";
 import {
   loadSnakeHeadCharacter,
   saveSnakeHeadCharacter,
@@ -85,15 +87,28 @@ class SnakePlayErrorBoundary extends Component<
   }
 }
 
-function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) {
+function SnakeIoPlayInner({
+  practiceMode = false,
+  debugMode = false,
+  immersiveWorld = false,
+  showMetaAfterExit = false,
+  gameMeta,
+}: {
+  practiceMode?: boolean;
+  debugMode?: boolean;
+  immersiveWorld?: boolean;
+  showMetaAfterExit?: boolean;
+  gameMeta?: Game;
+}) {
   const params = useSearchParams();
-  const debugMode = params.get("debug") === "1";
   const router = useRouter();
   const room = params.get("room");
   const isStageMode = room?.toUpperCase() === "STAGE";
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
   const [headCharacter, setHeadCharacter] = useState<SnakeHeadId>(() => loadSnakeHeadCharacter());
   const [characterReady, setCharacterReady] = useState(false);
+  const [worldEntered, setWorldEntered] = useState(!immersiveWorld);
+  const [showPostGameMeta, setShowPostGameMeta] = useState(false);
   const [sessionSummary, setSessionSummary] = useState<{
     score: number;
     rewards: UniversalRewardBundle;
@@ -200,7 +215,22 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
   }, [loop, router]);
 
   if (loop) {
-    return <ViralLoopResultPanel loop={loop} onRematch={handleRematch} />;
+    return (
+      <div className="h-full min-h-0 overflow-y-auto bg-background">
+        <ViralLoopResultPanel loop={loop} onRematch={handleRematch} />
+        {showMetaAfterExit && gameMeta ? (
+          <SnakeIoPlayMeta game={gameMeta} />
+        ) : null}
+      </div>
+    );
+  }
+
+  if (showPostGameMeta && showMetaAfterExit && gameMeta) {
+    return (
+      <div className="h-full min-h-0 overflow-y-auto bg-background">
+        <SnakeIoPlayMeta game={gameMeta} />
+      </div>
+    );
   }
 
   if (!characterReady) {
@@ -216,11 +246,36 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
     );
   }
 
+  if (immersiveWorld && !worldEntered) {
+    return (
+      <div className="flex h-full min-h-[100dvh] flex-col items-center justify-center gap-5 bg-black px-6 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-400/90">Live Multiplayer</p>
+        <h1 className="text-3xl font-black text-white sm:text-4xl">Snake WORLD</h1>
+        <p className="max-w-sm text-sm text-white/60">
+          같은 맵에서 실시간으로 경쟁합니다. 방향키로 움직이고 Space로 부스트하세요.
+        </p>
+        <button
+          type="button"
+          className="rounded-xl bg-emerald-500 px-10 py-3.5 text-base font-bold text-black shadow-[0_0_24px_rgba(16,185,129,0.45)] transition hover:bg-emerald-400"
+          onClick={() => setWorldEntered(true)}
+        >
+          ENTER WORLD
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       {debugMode ? <SnakeDebugOverlay /> : null}
       <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
-        <SnakeIoGame practiceMode={practiceMode} onJoinTimeout={goPractice} headCharacter={headCharacter} />
+        <SnakeIoGame
+          practiceMode={practiceMode}
+          onJoinTimeout={goPractice}
+          headCharacter={headCharacter}
+          debugHud={debugMode}
+          immersiveWorld={immersiveWorld}
+        />
       </SnakePlayErrorBoundary>
       {sessionSummary ? (
         <GameResultModal
@@ -229,6 +284,10 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
           rewards={sessionSummary.rewards}
           onClose={() => {
             setSessionSummary(null);
+            if (showMetaAfterExit && gameMeta) {
+              setShowPostGameMeta(true);
+              return;
+            }
             router.push("/games/snake");
           }}
         />
@@ -238,9 +297,18 @@ function SnakeIoPlayInner({ practiceMode = false }: { practiceMode?: boolean }) 
 }
 
 /** Snake.io play — SDK wrapper, SSR off, practice fallback. */
-export function SnakeIoPlayClient() {
+export function SnakeIoPlayClient({
+  showMetaAfterExit = false,
+  gameMeta,
+}: {
+  showMetaAfterExit?: boolean;
+  gameMeta?: Game;
+} = {}) {
   const params = useSearchParams();
   const practiceMode = params.get("room")?.toUpperCase() === "PRACTICE";
+  const room = params.get("room")?.toUpperCase() ?? "";
+  const debugMode = params.get("debug") === "1";
+  const immersiveWorld = room === "WORLD" || room.startsWith("WORLD-");
   const sdk = useMemo(() => ({ submitScore }), []);
 
   useEffect(() => {
@@ -250,15 +318,27 @@ export function SnakeIoPlayClient() {
   return (
     <GameSDKProvider sdk={sdk}>
       <GameErrorMonitor gameSlug="snake" />
-      <SnakeIoPlayInner practiceMode={practiceMode} />
+      <SnakeIoPlayInner
+        practiceMode={practiceMode}
+        debugMode={debugMode}
+        immersiveWorld={immersiveWorld}
+        showMetaAfterExit={showMetaAfterExit}
+        gameMeta={gameMeta}
+      />
     </GameSDKProvider>
   );
 }
 
-export function SnakeIoPlayClientRoot() {
+export function SnakeIoPlayClientRoot({
+  showMetaAfterExit = false,
+  game,
+}: {
+  showMetaAfterExit?: boolean;
+  game?: Game;
+} = {}) {
   return (
     <Suspense fallback={<p className="text-center text-muted-foreground">Loading…</p>}>
-      <SnakeIoPlayClient />
+      <SnakeIoPlayClient showMetaAfterExit={showMetaAfterExit} gameMeta={game} />
     </Suspense>
   );
 }

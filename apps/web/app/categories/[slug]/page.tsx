@@ -7,6 +7,7 @@ import { CategoryLeaderboard } from "@/components/category-leaderboard";
 import { GameCard } from "@/components/game-card";
 import { GameSection } from "@/components/game-section";
 import { JsonLdScript } from "@/components/json-ld-script";
+import { filterGamesForCategory } from "@/lib/category-fallbacks";
 import { selectHotSlugs } from "@/lib/game-sections";
 import {
   breadcrumbJsonLd,
@@ -44,7 +45,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const filtered = games.filter((game) => game.categoryId === category.id);
+  const filtered = filterGamesForCategory(category, games);
   const featuredGame = category.featuredGameId
     ? filtered.find((game) => game.id === category.featuredGameId)
     : undefined;

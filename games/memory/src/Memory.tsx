@@ -353,7 +353,6 @@ export function MemoryGame() {
           gridColsClass,
           wrongFlash && "animate-[shake_0.35s_ease-in-out]"
         )}
-        style={{ perspective: "800px" }}
       >
         {state.cards.map((card, index) => {
           const isFaceUp = card.matched || state.flipped.includes(index);
@@ -364,23 +363,28 @@ export function MemoryGame() {
               onClick={() => handleFlip(index)}
               disabled={isFaceUp || card.matched}
               aria-label={isFaceUp ? card.symbol : "카드 뒤집기"}
-              className="aspect-square min-h-11 [transform-style:preserve-3d]"
+              className="aspect-square min-h-11"
             >
               <span
                 className={cn(
-                  "relative flex h-full w-full items-center justify-center rounded-lg text-2xl transition-transform duration-300",
+                  "flex h-full w-full flex-col items-center justify-center rounded-lg border-2 text-2xl font-bold shadow-md transition-all duration-200",
                   isFaceUp
-                    ? "rotate-y-0 bg-primary/20 scale-100"
-                    : "rotate-y-180 bg-muted hover:bg-muted-foreground/20",
-                  card.matched && "ring-2 ring-primary/50",
+                    ? "border-primary/50 bg-primary/15 text-foreground"
+                    : "border-indigo-400/60 bg-gradient-to-br from-indigo-700 via-violet-700 to-indigo-900 text-white shadow-indigo-900/40 hover:brightness-110",
+                  card.matched && "ring-2 ring-primary/50 opacity-80",
                   sparkIndices.includes(index) && "ring-4 ring-amber-400/80 scale-105 animate-[pulse_0.4s_ease-out]"
                 )}
-                style={{
-                  transform: isFaceUp ? "rotateY(0deg)" : "rotateY(180deg)",
-                  backfaceVisibility: "hidden",
-                }}
               >
-                {isFaceUp ? card.symbol : "?"}
+                {isFaceUp ? (
+                  card.symbol
+                ) : (
+                  <>
+                    <span className="text-base leading-none opacity-90" aria-hidden>
+                      🎴
+                    </span>
+                    <span className="mt-0.5 text-sm font-black tracking-widest">?</span>
+                  </>
+                )}
               </span>
             </button>
           );

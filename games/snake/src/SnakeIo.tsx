@@ -181,10 +181,14 @@ export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
   headCharacter = "frog",
+  debugHud = false,
+  immersiveWorld = false,
 }: {
   practiceMode?: boolean;
   onJoinTimeout?: () => void;
   headCharacter?: SnakeHeadId;
+  debugHud?: boolean;
+  immersiveWorld?: boolean;
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -273,7 +277,8 @@ export function SnakeIoGame({
   playerCountRef.current = playerCount;
   const balance = useMemo(() => Replay.multiplayer.balance("snake", playerCount), [playerCount]);
   const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
-  const showMinimap = isGlobalWorld || ux.minimap;
+  const showMinimap = !immersiveWorld && (isGlobalWorld || ux.minimap);
+  const showDebugWorldHud = debugHud && isGlobalWorld;
   const worldHudPlayers = room?.players.length ?? 0;
   const worldHudBots = world
     ? Math.max(0, countWorldSnakes(world) - worldHudPlayers)
@@ -531,6 +536,7 @@ export function SnakeIoGame({
       setBoardPx(
         measureGameBoardPx({
           fullscreen: fs,
+          immersive: immersiveWorld,
           containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
         })
       );
@@ -548,7 +554,7 @@ export function SnakeIoGame({
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-  }, [connected, world, pseudoFullscreen, isFullscreen]);
+  }, [connected, world, pseudoFullscreen, isFullscreen, immersiveWorld]);
 
   useEffect(() => {
     if (practiceMode || roomCode) return;
@@ -1670,21 +1676,23 @@ export function SnakeIoGame({
   }));
 
   return (
-    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", isGameFullscreen ? "max-w-none px-0" : "max-w-6xl px-1 sm:px-2")}>
+    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", immersiveWorld || isGameFullscreen ? "max-w-none h-full px-0" : "max-w-6xl px-1 sm:px-2")}>
       <div
         className={cn(
           "flex w-full items-start justify-center gap-3",
-          isGameFullscreen && "h-full"
+          (immersiveWorld || isGameFullscreen) && "h-full"
         )}
       >
+        {!immersiveWorld ? (
         <aside className="hidden w-40 shrink-0 pt-10 lg:block">
           <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
         </aside>
+        ) : null}
 
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col items-center",
-          "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+          immersiveWorld ? "h-full pb-0" : "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
         )}
       >
       <div
@@ -1696,6 +1704,7 @@ export function SnakeIoGame({
             : "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
         )}
       >
+        {!immersiveWorld ? (
         <button
           type="button"
           onClick={() => void toggleFullscreen()}
@@ -1704,9 +1713,10 @@ export function SnakeIoGame({
         >
           {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
         </button>
+        ) : null}
 
         {/* Game canvas wrapper — square; fills viewport when fullscreen */}
-        <div className="relative" style={{ width: boardPx, height: boardPx, maxWidth: "min(100vw, 100dvh)", maxHeight: "min(100vw, 100dvh)" }}>
+        <div className="relative" style={{ width: boardPx, height: boardPx, maxWidth: immersiveWorld ? "min(92vw, 92dvh)" : "min(100vw, 100dvh)", maxHeight: immersiveWorld ? "min(92vw, 92dvh)" : "min(100vw, 100dvh)" }}>
         <div
           className="relative h-full w-full touch-none overflow-hidden rounded-xl border border-white/10"
           style={{
@@ -1766,7 +1776,7 @@ export function SnakeIoGame({
           </div>
         ) : null}
 
-        {isGlobalWorld ? (
+        {showDebugWorldHud ? (
           <SnakeWorldHud
             className="absolute right-2 top-12 z-40"
             roomCode={effectiveRoomCode}
@@ -1779,8 +1789,8 @@ export function SnakeIoGame({
           />
         ) : null}
 
-        {/* Kill Feed — WORLD sync via host state */}
-        {isGlobalWorld && world.killFeed.length > 0 ? (
+        {/* Kill Feed — compact in immersive; full in debug */}
+        {isGlobalWorld && !immersiveWorld && world.killFeed.length > 0 ? (
           <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[11rem] space-y-1">
             {world.killFeed.slice(0, 5).map((entry) => (
               <div
@@ -1795,13 +1805,34 @@ export function SnakeIoGame({
           </div>
         ) : null}
 
-        {/* HUD — anchored to canvas */}
-        <div className="pointer-events-none absolute left-2 top-12 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
-          <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
-          <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
-          <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
-            {isBoosting ? "⚡ BOOST" : "Boost"}
+        {/* HUD — minimal in immersive WORLD */}
+        <div className={cn(
+          "pointer-events-none absolute z-30 rounded-lg border border-white/10 bg-black/55 backdrop-blur-sm text-white",
+          immersiveWorld ? "left-2 top-2 px-2 py-1 text-[10px]" : "left-2 top-12 px-3 py-2 text-xs"
+        )}>
+          <p className="font-bold">
+            <span className="text-emerald-300">{myLength}</span>
+            {!immersiveWorld ? (
+              <>
+                {" · "}
+                <span className="text-amber-300">{myKills}</span> kills
+              </>
+            ) : (
+              <span className="text-white/50"> · #{myRank}</span>
+            )}
           </p>
+          {!immersiveWorld ? (
+            <>
+              <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
+              <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
+                {isBoosting ? "⚡ BOOST" : "Boost"}
+              </p>
+            </>
+          ) : (
+            <p className={cn(isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
+              {isBoosting ? "⚡ BOOST" : ""}
+            </p>
+          )}
         </div>
           <div
             ref={worldLayerRef}
@@ -2070,6 +2101,7 @@ export function SnakeIoGame({
 
 
         {/* MVP HUD — bottom global rank bar (desktop in-canvas) */}
+        {!immersiveWorld ? (
         <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 hidden justify-center lg:flex">
           <div className="rounded-lg border border-white/10 bg-black/55 px-4 py-1.5 text-center text-[11px] backdrop-blur-sm">
             {isStageMode && stageConfig ? (
@@ -2103,9 +2135,11 @@ export function SnakeIoGame({
             )}
           </div>
         </div>
+        ) : null}
         </div>
       </div>
 
+        {!immersiveWorld ? (
         <div className="mt-2 flex w-full max-w-sm items-start gap-2 px-1 lg:hidden">
           <SnakeRankingPanel
             compact
@@ -2127,8 +2161,10 @@ export function SnakeIoGame({
             />
           ) : null}
         </div>
+        ) : null}
       </div>
 
+        {!immersiveWorld ? (
         <aside className="hidden w-28 shrink-0 pt-10 lg:block">
           {showMinimap ? (
             <SnakeMinimap
@@ -2143,6 +2179,7 @@ export function SnakeIoGame({
             />
           ) : null}
         </aside>
+        ) : null}
       </div>
 
       {isStageMode && stageOverlay !== "none" ? (
