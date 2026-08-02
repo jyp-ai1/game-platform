@@ -86,10 +86,10 @@ export function ReplayIdentityHero({ games }: { games: Game[] }) {
         </div>
 
         <Link
-          href="/passport"
+          href="/profile"
           className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
         >
-          Replay Passport →
+          Profile →
         </Link>
       </Container>
     </section>

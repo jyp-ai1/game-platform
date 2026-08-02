@@ -311,6 +311,13 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
     if (state.lastPops.length > 0) {
       return { ...state, lastPops: [] };
     }
+    const idleRemaining = countGridBubbles(state.grid);
+    if (state.status === "playing" && idleRemaining === 0) {
+      return {
+        ...state,
+        status: state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear",
+      };
+    }
     return state;
   }
 
@@ -414,7 +421,7 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   const bubblesRemaining = countGridBubbles(grid);
   if (reachedDangerLine) {
     status = "over";
-  } else if (bubblesRemaining === 0 && state.flyingBubble === null) {
+  } else if (bubblesRemaining === 0) {
     status = state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear";
   } else if (status === "stage-clear" || status === "won") {
     // Never hold a clear state while bubbles remain (e.g. after ceiling drop).

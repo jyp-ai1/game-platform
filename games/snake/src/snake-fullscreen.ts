@@ -63,7 +63,7 @@ export function measureGameBoardPx(
   const vh = vv?.height ?? window.innerHeight;
 
   if (opts.fullscreen || opts.immersive) {
-    const fill = opts.immersive ? 0.92 : 1;
+    const fill = opts.immersive ? 1 : 1;
     return Math.max(280, Math.floor(Math.min(vw, vh) * fill));
   }
 

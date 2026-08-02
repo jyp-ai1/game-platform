@@ -209,6 +209,7 @@ export function SnakeIoGame({
   const boardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const [boardPx, setBoardPx] = useState(480);
+  const [viewportSize, setViewportSize] = useState({ w: 480, h: 480 });
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
@@ -260,7 +261,7 @@ export function SnakeIoGame({
   stageOverlayRef.current = stageOverlay;
   const playerCountRef = useRef(1);
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
-  const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalf: 240 });
+  const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalfX: 240, camHalfY: 240 });
   const worldLayerRef = useRef<HTMLDivElement>(null);
   const renderAlphaRef = useRef(1);
   const frameCounterRef = useRef(0);
@@ -333,8 +334,8 @@ export function SnakeIoGame({
       const layout = camLayoutRef.current;
       if (head && layout.cellSize > 0) {
         camRef.current = {
-          x: head.x * layout.cellSize - layout.camHalf,
-          y: head.y * layout.cellSize - layout.camHalf,
+          x: head.x * layout.cellSize - layout.camHalfX,
+          y: head.y * layout.cellSize - layout.camHalfY,
         };
       }
     };
@@ -342,6 +343,34 @@ export function SnakeIoGame({
     requestAnimationFrame(snapCamera);
     transitionGamePhase("READY", "await-input");
     transitionGamePhase("COUNTDOWN", "await-input");
+  }, [deviceId]);
+
+  /** WORLD immersive — skip wait gate; player snake visible and active immediately. */
+  const beginSpawnActive = useCallback(() => {
+    awaitingInputRef.current = false;
+    setAwaitingInput(false);
+    inputLoggedRef.current = true;
+    setSpawnHighlightUntil(Date.now() + SNAKE_MVP_RC1.spawnHighlightMs);
+    setGoFlashUntil(Date.now() + 650);
+    const snake = worldRef.current?.snakes[deviceId];
+    if (snake) {
+      snake.awaitingInput = false;
+      snake.spectating = false;
+    }
+    const snapCamera = () => {
+      const s = worldRef.current?.snakes[deviceId];
+      const head = resolveSnakeHead(s ?? undefined);
+      const layout = camLayoutRef.current;
+      if (head && layout.cellSize > 0) {
+        camRef.current = {
+          x: head.x * layout.cellSize - layout.camHalfX,
+          y: head.y * layout.cellSize - layout.camHalfY,
+        };
+      }
+    };
+    snapCamera();
+    requestAnimationFrame(snapCamera);
+    transitionGamePhase("PLAYING", "auto-start");
   }, [deviceId]);
 
   useEffect(() => {
@@ -533,11 +562,20 @@ export function SnakeIoGame({
     const measure = () => {
       const nativeFs = isViewportFullscreen(viewportRef.current);
       const fs = nativeFs || pseudoFullscreen;
+      const vv = window.visualViewport;
+      const vw = Math.floor(vv?.width ?? window.innerWidth);
+      const vh = Math.floor(vv?.height ?? window.innerHeight);
+      if (immersiveWorld) {
+        setViewportSize({ w: vw, h: vh });
+        setBoardPx(Math.min(vw, vh));
+        return;
+      }
+      setViewportSize({ w: vw, h: vh });
       setBoardPx(
         measureGameBoardPx({
           fullscreen: fs,
-          immersive: immersiveWorld,
-          containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
+          immersive: false,
+          containerWidth: boardRef.current?.clientWidth ?? vw,
         })
       );
     };
@@ -862,8 +900,12 @@ export function SnakeIoGame({
     appendLifecycle("STATE_READY");
     const me = world.snakes[deviceId];
     transitionGamePhase("READY", `alive=${me?.alive ?? "?"} len=${me ? getSegmentCount(me) : 0}`);
-    beginSpawnReady();
-  }, [world, activeRoom, deviceId, beginSpawnReady]);
+    if (immersiveWorld) {
+      beginSpawnActive();
+    } else {
+      beginSpawnReady();
+    }
+  }, [world, activeRoom, deviceId, beginSpawnReady, beginSpawnActive, immersiveWorld]);
 
   useEffect(() => {
     if (!connected || !world) transitionGamePhase("LOADING");
@@ -1523,8 +1565,8 @@ export function SnakeIoGame({
         camTarget = resolveSnakeHead(snake);
       }
       if (camTarget && layout.cellSize > 0) {
-        const targetX = camTarget.x * layout.cellSize - layout.camHalf;
-        const targetY = camTarget.y * layout.cellSize - layout.camHalf;
+        const targetX = camTarget.x * layout.cellSize - layout.camHalfX;
+        const targetY = camTarget.y * layout.cellSize - layout.camHalfY;
         const lerp = SNAKE_FEEL.cameraFollowLerp;
         camRef.current.x += (targetX - camRef.current.x) * lerp;
         camRef.current.y += (targetY - camRef.current.y) * lerp;
@@ -1545,7 +1587,7 @@ export function SnakeIoGame({
       const layer = worldLayerRef.current;
       if (layer && layout.cellSize > 0) {
         layer.style.transform = `translate(${-camRef.current.x + shakeX}px, ${-camRef.current.y + shakeY}px) scale(${zoomMultRef.current})`;
-        layer.style.transformOrigin = `${layout.camHalf + camRef.current.x}px ${layout.camHalf + camRef.current.y}px`;
+        layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
       }
 
       renderAlphaRef.current = Math.min(1, renderAlphaRef.current + SNAKE_FEEL.segmentLerpStep);
@@ -1651,8 +1693,10 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
+  const viewW = immersiveWorld ? viewportSize.w : boardPx;
+  const viewH = immersiveWorld ? viewportSize.h : boardPx;
   const baseCellRaw =
-    (boardPx / SNAKE_FEEL.viewportCellsVisible) *
+    (Math.min(viewW, viewH) / SNAKE_FEEL.viewportCellsVisible) *
     matchRule.cameraZoomMult *
     SNAKE_FEEL.baseCameraZoom;
   const baseCellSize = Math.min(
@@ -1663,8 +1707,9 @@ export function SnakeIoGame({
   const myLength = mySnake ? getSegmentCount(mySnake) : 0;
   const myKills = mySnake?.totalKills ?? 0;
   const myScore = mySnake?.score ?? 0;
-  const camHalf = boardPx / 2;
-  camLayoutRef.current = { boardPx, cellSize: baseCellSize, camHalf };
+  const camHalfX = viewW / 2;
+  const camHalfY = viewH / 2;
+  camLayoutRef.current = { boardPx: Math.min(viewW, viewH), cellSize: baseCellSize, camHalfX, camHalfY };
 
   const camX = camRef.current.x;
   const camY = camRef.current.y;
@@ -1698,10 +1743,13 @@ export function SnakeIoGame({
       <div
         ref={viewportRef}
         className={cn(
-          "relative flex w-full justify-center overflow-hidden bg-black",
+          "relative overflow-hidden bg-black",
+          immersiveWorld
+            ? "h-[100dvh] w-[100dvw]"
+            : "flex w-full justify-center",
           isGameFullscreen
             ? "fixed inset-0 z-[200] h-[100dvh] w-[100dvw] items-center justify-center"
-            : "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
+            : !immersiveWorld && "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
         )}
       >
         {!immersiveWorld ? (
@@ -1716,9 +1764,24 @@ export function SnakeIoGame({
         ) : null}
 
         {/* Game canvas wrapper — square; fills viewport when fullscreen */}
-        <div className="relative" style={{ width: boardPx, height: boardPx, maxWidth: immersiveWorld ? "min(92vw, 92dvh)" : "min(100vw, 100dvh)", maxHeight: immersiveWorld ? "min(92vw, 92dvh)" : "min(100vw, 100dvh)" }}>
         <div
-          className="relative h-full w-full touch-none overflow-hidden rounded-xl border border-white/10"
+          className="relative h-full w-full"
+          style={
+            immersiveWorld
+              ? undefined
+              : {
+                  width: boardPx,
+                  height: boardPx,
+                  maxWidth: "min(100vw, 100dvh)",
+                  maxHeight: "min(100vw, 100dvh)",
+                }
+          }
+        >
+        <div
+          className={cn(
+            "relative h-full w-full touch-none overflow-hidden",
+            !immersiveWorld && "rounded-xl border border-white/10"
+          )}
           style={{
             backgroundColor: seasonStyle.bg,
             backgroundImage:
@@ -2080,7 +2143,7 @@ export function SnakeIoGame({
           </div>
         </div>
 
-        {awaitingInput && mySnake?.alive ? (
+        {awaitingInput && mySnake?.alive && !immersiveWorld ? (
           <div className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center gap-2">
             <p className="rounded-lg border border-yellow-300/40 bg-black/70 px-3 py-1 text-xs font-bold tracking-widest text-yellow-300 backdrop-blur-sm">
               YOU

@@ -1,6 +1,6 @@
 "use client";
 
-import { GameSDKProvider, GameSlugProvider } from "@game-platform/game-sdk";
+import { GameSDKProvider, GameSlugProvider, InstantPlayProvider } from "@game-platform/game-sdk";
 
 import { GameErrorMonitor } from "@/components/game-error-monitor";
 import { GameProgressBar } from "@/components/game-progress-bar";
@@ -314,9 +314,13 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
 export function GamePlayer({
   slug,
   rankingEnabled = true,
+  instantPlay = false,
+  fullscreen = false,
 }: {
   slug: PlayableSlug;
   rankingEnabled?: boolean;
+  instantPlay?: boolean;
+  fullscreen?: boolean;
 }) {
   const Component = gameComponents[slug];
 
@@ -334,13 +338,21 @@ export function GamePlayer({
 
   return (
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
-      <GameSlugProvider slug={slug}>
-        <GameErrorMonitor gameSlug={slug} />
-        <div className="mx-auto w-full max-w-[min(100%,24rem)] overflow-hidden px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-[max(0.25rem,env(safe-area-inset-top))] sm:max-w-[min(100%,28rem)]">
-          <GameProgressBar slug={slug} />
-          <Component />
-        </div>
-      </GameSlugProvider>
+      <InstantPlayProvider enabled={instantPlay}>
+        <GameSlugProvider slug={slug}>
+          <GameErrorMonitor gameSlug={slug} />
+          <div
+            className={
+              fullscreen
+                ? "mx-auto flex h-full w-full max-w-none flex-col overflow-hidden px-0 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
+                : "mx-auto w-full max-w-[min(100%,24rem)] overflow-hidden px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-[max(0.25rem,env(safe-area-inset-top))] sm:max-w-[min(100%,28rem)]"
+            }
+          >
+            {!fullscreen ? <GameProgressBar slug={slug} /> : null}
+            <Component />
+          </div>
+        </GameSlugProvider>
+      </InstantPlayProvider>
     </GameSDKProvider>
   );
 }

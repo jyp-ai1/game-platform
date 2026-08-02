@@ -1,10 +1,9 @@
-import type { LucideIcon } from "lucide-react";
-import { Compass, Home, Map, Palette, User, Users } from "lucide-react";
+import { Palette, Home, Map, Compass, User, Users } from "lucide-react";
 
 export interface MainNavItem {
   label: string;
   href: string;
-  icon: LucideIcon;
+  icon: typeof Home;
   match?: (pathname: string) => boolean;
 }
 
@@ -34,15 +33,9 @@ export const mainNavItems: MainNavItem[] = [
     match: (p) => p.startsWith("/community"),
   },
   {
-    label: "Creators",
-    href: "/creators",
-    icon: Palette,
-    match: (p) => p.startsWith("/creators") || p.startsWith("/studio") || p.startsWith("/marketplace"),
-  },
-  {
-    label: "Passport",
-    href: "/passport",
+    label: "Profile",
+    href: "/profile",
     icon: User,
-    match: (p) => p.startsWith("/passport") || p.startsWith("/profile") || p.startsWith("/wrapped"),
+    match: (p) => p.startsWith("/profile") || p.startsWith("/passport") || p.startsWith("/wrapped"),
   },
 ];

@@ -487,14 +487,16 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
 function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
   if (snake.segments.length === 0) return;
-  const maxFood = Math.floor(world.config.foodCount * 2);
+  const maxFood = Math.floor(world.config.foodCount * 4);
   const cfg = FOOD_TIERS.death;
-  const step = Math.max(1, Math.floor(snake.segments.length / 28));
+  const len = snake.segments.length;
+  const targetDrops = Math.min(len, Math.max(12, Math.floor(len / 2)));
+  const step = Math.max(1, Math.floor(len / targetDrops));
 
-  for (let i = 0; i < snake.segments.length; i += step) {
+  for (let i = 0; i < len; i += step) {
     if (world.food.length >= maxFood) break;
     const seg = snake.segments[i]!;
-    if (world.food.some((f) => dist(f, seg) < 0.5)) continue;
+    if (world.food.some((f) => dist(f, seg) < 0.35)) continue;
     world.food.push({
       x: seg.x,
       y: seg.y,

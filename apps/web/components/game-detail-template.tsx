@@ -1,5 +1,6 @@
 import { Container } from "@game-platform/ui";
 import type { Game, GameStatus } from "@game-platform/shared";
+import Link from "next/link";
 
 import { GameDetailComments } from "@/components/game-detail-extras";
 import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
@@ -7,12 +8,7 @@ import { GameDetailHero } from "@/components/game-detail-hero";
 import { SnakeMultiplayerEntry } from "@/components/snake-multiplayer-entry";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
-import { GameDetailStage } from "@/components/game-detail-stage";
-import { RuntimeProvider } from "@/components/runtime-provider";
-import { GamePlayer } from "@/components/game-player";
 import { GameStatusBlock } from "@/components/game-status-block";
-import { RecentlyPlayedRecorder } from "@/components/recently-played-recorder";
-import type { PlayableSlug } from "@/lib/playable-games";
 
 function shortDescription(game: Game, slug: string): string {
   if (slug === "snake") {
@@ -53,18 +49,12 @@ export function GameDetailTemplate({
               {slug === "snake" ? (
                 <SnakeMultiplayerEntry variant="start" />
               ) : (
-                <>
-                  <RecentlyPlayedRecorder
-                    slug={slug}
-                    categorySlug={game.category?.slug ?? null}
-                    difficulty={game.difficulty}
-                  />
-                  <RuntimeProvider slug={slug} games={allGames}>
-                    <GameDetailStage>
-                      <GamePlayer slug={slug as PlayableSlug} rankingEnabled={rankingEnabled} />
-                    </GameDetailStage>
-                  </RuntimeProvider>
-                </>
+                <Link
+                  href={`/games/${slug}/play`}
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
+                >
+                  Play
+                </Link>
               )}
             </section>
 

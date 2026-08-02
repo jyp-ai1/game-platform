@@ -18,7 +18,7 @@ export function ReturnTomorrowCard({
   if (partyProgress && partyProgress.streak >= 1) {
     emoji = "🔥";
     text = `내일 출석하면 ${partyProgress.streak + 1}일 Streak`;
-    href = "/passport";
+    href = "/profile";
   } else if (revengeFriend) {
     emoji = "⚔️";
     text = `내일 ${revengeFriend}에게 리벤지`;
@@ -26,7 +26,7 @@ export function ReturnTomorrowCard({
   } else if (partyProgress && partyProgress.partyCoin > 0) {
     emoji = "🎁";
     text = "내일 Party Mission 보상 수령";
-    href = "/passport";
+    href = "/profile";
   }
 
   return (

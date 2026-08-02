@@ -16,6 +16,7 @@ import {
   getMyParty,
   type ViralLoopResult,
 } from "@game-platform/replay-engine/social";
+import { entryTrace } from "@game-platform/game-snake";
 import { Button } from "@game-platform/ui";
 import { Swords, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -93,7 +94,7 @@ export function ViralLoopResultPanel({
           <Link href={inviteHref}><UserPlus className="size-3" /> 친구 초대</Link>
         } />
         <Button variant="outline" size="sm" nativeButton={false} render={
-          <Link href="/passport">Passport</Link>
+          <Link href="/profile">Profile</Link>
         } />
       </div>
 
@@ -117,7 +118,15 @@ export function ViralLoopResultPanel({
         </p>
       </details>
 
-      <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => router.push("/")}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full text-muted-foreground"
+        onClick={() => {
+          entryTrace("EXIT", "PASS", "home");
+          router.push("/");
+        }}
+      >
         홈으로
       </Button>
     </div>

@@ -139,9 +139,6 @@ export function ReplayPassportPanel({ games }: { games: Game[] }) {
           <Link href="/community" className="rounded-xl border px-4 py-2 text-sm">
             Replay Feed →
           </Link>
-          <Link href="/creators" className="rounded-xl border border-violet-500/30 px-4 py-2 text-sm text-violet-300">
-            Creator →
-          </Link>
           <Link href="/wrapped" className="rounded-xl border px-4 py-2 text-sm">
             Wrapped →
           </Link>

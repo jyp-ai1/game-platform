@@ -68,6 +68,7 @@ export {
   type GameRuleGroupDef,
 } from "./game-rule-groups";
 export { GameSlugProvider, useGameSlug } from "./game-slug-context";
+export { InstantPlayProvider, useInstantPlay } from "./instant-play-context";
 export { FrameworkResultOverlay, type FrameworkResultOverlayProps } from "./framework-overlays";
 export {
   useGameFramework,

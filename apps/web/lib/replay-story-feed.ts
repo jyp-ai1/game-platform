@@ -162,7 +162,7 @@ export function buildReplayStoryFeed(games: Game[], limit = 16): StoryEvent[] {
       actor: "나",
       headline: `업적 달성: ${ach.titleKo}`,
       detail: ach.description,
-      href: "/passport",
+      href: "/profile",
       createdAt: new Date().toISOString(),
       emoji: "🎖️",
     });

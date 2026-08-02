@@ -392,6 +392,8 @@ export function MemoryGame() {
 
         {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
+            variant="stage-clear"
+            stageLabel={`Round ${state.stageIndex} Clear`}
             message={
               state.mismatches === 0
                 ? `Round ${state.stageIndex} Clear — Perfect!`
@@ -404,7 +406,7 @@ export function MemoryGame() {
             onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
-            onContinue={() => dispatch({ type: "nextStage" })}
+            onNextStage={() => dispatch({ type: "nextStage" })}
           />
         ) : null}
 

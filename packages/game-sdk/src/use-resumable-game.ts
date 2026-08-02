@@ -3,6 +3,7 @@
 import { useRef, useState, type MutableRefObject } from "react";
 
 import { clearSave, hasSave, loadGame } from "./save";
+import { useInstantPlay } from "./instant-play-context";
 import { isSaveEnabled } from "./platform-flags";
 import { emitPlatformAnalyticsEvent } from "./platform-analytics";
 
@@ -30,9 +31,11 @@ export function useResumableGame<State>(
   slug: string,
   createInitialState: () => State
 ): UseResumableGameResult<State> {
-  const [savedState] = useState<State | null>(() =>
-    isSaveEnabled() && hasSave(slug) ? loadGame<State>(slug) : null
-  );
+  const instantPlay = useInstantPlay();
+  const [savedState] = useState<State | null>(() => {
+    if (instantPlay) return null;
+    return isSaveEnabled() && hasSave(slug) ? loadGame<State>(slug) : null;
+  });
 
   const [phase, setPhase] = useState<ResumePhase>(
     savedState !== null ? "resume-prompt" : "ready"

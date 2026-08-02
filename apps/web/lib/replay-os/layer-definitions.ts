@@ -42,9 +42,9 @@ export const REPLAY_LAYERS: LayerDef[] = [
   {
     id: "L4",
     name: "Identity",
-    scope: ["Passport", "Journey", "Wrapped", "Mission"],
+    scope: ["Profile", "Journey", "Wrapped", "Mission"],
     status: "in_progress",
-    href: "/passport",
+    href: "/profile",
     dependsOn: "L3",
   },
   {
@@ -60,7 +60,7 @@ export const REPLAY_LAYERS: LayerDef[] = [
     name: "Creator",
     scope: ["Studio", "Marketplace", "Templates"],
     status: "in_progress",
-    href: "/creators",
+    href: "/studio",
     dependsOn: "L5",
   },
   {

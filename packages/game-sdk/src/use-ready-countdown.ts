@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 
 import { subscribePlatformAnalyticsEvents } from "./platform-analytics";
+import { useInstantPlay } from "./instant-play-context";
 import { useGameSlug } from "./game-slug-context";
 import { startTrackedSession } from "./session-tracker";
 import { playStartSound } from "./sound";
@@ -25,15 +26,23 @@ export interface UseReadyCountdownResult {
 export function useReadyCountdown(phase: ResumePhase, gameSlug?: string): UseReadyCountdownResult {
   const contextSlug = useGameSlug();
   const slug = gameSlug ?? contextSlug ?? undefined;
-  const [countdownDone, setCountdownDone] = useState(false);
+  const instantPlay = useInstantPlay();
+  const [countdownDone, setCountdownDone] = useState(instantPlay);
   const sessionStarted = useRef(false);
 
   useEffect(() => {
-    if (phase === "ready") {
-      setCountdownDone(false);
-      sessionStarted.current = false;
+    if (phase !== "ready") return;
+    setCountdownDone(instantPlay);
+    if (instantPlay && slug) {
+      if (!sessionStarted.current) {
+        sessionStarted.current = true;
+        startTrackedSession(slug);
+        playStartSound();
+      }
+      return;
     }
-  }, [phase]);
+    sessionStarted.current = false;
+  }, [phase, instantPlay, slug]);
 
   useEffect(() => {
     return subscribePlatformAnalyticsEvents((event) => {

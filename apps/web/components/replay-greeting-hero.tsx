@@ -56,8 +56,8 @@ export function ReplayGreetingHero({ games }: { games: Game[] }) {
           <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium">
             {living.titleKo}
           </span>
-          <Link href="/passport" className="rounded-full border px-3 py-1 text-xs hover:border-primary/40">
-            Passport
+          <Link href="/profile" className="rounded-full border px-3 py-1 text-xs hover:border-primary/40">
+            Profile
           </Link>
           <Link href="/community" className="rounded-full border px-3 py-1 text-xs hover:border-primary/40">
             Community
