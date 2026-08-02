@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   clearSelection,
@@ -42,6 +42,7 @@ import {
 
 const GAME_SLUG = "word-search";
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
+const STAGE_BY_DIFFICULTY: Record<WordSearchDifficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
 
 type Action =
   | { type: "select"; row: number; col: number }
@@ -75,13 +76,16 @@ export function WordSearchGame() {
   const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [puzzleNumber, setPuzzleNumber] = useState(1);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevFoundRef = useRef(state.found.length);
   const prevStatusRef = useRef(state.status);
   const score = computeScore(state);
+  const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty] + puzzleNumber - 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    stageIndex,
     fieldRef,
   });
 
@@ -125,6 +129,7 @@ export function WordSearchGame() {
     emitGameRetry(GAME_SLUG);
     resetSession();
     resetGameAudioPrime();
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart", difficulty });
   }
 
@@ -132,6 +137,7 @@ export function WordSearchGame() {
     onNewGame();
     resetSession();
     resetGameAudioPrime();
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart" });
   }
 
@@ -140,6 +146,7 @@ export function WordSearchGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Puzzle #" value={puzzleNumber} />
           <ScoreBox label="Found" value={`${state.found.length}/${state.words.length}`} />
           <ScoreBox label="Score" value={score} />
           <ScoreBox label="Best" value={feel.bestScore} />

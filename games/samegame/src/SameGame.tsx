@@ -44,6 +44,7 @@ import {
 
 const GAME_SLUG = "samegame";
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
+const STAGE_BY_DIFFICULTY: Record<SameGameDifficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
 
 type Action =
   | { type: "clear"; row: number; col: number }
@@ -102,8 +103,10 @@ export function SameGameGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
   const prevScoreRef = useRef(state.score);
+  const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty];
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, state.score),
+    stageIndex,
     fieldRef,
   });
 
@@ -179,9 +182,9 @@ export function SameGameGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Stage" value={stageIndex} />
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Best" value={feel.bestScore} />
-          <ScoreBox label="Best Stage" value={feel.bestStage} />
         </div>
         <Button
           variant="outline"

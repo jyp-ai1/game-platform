@@ -203,6 +203,7 @@ export function TableTennisGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
+        <ScoreBox label="Round" value={stage} />
         <ScoreBox label="You" value={state.playerScore} />
         <ScoreBox label="CPU" value={state.cpuScore} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>

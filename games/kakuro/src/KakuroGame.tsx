@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   clearCell,
@@ -79,12 +79,14 @@ export function KakuroGame() {
   const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [puzzleNumber, setPuzzleNumber] = useState(1);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     score: computeScore(state),
+    stageIndex: puzzleNumber,
     fieldRef,
   });
 
@@ -128,6 +130,7 @@ export function KakuroGame() {
     emitGameRetry(GAME_SLUG);
     resetSession();
     resetGameAudioPrime();
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart" });
   }
 
@@ -135,6 +138,7 @@ export function KakuroGame() {
     onNewGame();
     resetSession();
     resetGameAudioPrime();
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart" });
   }
 
@@ -143,6 +147,7 @@ export function KakuroGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
+          <ScoreBox label="Puzzle #" value={puzzleNumber} />
           <ScoreBox label="Score" value={computeScore(state)} />
           <ScoreBox label="Best" value={feel.bestScore} />
         </div>

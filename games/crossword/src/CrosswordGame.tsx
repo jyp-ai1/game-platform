@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   clearCell,
@@ -79,6 +79,7 @@ export function CrosswordGame() {
   const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [puzzleNumber, setPuzzleNumber] = useState(1);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
@@ -86,6 +87,7 @@ export function CrosswordGame() {
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     score: computeScore(state),
+    stageIndex: puzzleNumber,
     fieldRef,
   });
 
@@ -144,6 +146,7 @@ export function CrosswordGame() {
     emitGameRetry(GAME_SLUG);
     resetSession();
     resetGameAudioPrime();
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart" });
   }
 
@@ -151,6 +154,7 @@ export function CrosswordGame() {
     onNewGame();
     resetSession();
     resetGameAudioPrime();
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart" });
   }
 
@@ -158,6 +162,7 @@ export function CrosswordGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
+        <ScoreBox label="Puzzle #" value={puzzleNumber} />
         <ScoreBox label="Time" value={state.elapsedSeconds} />
         <ScoreBox label="Score" value={computeScore(state)} />
         <ScoreBox label="Best" value={feel.bestScore} />

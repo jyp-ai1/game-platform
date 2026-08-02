@@ -127,6 +127,7 @@ export function DartsGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
+          <ScoreBox label="Round" value={10 - state.throwsLeft + 1} />
           <ScoreBox label="Remaining" value={state.scoreRemaining} />
           <ScoreBox label="Throws" value={state.throwsLeft} />
         </div>

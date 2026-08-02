@@ -147,6 +147,7 @@ export function BilliardsGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
+        <ScoreBox label="Round" value={state.shots + 1} />
         <ScoreBox label="Score" value={state.score} />
         <ScoreBox label="Shots Left" value={MAX_SHOTS - state.shots} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>

@@ -39,6 +39,7 @@ import {
 
 const GAME_SLUG = "sliding-puzzle";
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
+const STAGE_BY_DIFFICULTY: Record<SlidingDifficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
 
 type Action = { type: "tap"; index: number } | { type: "restart"; difficulty?: SlidingDifficulty };
 
@@ -64,8 +65,10 @@ export function SlidingPuzzleGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const score = computeScore(state.moves, state.size);
+  const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty];
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    stageIndex,
     fieldRef,
   });
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "won" ? null : state), [state]);
@@ -122,6 +125,7 @@ export function SlidingPuzzleGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Stage" value={stageIndex} />
           <ScoreBox label="Moves" value={state.moves} />
           <ScoreBox label="Score" value={score} />
           <ScoreBox label="Best" value={feel.bestScore} />

@@ -56,6 +56,7 @@ export function MancalaGame() {
   }, []);
 
   const [mode, setMode] = useState<GameMode>("cpu");
+  const [matchRound, setMatchRound] = useState(1);
   const modeRef = useRef(mode);
   modeRef.current = mode;
 
@@ -158,12 +159,14 @@ export function MancalaGame() {
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     dispatch({ type: "restart" });
   }
 
@@ -171,6 +174,7 @@ export function MancalaGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
+        <ScoreBox label="Round" value={matchRound} />
         <ScoreBox label={mode === "local" ? "P1" : "You"} value={state.pits[6]!} />
         <ScoreBox label={mode === "local" ? "P2" : "CPU"} value={state.pits[13]!} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>

@@ -36,6 +36,7 @@ const PENALTY_PER_MISTAKE = 200;
 const MIN_SCORE = 100;
 const SIZE = 9;
 const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
+const STAGE_BY_DIFFICULTY: Record<Difficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
@@ -70,8 +71,10 @@ export function SudokuGame() {
   );
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
+  const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty];
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, computeScore(state.mistakes)),
+    stageIndex,
   });
   const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const completeCountdownRef = useRef(completeCountdown);

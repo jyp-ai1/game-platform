@@ -73,6 +73,7 @@ export function ReversiGame() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [mode, setMode] = useState<GameMode>("cpu");
+  const [matchRound, setMatchRound] = useState(1);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
@@ -155,12 +156,14 @@ export function ReversiGame() {
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     dispatch({ type: "restart" });
   }
 
@@ -169,6 +172,7 @@ export function ReversiGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between gap-2">
         <div className="flex gap-2">
+          <ScoreBox label="Round" value={matchRound} />
           <ScoreBox label="Black" value={discs.black} />
           <ScoreBox label="White" value={discs.white} />
         </div>

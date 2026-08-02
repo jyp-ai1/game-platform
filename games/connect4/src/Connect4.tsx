@@ -15,7 +15,7 @@ import {
   useResumableGame,
   type CpuDifficulty,
 } from "@game-platform/game-sdk";
-import { Button, cn, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
@@ -67,6 +67,7 @@ export function Connect4Game() {
   }, []);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [matchRound, setMatchRound] = useState(1);
   const [mode, setMode] = useState<GameMode>("cpu");
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const prevStatusRef = useRef(state.winner);
@@ -141,12 +142,14 @@ export function Connect4Game() {
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     dispatch({ type: "restart" });
   }
 
@@ -154,7 +157,10 @@ export function Connect4Game() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{msg}</p>
+        <div className="flex gap-2">
+          <ScoreBox label="Round" value={matchRound} />
+          <p className="text-sm font-medium text-muted-foreground self-center">{msg}</p>
+        </div>
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>

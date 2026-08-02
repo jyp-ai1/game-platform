@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   computeScore,
@@ -41,6 +41,7 @@ import {
 
 const GAME_SLUG = "hangman";
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
+const STAGE_BY_DIFFICULTY: Record<HangmanDifficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
 const KEYBOARD_ROWS = [
   "QWERTYUIOP",
   "ASDFGHJKL",
@@ -68,6 +69,7 @@ export function HangmanGame() {
     createInitialState
   );
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [puzzleNumber, setPuzzleNumber] = useState(1);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevGuessedRef = useRef(0);
@@ -79,8 +81,10 @@ export function HangmanGame() {
   const sessionActive = phase === "ready" && !showCountdown;
   const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
 
+  const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty];
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    stageIndex: stageIndex + puzzleNumber - 1,
     fieldRef,
   });
 
@@ -167,6 +171,7 @@ export function HangmanGame() {
     resetGameAudioPrime();
     prevGuessedRef.current = 0;
     prevWrongRef.current = 0;
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart", difficulty });
   }
 
@@ -175,6 +180,7 @@ export function HangmanGame() {
     resetSession();
     resetGameAudioPrime();
     prevGuessedRef.current = 0;
+    if (state.status !== "playing") setPuzzleNumber((n) => n + 1);
     dispatch({ type: "restart" });
   }
 
@@ -183,6 +189,7 @@ export function HangmanGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Puzzle #" value={puzzleNumber} />
           <ScoreBox label="Lives" value={livesLeft} />
           <ScoreBox label="Best" value={feel.bestScore} />
         </div>

@@ -31,6 +31,15 @@ import {
 const GAME_SLUG = "merge-blocks";
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
+function highestBlock(grid: number[][]): number {
+  return grid.reduce((max, row) => Math.max(max, ...row), 0);
+}
+
+function stageFromGrid(grid: number[][]): number {
+  const peak = highestBlock(grid);
+  return Math.max(1, Math.floor(Math.log2(Math.max(2, peak))));
+}
+
 type Action = { type: "drop"; col: number } | { type: "restart" };
 
 function reducer(state: MergeBlocksState, action: Action): MergeBlocksState {
@@ -56,8 +65,10 @@ export function MergeBlocksGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const stageIndex = stageFromGrid(state.grid);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, state.score),
+    stageIndex,
     fieldRef,
     muteScoreGain: true,
   });
@@ -119,6 +130,7 @@ export function MergeBlocksGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
+        <ScoreBox label="Stage" value={stageIndex} />
         <ScoreBox label="Score" value={state.score} />
         <ScoreBox label="Best" value={feel.bestScore} />
         <ScoreBox label="Next" value={state.next} />

@@ -15,7 +15,7 @@ import {
   standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
-import { Button, cn, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { Bomb, Flag, RotateCcw } from "lucide-react";
 import type { MouseEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
@@ -42,6 +42,7 @@ const MAX_SCORE = 10000;
 const SCORE_PER_SECOND = 50;
 const MIN_SCORE = 100;
 const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
+const STAGE_BY_DIFFICULTY: Record<Difficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
 
 type Status = "waiting" | "playing" | "won" | "lost";
 
@@ -159,12 +160,14 @@ export function MinesweeperGame() {
   const [elapsed, setElapsed] = useState(0);
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
+  const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty];
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     score:
       state.status === "won"
         ? Math.max(MIN_SCORE, MAX_SCORE - elapsed * SCORE_PER_SECOND)
         : 0,
+    stageIndex,
     fieldRef,
   });
 
@@ -286,17 +289,10 @@ export function MinesweeperGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between gap-2">
-        <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
-          <div className="text-[10px] font-medium uppercase text-muted-foreground">
-            Time
-          </div>
-          <div className="text-lg font-bold tabular-nums">{elapsed}s</div>
-        </div>
-        <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
-          <div className="text-[10px] font-medium uppercase text-muted-foreground">
-            Best
-          </div>
-          <div className="text-lg font-bold tabular-nums">{feel.bestScore}</div>
+        <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Stage" value={stageIndex} />
+          <ScoreBox label="Time" value={`${elapsed}s`} />
+          <ScoreBox label="Best" value={feel.bestScore} />
         </div>
         <div className="flex flex-wrap gap-1">
           {DIFFICULTIES.map((level) => (

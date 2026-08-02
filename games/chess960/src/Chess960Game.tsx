@@ -15,7 +15,7 @@ import {
   useResumableGame,
   type CpuDifficulty,
 } from "@game-platform/game-sdk";
-import { Button, cn, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
@@ -79,6 +79,7 @@ export function Chess960Game() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [mode, setMode] = useState<GameMode>("cpu");
+  const [matchRound, setMatchRound] = useState(1);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [pendingPromo, setPendingPromo] = useState<Move[] | null>(null);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
@@ -198,6 +199,7 @@ export function Chess960Game() {
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     setSelected(null);
     setPendingPromo(null);
     dispatch({ type: "restart" });
@@ -206,6 +208,7 @@ export function Chess960Game() {
   function handleNewGame() {
     onNewGame();
     resetGameAudioPrime();
+    if (state.winner !== null) setMatchRound((r) => r + 1);
     setSelected(null);
     setPendingPromo(null);
     dispatch({ type: "restart" });
@@ -215,7 +218,10 @@ export function Chess960Game() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{msg}</p>
+        <div className="flex gap-2">
+          <ScoreBox label="Round" value={matchRound} />
+          <p className="text-sm font-medium text-muted-foreground self-center">{msg}</p>
+        </div>
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
