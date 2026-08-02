@@ -40,7 +40,17 @@ export interface BreakoutState {
   score: number;
   lives: number;
   stage: number;
+  ballAttached: boolean;
   status: Status;
+}
+
+function attachedBall(paddleX: number): Ball {
+  return {
+    x: paddleX + PADDLE_WIDTH / 2,
+    y: PADDLE_Y - BALL_SIZE,
+    vx: 0,
+    vy: 0,
+  };
 }
 
 export function createInitialBricks(): boolean[] {
@@ -67,13 +77,15 @@ export function ballForStage(stage: number): Ball {
 }
 
 export function createInitialState(): BreakoutState {
+  const paddleX = FIELD_WIDTH / 2 - PADDLE_WIDTH / 2;
   return {
-    paddleX: FIELD_WIDTH / 2 - PADDLE_WIDTH / 2,
-    ball: createInitialBall(),
+    paddleX,
+    ball: attachedBall(paddleX),
     bricks: createInitialBricks(),
     score: 0,
     lives: STARTING_LIVES,
     stage: 1,
+    ballAttached: true,
     status: "playing",
   };
 }
@@ -88,12 +100,31 @@ export function advanceStage(state: BreakoutState): BreakoutState {
   if (nextStage > FINAL_STAGE) {
     return { ...state, status: "won" };
   }
+  const paddleX = FIELD_WIDTH / 2 - PADDLE_WIDTH / 2;
   return {
     ...state,
     stage: nextStage,
+    paddleX,
     bricks: createInitialBricks(),
-    ball: ballForStage(nextStage),
+    ball: attachedBall(paddleX),
+    ballAttached: true,
     status: "playing",
+  };
+}
+
+export function launchBall(state: BreakoutState): BreakoutState {
+  if (!state.ballAttached || state.status !== "playing") {
+    return state;
+  }
+  const launched = ballForStage(state.stage);
+  return {
+    ...state,
+    ballAttached: false,
+    ball: {
+      ...launched,
+      x: state.paddleX + PADDLE_WIDTH / 2,
+      y: PADDLE_Y - BALL_SIZE,
+    },
   };
 }
 
@@ -126,6 +157,13 @@ function circleRectIntersect(
 export function step(state: BreakoutState, dtSeconds: number): BreakoutState {
   if (state.status !== "playing") {
     return state;
+  }
+
+  if (state.ballAttached) {
+    return {
+      ...state,
+      ball: attachedBall(state.paddleX),
+    };
   }
 
   let { x, y, vx, vy } = state.ball;
@@ -186,7 +224,15 @@ export function step(state: BreakoutState, dtSeconds: number): BreakoutState {
     if (lives <= 0) {
       return { ...state, ball: { x, y, vx, vy }, bricks, score, lives, status: "over" };
     }
-    return { ...state, ball: createInitialBall(), bricks, score, lives, status: "playing" };
+    return {
+      ...state,
+      ball: attachedBall(state.paddleX),
+      ballAttached: true,
+      bricks,
+      score,
+      lives,
+      status: "playing",
+    };
   }
 
   const status: Status = bricks.some(Boolean) ? "playing" : "stage-clear";

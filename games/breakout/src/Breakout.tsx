@@ -29,6 +29,7 @@ import {
   createInitialState,
   FIELD_HEIGHT,
   FIELD_WIDTH,
+  launchBall,
   PADDLE_HEIGHT,
   PADDLE_WIDTH,
   PADDLE_Y,
@@ -48,6 +49,7 @@ type Action =
   | { type: "step"; dt: number }
   | { type: "setPaddleX"; x: number }
   | { type: "advanceStage" }
+  | { type: "launchBall" }
   | { type: "restart" };
 
 function reducer(state: BreakoutState, action: Action): BreakoutState {
@@ -56,6 +58,8 @@ function reducer(state: BreakoutState, action: Action): BreakoutState {
       return createInitialState();
     case "advanceStage":
       return advanceStage(state);
+    case "launchBall":
+      return launchBall(state);
     case "setPaddleX":
       return {
         ...state,
@@ -182,6 +186,13 @@ export function BreakoutGame() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        primeGameAudio();
+        playGameFeel("button", fieldRef.current);
+        dispatch({ type: "launchBall" });
+        return;
+      }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
         primeGameAudio();
@@ -227,6 +238,11 @@ export function BreakoutGame() {
   const handlePointerDown = useCallback(
     (event: PointerEvent) => {
       playGameFeel("button", fieldRef.current);
+      if (stateRef.current.ballAttached && stateRef.current.status === "playing") {
+        primeGameAudio();
+        dispatch({ type: "launchBall" });
+        return;
+      }
       updatePaddleFromPointer(event.clientX);
     },
     [updatePaddleFromPointer]
@@ -313,6 +329,11 @@ export function BreakoutGame() {
           })}
         />
 
+        {state.ballAttached && state.status === "playing" ? (
+          <p className="pointer-events-none absolute inset-x-0 bottom-8 text-center text-xs font-medium text-primary animate-pulse">
+            Tap / Space to launch
+          </p>
+        ) : null}
         {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
             variant="stage-clear"
@@ -355,7 +376,7 @@ export function BreakoutGame() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        방향키 또는 드래그로 패들을 움직여 공을 받아치세요.
+        패들을 맞춘 뒤 탭(또는 스페이스)으로 공을 발사하세요.
       </p>
     </div>
   );
