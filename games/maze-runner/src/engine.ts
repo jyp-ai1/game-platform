@@ -20,7 +20,7 @@ export interface Chaser {
   homeY: number;
 }
 
-export type Status = "playing" | "won" | "over";
+export type Status = "playing" | "won" | "over" | "stage-clear";
 
 export interface MazeState {
   grid: Cell[][];
@@ -34,6 +34,7 @@ export interface MazeState {
   score: number;
   dotsRemaining: number;
   lives: number;
+  mazeIndex: number;
   status: Status;
 }
 
@@ -109,13 +110,15 @@ function normalizeLayoutRow(row: string): string {
   return row.slice(0, COLS);
 }
 
-function buildGrid(): Cell[][] {
+function buildGrid(mazeIndex = 0): Cell[][] {
+  const flip = mazeIndex % 2 === 1;
   const grid: Cell[][] = [];
   for (let y = 0; y < ROWS; y++) {
     const rawRow = normalizeLayoutRow(LAYOUT[y] ?? "#".repeat(COLS));
     const row: Cell[] = [];
     for (let x = 0; x < COLS; x++) {
-      const ch = rawRow[x];
+      const srcX = flip ? COLS - 1 - x : x;
+      const ch = rawRow[srcX];
       if (ch === "#") {
         row.push("wall");
       } else if (ch === "-") {
@@ -178,7 +181,7 @@ function isWalkable(grid: Cell[][], x: number, y: number): boolean {
 }
 
 export function createInitialState(): MazeState {
-  const grid = buildGrid();
+  const grid = buildGrid(0);
   const chasers: Chaser[] = PEN_SPAWNS.map((spawn, index) => {
     const home = HOME_CORNERS[index] ?? { x: 1, y: 1 };
     return {
@@ -204,6 +207,41 @@ export function createInitialState(): MazeState {
     score: 0,
     dotsRemaining: countDots(grid),
     lives: STARTING_LIVES,
+    mazeIndex: 0,
+    status: "playing",
+  };
+}
+
+export function advanceMaze(state: MazeState): MazeState {
+  if (state.status !== "stage-clear") {
+    return state;
+  }
+  const mazeIndex = state.mazeIndex + 1;
+  const grid = buildGrid(mazeIndex);
+  const chasers: Chaser[] = PEN_SPAWNS.map((spawn, index) => {
+    const home = HOME_CORNERS[index] ?? { x: 1, y: 1 };
+    return {
+      id: index,
+      x: spawn.x,
+      y: spawn.y,
+      direction: "none",
+      mode: "scatter",
+      homeX: home.x,
+      homeY: home.y,
+    };
+  });
+  return {
+    ...state,
+    grid,
+    playerX: PLAYER_SPAWN.x,
+    playerY: PLAYER_SPAWN.y,
+    playerDirection: "none",
+    queuedDirection: "none",
+    chasers,
+    frightenedTimer: 0,
+    modeTimer: SCATTER_DURATION,
+    dotsRemaining: countDots(grid),
+    mazeIndex,
     status: "playing",
   };
 }
@@ -439,7 +477,7 @@ export function step(state: MazeState, dtSeconds: number): MazeState {
   }
 
   if (dotsRemaining <= 0) {
-    status = "won";
+    status = "stage-clear";
   }
 
   return {

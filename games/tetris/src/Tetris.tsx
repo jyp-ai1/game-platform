@@ -36,7 +36,7 @@ import {
   tryRotate,
   type TetrisState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "tetris";
 const SWIPE_THRESHOLD = 24;
@@ -117,6 +117,7 @@ export function TetrisGame() {
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const prevLinesRef = useRef(0);
+  const prevLevelRef = useRef(state.level);
   const prevStatusRef = useRef(state.status);
 
   const saveStatus = useAutoSave(
@@ -159,6 +160,13 @@ export function TetrisGame() {
     }
     prevLinesRef.current = state.linesCleared;
   }, [state.linesCleared]);
+
+  useEffect(() => {
+    if (state.level > prevLevelRef.current) {
+      playStageClearAudio();
+    }
+    prevLevelRef.current = state.level;
+  }, [state.level]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -223,6 +231,8 @@ export function TetrisGame() {
     const maxAbs = Math.max(Math.abs(dx), Math.abs(dy));
 
     if (maxAbs < TAP_THRESHOLD) {
+      playGameFeel("button", fieldRef.current);
+      dispatch({ type: "rotate" });
       return;
     }
     playGameFeel("button", fieldRef.current);
@@ -265,7 +275,7 @@ export function TetrisGame() {
   const activeColor = TETROMINO_COLORS[state.active.type];
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -285,7 +295,7 @@ export function TetrisGame() {
         </Button>
       </div>
 
-      <div className="flex w-full max-w-xs items-start gap-2">
+      <div className="flex w-full max-w-[min(100%,20.5rem)] items-start gap-2">
       <div
         ref={fieldRef}
         className="relative grid aspect-[1/2] flex-1 touch-none select-none gap-px rounded-xl bg-muted p-1 transition-transform duration-150"
@@ -352,6 +362,35 @@ export function TetrisGame() {
             ))}
         </div>
       </div>
+      </div>
+
+      <div className="flex w-full max-w-[min(100%,20.5rem)] gap-2 sm:hidden">
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 flex-1"
+          disabled={!canPlay || state.status !== "playing"}
+          onClick={() => {
+            primeGameAudio();
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "rotate" });
+          }}
+        >
+          Rotate
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 flex-1"
+          disabled={!canPlay || state.status !== "playing"}
+          onClick={() => {
+            primeGameAudio();
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "hardDrop" });
+          }}
+        >
+          Drop
+        </Button>
       </div>
 
       <p className="text-xs text-muted-foreground">

@@ -11,8 +11,12 @@ export interface StackTowerState {
 }
 
 const BOARD = 100;
-const SPEED = 2.2;
+const BASE_SPEED = 2.2;
 const INITIAL_WIDTH = 40;
+
+function speedForStage(stackLength: number): number {
+  return BASE_SPEED + Math.max(0, stackLength - 1) * 0.35;
+}
 
 export function createInitialState(): StackTowerState {
   return {
@@ -25,8 +29,9 @@ export function createInitialState(): StackTowerState {
 
 export function tick(state: StackTowerState): StackTowerState {
   if (state.status !== "playing") return state;
+  const speed = speedForStage(state.stack.length);
   let { x, width, dir } = state.current;
-  x += dir * SPEED;
+  x += dir * speed;
   if (x <= 0) {
     x = 0;
     dir = 1;

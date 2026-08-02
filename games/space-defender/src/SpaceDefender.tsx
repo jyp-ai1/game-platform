@@ -24,6 +24,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 import {
   BULLET_HEIGHT,
   BULLET_WIDTH,
+  advanceWave,
   createInitialState,
   FIELD_HEIGHT,
   FIELD_WIDTH,
@@ -31,6 +32,7 @@ import {
   INVADER_ROWS,
   INVADER_SIZE,
   invaderCellRect,
+  MAX_WAVES,
   PLAYER_HEIGHT,
   PLAYER_WIDTH,
   PLAYER_Y,
@@ -56,12 +58,15 @@ type Action =
   | { type: "step"; dt: number }
   | { type: "setPlayerX"; x: number }
   | { type: "fire" }
+  | { type: "advanceWave" }
   | { type: "restart" };
 
 function reducer(state: SpaceDefenderState, action: Action): SpaceDefenderState {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "advanceWave":
+      return advanceWave(state);
     case "setPlayerX":
       return setPlayerX(state, action.x);
     case "fire":
@@ -99,7 +104,7 @@ export function SpaceDefenderGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
-  const stageIndex = Math.floor(state.score / 100) + 1;
+  const stageIndex = state.wave;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex,
@@ -122,7 +127,7 @@ export function SpaceDefenderGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status !== "playing" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -171,7 +176,7 @@ export function SpaceDefenderGame() {
     }
     if (state.status === "over") {
       playGameOverAudio();
-    } else if (state.status === "won") {
+    } else if (state.status === "won" || state.status === "stage-clear") {
       playStageClearAudio();
     }
     prevStatusRef.current = state.status;
@@ -255,12 +260,12 @@ export function SpaceDefenderGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={state.score} />
-          <ScoreBox label="Wave" value={stageIndex} />
+          <ScoreBox label="Wave" value={`${state.wave}/${MAX_WAVES}`} />
           <ScoreBox label="Lives" value={state.lives} />
           <ScoreBox label="Best" value={feel.bestScore} />
         </div>
@@ -277,7 +282,7 @@ export function SpaceDefenderGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-slate-950 transition-transform duration-150 active:scale-[0.99]"
+        className="relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-slate-950 transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
@@ -336,7 +341,22 @@ export function SpaceDefenderGame() {
           style={toPercentRect(state.playerX, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)}
         />
 
-        {state.status !== "playing" ? (
+        {state.status === "stage-clear" ? (
+          <StandardGameOverOverlay
+            variant="stage-clear"
+            stageLabel={`Wave ${state.wave} Clear`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={handleExit}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "advanceWave" })}
+          />
+        ) : null}
+
+        {state.status === "over" || state.status === "won" ? (
           <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}

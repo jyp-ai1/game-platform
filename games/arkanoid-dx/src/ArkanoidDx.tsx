@@ -23,6 +23,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   BALL_SIZE,
+  advanceStage,
   brickRect,
   CAPSULE_SIZE,
   createInitialState,
@@ -50,12 +51,15 @@ const MAX_DT = 0.05;
 type Action =
   | { type: "step"; dt: number }
   | { type: "setPaddleX"; x: number }
+  | { type: "advanceStage" }
   | { type: "restart" };
 
 function reducer(state: ArkanoidState, action: Action): ArkanoidState {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "advanceStage":
+      return advanceStage(state);
     case "setPaddleX":
       return {
         ...state,
@@ -116,7 +120,7 @@ export function ArkanoidDxGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status !== "playing" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -162,14 +166,14 @@ export function ArkanoidDxGame() {
     }
     if (state.status === "over") {
       playGameOverAudio();
-    } else if (state.status === "won") {
+    } else if (state.status === "won" || state.status === "stage-clear") {
       playStageClearAudio();
     }
     prevStatusRef.current = state.status;
   }, [state.status]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
@@ -196,8 +200,8 @@ export function ArkanoidDxGame() {
     };
   }, []);
 
-  const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
+  const updatePaddleFromPointer = useCallback(
+    (clientX: number) => {
       if (!canPlayRef.current) {
         return;
       }
@@ -206,10 +210,26 @@ export function ArkanoidDxGame() {
         return;
       }
       const rect = field.getBoundingClientRect();
-      const relativeX = ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
+      const relativeX = ((clientX - rect.left) / rect.width) * FIELD_WIDTH;
       dispatch({ type: "setPaddleX", x: relativeX - state.paddleWidth / 2 });
     },
-    [phaseRef, state.paddleWidth]
+    [canPlayRef, state.paddleWidth]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      updatePaddleFromPointer(event.clientX);
+    },
+    [updatePaddleFromPointer]
+  );
+
+  const handlePointerDown = useCallback(
+    (event: PointerEvent) => {
+      primeGameAudio();
+      playGameFeel("button", fieldRef.current);
+      updatePaddleFromPointer(event.clientX);
+    },
+    [updatePaddleFromPointer]
   );
 
 
@@ -234,7 +254,7 @@ export function ArkanoidDxGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -256,13 +276,10 @@ export function ArkanoidDxGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
+        className="relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
-        onPointerDown={() => {
-          primeGameAudio();
-          playGameFeel("button", fieldRef.current);
-        }}
+        onPointerDown={handlePointerDown}
       >
         {state.bricks.map((alive, index) =>
           alive ? (
@@ -315,7 +332,22 @@ export function ArkanoidDxGame() {
           })}
         />
 
-        {state.status !== "playing" ? (
+        {state.status === "stage-clear" ? (
+          <StandardGameOverOverlay
+            variant="stage-clear"
+            stageLabel={`${STAGE_NAMES[state.stage] ?? `Stage ${state.stage + 1}`} Clear`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={handleExit}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "advanceStage" })}
+          />
+        ) : null}
+
+        {state.status === "over" || state.status === "won" ? (
           <StandardGameOverOverlay
             message={
               state.status === "won"

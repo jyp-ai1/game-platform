@@ -23,6 +23,7 @@ import { useEffect, useCallback, useReducer, useRef } from "react";
 
 import {
   COLS,
+  advanceMaze,
   createInitialState,
   ROWS,
   setQueuedDirection,
@@ -44,12 +45,15 @@ const SWIPE_THRESHOLD = 24;
 type Action =
   | { type: "tick"; dt: number }
   | { type: "setDirection"; direction: Direction }
+  | { type: "advanceMaze" }
   | { type: "restart" };
 
 function reducer(state: MazeState, action: Action): MazeState {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "advanceMaze":
+      return advanceMaze(state);
     case "setDirection":
       return setQueuedDirection(state, action.direction);
     case "tick":
@@ -84,7 +88,7 @@ export function MazeRunnerGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
-  const stageIndex = Math.floor(state.score / 200) + 1;
+  const stageIndex = state.mazeIndex + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex,
@@ -105,7 +109,7 @@ export function MazeRunnerGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status !== "playing" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -123,14 +127,14 @@ export function MazeRunnerGame() {
     }
     if (state.status === "over") {
       playGameOverAudio();
-    } else if (state.status === "won") {
+    } else if (state.status === "stage-clear") {
       playStageClearAudio();
     }
     prevStatusRef.current = state.status;
   }, [state.status]);
 
   useEffect(() => {
-    if (state.status === "over" || state.status === "won") {
+    if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
@@ -213,7 +217,7 @@ export function MazeRunnerGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -235,7 +239,7 @@ export function MazeRunnerGame() {
       </div>
 
       <div
-        className="relative grid w-full max-w-sm touch-none select-none gap-0 rounded-xl bg-muted p-1 transition-transform duration-150"
+        className="relative grid w-full max-w-[min(100%,20.5rem)] touch-none select-none gap-0 rounded-xl bg-muted p-1 transition-transform duration-150"
         ref={fieldRef}
         style={{
           gridTemplateColumns: `repeat(${COLS}, 1fr)`,
@@ -277,9 +281,24 @@ export function MazeRunnerGame() {
           })
         )}
 
-        {state.status !== "playing" ? (
+        {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
-            message={state.status === "won" ? "You Win!" : "Game Over"}
+            variant="stage-clear"
+            stageLabel={`Maze ${state.mazeIndex + 1} Clear`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={handleExit}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "advanceMaze" })}
+          />
+        ) : null}
+
+        {state.status === "over" ? (
+          <StandardGameOverOverlay
+            message="Game Over"
             score={state.score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}

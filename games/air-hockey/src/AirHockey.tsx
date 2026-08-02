@@ -22,6 +22,7 @@ import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
+  advanceMatch,
   createInitialState,
   FIELD_HEIGHT,
   FIELD_WIDTH,
@@ -30,6 +31,7 @@ import {
   movePlayerPaddle,
   PADDLE_RADIUS,
   PUCK_RADIUS,
+  SERIES_WIN_TARGET,
   step,
   type AirHockeyState,
 } from "./engine";
@@ -46,12 +48,15 @@ const MAX_DT = 0.05;
 type Action =
   | { type: "step"; dt: number }
   | { type: "movePlayer"; target: { x: number; y: number } }
+  | { type: "advanceMatch" }
   | { type: "restart" };
 
 function reducer(state: AirHockeyState, action: Action): AirHockeyState {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "advanceMatch":
+      return advanceMatch(state);
     case "movePlayer":
       return movePlayerPaddle(state, action.target);
     case "step":
@@ -143,9 +148,11 @@ export function AirHockeyGame() {
 
   useEffect(() => {
     if (state.status !== "playing" && prevStatusRef.current === "playing") {
-      if (state.winner === "player") {
+      if (state.winner === "player" && state.status === "over") {
         playStageClearAudio();
-      } else {
+      } else if (state.status === "match-over" && state.winner === "player") {
+        playStageClearAudio();
+      } else if (state.status === "over") {
         playGameOverAudio();
       }
     }
@@ -195,16 +202,41 @@ export function AirHockeyGame() {
       };
       dispatch({ type: "movePlayer", target });
     },
-    []
+    [canPlayRef]
+  );
+
+  const handlePointerDown = useCallback(
+    (event: PointerEvent) => {
+      if (!canPlayRef.current || stateRef.current.status !== "playing") {
+        return;
+      }
+      primeGameAudio();
+      playGameFeel("button", fieldRef.current);
+      const field = fieldRef.current;
+      if (!field) {
+        return;
+      }
+      const rect = field.getBoundingClientRect();
+      dispatch({
+        type: "movePlayer",
+        target: {
+          x: ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH,
+          y: ((event.clientY - rect.top) / rect.height) * FIELD_HEIGHT,
+        },
+      });
+    },
+    [canPlayRef]
   );
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="You" value={state.playerScore} />
           <ScoreBox label="CPU" value={state.aiScore} />
+          <ScoreBox label="Series" value={`${state.seriesPlayerWins}-${state.seriesAiWins}`} />
+          <ScoreBox label="Match" value={state.matchIndex} />
           <ScoreBox
             label="Time"
             value={Math.max(0, Math.ceil(MATCH_TIME_LIMIT_SECONDS - state.elapsedSeconds))}
@@ -223,15 +255,12 @@ export function AirHockeyGame() {
       <div
         ref={fieldRef}
         className={cn(
-          "relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]",
+          "relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]",
           state.goalFlashTimer > 0 && "game-effect-shake"
         )}
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
-        onPointerDown={() => {
-          primeGameAudio();
-          playGameFeel("button", fieldRef.current);
-        }}
+        onPointerDown={handlePointerDown}
       >
         <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/20" />
         <div
@@ -270,14 +299,33 @@ export function AirHockeyGame() {
           )}
         />
 
-        {state.status !== "playing" ? (
+        {state.status === "match-over" ? (
+          <StandardGameOverOverlay
+            variant="stage-clear"
+            stageLabel={
+              state.winner === "player"
+                ? `Match ${state.matchIndex} Won (${state.seriesPlayerWins}/${SERIES_WIN_TARGET})`
+                : `Match ${state.matchIndex} Lost (${state.seriesAiWins}/${SERIES_WIN_TARGET})`
+            }
+            score={state.playerScore}
+            gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={handleExit}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "advanceMatch" })}
+          />
+        ) : null}
+
+        {state.status === "over" ? (
           <StandardGameOverOverlay
             message={
               state.winner === "player"
-                ? "You Win!"
+                ? `Series Won! (${state.seriesPlayerWins}-${state.seriesAiWins})`
                 : state.winner === "draw"
                   ? "Draw!"
-                  : "Game Over"
+                  : `Series Lost (${state.seriesPlayerWins}-${state.seriesAiWins})`
             }
             score={state.playerScore}
             gameSlug={GAME_SLUG}
@@ -297,8 +345,8 @@ export function AirHockeyGame() {
       ) : null}
 
       <p className="text-xs text-muted-foreground">
-        드래그(또는 터치)로 패들을 움직여 퍽을 쳐내세요. 5점을 먼저 획득하거나
-        3분이 지나면 승리합니다.
+        드래그(또는 터치)로 패들을 움직여 퍽을 쳐내세요. 매치 선승 5점 · 시리즈
+        2승(Best of 3).
       </p>
     </div>
   );

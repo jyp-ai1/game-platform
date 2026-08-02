@@ -28,7 +28,10 @@ export interface Rect {
   height: number;
 }
 
-export type Status = "playing" | "over" | "won";
+export type Status = "playing" | "over" | "won" | "stage-clear";
+
+export const BRICK_ROW_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6"] as const;
+export const FINAL_STAGE = 5;
 
 export interface BreakoutState {
   paddleX: number;
@@ -36,6 +39,7 @@ export interface BreakoutState {
   bricks: boolean[];
   score: number;
   lives: number;
+  stage: number;
   status: Status;
 }
 
@@ -52,6 +56,16 @@ export function createInitialBall(): Ball {
   };
 }
 
+export function ballForStage(stage: number): Ball {
+  const speedMult = 1 + (stage - 1) * 0.1;
+  const ball = createInitialBall();
+  return {
+    ...ball,
+    vx: ball.vx * speedMult,
+    vy: ball.vy * speedMult,
+  };
+}
+
 export function createInitialState(): BreakoutState {
   return {
     paddleX: FIELD_WIDTH / 2 - PADDLE_WIDTH / 2,
@@ -59,6 +73,26 @@ export function createInitialState(): BreakoutState {
     bricks: createInitialBricks(),
     score: 0,
     lives: STARTING_LIVES,
+    stage: 1,
+    status: "playing",
+  };
+}
+
+export function brickRowColor(index: number): string {
+  const row = Math.floor(index / BRICK_COLS);
+  return BRICK_ROW_COLORS[row % BRICK_ROW_COLORS.length]!;
+}
+
+export function advanceStage(state: BreakoutState): BreakoutState {
+  const nextStage = state.stage + 1;
+  if (nextStage > FINAL_STAGE) {
+    return { ...state, status: "won" };
+  }
+  return {
+    ...state,
+    stage: nextStage,
+    bricks: createInitialBricks(),
+    ball: ballForStage(nextStage),
     status: "playing",
   };
 }
@@ -155,7 +189,7 @@ export function step(state: BreakoutState, dtSeconds: number): BreakoutState {
     return { ...state, ball: createInitialBall(), bricks, score, lives, status: "playing" };
   }
 
-  const status: Status = bricks.some(Boolean) ? "playing" : "won";
+  const status: Status = bricks.some(Boolean) ? "playing" : "stage-clear";
 
   return { ...state, ball: { x, y, vx, vy }, bricks, score, status };
 }

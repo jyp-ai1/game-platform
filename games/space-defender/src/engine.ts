@@ -29,6 +29,7 @@ export const SHIELD_COUNT = 4;
 export const SHIELD_Y = Math.round((FIELD_HEIGHT * 2) / 3);
 
 export const STARTING_LIVES = 3;
+export const MAX_WAVES = 3;
 /** Bottom row (nearest player) = 10 pts; each row higher adds 10 (classic ladder). */
 export function pointsForInvaderRow(row: number): number {
   return (INVADER_ROWS - row) * 10;
@@ -38,7 +39,7 @@ export function pointsForInvaderRow(row: number): number {
 // step() docs below for how this is applied.
 export const INVADER_FIRE_CHANCE_PER_TICK = 0.5;
 
-export type Status = "playing" | "over" | "won";
+export type Status = "playing" | "over" | "won" | "stage-clear";
 
 export interface InvaderGrid {
   alive: boolean[][]; // [row][col], row 0 = frontmost/topmost row
@@ -68,6 +69,7 @@ export interface SpaceDefenderState {
   bullets: Bullet[];
   score: number;
   lives: number;
+  wave: number;
   invaderMoveAccumulatorMs: number;
   status: Status;
 }
@@ -83,6 +85,14 @@ function invaderFormationWidth(): number {
 }
 
 export function createInitialState(): SpaceDefenderState {
+  return createWaveState(1, 0, STARTING_LIVES);
+}
+
+function createWaveState(
+  wave: number,
+  score: number,
+  lives: number
+): SpaceDefenderState {
   const formationWidth = invaderFormationWidth();
   const originX = (FIELD_WIDTH - formationWidth) / 2;
   const originY = 40;
@@ -108,11 +118,23 @@ export function createInitialState(): SpaceDefenderState {
     },
     shields,
     bullets: [],
-    score: 0,
-    lives: STARTING_LIVES,
+    score,
+    lives,
+    wave,
     invaderMoveAccumulatorMs: 0,
     status: "playing",
   };
+}
+
+export function advanceWave(state: SpaceDefenderState): SpaceDefenderState {
+  if (state.status !== "stage-clear") {
+    return state;
+  }
+  const nextWave = state.wave + 1;
+  if (nextWave > MAX_WAVES) {
+    return { ...state, status: "won" };
+  }
+  return createWaveState(nextWave, state.score, state.lives);
 }
 
 export function setPlayerX(
@@ -408,9 +430,9 @@ export function step(
     shields = shields.filter((s) => s.hp > 0);
   }
 
-  // (5) Win condition.
+  // (5) Wave clear / win condition.
   if (status === "playing" && countAlive(alive) === 0) {
-    status = "won";
+    status = state.wave >= MAX_WAVES ? "won" : "stage-clear";
   }
 
   return {
@@ -421,6 +443,7 @@ export function step(
     bullets: survivingBullets,
     score,
     lives,
+    wave: state.wave,
     invaderMoveAccumulatorMs,
     status,
   };

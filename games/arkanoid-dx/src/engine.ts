@@ -62,7 +62,7 @@ export interface Rect {
   height: number;
 }
 
-export type Status = "playing" | "over" | "won";
+export type Status = "playing" | "over" | "won" | "stage-clear";
 
 export interface ArkanoidState {
   paddleX: number;
@@ -312,14 +312,13 @@ export function step(state: ArkanoidState, dtSeconds: number): ArkanoidState {
     return {
       ...state,
       paddleX,
-      paddleWidth: PADDLE_WIDTH_BASE,
-      widenTimer: 0,
-      balls: [createInitialBall()],
-      bricks: createBricksForStage(nextStage),
-      capsules: [],
-      stage: nextStage,
+      paddleWidth: finalPaddleWidth,
+      widenTimer: nextWidenTimer,
+      balls,
+      bricks,
+      capsules: nextCapsules,
       score: score + STAGE_CLEAR_BONUS,
-      status: "playing",
+      status: "stage-clear",
     };
   }
 
@@ -332,5 +331,22 @@ export function step(state: ArkanoidState, dtSeconds: number): ArkanoidState {
     bricks,
     capsules: nextCapsules,
     score,
+  };
+}
+
+export function advanceStage(state: ArkanoidState): ArkanoidState {
+  if (state.status !== "stage-clear") {
+    return state;
+  }
+  const nextStage = state.stage + 1;
+  return {
+    ...state,
+    paddleWidth: PADDLE_WIDTH_BASE,
+    widenTimer: 0,
+    balls: [createInitialBall()],
+    bricks: createBricksForStage(nextStage),
+    capsules: [],
+    stage: nextStage,
+    status: "playing",
   };
 }

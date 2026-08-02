@@ -25,8 +25,9 @@ export interface Vec2 {
   y: number;
 }
 
-export type Status = "playing" | "over";
+export type Status = "playing" | "over" | "match-over";
 export type Winner = "player" | "ai" | "draw" | null;
+export const SERIES_WIN_TARGET = 2;
 
 export interface AirHockeyState {
   playerPaddle: Vec2; // bottom half of the table
@@ -35,6 +36,9 @@ export interface AirHockeyState {
   puckVelocity: Vec2;
   playerScore: number;
   aiScore: number;
+  seriesPlayerWins: number;
+  seriesAiWins: number;
+  matchIndex: number;
   status: Status;
   winner: Winner;
   resetTimer: number; // seconds remaining before the puck respawns after a goal; 0 = active play
@@ -64,6 +68,9 @@ export function createInitialState(): AirHockeyState {
     puckVelocity: { x: 70, y: -160 },
     playerScore: 0,
     aiScore: 0,
+    seriesPlayerWins: 0,
+    seriesAiWins: 0,
+    matchIndex: 1,
     status: "playing",
     winner: null,
     resetTimer: 0,
@@ -222,12 +229,27 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
 
   let status: Status = state.status;
   let winner: Winner = state.winner;
+  let seriesPlayerWins = state.seriesPlayerWins;
+  let seriesAiWins = state.seriesAiWins;
+  let matchIndex = state.matchIndex;
   if (playerScore >= WINNING_SCORE) {
-    status = "over";
-    winner = "player";
+    seriesPlayerWins += 1;
+    if (seriesPlayerWins >= SERIES_WIN_TARGET) {
+      status = "over";
+      winner = "player";
+    } else {
+      status = "match-over";
+      winner = "player";
+    }
   } else if (aiScore >= WINNING_SCORE) {
-    status = "over";
-    winner = "ai";
+    seriesAiWins += 1;
+    if (seriesAiWins >= SERIES_WIN_TARGET) {
+      status = "over";
+      winner = "ai";
+    } else {
+      status = "match-over";
+      winner = "ai";
+    }
   } else if (elapsedSeconds >= MATCH_TIME_LIMIT_SECONDS) {
     status = "over";
     winner =
@@ -245,11 +267,27 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
     puckVelocity: velocity,
     playerScore,
     aiScore,
+    seriesPlayerWins,
+    seriesAiWins,
+    matchIndex,
     status,
     winner,
     resetTimer,
     elapsedSeconds,
     goalFlashSide,
     goalFlashTimer,
+  };
+}
+
+export function advanceMatch(state: AirHockeyState): AirHockeyState {
+  if (state.status !== "match-over") {
+    return state;
+  }
+  return {
+    ...createInitialState(),
+    seriesPlayerWins: state.seriesPlayerWins,
+    seriesAiWins: state.seriesAiWins,
+    matchIndex: state.matchIndex + 1,
+    elapsedSeconds: state.elapsedSeconds,
   };
 }

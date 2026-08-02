@@ -19,7 +19,7 @@ import {
 import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   createInitialState,
@@ -108,6 +108,8 @@ export function GalaxyDefenderGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const prevWaveRef = useRef(state.wave);
+  const [waveMilestone, setWaveMilestone] = useState<number | null>(null);
 
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -116,6 +118,17 @@ export function GalaxyDefenderGame() {
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
+
+  useEffect(() => {
+    if (state.wave > prevWaveRef.current && state.wave % 5 === 0) {
+      playStageClearAudio();
+      setWaveMilestone(state.wave);
+      const timeout = window.setTimeout(() => setWaveMilestone(null), 1800);
+      prevWaveRef.current = state.wave;
+      return () => window.clearTimeout(timeout);
+    }
+    prevWaveRef.current = state.wave;
+  }, [state.wave]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
@@ -260,7 +273,7 @@ export function GalaxyDefenderGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -282,7 +295,7 @@ export function GalaxyDefenderGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
+        className="relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={() => {
@@ -310,6 +323,14 @@ export function GalaxyDefenderGame() {
           className="absolute rounded-sm bg-foreground"
           style={toPercentBox(state.playerX, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)}
         />
+
+        {waveMilestone !== null ? (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/60">
+            <p className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+              Wave {waveMilestone}!
+            </p>
+          </div>
+        ) : null}
 
         {state.status !== "playing" ? (
           <StandardGameOverOverlay

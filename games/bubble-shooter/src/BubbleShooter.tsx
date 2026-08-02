@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -17,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useCallback, useReducer, useRef } from "react";
+import { useEffect, useCallback, useReducer, useRef, useState } from "react";
 
 import {
   computeScore,
@@ -66,14 +67,16 @@ export function BubbleShooterGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const stageIndex = state.stageIndex;
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       const gain = state.score - prevScoreRef.current;
-      playGameFeel(gain >= 15 ? "combo" : "pop", fieldRef.current);
+      playGameFeel(gain >= 15 * diff.speedMult ? "combo" : "pop", fieldRef.current);
     }
     prevScoreRef.current = state.score;
-  }, [state.score]);
+  }, [state.score, diff.speedMult]);
 
   useEffect(() => {
     if (state.status === "won" && prevStatusRef.current !== "won") {
@@ -86,7 +89,6 @@ export function BubbleShooterGame() {
     prevStatusRef.current = state.status;
   }, [state.status]);
 
-  const stageIndex = state.stageIndex;
   const stageDef = getBubbleShooterStage(stageIndex);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
@@ -94,6 +96,7 @@ export function BubbleShooterGame() {
     muteScoreGain: true,
     fieldRef,
   });
+  const [aimCol, setAimCol] = useState<number | null>(null);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -132,7 +135,7 @@ export function BubbleShooterGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -145,7 +148,26 @@ export function BubbleShooterGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div ref={fieldRef} className="relative w-full max-w-sm touch-none select-none rounded-xl bg-muted p-2">
+      <div
+        ref={fieldRef}
+        className="relative w-full max-w-[min(100%,20.5rem)] touch-none select-none rounded-xl bg-muted p-2"
+        onPointerMove={(event) => {
+          const field = fieldRef.current;
+          if (!field) return;
+          const rect = field.getBoundingClientRect();
+          const col = Math.floor(
+            ((event.clientX - rect.left) / rect.width) * state.grid[0]!.length
+          );
+          setAimCol(Math.max(0, Math.min(state.grid[0]!.length - 1, col)));
+        }}
+        onPointerLeave={() => setAimCol(null)}
+      >
+        {aimCol !== null && state.status === "playing" ? (
+          <div
+            className="pointer-events-none absolute bottom-10 top-2 w-0.5 bg-foreground/30"
+            style={{ left: `${((aimCol + 0.5) / state.grid[0]!.length) * 100}%` }}
+          />
+        ) : null}
         {state.grid.map((row, ri) => (
           <div key={ri} className="flex gap-1">
             {row.map((cell, ci) => (

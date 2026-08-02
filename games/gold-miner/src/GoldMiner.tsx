@@ -119,7 +119,7 @@ export function GoldMinerGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "over" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -148,12 +148,14 @@ export function GoldMinerGame() {
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
       playGameOverAudio();
+    } else if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
     }
     prevStatusRef.current = state.status;
   }, [state.status]);
 
   useEffect(() => {
-    if (state.status === "over") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
@@ -210,7 +212,7 @@ export function GoldMinerGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -232,7 +234,7 @@ export function GoldMinerGame() {
       </div>
 
       <div
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-amber-950/30 transition-transform duration-150 active:scale-[0.99]"
+        className="relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-amber-950/30 transition-transform duration-150 active:scale-[0.99]"
         ref={fieldRef}
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerDown={handleFire}
@@ -277,9 +279,9 @@ export function GoldMinerGame() {
           )
         )}
 
-        {state.status === "over" ? (
+        {state.status === "over" || state.status === "won" ? (
           <StandardGameOverOverlay
-            message="Time's Up!"
+            message={state.status === "won" ? "You Win!" : "Time's Up!"}
             score={state.score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}

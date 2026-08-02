@@ -14,7 +14,7 @@ export const MAX_LEVEL = 5;
 export const CATCH_RADIUS = ITEM_SIZE / 2 + 6;
 
 export type HookState = "swinging" | "extending" | "retracting";
-export type Status = "playing" | "over";
+export type Status = "playing" | "over" | "won";
 export type ItemType = "gold" | "rock" | "diamond";
 
 export interface Item {
@@ -105,8 +105,11 @@ export function fireHook(state: GoldMinerState): GoldMinerState {
 
 function maybeAdvanceLevel(state: GoldMinerState): GoldMinerState {
   const goal = goalForLevel(state.level);
-  if (state.score < goal || state.level >= MAX_LEVEL) {
+  if (state.score < goal) {
     return state;
+  }
+  if (state.level >= MAX_LEVEL) {
+    return { ...state, status: "won" };
   }
   return {
     ...state,
@@ -192,7 +195,7 @@ export function step(state: GoldMinerState, dtSeconds: number): GoldMinerState {
       hookState: "swinging",
       attachedItemIndex: null,
       timeLeft,
-      status,
+      status: advanced.status === "won" ? "won" : status,
     };
   }
 

@@ -23,7 +23,9 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   BALL_SIZE,
+  advanceStage,
   brickRect,
+  brickRowColor,
   createInitialState,
   FIELD_HEIGHT,
   FIELD_WIDTH,
@@ -37,18 +39,23 @@ import {
 import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "breakout";
+const PLAY_FIELD_CLASS =
+  "relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]";
 const PADDLE_KEY_SPEED = 320;
 const MAX_DT = 0.05;
 
 type Action =
   | { type: "step"; dt: number }
   | { type: "setPaddleX"; x: number }
+  | { type: "advanceStage" }
   | { type: "restart" };
 
 function reducer(state: BreakoutState, action: Action): BreakoutState {
   switch (action.type) {
     case "restart":
       return createInitialState();
+    case "advanceStage":
+      return advanceStage(state);
     case "setPaddleX":
       return {
         ...state,
@@ -96,7 +103,7 @@ export function BreakoutGame() {
 
   useEffect(() => {
     if (state.status !== "playing" && prevStatusRef.current === "playing") {
-      if (state.status === "won") {
+      if (state.status === "won" || state.status === "stage-clear") {
         playStageClearAudio();
       } else {
         playGameOverAudio();
@@ -105,7 +112,7 @@ export function BreakoutGame() {
     prevStatusRef.current = state.status;
   }, [state.status]);
 
-  const stageIndex = Math.floor(state.score / 70) + 1;
+  const stageIndex = state.stage;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex,
@@ -121,7 +128,7 @@ export function BreakoutGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status !== "playing" ? null : state),
+    () => (state.status === "playing" ? state : null),
     [state]
   );
 
@@ -165,7 +172,7 @@ export function BreakoutGame() {
   }, [canPlayRef, diff.speedMult]);
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
@@ -192,8 +199,8 @@ export function BreakoutGame() {
     };
   }, []);
 
-  const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
+  const updatePaddleFromPointer = useCallback(
+    (clientX: number) => {
       if (!canPlayRef.current) {
         return;
       }
@@ -204,10 +211,25 @@ export function BreakoutGame() {
       }
       const rect = field.getBoundingClientRect();
       const relativeX =
-        ((event.clientX - rect.left) / rect.width) * FIELD_WIDTH;
+        ((clientX - rect.left) / rect.width) * FIELD_WIDTH;
       dispatch({ type: "setPaddleX", x: relativeX - PADDLE_WIDTH / 2 });
     },
     [canPlayRef]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      updatePaddleFromPointer(event.clientX);
+    },
+    [updatePaddleFromPointer]
+  );
+
+  const handlePointerDown = useCallback(
+    (event: PointerEvent) => {
+      playGameFeel("button", fieldRef.current);
+      updatePaddleFromPointer(event.clientX);
+    },
+    [updatePaddleFromPointer]
   );
 
   function handleExit() {
@@ -231,7 +253,7 @@ export function BreakoutGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -253,17 +275,20 @@ export function BreakoutGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
+        className={PLAY_FIELD_CLASS}
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
-        onPointerDown={() => playGameFeel("button", fieldRef.current)}
+        onPointerDown={handlePointerDown}
       >
         {state.bricks.map((alive, index) =>
           alive ? (
             <div
               key={index}
-              className="absolute rounded-sm bg-primary/70"
-              style={toPercentRect(brickRect(index))}
+              className="absolute rounded-sm"
+              style={{
+                ...toPercentRect(brickRect(index)),
+                backgroundColor: brickRowColor(index),
+              }}
             />
           ) : null
         )}
@@ -288,7 +313,22 @@ export function BreakoutGame() {
           })}
         />
 
-        {state.status !== "playing" ? (
+        {state.status === "stage-clear" ? (
+          <StandardGameOverOverlay
+            variant="stage-clear"
+            stageLabel={`Stage ${state.stage} Clear`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={handleExit}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+            onNextStage={() => dispatch({ type: "advanceStage" })}
+          />
+        ) : null}
+
+        {state.status === "over" || state.status === "won" ? (
           <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}

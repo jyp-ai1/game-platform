@@ -91,6 +91,7 @@ export function SpaceImpactGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const prevWaveRef = useRef(state.wave);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -100,7 +101,7 @@ export function SpaceImpactGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
-  const stageIndex = Math.floor(state.score / 150) + 1;
+  const stageIndex = state.wave;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex,
@@ -157,6 +158,13 @@ export function SpaceImpactGame() {
       }
     };
   }, [canPlayRef]);
+
+  useEffect(() => {
+    if (state.wave > prevWaveRef.current) {
+      playStageClearAudio();
+    }
+    prevWaveRef.current = state.wave;
+  }, [state.wave]);
 
   useEffect(() => {
     if (state.status !== "playing" && prevStatusRef.current === "playing") {
@@ -240,12 +248,12 @@ export function SpaceImpactGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={state.score} />
-          <ScoreBox label="Wave" value={stageIndex} />
+          <ScoreBox label="Wave" value={state.wave} />
           <ScoreBox label="Lives" value={state.lives} />
           <ScoreBox label="Best" value={feel.bestScore} />
         </div>
@@ -262,7 +270,7 @@ export function SpaceImpactGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-slate-950 transition-transform duration-150 active:scale-[0.99]"
+        className="relative w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-slate-950 transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}

@@ -125,7 +125,7 @@ export function StackTowerGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -140,7 +140,7 @@ export function StackTowerGame() {
       </div>
       <button
         type="button"
-        className="relative h-72 w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
+        className="relative h-72 w-full max-w-[min(100%,20.5rem)] touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         ref={fieldRef}
         onClick={() => {
           if (canPlayRef.current && state.status === "playing") {
@@ -173,24 +173,24 @@ export function StackTowerGame() {
             }}
           />
         ) : null}
-        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
-      </button>
-      {state.status === "over" ? (
-        <StandardGameOverOverlay
-          message={`${state.stack.length} blocks!`}
-          score={state.score}
-          gameSlug={GAME_SLUG}
+        {state.status === "over" ? (
+          <StandardGameOverOverlay
+            message={`${state.stack.length} blocks!`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={handleExit}
-          onRetry={handleRetry}
-          onRestart={handleRetry}
-        />
-      ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
-      {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Stack Tower" onResume={onResume} onNewGame={handleNewGame} />
-      ) : null}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+          />
+        ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
+        {phase === "resume-prompt" ? (
+          <ResumeDialog gameTitle="Stack Tower" onResume={onResume} onNewGame={handleNewGame} />
+        ) : null}
+        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
+      </button>
       <p className="text-xs text-muted-foreground">움직이는 블록을 탭해서 쌓으세요.</p>
     </div>
   );

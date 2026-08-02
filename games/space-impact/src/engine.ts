@@ -16,6 +16,7 @@ export const ENEMY_SPAWN_INTERVAL_MS = 850;
 
 export const STARTING_LIVES = 3;
 export const POINTS_PER_ENEMY = 15;
+export const ENEMIES_PER_WAVE = 12;
 
 export type Status = "playing" | "over";
 
@@ -38,6 +39,8 @@ export interface SpaceImpactState {
   spawnAccumulatorMs: number;
   score: number;
   lives: number;
+  wave: number;
+  waveKills: number;
   status: Status;
 }
 
@@ -50,6 +53,8 @@ export function createInitialState(): SpaceImpactState {
     spawnAccumulatorMs: 0,
     score: 0,
     lives: STARTING_LIVES,
+    wave: 1,
+    waveKills: 0,
     status: "playing",
   };
 }
@@ -126,8 +131,11 @@ export function step(
     .filter((enemy) => enemy.x + ENEMY_SIZE > 0);
 
   let score = state.score;
+  let wave = state.wave;
+  let waveKills = state.waveKills;
   const hitBulletIndices = new Set<number>();
   const survivingEnemies: Enemy[] = [];
+  let killsThisStep = 0;
 
   for (const enemy of movedEnemies) {
     let hit = false;
@@ -150,12 +158,21 @@ export function step(
       ) {
         hitBulletIndices.add(i);
         score += POINTS_PER_ENEMY;
+        killsThisStep += 1;
         hit = true;
         break;
       }
     }
     if (!hit) {
       survivingEnemies.push(enemy);
+    }
+  }
+
+  if (killsThisStep > 0) {
+    waveKills += killsThisStep;
+    while (waveKills >= ENEMIES_PER_WAVE) {
+      waveKills -= ENEMIES_PER_WAVE;
+      wave += 1;
     }
   }
 
@@ -196,6 +213,8 @@ export function step(
     spawnAccumulatorMs,
     score,
     lives,
+    wave,
+    waveKills,
     status,
   };
 }

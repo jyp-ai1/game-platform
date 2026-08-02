@@ -28,7 +28,7 @@ import {
   type SimonColor,
   type SimonState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playPadTone, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "simon";
 const PLAYBACK_STEP_MS = 600;
@@ -73,6 +73,8 @@ export function SimonGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
+  const prevPlaybackIndexRef = useRef(-1);
+  const prevRoundCompleteRef = useRef(false);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -87,6 +89,28 @@ export function SimonGame() {
     }
     prevPhaseRef.current = state.phase;
   }, [state.phase]);
+
+  useEffect(() => {
+    if (state.phase === "playback" && state.playbackIndex !== prevPlaybackIndexRef.current) {
+      const color = state.sequence[state.playbackIndex];
+      if (color) {
+        playPadTone(color);
+      }
+      prevPlaybackIndexRef.current = state.playbackIndex;
+    }
+    if (state.phase !== "playback") {
+      prevPlaybackIndexRef.current = -1;
+    }
+  }, [state.phase, state.playbackIndex, state.sequence]);
+
+  useEffect(() => {
+    const roundComplete =
+      state.phase === "idle" && state.round > 0 && state.inputIndex === state.sequence.length;
+    if (roundComplete && !prevRoundCompleteRef.current) {
+      playStageClearAudio();
+    }
+    prevRoundCompleteRef.current = roundComplete;
+  }, [state.phase, state.round, state.inputIndex, state.sequence.length]);
 
   const stageIndex = Math.max(1, state.round);
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -180,7 +204,7 @@ export function SimonGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex flex-wrap gap-2">
@@ -199,7 +223,7 @@ export function SimonGame() {
         </Button>
       </div>
 
-      <div ref={fieldRef} className="relative grid w-full max-w-sm touch-none select-none grid-cols-2 gap-2">
+      <div ref={fieldRef} className="relative grid w-full max-w-[min(100%,20.5rem)] touch-none select-none grid-cols-2 gap-2">
         {PADS.map((pad) => {
           const isActive = highlightedColor === pad.color;
           const disabled = !canPlay || state.phase !== "input";
@@ -211,6 +235,7 @@ export function SimonGame() {
               disabled={disabled}
               onClick={() => {
                 primeGameAudio();
+                playPadTone(pad.color);
                 playGameFeel("button", fieldRef.current);
                 dispatch({ type: "submitInput", color: pad.color });
               }}

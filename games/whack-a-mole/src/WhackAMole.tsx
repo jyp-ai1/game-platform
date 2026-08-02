@@ -21,7 +21,7 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, tick, tickIntervalMs, whack, type WhackAMoleState } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "whack-a-mole";
 
@@ -48,6 +48,7 @@ export function WhackAMoleGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStageMilestoneRef = useRef(0);
   const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
@@ -61,6 +62,14 @@ export function WhackAMoleGame() {
     }
     prevScoreRef.current = state.score;
   }, [state.score, state.combo]);
+
+  useEffect(() => {
+    const milestone = Math.floor(state.score / 30);
+    if (milestone > prevStageMilestoneRef.current && state.score > 0) {
+      playStageClearAudio();
+    }
+    prevStageMilestoneRef.current = milestone;
+  }, [state.score]);
 
   const stageIndex = Math.floor(state.score / 30) + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -116,7 +125,7 @@ export function WhackAMoleGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <ScoreBox label="Score" value={state.score} />
@@ -128,7 +137,7 @@ export function WhackAMoleGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div ref={fieldRef} className="grid w-full max-w-sm touch-none select-none grid-cols-3 gap-2">
+      <div ref={fieldRef} className="relative grid w-full max-w-[min(100%,20.5rem)] touch-none select-none grid-cols-3 gap-2">
         {Array.from({ length: 9 }, (_, i) => (
           <button
             key={i}
@@ -145,28 +154,35 @@ export function WhackAMoleGame() {
               dispatch({ type: "whack", index: i });
             }}
             className={cn(
-              "aspect-square min-h-11 min-w-11 rounded-xl border-2 border-amber-900/30 bg-amber-100/20 transition-transform duration-150 active:scale-95",
+              "relative aspect-square min-h-11 min-w-11 rounded-xl border-2 border-amber-900/30 bg-amber-100/20 transition-transform duration-150 active:scale-95",
               state.active === i && "scale-110 bg-amber-600 shadow-lg"
             )}
             aria-label={`구멍 ${i + 1}`}
-          />
+          >
+            {state.active === i ? (
+              <span className="pointer-events-none text-2xl leading-none" aria-hidden>
+                🐹
+              </span>
+            ) : null}
+          </button>
         ))}
-      </div>
-      {state.status === "over" ? (
-        <StandardGameOverOverlay
-          message={`Score ${state.score}`}
-          score={state.score}
-          gameSlug={GAME_SLUG}
+
+        {state.status === "over" ? (
+          <StandardGameOverOverlay
+            message={`Score ${state.score}`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={handleExit}
-          onRetry={handleRetry}
-          onRestart={handleRetry}
-        />
-      ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+          />
+        ) : null}
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
+      </div>
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Whack-a-Mole" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
