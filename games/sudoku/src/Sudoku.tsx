@@ -28,7 +28,14 @@ import {
   type Difficulty,
   type SudokuState,
 } from "./engine";
-import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import {
+  playGameOverAudio,
+  playScoreAudio,
+  playStageClearAudio,
+  playWrongAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "sudoku";
 const BASE_SCORE = 1000;
@@ -95,6 +102,7 @@ export function SudokuGame() {
         const { row, col } = changed;
         const val = state.board[row]?.[col];
         if (val !== null && val === state.solution[row]?.[col]) {
+          playScoreAudio();
           playGameFeel("correct");
         }
       }
@@ -104,6 +112,7 @@ export function SudokuGame() {
 
   useEffect(() => {
     if (state.mistakes > prevMistakesRef.current && state.status === "playing") {
+      playWrongAudio();
       playGameFeel("wrong");
     }
     prevMistakesRef.current = state.mistakes;

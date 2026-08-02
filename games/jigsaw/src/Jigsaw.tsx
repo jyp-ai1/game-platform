@@ -18,7 +18,7 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   computeScore,
@@ -33,6 +33,7 @@ import {
   difficultyLabel,
 } from "./jigsaw-stage-config";
 import {
+  playPopAudio,
   playStageClearAudio,
   primeGameAudio,
   resetGameAudioPrime,
@@ -66,6 +67,8 @@ export function JigsawGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
+  const prevMovesRef = useRef(0);
+  const [snapIndex, setSnapIndex] = useState<number | null>(null);
   const score = computeScore(state.moves, state.size);
   const stageIndex = STAGE_BY_DIFFICULTY[state.difficulty];
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -78,6 +81,14 @@ export function JigsawGame() {
     () => (state.status === "won" ? null : state),
     [state]
   );
+
+  useEffect(() => {
+    if (state.moves > prevMovesRef.current && state.status === "playing") {
+      playPopAudio();
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevMovesRef.current = state.moves;
+  }, [state.moves, state.status]);
 
   useEffect(() => {
     if (state.status === "won" && prevStatusRef.current !== "won") {
@@ -167,12 +178,15 @@ export function JigsawGame() {
                 if (canPlayRef.current) {
                   primeGameAudio();
                   playGameFeel("button", fieldRef.current);
+                  setSnapIndex(i);
+                  window.setTimeout(() => setSnapIndex(null), 280);
                   dispatch({ type: "tap", index: i });
                 }
               }}
               className={cn(
                 "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded-lg border-2 border-white/20 text-lg font-bold text-white shadow-inner transition-transform duration-150 active:scale-95",
-                tile === 0 && "border-transparent bg-transparent shadow-none"
+                tile === 0 && "border-transparent bg-transparent shadow-none",
+                snapIndex === i && "scale-105 ring-2 ring-amber-400/80"
               )}
               style={tile ? { backgroundColor: tileColor(tile) } : undefined}
             >

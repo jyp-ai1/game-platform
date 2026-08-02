@@ -29,7 +29,10 @@ import {
   type Card,
 } from "./engine";
 import {
+  playComboAudio,
+  playMatchAudio,
   playStageClearAudio,
+  playWrongAudio,
   primeGameAudio,
   resetGameAudioPrime,
 } from "./game-audio-prime";
@@ -197,6 +200,11 @@ export function MemoryGame() {
         .slice(-2);
       setSparkIndices(newlyMatched);
       window.setTimeout(() => setSparkIndices([]), 450);
+      if (state.comboStreak >= 3) {
+        playComboAudio();
+      } else {
+        playMatchAudio();
+      }
       playGameFeel(state.comboStreak >= 3 ? "combo" : "match");
     }
     prevMatchedRef.current = matched;
@@ -210,6 +218,7 @@ export function MemoryGame() {
     const first = state.cards[firstIndex];
     const second = state.cards[secondIndex];
     if (first && second && first.symbol !== second.symbol) {
+      playWrongAudio();
       playGameFeel("wrong");
       setWrongFlash(true);
       window.setTimeout(() => setWrongFlash(false), 400);

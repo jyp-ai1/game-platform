@@ -32,6 +32,7 @@ import {
   difficultyLabel,
 } from "./sliding-stage-config";
 import {
+  playPopAudio,
   playStageClearAudio,
   primeGameAudio,
   resetGameAudioPrime,
@@ -77,6 +78,7 @@ export function SlidingPuzzleGame() {
   const prevStatusRef = useRef(state.status);
   useEffect(() => {
     if (state.moves > prevMovesRef.current && state.status === "playing") {
+      playPopAudio();
       playGameFeel("pop", fieldRef.current);
     }
     prevMovesRef.current = state.moves;
@@ -126,6 +128,7 @@ export function SlidingPuzzleGame() {
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
           <ScoreBox label="Stage" value={stageIndex} />
+          <ScoreBox label="Grid" value={`${state.size}×${state.size}`} />
           <ScoreBox label="Moves" value={state.moves} />
           <ScoreBox label="Score" value={score} />
           <ScoreBox label="Best" value={feel.bestScore} />

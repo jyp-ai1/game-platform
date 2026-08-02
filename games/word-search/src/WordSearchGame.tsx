@@ -35,6 +35,8 @@ import {
   difficultyLabel,
 } from "./word-search-stage-config";
 import {
+  playComboAudio,
+  playMatchAudio,
   playStageClearAudio,
   primeGameAudio,
   resetGameAudioPrime,
@@ -91,6 +93,11 @@ export function WordSearchGame() {
 
   useEffect(() => {
     if (state.found.length > prevFoundRef.current) {
+      if (state.found.length >= 4) {
+        playComboAudio();
+      } else {
+        playMatchAudio();
+      }
       playGameFeel(state.found.length >= 4 ? "combo" : "match", fieldRef.current);
     }
     prevFoundRef.current = state.found.length;

@@ -35,7 +35,9 @@ import {
   getNonogramPuzzle,
 } from "./nonogram-stage-config";
 import {
+  playScoreAudio,
   playStageClearAudio,
+  playWrongAudio,
   primeGameAudio,
   resetGameAudioPrime,
 } from "./game-audio-prime";
@@ -89,6 +91,7 @@ export function NonogramGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
+  const prevMarksRef = useRef<string>("");
   const score = computeScore(state);
   const size = puzzleSize(state);
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -135,7 +138,16 @@ export function NonogramGame() {
   }, [state.status, score, state.stageIndex, reportScore, recordGameEnd]);
 
   useEffect(() => {
+    const marksKey = state.marks.map((r) => r.map((m) => (m === true ? "1" : m === false ? "0" : ".")).join("")).join("|");
+    if (prevMarksRef.current && marksKey !== prevMarksRef.current && state.status === "playing") {
+      playScoreAudio();
+    }
+    prevMarksRef.current = marksKey;
+  }, [state.marks, state.status]);
+
+  useEffect(() => {
     if (!state.wrongFlash) return;
+    playWrongAudio();
     playGameFeel("wrong", fieldRef.current);
     const id = window.setTimeout(() => dispatch({ type: "clearFlash" }), 400);
     return () => window.clearTimeout(id);

@@ -19,11 +19,12 @@ import {
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { createInitialState, dropColumn, type MergeBlocksState } from "./engine";
 import {
   playGameOverAudio,
+  playMergeAudio,
   primeGameAudio,
   resetGameAudioPrime,
 } from "./game-audio-prime";
@@ -65,6 +66,7 @@ export function MergeBlocksGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const [mergeFlash, setMergeFlash] = useState(false);
   const stageIndex = stageFromGrid(state.grid);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, state.score),
@@ -99,6 +101,11 @@ export function MergeBlocksGame() {
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       const gain = state.score - prevScoreRef.current;
+      if (gain > 0) {
+        playMergeAudio();
+        setMergeFlash(true);
+        window.setTimeout(() => setMergeFlash(false), 350);
+      }
       playGameFeel(gain >= 20 ? "combo" : "merge", fieldRef.current);
     }
     prevScoreRef.current = state.score;
@@ -143,7 +150,7 @@ export function MergeBlocksGame() {
         {state.grid.map((row, ri) =>
           row.map((cell, ci) => (
             <button
-              key={`${ri}-${ci}`}
+              key={`${ri}-${ci}-${cell}`}
               type="button"
               onClick={() => {
                 if (canPlayRef.current && state.status === "playing") {
@@ -154,7 +161,8 @@ export function MergeBlocksGame() {
               }}
               className={cn(
                 "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded text-sm font-bold transition-transform duration-150 active:scale-95",
-                cell ? "bg-primary/80 text-primary-foreground" : "bg-background/50"
+                cell ? "bg-primary/80 text-primary-foreground" : "bg-background/50",
+                cell > 0 && mergeFlash && "game-effect-merge scale-110 animate-[bounce_0.35s_ease-out]"
               )}
             >
               {cell || ""}

@@ -32,7 +32,13 @@ import {
   type Board,
   type Difficulty,
 } from "./engine";
-import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import {
+  playGameOverAudio,
+  playPopAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 import { getMinesweeperBoard } from "./minesweeper-stage-config";
 
 const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
@@ -218,6 +224,7 @@ export function MinesweeperGame() {
       playStageClearAudio();
     }
     if (state.status === "playing" && prevStatusRef.current === "waiting") {
+      playPopAudio();
       playGameFeel("pop", fieldRef.current);
     }
     prevStatusRef.current = state.status;
@@ -235,6 +242,7 @@ export function MinesweeperGame() {
       cell.adjacentMines > 0 &&
       state.status === "playing"
     ) {
+      playPopAudio();
       playGameFeel("button", fieldRef.current);
       dispatch({ type: "chord", row, col });
       return;

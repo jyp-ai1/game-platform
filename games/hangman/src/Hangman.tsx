@@ -31,10 +31,13 @@ import {
 import {
   HANGMAN_DIFFICULTIES,
   difficultyLabel,
+  wordLengthRange,
 } from "./hangman-stage-config";
 import {
   playGameOverAudio,
+  playMatchAudio,
   playStageClearAudio,
+  playWrongAudio,
   primeGameAudio,
   resetGameAudioPrime,
 } from "./game-audio-prime";
@@ -91,6 +94,7 @@ export function HangmanGame() {
   useEffect(() => {
     const correct = state.guessedLetters.filter((l) => state.word.includes(l)).length;
     if (correct > prevGuessedRef.current) {
+      playMatchAudio();
       playGameFeel("correct", fieldRef.current);
     }
     prevGuessedRef.current = correct;
@@ -98,6 +102,7 @@ export function HangmanGame() {
 
   useEffect(() => {
     if (state.wrongGuesses > prevWrongRef.current) {
+      playWrongAudio();
       playGameFeel("wrong", fieldRef.current);
     }
     prevWrongRef.current = state.wrongGuesses;
@@ -157,6 +162,7 @@ export function HangmanGame() {
   }, [state.status, canPlay]);
 
   const livesLeft = state.maxWrongGuesses - state.wrongGuesses;
+  const [wordMin, wordMax] = wordLengthRange(state.difficulty);
   const interactive = canPlay && state.status === "playing";
 
   function handleExit() {
@@ -190,6 +196,8 @@ export function HangmanGame() {
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
           <ScoreBox label="Puzzle #" value={puzzleNumber} />
+          <ScoreBox label="Stage" value={stageIndex} />
+          <ScoreBox label="Letters" value={`${wordMin}-${wordMax}`} />
           <ScoreBox label="Lives" value={livesLeft} />
           <ScoreBox label="Best" value={feel.bestScore} />
         </div>

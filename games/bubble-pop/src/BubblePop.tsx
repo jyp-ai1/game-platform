@@ -38,7 +38,14 @@ import {
   step,
 } from "./engine";
 import { getBubbleStage } from "./bubble-stage-config";
-import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import {
+  playComboAudio,
+  playGameOverAudio,
+  playPopAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "bubble-pop";
 const MAX_DT = 0.05;
@@ -171,12 +178,15 @@ export function BubblePopGame() {
       return;
     }
     if (state.lastPops.length >= 5) {
+      playComboAudio();
       playGameFeel("combo", fieldRef.current);
       setComboLabel(`${state.lastPops.length}x Pop!`);
     } else if (state.lastPops.length >= 3) {
+      playComboAudio();
       playGameFeel("combo", fieldRef.current);
       setComboLabel(`${state.lastPops.length}x Combo`);
     } else {
+      playPopAudio();
       playGameFeel("pop", fieldRef.current);
       setComboLabel(null);
     }
@@ -330,6 +340,7 @@ export function BubblePopGame() {
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Best" value={feel.bestScore} />
           <ScoreBox label="Best Stage" value={feel.bestStage} />
+          <ScoreBox label="Ceiling" value={state.shotsUntilCeilingDrop} />
           <div className="flex flex-col items-center gap-1">
             <span className="text-[10px] font-medium uppercase text-muted-foreground">
               Next

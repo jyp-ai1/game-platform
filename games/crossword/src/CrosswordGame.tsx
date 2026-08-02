@@ -32,7 +32,9 @@ import {
   type CrosswordState,
 } from "./engine";
 import {
+  playScoreAudio,
   playStageClearAudio,
+  playWrongAudio,
   primeGameAudio,
   resetGameAudioPrime,
 } from "./game-audio-prime";
@@ -106,6 +108,11 @@ export function CrosswordGame() {
         const entered = state.entries[row]?.[col];
         const expected = state.solution[row]?.[col];
         if (entered && expected) {
+          if (entered === expected) {
+            playScoreAudio();
+          } else {
+            playWrongAudio();
+          }
           playGameFeel(entered === expected ? "correct" : "wrong", fieldRef.current);
         }
       }

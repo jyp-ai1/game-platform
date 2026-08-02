@@ -32,7 +32,9 @@ import {
   type KakuroState,
 } from "./engine";
 import {
+  playScoreAudio,
   playStageClearAudio,
+  playWrongAudio,
   primeGameAudio,
   resetGameAudioPrime,
 } from "./game-audio-prime";
@@ -83,6 +85,7 @@ export function KakuroGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
+  const prevEntriesRef = useRef<string>("");
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     score: computeScore(state),
@@ -97,7 +100,16 @@ export function KakuroGame() {
   );
 
   useEffect(() => {
+    const key = state.entries.map((r) => r.join(",")).join("|");
+    if (prevEntriesRef.current && key !== prevEntriesRef.current && state.status === "playing") {
+      playScoreAudio();
+    }
+    prevEntriesRef.current = key;
+  }, [state.entries, state.status]);
+
+  useEffect(() => {
     if (!state.wrongFlash) return;
+    playWrongAudio();
     playGameFeel("wrong", fieldRef.current);
     const id = window.setTimeout(() => dispatch({ type: "clearFlash" }), 400);
     return () => window.clearTimeout(id);

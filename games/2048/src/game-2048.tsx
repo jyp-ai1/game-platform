@@ -36,7 +36,13 @@ import {
   type Direction,
   type Grid,
 } from "./engine";
-import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import {
+  playGameOverAudio,
+  playMergeAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "2048";
 const SWIPE_THRESHOLD = 24;
@@ -237,6 +243,7 @@ export function Game2048() {
       const stageJustCleared =
         state.tileStagesReached.length > prevStagesLenRef.current;
       if (!stageJustCleared && state.mergeHighlight.length > 0) {
+        playMergeAudio();
         playGameFeel("merge", gridRef.current);
       }
     }

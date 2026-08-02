@@ -36,7 +36,9 @@ import {
   difficultyLabel,
 } from "./samegame-stage-config";
 import {
+  playComboAudio,
   playGameOverAudio,
+  playPopAudio,
   playStageClearAudio,
   primeGameAudio,
   resetGameAudioPrime,
@@ -128,6 +130,11 @@ export function SameGameGame() {
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       const gain = state.score - prevScoreRef.current;
+      if (gain >= 20) {
+        playComboAudio();
+      } else {
+        playPopAudio();
+      }
       playGameFeel(gain >= 20 ? "combo" : "pop", fieldRef.current);
     }
     prevScoreRef.current = state.score;

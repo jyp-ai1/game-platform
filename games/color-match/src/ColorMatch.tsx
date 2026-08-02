@@ -27,7 +27,14 @@ import {
   type ColorMatchState,
   type ColorName,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import {
+  playComboAudio,
+  playGameOverAudio,
+  playMatchAudio,
+  playWrongAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "color-match";
 const TICK_MS = 100;
@@ -114,6 +121,7 @@ export function ColorMatchGame() {
 
   useEffect(() => {
     if (state.round > prevRoundRef.current && state.status === "playing") {
+      playMatchAudio();
       playGameFeel("correct", fieldRef.current);
     }
     prevRoundRef.current = state.round;
@@ -172,8 +180,14 @@ export function ColorMatchGame() {
     const bonus = Math.floor(state.timeLeftMs / 100);
     dispatch({ type: "select", color });
     if (wasCorrect) {
+      if (bonus >= 15) {
+        playComboAudio();
+      } else {
+        playMatchAudio();
+      }
       playGameFeel(bonus >= 15 ? "combo" : "correct", fieldRef.current);
     } else {
+      playWrongAudio();
       playGameFeel("wrong", fieldRef.current);
     }
   }
