@@ -36,6 +36,8 @@ import {
 
 const GAME_SLUG = "checkers";
 
+type GameMode = "cpu" | "local";
+
 type Action =
   | { type: "move"; move: ReturnType<typeof getLegalMoves>[number] }
   | { type: "cpu"; difficulty: CpuDifficulty }
@@ -65,6 +67,7 @@ export function CheckersGame() {
   }, []);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [mode, setMode] = useState<GameMode>("cpu");
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const prevStatusRef = useRef(state.winner);
@@ -84,35 +87,38 @@ export function CheckersGame() {
   );
 
   useEffect(() => {
-    if (!canPlayRef.current || state.winner !== null || state.current !== 2) return;
+    if (mode !== "cpu" || !canPlayRef.current || state.winner !== null || state.current !== 2) return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 500);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.board, state.mustContinue, difficulty, canPlay]);
+  }, [mode, state.current, state.winner, state.board, state.mustContinue, difficulty, canPlay]);
 
   useEffect(() => {
     if (state.winner !== null && prevStatusRef.current === null) {
-      if (state.winner === 1) {
+      if (mode === "cpu" && state.winner === 1) {
         playStageClearAudio();
-      } else {
+      } else if (mode === "cpu" && state.winner !== "draw") {
         playGameOverAudio();
       }
     }
     prevStatusRef.current = state.winner;
-  }, [state.winner]);
+  }, [state.winner, mode]);
 
   useEffect(() => {
-    if (state.winner !== null) {
+    if (state.winner !== null && mode === "cpu") {
       reportScore(GAME_SLUG, computeScore(state));
+    }
+    if (state.winner !== null) {
       clearSave(GAME_SLUG);
       setSelected(null);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.winner, reportScore]);
+  }, [state.winner, reportScore, mode]);
 
+  const activePlayer = mode === "local" ? state.current : 1;
   const humanTurn =
-    canPlayRef.current && state.current === 1 && state.winner === null;
-  const legal = humanTurn ? getLegalMoves(state, 1) : [];
+    canPlayRef.current && state.winner === null && (mode === "local" || state.current === 1);
+  const legal = humanTurn ? getLegalMoves(state, activePlayer) : [];
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
@@ -147,15 +153,21 @@ export function CheckersGame() {
 
   const msg =
     state.winner === 1
-      ? "You Win!"
+      ? mode === "local"
+        ? "Player 1 Wins!"
+        : "You Win!"
       : state.winner === 2
-        ? "CPU Wins!"
+        ? mode === "local"
+          ? "Player 2 Wins!"
+          : "CPU Wins!"
         : state.winner === "draw"
           ? "Draw"
           : humanTurn
             ? state.mustContinue
               ? "Continue jumping!"
-              : "Select a piece"
+              : mode === "local"
+                ? `Player ${state.current} — select a piece`
+                : "Select a piece"
             : "CPU...";
 
   const targets = selected
@@ -199,11 +211,31 @@ export function CheckersGame() {
           <RotateCcw />
         </Button>
       </div>
-      <CpuDifficultyPicker
-        value={difficulty}
-        onChange={setDifficulty}
-        disabled={state.winner !== null}
-      />
+      <div className="flex w-full max-w-sm gap-2">
+        <Button
+          variant={mode === "cpu" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("cpu")}
+        >
+          vs CPU
+        </Button>
+        <Button
+          variant={mode === "local" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("local")}
+        >
+          2 Player
+        </Button>
+      </div>
+      {mode === "cpu" ? (
+        <CpuDifficultyPicker
+          value={difficulty}
+          onChange={setDifficulty}
+          disabled={state.winner !== null}
+        />
+      ) : null}
       <div
         ref={fieldRef}
         className="relative grid w-full max-w-sm grid-cols-8 gap-0.5 rounded-xl border border-border p-1"
@@ -250,7 +282,7 @@ export function CheckersGame() {
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
-          score={computeScore(state)}
+          score={mode === "cpu" ? computeScore(state) : undefined}
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
@@ -263,6 +295,11 @@ export function CheckersGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Checkers" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">
+        {mode === "local"
+          ? "같은 기기 2인 — 점프 가능하면 반드시 점프해야 합니다."
+          : "Forced capture · multi-jump · kinging enabled."}
+      </p>
     </div>
   );
 }

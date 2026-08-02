@@ -26,7 +26,7 @@ import {
   tickPower,
   type ShuffleboardState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "shuffleboard";
 const TICK_MS = 32;
@@ -77,6 +77,7 @@ export function ShuffleboardGame() {
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.round,
     fieldRef,
   });
 
@@ -100,10 +101,11 @@ export function ShuffleboardGame() {
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
-      playGameOverAudio();
+      if (state.score >= 20) playStageClearAudio();
+      else playGameOverAudio();
     }
     prevStatusRef.current = state.status;
-  }, [state.status]);
+  }, [state.status, state.score]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -189,6 +191,7 @@ export function ShuffleboardGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Shuffleboard" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">파워를 맞춰 8라운드 셔플보드.</p>
     </div>
   );
 }

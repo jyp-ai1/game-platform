@@ -22,16 +22,18 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 import {
   BALL_R,
   computeScore,
+  coursePar,
   createInitialState,
+  FINAL_MINI_GOLF_HOLE,
   HOLE_R,
   MINI_GOLF_H,
   MINI_GOLF_W,
-  PAR,
   putt,
   tickAim,
   type MiniGolfState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { getMiniGolfHole } from "./mini-golf-stage-config";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "mini-golf";
 const TICK_MS = 32;
@@ -52,13 +54,13 @@ function reducer(state: MiniGolfState, action: Action): MiniGolfState {
 }
 
 export function MiniGolfGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
-  const prevScoreRef = useRef(0);
+  const prevHoleRef = useRef(state.holeIndex);
   const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
@@ -66,16 +68,21 @@ export function MiniGolfGame() {
     completeCountdownRef.current();
   }, []);
 
+  const holeLabel = getMiniGolfHole(state.holeIndex).label;
+
   useEffect(() => {
-    const score = computeScore(state);
-    if (score > prevScoreRef.current) {
+    if (state.lastHoleIn && state.holeIndex > prevHoleRef.current) {
       playGameFeel("goal", fieldRef.current);
+      if (state.holeIndex <= FINAL_MINI_GOLF_HOLE) {
+        playStageClearAudio();
+      }
     }
-    prevScoreRef.current = score;
-  }, [state.strokes, state.status]);
+    prevHoleRef.current = state.holeIndex;
+  }, [state.holeIndex, state.lastHoleIn]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.holeIndex,
     fieldRef,
   });
 
@@ -105,11 +112,7 @@ export function MiniGolfGame() {
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.status, state.strokes, reportScore]);
-
-  const inHole =
-    Math.hypot(state.ballX - state.holeX, state.ballY - state.holeY) <=
-    HOLE_R + BALL_R;
+  }, [state.status, state.totalStrokes, reportScore]);
 
   function handleExit() {
     clearSave(GAME_SLUG);
@@ -120,27 +123,29 @@ export function MiniGolfGame() {
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetGameAudioPrime();
-    prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetGameAudioPrime();
-    prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
+
+  const scoreToPar = state.totalStrokes - coursePar();
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm justify-between">
-        <ScoreBox label="Strokes" value={state.strokes} />
-        <ScoreBox label="Par" value={PAR} />
+      <div className="flex w-full max-w-sm justify-between gap-1">
+        <ScoreBox label="Hole" value={`${state.holeIndex}/${FINAL_MINI_GOLF_HOLE}`} />
+        <ScoreBox label="Strokes" value={state.totalStrokes} />
+        <ScoreBox label="Par" value={state.par} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
+      <p className="text-xs text-muted-foreground">{holeLabel} · Hole strokes: {state.holeStrokes}</p>
       <div
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border border-green-800/50 bg-green-900/40"
         ref={fieldRef}
@@ -192,12 +197,16 @@ export function MiniGolfGame() {
       </Button>
       {state.status === "over" ? (
         <StandardGameOverOverlay
-          message={inHole ? `Hole in ${state.strokes}!` : `${state.strokes} strokes`}
+          message={
+            scoreToPar <= 0
+              ? `${state.totalStrokes} strokes (${scoreToPar === 0 ? "Even par" : `${Math.abs(scoreToPar)} under par`})`
+              : `${state.totalStrokes} strokes (+${scoreToPar})`
+          }
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />
@@ -206,6 +215,7 @@ export function MiniGolfGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Mini Golf" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">9홀 코스 — 파보다 적은 타수를 노리세요.</p>
     </div>
   );
 }

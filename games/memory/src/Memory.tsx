@@ -178,6 +178,7 @@ export function MemoryGame() {
       : state.totalScore;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    stageIndex: state.stageIndex,
   });
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stageClearReported = useRef(false);
@@ -308,6 +309,8 @@ export function MemoryGame() {
         <div className="flex gap-2">
           <ScoreBox label="Score" value={score} />
           <ScoreBox label="Round" value={state.stageIndex} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+          <ScoreBox label="Best Stage" value={feel.bestStage} />
           <ScoreBox label="Combo" value={state.comboStreak} />
           <ScoreBox label="Moves" value={state.moves} />
         </div>

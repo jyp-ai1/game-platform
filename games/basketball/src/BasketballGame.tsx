@@ -26,10 +26,11 @@ import {
   tickPower,
   type BasketballState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "basketball";
 const TICK_MS = 32;
+const SWEET_SPOT = 78;
 
 type Action =
   | { type: "tick" }
@@ -101,10 +102,11 @@ export function BasketballGame() {
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
-      playGameOverAudio();
+      if (state.made >= 7) playStageClearAudio();
+      else playGameOverAudio();
     }
     prevStatusRef.current = state.status;
-  }, [state.status]);
+  }, [state.status, state.made]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -153,6 +155,11 @@ export function BasketballGame() {
       </div>
       <div ref={fieldRef} className="relative h-48 w-full max-w-sm touch-none select-none rounded-xl bg-gradient-to-b from-sky-900/40 to-orange-900/30 p-4">
         <div className="absolute left-1/2 top-4 h-16 w-24 -translate-x-1/2 rounded-b-lg border-4 border-orange-400 bg-transparent" />
+        <div
+          className="absolute bottom-1 h-1 -translate-x-1/2 rounded bg-green-400/60"
+          style={{ left: `${20 + SWEET_SPOT * 0.6}%`, width: "12%" }}
+          aria-hidden
+        />
         <div
           className="absolute bottom-6 size-8 rounded-full bg-orange-500 transition-all duration-300"
           style={{ left: `${20 + state.power * 0.6}%` }}
@@ -204,6 +211,7 @@ export function BasketballGame() {
           onNewGame={handleNewGame}
         />
       ) : null}
+      <p className="text-xs text-muted-foreground">그린 존에서 Shoot — 10라운드 슛.</p>
     </div>
   );
 }

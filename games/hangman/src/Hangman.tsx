@@ -3,14 +3,15 @@
 import {
   clearSave,
   emitGameRetry,
+  feelWithScore,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
   useStandardGameFeel,
   playGameFeel,
   GameFeelLayer,
@@ -24,8 +25,13 @@ import {
   createInitialState,
   getDisplayWord,
   guessLetter,
+  type HangmanDifficulty,
   type HangmanState,
 } from "./engine";
+import {
+  HANGMAN_DIFFICULTIES,
+  difficultyLabel,
+} from "./hangman-stage-config";
 import {
   playGameOverAudio,
   playStageClearAudio,
@@ -40,12 +46,14 @@ const KEYBOARD_ROWS = [
   "ZXCVBNM",
 ];
 
-type Action = { type: "guess"; letter: string } | { type: "restart" };
+type Action =
+  | { type: "guess"; letter: string }
+  | { type: "restart"; difficulty?: HangmanDifficulty };
 
 function reducer(state: HangmanState, action: Action): HangmanState {
   switch (action.type) {
     case "restart":
-      return createInitialState();
+      return createInitialState(action.difficulty ?? state.difficulty);
     case "guess":
       return guessLetter(state, action.letter);
     default:
@@ -64,6 +72,17 @@ export function HangmanGame() {
   const prevGuessedRef = useRef(0);
   const prevWrongRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const score = state.status === "won" ? computeScore(state.wrongGuesses) : 0;
+
+  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
+
+  const feel = useStandardGameFeel(GAME_SLUG, {
+    ...feelWithScore(state as unknown as Record<string, unknown>, score),
+    fieldRef,
+  });
+
   useEffect(() => {
     const correct = state.guessedLetters.filter((l) => state.word.includes(l)).length;
     if (correct > prevGuessedRef.current) {
@@ -82,23 +101,18 @@ export function HangmanGame() {
   useEffect(() => {
     if (state.status === "won" && prevStatusRef.current !== "won") {
       playStageClearAudio();
+      playGameFeel("goal", fieldRef.current);
     } else if (state.status === "lost" && prevStatusRef.current !== "lost") {
       playGameOverAudio();
     }
     prevStatusRef.current = state.status;
   }, [state.status]);
 
-  const feel = useStandardGameFeel(GAME_SLUG, {
-    ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    fieldRef,
-  });
-  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
     completeCountdownRef.current();
   }, []);
-
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -109,15 +123,17 @@ export function HangmanGame() {
   useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.wrongGuesses));
+      recordGameEnd({ score: computeScore(state.wrongGuesses), outcome: "clear" });
     } else if (state.status === "lost") {
       reportScore(GAME_SLUG, 0);
+      recordGameEnd({ score: 0, outcome: "failure" });
     }
     if (state.status !== "playing") {
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.status, state.wrongGuesses, reportScore]);
+  }, [state.status, state.wrongGuesses, reportScore, recordGameEnd]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -144,15 +160,18 @@ export function HangmanGame() {
     window.setTimeout(() => clearSave(GAME_SLUG), 400);
   }
 
-  function handleRetry() {
+  function handleRetry(difficulty?: HangmanDifficulty) {
     emitGameRetry(GAME_SLUG);
+    resetSession();
     resetGameAudioPrime();
     prevGuessedRef.current = 0;
-    dispatch({ type: "restart" });
+    prevWrongRef.current = 0;
+    dispatch({ type: "restart", difficulty });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetSession();
     resetGameAudioPrime();
     prevGuessedRef.current = 0;
     dispatch({ type: "restart" });
@@ -161,16 +180,33 @@ export function HangmanGame() {
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Lives" value={livesLeft} />
+      <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Lives" value={livesLeft} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+        </div>
         <Button
           variant="outline"
           size="icon"
           aria-label="새 게임"
-          onClick={handleRetry}
+          onClick={() => handleRetry()}
         >
           <RotateCcw />
         </Button>
+      </div>
+      <div className="flex w-full max-w-sm flex-wrap gap-1">
+        {HANGMAN_DIFFICULTIES.map((level) => (
+          <Button
+            key={level}
+            variant={state.difficulty === level ? "default" : "outline"}
+            size="sm"
+            className="min-h-9 flex-1 text-xs"
+            disabled={state.status === "playing" && state.guessedLetters.length > 0}
+            onClick={() => handleRetry(level)}
+          >
+            {difficultyLabel(level)}
+          </Button>
+        ))}
       </div>
 
       <div className="flex gap-1.5">

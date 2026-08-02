@@ -20,7 +20,7 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, throwDart, type DartsState } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "darts";
 
@@ -61,6 +61,7 @@ export function DartsGame() {
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: 10 - state.throwsLeft + 1,
     fieldRef,
   });
 
@@ -75,7 +76,8 @@ export function DartsGame() {
       (state.status === "over" || state.status === "won") &&
       prevStatusRef.current === "playing"
     ) {
-      playGameOverAudio();
+      if (state.status === "won") playStageClearAudio();
+      else playGameOverAudio();
     }
     prevStatusRef.current = state.status;
   }, [state.status]);

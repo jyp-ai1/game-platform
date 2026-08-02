@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -87,15 +88,18 @@ export function SimonGame() {
     prevPhaseRef.current = state.phase;
   }, [state.phase]);
 
+  const stageIndex = Math.max(1, state.round);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState({
       ...(state as unknown as Record<string, unknown>),
       status: state.phase === "over" ? "over" : "playing",
       round: state.round,
     }),
-    stageIndex: state.round,
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
@@ -134,14 +138,14 @@ export function SimonGame() {
     if (!canPlayRef.current || state.phase !== "playback") {
       return;
     }
-    const playbackMs = Math.max(280, PLAYBACK_STEP_MS - state.round * 28);
+    const playbackMs = Math.max(220, (PLAYBACK_STEP_MS - state.round * 28) / diff.speedMult);
     const interval = setInterval(() => {
       if (canPlayRef.current) {
         dispatch({ type: "advancePlayback" });
       }
     }, playbackMs);
     return () => clearInterval(interval);
-  }, [state.phase, state.round, canPlay]);
+  }, [state.phase, state.round, canPlay, diff.speedMult]);
 
   useEffect(() => {
     if (state.phase === "over") {
@@ -179,14 +183,15 @@ export function SimonGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Round" value={state.round} />
           <ScoreBox label="Score" value={state.score} />
-          <ScoreBox label="Best" value={state.bestRound} />
+          <ScoreBox label="Best" value={Math.max(state.bestRound, feel.bestStage)} />
         </div>
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >

@@ -89,11 +89,9 @@ export function ColorMatchGame() {
   }, []);
 
   const sessionActive = phase === "ready" && !showCountdown;
+  const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
+  const prevRoundRef = useRef(state.round);
   const prevStatusRef = useRef(state.status);
-  const { recordGameEnd, resetSession } = useGameSession(
-    GAME_SLUG,
-    sessionActive
-  );
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -112,6 +110,13 @@ export function ColorMatchGame() {
     }, TICK_MS);
     return () => clearInterval(id);
   }, [state.status, canPlay]);
+
+  useEffect(() => {
+    if (state.round > prevRoundRef.current && state.status === "playing") {
+      playGameFeel("correct", fieldRef.current);
+    }
+    prevRoundRef.current = state.round;
+  }, [state.round, state.status]);
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
@@ -163,9 +168,10 @@ export function ColorMatchGame() {
     primeGameAudio();
     playGameFeel("button", fieldRef.current);
     const wasCorrect = color === state.targetColor;
+    const bonus = Math.floor(state.timeLeftMs / 100);
     dispatch({ type: "select", color });
     if (wasCorrect) {
-      playGameFeel("correct", fieldRef.current);
+      playGameFeel(bonus >= 15 ? "combo" : "correct", fieldRef.current);
     } else {
       playGameFeel("wrong", fieldRef.current);
     }
@@ -182,7 +188,10 @@ export function ColorMatchGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Round" value={state.round} />
           <ScoreBox label="Lives" value={state.lives} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+          <ScoreBox label="Best Stage" value={feel.bestStage} />
           <ScoreBox
             label="Time"
             value={Math.max(0, Math.ceil(state.timeLeftMs / 1000))}

@@ -108,6 +108,7 @@ export function BubblePopGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.stageIndex,
     muteScoreGain: true,
     fieldRef,
   });
@@ -326,6 +327,8 @@ export function BubblePopGame() {
             {getBubbleStage(state.stageIndex).label}
           </span>
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+          <ScoreBox label="Best Stage" value={feel.bestStage} />
           <div className="flex flex-col items-center gap-1">
             <span className="text-[10px] font-medium uppercase text-muted-foreground">
               Next

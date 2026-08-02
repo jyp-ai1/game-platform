@@ -1,34 +1,58 @@
+import {
+  coursePar,
+  FINAL_MINI_GOLF_HOLE,
+  getMiniGolfHole,
+} from "./mini-golf-stage-config";
+
 export interface MiniGolfState {
+  holeIndex: number;
   ballX: number;
   ballY: number;
   holeX: number;
   holeY: number;
+  par: number;
+  holeStrokes: number;
+  totalStrokes: number;
   angle: number;
   angleDir: 1 | -1;
   power: number;
   powerDir: 1 | -1;
-  strokes: number;
-  status: "aiming" | "moving" | "over";
+  status: "aiming" | "over";
+  lastHoleIn: boolean;
 }
 
 const W = 100;
 const H = 100;
 const HOLE_R = 5.5;
 const BALL_R = 2;
-export const PAR = 3;
+const MAX_STROKES_PER_HOLE = 12;
 
-export function createInitialState(): MiniGolfState {
+function holeLayout(holeIndex: number): Pick<
+  MiniGolfState,
+  "ballX" | "ballY" | "holeX" | "holeY" | "par" | "holeStrokes"
+> {
+  const h = getMiniGolfHole(holeIndex);
   return {
-    ballX: 15,
-    ballY: 50,
-    holeX: 85,
-    holeY: 50,
+    ballX: h.ballX,
+    ballY: h.ballY,
+    holeX: h.holeX,
+    holeY: h.holeY,
+    par: h.par,
+    holeStrokes: 0,
+  };
+}
+
+export function createInitialState(holeIndex = 1, totalStrokes = 0): MiniGolfState {
+  return {
+    holeIndex,
+    totalStrokes,
     angle: 0,
     angleDir: 1,
     power: 0,
     powerDir: 1,
-    strokes: 0,
     status: "aiming",
+    lastHoleIn: false,
+    ...holeLayout(holeIndex),
   };
 }
 
@@ -63,38 +87,71 @@ export function putt(state: MiniGolfState): MiniGolfState {
   let ballY = state.ballY + Math.sin(rad) * dist * 0.35;
   ballX = Math.max(BALL_R, Math.min(W - BALL_R, ballX));
   ballY = Math.max(BALL_R, Math.min(H - BALL_R, ballY));
-  const strokes = state.strokes + 1;
+  const holeStrokes = state.holeStrokes + 1;
+  const totalStrokes = state.totalStrokes + 1;
   const dx = ballX - state.holeX;
   const dy = ballY - state.holeY;
   const inHole = Math.hypot(dx, dy) <= HOLE_R + BALL_R;
-  if (inHole || strokes >= 12) {
+
+  if (inHole) {
+    if (state.holeIndex >= FINAL_MINI_GOLF_HOLE) {
+      return {
+        ...state,
+        ballX,
+        ballY,
+        holeStrokes,
+        totalStrokes,
+        status: "over",
+        lastHoleIn: true,
+        power: 0,
+        powerDir: 1,
+      };
+    }
+    const nextHole = state.holeIndex + 1;
     return {
-      ...state,
-      ballX,
-      ballY,
-      strokes,
-      status: "over",
-      power: 0,
-      powerDir: 1,
+      ...createInitialState(nextHole, totalStrokes),
+      lastHoleIn: true,
     };
   }
+
+  if (holeStrokes >= MAX_STROKES_PER_HOLE) {
+    if (state.holeIndex >= FINAL_MINI_GOLF_HOLE) {
+      return {
+        ...state,
+        ballX,
+        ballY,
+        holeStrokes,
+        totalStrokes,
+        status: "over",
+        lastHoleIn: false,
+        power: 0,
+        powerDir: 1,
+      };
+    }
+    const nextHole = state.holeIndex + 1;
+    return {
+      ...createInitialState(nextHole, totalStrokes),
+      lastHoleIn: false,
+    };
+  }
+
   return {
     ...state,
     ballX,
     ballY,
-    strokes,
+    holeStrokes,
+    totalStrokes,
     status: "aiming",
+    lastHoleIn: false,
     power: 0,
     powerDir: 1,
   };
 }
 
 export function computeScore(state: MiniGolfState): number {
-  const dx = state.ballX - state.holeX;
-  const dy = state.ballY - state.holeY;
-  const inHole = Math.hypot(dx, dy) <= HOLE_R + BALL_R;
-  if (inHole) return Math.max(500 - state.strokes * 40, 100);
-  return Math.max(80 - state.strokes * 5, 10);
+  const course = coursePar();
+  const underPar = course - state.totalStrokes;
+  return Math.max(100 + underPar * 50, 50);
 }
 
-export { W as MINI_GOLF_W, H as MINI_GOLF_H, HOLE_R, BALL_R };
+export { W as MINI_GOLF_W, H as MINI_GOLF_H, HOLE_R, BALL_R, coursePar, FINAL_MINI_GOLF_HOLE };

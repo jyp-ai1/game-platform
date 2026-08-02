@@ -38,6 +38,8 @@ import {
 
 const GAME_SLUG = "reversi";
 
+type GameMode = "cpu" | "local";
+
 type Action =
   | { type: "place"; row: number; col: number }
   | { type: "cpu"; difficulty: CpuDifficulty }
@@ -70,6 +72,7 @@ export function ReversiGame() {
   }, []);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [mode, setMode] = useState<GameMode>("cpu");
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
@@ -80,9 +83,10 @@ export function ReversiGame() {
     difficulty,
     score: computeScore(state),
   });
-  const humanMoves = validMoves(state.board, 1);
+  const activePlayer = mode === "local" ? state.current : 1;
+  const humanMoves = validMoves(state.board, activePlayer);
   const humanTurn =
-    canPlayRef.current && state.current === 1 && state.winner === null;
+    canPlayRef.current && state.winner === null && (mode === "local" || state.current === 1);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -91,45 +95,53 @@ export function ReversiGame() {
   );
 
   useEffect(() => {
-    if (!canPlayRef.current || state.winner !== null || state.current !== 2) return;
+    if (mode !== "cpu" || !canPlayRef.current || state.winner !== null || state.current !== 2) return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), 500);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.board, difficulty, canPlay]);
+  }, [mode, state.current, state.winner, state.board, difficulty, canPlay]);
 
   const canPass =
     humanTurn && humanMoves.length === 0 && state.winner === null;
 
   useEffect(() => {
     if (state.winner !== null && prevStatusRef.current === null) {
-      if (state.winner === 1) {
+      if (mode === "cpu" && state.winner === 1) {
         playStageClearAudio();
-      } else {
+      } else if (mode === "cpu" && state.winner !== "draw") {
         playGameOverAudio();
       }
     }
     prevStatusRef.current = state.winner;
-  }, [state.winner]);
+  }, [state.winner, mode]);
 
   useEffect(() => {
-    if (state.winner !== null) {
+    if (state.winner !== null && mode === "cpu") {
       reportScore(GAME_SLUG, computeScore(state));
+    }
+    if (state.winner !== null) {
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.winner, reportScore]);
+  }, [state.winner, reportScore, mode]);
 
   const msg =
     state.winner === 1
-      ? "You Win!"
+      ? mode === "local"
+        ? "Black Wins!"
+        : "You Win!"
       : state.winner === 2
-        ? "CPU Wins!"
+        ? mode === "local"
+          ? "White Wins!"
+          : "CPU Wins!"
         : state.winner === "draw"
           ? "Draw"
           : canPass
-            ? "둘 곳 없음 — Pass 가능"
+            ? "No move — Pass"
             : humanTurn
-              ? "흑(당신) 차례"
+              ? mode === "local"
+                ? `${state.current === 1 ? "Black" : "White"} to move`
+                : "흑(당신) 차례"
               : "CPU 차례...";
 
   const discs = discCounts(state);
@@ -184,11 +196,31 @@ export function ReversiGame() {
           </Button>
         ) : null}
       </div>
-      <CpuDifficultyPicker
-        value={difficulty}
-        onChange={setDifficulty}
-        disabled={state.winner !== null}
-      />
+      <div className="flex w-full max-w-sm gap-2">
+        <Button
+          variant={mode === "cpu" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("cpu")}
+        >
+          vs CPU
+        </Button>
+        <Button
+          variant={mode === "local" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("local")}
+        >
+          2 Player
+        </Button>
+      </div>
+      {mode === "cpu" ? (
+        <CpuDifficultyPicker
+          value={difficulty}
+          onChange={setDifficulty}
+          disabled={state.winner !== null}
+        />
+      ) : null}
       <div
         ref={fieldRef}
         className="relative grid w-full max-w-sm grid-cols-8 gap-0.5 rounded-xl bg-green-800/40 p-1"
@@ -223,7 +255,7 @@ export function ReversiGame() {
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
-          score={computeScore(state)}
+          score={mode === "cpu" ? computeScore(state) : undefined}
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
@@ -236,6 +268,11 @@ export function ReversiGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Reversi" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">
+        {mode === "local"
+          ? "같은 기기 2인 — 둘 곳 없으면 Pass."
+          : "Flip discs · pass when blocked · most discs wins."}
+      </p>
     </div>
   );
 }

@@ -1,3 +1,9 @@
+import {
+  type HangmanDifficulty,
+  maxWrongForDifficulty,
+  wordLengthRange,
+} from "./hangman-stage-config";
+
 export const WORD_LIST: string[] = [
   "ARCADE",
   "PIXEL",
@@ -41,20 +47,25 @@ export interface HangmanState {
   guessedLetters: string[];
   wrongGuesses: number;
   maxWrongGuesses: number;
+  difficulty: HangmanDifficulty;
   status: "playing" | "won" | "lost";
 }
 
-export function pickRandomWord(): string {
-  const index = Math.floor(Math.random() * WORD_LIST.length);
-  return WORD_LIST[index]!;
+export function pickRandomWord(difficulty: HangmanDifficulty = "MEDIUM"): string {
+  const [minLen, maxLen] = wordLengthRange(difficulty);
+  const pool = WORD_LIST.filter((w) => w.length >= minLen && w.length <= maxLen);
+  const list = pool.length > 0 ? pool : WORD_LIST;
+  const index = Math.floor(Math.random() * list.length);
+  return list[index]!;
 }
 
-export function createInitialState(): HangmanState {
+export function createInitialState(difficulty: HangmanDifficulty = "MEDIUM"): HangmanState {
   return {
-    word: pickRandomWord(),
+    word: pickRandomWord(difficulty),
     guessedLetters: [],
     wrongGuesses: 0,
-    maxWrongGuesses: 6,
+    maxWrongGuesses: maxWrongForDifficulty(difficulty),
+    difficulty,
     status: "playing",
   };
 }
@@ -89,3 +100,5 @@ export function getDisplayWord(state: HangmanState): string {
 export function computeScore(wrongGuesses: number): number {
   return Math.max(100, 1000 - wrongGuesses * 150);
 }
+
+export type { HangmanDifficulty };

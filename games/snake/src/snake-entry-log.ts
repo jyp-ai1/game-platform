@@ -19,6 +19,7 @@ export type EntryStep =
   | "CONNECT"
   | "CONNECTING"
   | "RETRY"
+  | "RECONNECT"
   | "CONNECTED"
   | "JOIN"
   | "JOINED"

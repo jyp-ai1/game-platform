@@ -39,6 +39,8 @@ export interface AirHockeyState {
   winner: Winner;
   resetTimer: number; // seconds remaining before the puck respawns after a goal; 0 = active play
   elapsedSeconds: number;
+  goalFlashSide: "top" | "bottom" | null;
+  goalFlashTimer: number;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -66,6 +68,8 @@ export function createInitialState(): AirHockeyState {
     winner: null,
     resetTimer: 0,
     elapsedSeconds: 0,
+    goalFlashSide: null,
+    goalFlashTimer: 0,
   };
 }
 
@@ -116,12 +120,15 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
   }
 
   const elapsedSeconds = (state.elapsedSeconds ?? 0) + dtSeconds;
+  let goalFlashSide = state.goalFlashSide;
+  let goalFlashTimer = Math.max(0, (state.goalFlashTimer ?? 0) - dtSeconds);
+  if (goalFlashTimer <= 0) goalFlashSide = null;
 
   // Reset countdown after a goal — puck stays parked at center until it elapses.
   if (state.resetTimer > 0) {
     const resetTimer = state.resetTimer - dtSeconds;
     if (resetTimer > 0) {
-      return { ...state, resetTimer, elapsedSeconds };
+      return { ...state, resetTimer, elapsedSeconds, goalFlashSide, goalFlashTimer };
     }
     return {
       ...state,
@@ -129,6 +136,8 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
       puckVelocity: { x: 0, y: 0 },
       resetTimer: 0,
       elapsedSeconds,
+      goalFlashSide,
+      goalFlashTimer,
     };
   }
 
@@ -176,6 +185,8 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
     if (isInGoalRange(puck.x)) {
       playerScore += 1;
       scored = true;
+      goalFlashSide = "top";
+      goalFlashTimer = 0.6;
     } else {
       puck = { ...puck, y: PUCK_RADIUS };
       velocity = { ...velocity, y: Math.abs(velocity.y) };
@@ -184,6 +195,8 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
     if (isInGoalRange(puck.x)) {
       aiScore += 1;
       scored = true;
+      goalFlashSide = "bottom";
+      goalFlashTimer = 0.6;
     } else {
       puck = { ...puck, y: FIELD_HEIGHT - PUCK_RADIUS };
       velocity = { ...velocity, y: -Math.abs(velocity.y) };
@@ -236,5 +249,7 @@ export function step(state: AirHockeyState, dtSeconds: number): AirHockeyState {
     winner,
     resetTimer,
     elapsedSeconds,
+    goalFlashSide,
+    goalFlashTimer,
   };
 }

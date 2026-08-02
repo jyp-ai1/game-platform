@@ -22,11 +22,11 @@ import { useEffect, useCallback, useReducer, useRef } from "react";
 import {
   computeScore,
   createInitialState,
-  MAX_SHOTS,
   shootColumn,
   type BubbleShooterState,
   type ColorId,
 } from "./engine";
+import { getBubbleShooterStage } from "./bubble-shooter-stage-config";
 import {
   playGameOverAudio,
   playStageClearAudio,
@@ -41,10 +41,13 @@ const COLORS: Record<ColorId, string> = {
   3: "bg-amber-400",
 };
 
-type Action = { type: "shoot"; col: number } | { type: "restart" };
+type Action = { type: "shoot"; col: number } | { type: "restart" } | { type: "nextStage" };
 
 function reducer(state: BubbleShooterState, action: Action): BubbleShooterState {
   if (action.type === "restart") return createInitialState();
+  if (action.type === "nextStage") {
+    return createInitialState(state.stageIndex + 1, state.score);
+  }
   return shootColumn(state, action.col);
 }
 
@@ -75,14 +78,20 @@ export function BubbleShooterGame() {
   useEffect(() => {
     if (state.status === "won" && prevStatusRef.current !== "won") {
       playStageClearAudio();
+    } else if (state.status === "stage-clear" && prevStatusRef.current !== "stage-clear") {
+      playStageClearAudio();
     } else if (state.status === "over" && prevStatusRef.current !== "over") {
       playGameOverAudio();
     }
     prevStatusRef.current = state.status;
   }, [state.status]);
 
+  const stageIndex = state.stageIndex;
+  const stageDef = getBubbleShooterStage(stageIndex);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
 
@@ -93,7 +102,7 @@ export function BubbleShooterGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "playing") {
+    if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.score, state.status));
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
@@ -126,9 +135,13 @@ export function BubbleShooterGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Score" value={state.score} />
-        <ScoreBox label="Shots Left" value={MAX_SHOTS - state.shots} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
+        <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Stage" value={`${stageIndex} · ${stageDef.label}`} />
+          <ScoreBox label="Shots" value={`${state.shots}/${state.maxShots}`} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+        </div>
+        <Button variant="outline" size="icon" className="min-h-11 min-w-11 shrink-0" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>
@@ -160,7 +173,21 @@ export function BubbleShooterGame() {
         </div>
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
-      {state.status !== "playing" ? (
+      {state.status === "stage-clear" ? (
+        <StandardGameOverOverlay
+          variant="stage-clear"
+          stageLabel={`${stageDef.label} — Stage ${stageIndex} Clear`}
+          score={state.score}
+          gameSlug={GAME_SLUG}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={handleExit}
+          onRetry={handleRetry}
+          onRestart={handleRetry}
+          onNextStage={() => dispatch({ type: "nextStage" })}
+        />
+      ) : null}
+      {state.status === "over" || state.status === "won" ? (
         <StandardGameOverOverlay
           message={
             state.status === "won"

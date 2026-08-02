@@ -11,6 +11,7 @@ import {
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
   standardFeelFromState,
@@ -46,6 +47,9 @@ export function MergeBlocksGame() {
     completeCountdownRef.current();
   }, []);
 
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -73,11 +77,12 @@ export function MergeBlocksGame() {
   useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
+      recordGameEnd({ score: state.score, outcome: "failure" });
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.status, state.score, reportScore]);
+  }, [state.status, state.score, reportScore, recordGameEnd]);
 
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -95,6 +100,7 @@ export function MergeBlocksGame() {
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetSession();
     resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
@@ -102,6 +108,7 @@ export function MergeBlocksGame() {
 
   function handleNewGame() {
     onNewGame();
+    resetSession();
     resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
@@ -112,6 +119,7 @@ export function MergeBlocksGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
+        <ScoreBox label="Best" value={feel.bestScore} />
         <ScoreBox label="Next" value={state.next} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />

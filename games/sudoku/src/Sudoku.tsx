@@ -160,6 +160,7 @@ export function SudokuGame() {
         <div className="flex gap-2">
           <ScoreBox label="Score" value={computeScore(state.mistakes)} />
           <ScoreBox label="Mistakes" value={`${state.mistakes}/${state.maxMistakes}`} />
+          <ScoreBox label="Best" value={feel.bestScore} />
           <ScoreBox label="Level" value={state.difficulty} />
         </div>
         <div className="flex items-center gap-1">

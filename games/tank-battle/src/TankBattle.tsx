@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -112,8 +113,11 @@ export function TankBattleGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  const stageIndex = state.enemiesDefeated + 1;
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex,
     fieldRef,
   });
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
@@ -143,7 +147,7 @@ export function TankBattleGame() {
       lastTimeRef.current = time;
 
       if (stateRef.current.status === "playing" && canPlayRef.current) {
-        dispatch({ type: "step", dt });
+        dispatch({ type: "step", dt: dt * diff.speedMult });
       }
 
       rafRef.current = requestAnimationFrame(loop);
@@ -155,7 +159,7 @@ export function TankBattleGame() {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [canPlayRef]);
+  }, [canPlayRef, diff.speedMult]);
 
   useEffect(() => {
     if (state.status === prevStatusRef.current) {
@@ -206,6 +210,19 @@ export function TankBattleGame() {
     window.setTimeout(() => clearSave(GAME_SLUG), 400);
   }
 
+  function handleMove(dir: Facing) {
+    if (!canPlayRef.current || state.status !== "playing") return;
+    primeGameAudio();
+    dispatch({ type: "move", dir });
+  }
+
+  function handleFire() {
+    if (!canPlayRef.current || state.status !== "playing") return;
+    primeGameAudio();
+    playGameFeel("button", fieldRef.current);
+    dispatch({ type: "fire" });
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetGameAudioPrime();
@@ -227,6 +244,7 @@ export function TankBattleGame() {
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Enemies" value={enemiesRemaining(state)} />
+          <ScoreBox label="Stage" value={stageIndex} />
         </div>
         <Button
           variant="outline"
@@ -242,6 +260,7 @@ export function TankBattleGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         ref={fieldRef}
         style={{ aspectRatio: "1 / 1" }}
+        onPointerDown={() => primeGameAudio()}
       >
         {state.grid.map((row, rowIndex) =>
           row.map((tile, colIndex) => {
@@ -320,22 +339,30 @@ export function TankBattleGame() {
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
 
-      <Button
-        variant="secondary"
-        className="w-full max-w-sm"
-        disabled={!canPlay}
-        onClick={() => {
-          primeGameAudio();
-          playGameFeel("button", fieldRef.current);
-          dispatch({ type: "fire" });
-        }}
-      >
-        발사 (Space)
-      </Button>
+      <div className="grid w-full max-w-sm grid-cols-3 gap-2">
+        <div />
+        <Button variant="secondary" disabled={!canPlay} onClick={() => handleMove("up")} aria-label="위">
+          ↑
+        </Button>
+        <div />
+        <Button variant="secondary" disabled={!canPlay} onClick={() => handleMove("left")} aria-label="왼쪽">
+          ←
+        </Button>
+        <Button variant="secondary" disabled={!canPlay} onClick={handleFire} aria-label="발사">
+          🔥
+        </Button>
+        <Button variant="secondary" disabled={!canPlay} onClick={() => handleMove("right")} aria-label="오른쪽">
+          →
+        </Button>
+        <div />
+        <Button variant="secondary" disabled={!canPlay} onClick={() => handleMove("down")} aria-label="아래">
+          ↓
+        </Button>
+        <div />
+      </div>
 
       <p className="text-xs text-muted-foreground">
-        방향키로 탱크를 움직이고 스페이스바 또는 버튼으로 발사하세요. 벽돌은
-        총알로 파괴할 수 있습니다.
+        방향키 또는 D-pad로 이동, 스페이스/🔥로 발사. 벽돌은 파괴 가능합니다.
       </p>
     </div>
   );

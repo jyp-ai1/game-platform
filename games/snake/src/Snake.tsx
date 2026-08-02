@@ -2,6 +2,7 @@
 
 import {
   clearSave,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   standardFeelFromState,
@@ -162,10 +163,14 @@ export function SnakeGame() {
     prevStatusRef.current = state.status;
   }, [state.status]);
 
+  const stageIndex = Math.floor(state.score / 50) + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const saveStatus = useAutoSave(
@@ -178,10 +183,13 @@ export function SnakeGame() {
     if (state.status !== "playing" || !canPlay) {
       return;
     }
-    const ms = Math.max(MIN_TICK_MS, TICK_MS - Math.floor(state.score / 30) * 10);
+    const ms = Math.max(
+      MIN_TICK_MS,
+      (TICK_MS - Math.floor(state.score / 30) * 10) / diff.speedMult
+    );
     const id = setInterval(() => dispatch({ type: "tick" }), ms);
     return () => clearInterval(id);
-  }, [state.status, canPlay, state.score]);
+  }, [state.status, canPlay, state.score, diff.speedMult]);
 
   useEffect(() => {
     if (state.status !== "playing") {
@@ -274,10 +282,15 @@ export function SnakeGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Score" value={state.score} />
+        <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Level" value={stageIndex} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+        </div>
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >

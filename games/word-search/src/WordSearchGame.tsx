@@ -11,9 +11,9 @@ import {
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
-  standardFeelFromState,
   useStandardGameFeel,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
@@ -27,10 +27,13 @@ import {
   isAnchor,
   isHighlighted,
   selectCell,
-  SIZE,
-  WORDS,
+  type WordSearchDifficulty,
   type WordSearchState,
 } from "./engine";
+import {
+  WORD_SEARCH_DIFFICULTIES,
+  difficultyLabel,
+} from "./word-search-stage-config";
 import {
   playStageClearAudio,
   primeGameAudio,
@@ -42,12 +45,12 @@ const GAME_SLUG = "word-search";
 type Action =
   | { type: "select"; row: number; col: number }
   | { type: "clear" }
-  | { type: "restart" };
+  | { type: "restart"; difficulty?: WordSearchDifficulty };
 
 function reducer(state: WordSearchState, action: Action): WordSearchState {
   switch (action.type) {
     case "restart":
-      return createInitialState();
+      return createInitialState(action.difficulty ?? state.difficulty);
     case "select":
       return selectCell(state, action.row, action.col);
     case "clear":
@@ -58,7 +61,7 @@ function reducer(state: WordSearchState, action: Action): WordSearchState {
 }
 
 export function WordSearchGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const completeCountdownRef = useRef(completeCountdown);
@@ -66,6 +69,9 @@ export function WordSearchGame() {
   const onCountdownComplete = useCallback(() => {
     completeCountdownRef.current();
   }, []);
+
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
@@ -81,6 +87,7 @@ export function WordSearchGame() {
   useEffect(() => {
     if (state.found.length > prevFoundRef.current) {
       playGameFeel("match", fieldRef.current);
+      playGameFeel(state.found.length >= 4 ? "combo" : "match", fieldRef.current);
     }
     prevFoundRef.current = state.found.length;
   }, [state.found.length]);
@@ -100,12 +107,13 @@ export function WordSearchGame() {
 
   useEffect(() => {
     if (state.status === "won") {
-      reportScore(GAME_SLUG, computeScore(state));
+      reportScore(GAME_SLUG, score);
+      recordGameEnd({ score, outcome: "clear" });
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.status, state.found.length, reportScore]);
+  }, [state.status, state.found.length, score, reportScore, recordGameEnd]);
 
   function handleExit() {
     clearSave(GAME_SLUG);
@@ -113,14 +121,16 @@ export function WordSearchGame() {
     window.setTimeout(() => clearSave(GAME_SLUG), 400);
   }
 
-  function handleRetry() {
+  function handleRetry(difficulty?: WordSearchDifficulty) {
     emitGameRetry(GAME_SLUG);
+    resetSession();
     resetGameAudioPrime();
-    dispatch({ type: "restart" });
+    dispatch({ type: "restart", difficulty });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetSession();
     resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
@@ -128,14 +138,31 @@ export function WordSearchGame() {
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Found" value={state.found.length} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
+      <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Found" value={`${state.found.length}/${state.words.length}`} />
+          <ScoreBox label="Score" value={score} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+        </div>
+        <Button variant="outline" size="icon" aria-label="새 게임" onClick={() => handleRetry()}>
           <RotateCcw />
         </Button>
       </div>
+      <div className="flex w-full max-w-sm flex-wrap gap-1">
+        {WORD_SEARCH_DIFFICULTIES.map((level) => (
+          <Button
+            key={level}
+            variant={state.difficulty === level ? "default" : "outline"}
+            size="sm"
+            className="min-h-9 flex-1 text-xs"
+            onClick={() => handleRetry(level)}
+          >
+            {difficultyLabel(level)}
+          </Button>
+        ))}
+      </div>
       <ul className="flex flex-wrap gap-2 text-sm">
-        {WORDS.map((w) => (
+        {state.words.map((w) => (
           <li
             key={w}
             className={cn(
@@ -149,33 +176,36 @@ export function WordSearchGame() {
       </ul>
       <p className="text-xs text-muted-foreground">Tap start cell, then end cell along a straight line</p>
       <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
-      <div className="grid w-full grid-cols-10 gap-0.5">
-        {Array.from({ length: SIZE * SIZE }, (_, i) => {
-          const r = Math.floor(i / SIZE);
-          const c = i % SIZE;
-          const letter = state.grid[r]![c];
-          return (
-            <button
-              key={i}
-              type="button"
-              disabled={!canPlayRef.current || state.status === "won"}
-              onClick={() => {
-                primeGameAudio();
-                playGameFeel("button", fieldRef.current);
-                dispatch({ type: "select", row: r, col: c });
-              }}
-              className={cn(
-                "aspect-square min-h-11 min-w-11 text-sm font-bold uppercase transition-transform duration-150 active:scale-95",
-                isHighlighted(state, r, c) && "bg-primary text-primary-foreground",
-                isAnchor(state, r, c) && "ring-2 ring-amber-400",
-                !isHighlighted(state, r, c) && "bg-background border border-border"
-              )}
-            >
-              {letter}
-            </button>
-          );
-        })}
-      </div>
+        <div
+          className="grid w-full gap-0.5"
+          style={{ gridTemplateColumns: `repeat(${state.size}, minmax(0, 1fr))` }}
+        >
+          {Array.from({ length: state.size * state.size }, (_, i) => {
+            const r = Math.floor(i / state.size);
+            const c = i % state.size;
+            const letter = state.grid[r]![c];
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={!canPlayRef.current || state.status === "won"}
+                onClick={() => {
+                  primeGameAudio();
+                  playGameFeel("button", fieldRef.current);
+                  dispatch({ type: "select", row: r, col: c });
+                }}
+                className={cn(
+                  "aspect-square min-h-11 min-w-11 text-sm font-bold uppercase transition-transform duration-150 active:scale-95",
+                  isHighlighted(state, r, c) && "bg-primary text-primary-foreground",
+                  isAnchor(state, r, c) && "ring-2 ring-amber-400",
+                  !isHighlighted(state, r, c) && "bg-background border border-border"
+                )}
+              >
+                {letter}
+              </button>
+            );
+          })}
+        </div>
       </PuzzlePlayField>
       {state.anchor ? (
         <Button variant="ghost" size="sm" onClick={() => dispatch({ type: "clear" })}>
@@ -187,9 +217,9 @@ export function WordSearchGame() {
           message="All words found!"
           score={score}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

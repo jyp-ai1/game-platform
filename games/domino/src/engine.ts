@@ -115,6 +115,12 @@ export function playerPlay(state: DominoState, index: number): DominoState {
   return playTile(state, "playerHand", index);
 }
 
+/** Local 2-player — second human plays from cpuHand slot */
+export function secondPlayerPlay(state: DominoState, index: number): DominoState {
+  if (state.winner || state.current !== "cpu") return state;
+  return playTile(state, "cpuHand", index);
+}
+
 function validMoves(hand: Tile[], left: number | null, right: number | null): number[] {
   return hand
     .map((t, i) => (canPlay(t, left, right) ? i : -1))
@@ -247,6 +253,21 @@ export function playerCanAct(state: DominoState): boolean {
 
 export function getPlayableIndices(state: DominoState): number[] {
   return validMoves(state.playerHand, state.leftEnd, state.rightEnd);
+}
+
+export function getSecondPlayerPlayableIndices(state: DominoState): number[] {
+  return validMoves(state.cpuHand, state.leftEnd, state.rightEnd);
+}
+
+/** Pass to player 1 when player 2 has no playable tile and boneyard is empty. */
+export function resolveSecondPlayerTurn(state: DominoState): DominoState {
+  if (state.winner || state.current !== "cpu") return state;
+  if (validMoves(state.cpuHand, state.leftEnd, state.rightEnd).length > 0) return state;
+  if (state.boneyard.length > 0) return state;
+  if (neitherCanPlay(state)) {
+    return finalizeBlockedGame(state);
+  }
+  return { ...state, current: "player", message: "Player 1 turn" };
 }
 
 /** Pass to CPU when the player has no playable tile and the boneyard is empty. */

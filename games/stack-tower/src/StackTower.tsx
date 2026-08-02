@@ -64,13 +64,15 @@ export function StackTowerGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  const stageIndex = state.stack.length;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    stageIndex: state.stack.length,
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
 
-  const diff = getGroupDifficulty(GAME_SLUG, state.stack.length);
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const tickMs = Math.max(16, TICK_MS / diff.speedMult);
 
   const saveStatus = useAutoSave(
@@ -126,10 +128,13 @@ export function StackTowerGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Height" value={state.stack.length} />
-        <ScoreBox label="Width" value={`${Math.round(state.current.width)}%`} />
-        <ScoreBox label="Score" value={state.score} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
+        <div className="flex flex-wrap gap-2">
+          <ScoreBox label="Stage" value={stageIndex} />
+          <ScoreBox label="Height" value={state.stack.length} />
+          <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Best" value={feel.bestScore} />
+        </div>
+        <Button variant="outline" size="icon" className="min-h-11 min-w-11 shrink-0" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>

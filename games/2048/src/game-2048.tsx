@@ -400,6 +400,7 @@ export function Game2048() {
           <ScoreBox label="Tile" value={currentTile || 2} />
           <ScoreBox label="Stage" value={tileStageIndex(currentTile)} />
           <ScoreBox label="Best" value={state.best} />
+          <ScoreBox label="Best Tile" value={state.bestTile} />
         </div>
         <Button
           variant="outline"

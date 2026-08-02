@@ -96,6 +96,14 @@ export function playerMove(state: MancalaState, pit: number): MancalaState {
   return sow(state, pit);
 }
 
+/** Local 2-player — either side may sow on their turn */
+export function pitMove(state: MancalaState, pit: number): MancalaState {
+  if (state.winner !== null) return state;
+  if (state.current === 1 && isPlayerPit(pit) && state.pits[pit]! > 0) return sow(state, pit);
+  if (state.current === 2 && isCpuPit(pit) && state.pits[pit]! > 0) return sow(state, pit);
+  return state;
+}
+
 function scoreCpuMove(state: MancalaState, pit: number): number {
   const after = sow(state, pit);
   if (after.winner === 2) return 1000;

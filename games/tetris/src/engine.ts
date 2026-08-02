@@ -184,6 +184,12 @@ export function gravityIntervalMs(level: number): number {
 
 /** Locks the active piece into the board, clears lines, and spawns the next
  * piece — used by both soft-drop-can't-descend and hard-drop. */
+/** Mini-grid (4x4) for next-piece HUD preview. */
+export function previewGrid(type: TetrominoType): boolean[] {
+  const shape = shapeForRotation(type, 0);
+  return shape.map((v) => v === 1);
+}
+
 export function lockPiece(state: TetrisState): TetrisState {
   const merged = mergeIntoBoard(state.board, state.active);
   const { board, cleared } = clearLines(merged);

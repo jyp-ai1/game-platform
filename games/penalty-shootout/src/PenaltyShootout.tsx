@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -26,9 +27,27 @@ import {
   type Direction,
   type PenaltyState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "penalty-shootout";
+
+const SHOOT_KEYS: Record<string, Direction> = {
+  ArrowLeft: "left",
+  "1": "left",
+  a: "left",
+  ArrowUp: "center",
+  "2": "center",
+  w: "center",
+  " ": "center",
+  ArrowRight: "right",
+  "3": "right",
+  d: "right",
+};
 
 type Action = { type: "shoot"; dir: Direction } | { type: "restart" };
 
@@ -38,7 +57,7 @@ function reducer(state: PenaltyState, action: Action): PenaltyState {
 }
 
 export function PenaltyShootoutGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -51,7 +70,10 @@ export function PenaltyShootoutGame() {
   const onCountdownComplete = useCallback(() => {
     completeCountdownRef.current();
   }, []);
-  
+
+  const stageIndex = state.round + 1;
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
+
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       const gain = state.score - prevScoreRef.current;
@@ -62,6 +84,7 @@ export function PenaltyShootoutGame() {
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex,
     fieldRef,
   });
 
@@ -73,10 +96,11 @@ export function PenaltyShootoutGame() {
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
-      playGameOverAudio();
+      if (state.outcome === "win") playStageClearAudio();
+      else playGameOverAudio();
     }
     prevStatusRef.current = state.status;
-  }, [state.status]);
+  }, [state.status, state.outcome]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -93,6 +117,18 @@ export function PenaltyShootoutGame() {
     playGameFeel("button", fieldRef.current);
     dispatch({ type: "shoot", dir });
   }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!canPlayRef.current) return;
+      const dir = SHOOT_KEYS[event.key];
+      if (!dir) return;
+      event.preventDefault();
+      handleShoot(dir);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canPlayRef, state.status]);
 
   function handleExit() {
     clearSave(GAME_SLUG);
@@ -114,6 +150,13 @@ export function PenaltyShootoutGame() {
     dispatch({ type: "restart" });
   }
 
+  const resultFlash =
+    state.lastResult === "goal"
+      ? "ring-4 ring-emerald-400/70 bg-emerald-500/10"
+      : state.lastResult === "save"
+        ? "ring-4 ring-sky-400/70 bg-sky-500/10"
+        : "";
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -130,7 +173,14 @@ export function PenaltyShootoutGame() {
           <RotateCcw />
         </Button>
       </div>
-      <div ref={fieldRef} className="relative flex w-full max-w-sm touch-none select-none flex-col gap-2 rounded-xl border-2 border-primary/30 bg-muted p-4">
+      <div
+        ref={fieldRef}
+        className={cn(
+          "relative flex w-full max-w-sm touch-none select-none flex-col gap-2 rounded-xl border-2 border-primary/30 bg-muted p-4 transition-all duration-300",
+          resultFlash
+        )}
+        onPointerDown={() => primeGameAudio()}
+      >
         <div className="mx-auto h-2 w-3/4 rounded bg-background" aria-hidden />
         <p className="text-center text-sm font-medium">
           {state.lastResult === "goal"
@@ -155,32 +205,36 @@ export function PenaltyShootoutGame() {
           ))}
         </div>
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
-      </div>
-      {state.status === "over" ? (
-        <StandardGameOverOverlay
-          message={
-            state.outcome === "win"
-              ? state.suddenDeath
-                ? `Sudden death win! ${state.score} goals`
-                : `${state.score} goals — you win!`
-              : state.suddenDeath
-                ? "Sudden death — saved!"
-                : `${state.score} goals — keeper wins`
-          }
-          score={computeRankingScore(state)}
-          gameSlug={GAME_SLUG}
+
+        {state.status === "over" ? (
+          <StandardGameOverOverlay
+            message={
+              state.outcome === "win"
+                ? state.suddenDeath
+                  ? `Sudden death win! ${state.score} goals`
+                  : `${state.score} goals — you win!`
+                : state.suddenDeath
+                  ? "Sudden death — saved!"
+                  : `${state.score} goals — keeper wins`
+            }
+            score={computeRankingScore(state)}
+            gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
             onExit={handleExit}
-          onRetry={handleRetry}
-          onRestart={handleRetry}
-        />
-      ) : null}
-      {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
-      {phase === "resume-prompt" ? (
-        <ResumeDialog gameTitle="Penalty Shootout" onResume={onResume} onNewGame={handleNewGame} />
-      ) : null}
-      <p className="text-xs text-muted-foreground">슛 방향을 고르세요. 골키퍼는 랜덤입니다.</p>
+            onRetry={handleRetry}
+            onRestart={handleRetry}
+          />
+        ) : null}
+
+        {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
+        {phase === "resume-prompt" ? (
+          <ResumeDialog gameTitle="Penalty Shootout" onResume={onResume} onNewGame={handleNewGame} />
+        ) : null}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        방향키 · 1/2/3 · 버튼으로 슛 방향을 고르세요. {diff.label}
+      </p>
     </div>
   );
 }

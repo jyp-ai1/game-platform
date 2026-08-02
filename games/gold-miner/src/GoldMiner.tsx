@@ -25,6 +25,7 @@ import {
   FIELD_HEIGHT,
   FIELD_WIDTH,
   fireHook,
+  goalForLevel,
   HOOK_ORIGIN_X,
   HOOK_ORIGIN_Y,
   hookTip,
@@ -33,7 +34,7 @@ import {
   type GoldMinerState,
   type ItemType,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "gold-miner";
 const MAX_DT = 0.05;
@@ -83,6 +84,7 @@ export function GoldMinerGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevLevelRef = useRef(state.level);
   const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
@@ -93,11 +95,20 @@ export function GoldMinerGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
-  const level = Math.floor(state.score / 500) + 1;
-  const levelTarget = level * 500;
+  useEffect(() => {
+    if (state.level > prevLevelRef.current) {
+      playStageClearAudio();
+      playGameFeel("goal", fieldRef.current);
+    }
+    prevLevelRef.current = state.level;
+  }, [state.level]);
+
+  const level = state.level;
+  const levelTarget = goalForLevel(level);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     stageIndex: level,
+    muteScoreGain: true,
     fieldRef,
   });
   const diff = getGroupDifficulty(GAME_SLUG, level);
@@ -202,14 +213,17 @@ export function GoldMinerGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Level" value={level} />
           <ScoreBox label="Goal" value={levelTarget} />
           <ScoreBox label="Time" value={Math.ceil(state.timeLeft)} />
+          <ScoreBox label="Best" value={feel.bestScore} />
         </div>
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >

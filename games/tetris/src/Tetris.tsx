@@ -31,6 +31,7 @@ import {
   ROWS,
   SOFT_DROP_POINTS,
   TETROMINO_COLORS,
+  previewGrid,
   tryMove,
   tryRotate,
   type TetrisState,
@@ -110,6 +111,8 @@ export function TetrisGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.level,
+    muteScoreGain: true,
     fieldRef,
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -265,14 +268,16 @@ export function TetrisGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Lines" value={state.linesCleared} />
           <ScoreBox label="Level" value={state.level} />
+          <ScoreBox label="Best" value={feel.bestScore} />
         </div>
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >
@@ -280,9 +285,10 @@ export function TetrisGame() {
         </Button>
       </div>
 
+      <div className="flex w-full max-w-xs items-start gap-2">
       <div
         ref={fieldRef}
-        className="relative grid aspect-[1/2] w-full max-w-xs touch-none select-none gap-px rounded-xl bg-muted p-1 transition-transform duration-150"
+        className="relative grid aspect-[1/2] flex-1 touch-none select-none gap-px rounded-xl bg-muted p-1 transition-transform duration-150"
         style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -328,6 +334,24 @@ export function TetrisGame() {
         ) : null}
 
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
+      </div>
+      <div className="flex w-12 shrink-0 flex-col gap-1 pt-1">
+        <span className="text-[10px] font-medium text-muted-foreground">Next</span>
+        <div
+          className="grid aspect-square w-full gap-px rounded-md bg-muted p-0.5"
+          style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+        >
+          {previewGrid(state.next).map((filled, i) => (
+              <div
+                key={i}
+                className="rounded-[1px]"
+                style={{
+                  backgroundColor: filled ? TETROMINO_COLORS[state.next] : undefined,
+                }}
+              />
+            ))}
+        </div>
+      </div>
       </div>
 
       <p className="text-xs text-muted-foreground">

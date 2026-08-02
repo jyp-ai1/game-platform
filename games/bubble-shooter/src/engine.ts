@@ -1,16 +1,22 @@
 export type ColorId = 1 | 2 | 3;
 
+import {
+  FINAL_BUBBLE_SHOOTER_STAGE,
+  getBubbleShooterStage,
+} from "./bubble-shooter-stage-config";
+
 export interface BubbleShooterState {
   grid: (ColorId | 0)[][];
   next: ColorId;
   score: number;
   shots: number;
-  status: "playing" | "over" | "won";
+  stageIndex: number;
+  maxShots: number;
+  status: "playing" | "over" | "won" | "stage-clear";
 }
 
 const ROWS = 9;
 const COLS = 7;
-const INITIAL_ROWS = 4;
 export const MAX_SHOTS = 40;
 
 function emptyGrid(): (ColorId | 0)[][] {
@@ -21,14 +27,27 @@ function randomColor(): ColorId {
   return (Math.floor(Math.random() * 3) + 1) as ColorId;
 }
 
-export function createInitialState(): BubbleShooterState {
+function buildGrid(initialRows: number): (ColorId | 0)[][] {
   const grid = emptyGrid();
-  for (let r = 0; r < INITIAL_ROWS; r++) {
+  for (let r = 0; r < initialRows; r++) {
     for (let c = 0; c < COLS; c++) {
       grid[r]![c] = randomColor();
     }
   }
-  return { grid, next: randomColor(), score: 0, shots: 0, status: "playing" };
+  return grid;
+}
+
+export function createInitialState(stageIndex = 1, carryScore = 0): BubbleShooterState {
+  const stage = getBubbleShooterStage(stageIndex);
+  return {
+    grid: buildGrid(stage.initialRows),
+    next: randomColor(),
+    score: carryScore,
+    shots: 0,
+    stageIndex,
+    maxShots: stage.maxShots,
+    status: "playing",
+  };
 }
 
 function flood(
@@ -127,13 +146,18 @@ export function shootColumn(state: BubbleShooterState, col: number): BubbleShoot
 
   const shots = state.shots + 1;
   let status: BubbleShooterState["status"] = "playing";
-  if (isEmpty(grid)) status = "won";
-  else if (bottomReached(grid) || shots >= MAX_SHOTS) status = "over";
+  if (isEmpty(grid)) {
+    status =
+      state.stageIndex >= FINAL_BUBBLE_SHOOTER_STAGE ? "won" : "stage-clear";
+  } else if (bottomReached(grid) || shots >= state.maxShots) {
+    status = "over";
+  }
 
-  return { grid, next: randomColor(), score, shots, status };
+  return { grid, next: randomColor(), score, shots, stageIndex: state.stageIndex, maxShots: state.maxShots, status };
 }
 
 export function computeScore(score: number, status: BubbleShooterState["status"]): number {
   if (status === "won") return score + 200;
+  if (status === "stage-clear") return score;
   return score;
 }

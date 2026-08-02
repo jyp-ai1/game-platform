@@ -24,9 +24,12 @@ import {
   cpuMove,
   createInitialState,
   getPlayableIndices,
+  getSecondPlayerPlayableIndices,
   playerDraw,
   playerPlay,
   resolvePlayerTurn,
+  resolveSecondPlayerTurn,
+  secondPlayerPlay,
   type DominoState,
 } from "./engine";
 import {
@@ -39,10 +42,12 @@ import {
 const GAME_SLUG = "domino";
 const CPU_DELAY = 500;
 
+type GameMode = "cpu" | "local";
+
 type Action =
-  | { type: "play"; index: number }
+  | { type: "play"; index: number; seat: "p1" | "p2" }
   | { type: "draw" }
-  | { type: "resolve" }
+  | { type: "resolve"; seat: "p1" | "p2" }
   | { type: "cpu"; difficulty: CpuDifficulty }
   | { type: "restart" };
 
@@ -51,11 +56,13 @@ function reducer(state: DominoState, action: Action): DominoState {
     case "restart":
       return createInitialState();
     case "play":
-      return playerPlay(state, action.index);
+      return action.seat === "p1"
+        ? playerPlay(state, action.index)
+        : secondPlayerPlay(state, action.index);
     case "draw":
       return playerDraw(state);
     case "resolve":
-      return resolvePlayerTurn(state);
+      return action.seat === "p1" ? resolvePlayerTurn(state) : resolveSecondPlayerTurn(state);
     case "cpu":
       return cpuMove(state, action.difficulty);
     default:
@@ -74,6 +81,7 @@ export function DominoGame() {
   }, []);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [mode, setMode] = useState<GameMode>("cpu");
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
   const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
@@ -84,9 +92,16 @@ export function DominoGame() {
     difficulty,
     score: computeScore(state),
   });
-  const playable = getPlayableIndices(state);
+  const playable =
+    state.current === "player"
+      ? getPlayableIndices(state)
+      : getSecondPlayerPlayableIndices(state);
+  const activeHand =
+    state.current === "player" ? state.playerHand : state.cpuHand;
   const humanTurn =
-    canPlayRef.current && state.current === "player" && !state.winner;
+    canPlayRef.current &&
+    !state.winner &&
+    (mode === "local" || state.current === "player");
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -95,35 +110,41 @@ export function DominoGame() {
   );
 
   useEffect(() => {
-    if (!canPlayRef.current || state.winner || state.current !== "cpu") return;
+    if (mode !== "cpu" || !canPlayRef.current || state.winner || state.current !== "cpu") return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), CPU_DELAY);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, state.chain.length, difficulty, canPlay]);
+  }, [mode, state.current, state.winner, state.chain.length, difficulty, canPlay]);
 
   useEffect(() => {
-    if (!canPlayRef.current || state.winner || state.current !== "player") return;
-    dispatch({ type: "resolve" });
-  }, [state.current, state.winner, state.playerHand, state.boneyard.length, state.chain.length, canPlay]);
+    if (!canPlayRef.current || state.winner) return;
+    if (state.current === "player") {
+      dispatch({ type: "resolve", seat: "p1" });
+    } else if (mode === "local") {
+      dispatch({ type: "resolve", seat: "p2" });
+    }
+  }, [state.current, state.winner, state.playerHand, state.cpuHand, state.boneyard.length, state.chain.length, canPlay, mode]);
 
   useEffect(() => {
     if (state.winner && prevStatusRef.current === null) {
-      if (state.winner === "player") {
+      if (mode === "cpu" && state.winner === "player") {
         playStageClearAudio();
-      } else {
+      } else if (mode === "cpu") {
         playGameOverAudio();
       }
     }
     prevStatusRef.current = state.winner;
-  }, [state.winner]);
+  }, [state.winner, mode]);
 
   useEffect(() => {
-    if (state.winner) {
+    if (state.winner && mode === "cpu") {
       reportScore(GAME_SLUG, computeScore(state));
+    }
+    if (state.winner) {
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.winner, reportScore]);
+  }, [state.winner, reportScore, mode]);
 
   function handleExit() {
     clearSave(GAME_SLUG);
@@ -148,8 +169,19 @@ export function DominoGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <ScoreBox label="Hand" value={state.playerHand.length} />
-          <p className="text-sm text-muted-foreground">{state.message}</p>
+          <ScoreBox label={mode === "local" ? "P1" : "Hand"} value={state.playerHand.length} />
+          {mode === "local" ? (
+            <ScoreBox label="P2" value={state.cpuHand.length} />
+          ) : null}
+          <p className="text-sm text-muted-foreground">
+            {state.winner
+              ? state.message
+              : mode === "local"
+                ? state.current === "player"
+                  ? "Player 1 turn"
+                  : "Player 2 turn"
+                : state.message}
+          </p>
         </div>
         <Button
           variant="outline"
@@ -160,11 +192,31 @@ export function DominoGame() {
           <RotateCcw />
         </Button>
       </div>
-      <CpuDifficultyPicker
-        value={difficulty}
-        onChange={setDifficulty}
-        disabled={!!state.winner}
-      />
+      <div className="flex w-full max-w-sm gap-2">
+        <Button
+          variant={mode === "cpu" ? "default" : "outline"}
+          size="sm"
+          disabled={!!state.winner}
+          onClick={() => setMode("cpu")}
+        >
+          vs CPU
+        </Button>
+        <Button
+          variant={mode === "local" ? "default" : "outline"}
+          size="sm"
+          disabled={!!state.winner}
+          onClick={() => setMode("local")}
+        >
+          2 Player
+        </Button>
+      </div>
+      {mode === "cpu" ? (
+        <CpuDifficultyPicker
+          value={difficulty}
+          onChange={setDifficulty}
+          disabled={!!state.winner}
+        />
+      ) : null}
       <div ref={fieldRef} className="relative flex w-full max-w-sm flex-col gap-3">
         <div className="flex min-h-12 flex-wrap justify-center gap-1 rounded-lg bg-muted/40 p-2">
           {state.chain.length === 0 ? (
@@ -178,22 +230,29 @@ export function DominoGame() {
           )}
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          {state.playerHand.map((t, i) => {
-            const canPlay = humanTurn && playable.includes(i);
+          {activeHand.map((t, i) => {
+            const canPlayTile =
+              humanTurn &&
+              (mode === "local" || state.current === "player") &&
+              playable.includes(i);
             return (
               <button
                 key={i}
                 type="button"
-                disabled={!canPlay}
+                disabled={!canPlayTile}
                 onClick={() => {
                   primeGameAudio();
                   playGameFeel("button");
                   feelTap();
-                  dispatch({ type: "play", index: i });
+                  dispatch({
+                    type: "play",
+                    index: i,
+                    seat: state.current === "player" ? "p1" : "p2",
+                  });
                 }}
                 className={cn(
                   "min-h-11 rounded-lg border-2 px-3 py-3 font-mono text-sm transition-transform duration-150 active:scale-95",
-                  canPlay ? "border-primary bg-primary/10 hover:bg-primary/20" : "opacity-50"
+                  canPlayTile ? "border-primary bg-primary/10 hover:bg-primary/20" : "opacity-50"
                 )}
               >
                 {t[0]}|{t[1]}
@@ -201,7 +260,7 @@ export function DominoGame() {
             );
           })}
         </div>
-        {humanTurn && playable.length === 0 && state.boneyard.length > 0 ? (
+        {humanTurn && state.current === "player" && playable.length === 0 && state.boneyard.length > 0 ? (
           <Button
             onClick={() => {
               primeGameAudio();
@@ -218,7 +277,7 @@ export function DominoGame() {
       {state.winner ? (
         <StandardGameOverOverlay
           message={state.message}
-          score={computeScore(state)}
+          score={mode === "cpu" ? computeScore(state) : undefined}
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
@@ -231,6 +290,11 @@ export function DominoGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Domino" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">
+        {mode === "local"
+          ? "같은 기기 2인 — 체인 끝에 맞추거나 Draw."
+          : "Match chain ends · draw when stuck · empty hand wins."}
+      </p>
     </div>
   );
 }

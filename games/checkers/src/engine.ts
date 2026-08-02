@@ -59,7 +59,8 @@ function getJumps(state: CheckersState, r: number, c: number, player: 1 | 2): Mo
   const p = state.board[r]![c]!;
   if (owner(p) !== player) return [];
   const moves: Move[] = [];
-  for (const dr of dirs(p)) {
+  const jumpDirs = isKing(p) ? [-1, 1] : dirs(p);
+  for (const dr of jumpDirs) {
     for (const dc of [-1, 1]) {
       const mr = r + dr;
       const mc = c + dc;

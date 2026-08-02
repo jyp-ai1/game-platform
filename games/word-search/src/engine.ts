@@ -1,6 +1,7 @@
-export const SIZE = 10;
-
-export const WORDS = ["GAME", "PLAY", "FUN", "WIN", "CODE", "FIND"] as const;
+import {
+  type WordSearchDifficulty,
+  levelForDifficulty,
+} from "./word-search-stage-config";
 
 export interface WordSearchState {
   grid: string[][];
@@ -8,6 +9,9 @@ export interface WordSearchState {
   anchor: [number, number] | null;
   highlight: string[];
   status: "playing" | "won";
+  difficulty: WordSearchDifficulty;
+  size: number;
+  words: readonly string[];
 }
 
 const DIRECTIONS: [number, number][] = [
@@ -21,8 +25,8 @@ const DIRECTIONS: [number, number][] = [
   [-1, 1],
 ];
 
-function emptyGrid(): string[][] {
-  return Array.from({ length: SIZE }, () => Array<string>(SIZE).fill(""));
+function emptyGrid(size: number): string[][] {
+  return Array.from({ length: size }, () => Array<string>(size).fill(""));
 }
 
 function canPlace(
@@ -31,12 +35,13 @@ function canPlace(
   row: number,
   col: number,
   dr: number,
-  dc: number
+  dc: number,
+  size: number
 ): boolean {
   for (let i = 0; i < word.length; i++) {
     const r = row + dr * i;
     const c = col + dc * i;
-    if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return false;
+    if (r < 0 || r >= size || c < 0 || c >= size) return false;
     const cell = grid[r]![c];
     if (cell !== "" && cell !== word[i]) return false;
   }
@@ -56,10 +61,10 @@ function placeWord(
   }
 }
 
-function fillRandom(grid: string[][]): void {
+function fillRandom(grid: string[][], size: number): void {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       if (grid[r]![c] === "") {
         grid[r]![c] = letters[Math.floor(Math.random() * letters.length)]!;
       }
@@ -67,15 +72,15 @@ function fillRandom(grid: string[][]): void {
   }
 }
 
-function buildGrid(): string[][] {
-  const grid = emptyGrid();
-  for (const word of WORDS) {
+function buildGrid(size: number, words: readonly string[]): string[][] {
+  const grid = emptyGrid(size);
+  for (const word of words) {
     let placed = false;
     for (let attempt = 0; attempt < 80 && !placed; attempt++) {
       const [dr, dc] = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)]!;
-      const row = Math.floor(Math.random() * SIZE);
-      const col = Math.floor(Math.random() * SIZE);
-      if (canPlace(grid, word, row, col, dr, dc)) {
+      const row = Math.floor(Math.random() * size);
+      const col = Math.floor(Math.random() * size);
+      if (canPlace(grid, word, row, col, dr, dc, size)) {
         placeWord(grid, word, row, col, dr, dc);
         placed = true;
       }
@@ -84,17 +89,21 @@ function buildGrid(): string[][] {
       placeWord(grid, word, 0, 0, 0, 1);
     }
   }
-  fillRandom(grid);
+  fillRandom(grid, size);
   return grid;
 }
 
-export function createInitialState(): WordSearchState {
+export function createInitialState(difficulty: WordSearchDifficulty = "MEDIUM"): WordSearchState {
+  const level = levelForDifficulty(difficulty);
   return {
-    grid: buildGrid(),
+    grid: buildGrid(level.size, level.words),
     found: [],
     anchor: null,
     highlight: [],
     status: "playing",
+    difficulty,
+    size: level.size,
+    words: level.words,
   };
 }
 
@@ -139,7 +148,7 @@ export function selectCell(state: WordSearchState, row: number, col: number): Wo
   const forward = wordFromCells(state.grid, cells);
   const backward = reverse(forward);
   let matched: string | null = null;
-  for (const w of WORDS) {
+  for (const w of state.words) {
     if ((forward === w || backward === w) && !state.found.includes(w)) {
       matched = w;
       break;
@@ -152,7 +161,7 @@ export function selectCell(state: WordSearchState, row: number, col: number): Wo
       if (!highlight.includes(k)) highlight.push(k);
     }
     const found = [...state.found, matched];
-    const status = found.length === WORDS.length ? "won" : "playing";
+    const status = found.length === state.words.length ? "won" : "playing";
     return { ...state, found, highlight, anchor: null, status };
   }
   return { ...state, anchor: [row, col] };
@@ -173,3 +182,5 @@ export function isHighlighted(state: WordSearchState, r: number, c: number): boo
 export function isAnchor(state: WordSearchState, r: number, c: number): boolean {
   return state.anchor?.[0] === r && state.anchor?.[1] === c;
 }
+
+export type { WordSearchDifficulty };

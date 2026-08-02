@@ -15,21 +15,25 @@ import {
   playGameFeel,
   GameFeelLayer,
 } from "@game-platform/game-sdk";
-import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
+  BALL_R,
   BILLIARDS_H,
   BILLIARDS_W,
   computeScore,
   createInitialState,
   MAX_SHOTS,
+  POCKETS,
+  POCKET_R,
   shoot,
   tickAim,
+  tickRolling,
   type BilliardsState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "billiards";
 const TICK_MS = 32;
@@ -41,7 +45,7 @@ function reducer(state: BilliardsState, action: Action): BilliardsState {
     case "restart":
       return createInitialState();
     case "tick":
-      return tickAim(state);
+      return state.status === "rolling" ? tickRolling(state) : tickAim(state);
     case "shoot":
       return shoot(state);
     default:
@@ -50,9 +54,9 @@ function reducer(state: BilliardsState, action: Action): BilliardsState {
 }
 
 export function BilliardsGame() {
-  const { phase, initialState, phaseRef, onResume, onNewGame } =
+  const { phase, initialState, onResume, onNewGame } =
     useResumableGame(GAME_SLUG, createInitialState);
-  const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
+  const { canPlay, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -63,17 +67,25 @@ export function BilliardsGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
   const prevStatusRef = useRef(state.status);
+  const prevPocketPulseRef = useRef(0);
 
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      const gain = state.score - prevScoreRef.current;
-      playGameFeel(gain >= 25 ? "combo" : "explosion", fieldRef.current);
+      playGameFeel("goal", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  useEffect(() => {
+    if (state.pocketPulse > prevPocketPulseRef.current) {
+      playGameFeel("pop", fieldRef.current);
+    }
+    prevPocketPulseRef.current = state.pocketPulse;
+  }, [state.pocketPulse]);
+
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    stageIndex: state.shots + 1,
     fieldRef,
   });
 
@@ -84,17 +96,21 @@ export function BilliardsGame() {
   );
 
   useEffect(() => {
-    if (state.status !== "aiming" || !canPlay) return;
-    const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
-    return () => clearInterval(id);
+    if (state.status === "aiming" || state.status === "rolling") {
+      if (!canPlay) return;
+      const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
+      return () => clearInterval(id);
+    }
   }, [state.status, canPlay]);
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
-      playGameOverAudio();
+      const allPocketed = state.balls.every((b) => b.pocketed);
+      if (allPocketed) playStageClearAudio();
+      else playGameOverAudio();
     }
     prevStatusRef.current = state.status;
-  }, [state.status]);
+  }, [state.status, state.balls]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -125,6 +141,8 @@ export function BilliardsGame() {
     dispatch({ type: "restart" });
   }
 
+  const allPocketed = state.balls.every((b) => b.pocketed);
+
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
@@ -136,22 +154,46 @@ export function BilliardsGame() {
         </Button>
       </div>
       <div
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border-4 border-amber-900 bg-green-800"
+        className={cn(
+          "relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border-4 border-amber-900 bg-green-800",
+          state.pocketPulse > 0 && "game-effect-shake"
+        )}
         ref={fieldRef}
         style={{ aspectRatio: `${BILLIARDS_W}/${BILLIARDS_H}` }}
       >
+        {POCKETS.map(([px, py], i) => (
+          <div
+            key={i}
+            className={cn(
+              "absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/80 transition-all",
+              state.lastPocketFlash === px * 1000 + py && "scale-150 bg-amber-300/90 game-effect-flash"
+            )}
+            style={{ left: `${px}%`, top: `${py}%`, width: `${POCKET_R * 2}%`, height: `${POCKET_R * 2}%` }}
+          />
+        ))}
         {state.balls
           .filter((b) => !b.pocketed)
           .map((b) => (
             <div
               key={b.id}
-              className="absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40"
-              style={{ left: `${b.x}%`, top: `${b.y}%`, backgroundColor: b.color }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 shadow-md transition-none"
+              style={{
+                left: `${b.x}%`,
+                top: `${b.y}%`,
+                width: `${BALL_R * 2}%`,
+                height: `${BALL_R * 2}%`,
+                backgroundColor: b.color,
+              }}
             />
           ))}
         <div
-          className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow"
-          style={{ left: `${state.cueX}%`, top: `${state.cueY}%` }}
+          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-lg border border-white/60"
+          style={{
+            left: `${state.cueX}%`,
+            top: `${state.cueY}%`,
+            width: `${BALL_R * 2.2}%`,
+            height: `${BALL_R * 2.2}%`,
+          }}
         />
         {state.status === "aiming" ? (
           <div
@@ -181,12 +223,12 @@ export function BilliardsGame() {
       </Button>
       {state.status === "over" ? (
         <StandardGameOverOverlay
-          message={`Score ${state.score}`}
+          message={allPocketed ? `Clear! Score ${state.score}` : `Score ${state.score}`}
           score={computeScore(state)}
           gameSlug={GAME_SLUG}
-            isNewBest={feel.isNewBest}
-            bestRecordDelta={feel.bestRecordDelta}
-            onExit={handleExit}
+          isNewBest={feel.isNewBest}
+          bestRecordDelta={feel.bestRecordDelta}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />
@@ -195,6 +237,7 @@ export function BilliardsGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Billiards" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">조준 후 Shoot — 공을 포켓에 넣으세요.</p>
     </div>
   );
 }

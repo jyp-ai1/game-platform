@@ -1,5 +1,7 @@
-export const ROWS = 10;
-export const COLS = 8;
+import {
+  type SameGameDifficulty,
+  boardSizeForDifficulty,
+} from "./samegame-stage-config";
 
 export const COLORS = ["red", "blue", "green", "yellow", "purple"] as const;
 export type TileColor = (typeof COLORS)[number];
@@ -13,15 +15,22 @@ export const COLOR_HEX: Record<TileColor, string> = {
 };
 
 export type Cell = TileColor | null;
-// board[row][col] -- row 0 is the top; gravity pulls tiles toward higher
-// row indices (down), matching how the board visually renders.
 export type Board = Cell[][];
 
-export function createRandomBoard(): Board {
+export interface SameGameState {
+  board: Board;
+  score: number;
+  status: "playing" | "over" | "won";
+  difficulty: SameGameDifficulty;
+  rows: number;
+  cols: number;
+}
+
+export function createRandomBoard(rows: number, cols: number): Board {
   const board: Board = [];
-  for (let r = 0; r < ROWS; r++) {
+  for (let r = 0; r < rows; r++) {
     const row: Cell[] = [];
-    for (let c = 0; c < COLS; c++) {
+    for (let c = 0; c < cols; c++) {
       row.push(COLORS[Math.floor(Math.random() * COLORS.length)]!);
     }
     board.push(row);
@@ -29,7 +38,7 @@ export function createRandomBoard(): Board {
   return board;
 }
 
-function findGroup(board: Board, row: number, col: number): [number, number][] {
+function findGroup(board: Board, row: number, col: number, rows: number, cols: number): [number, number][] {
   const color = board[row]?.[col];
   if (!color) {
     return [];
@@ -41,7 +50,7 @@ function findGroup(board: Board, row: number, col: number): [number, number][] {
   while (stack.length > 0) {
     const [r, c] = stack.pop()!;
     const key = `${r},${c}`;
-    if (seen.has(key) || r < 0 || r >= ROWS || c < 0 || c >= COLS) {
+    if (seen.has(key) || r < 0 || r >= rows || c < 0 || c >= cols) {
       continue;
     }
     seen.add(key);
@@ -65,34 +74,31 @@ export function computeGroupScore(size: number): number {
 /** Bonus for clearing every tile (classic SameGame board-clear reward). */
 export const BOARD_CLEAR_BONUS = 2000;
 
-// Tiles fall down within their column (gravity), then any fully-emptied
-// column collapses and columns to its right shift left to fill the gap --
-// the two standard SameGame board-settling rules.
-function settleBoard(board: Board): Board {
+function settleBoard(board: Board, rows: number, cols: number): Board {
   const columns: Cell[][] = [];
-  for (let c = 0; c < COLS; c++) {
+  for (let c = 0; c < cols; c++) {
     const filled: Cell[] = [];
-    for (let r = 0; r < ROWS; r++) {
+    for (let r = 0; r < rows; r++) {
       const cell = board[r]?.[c];
       if (cell) {
         filled.push(cell);
       }
     }
-    const column: Cell[] = new Array(ROWS - filled.length).fill(null);
+    const column: Cell[] = new Array(rows - filled.length).fill(null);
     columns.push([...column, ...filled]);
   }
 
   const nonEmptyColumns = columns.filter((column) =>
     column.some((cell) => cell !== null)
   );
-  while (nonEmptyColumns.length < COLS) {
-    nonEmptyColumns.push(new Array(ROWS).fill(null));
+  while (nonEmptyColumns.length < cols) {
+    nonEmptyColumns.push(new Array(rows).fill(null));
   }
 
   const settled: Board = [];
-  for (let r = 0; r < ROWS; r++) {
+  for (let r = 0; r < rows; r++) {
     const row: Cell[] = [];
-    for (let c = 0; c < COLS; c++) {
+    for (let c = 0; c < cols; c++) {
       row.push(nonEmptyColumns[c]![r]!);
     }
     settled.push(row);
@@ -103,9 +109,11 @@ function settleBoard(board: Board): Board {
 export function clearGroup(
   board: Board,
   row: number,
-  col: number
+  col: number,
+  rows: number,
+  cols: number
 ): { board: Board; cleared: number } {
-  const group = findGroup(board, row, col);
+  const group = findGroup(board, row, col, rows, cols);
   if (group.length < 2) {
     return { board, cleared: 0 };
   }
@@ -113,12 +121,12 @@ export function clearGroup(
   for (const [r, c] of group) {
     next[r]![c] = null;
   }
-  return { board: settleBoard(next), cleared: group.length };
+  return { board: settleBoard(next, rows, cols), cleared: group.length };
 }
 
-export function hasValidMove(board: Board): boolean {
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
+export function hasValidMove(board: Board, rows: number, cols: number): boolean {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       const color = board[r]?.[c];
       if (!color) {
         continue;
@@ -134,3 +142,14 @@ export function hasValidMove(board: Board): boolean {
 export function isBoardEmpty(board: Board): boolean {
   return board.every((row) => row.every((cell) => cell === null));
 }
+
+export function createInitialState(difficulty: SameGameDifficulty = "MEDIUM"): SameGameState {
+  const { rows, cols } = boardSizeForDifficulty(difficulty);
+  let board = createRandomBoard(rows, cols);
+  while (!hasValidMove(board, rows, cols)) {
+    board = createRandomBoard(rows, cols);
+  }
+  return { board, score: 0, status: "playing", difficulty, rows, cols };
+}
+
+export type { SameGameDifficulty };

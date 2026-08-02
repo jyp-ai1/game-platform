@@ -3,6 +3,7 @@
 import {
   clearSave,
   emitGameRetry,
+  getGroupDifficulty,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -61,19 +62,22 @@ export function WhackAMoleGame() {
     prevScoreRef.current = state.score;
   }, [state.score, state.combo]);
 
+  const stageIndex = Math.floor(state.score / 30) + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    stageIndex: Math.floor(state.score / 30) + 1,
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "over" ? null : state), [state]);
 
   useEffect(() => {
     if (state.status !== "playing" || !canPlay) return;
-    const ms = tickIntervalMs(state.score);
+    const ms = Math.max(400, tickIntervalMs(state.score) / diff.speedMult);
     const id = setInterval(() => dispatch({ type: "tick" }), ms);
     return () => clearInterval(id);
-  }, [state.status, canPlay, state.score]);
+  }, [state.status, canPlay, state.score, diff.speedMult]);
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
@@ -116,10 +120,11 @@ export function WhackAMoleGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <ScoreBox label="Score" value={state.score} />
+        <ScoreBox label="Stage" value={stageIndex} />
         <ScoreBox label="Combo" value={state.combo} />
-        <ScoreBox label="Miss" value={state.misses} />
         <ScoreBox label="Time" value={state.timeLeft} />
-        <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
+        <ScoreBox label="Best" value={feel.bestScore} />
+        <Button variant="outline" size="icon" className="min-h-11 min-w-11 shrink-0" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
       </div>

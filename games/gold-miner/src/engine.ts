@@ -10,6 +10,7 @@ export const HOOK_EMPTY_RETRACT_SPEED = 420; // px/sec, nothing attached
 export const ITEM_SIZE = 28;
 export const ITEM_COUNT = 9;
 export const ROUND_DURATION_S = 60;
+export const MAX_LEVEL = 5;
 export const CATCH_RADIUS = ITEM_SIZE / 2 + 6;
 
 export type HookState = "swinging" | "extending" | "retracting";
@@ -34,8 +35,13 @@ export interface GoldMinerState {
   attachedItemIndex: number | null;
   items: Item[];
   score: number;
+  level: number;
   timeLeft: number;
   status: Status;
+}
+
+export function goalForLevel(level: number): number {
+  return level * 500;
 }
 
 const ITEM_TEMPLATES: { type: ItemType; value: number; weight: number }[] = [
@@ -74,6 +80,7 @@ export function createInitialState(): GoldMinerState {
     attachedItemIndex: null,
     items: randomItems(),
     score: 0,
+    level: 1,
     timeLeft: ROUND_DURATION_S,
     status: "playing",
   };
@@ -94,6 +101,19 @@ export function fireHook(state: GoldMinerState): GoldMinerState {
     return state;
   }
   return { ...state, hookState: "extending" };
+}
+
+function maybeAdvanceLevel(state: GoldMinerState): GoldMinerState {
+  const goal = goalForLevel(state.level);
+  if (state.score < goal || state.level >= MAX_LEVEL) {
+    return state;
+  }
+  return {
+    ...state,
+    level: state.level + 1,
+    timeLeft: Math.min(ROUND_DURATION_S, state.timeLeft + 12),
+    items: randomItems(),
+  };
 }
 
 export function step(state: GoldMinerState, dtSeconds: number): GoldMinerState {
@@ -165,13 +185,12 @@ export function step(state: GoldMinerState, dtSeconds: number): GoldMinerState {
         index === state.attachedItemIndex ? { ...item, collected: true } : item
       );
     }
+    const advanced = maybeAdvanceLevel({ ...state, score, items, timeLeft, status });
     return {
-      ...state,
+      ...advanced,
       hookLength: 0,
       hookState: "swinging",
       attachedItemIndex: null,
-      items,
-      score,
       timeLeft,
       status,
     };

@@ -13,6 +13,8 @@ import {
   isGlobalWorldRoom,
   joinRoom,
   joinRoomAsync,
+  leaveRoom,
+  replay,
   resolveAvailableCluster,
   send,
   spectator,
@@ -23,7 +25,7 @@ import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engi
 import { cn, GameOverOverlay, Button } from "@game-platform/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import type { GameRoom, ReplayMoment } from "@game-platform/shared";
 import {
@@ -240,6 +242,10 @@ export function SnakeIoGame({
   const playerCountRef = useRef(1);
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
   const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalf: 240 });
+  const worldLayerRef = useRef<HTMLDivElement>(null);
+  const renderAlphaRef = useRef(1);
+  const frameCounterRef = useRef(0);
+  const [, bumpLocalInput] = useReducer((n: number) => n + 1, 0);
   onJoinTimeoutRef.current = onJoinTimeout;
 
   const effectiveRoomCode = sessionRoom || roomCode;
@@ -274,24 +280,6 @@ export function SnakeIoGame({
     : spectatorTarget ?? (world ? getSpectatorTarget(world, spectatorMode === "friend" ? undefined : deviceId, friendIds) : null);
   const watchSnake = watchId && world ? world.snakes[watchId] : null;
   const bossCam = spectatorMode === "boss" && world?.boss && !world.boss.defeated ? world.boss : null;
-  const cameraFallback = useMemo((): Vec | null => {
-    if (!world) return null;
-    const sz = world.living?.safeZone;
-    if (sz) return { x: sz.x, y: sz.y };
-    const mid = world.config.worldSize / 2;
-    return { x: mid, y: mid };
-  }, [world]);
-
-  const localHead = useMemo((): Vec | null => {
-    if (isSpectating || bossCam) return null;
-    return resolveSnakeHead(worldRef.current?.snakes[deviceId] ?? mySnake);
-  }, [world?.tick, mySnake, deviceId, isSpectating, bossCam]);
-
-  const cameraHead = bossCam
-    ? { x: bossCam.x, y: bossCam.y }
-    : isSpectating
-      ? resolveSnakeHead(watchSnake ?? undefined)
-      : localHead ?? cameraFallback ?? undefined;
   const top10 = world ? getDisplayRankings(world, 10) : [];
   const myRank = world ? getMyRank(world, deviceId) : 0;
   const activeEvent = world?.events[0];
@@ -1140,10 +1128,17 @@ export function SnakeIoGame({
     setIsPaused(false);
     emitGameExit("snake");
     postDeath("exit");
+    if (activeRoom && !isLocalOnly) {
+      try {
+        leaveRoom(activeRoom);
+      } catch {
+        /* room may already be gone */
+      }
+    }
     if (typeof window !== "undefined") {
       window.location.assign("/");
     }
-  }, [postDeath]);
+  }, [postDeath, activeRoom, isLocalOnly]);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -1172,10 +1167,10 @@ export function SnakeIoGame({
     }
     markFirstMove(activeRoom);
     const payload = { deviceId, direction, boosting: boostingRef.current };
-    if (shouldTickWorld) {
-      setInput(worldRef.current, deviceId, direction);
-      setBoost(worldRef.current, deviceId, boostingRef.current);
-    } else {
+    setInput(worldRef.current, deviceId, direction);
+    setBoost(worldRef.current, deviceId, boostingRef.current);
+    if (!shouldTickWorld) {
+      bumpLocalInput();
       send(activeRoom, "input", payload);
     }
   }, [activeRoom, shouldTickWorld, deviceId, isSpectating]);
@@ -1194,15 +1189,25 @@ export function SnakeIoGame({
         e.preventDefault();
         if (!boostingRef.current) playBoostSound();
         boostingRef.current = true;
-        if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, true);
-        else if (activeRoom) send(activeRoom, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: true });
+        if (worldRef.current) {
+          setBoost(worldRef.current, deviceId, true);
+          if (!shouldTickWorld) bumpLocalInput();
+        }
+        if (!shouldTickWorld && activeRoom) {
+          send(activeRoom, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: true });
+        }
       }
     }
     function onKeyUp(e: KeyboardEvent) {
       if (e.code === "Space") {
         boostingRef.current = false;
-        if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, false);
-        else if (activeRoom) send(activeRoom, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: false });
+        if (worldRef.current) {
+          setBoost(worldRef.current, deviceId, false);
+          if (!shouldTickWorld) bumpLocalInput();
+        }
+        if (!shouldTickWorld && activeRoom) {
+          send(activeRoom, "input", { deviceId, direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right", boosting: false });
+        }
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -1255,6 +1260,7 @@ export function SnakeIoGame({
         Object.entries(prev.snakes).map(([id, s]) => [id, captureSnakeSnapshot(s)])
       );
       setRenderAlpha(0);
+      renderAlphaRef.current = 0;
       for (const [id, s] of Object.entries(world.snakes)) {
         const prevS = prev.snakes[id];
         if (prevS && s && s.score > prevS.score) {
@@ -1342,34 +1348,79 @@ export function SnakeIoGame({
   }, [pseudoFullscreen]);
 
   useEffect(() => {
+    if (isLocalOnly || !activeRoom || !connected) return;
+
+    const tryReconnect = () => {
+      if (document.visibilityState !== "visible") return;
+      const code = activeRoom;
+      const existing = getRoom(code);
+      if (existing?.players.some((p) => p.deviceId === deviceId)) return;
+      const token = deviceId.slice(0, 8);
+      const restored = replay(code, token);
+      if (restored) {
+        entryTrace("RECONNECT", "PASS", code);
+        return;
+      }
+      void joinRoomAsync(code).catch(() => {
+        entryTrace("RECONNECT", "FAIL", code);
+      });
+    };
+
+    document.addEventListener("visibilitychange", tryReconnect);
+    window.addEventListener("online", tryReconnect);
+    return () => {
+      document.removeEventListener("visibilitychange", tryReconnect);
+      window.removeEventListener("online", tryReconnect);
+    };
+  }, [isLocalOnly, activeRoom, connected, deviceId]);
+
+  useEffect(() => {
     let frame = 0;
     const loop = () => {
       diagFrame();
+      frameCounterRef.current += 1;
       const snake = worldRef.current?.snakes[deviceId];
       const boosting = !!(snake?.alive && !snake.spectating && snake.boosting);
       const targetFov = boosting ? SNAKE_FEEL.boostFovScale : 1;
       zoomMultRef.current +=
         (targetFov - zoomMultRef.current) * SNAKE_FEEL.cameraZoomLerp;
 
-      if (snake?.alive && !snake.spectating) {
-        const head = resolveSnakeHead(snake);
-        const layout = camLayoutRef.current;
-        if (head && layout.cellSize > 0) {
-          const targetX = head.x * layout.cellSize - layout.camHalf;
-          const targetY = head.y * layout.cellSize - layout.camHalf;
-          const lerp = SNAKE_FEEL.cameraFollowLerp;
-          camRef.current.x += (targetX - camRef.current.x) * lerp;
-          camRef.current.y += (targetY - camRef.current.y) * lerp;
-        }
+      const layout = camLayoutRef.current;
+      let camTarget: Vec | null = null;
+      if (bossCam) {
+        camTarget = { x: bossCam.x, y: bossCam.y };
+      } else if (isSpectating) {
+        camTarget = resolveSnakeHead(watchSnake ?? undefined);
+      } else if (snake?.alive && !snake.spectating) {
+        camTarget = resolveSnakeHead(snake);
       }
-      setRenderAlpha((a) => Math.min(1, a + SNAKE_FEEL.segmentLerpStep));
-      setParticles((p) => tickParticles(p));
-      setScorePopups((pop) => tickScorePopups(pop));
+      if (camTarget && layout.cellSize > 0) {
+        const targetX = camTarget.x * layout.cellSize - layout.camHalf;
+        const targetY = camTarget.y * layout.cellSize - layout.camHalf;
+        const lerp = SNAKE_FEEL.cameraFollowLerp;
+        camRef.current.x += (targetX - camRef.current.x) * lerp;
+        camRef.current.y += (targetY - camRef.current.y) * lerp;
+      }
+
+      const layer = worldLayerRef.current;
+      if (layer && layout.cellSize > 0) {
+        layer.style.transform = `translate(${-camRef.current.x}px, ${-camRef.current.y}px) scale(${zoomMultRef.current})`;
+        layer.style.transformOrigin = `${layout.camHalf + camRef.current.x}px ${layout.camHalf + camRef.current.y}px`;
+      }
+
+      renderAlphaRef.current = Math.min(1, renderAlphaRef.current + SNAKE_FEEL.segmentLerpStep);
+      if (frameCounterRef.current % 2 === 0) {
+        setRenderAlpha(renderAlphaRef.current);
+      }
+      if (frameCounterRef.current % 3 === 0) {
+        setParticles((p) => tickParticles(p));
+        setScorePopups((pop) => tickScorePopups(pop));
+      }
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [deviceId]);
+  }, [deviceId, isSpectating, bossCam, watchSnake]);
 
   useEffect(() => {
     if (!activeRoom) return;
@@ -1460,7 +1511,6 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const boostVisualScale = zoomMultRef.current;
   const baseCellRaw =
     (boardPx / SNAKE_FEEL.viewportCellsVisible) *
     matchRule.cameraZoomMult *
@@ -1591,12 +1641,11 @@ export function SnakeIoGame({
           </p>
         </div>
           <div
+            ref={worldLayerRef}
             className="absolute origin-top-left"
             style={{
               width: worldSize * cellSize,
               height: worldSize * cellSize,
-              transform: `translate(${-camX}px, ${-camY}px) scale(${boostVisualScale})`,
-              transformOrigin: `${boardPx / 2 + camX}px ${boardPx / 2 + camY}px`,
             }}
           >
             {world.living?.collapseRadius != null ? (
@@ -1965,6 +2014,13 @@ export function SnakeIoGame({
               onExit={() => {
                 emitGameExit("snake");
                 postDeath("exit");
+                if (activeRoom && !isLocalOnly) {
+                  try {
+                    leaveRoom(activeRoom);
+                  } catch {
+                    /* ignore */
+                  }
+                }
               }}
             />
           </div>
@@ -1978,8 +2034,11 @@ export function SnakeIoGame({
             if (getSegmentCount(mySnake) <= SNAKE_FEEL.boostMinSegments) return;
             if (!boostingRef.current) playBoostSound();
             boostingRef.current = true;
-            if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, true);
-            else if (activeRoom) {
+            if (worldRef.current) {
+              setBoost(worldRef.current, deviceId, true);
+              if (!shouldTickWorld) bumpLocalInput();
+            }
+            if (!shouldTickWorld && activeRoom) {
               send(activeRoom, "input", {
                 deviceId,
                 direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
@@ -1989,12 +2048,17 @@ export function SnakeIoGame({
           }}
           onBoostEnd={() => {
             boostingRef.current = false;
-            if (shouldTickWorld && worldRef.current) setBoost(worldRef.current, deviceId, false);
-            else if (activeRoom) send(activeRoom, "input", {
-              deviceId,
-              direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
-              boosting: false,
-            });
+            if (worldRef.current) {
+              setBoost(worldRef.current, deviceId, false);
+              if (!shouldTickWorld) bumpLocalInput();
+            }
+            if (!shouldTickWorld && activeRoom) {
+              send(activeRoom, "input", {
+                deviceId,
+                direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
+                boosting: false,
+              });
+            }
           }}
           boosting={!!isBoosting}
           boostReady={getSegmentCount(mySnake) > SNAKE_FEEL.boostMinSegments}

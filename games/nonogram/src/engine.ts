@@ -1,4 +1,4 @@
-export const SIZE = 5;
+import { getNonogramPuzzle, type NonogramPuzzleDef } from "./nonogram-stage-config";
 
 export interface NonogramState {
   solution: boolean[][];
@@ -6,34 +6,32 @@ export interface NonogramState {
   rowHints: number[][];
   colHints: number[][];
   wrongFlash: [number, number] | null;
-  status: "playing" | "won";
+  status: "playing" | "won" | "stage-clear";
+  stageIndex: number;
+  puzzle: NonogramPuzzleDef;
 }
 
-// Plus-shaped pattern
-const SOLUTION: boolean[][] = [
-  [false, true, false, true, false],
-  [true, true, true, true, true],
-  [false, true, true, true, false],
-  [false, true, false, true, false],
-  [false, true, false, true, false],
-];
+export function puzzleSize(state: NonogramState): number {
+  return state.puzzle.size;
+}
 
-const ROW_HINTS = [[1, 1], [5], [3], [1, 1], [1, 1]];
-const COL_HINTS = [[1, 1], [5], [3], [1, 1], [1, 1]];
-
-export function createInitialState(): NonogramState {
+export function createInitialState(stageIndex = 1): NonogramState {
+  const puzzle = getNonogramPuzzle(stageIndex);
+  const size = puzzle.size;
   return {
-    solution: SOLUTION.map((r) => [...r]),
-    marks: Array.from({ length: SIZE }, () => Array<boolean | null>(SIZE).fill(null)),
-    rowHints: ROW_HINTS,
-    colHints: COL_HINTS,
+    solution: puzzle.solution.map((r) => [...r]),
+    marks: Array.from({ length: size }, () => Array<boolean | null>(size).fill(null)),
+    rowHints: puzzle.rowHints,
+    colHints: puzzle.colHints,
     status: "playing",
     wrongFlash: null,
+    stageIndex,
+    puzzle,
   };
 }
 
 export function toggleCell(state: NonogramState, row: number, col: number): NonogramState {
-  if (state.status === "won") return state;
+  if (state.status !== "playing") return state;
   const marks = state.marks.map((r) => [...r]);
   const cur = marks[row]![col];
   if (cur === true) {
@@ -45,19 +43,25 @@ export function toggleCell(state: NonogramState, row: number, col: number): Nono
   }
   marks[row]![col] = true;
   const won = checkWin(state.solution, marks);
-  return { ...state, marks, wrongFlash: null, status: won ? "won" : "playing" };
+  return {
+    ...state,
+    marks,
+    wrongFlash: null,
+    status: won ? "stage-clear" : "playing",
+  };
 }
 
 export function markEmpty(state: NonogramState, row: number, col: number): NonogramState {
-  if (state.status === "won") return state;
+  if (state.status !== "playing") return state;
   const marks = state.marks.map((r) => [...r]);
   marks[row]![col] = marks[row]![col] === false ? null : false;
   return { ...state, marks, status: "playing" };
 }
 
 function checkWin(solution: boolean[][], marks: (boolean | null)[][]): boolean {
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
+  const size = solution.length;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       const filled = marks[r]![c] === true;
       if (filled !== solution[r]![c]) return false;
     }
@@ -66,7 +70,8 @@ function checkWin(solution: boolean[][], marks: (boolean | null)[][]): boolean {
 }
 
 export function computeScore(state: NonogramState): number {
-  return state.status === "won" ? 450 : 0;
+  const base = state.stageIndex * 150;
+  return state.status === "won" || state.status === "stage-clear" ? base + 300 : 0;
 }
 
 export function clearWrongFlash(state: NonogramState): NonogramState {

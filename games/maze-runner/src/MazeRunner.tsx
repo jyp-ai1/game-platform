@@ -84,13 +84,15 @@ export function MazeRunnerGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  const stageIndex = Math.floor(state.score / 200) + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    stageIndex: Math.floor(state.score / 200) + 1,
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
 
-  const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 200) + 1);
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const tickMs = Math.max(80, TICK_MS / diff.speedMult);
   const { canPlay, canPlayRef, showCountdown, completeCountdown } = useReadyCountdown(phase);
   const completeCountdownRef = useRef(completeCountdown);
@@ -214,14 +216,17 @@ export function MazeRunnerGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Dots" value={state.dotsRemaining} />
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Stage" value={stageIndex} />
           <ScoreBox label="Lives" value={state.lives} />
+          <ScoreBox label="Best" value={feel.bestScore} />
         </div>
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >

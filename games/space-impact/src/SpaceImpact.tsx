@@ -35,7 +35,7 @@ import {
   step,
   type SpaceImpactState,
 } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "space-impact";
 const PLAYER_KEY_SPEED = 240;
@@ -100,12 +100,14 @@ export function SpaceImpactGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  const stageIndex = Math.floor(state.score / 150) + 1;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    stageIndex: Math.floor(state.score / 150) + 1,
+    stageIndex,
+    muteScoreGain: true,
     fieldRef,
   });
-  const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 150) + 1);
+  const diff = getGroupDifficulty(GAME_SLUG, stageIndex);
   const keysRef = useRef<Set<string>>(new Set());
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -241,13 +243,16 @@ export function SpaceImpactGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Wave" value={stageIndex} />
           <ScoreBox label="Lives" value={state.lives} />
+          <ScoreBox label="Best" value={feel.bestScore} />
         </div>
         <Button
           variant="outline"
           size="icon"
+          className="min-h-11 min-w-11 shrink-0"
           aria-label="새 게임"
           onClick={handleRetry}
         >

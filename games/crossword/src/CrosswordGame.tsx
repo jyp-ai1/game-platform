@@ -10,6 +10,7 @@ import {
   StandardGameOverOverlay,
   useAutoSave,
   useGameSDK,
+  useGameSession,
   useReadyCountdown,
   useResumableGame,
   standardFeelFromState,
@@ -73,12 +74,16 @@ export function CrosswordGame() {
     completeCountdownRef.current();
   }, []);
 
+  const sessionActive = phase === "ready" && !showCountdown;
+  const { recordGameEnd, resetSession } = useGameSession(GAME_SLUG, sessionActive);
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
+    score: computeScore(state),
     fieldRef,
   });
 
@@ -98,11 +103,12 @@ export function CrosswordGame() {
   useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state));
+      recordGameEnd({ score: computeScore(state), outcome: "clear" });
       clearSave(GAME_SLUG);
       const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
       return () => window.clearTimeout(guard);
     }
-  }, [state.status, reportScore]);
+  }, [state.status, reportScore, recordGameEnd]);
 
   useEffect(() => {
     if (state.status !== "playing" || showCountdown) return;
@@ -118,12 +124,14 @@ export function CrosswordGame() {
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetSession();
     resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetSession();
     resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
@@ -133,6 +141,8 @@ export function CrosswordGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Time" value={state.elapsedSeconds} />
+        <ScoreBox label="Score" value={computeScore(state)} />
+        <ScoreBox label="Best" value={feel.bestScore} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>

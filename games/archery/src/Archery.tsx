@@ -20,7 +20,7 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, shoot, type ArcheryState } from "./engine";
-import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "archery";
 
@@ -62,10 +62,11 @@ export function ArcheryGame() {
 
   useEffect(() => {
     if (state.status === "over" && prevStatusRef.current !== "over") {
-      playGameOverAudio();
+      if (state.score >= 200) playStageClearAudio();
+      else playGameOverAudio();
     }
     prevStatusRef.current = state.status;
-  }, [state.status]);
+  }, [state.status, state.score]);
 
   useEffect(() => {
     if (state.status === "over") {
@@ -152,6 +153,7 @@ export function ArcheryGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Archery" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">과녁을 클릭해 8발 — 높은 점수를 노리세요.</p>
     </div>
   );
 }

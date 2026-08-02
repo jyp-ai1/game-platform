@@ -287,6 +287,12 @@ export function MinesweeperGame() {
           </div>
           <div className="text-lg font-bold tabular-nums">{elapsed}s</div>
         </div>
+        <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
+          <div className="text-[10px] font-medium uppercase text-muted-foreground">
+            Best
+          </div>
+          <div className="text-lg font-bold tabular-nums">{feel.bestScore}</div>
+        </div>
         <div className="flex flex-wrap gap-1">
           {DIFFICULTIES.map((level) => (
             <Button

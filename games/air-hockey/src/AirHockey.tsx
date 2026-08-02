@@ -16,7 +16,7 @@ import {
   useStandardGameFeel,
   GameFeelLayer,
 } from "@game-platform/game-sdk";
-import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
@@ -25,6 +25,7 @@ import {
   createInitialState,
   FIELD_HEIGHT,
   FIELD_WIDTH,
+  GOAL_WIDTH,
   MATCH_TIME_LIMIT_SECONDS,
   movePlayerPaddle,
   PADDLE_RADIUS,
@@ -125,12 +126,20 @@ export function AirHockeyGame() {
   }, [canPlayRef, diff.speedMult]);
 
   const prevPlayerScore = useRef(state.playerScore);
+  const prevGoalSideRef = useRef(state.goalFlashSide);
   useEffect(() => {
     if (state.playerScore > prevPlayerScore.current) {
       playGameFeel("goal", fieldRef.current);
     }
     prevPlayerScore.current = state.playerScore;
   }, [state.playerScore]);
+
+  useEffect(() => {
+    if (state.goalFlashSide && state.goalFlashSide !== prevGoalSideRef.current) {
+      playGameFeel(state.goalFlashSide === "top" ? "combo" : "explosion", fieldRef.current);
+    }
+    prevGoalSideRef.current = state.goalFlashSide;
+  }, [state.goalFlashSide]);
 
   useEffect(() => {
     if (state.status !== "playing" && prevStatusRef.current === "playing") {
@@ -213,7 +222,10 @@ export function AirHockeyGame() {
 
       <div
         ref={fieldRef}
-        className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
+        className={cn(
+          "relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]",
+          state.goalFlashTimer > 0 && "game-effect-shake"
+        )}
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
         onPointerDown={() => {
@@ -223,12 +235,22 @@ export function AirHockeyGame() {
       >
         <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/20" />
         <div
-          className="absolute top-0 h-1 -translate-x-1/2 bg-destructive"
-          style={{ left: "50%", width: `${(140 / FIELD_WIDTH) * 100}%` }}
+          className={cn(
+            "absolute top-0 h-2 -translate-x-1/2 transition-all duration-150",
+            state.goalFlashSide === "top" && state.goalFlashTimer > 0
+              ? "bg-amber-400 game-effect-flash"
+              : "bg-destructive"
+          )}
+          style={{ left: "50%", width: `${(GOAL_WIDTH / FIELD_WIDTH) * 100}%` }}
         />
         <div
-          className="absolute bottom-0 h-1 -translate-x-1/2 bg-primary"
-          style={{ left: "50%", width: `${(140 / FIELD_WIDTH) * 100}%` }}
+          className={cn(
+            "absolute bottom-0 h-2 -translate-x-1/2 transition-all duration-150",
+            state.goalFlashSide === "bottom" && state.goalFlashTimer > 0
+              ? "bg-amber-400 game-effect-flash"
+              : "bg-primary"
+          )}
+          style={{ left: "50%", width: `${(GOAL_WIDTH / FIELD_WIDTH) * 100}%` }}
         />
 
         <div
