@@ -143,10 +143,12 @@ import {
 } from "./snake-fullscreen";
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
 import { SnakeMinimap } from "./snake-minimap";
+import { SnakeWorldHud } from "./snake-world-hud";
 import { SnakeMobileControls } from "./snake-mobile-controls";
 import { SnakeRankingPanel } from "./snake-ranking-panel";
 import {
   playBoostSound,
+  playBoostEndSound,
   playDeathSound,
   playEatSound,
   playKillSound,
@@ -216,6 +218,10 @@ export function SnakeIoGame({
   const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
   const [goFlashUntil, setGoFlashUntil] = useState(0);
   const [respawnSec, setRespawnSec] = useState<number | null>(null);
+  const [worldHudFps, setWorldHudFps] = useState(60);
+  const [worldHudPing, setWorldHudPing] = useState<number | null>(null);
+  const lastStateAtRef = useRef(Date.now());
+  const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
   const headCharacterRef = useRef<SnakeHeadId>(headCharacter);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -268,6 +274,11 @@ export function SnakeIoGame({
   const balance = useMemo(() => Replay.multiplayer.balance("snake", playerCount), [playerCount]);
   const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
   const showMinimap = isGlobalWorld || ux.minimap;
+  const worldHudPlayers = room?.players.length ?? 0;
+  const worldHudBots = world
+    ? Math.max(0, countWorldSnakes(world) - worldHudPlayers)
+    : Math.max(0, SNAKE_WORLD_TARGET - worldHudPlayers);
+  const worldTickHz = Math.round(1000 / balance.physicsTickMs);
   const season = useMemo(() => Replay.multiplayer.season.current(), []);
   const seasonStyle = Replay.multiplayer.season.palette[season];
   const progressionStage = useMemo(
@@ -359,6 +370,29 @@ export function SnakeIoGame({
     const id = window.setInterval(tick, 100);
     return () => window.clearInterval(id);
   }, [isGlobalWorld, mySnake?.alive, mySnake?.respawnAt, world?.tick]);
+
+  useEffect(() => {
+    if (!isGlobalWorld) return;
+    const updatedAt = room?.gameState?._updatedAt as string | undefined;
+    if (updatedAt) {
+      setWorldHudPing(Math.max(0, Math.round(Date.now() - new Date(updatedAt).getTime())));
+    }
+  }, [isGlobalWorld, world?.tick, room?.gameState]);
+
+  useEffect(() => {
+    if (!isGlobalWorld) return;
+    const id = window.setInterval(() => {
+      const sample = fpsSampleRef.current;
+      const now = performance.now();
+      const dt = (now - sample.at) / 1000;
+      if (dt > 0) {
+        setWorldHudFps(Math.max(1, Math.round((frameCounterRef.current - sample.frames) / dt)));
+      }
+      sample.frames = frameCounterRef.current;
+      sample.at = now;
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [isGlobalWorld]);
 
   useEffect(() => {
     if (spectatorMode === "friend") {
@@ -1246,6 +1280,7 @@ export function SnakeIoGame({
       if (e.code === "Space" && !isSpectating && !awaitingInputRef.current) {
         e.preventDefault();
         if (!boostingRef.current) playBoostSound();
+        if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 4);
         boostingRef.current = true;
         if (worldRef.current && shouldTickWorld) {
           setBoost(worldRef.current, deviceId, true);
@@ -1264,6 +1299,7 @@ export function SnakeIoGame({
     }
     function onKeyUp(e: KeyboardEvent) {
       if (e.code === "Space") {
+        if (boostingRef.current) playBoostEndSound();
         boostingRef.current = false;
         if (worldRef.current && shouldTickWorld) {
           setBoost(worldRef.current, deviceId, false);
@@ -1354,14 +1390,15 @@ export function SnakeIoGame({
         if (delta >= 12) playRareFoodSound();
         else playEatSound("normal", vis.soundHz);
         markFirstFun(activeRoom);
-        setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, vis.particleCount));
+        setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, isGlobalWorld ? Math.max(vis.particleCount, 6) : vis.particleCount));
         setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y, delta, vis.color));
         const buf = me.gemsEaten ?? 0;
         setScorePopups((pop) =>
           spawnScorePopup(pop, head.x, head.y - 0.8, `${buf % 2}/2`, "#94a3b8")
         );
+        if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 3);
         if (me.boosting) {
-          setParticles((p) => spawnBoostTrail(p, head.x, head.y, me.color));
+          setParticles((p) => spawnBoostTrail(p, head.x, head.y, me.color, 2));
         }
       }
       if (me && prevMe && getSegmentCount(me) > getSegmentCount(prevMe) && me.segments[0]) {
@@ -1383,6 +1420,16 @@ export function SnakeIoGame({
       const kills = me?.totalKills ?? 0;
       if (kills > prevTotalKillsRef.current && me?.segments[0]) {
         playKillSound(prevTotalKillsRef.current === 0);
+        if (isGlobalWorld) {
+          shakeRef.current = Math.max(shakeRef.current, 10);
+          const streak = me.killStreak ?? 1;
+          const killLabel =
+            streak >= 3 ? "Triple Kill!" : streak >= 2 ? "Double Kill!" : "+1 Kill";
+          const head = me.segments[0]!;
+          setScorePopups((pop) =>
+            spawnScorePopup(pop, head.x, head.y - 1.8, killLabel, "#fbbf24")
+          );
+        }
       }
       prevTotalKillsRef.current = kills;
     }
@@ -1477,6 +1524,14 @@ export function SnakeIoGame({
         camRef.current.y += (targetY - camRef.current.y) * lerp;
       }
 
+      const localSnake = worldRef.current?.snakes[deviceId];
+      if (isGlobalWorld && localSnake?.alive && localSnake.boosting && frameCounterRef.current % 2 === 0) {
+        const head = resolveSnakeHead(localSnake);
+        if (head) {
+          setParticles((p) => spawnBoostTrail(p, head.x, head.y, localSnake.color, 1.5));
+        }
+      }
+
       shakeRef.current = shakeIntensity(shakeRef.current, 0);
       const shakeX = shakeRef.current > 0.4 ? (Math.random() - 0.5) * shakeRef.current * 2 : 0;
       const shakeY = shakeRef.current > 0.4 ? (Math.random() - 0.5) * shakeRef.current * 2 : 0;
@@ -1499,7 +1554,7 @@ export function SnakeIoGame({
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [deviceId, isSpectating, bossCam, watchSnake]);
+  }, [deviceId, isSpectating, bossCam, watchSnake, isGlobalWorld]);
 
   useEffect(() => {
     if (!activeRoom) return;
@@ -1711,9 +1766,22 @@ export function SnakeIoGame({
           </div>
         ) : null}
 
+        {isGlobalWorld ? (
+          <SnakeWorldHud
+            className="absolute right-2 top-12 z-40"
+            roomCode={effectiveRoomCode}
+            players={worldHudPlayers}
+            bots={worldHudBots}
+            pingMs={worldHudPing}
+            fps={worldHudFps}
+            tickHz={worldTickHz}
+            isHost={isHost}
+          />
+        ) : null}
+
         {/* Kill Feed — WORLD sync via host state */}
         {isGlobalWorld && world.killFeed.length > 0 ? (
-          <div className="pointer-events-none absolute right-2 top-12 z-30 max-w-[11rem] space-y-1">
+          <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[11rem] space-y-1">
             {world.killFeed.slice(0, 5).map((entry) => (
               <div
                 key={`${entry.tick}-${entry.killerId}-${entry.victimId}`}
@@ -1922,9 +1990,11 @@ export function SnakeIoGame({
               const head = resolveSnakeHead(snake);
               if (!head) return null;
               const isMe = snake.deviceId === deviceId;
+              const isLeader = snake.deviceId === top1Id;
               const myHead = resolveSnakeHead(worldRef.current?.snakes[deviceId] ?? mySnake);
               const dist = myHead ? Math.hypot(head.x - myHead.x, head.y - myHead.y) : 999;
-              if (!isMe && dist > 14) return null;
+              const nameFade = isMe ? 1 : Math.max(0.22, 1 - dist / 30);
+              if (!isMe && dist > 32) return null;
               const label = isMe ? "YOU" : snake.nickname.slice(0, 8);
               return (
                 <div
@@ -1932,11 +2002,17 @@ export function SnakeIoGame({
                   className="pointer-events-none absolute z-20 whitespace-nowrap text-[9px] font-bold"
                   style={{
                     left: head.x * cellSize,
-                    top: head.y * cellSize - cellSize * 1.1,
-                    color: isMe ? "#fde047" : "rgba(255,255,255,0.75)",
+                    top: head.y * cellSize - cellSize * (isLeader ? 1.55 : 1.1),
+                    color: isMe ? "#fde047" : `rgba(255,255,255,${0.75 * nameFade})`,
+                    opacity: nameFade,
                     textShadow: "0 1px 3px rgba(0,0,0,0.9)",
                   }}
                 >
+                  {isLeader ? (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] leading-none" aria-hidden>
+                      👑
+                    </span>
+                  ) : null}
                   {label}
                 </div>
               );
@@ -2136,7 +2212,10 @@ export function SnakeIoGame({
           onDirection={handleDirection}
           onBoostStart={() => {
             if (getSegmentCount(mySnake) <= SNAKE_FEEL.boostMinSegments) return;
-            if (!boostingRef.current) playBoostSound();
+            if (!boostingRef.current) {
+              playBoostSound();
+              if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 4);
+            }
             boostingRef.current = true;
             if (worldRef.current && shouldTickWorld) {
               setBoost(worldRef.current, deviceId, true);
@@ -2153,6 +2232,7 @@ export function SnakeIoGame({
             }
           }}
           onBoostEnd={() => {
+            if (boostingRef.current) playBoostEndSound();
             boostingRef.current = false;
             if (worldRef.current && shouldTickWorld) {
               setBoost(worldRef.current, deviceId, false);

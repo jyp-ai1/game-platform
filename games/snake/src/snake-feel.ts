@@ -61,6 +61,10 @@ export function playBoostSound(): void {
   tone(SNAKE_FEEL.boostSoundHz, 0.045, "triangle", 0.05);
 }
 
+export function playBoostEndSound(): void {
+  tone(SNAKE_FEEL.boostSoundHz - 80, 0.035, "triangle", 0.04);
+}
+
 export function playDeathSound(): void {
   tone(110, 0.22, "sawtooth", 0.11);
   setTimeout(() => tone(70, 0.28, "sawtooth", 0.09), 90);
@@ -105,21 +109,25 @@ export function spawnBoostTrail(
   particles: Particle[],
   x: number,
   y: number,
-  color: string
+  color: string,
+  intensity = 1
 ): Particle[] {
   const next = [...particles];
-  next.push({
-    id: ++particleId,
-    x,
-    y,
-    vx: (Math.random() - 0.5) * 0.6,
-    vy: (Math.random() - 0.5) * 0.6,
-    color,
-    life: 0.7,
-    maxLife: 0.7,
-    size: 3,
-  });
-  return next.slice(-100);
+  const count = Math.min(3, Math.ceil(intensity));
+  for (let i = 0; i < count; i++) {
+    next.push({
+      id: ++particleId,
+      x: x + (Math.random() - 0.5) * 0.3,
+      y: y + (Math.random() - 0.5) * 0.3,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: (Math.random() - 0.5) * 0.8,
+      color,
+      life: 0.85,
+      maxLife: 0.85,
+      size: 2.5 + Math.random() * 2.5,
+    });
+  }
+  return next.slice(-120);
 }
 
 export interface ScorePopup {

@@ -38,8 +38,8 @@ export function SnakeMinimap({
   return (
     <div
       className={cn(
-        "shrink-0 rounded-xl border border-white/15 bg-black/50 p-1.5",
-        compact ? "w-20 p-1" : "w-28"
+        "shrink-0 rounded-xl border border-white/15 bg-black/50 p-2",
+        compact ? "w-24 p-1.5" : "w-36"
       )}
     >
       <p
@@ -76,10 +76,10 @@ export function SnakeMinimap({
                 style={{ left, top }}
                 title="You"
               >
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] leading-none text-yellow-200">★</span>
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] leading-none text-yellow-200">★</span>
                 <div
-                  className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_8px_#22c55e]"
-                  style={{ width: 8, height: 8 }}
+                  className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_12px_#22c55e]"
+                  style={{ width: compact ? 10 : 12, height: compact ? 10 : 12 }}
                 />
               </div>
             );
