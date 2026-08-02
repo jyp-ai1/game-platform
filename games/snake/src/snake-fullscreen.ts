@@ -49,11 +49,10 @@ export async function exitViewportFullscreen(): Promise<void> {
   }
 }
 
-/** Board size in px — fills viewport when fullscreen / immersive WORLD. */
+/** Board size in px — fills viewport when fullscreen. */
 export function measureGameBoardPx(
   opts: {
     fullscreen: boolean;
-    immersive?: boolean;
     containerWidth: number;
   }
 ): number {
@@ -62,9 +61,8 @@ export function measureGameBoardPx(
   const vw = vv?.width ?? window.innerWidth;
   const vh = vv?.height ?? window.innerHeight;
 
-  if (opts.fullscreen || opts.immersive) {
-    const fill = opts.immersive ? 1 : 1;
-    return Math.max(280, Math.floor(Math.min(vw, vh) * fill));
+  if (opts.fullscreen) {
+    return Math.max(280, Math.floor(Math.min(vw, vh)));
   }
 
   const cap = Math.min(opts.containerWidth || vw, vh * 0.65, 720);

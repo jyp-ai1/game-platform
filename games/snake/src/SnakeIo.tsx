@@ -25,7 +25,7 @@ import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engi
 import { cn, GameOverOverlay, Button } from "@game-platform/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import type { GameRoom, ReplayMoment } from "@game-platform/shared";
 import {
@@ -42,7 +42,6 @@ import {
   lerpSegments,
   restartPlayerSnake,
   rehydrateWorldSnakes,
-  respreadClusteredSpawns,
   setBoost,
   setInput,
   spawnEventFood,
@@ -134,11 +133,6 @@ import { PlaytestReport } from "./snake-playtest-report";
 import { refreshWorldTuningFromTelemetry } from "./snake-balance-tuner";
 import { recordSnakeSessionEnd } from "./snake-session-recap";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
-import {
-  diagnoseLocalSpawn,
-  ensureRenderableLocalSnake,
-  type Rc014SpawnDiag,
-} from "./snake-spawn-rc014";
 import { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
 import { applyCharacterToSnake, resolveHeadEmoji, segmentBodyColor, type SnakeHeadId } from "./snake-characters";
 import {
@@ -178,16 +172,6 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 
 type PlayerInputPayload = { deviceId: string; direction: Direction; boosting?: boolean };
 
-function rc014Debug(
-  tag: "SPAWN" | "RENDER" | "CAMERA" | "PLAYER",
-  message: string,
-  detail?: Record<string, unknown>
-): void {
-  if (typeof console === "undefined") return;
-  if (detail) console.debug(`[${tag}]`, message, detail);
-  else console.debug(`[${tag}]`, message);
-}
-
 function sendPlayerInput(roomCode: string, globalWorld: boolean, payload: PlayerInputPayload): void {
   send(roomCode, globalWorld ? `input:${payload.deviceId}` : "input", payload);
 }
@@ -197,14 +181,10 @@ export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
   headCharacter = "frog",
-  debugHud = false,
-  immersiveWorld = false,
 }: {
   practiceMode?: boolean;
   onJoinTimeout?: () => void;
   headCharacter?: SnakeHeadId;
-  debugHud?: boolean;
-  immersiveWorld?: boolean;
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -225,7 +205,6 @@ export function SnakeIoGame({
   const boardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const [boardPx, setBoardPx] = useState(480);
-  const [viewportSize, setViewportSize] = useState({ w: 480, h: 480 });
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
@@ -277,18 +256,9 @@ export function SnakeIoGame({
   stageOverlayRef.current = stageOverlay;
   const playerCountRef = useRef(1);
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
-  const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalfX: 240, camHalfY: 240 });
+  const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalf: 240 });
   const worldLayerRef = useRef<HTMLDivElement>(null);
   const renderAlphaRef = useRef(1);
-  const spawnCameraLockRef = useRef(0);
-  const [rc014Diag, setRc014Diag] = useState<Rc014SpawnDiag>({
-    spawn: "FAIL",
-    camera: "FAIL",
-    segments: 0,
-    visible: "NO",
-    tick: 0,
-    sim: "FAIL",
-  });
   const frameCounterRef = useRef(0);
   const [, bumpLocalInput] = useReducer((n: number) => n + 1, 0);
   onJoinTimeoutRef.current = onJoinTimeout;
@@ -303,8 +273,7 @@ export function SnakeIoGame({
   playerCountRef.current = playerCount;
   const balance = useMemo(() => Replay.multiplayer.balance("snake", playerCount), [playerCount]);
   const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
-  const showMinimap = !immersiveWorld && (isGlobalWorld || ux.minimap);
-  const showDebugWorldHud = debugHud && isGlobalWorld;
+  const showMinimap = isGlobalWorld || ux.minimap;
   const worldHudPlayers = room?.players.length ?? 0;
   const worldHudBots = world
     ? Math.max(0, countWorldSnakes(world) - worldHudPlayers)
@@ -318,11 +287,7 @@ export function SnakeIoGame({
   );
   void progressionStage;
   const isHost = isLocalOnly || room?.hostId === deviceId;
-  const isSoloWorldPlayer =
-    isGlobalWorld &&
-    room?.players.length === 1 &&
-    room.players[0]?.deviceId === deviceId;
-  const shouldTickWorld = isLocalOnly || isHost || isSoloWorldPlayer;
+  const shouldTickWorld = isLocalOnly || isHost;
   const mySnake = world?.snakes[deviceId];
   const isSpectating = !isStageMode && mySnake?.spectating && !mySnake?.alive;
   const stageConfig = isStageMode ? getSnakeStage(stageIndex) : null;
@@ -346,33 +311,6 @@ export function SnakeIoGame({
   const announcements = world ? getActiveAnnouncements(world) : [];
   const latestKill = world?.killFeed[0];
 
-  const snapCameraToLocalSnake = useCallback((reason: string, opts?: { resetZoom?: boolean }): boolean => {
-    if (opts?.resetZoom) {
-      zoomMultRef.current = 1;
-    }
-    const s = worldRef.current?.snakes[deviceId];
-    const head = resolveSnakeHead(s ?? undefined);
-    const layout = camLayoutRef.current;
-    if (!head || layout.cellSize <= 0) {
-      rc014Debug("CAMERA", `snap skipped (${reason})`, {
-        hasHead: !!head,
-        cellSize: layout.cellSize,
-      });
-      return false;
-    }
-    camRef.current = {
-      x: head.x * layout.cellSize - layout.camHalfX,
-      y: head.y * layout.cellSize - layout.camHalfY,
-    };
-    spawnCameraLockRef.current = Math.max(spawnCameraLockRef.current, 2);
-    rc014Debug("CAMERA", `snap ok (${reason})`, {
-      head,
-      cam: { x: camRef.current.x, y: camRef.current.y },
-      cellSize: layout.cellSize,
-    });
-    return true;
-  }, [deviceId]);
-
   const beginSpawnReady = useCallback(() => {
     awaitingInputRef.current = true;
     setAwaitingInput(true);
@@ -385,45 +323,21 @@ export function SnakeIoGame({
       snake.spectating = false;
     }
     const snapCamera = () => {
-      if (!snapCameraToLocalSnake("beginSpawnReady")) {
-        requestAnimationFrame(() => snapCameraToLocalSnake("beginSpawnReady-rAF"));
-      }
-    };
-    snapCamera();
-    transitionGamePhase("READY", "await-input");
-    transitionGamePhase("COUNTDOWN", "await-input");
-  }, [deviceId, snapCameraToLocalSnake]);
-
-  /** WORLD immersive — skip wait gate; player snake visible and active immediately. */
-  const beginSpawnActive = useCallback(() => {
-    awaitingInputRef.current = false;
-    setAwaitingInput(false);
-    inputLoggedRef.current = true;
-    setSpawnHighlightUntil(Date.now() + SNAKE_MVP_RC1.spawnHighlightMs);
-    setGoFlashUntil(Date.now() + 650);
-    zoomMultRef.current = 1;
-    renderAlphaRef.current = 1;
-    setRenderAlpha(1);
-    spawnCameraLockRef.current = 3;
-    const wr = worldRef.current;
-    if (wr && (isGlobalWorld || immersiveWorld)) {
-      ensureRenderableLocalSnake(wr, deviceId);
-    }
-    const snake = worldRef.current?.snakes[deviceId];
-    if (snake) {
-      snake.awaitingInput = false;
-      snake.spectating = false;
-      snake.bodyRadiusScale = 1;
-    }
-    const snapCamera = () => {
-      if (!snapCameraToLocalSnake("beginSpawnActive", { resetZoom: true })) {
-        requestAnimationFrame(() => snapCameraToLocalSnake("beginSpawnActive-rAF", { resetZoom: true }));
+      const s = worldRef.current?.snakes[deviceId];
+      const head = resolveSnakeHead(s ?? undefined);
+      const layout = camLayoutRef.current;
+      if (head && layout.cellSize > 0) {
+        camRef.current = {
+          x: head.x * layout.cellSize - layout.camHalf,
+          y: head.y * layout.cellSize - layout.camHalf,
+        };
       }
     };
     snapCamera();
     requestAnimationFrame(snapCamera);
-    transitionGamePhase("PLAYING", "auto-start");
-  }, [deviceId, snapCameraToLocalSnake, isGlobalWorld, immersiveWorld]);
+    transitionGamePhase("READY", "await-input");
+    transitionGamePhase("COUNTDOWN", "await-input");
+  }, [deviceId]);
 
   useEffect(() => {
     if (!latestKill) return;
@@ -614,20 +528,10 @@ export function SnakeIoGame({
     const measure = () => {
       const nativeFs = isViewportFullscreen(viewportRef.current);
       const fs = nativeFs || pseudoFullscreen;
-      const vv = window.visualViewport;
-      const vw = Math.floor(vv?.width ?? window.innerWidth);
-      const vh = Math.floor(vv?.height ?? window.innerHeight);
-      if (immersiveWorld) {
-        setViewportSize({ w: vw, h: vh });
-        setBoardPx(Math.min(vw, vh));
-        return;
-      }
-      setViewportSize({ w: vw, h: vh });
       setBoardPx(
         measureGameBoardPx({
           fullscreen: fs,
-          immersive: false,
-          containerWidth: boardRef.current?.clientWidth ?? vw,
+          containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
         })
       );
     };
@@ -644,7 +548,7 @@ export function SnakeIoGame({
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-  }, [connected, world, pseudoFullscreen, isFullscreen, immersiveWorld]);
+  }, [connected, world, pseudoFullscreen, isFullscreen]);
 
   useEffect(() => {
     if (practiceMode || roomCode) return;
@@ -851,32 +755,19 @@ export function SnakeIoGame({
 
     const spawnTrace = (line: string) => {
       appendLifecycle(line);
-      rc014Debug("SPAWN", line);
+      if (typeof console !== "undefined") console.info(`[SPAWN] ${line}`);
     };
 
-    const bindLocalPlayerSnake = (
-      w: SnakeIoWorld,
-      r: GameRoom,
-      opts: { populationSync?: boolean; reviveDead?: boolean }
-    ): SnakeIoWorld => {
+    const attachLocalPlayer = (w: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
       spawnTrace("GAME_INIT");
       spawnTrace("PLAYER_REGISTER");
       const humans = humansForRoom(r);
-      if (opts.populationSync && isGlobalWorld) {
+      if (isGlobalWorld) {
         syncSnakePopulation(w, humans, SNAKE_WORLD_TARGET, deviceId);
       }
       rehydrateWorldSnakes(w);
-
       let me = w.snakes[deviceId];
-      rc014Debug("PLAYER", "lookup", {
-        deviceId,
-        found: !!me,
-        alive: me?.alive,
-        segments: me ? getSegmentCount(me) : 0,
-        renderSegs: me?.segments.length ?? 0,
-      });
-
-      if (me && !me.alive && opts.reviveDead) {
+      if (me && !me.alive) {
         restartPlayerSnake(w, deviceId, getLastNickname() || "Player");
         me = w.snakes[deviceId];
         spawnTrace("PLAYER_REVIVE dead→retry spawn");
@@ -884,23 +775,17 @@ export function SnakeIoGame({
       if (!me) {
         const idx = humans.findIndex((h) => h.deviceId === deviceId);
         me = ensureLocalSnake(w, deviceId, getLastNickname() || "Player", Math.max(0, idx));
-        spawnTrace("PLAYER_CREATE ensureLocalSnake");
+        spawnTrace("PLAYER_CREATE retry ensureLocalSnake");
         recordSpawnAudit(`ensureLocalSnake len=${getSegmentCount(me)}`, true);
       }
       if (me) {
-        if (isGlobalWorld || immersiveWorld) {
-          me.awaitingInput = false;
-          me.spectating = false;
-          ensureRenderableLocalSnake(w, deviceId);
-        }
         applyLocalHead(w);
-        rehydrateWorldSnakes(w);
         spawnTrace("PLAYER_CREATE");
         spawnTrace(`SPAWN_SUCCESS len=${getSegmentCount(me)}`);
         recordSpawnAudit(`PLAYER_CREATE len=${getSegmentCount(me)}`, true);
       } else {
-        spawnTrace("PLAYER_CREATE FAIL — missing after bind");
-        recordSpawnAudit("missing after bindLocalPlayerSnake", false);
+        spawnTrace("PLAYER_CREATE FAIL — missing after syncSnakePopulation");
+        recordSpawnAudit("missing after syncSnakePopulation", false);
       }
       return w;
     };
@@ -909,23 +794,20 @@ export function SnakeIoGame({
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
-          if (shouldTickWorld && worldRef.current) {
+          // Host-authoritative WORLD: non-host clients render shared simulation.
+          if (!isHost) {
+            worldRef.current = structuredClone(state);
+            setWorld(structuredClone(state));
             return;
           }
-          const next = bindLocalPlayerSnake(structuredClone(state), r, {
-            populationSync: isHost && !state.snakes[deviceId],
-            reviveDead: isHost,
-          });
-          worldRef.current = next;
-          setWorld(next);
-          if (!worldRef.current.snakes[deviceId]) {
-            snapCameraToLocalSnake("applyRoom-new", { resetZoom: true });
+          if (!worldRef.current) {
+            const next = attachLocalPlayer(structuredClone(state), r);
+            worldRef.current = next;
+            setWorld(next);
+            return;
           }
-          rc014Debug("SPAWN", "applyRoom global state", {
-            isHost,
-            localBound: !!next.snakes[deviceId],
-            totalSnakes: Object.keys(next.snakes).length,
-          });
+          worldRef.current = structuredClone(state);
+          setWorld(structuredClone(state));
           return;
         }
         worldRef.current = state;
@@ -939,11 +821,7 @@ export function SnakeIoGame({
         const humans = humansForRoom(r);
         const persisted = isGlobalWorld ? loadPersistedGlobalWorld(effectiveRoomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
-        initial = bindLocalPlayerSnake(initial, r, { populationSync: true, reviveDead: true });
-        if (isGlobalWorld) {
-          const spread = respreadClusteredSpawns(initial);
-          if (spread > 0) rc014Debug("SPAWN", "respreadClusteredSpawns", { count: spread });
-        }
+        initial = attachLocalPlayer(initial, r);
         if (isGlobalWorld && !persisted) warmGlobalWorld(initial);
         initial.objective = obj;
         initLivingWorld(initial, resolveSnakeMatchRule(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
@@ -962,7 +840,7 @@ export function SnakeIoGame({
     const current = getRoom(effectiveRoomCode);
     if (current) applyRoom(current);
     return unsub;
-  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId, applyLocalHead, immersiveWorld, shouldTickWorld, snapCameraToLocalSnake]);
+  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId]);
 
   useEffect(() => {
     if (!world) return;
@@ -978,114 +856,8 @@ export function SnakeIoGame({
     appendLifecycle("STATE_READY");
     const me = world.snakes[deviceId];
     transitionGamePhase("READY", `alive=${me?.alive ?? "?"} len=${me ? getSegmentCount(me) : 0}`);
-    if (immersiveWorld) {
-      beginSpawnActive();
-    } else {
-      beginSpawnReady();
-    }
-  }, [world, activeRoom, deviceId, beginSpawnReady, beginSpawnActive, immersiveWorld]);
-
-  useEffect(() => {
-    if (!world || !isGlobalWorld) return;
-    const me = world.snakes[deviceId];
-    if (!me?.alive || me.spectating) return;
-    if (!snapCameraToLocalSnake("mySnake-ready")) {
-      requestAnimationFrame(() => snapCameraToLocalSnake("mySnake-ready-rAF"));
-    }
-  }, [
-    world?.snakes[deviceId]?.alive,
-    world?.snakes[deviceId]?.spectating,
-    deviceId,
-    isGlobalWorld,
-    viewportSize.w,
-    viewportSize.h,
-    boardPx,
-    snapCameraToLocalSnake,
-  ]);
-
-  useEffect(() => {
-    if (!connected || !isGlobalWorld || isLocalOnly) return;
-    const started = Date.now();
-    const id = window.setInterval(() => {
-      if (Date.now() - started > 5000) {
-        window.clearInterval(id);
-        return;
-      }
-      const wr = worldRef.current;
-      const r = getRoom(activeRoom);
-      if (!wr || !r) return;
-      const me = wr.snakes[deviceId];
-      if (me?.alive && me.segments.length > 0) return;
-
-      rc014Debug("SPAWN", "recovery tick", {
-        hasMe: !!me,
-        alive: me?.alive,
-        segs: me?.segments.length ?? 0,
-      });
-      const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
-      if (!humans.some((h) => h.deviceId === deviceId)) {
-        humans.push({ deviceId, nickname: getLastNickname() || "Player" });
-      }
-      const next = structuredClone(wr);
-      if (isHost) syncSnakePopulation(next, humans, SNAKE_WORLD_TARGET, deviceId);
-      rehydrateWorldSnakes(next);
-      if (!next.snakes[deviceId]?.alive) {
-        const idx = humans.findIndex((h) => h.deviceId === deviceId);
-        ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
-      }
-      const bound = next.snakes[deviceId];
-      if (bound) {
-        bound.awaitingInput = false;
-        bound.spectating = false;
-        applyLocalHead(next);
-        rehydrateWorldSnakes(next);
-      }
-      worldRef.current = next;
-      setWorld(next);
-      snapCameraToLocalSnake("recovery");
-    }, 250);
-    return () => window.clearInterval(id);
-  }, [
-    connected,
-    isGlobalWorld,
-    isLocalOnly,
-    activeRoom,
-    deviceId,
-    isHost,
-    applyLocalHead,
-    snapCameraToLocalSnake,
-  ]);
-
-  useEffect(() => {
-    if (!world) return;
-    const me = world.snakes[deviceId];
-    if (me?.alive && me.segments.length > 0) return;
-    rc014Debug("RENDER", "local snake missing or empty", {
-      totalSnakes: Object.keys(world.snakes).length,
-      localBound: !!me,
-      localAlive: me?.alive,
-      localSegs: me?.segments.length ?? 0,
-      renderAlpha,
-      cellSize: camLayoutRef.current.cellSize,
-    });
-  }, [world, deviceId, renderAlpha]);
-
-  useLayoutEffect(() => {
-    if (!world || !(isGlobalWorld || immersiveWorld)) return;
-    const wr = worldRef.current ?? world;
-    if (!wr.snakes[deviceId]) return;
-    ensureRenderableLocalSnake(wr, deviceId);
-    snapCameraToLocalSnake("layout", { resetZoom: spawnCameraLockRef.current > 0 });
-  }, [
-    world,
-    deviceId,
-    isGlobalWorld,
-    immersiveWorld,
-    viewportSize.w,
-    viewportSize.h,
-    boardPx,
-    snapCameraToLocalSnake,
-  ]);
+    beginSpawnReady();
+  }, [world, activeRoom, deviceId, beginSpawnReady]);
 
   useEffect(() => {
     if (!connected || !world) transitionGamePhase("LOADING");
@@ -1192,7 +964,6 @@ export function SnakeIoGame({
           if (isBotSnake(worldRef.current.snakes[input.deviceId]!)) continue;
           setInput(worldRef.current, input.deviceId, input.direction);
           setBoost(worldRef.current, input.deviceId, !!input.boosting);
-          worldRef.current.snakes[input.deviceId]!.awaitingInput = false;
         }
       }
       // Legacy single-input key (private rooms)
@@ -1202,7 +973,6 @@ export function SnakeIoGame({
         if (snake && !isBotSnake(snake)) {
           setInput(worldRef.current, input.deviceId, input.direction);
           setBoost(worldRef.current, input.deviceId, !!input.boosting);
-          snake.awaitingInput = false;
         }
       }
       if (!worldRef.current) return;
@@ -1219,16 +989,9 @@ export function SnakeIoGame({
         rehydrateWorldSnakes(next);
         if (!next.snakes[deviceId]) {
           const idx = humans.findIndex((h) => h.deviceId === deviceId);
-          const created = ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
-          created.awaitingInput = false;
-          created.spectating = false;
+          ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
           applyLocalHead(next);
-          rehydrateWorldSnakes(next);
-          rc014Debug("SPAWN", "host tick ensureLocalSnake", {
-            len: getSegmentCount(created),
-            head: resolveSnakeHead(created),
-          });
-          snapCameraToLocalSnake("host-tick");
+          camRef.current = { x: 0, y: 0 };
         }
         tickBotBrains(next);
         recordGlobalWorldTick(activeRoom, {
@@ -1245,16 +1008,9 @@ export function SnakeIoGame({
         environment: EnvironmentEngine.resolve(pc, next.tick + 1),
       };
 
-      if (isGlobalWorld) {
-        for (const snake of Object.values(next.snakes)) {
-          if (isBotSnake(snake) || !snake.alive || snake.spectating) continue;
-          snake.awaitingInput = false;
-        }
-      } else {
-        const localSnake = next.snakes[deviceId];
-        if (localSnake) {
-          localSnake.awaitingInput = awaitingInputRef.current;
-        }
+      const localSnake = next.snakes[deviceId];
+      if (localSnake) {
+        localSnake.awaitingInput = awaitingInputRef.current;
       }
 
       if (ux.events) {
@@ -1387,7 +1143,7 @@ export function SnakeIoGame({
       }
     }, tickMs);
     return () => clearInterval(id);
-  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch, applyLocalHead, snapCameraToLocalSnake]);
+  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch]);
 
   useEffect(() => {
     if (!mySnake) return;
@@ -1486,7 +1242,7 @@ export function SnakeIoGame({
       const snake = worldRef.current.snakes[deviceId];
       if (snake) {
         snake.awaitingInput = false;
-        if (!isGlobalWorld) snake.invincibleUntil = undefined;
+        snake.invincibleUntil = undefined;
       }
     }
     diagInput(direction);
@@ -1761,30 +1517,11 @@ export function SnakeIoGame({
         camTarget = resolveSnakeHead(snake);
       }
       if (camTarget && layout.cellSize > 0) {
-        const targetX = camTarget.x * layout.cellSize - layout.camHalfX;
-        const targetY = camTarget.y * layout.cellSize - layout.camHalfY;
-        const hardLock = spawnCameraLockRef.current > 0;
-        const lerp = hardLock ? 1 : SNAKE_FEEL.cameraFollowLerp;
+        const targetX = camTarget.x * layout.cellSize - layout.camHalf;
+        const targetY = camTarget.y * layout.cellSize - layout.camHalf;
+        const lerp = SNAKE_FEEL.cameraFollowLerp;
         camRef.current.x += (targetX - camRef.current.x) * lerp;
         camRef.current.y += (targetY - camRef.current.y) * lerp;
-        if (hardLock) spawnCameraLockRef.current -= 1;
-      }
-
-      if (debugHud && isGlobalWorld && frameCounterRef.current % 4 === 0) {
-        const wt = worldRef.current?.tick ?? 0;
-        const prev = prevWorldTickRef.current;
-        const tickAdvancing = wt > prev.tick && performance.now() - prev.at < 3000;
-        const diag = diagnoseLocalSpawn(
-          worldRef.current,
-          deviceId,
-          layout.cellSize,
-          camRef.current.x,
-          camRef.current.y,
-          viewportSize.w,
-          viewportSize.h,
-          tickAdvancing
-        );
-        setRc014Diag(diag);
       }
 
       const localSnake = worldRef.current?.snakes[deviceId];
@@ -1802,7 +1539,7 @@ export function SnakeIoGame({
       const layer = worldLayerRef.current;
       if (layer && layout.cellSize > 0) {
         layer.style.transform = `translate(${-camRef.current.x + shakeX}px, ${-camRef.current.y + shakeY}px) scale(${zoomMultRef.current})`;
-        layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
+        layer.style.transformOrigin = `${layout.camHalf + camRef.current.x}px ${layout.camHalf + camRef.current.y}px`;
       }
 
       renderAlphaRef.current = Math.min(1, renderAlphaRef.current + SNAKE_FEEL.segmentLerpStep);
@@ -1817,7 +1554,7 @@ export function SnakeIoGame({
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [deviceId, isSpectating, bossCam, watchSnake, isGlobalWorld, debugHud, viewportSize.w, viewportSize.h]);
+  }, [deviceId, isSpectating, bossCam, watchSnake, isGlobalWorld]);
 
   useEffect(() => {
     if (!activeRoom) return;
@@ -1908,10 +1645,8 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
-  const viewW = immersiveWorld ? viewportSize.w : boardPx;
-  const viewH = immersiveWorld ? viewportSize.h : boardPx;
   const baseCellRaw =
-    (Math.min(viewW, viewH) / SNAKE_FEEL.viewportCellsVisible) *
+    (boardPx / SNAKE_FEEL.viewportCellsVisible) *
     matchRule.cameraZoomMult *
     SNAKE_FEEL.baseCameraZoom;
   const baseCellSize = Math.min(
@@ -1922,9 +1657,8 @@ export function SnakeIoGame({
   const myLength = mySnake ? getSegmentCount(mySnake) : 0;
   const myKills = mySnake?.totalKills ?? 0;
   const myScore = mySnake?.score ?? 0;
-  const camHalfX = viewW / 2;
-  const camHalfY = viewH / 2;
-  camLayoutRef.current = { boardPx: Math.min(viewW, viewH), cellSize: baseCellSize, camHalfX, camHalfY };
+  const camHalf = boardPx / 2;
+  camLayoutRef.current = { boardPx, cellSize: baseCellSize, camHalf };
 
   const camX = camRef.current.x;
   const camY = camRef.current.y;
@@ -1936,38 +1670,32 @@ export function SnakeIoGame({
   }));
 
   return (
-    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", immersiveWorld || isGameFullscreen ? "max-w-none h-full px-0" : "max-w-6xl px-1 sm:px-2")}>
+    <div ref={boardRef} className={cn("relative mx-auto flex w-full flex-col items-center overflow-hidden", isGameFullscreen ? "max-w-none px-0" : "max-w-6xl px-1 sm:px-2")}>
       <div
         className={cn(
           "flex w-full items-start justify-center gap-3",
-          (immersiveWorld || isGameFullscreen) && "h-full"
+          isGameFullscreen && "h-full"
         )}
       >
-        {!immersiveWorld ? (
         <aside className="hidden w-40 shrink-0 pt-10 lg:block">
           <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
         </aside>
-        ) : null}
 
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col items-center",
-          immersiveWorld ? "h-full pb-0" : "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+          "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
         )}
       >
       <div
         ref={viewportRef}
         className={cn(
-          "relative overflow-hidden bg-black",
-          immersiveWorld
-            ? "h-[100dvh] w-[100dvw]"
-            : "flex w-full justify-center",
+          "relative flex w-full justify-center overflow-hidden bg-black",
           isGameFullscreen
             ? "fixed inset-0 z-[200] h-[100dvh] w-[100dvw] items-center justify-center"
-            : !immersiveWorld && "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
+            : "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
         )}
       >
-        {!immersiveWorld ? (
         <button
           type="button"
           onClick={() => void toggleFullscreen()}
@@ -1976,27 +1704,11 @@ export function SnakeIoGame({
         >
           {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
         </button>
-        ) : null}
 
         {/* Game canvas wrapper — square; fills viewport when fullscreen */}
+        <div className="relative" style={{ width: boardPx, height: boardPx, maxWidth: "min(100vw, 100dvh)", maxHeight: "min(100vw, 100dvh)" }}>
         <div
-          className="relative h-full w-full"
-          style={
-            immersiveWorld
-              ? undefined
-              : {
-                  width: boardPx,
-                  height: boardPx,
-                  maxWidth: "min(100vw, 100dvh)",
-                  maxHeight: "min(100vw, 100dvh)",
-                }
-          }
-        >
-        <div
-          className={cn(
-            "relative h-full w-full touch-none overflow-hidden",
-            !immersiveWorld && "rounded-xl border border-white/10"
-          )}
+          className="relative h-full w-full touch-none overflow-hidden rounded-xl border border-white/10"
           style={{
             backgroundColor: seasonStyle.bg,
             backgroundImage:
@@ -2019,20 +1731,8 @@ export function SnakeIoGame({
             handleDirection(dir);
           }}
         >
-        {debugHud && isGlobalWorld ? (
-          <div className="pointer-events-none absolute left-2 top-2 z-[60] rounded border border-amber-400/50 bg-black/80 px-2 py-1.5 font-mono text-[10px] leading-relaxed text-amber-100">
-            <div className="font-bold text-amber-300">DEBUG MODE</div>
-            <div>Spawn : {rc014Diag.spawn}</div>
-            <div>Camera : {rc014Diag.camera}</div>
-            <div>Segments : {rc014Diag.segments}</div>
-            <div>Visible : {rc014Diag.visible}</div>
-            <div>Tick : {rc014Diag.tick}</div>
-            <div>Sim : {rc014Diag.sim}</div>
-          </div>
-        ) : null}
-
         {mySnake?.alive && !isSpectating && !awaitingInput ? (
-          <div className={cn("pointer-events-auto absolute z-40 flex gap-1.5", debugHud && isGlobalWorld ? "left-2 top-[5.5rem]" : "left-2 top-2")}>
+          <div className="pointer-events-auto absolute left-2 top-2 z-40 flex gap-1.5">
             <Button
               type="button"
               size="sm"
@@ -2066,7 +1766,7 @@ export function SnakeIoGame({
           </div>
         ) : null}
 
-        {showDebugWorldHud ? (
+        {isGlobalWorld ? (
           <SnakeWorldHud
             className="absolute right-2 top-12 z-40"
             roomCode={effectiveRoomCode}
@@ -2079,8 +1779,8 @@ export function SnakeIoGame({
           />
         ) : null}
 
-        {/* Kill Feed — compact in immersive; full in debug */}
-        {isGlobalWorld && !immersiveWorld && world.killFeed.length > 0 ? (
+        {/* Kill Feed — WORLD sync via host state */}
+        {isGlobalWorld && world.killFeed.length > 0 ? (
           <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[11rem] space-y-1">
             {world.killFeed.slice(0, 5).map((entry) => (
               <div
@@ -2095,34 +1795,13 @@ export function SnakeIoGame({
           </div>
         ) : null}
 
-        {/* HUD — minimal in immersive WORLD */}
-        <div className={cn(
-          "pointer-events-none absolute z-30 rounded-lg border border-white/10 bg-black/55 backdrop-blur-sm text-white",
-          immersiveWorld ? "left-2 top-2 px-2 py-1 text-[10px]" : "left-2 top-12 px-3 py-2 text-xs"
-        )}>
-          <p className="font-bold">
-            <span className="text-emerald-300">{myLength}</span>
-            {!immersiveWorld ? (
-              <>
-                {" · "}
-                <span className="text-amber-300">{myKills}</span> kills
-              </>
-            ) : (
-              <span className="text-white/50"> · #{myRank}</span>
-            )}
+        {/* HUD — anchored to canvas */}
+        <div className="pointer-events-none absolute left-2 top-12 z-30 rounded-lg border border-white/10 bg-black/55 px-3 py-2 text-xs backdrop-blur-sm">
+          <p className="font-bold text-white">Length <span className="text-emerald-300">{myLength}</span></p>
+          <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
+          <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
+            {isBoosting ? "⚡ BOOST" : "Boost"}
           </p>
-          {!immersiveWorld ? (
-            <>
-              <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
-              <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
-                {isBoosting ? "⚡ BOOST" : "Boost"}
-              </p>
-            </>
-          ) : (
-            <p className={cn(isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
-              {isBoosting ? "⚡ BOOST" : ""}
-            </p>
-          )}
         </div>
           <div
             ref={worldLayerRef}
@@ -2224,20 +1903,16 @@ export function SnakeIoGame({
               </div>
             ) : null}
             {Object.values(world.snakes).map((snake) => {
-              const isMe = snake.deviceId === deviceId;
-              if (isMe && snake.segments.length === 0) return null;
               const snap = prevSnakeSnapRef.current[snake.deviceId];
-              const segAlpha = isMe && (isGlobalWorld || immersiveWorld) ? Math.max(renderAlpha, 1) : renderAlpha;
               const segs = snap
-                ? interpolateSnakeRender(snake, snap, segAlpha)
+                ? interpolateSnakeRender(snake, snap, renderAlpha)
                 : lerpSegments(
                     prevSegmentsRef.current[snake.deviceId],
                     snake.segments,
-                    segAlpha,
-                    Math.min(1, segAlpha * (SNAKE_FEEL.headLerpStep / SNAKE_FEEL.segmentLerpStep)),
+                    renderAlpha,
+                    Math.min(1, renderAlpha * (SNAKE_FEEL.headLerpStep / SNAKE_FEEL.segmentLerpStep)),
                     snake.boosting ? SNAKE_FEEL.tailWaveAmpBoost : SNAKE_FEEL.tailWaveAmp
                   );
-              if (segs.length === 0) return null;
               const growing = (growthUntilRef.current[snake.deviceId] ?? 0) > Date.now();
               const growthLeft = (growthUntilRef.current[snake.deviceId] ?? 0) - Date.now();
               const tailPopScale = growing
@@ -2253,6 +1928,7 @@ export function SnakeIoGame({
               const radiusScale = snake.bodyRadiusScale ?? 1;
               const len = segs.length;
               const headRad = ((snake.angle ?? 0) * 180) / Math.PI;
+              const isMe = snake.deviceId === deviceId;
               const highlight = isMe && spawnHighlightUntil > Date.now();
               return segs.map((seg, i) => {
                 const isHead = i === 0;
@@ -2272,9 +1948,9 @@ export function SnakeIoGame({
                     key={`${snake.deviceId}-${i}`}
                     className={cn(
                       "absolute rounded-full origin-center",
-                      (!snake.alive || snake.spectating) && !isMe && "opacity-25",
+                      (!snake.alive || snake.spectating) && "opacity-25",
                       isHead && "z-10",
-                      isMe && snake.alive && "z-20 ring-2 ring-white/90",
+                      isMe && snake.alive && "ring-2 ring-white/90",
                       snake.boosting && isHead && "ring-2 ring-amber-300/60"
                     )}
                     style={{
@@ -2283,8 +1959,7 @@ export function SnakeIoGame({
                       width: size * pulse,
                       height: size * pulse,
                       backgroundColor: fill,
-                      opacity: isMe && snake.alive ? 1 : isTail ? 0.75 : isHead ? 1 : 0.92,
-                      visibility: "visible",
+                      opacity: isTail ? 0.75 : isHead ? 1 : 0.92,
                       boxShadow: highlight
                         ? "0 0 18px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.45)"
                         : isHead
@@ -2374,7 +2049,7 @@ export function SnakeIoGame({
           </div>
         </div>
 
-        {awaitingInput && mySnake?.alive && !immersiveWorld ? (
+        {awaitingInput && mySnake?.alive ? (
           <div className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center gap-2">
             <p className="rounded-lg border border-yellow-300/40 bg-black/70 px-3 py-1 text-xs font-bold tracking-widest text-yellow-300 backdrop-blur-sm">
               YOU
@@ -2395,7 +2070,6 @@ export function SnakeIoGame({
 
 
         {/* MVP HUD — bottom global rank bar (desktop in-canvas) */}
-        {!immersiveWorld ? (
         <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-30 hidden justify-center lg:flex">
           <div className="rounded-lg border border-white/10 bg-black/55 px-4 py-1.5 text-center text-[11px] backdrop-blur-sm">
             {isStageMode && stageConfig ? (
@@ -2429,11 +2103,9 @@ export function SnakeIoGame({
             )}
           </div>
         </div>
-        ) : null}
         </div>
       </div>
 
-        {!immersiveWorld ? (
         <div className="mt-2 flex w-full max-w-sm items-start gap-2 px-1 lg:hidden">
           <SnakeRankingPanel
             compact
@@ -2455,10 +2127,8 @@ export function SnakeIoGame({
             />
           ) : null}
         </div>
-        ) : null}
       </div>
 
-        {!immersiveWorld ? (
         <aside className="hidden w-28 shrink-0 pt-10 lg:block">
           {showMinimap ? (
             <SnakeMinimap
@@ -2473,7 +2143,6 @@ export function SnakeIoGame({
             />
           ) : null}
         </aside>
-        ) : null}
       </div>
 
       {isStageMode && stageOverlay !== "none" ? (

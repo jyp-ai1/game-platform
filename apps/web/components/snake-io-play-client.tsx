@@ -273,8 +273,6 @@ function SnakeIoPlayInner({
           practiceMode={practiceMode}
           onJoinTimeout={goPractice}
           headCharacter={headCharacter}
-          debugHud={debugMode}
-          immersiveWorld={immersiveWorld}
         />
       </SnakePlayErrorBoundary>
       {sessionSummary ? (
