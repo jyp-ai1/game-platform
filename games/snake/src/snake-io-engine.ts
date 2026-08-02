@@ -537,7 +537,8 @@ function killSnake(
   }
   snake.alive = false;
   snake.spectating = true;
-  if (isBotEntity(snake)) {
+  const humanAuto = world.living?.matchRule.humanAutoRespawn ?? false;
+  if (isBotEntity(snake) || humanAuto) {
     snake.respawnAt = Date.now() + config.respawnMs;
   } else {
     snake.respawnAt = undefined;
@@ -624,8 +625,13 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
   for (const [i, snake] of Object.entries(world.snakes)) {
     const idx = Object.keys(world.snakes).indexOf(i);
     if (!snake.alive) {
-      const canRespawn = isBotEntity(snake) && (world.living?.matchRule.respawnEnabled ?? true);
-      if (canRespawn && snake.respawnAt && now >= snake.respawnAt) respawnSnake(world, snake, idx, now);
+      const rule = world.living?.matchRule;
+      const botCan = isBotEntity(snake) && (rule?.respawnEnabled ?? true);
+      const humanCan = !isBotEntity(snake) && (rule?.humanAutoRespawn ?? false);
+      if ((botCan || humanCan) && snake.respawnAt && now >= snake.respawnAt) {
+        respawnSnake(world, snake, idx, now);
+        if (humanCan) snake.awaitingInput = false;
+      }
       continue;
     }
 

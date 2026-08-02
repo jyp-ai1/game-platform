@@ -17,6 +17,8 @@ export interface MatchRuleConfig {
   collapseEnabled: boolean;
   safeZoneDrift: boolean;
   respawnEnabled: boolean;
+  /** WORLD: humans auto-respawn after countdown (no Retry overlay) */
+  humanAutoRespawn?: boolean;
   foodDensityMult: number;
   boostCostMult: number;
   startingSegments: number;
@@ -145,7 +147,8 @@ export function resolveGlobalWorldRule(): MatchRuleConfig {
     eventsEnabled: true,
     collapseEnabled: false,
     safeZoneDrift: false,
-    respawnEnabled: false,
+    respawnEnabled: true,
+    humanAutoRespawn: true,
     foodDensityMult: 1.38,
     boostCostMult: 0.75,
     startingSegments: 12,
