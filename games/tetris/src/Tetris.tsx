@@ -272,6 +272,12 @@ export function TetrisGame() {
   const activeCellSet = new Set(
     activeCells(state.active).map(({ row, col }) => `${row},${col}`)
   );
+  const ghostRow = hardDropRow(state.board, state.active);
+  const ghostCellSet = new Set(
+    activeCells({ ...state.active, row: ghostRow })
+      .filter(({ row }) => row >= 0)
+      .map(({ row, col }) => `${row},${col}`)
+  );
   const activeColor = TETROMINO_COLORS[state.active.type];
 
   return (
@@ -305,15 +311,18 @@ export function TetrisGame() {
       >
         {state.board.map((row, rowIndex) =>
           row.map((cell, colIndex) => {
-            const isActiveCell = activeCellSet.has(`${rowIndex},${colIndex}`);
+            const key = `${rowIndex},${colIndex}`;
+            const isActiveCell = activeCellSet.has(key);
+            const isGhostCell =
+              !cell && !isActiveCell && ghostCellSet.has(key) && state.status === "playing";
             const color = cell ?? (isActiveCell ? activeColor : undefined);
             return (
               <div
-                key={`${rowIndex}-${colIndex}`}
+                key={key}
                 className="rounded-[2px] bg-muted-foreground/10"
                 style={{
-                  backgroundColor: color,
-                  opacity: color ? 1 : undefined,
+                  backgroundColor: isGhostCell ? activeColor : color,
+                  opacity: isGhostCell ? 0.22 : color ? 1 : undefined,
                 }}
               />
             );
@@ -364,32 +373,76 @@ export function TetrisGame() {
       </div>
       </div>
 
-      <div className="flex w-full max-w-[min(100%,20.5rem)] gap-2 sm:hidden">
+      <div className="grid w-full max-w-[min(100%,20.5rem)] grid-cols-3 gap-2 sm:hidden">
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 flex-1"
+          className="min-h-11"
           disabled={!canPlay || state.status !== "playing"}
+          aria-label="왼쪽"
+          onClick={() => {
+            primeGameAudio();
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "move", dCol: -1 });
+          }}
+        >
+          ←
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          disabled={!canPlay || state.status !== "playing"}
+          aria-label="회전"
           onClick={() => {
             primeGameAudio();
             playGameFeel("button", fieldRef.current);
             dispatch({ type: "rotate" });
           }}
         >
-          Rotate
+          ↻
         </Button>
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 flex-1"
+          className="min-h-11"
+          aria-label="오른쪽"
           disabled={!canPlay || state.status !== "playing"}
+          onClick={() => {
+            primeGameAudio();
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "move", dCol: 1 });
+          }}
+        >
+          →
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 col-span-2"
+          disabled={!canPlay || state.status !== "playing"}
+          aria-label="소프트 드롭"
+          onClick={() => {
+            primeGameAudio();
+            playGameFeel("button", fieldRef.current);
+            dispatch({ type: "softDrop" });
+          }}
+        >
+          ↓
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          disabled={!canPlay || state.status !== "playing"}
+          aria-label="하드 드롭"
           onClick={() => {
             primeGameAudio();
             playGameFeel("button", fieldRef.current);
             dispatch({ type: "hardDrop" });
           }}
         >
-          Drop
+          ⬇
         </Button>
       </div>
 

@@ -154,8 +154,10 @@ export function WhackAMoleGame() {
               dispatch({ type: "whack", index: i });
             }}
             className={cn(
-              "relative aspect-square min-h-11 min-w-11 rounded-xl border-2 border-amber-900/30 bg-amber-100/20 transition-transform duration-150 active:scale-95",
-              state.active === i && "scale-110 bg-amber-600 shadow-lg"
+              "relative aspect-square min-h-11 min-w-11 overflow-hidden rounded-full border-2 border-amber-950/50 transition-transform duration-150 active:scale-95",
+              state.active === i
+                ? "scale-110 border-amber-700 bg-amber-500/90 shadow-lg shadow-amber-900/40"
+                : "bg-amber-950/35 shadow-inner"
             )}
             aria-label={`구멍 ${i + 1}`}
           >
