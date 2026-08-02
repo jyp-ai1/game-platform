@@ -41,6 +41,7 @@ import {
 
 const GAME_SLUG = "memory";
 const MISMATCH_DELAY_MS = 800;
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 interface State {
   stageIndex: number;
@@ -185,10 +186,17 @@ export function MemoryGame() {
   const prevMatchedRef = useRef(0);
   const prevStatusRef = useRef(state.status);
   const [wrongFlash, setWrongFlash] = useState(false);
+  const [sparkIndices, setSparkIndices] = useState<number[]>([]);
 
   useEffect(() => {
     const matched = state.cards.filter((c) => c.matched).length;
     if (matched > prevMatchedRef.current) {
+      const newlyMatched = state.cards
+        .map((c, i) => (c.matched ? i : -1))
+        .filter((i) => i >= 0)
+        .slice(-2);
+      setSparkIndices(newlyMatched);
+      window.setTimeout(() => setSparkIndices([]), 450);
       playGameFeel(state.comboStreak >= 3 ? "combo" : "match");
     }
     prevMatchedRef.current = matched;
@@ -303,12 +311,12 @@ export function MemoryGame() {
         : "grid-cols-4";
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 max-h-[700px]:gap-2 max-h-[520px]:gap-1 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 max-h-[700px]:gap-2 max-h-[520px]:gap-1 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+      <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={score} />
-          <ScoreBox label="Round" value={state.stageIndex} />
+          <ScoreBox label="Round" value={`${state.stageIndex}/${FINAL_MEMORY_STAGE}`} />
           <ScoreBox label="Best" value={feel.bestScore} />
           <ScoreBox label="Best Stage" value={feel.bestStage} />
           <ScoreBox label="Combo" value={state.comboStreak} />
@@ -325,7 +333,11 @@ export function MemoryGame() {
         </Button>
       </div>
 
-      <PuzzlePlayField bursts={feel.bursts}>
+      <p className="text-sm font-medium text-muted-foreground">
+        Round {state.stageIndex} — {state.stage.label} ({state.stage.pairs} pairs)
+      </p>
+
+      <PuzzlePlayField bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div
         className={cn(
           "relative grid w-full gap-2 max-h-[520px]:gap-1 landscape:max-h-[55vh] landscape:overflow-y-auto",
@@ -347,11 +359,12 @@ export function MemoryGame() {
             >
               <span
                 className={cn(
-                  "flex h-full w-full items-center justify-center rounded-lg text-2xl transition-transform duration-300",
+                  "relative flex h-full w-full items-center justify-center rounded-lg text-2xl transition-transform duration-300",
                   isFaceUp
                     ? "rotate-y-0 bg-primary/20 scale-100"
                     : "rotate-y-180 bg-muted hover:bg-muted-foreground/20",
-                  card.matched && "ring-2 ring-primary/50"
+                  card.matched && "ring-2 ring-primary/50",
+                  sparkIndices.includes(index) && "ring-4 ring-amber-400/80 scale-105 animate-[pulse_0.4s_ease-out]"
                 )}
                 style={{
                   transform: isFaceUp ? "rotateY(0deg)" : "rotateY(180deg)",

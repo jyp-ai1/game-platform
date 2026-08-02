@@ -31,6 +31,7 @@ import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-a
 
 const GAME_SLUG = "color-match";
 const TICK_MS = 100;
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
   | { type: "select"; color: ColorName }
@@ -183,7 +184,7 @@ export function ColorMatchGame() {
   );
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -207,7 +208,7 @@ export function ColorMatchGame() {
         </Button>
       </div>
 
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div className="relative flex w-full flex-col items-center gap-4 rounded-xl bg-muted p-4">
         <p className="text-xs font-medium uppercase text-muted-foreground">
           Round {state.round}

@@ -15,8 +15,8 @@ import {
   useResumableGame,
   standardFeelFromState,
   useStandardGameFeel,
-  GameFeelLayer,
   playGameFeel,
+  PuzzlePlayField,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -41,6 +41,7 @@ import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioP
 const GAME_SLUG = "2048";
 const SWIPE_THRESHOLD = 24;
 const DIFFICULTIES: Difficulty2048[] = ["easy", "normal", "hard"];
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Status = "playing" | "won" | "over";
 
@@ -235,13 +236,13 @@ export function Game2048() {
     if (state.score > prevScoreRef.current) {
       const stageJustCleared =
         state.tileStagesReached.length > prevStagesLenRef.current;
-      if (!stageJustCleared) {
+      if (!stageJustCleared && state.mergeHighlight.length > 0) {
         playGameFeel("merge", gridRef.current);
       }
     }
     prevScoreRef.current = state.score;
     prevStagesLenRef.current = state.tileStagesReached.length;
-  }, [state.score, state.tileStagesReached]);
+  }, [state.score, state.tileStagesReached, state.mergeHighlight]);
 
   useEffect(() => {
     if (state.blockedPulse <= lastBlockedRef.current) return;
@@ -392,7 +393,7 @@ export function Game2048() {
     state.status === "over" || (state.status === "won" && !state.winAcknowledged);
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -427,10 +428,10 @@ export function Game2048() {
         ))}
       </div>
 
+      <PuzzlePlayField fieldRef={gridRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div
-        ref={gridRef}
         className={cn(
-          "relative grid aspect-square w-full max-w-sm touch-none select-none grid-cols-4 gap-3 rounded-xl bg-muted p-3 transition-transform duration-100",
+          "relative grid aspect-square w-full touch-none select-none grid-cols-4 gap-3 rounded-xl bg-muted p-3 transition-transform duration-100",
           slideNudgeClass
         )}
         key={`slide-${state.slidePulse}`}
@@ -441,10 +442,10 @@ export function Game2048() {
           <div
             key={`${index}-${value}-${state.mergePulse}`}
             className={cn(
-              "flex items-center justify-center rounded-lg text-lg font-bold transition-transform duration-150 sm:text-2xl",
+              "flex items-center justify-center rounded-lg text-lg font-bold transition-transform duration-200 sm:text-2xl",
               value !== 0 &&
                 state.mergeHighlight.includes(index) &&
-                "game-effect-merge scale-110"
+                "game-effect-merge scale-125 animate-[bounce_0.35s_ease-out]"
             )}
             style={tileStyle(value)}
           >
@@ -463,6 +464,7 @@ export function Game2048() {
             onRetry={() => handleRetry()}
             onRestart={() => handleRetry()}
             onContinue={() => setStageClearMilestone(null)}
+            variant="stage-clear"
           />
         ) : null}
 
@@ -493,9 +495,8 @@ export function Game2048() {
             onNewGame={handleNewGame}
           />
         ) : null}
-
-        <GameFeelLayer bursts={feel.bursts} />
       </div>
+      </PuzzlePlayField>
 
       <p className="text-xs text-muted-foreground">
         목표: {tileStageLabel(currentTile)} → 다음{" "}

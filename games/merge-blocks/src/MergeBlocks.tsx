@@ -29,6 +29,7 @@ import {
 } from "./game-audio-prime";
 
 const GAME_SLUG = "merge-blocks";
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action = { type: "drop"; col: number } | { type: "restart" };
 
@@ -115,7 +116,7 @@ export function MergeBlocksGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
@@ -125,7 +126,7 @@ export function MergeBlocksGame() {
           <RotateCcw />
         </Button>
       </div>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div className="grid w-full grid-cols-4 gap-1 rounded-xl bg-muted p-2">
         {state.grid.map((row, ri) =>
           row.map((cell, ci) => (

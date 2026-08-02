@@ -43,6 +43,7 @@ import {
 } from "./game-audio-prime";
 
 const GAME_SLUG = "samegame";
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
   | { type: "clear"; row: number; col: number }
@@ -174,7 +175,7 @@ export function SameGameGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
@@ -205,7 +206,7 @@ export function SameGameGame() {
         ))}
       </div>
 
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
         <div
           className="grid w-full gap-1 rounded-xl bg-muted p-1"
           style={{ gridTemplateColumns: `repeat(${state.cols}, minmax(0, 1fr))` }}

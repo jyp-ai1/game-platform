@@ -6,6 +6,8 @@ export const COLORS: BubbleColor[] = ["red", "blue", "green", "yellow", "purple"
 
 export const COLS = 8;
 export const ROWS = 12; // playable grid height before "bottom line" loss
+/** Row index (0-based) — bubbles at or below this row trigger game over. */
+export const DANGER_ROW = ROWS - 2;
 
 export const FIELD_WIDTH = 320;
 export const FIELD_HEIGHT = 440;
@@ -394,8 +396,9 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   }
 
   let status: BubblePopStatus = state.status;
-  const reachedBottom = grid[ROWS - 1]?.some((cell) => cell !== null) ?? false;
-  if (reachedBottom) {
+  const reachedDangerLine =
+    grid.slice(DANGER_ROW).some((row) => row.some((cell) => cell !== null));
+  if (reachedDangerLine) {
     status = "over";
   } else if (isGridEmpty(grid)) {
     status = state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear";

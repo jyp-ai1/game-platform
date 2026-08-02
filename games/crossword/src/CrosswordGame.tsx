@@ -39,6 +39,7 @@ import {
 
 const GAME_SLUG = "crossword";
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
   | { type: "select"; row: number; col: number }
@@ -81,6 +82,7 @@ export function CrosswordGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(state.status);
+  const prevEntriesRef = useRef<string>("");
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     score: computeScore(state),
@@ -92,6 +94,22 @@ export function CrosswordGame() {
     () => (state.status === "won" ? null : state),
     [state]
   );
+
+  useEffect(() => {
+    const key = state.entries.map((r) => r.join("")).join("|");
+    if (prevEntriesRef.current && key !== prevEntriesRef.current && state.status === "playing") {
+      const sel = state.selected;
+      if (sel) {
+        const [row, col] = sel;
+        const entered = state.entries[row]?.[col];
+        const expected = state.solution[row]?.[col];
+        if (entered && expected) {
+          playGameFeel(entered === expected ? "correct" : "wrong", fieldRef.current);
+        }
+      }
+    }
+    prevEntriesRef.current = key;
+  }, [state.entries, state.selected, state.solution, state.status]);
 
   useEffect(() => {
     if (state.status === "won" && prevStatusRef.current !== "won") {
@@ -137,7 +155,7 @@ export function CrosswordGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Time" value={state.elapsedSeconds} />
@@ -154,7 +172,7 @@ export function CrosswordGame() {
           </li>
         ))}
       </ul>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div className="grid w-full grid-cols-5 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);

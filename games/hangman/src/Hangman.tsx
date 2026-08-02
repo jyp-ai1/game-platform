@@ -4,6 +4,7 @@ import {
   clearSave,
   emitGameRetry,
   feelWithScore,
+  PuzzlePlayField,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -14,7 +15,6 @@ import {
   useResumableGame,
   useStandardGameFeel,
   playGameFeel,
-  GameFeelLayer,
 } from "@game-platform/game-sdk";
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
@@ -40,6 +40,7 @@ import {
 } from "./game-audio-prime";
 
 const GAME_SLUG = "hangman";
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 const KEYBOARD_ROWS = [
   "QWERTYUIOP",
   "ASDFGHJKL",
@@ -178,7 +179,7 @@ export function HangmanGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
@@ -221,7 +222,8 @@ export function HangmanGame() {
         ))}
       </div>
 
-      <div ref={fieldRef} className="relative flex w-full max-w-sm touch-none select-none flex-col items-center gap-6 rounded-xl bg-muted p-6">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
+      <div className="relative flex w-full touch-none select-none flex-col items-center gap-6 rounded-xl bg-muted p-6">
         <p className="text-center text-2xl font-bold tracking-widest tabular-nums">
           {state.status === "lost" ? state.word.split("").join(" ") : getDisplayWord(state)}
         </p>
@@ -275,9 +277,8 @@ export function HangmanGame() {
           />
         ) : null}
         {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
-
-        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
+      </PuzzlePlayField>
 
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Hangman" onResume={onResume} onNewGame={handleNewGame} />

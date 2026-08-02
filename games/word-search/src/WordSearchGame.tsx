@@ -41,6 +41,7 @@ import {
 } from "./game-audio-prime";
 
 const GAME_SLUG = "word-search";
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
   | { type: "select"; row: number; col: number }
@@ -86,7 +87,6 @@ export function WordSearchGame() {
 
   useEffect(() => {
     if (state.found.length > prevFoundRef.current) {
-      playGameFeel("match", fieldRef.current);
       playGameFeel(state.found.length >= 4 ? "combo" : "match", fieldRef.current);
     }
     prevFoundRef.current = state.found.length;
@@ -136,7 +136,7 @@ export function WordSearchGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
@@ -175,7 +175,7 @@ export function WordSearchGame() {
         ))}
       </ul>
       <p className="text-xs text-muted-foreground">Tap start cell, then end cell along a straight line</p>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
         <div
           className="grid w-full gap-0.5"
           style={{ gridTemplateColumns: `repeat(${state.size}, minmax(0, 1fr))` }}

@@ -1,18 +1,6 @@
-export const ROWS = 9;
-export const COLS = 9;
-export const MINE_COUNT = 10;
+import { getMinesweeperBoard, type MinesweeperDifficulty } from "./minesweeper-stage-config";
 
-export type Difficulty = "EASY" | "MEDIUM" | "HARD";
-
-export const MINE_COUNT_BY_DIFFICULTY: Record<Difficulty, number> = {
-  EASY: 8,
-  MEDIUM: 10,
-  HARD: 14,
-};
-
-export function mineCountForDifficulty(difficulty: Difficulty): number {
-  return MINE_COUNT_BY_DIFFICULTY[difficulty];
-}
+export type Difficulty = MinesweeperDifficulty;
 
 export interface Cell {
   mine: boolean;
@@ -23,9 +11,29 @@ export interface Cell {
 
 export type Board = Cell[][];
 
-export function createEmptyBoard(): Board {
-  return Array.from({ length: ROWS }, () =>
-    Array.from({ length: COLS }, () => ({
+export function boardRows(board: Board): number {
+  return board.length;
+}
+
+export function boardCols(board: Board): number {
+  return board[0]?.length ?? 0;
+}
+
+/** @deprecated use getMinesweeperBoard(difficulty).mines */
+export const MINE_COUNT = 10;
+
+/** @deprecated use board dimensions from state */
+export const ROWS = 9;
+/** @deprecated use board dimensions from state */
+export const COLS = 9;
+
+export function mineCountForDifficulty(difficulty: Difficulty): number {
+  return getMinesweeperBoard(difficulty).mines;
+}
+
+export function createEmptyBoard(rows: number, cols: number): Board {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => ({
       mine: false,
       revealed: false,
       flagged: false,
@@ -34,7 +42,9 @@ export function createEmptyBoard(): Board {
   );
 }
 
-function neighbors(row: number, col: number): Array<[number, number]> {
+function neighbors(board: Board, row: number, col: number): Array<[number, number]> {
+  const rows = boardRows(board);
+  const cols = boardCols(board);
   const result: Array<[number, number]> = [];
   for (let dr = -1; dr <= 1; dr++) {
     for (let dc = -1; dc <= 1; dc++) {
@@ -43,7 +53,7 @@ function neighbors(row: number, col: number): Array<[number, number]> {
       }
       const r = row + dr;
       const c = col + dc;
-      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+      if (r >= 0 && r < rows && c >= 0 && c < cols) {
         result.push([r, c]);
       }
     }
@@ -55,31 +65,31 @@ function cloneBoard(board: Board): Board {
   return board.map((row) => row.map((cell) => ({ ...cell })));
 }
 
-// Mines are placed on the first reveal so the very first click is always
-// safe (classic minesweeper convention).
 export function placeMines(
   board: Board,
   safeRow: number,
   safeCol: number,
-  mineCount = MINE_COUNT
+  mineCount: number
 ): Board {
+  const rows = boardRows(board);
+  const cols = boardCols(board);
   const next = cloneBoard(board);
   let placed = 0;
   while (placed < mineCount) {
-    const r = Math.floor(Math.random() * ROWS);
-    const c = Math.floor(Math.random() * COLS);
+    const r = Math.floor(Math.random() * rows);
+    const c = Math.floor(Math.random() * cols);
     if ((r === safeRow && c === safeCol) || next[r]![c]!.mine) {
       continue;
     }
     next[r]![c]!.mine = true;
     placed++;
   }
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       if (next[r]![c]!.mine) {
         continue;
       }
-      next[r]![c]!.adjacentMines = neighbors(r, c).filter(
+      next[r]![c]!.adjacentMines = neighbors(next, r, c).filter(
         ([nr, nc]) => next[nr]![nc]!.mine
       ).length;
     }
@@ -98,7 +108,7 @@ export function reveal(board: Board, row: number, col: number): Board {
     }
     cell.revealed = true;
     if (cell.adjacentMines === 0 && !cell.mine) {
-      for (const [nr, nc] of neighbors(r, c)) {
+      for (const [nr, nc] of neighbors(next, r, c)) {
         if (!next[nr]![nc]!.revealed) {
           stack.push([nr, nc]);
         }
@@ -138,7 +148,7 @@ export function chordReveal(
     return { board, hitMine: false };
   }
 
-  const flaggedNeighbors = neighbors(row, col).filter(
+  const flaggedNeighbors = neighbors(board, row, col).filter(
     ([r, c]) => board[r]![c]!.flagged
   ).length;
   if (flaggedNeighbors !== cell.adjacentMines) {
@@ -146,7 +156,7 @@ export function chordReveal(
   }
 
   let next = board;
-  for (const [r, c] of neighbors(row, col)) {
+  for (const [r, c] of neighbors(board, row, col)) {
     const neighbor = next[r]![c]!;
     if (neighbor.revealed || neighbor.flagged) {
       continue;

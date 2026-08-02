@@ -39,6 +39,7 @@ import {
 
 const GAME_SLUG = "kakuro";
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
   | { type: "select"; row: number; col: number }
@@ -138,7 +139,7 @@ export function KakuroGame() {
   }
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
@@ -150,7 +151,7 @@ export function KakuroGame() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">Fill digits 1–9 to match sum clues</p>
-      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div className="grid w-full grid-cols-4 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);

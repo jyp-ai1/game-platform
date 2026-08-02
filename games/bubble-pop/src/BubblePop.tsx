@@ -3,8 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
-  GameFeelLayer,
   playGameFeel,
+  PuzzlePlayField,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -27,11 +27,11 @@ import {
   type BubbleColor,
   type BubblePopState,
   createInitialState,
+  DANGER_ROW,
   fireBubble,
   FIELD_HEIGHT,
   FIELD_WIDTH,
   MAX_AIM_ANGLE,
-  ROWS,
   setShooterAngle,
   SHOOTER_X,
   SHOOTER_Y,
@@ -43,6 +43,7 @@ import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioP
 const GAME_SLUG = "bubble-pop";
 const MAX_DT = 0.05;
 const AIM_LINE_LENGTH = 60;
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 interface PopParticle {
   id: number;
@@ -197,7 +198,7 @@ export function BubblePopGame() {
     window.setTimeout(() => {
       setPopFlash(false);
       setComboLabel(null);
-    }, 120);
+    }, 220);
   }, [state.lastPops]);
 
   useEffect(() => {
@@ -318,7 +319,7 @@ export function BubblePopGame() {
   const aimY2 = SHOOTER_Y - Math.cos(state.shooterAngle) * AIM_LINE_LENGTH;
 
   return (
-    <div className="standard-game-shell relative flex w-full flex-col items-center gap-3 overflow-hidden mx-auto max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex w-full flex-col items-center gap-3 overflow-hidden mx-auto max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -351,16 +352,15 @@ export function BubblePopGame() {
         </Button>
       </div>
 
+      <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div
-        ref={fieldRef}
         className={cn(
           "relative mx-auto w-full touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]",
-          popFlash && "ring-2 ring-primary/40"
+          popFlash && "ring-2 ring-primary/60 scale-[1.01]"
         )}
         style={{
           aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}`,
-          maxWidth: "min(100%, 22rem)",
-          maxHeight: "min(72vh, 32rem)",
+          maxHeight: "min(68vh, 28rem)",
           touchAction: "none",
         }}
         onPointerMove={handlePointerMove}
@@ -376,7 +376,7 @@ export function BubblePopGame() {
         ) : null}
         <div
           className="absolute inset-x-0 border-t-2 border-dashed border-destructive/60"
-          style={{ top: toPercent((ROWS - 1) * BUBBLE_SIZE, FIELD_HEIGHT) }}
+          style={{ top: toPercent(DANGER_ROW * BUBBLE_SIZE, FIELD_HEIGHT) }}
         />
 
         {state.grid.map((rowColors, row) =>
@@ -491,8 +491,8 @@ export function BubblePopGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
-        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </div>
+      </PuzzlePlayField>
 
       <p className="text-xs text-muted-foreground">
         마우스로 조준하고 클릭하거나 스페이스바를 눌러 버블을 발사하세요. 같은

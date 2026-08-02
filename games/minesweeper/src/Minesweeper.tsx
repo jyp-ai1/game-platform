@@ -3,8 +3,8 @@
 import {
   clearSave,
   emitGameRetry,
-  GameFeelLayer,
   playGameFeel,
+  PuzzlePlayField,
   ResumeDialog,
   SaveIndicator,
   StandardGameOverOverlay,
@@ -21,10 +21,10 @@ import type { MouseEvent } from "react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
+  boardCols,
   checkWin,
   chordReveal,
   createEmptyBoard,
-  mineCountForDifficulty,
   placeMines,
   reveal,
   revealAllMines,
@@ -33,6 +33,9 @@ import {
   type Difficulty,
 } from "./engine";
 import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
+import { getMinesweeperBoard } from "./minesweeper-stage-config";
+
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 const GAME_SLUG = "minesweeper";
 const MAX_SCORE = 10000;
@@ -58,8 +61,9 @@ type Action =
   | { type: "restart"; difficulty?: Difficulty };
 
 function createInitialState(difficulty: Difficulty = "MEDIUM"): State {
+  const def = getMinesweeperBoard(difficulty);
   return {
-    board: createEmptyBoard(),
+    board: createEmptyBoard(def.rows, def.cols),
     status: "waiting",
     startedAt: null,
     flagMode: false,
@@ -110,7 +114,7 @@ function reducer(state: State, action: Action): State {
           board,
           action.row,
           action.col,
-          mineCountForDifficulty(state.difficulty)
+          getMinesweeperBoard(state.difficulty).mines
         );
         startedAt = Date.now();
       }
@@ -275,10 +279,11 @@ export function MinesweeperGame() {
     dispatch({ type: "restart" });
   }
 
-  const mineCount = mineCountForDifficulty(state.difficulty);
+  const boardDef = getMinesweeperBoard(state.difficulty);
+  const cols = boardCols(state.board);
 
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between gap-2">
         <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
@@ -328,13 +333,15 @@ export function MinesweeperGame() {
         </div>
       </div>
 
-      <div
-        ref={fieldRef}
-        className={cn(
-          "relative grid w-full max-w-sm grid-cols-9 gap-0.5 rounded-xl bg-muted p-1",
-          state.status === "lost" && "ring-2 ring-destructive/60"
-        )}
+      <PuzzlePlayField
+        fieldRef={fieldRef}
+        bursts={feel.bursts}
+        className={cn(PUZZLE_FIELD_CLASS, state.status === "lost" && "ring-2 ring-destructive/60 rounded-xl")}
       >
+        <div
+          className="relative grid w-full gap-0.5 rounded-xl bg-muted p-1"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        >
         {state.board.map((rowCells, row) =>
           rowCells.map((cell, col) => (
             <button
@@ -343,7 +350,7 @@ export function MinesweeperGame() {
               onClick={() => handleClick(row, col)}
               onContextMenu={(event) => handleContextMenu(event, row, col)}
               className={cn(
-                "flex aspect-square min-h-11 min-w-11 items-center justify-center rounded-[3px] text-[10px] font-bold transition-transform duration-150 active:scale-95 sm:text-xs",
+                "flex aspect-square min-h-8 min-w-8 items-center justify-center rounded-[3px] text-[10px] font-bold transition-transform duration-150 active:scale-95 sm:min-h-9 sm:min-w-9 sm:text-xs",
                 cell.revealed
                   ? cell.mine
                     ? "bg-destructive/20"
@@ -378,8 +385,8 @@ export function MinesweeperGame() {
         ) : null}
 
         {showCountdown ? <ReadyCountdown onComplete={onCountdownComplete} /> : null}
-        {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
-      </div>
+        </div>
+      </PuzzlePlayField>
 
       {phase === "resume-prompt" ? (
         <ResumeDialog
@@ -390,7 +397,7 @@ export function MinesweeperGame() {
       ) : null}
 
       <p className="text-xs text-muted-foreground">
-        {mineCount}개 지뢰 · 칸을 클릭해 열고, 우클릭(모바일은 깃발 모드)으로 지뢰를 표시하세요.
+        {boardDef.label} · {boardDef.mines}개 지뢰 · 숫자 칸을 다시 클릭하면 chord(주변 깃발과 일치 시 열기)
       </p>
     </div>
   );

@@ -15,12 +15,18 @@ export interface SudokuState {
 
 const SIZE = 9;
 const BOX_SIZE = 3;
-const MAX_MISTAKES = 3;
 
 const GIVENS_BY_DIFFICULTY: Record<Difficulty, number> = {
   EASY: 40,
   MEDIUM: 32,
   HARD: 30,
+};
+
+/** Per-game mistake limit — easier boards allow more errors. */
+const MAX_MISTAKES_BY_DIFFICULTY: Record<Difficulty, number> = {
+  EASY: 5,
+  MEDIUM: 3,
+  HARD: 2,
 };
 
 function createEmptyBoard(): Board {
@@ -190,7 +196,7 @@ export function createInitialState(difficulty: Difficulty = "MEDIUM"): SudokuSta
     solution,
     selectedCell: null,
     mistakes: 0,
-    maxMistakes: MAX_MISTAKES,
+    maxMistakes: MAX_MISTAKES_BY_DIFFICULTY[difficulty],
     difficulty,
     status: "playing",
   };

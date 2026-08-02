@@ -36,6 +36,7 @@ const PENALTY_PER_MISTAKE = 200;
 const MIN_SCORE = 100;
 const SIZE = 9;
 const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
+const PUZZLE_FIELD_CLASS = "touch-none max-w-[min(100%,20.5rem)]";
 
 type Action =
   | { type: "select"; row: number; col: number }
@@ -153,13 +154,16 @@ export function SudokuGame() {
     dispatch({ type: "restart" });
   }
 
+  const mistakesLeft = Math.max(0, state.maxMistakes - state.mistakes);
+
   return (
-    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
+    <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-3 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <div className="flex gap-2">
+      <div className="flex w-full max-w-sm flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
           <ScoreBox label="Score" value={computeScore(state.mistakes)} />
           <ScoreBox label="Mistakes" value={`${state.mistakes}/${state.maxMistakes}`} />
+          <ScoreBox label="Left" value={mistakesLeft} />
           <ScoreBox label="Best" value={feel.bestScore} />
           <ScoreBox label="Level" value={state.difficulty} />
         </div>
@@ -175,18 +179,33 @@ export function SudokuGame() {
               {difficulty === "EASY" ? "Easy" : difficulty === "MEDIUM" ? "Normal" : "Hard"}
             </Button>
           ))}
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="새 게임"
+            onClick={() => handleRetry()}
+          >
+            <RotateCcw />
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="새 게임"
-          onClick={() => handleRetry()}
-        >
-          <RotateCcw />
-        </Button>
       </div>
 
-      <PuzzlePlayField bursts={feel.bursts}>
+      <div className="flex items-center gap-1.5" aria-label={`실수 ${state.mistakes}회, 남은 기회 ${mistakesLeft}회`}>
+        {Array.from({ length: state.maxMistakes }, (_, index) => (
+          <div
+            key={index}
+            className={cn(
+              "size-3 rounded-full transition-colors",
+              index < mistakesLeft ? "bg-primary" : "bg-destructive/40"
+            )}
+          />
+        ))}
+        <span className="text-xs text-muted-foreground">
+          {mistakesLeft} mistake{mistakesLeft === 1 ? "" : "s"} left
+        </span>
+      </div>
+
+      <PuzzlePlayField bursts={feel.bursts} className={PUZZLE_FIELD_CLASS}>
       <div
         className="relative grid aspect-square w-full max-w-sm gap-px rounded-xl bg-muted p-1"
         style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}
