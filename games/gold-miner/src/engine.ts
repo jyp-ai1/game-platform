@@ -9,7 +9,7 @@ export const HOOK_EXTEND_SPEED = 480; // px/sec
 export const HOOK_EMPTY_RETRACT_SPEED = 420; // px/sec, nothing attached
 export const ITEM_SIZE = 28;
 export const ITEM_COUNT = 9;
-export const ROUND_DURATION_S = 45;
+export const ROUND_DURATION_S = 60;
 export const CATCH_RADIUS = ITEM_SIZE / 2 + 6;
 
 export type HookState = "swinging" | "extending" | "retracting";

@@ -29,7 +29,10 @@ export const SHIELD_COUNT = 4;
 export const SHIELD_Y = Math.round((FIELD_HEIGHT * 2) / 3);
 
 export const STARTING_LIVES = 3;
-export const POINTS_PER_INVADER = 20;
+/** Bottom row (nearest player) = 10 pts; each row higher adds 10 (classic ladder). */
+export function pointsForInvaderRow(row: number): number {
+  return (INVADER_ROWS - row) * 10;
+}
 
 // Probability (per grid-step tick) that the invaders fire a bullet. See
 // step() docs below for how this is applied.
@@ -387,7 +390,7 @@ export function step(
               aliveCopied = true;
             }
             alive[row]![col] = false;
-            score += POINTS_PER_INVADER;
+            score += pointsForInvaderRow(row);
             hit = true;
           }
         }

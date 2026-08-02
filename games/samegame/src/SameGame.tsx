@@ -27,9 +27,16 @@ import {
   createRandomBoard,
   hasValidMove,
   isBoardEmpty,
+  BOARD_CLEAR_BONUS,
   computeGroupScore,
   type Board,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "samegame";
 
@@ -65,10 +72,11 @@ function reducer(state: State, action: Action): State {
       if (hasValidMove(board)) {
         return { board, score, status: "playing" };
       }
+      const clearedBoard = isBoardEmpty(board);
       return {
         board,
-        score,
-        status: isBoardEmpty(board) ? "won" : "over",
+        score: clearedBoard ? score + BOARD_CLEAR_BONUS : score,
+        status: clearedBoard ? "won" : "over",
       };
     }
     default:
@@ -89,6 +97,7 @@ export function SameGameGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     fieldRef,
@@ -101,20 +110,38 @@ export function SameGameGame() {
   );
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    } else if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over" || state.status === "won") {
-      playGameFeel(state.status === "won" ? "goal" : "wrong", fieldRef.current);
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -122,6 +149,7 @@ export function SameGameGame() {
     if (!canPlayRef.current) {
       return;
     }
+    primeGameAudio();
     playGameFeel("pop", fieldRef.current);
     dispatch({ type: "clear", row, col });
   }
@@ -167,7 +195,7 @@ export function SameGameGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

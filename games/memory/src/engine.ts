@@ -21,6 +21,8 @@ export const PAIR_SYMBOLS = [
 export const BASE_SCORE = 1000;
 export const PENALTY_PER_MOVE = 15;
 export const MIN_SCORE = 100;
+export const COMBO_BONUS = 25;
+export const PERFECT_ROUND_BONUS = 350;
 
 export interface Card {
   symbol: string;
@@ -47,4 +49,15 @@ export function createShuffledCards(pairs: number): Card[] {
 export function computeScore(moves: number, stageIndex = 1): number {
   const stageBonus = (stageIndex - 1) * 200;
   return Math.max(MIN_SCORE, BASE_SCORE + stageBonus - moves * PENALTY_PER_MOVE);
+}
+
+export function computeStageScore(
+  moves: number,
+  stageIndex: number,
+  comboPeak: number,
+  perfect: boolean
+): number {
+  const comboBonus = Math.max(0, comboPeak - 1) * COMBO_BONUS;
+  const perfectBonus = perfect ? PERFECT_ROUND_BONUS : 0;
+  return computeScore(moves, stageIndex) + comboBonus + perfectBonus;
 }

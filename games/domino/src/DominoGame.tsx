@@ -15,7 +15,7 @@ import {
   useResumableGame,
   type CpuDifficulty,
 } from "@game-platform/game-sdk";
-import { Button, cn, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
@@ -29,6 +29,12 @@ import {
   resolvePlayerTurn,
   type DominoState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "domino";
 const CPU_DELAY = 500;
@@ -69,6 +75,7 @@ export function DominoGame() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -99,28 +106,51 @@ export function DominoGame() {
   }, [state.current, state.winner, state.playerHand, state.boneyard.length, state.chain.length, canPlay]);
 
   useEffect(() => {
+    if (state.winner && prevStatusRef.current === null) {
+      if (state.winner === "player") {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner]);
+
+  useEffect(() => {
     if (state.winner) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.winner, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <p className="text-sm text-muted-foreground">{state.message}</p>
+      <div className="flex w-full max-w-sm items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <ScoreBox label="Hand" value={state.playerHand.length} />
+          <p className="text-sm text-muted-foreground">{state.message}</p>
+        </div>
         <Button
           variant="outline"
           size="icon"
@@ -156,6 +186,7 @@ export function DominoGame() {
                 type="button"
                 disabled={!canPlay}
                 onClick={() => {
+                  primeGameAudio();
                   playGameFeel("button");
                   feelTap();
                   dispatch({ type: "play", index: i });
@@ -173,6 +204,7 @@ export function DominoGame() {
         {humanTurn && playable.length === 0 && state.boneyard.length > 0 ? (
           <Button
             onClick={() => {
+              primeGameAudio();
               playGameFeel("button");
               feelTap();
               dispatch({ type: "draw" });
@@ -190,7 +222,7 @@ export function DominoGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

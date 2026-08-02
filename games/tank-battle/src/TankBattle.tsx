@@ -22,6 +22,7 @@ import { useEffect, useCallback, useReducer, useRef } from "react";
 
 import {
   createInitialState,
+  enemiesRemaining,
   fire,
   GRID_SIZE,
   move,
@@ -29,6 +30,12 @@ import {
   type Facing,
   type TankState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "tank-battle";
 const MAX_DT = 0.05;
@@ -95,6 +102,7 @@ export function TankBattleGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -150,9 +158,23 @@ export function TankBattleGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
+    if (state.status === prevStatusRef.current) {
+      return;
+    }
+    if (state.status === "over") {
+      playGameOverAudio();
+    } else if (state.status === "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -164,11 +186,13 @@ export function TankBattleGame() {
       const dir = DIRECTION_KEYS[event.key];
       if (dir) {
         event.preventDefault();
+        primeGameAudio();
         dispatch({ type: "move", dir });
         return;
       }
       if (event.key === " " || event.code === "Space") {
         event.preventDefault();
+        primeGameAudio();
         dispatch({ type: "fire" });
       }
     }
@@ -176,14 +200,22 @@ export function TankBattleGame() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [canPlayRef]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -194,10 +226,7 @@ export function TankBattleGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
-          <ScoreBox
-            label="Defeated"
-            value={state.enemiesDefeated}
-          />
+          <ScoreBox label="Enemies" value={enemiesRemaining(state)} />
         </div>
         <Button
           variant="outline"
@@ -272,7 +301,7 @@ export function TankBattleGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />
@@ -296,6 +325,7 @@ export function TankBattleGame() {
         className="w-full max-w-sm"
         disabled={!canPlay}
         onClick={() => {
+          primeGameAudio();
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "fire" });
         }}

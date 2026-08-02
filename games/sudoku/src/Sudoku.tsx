@@ -28,6 +28,7 @@ import {
   type Difficulty,
   type SudokuState,
 } from "./engine";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "sudoku";
 const BASE_SCORE = 1000;
@@ -80,6 +81,7 @@ export function SudokuGame() {
 
   const prevMistakesRef = useRef(0);
   const prevBoardRef = useRef<string>("");
+  const prevStatusRef = useRef(state.status);
 
   useEffect(() => {
     const boardKey = state.board.map((r) => r.join(",")).join("|");
@@ -97,16 +99,19 @@ export function SudokuGame() {
   }, [state.board, state.selectedCell, state.solution, state.status]);
 
   useEffect(() => {
-    if (state.mistakes > prevMistakesRef.current) {
+    if (state.mistakes > prevMistakesRef.current && state.status === "playing") {
       playGameFeel("wrong");
     }
     prevMistakesRef.current = state.mistakes;
-  }, [state.mistakes]);
+  }, [state.mistakes, state.status]);
 
   useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("goal");
+      playStageClearAudio();
+    } else if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
     }
+    prevStatusRef.current = state.status;
   }, [state.status]);
 
   const saveStatus = useAutoSave(
@@ -121,14 +126,23 @@ export function SudokuGame() {
     }
     if (state.status !== "playing") {
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, reportScore, state.mistakes]);
 
   const interactive = canPlay && state.status === "playing";
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry(difficulty?: (typeof DIFFICULTIES)[number]) {
     emitGameRetry(GAME_SLUG);
     clearSave(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch(
       difficulty ? { type: "restart", difficulty } : { type: "restart" }
     );
@@ -143,7 +157,11 @@ export function SudokuGame() {
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
-        <ScoreBox label="Mistakes" value={state.mistakes} />
+        <div className="flex gap-2">
+          <ScoreBox label="Score" value={computeScore(state.mistakes)} />
+          <ScoreBox label="Mistakes" value={`${state.mistakes}/${state.maxMistakes}`} />
+          <ScoreBox label="Level" value={state.difficulty} />
+        </div>
         <div className="flex items-center gap-1">
           {DIFFICULTIES.map((difficulty) => (
             <Button
@@ -153,7 +171,7 @@ export function SudokuGame() {
               disabled={state.status === "playing"}
               onClick={() => handleRetry(difficulty)}
             >
-              {difficulty}
+              {difficulty === "EASY" ? "Easy" : difficulty === "MEDIUM" ? "Normal" : "Hard"}
             </Button>
           ))}
         </div>
@@ -187,6 +205,7 @@ export function SudokuGame() {
                 type="button"
                 disabled={!interactive}
                 onClick={() => {
+                  primeGameAudio();
                   playGameFeel("button");
                   dispatch({ type: "select", row, col });
                 }}
@@ -212,7 +231,7 @@ export function SudokuGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />
@@ -240,6 +259,7 @@ export function SudokuGame() {
             className="min-h-11 py-3 transition-transform duration-150 active:scale-95"
             disabled={!interactive}
             onClick={() => {
+              primeGameAudio();
               playGameFeel("button");
               dispatch({ type: "enter", value: digit });
             }}

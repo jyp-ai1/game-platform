@@ -20,6 +20,12 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { computeScore, cpuMove, createInitialState, placeStone, type GomokuState } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "gomoku";
 
@@ -53,6 +59,7 @@ export function GomokuGame() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -77,9 +84,22 @@ export function GomokuGame() {
   }, [state.current, state.winner, state.board, difficulty, canPlay]);
 
   useEffect(() => {
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (state.winner === 1) {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner]);
+
+  useEffect(() => {
     if (state.winner !== null) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.winner, reportScore]);
 
@@ -94,14 +114,21 @@ export function GomokuGame() {
             ? "돌을 놓으세요 (5목)"
             : "CPU...";
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -126,7 +153,8 @@ export function GomokuGame() {
       />
       <div
         ref={fieldRef}
-        className="relative grid w-full max-w-sm grid-cols-9 gap-px rounded bg-amber-900/40 p-1"
+        className="relative grid w-full max-w-md gap-px rounded bg-amber-900/40 p-1"
+        style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}
       >
         {state.board.map((row, ri) =>
           row.map((cell, ci) => {
@@ -137,12 +165,13 @@ export function GomokuGame() {
                 type="button"
                 disabled={!humanTurn || cell !== 0}
                 onClick={() => {
+                  primeGameAudio();
                   playGameFeel("button");
                   feelTap();
                   dispatch({ type: "place", row: ri, col: ci });
                 }}
                 className={cn(
-                  "aspect-square min-h-11 min-w-11 rounded-sm bg-amber-100/20 transition-transform duration-150 active:scale-95",
+                  "aspect-square min-h-5 min-w-5 rounded-sm bg-amber-100/20 transition-transform duration-150 active:scale-95 sm:min-h-6 sm:min-w-6",
                   cell === 1 && "bg-neutral-900",
                   cell === 2 && "bg-neutral-100",
                   win && "ring-2 ring-amber-400"
@@ -160,7 +189,7 @@ export function GomokuGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

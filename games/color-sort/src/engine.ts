@@ -1,4 +1,4 @@
-export type ColorId = 1 | 2 | 3;
+export type ColorId = 1 | 2 | 3 | 4;
 
 export interface ColorSortState {
   tubes: ColorId[][];
@@ -8,14 +8,23 @@ export interface ColorSortState {
 }
 
 const CAP = 4;
+const COLOR_COUNT = 4;
+const TUBE_COUNT = 6;
 
 function makeTubes(): ColorId[][] {
-  const colors: ColorId[] = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3];
+  const colors: ColorId[] = [];
+  for (let c = 1; c <= COLOR_COUNT; c++) {
+    for (let i = 0; i < CAP; i++) colors.push(c as ColorId);
+  }
   for (let i = colors.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [colors[i], colors[j]] = [colors[j]!, colors[i]!];
   }
-  return [colors.slice(0, 4), colors.slice(4, 8), colors.slice(8, 12), []];
+  const tubes: ColorId[][] = [[], [], [], [], [], []];
+  colors.forEach((color, i) => {
+    tubes[i % 4]!.push(color);
+  });
+  return tubes;
 }
 
 export function createInitialState(): ColorSortState {
@@ -49,8 +58,10 @@ export function tapTube(state: ColorSortState, index: number): ColorSortState {
   if (dst.length > 0 && dst[dst.length - 1] !== ball) {
     return { ...state, selected: index };
   }
-  src.pop();
-  dst.push(ball);
+  let run = 1;
+  for (let i = src.length - 2; i >= 0 && src[i] === ball; i--) run++;
+  const moveCount = Math.min(run, CAP - dst.length);
+  for (let i = 0; i < moveCount; i++) dst.push(src.pop()!);
   const moves = state.moves + 1;
   const won = isSorted(tubes);
   return { tubes, selected: null, moves, status: won ? "won" : "playing" };
@@ -59,3 +70,5 @@ export function tapTube(state: ColorSortState, index: number): ColorSortState {
 export function computeScore(moves: number): number {
   return Math.max(500 - moves * 5, 50);
 }
+
+export { CAP, COLOR_COUNT, TUBE_COUNT };

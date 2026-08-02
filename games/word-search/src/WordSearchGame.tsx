@@ -31,6 +31,11 @@ import {
   WORDS,
   type WordSearchState,
 } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "word-search";
 
@@ -66,6 +71,7 @@ export function WordSearchGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevFoundRef = useRef(state.found.length);
+  const prevStatusRef = useRef(state.status);
   const score = computeScore(state);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
@@ -86,20 +92,36 @@ export function WordSearchGame() {
   );
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.found.length, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -127,7 +149,7 @@ export function WordSearchGame() {
       </ul>
       <p className="text-xs text-muted-foreground">Tap start cell, then end cell along a straight line</p>
       <PuzzlePlayField fieldRef={fieldRef} bursts={feel.bursts} className="touch-none">
-      <div className="grid w-full grid-cols-8 gap-0.5">
+      <div className="grid w-full grid-cols-10 gap-0.5">
         {Array.from({ length: SIZE * SIZE }, (_, i) => {
           const r = Math.floor(i / SIZE);
           const c = i % SIZE;
@@ -138,6 +160,7 @@ export function WordSearchGame() {
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
               onClick={() => {
+                primeGameAudio();
                 playGameFeel("button", fieldRef.current);
                 dispatch({ type: "select", row: r, col: c });
               }}
@@ -166,7 +189,7 @@ export function WordSearchGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

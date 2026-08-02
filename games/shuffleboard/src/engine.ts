@@ -55,8 +55,7 @@ export function slide(state: ShuffleboardState): ShuffleboardState {
   const discX = Math.min(BOARD - 2, Math.max(5, 10 + dist + wobble));
   const lastPoints = zonePoints(discX);
   const score = state.score + lastPoints;
-  const nextRound = state.round + 1;
-  if (nextRound > MAX_ROUNDS) {
+  if (state.round >= MAX_ROUNDS) {
     return {
       ...state,
       discX,
@@ -68,8 +67,7 @@ export function slide(state: ShuffleboardState): ShuffleboardState {
   }
   return {
     ...state,
-    round: nextRound,
-    discX: 10,
+    discX,
     score,
     power: 0,
     powerDir: 1,
@@ -81,7 +79,18 @@ export function slide(state: ShuffleboardState): ShuffleboardState {
 
 export function nextRound(state: ShuffleboardState): ShuffleboardState {
   if (state.status !== "result") return state;
-  return { ...state, status: "aiming", lastPoints: 0, lastZone: 0 };
+  const next = state.round + 1;
+  if (next > MAX_ROUNDS) {
+    return { ...state, status: "over" };
+  }
+  return {
+    ...state,
+    round: next,
+    discX: 10,
+    status: "aiming",
+    lastPoints: 0,
+    lastZone: 0,
+  };
 }
 
 export { BOARD as SHUFFLEBOARD_LEN };

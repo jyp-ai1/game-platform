@@ -27,6 +27,12 @@ import {
   resolveTurn,
   type MancalaState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "mancala";
 
@@ -63,6 +69,7 @@ export function MancalaGame() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -90,9 +97,22 @@ export function MancalaGame() {
   }, [state.current, state.winner, state.pits, canPlay]);
 
   useEffect(() => {
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (state.winner === 1) {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner]);
+
+  useEffect(() => {
     if (state.winner !== null) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.winner, reportScore, state.pits]);
 
@@ -110,14 +130,21 @@ export function MancalaGame() {
             ? "Pick a pit"
             : "CPU...";
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -166,6 +193,7 @@ export function MancalaGame() {
               type="button"
               disabled={!humanTurn || state.pits[pit] === 0}
               onClick={() => {
+                primeGameAudio();
                 playGameFeel("button");
                 feelTap();
                 dispatch({ type: "pick", pit });
@@ -188,7 +216,7 @@ export function MancalaGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

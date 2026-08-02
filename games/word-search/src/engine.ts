@@ -1,6 +1,6 @@
-export const SIZE = 8;
+export const SIZE = 10;
 
-export const WORDS = ["GAME", "PLAY", "FUN", "WIN"] as const;
+export const WORDS = ["GAME", "PLAY", "FUN", "WIN", "CODE", "FIND"] as const;
 
 export interface WordSearchState {
   grid: string[][];
@@ -10,20 +10,87 @@ export interface WordSearchState {
   status: "playing" | "won";
 }
 
-const BASE_GRID = [
-  "GAMEZXQW",
-  "ABCDETYO",
-  "PLAYUIOP",
-  "LKJHGFDS",
-  "FUNMNBVC",
-  "QWERTYUI",
-  "WINASDFG",
-  "ZXCVBNMQ",
+const DIRECTIONS: [number, number][] = [
+  [0, 1],
+  [1, 0],
+  [1, 1],
+  [1, -1],
+  [0, -1],
+  [-1, 0],
+  [-1, -1],
+  [-1, 1],
 ];
+
+function emptyGrid(): string[][] {
+  return Array.from({ length: SIZE }, () => Array<string>(SIZE).fill(""));
+}
+
+function canPlace(
+  grid: string[][],
+  word: string,
+  row: number,
+  col: number,
+  dr: number,
+  dc: number
+): boolean {
+  for (let i = 0; i < word.length; i++) {
+    const r = row + dr * i;
+    const c = col + dc * i;
+    if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return false;
+    const cell = grid[r]![c];
+    if (cell !== "" && cell !== word[i]) return false;
+  }
+  return true;
+}
+
+function placeWord(
+  grid: string[][],
+  word: string,
+  row: number,
+  col: number,
+  dr: number,
+  dc: number
+): void {
+  for (let i = 0; i < word.length; i++) {
+    grid[row + dr * i]![col + dc * i] = word[i]!;
+  }
+}
+
+function fillRandom(grid: string[][]): void {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (grid[r]![c] === "") {
+        grid[r]![c] = letters[Math.floor(Math.random() * letters.length)]!;
+      }
+    }
+  }
+}
+
+function buildGrid(): string[][] {
+  const grid = emptyGrid();
+  for (const word of WORDS) {
+    let placed = false;
+    for (let attempt = 0; attempt < 80 && !placed; attempt++) {
+      const [dr, dc] = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)]!;
+      const row = Math.floor(Math.random() * SIZE);
+      const col = Math.floor(Math.random() * SIZE);
+      if (canPlace(grid, word, row, col, dr, dc)) {
+        placeWord(grid, word, row, col, dr, dc);
+        placed = true;
+      }
+    }
+    if (!placed) {
+      placeWord(grid, word, 0, 0, 0, 1);
+    }
+  }
+  fillRandom(grid);
+  return grid;
+}
 
 export function createInitialState(): WordSearchState {
   return {
-    grid: BASE_GRID.map((row) => row.split("")),
+    grid: buildGrid(),
     found: [],
     anchor: null,
     highlight: [],

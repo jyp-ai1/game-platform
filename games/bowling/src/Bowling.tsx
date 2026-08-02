@@ -19,7 +19,8 @@ import { Button, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
-import { createInitialState, roll, tickPower, type BowlingState } from "./engine";
+import { createInitialState, MAX_FRAMES, roll, tickPower, type BowlingState } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "bowling";
 const TICK_MS = 32;
@@ -51,7 +52,8 @@ export function BowlingGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
-  
+  const prevStatusRef = useRef(state.status);
+
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       const gain = state.score - prevScoreRef.current;
@@ -74,21 +76,37 @@ export function BowlingGame() {
   }, [state.status, canPlay]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -98,7 +116,7 @@ export function BowlingGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="Score" value={state.score} />
-        <ScoreBox label="Frame" value={Math.min(state.frame, 5)} />
+        <ScoreBox label="Frame" value={Math.min(state.frame, MAX_FRAMES)} />
         <ScoreBox label="Pins" value={state.pins} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
@@ -111,6 +129,7 @@ export function BowlingGame() {
       <Button
         disabled={state.status !== "aiming" || !canPlay}
         onClick={() => {
+          primeGameAudio();
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "roll" });
         }}
@@ -127,7 +146,7 @@ export function BowlingGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

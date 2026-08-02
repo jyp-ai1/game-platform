@@ -21,6 +21,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import {
   clearCell,
+  clearWrongFlash,
   computeScore,
   createInitialState,
   enterDigit,
@@ -29,6 +30,11 @@ import {
   type ClueCell,
   type KakuroState,
 } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "kakuro";
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -37,6 +43,7 @@ type Action =
   | { type: "select"; row: number; col: number }
   | { type: "digit"; n: number }
   | { type: "clear" }
+  | { type: "clearFlash" }
   | { type: "restart" };
 
 function reducer(state: KakuroState, action: Action): KakuroState {
@@ -49,6 +56,8 @@ function reducer(state: KakuroState, action: Action): KakuroState {
       return enterDigit(state, action.n);
     case "clear":
       return clearCell(state);
+    case "clearFlash":
+      return clearWrongFlash(state);
     default:
       return state;
   }
@@ -67,6 +76,7 @@ export function KakuroGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     fieldRef,
@@ -79,20 +89,42 @@ export function KakuroGame() {
   );
 
   useEffect(() => {
+    if (!state.wrongFlash) return;
+    const id = window.setTimeout(() => dispatch({ type: "clearFlash" }), 400);
+    return () => window.clearTimeout(id);
+  }, [state.wrongFlash]);
+
+  useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
-      playGameFeel("goal", fieldRef.current);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -112,6 +144,8 @@ export function KakuroGame() {
           const c = i % SIZE;
           const cell = state.grid[r]![c]!;
           const sel = state.selected?.[0] === r && state.selected?.[1] === c;
+          const wrong =
+            state.wrongFlash?.[0] === r && state.wrongFlash?.[1] === c;
           if (cell.kind === "blank") {
             return <div key={i} className="aspect-square bg-muted" />;
           }
@@ -133,12 +167,14 @@ export function KakuroGame() {
               type="button"
               disabled={!canPlayRef.current || state.status === "won"}
               onClick={() => {
+                primeGameAudio();
                 playGameFeel("button", fieldRef.current);
                 dispatch({ type: "select", row: r, col: c });
               }}
               className={cn(
                 "aspect-square min-h-11 min-w-11 border text-lg font-bold transition-transform duration-150 active:scale-95",
-                sel ? "border-primary bg-primary/10" : "border-border bg-background"
+                wrong && "border-destructive bg-destructive/20",
+                sel && !wrong ? "border-primary bg-primary/10" : !wrong ? "border-border bg-background" : ""
               )}
             >
               {state.entries[r]![c] ?? ""}
@@ -155,6 +191,7 @@ export function KakuroGame() {
             size="sm"
             disabled={!state.selected || state.status === "won"}
             onClick={() => {
+              primeGameAudio();
               playGameFeel("button", fieldRef.current);
               dispatch({ type: "digit", n });
             }}
@@ -167,6 +204,7 @@ export function KakuroGame() {
           size="sm"
           disabled={!state.selected}
           onClick={() => {
+            primeGameAudio();
             playGameFeel("button", fieldRef.current);
             dispatch({ type: "clear" });
           }}
@@ -181,7 +219,7 @@ export function KakuroGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

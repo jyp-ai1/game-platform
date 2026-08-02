@@ -26,14 +26,21 @@ import {
   markEmpty,
   SIZE,
   toggleCell,
+  clearWrongFlash,
   type NonogramState,
 } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "nonogram";
 
 type Action =
   | { type: "fill"; row: number; col: number }
   | { type: "empty"; row: number; col: number }
+  | { type: "clearFlash" }
   | { type: "restart" };
 
 function reducer(state: NonogramState, action: Action): NonogramState {
@@ -44,6 +51,8 @@ function reducer(state: NonogramState, action: Action): NonogramState {
       return toggleCell(state, action.row, action.col);
     case "empty":
       return markEmpty(state, action.row, action.col);
+    case "clearFlash":
+      return clearWrongFlash(state);
     default:
       return state;
   }
@@ -62,6 +71,7 @@ export function NonogramGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
     fieldRef,
@@ -74,20 +84,43 @@ export function NonogramGame() {
   );
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
-      playGameFeel("goal", fieldRef.current);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, reportScore]);
 
+  useEffect(() => {
+    if (!state.wrongFlash) return;
+    playGameFeel("wrong", fieldRef.current);
+    const id = window.setTimeout(() => dispatch({ type: "clearFlash" }), 400);
+    return () => window.clearTimeout(id);
+  }, [state.wrongFlash]);
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -119,12 +152,15 @@ export function NonogramGame() {
               </div>
               {Array.from({ length: SIZE }, (_, c) => {
                 const mark = state.marks[r]![c];
+                const isWrongFlash =
+                  state.wrongFlash?.[0] === r && state.wrongFlash?.[1] === c;
                 return (
                   <button
                     key={`${r}-${c}`}
                     type="button"
                     disabled={!canPlayRef.current || state.status === "won"}
                     onClick={() => {
+                      primeGameAudio();
                       playGameFeel("button", fieldRef.current);
                       dispatch({ type: "fill", row: r, col: c });
                     }}
@@ -135,7 +171,8 @@ export function NonogramGame() {
                     className={cn(
                 "aspect-square w-full min-h-11 min-w-11 border border-border text-[10px] transition-transform duration-150 active:scale-95 sm:text-xs",
                       mark === true && "bg-primary",
-                      mark === false && "text-muted-foreground"
+                      mark === false && "text-muted-foreground",
+                      isWrongFlash && "animate-pulse bg-destructive"
                     )}
                   >
                     {mark === false ? "×" : ""}
@@ -154,7 +191,7 @@ export function NonogramGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

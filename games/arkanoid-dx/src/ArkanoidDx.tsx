@@ -26,6 +26,7 @@ import {
   brickRect,
   CAPSULE_SIZE,
   createInitialState,
+  STAGE_NAMES,
   FIELD_HEIGHT,
   FIELD_WIDTH,
   PADDLE_HEIGHT,
@@ -35,6 +36,12 @@ import {
   type ArkanoidState,
   type Rect,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "arkanoid-dx";
 const PADDLE_KEY_SPEED = 320;
@@ -84,6 +91,7 @@ export function ArkanoidDxGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -148,9 +156,23 @@ export function ArkanoidDxGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
+    if (state.status === prevStatusRef.current) {
+      return;
+    }
+    if (state.status === "over") {
+      playGameOverAudio();
+    } else if (state.status === "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status !== "playing") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -158,6 +180,7 @@ export function ArkanoidDxGame() {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
+        primeGameAudio();
         keysRef.current.add(event.key);
       }
     }
@@ -189,14 +212,22 @@ export function ArkanoidDxGame() {
   );
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -207,7 +238,7 @@ export function ArkanoidDxGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
-          <ScoreBox label="Stage" value={state.stage + 1} />
+          <ScoreBox label="Stage" value={STAGE_NAMES[state.stage] ?? state.stage + 1} />
           <ScoreBox label="Lives" value={state.lives} />
         </div>
         <Button
@@ -225,7 +256,10 @@ export function ArkanoidDxGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
-        onPointerDown={() => playGameFeel("button", fieldRef.current)}
+        onPointerDown={() => {
+          primeGameAudio();
+          playGameFeel("button", fieldRef.current);
+        }}
       >
         {state.bricks.map((alive, index) =>
           alive ? (
@@ -289,7 +323,7 @@ export function ArkanoidDxGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

@@ -24,10 +24,12 @@ import {
   BILLIARDS_W,
   computeScore,
   createInitialState,
+  MAX_SHOTS,
   shoot,
   tickAim,
   type BilliardsState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "billiards";
 const TICK_MS = 32;
@@ -60,7 +62,8 @@ export function BilliardsGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
-  
+  const prevStatusRef = useRef(state.status);
+
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       const gain = state.score - prevScoreRef.current;
@@ -87,21 +90,37 @@ export function BilliardsGame() {
   }, [state.status, canPlay]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -111,7 +130,7 @@ export function BilliardsGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="Score" value={state.score} />
-        <ScoreBox label="Shots" value={state.shots} />
+        <ScoreBox label="Shots Left" value={MAX_SHOTS - state.shots} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
@@ -153,6 +172,7 @@ export function BilliardsGame() {
       <Button
         disabled={state.status !== "aiming" || !canPlay}
         onClick={() => {
+          primeGameAudio();
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "shoot" });
         }}
@@ -166,7 +186,7 @@ export function BilliardsGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

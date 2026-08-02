@@ -26,6 +26,7 @@ import {
   tickPower,
   type ShuffleboardState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "shuffleboard";
 const TICK_MS = 32;
@@ -59,6 +60,7 @@ export function ShuffleboardGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -91,21 +93,43 @@ export function ShuffleboardGame() {
   }, [state.status, canPlay]);
 
   useEffect(() => {
+    if (state.status !== "result" || !canPlay) return;
+    const id = window.setTimeout(() => dispatch({ type: "next" }), 1200);
+    return () => window.clearTimeout(id);
+  }, [state.status, state.round, canPlay]);
+
+  useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -139,6 +163,7 @@ export function ShuffleboardGame() {
       </div>
       {state.status === "aiming" ? (
         <Button disabled={!canPlay} onClick={() => {
+          primeGameAudio();
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "slide" });
         }}>
@@ -146,10 +171,7 @@ export function ShuffleboardGame() {
         </Button>
       ) : null}
       {state.status === "result" ? (
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm">Zone score: +{state.lastPoints}</p>
-          <Button onClick={() => dispatch({ type: "next" })}>Next round</Button>
-        </div>
+        <p className="text-sm">Zone score: +{state.lastPoints}</p>
       ) : null}
       {state.status === "over" ? (
         <StandardGameOverOverlay
@@ -158,7 +180,7 @@ export function ShuffleboardGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

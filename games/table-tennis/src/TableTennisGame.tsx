@@ -34,6 +34,12 @@ import {
   step,
   type TableTennisState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "table-tennis";
 const MAX_DT = 0.05;
@@ -75,6 +81,7 @@ export function TableTennisGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const stage = state.playerScore + state.cpuScore + 1;
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -127,9 +134,22 @@ export function TableTennisGame() {
   }, [state.playerScore]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      if (state.winner === "player") {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status, state.winner]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.playerScore, state.winner, reportScore]);
 
@@ -137,6 +157,7 @@ export function TableTennisGame() {
     const el = fieldRef.current;
     if (!el || !canPlayRef.current) return;
     if (e.type === "pointerdown") {
+      primeGameAudio();
       playGameFeel("button", el);
     }
     const rect = el.getBoundingClientRect();
@@ -152,8 +173,15 @@ export function TableTennisGame() {
         : "Move paddle — first to 5";
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     prevPlayerScore.current = 0;
     dispatch({ type: "restart" });
@@ -161,6 +189,7 @@ export function TableTennisGame() {
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     prevPlayerScore.current = 0;
     dispatch({ type: "restart" });
@@ -195,7 +224,7 @@ export function TableTennisGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

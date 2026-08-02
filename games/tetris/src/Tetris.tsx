@@ -29,11 +29,13 @@ import {
   hardDropRow,
   lockPiece,
   ROWS,
+  SOFT_DROP_POINTS,
   TETROMINO_COLORS,
   tryMove,
   tryRotate,
   type TetrisState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "tetris";
 const SWIPE_THRESHOLD = 24;
@@ -65,13 +67,21 @@ function reducer(state: TetrisState, action: Action): TetrisState {
       const rotated = tryRotate(state.board, state.active);
       return rotated ? { ...state, active: rotated } : state;
     }
-    case "softDrop":
     case "tick": {
       if (state.status !== "playing") {
         return state;
       }
       const moved = tryMove(state.board, state.active, 0, 1);
       return moved ? { ...state, active: moved } : lockPiece(state);
+    }
+    case "softDrop": {
+      if (state.status !== "playing") {
+        return state;
+      }
+      const moved = tryMove(state.board, state.active, 0, 1);
+      return moved
+        ? { ...state, active: moved, score: state.score + SOFT_DROP_POINTS }
+        : lockPiece(state);
     }
     case "hardDrop": {
       if (state.status !== "playing") {
@@ -104,6 +114,7 @@ export function TetrisGame() {
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const prevLinesRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -124,9 +135,18 @@ export function TetrisGame() {
   }, [state.status, state.level, canPlay]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -142,6 +162,7 @@ export function TetrisGame() {
       if (!canPlayRef.current) {
         return;
       }
+      primeGameAudio();
       switch (event.key) {
         case "ArrowLeft":
           event.preventDefault();
@@ -215,15 +236,23 @@ export function TetrisGame() {
     }
   }
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     prevLinesRef.current = 0;
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     prevLinesRef.current = 0;
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -238,6 +267,7 @@ export function TetrisGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Lines" value={state.linesCleared} />
           <ScoreBox label="Level" value={state.level} />
         </div>
         <Button
@@ -281,7 +311,7 @@ export function TetrisGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

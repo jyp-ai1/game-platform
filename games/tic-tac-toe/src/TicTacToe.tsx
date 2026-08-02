@@ -25,10 +25,18 @@ import {
   playMove,
   type TicTacToeState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "tic-tac-toe";
 const CPU_MOVE_DELAY_MS = 500;
 const WIN_SCORE = 100;
+
+type GameMode = "cpu" | "local";
 
 type Action =
   | { type: "playMove"; index: number }
@@ -48,10 +56,11 @@ function reducer(state: TicTacToeState, action: Action): TicTacToeState {
   }
 }
 
-function statusMessage(state: TicTacToeState): string {
-  if (state.winner === "X") return "You Win!";
-  if (state.winner === "O") return "CPU Wins!";
+function statusMessage(state: TicTacToeState, mode: GameMode): string {
+  if (state.winner === "X") return mode === "local" ? "X Wins!" : "You Win!";
+  if (state.winner === "O") return mode === "local" ? "O Wins!" : "CPU Wins!";
   if (state.winner === "draw") return "Draw";
+  if (mode === "local") return `${state.currentPlayer} 차례`;
   return state.currentPlayer === "X" ? "당신의 차례입니다" : "CPU가 생각 중...";
 }
 
@@ -61,7 +70,9 @@ export function TicTacToeGame() {
     createInitialState
   );
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [mode, setMode] = useState<GameMode>("cpu");
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -85,7 +96,7 @@ export function TicTacToeGame() {
   );
 
   useEffect(() => {
-    if (!canPlayRef.current || state.winner !== null || state.currentPlayer !== "O") {
+    if (mode !== "cpu" || !canPlayRef.current || state.winner !== null || state.currentPlayer !== "O") {
       return;
     }
     const id = setTimeout(
@@ -93,27 +104,48 @@ export function TicTacToeGame() {
       CPU_MOVE_DELAY_MS
     );
     return () => clearTimeout(id);
-  }, [state.currentPlayer, state.winner, canPlay, difficulty]);
+  }, [mode, state.currentPlayer, state.winner, canPlay, difficulty]);
 
   useEffect(() => {
-    if (state.winner === "X") {
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (mode === "cpu" && state.winner === "X") {
+        playStageClearAudio();
+      } else if (mode === "cpu" && state.winner !== "draw") {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner, mode]);
+
+  useEffect(() => {
+    if (mode === "cpu" && state.winner === "X") {
       reportScore(GAME_SLUG, WIN_SCORE);
     }
     if (state.winner !== null) {
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
-  }, [state.winner, reportScore]);
+  }, [state.winner, reportScore, mode]);
 
   const isHumanTurn =
-    canPlay && state.currentPlayer === "X" && state.winner === null;
+    canPlay && state.winner === null && (mode === "local" || state.currentPlayer === "X");
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -122,7 +154,7 @@ export function TicTacToeGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">
-          {statusMessage(state)}
+          {statusMessage(state, mode)}
         </p>
         <Button
           variant="outline"
@@ -134,11 +166,32 @@ export function TicTacToeGame() {
         </Button>
       </div>
 
-      <CpuDifficultyPicker
-        value={difficulty}
-        onChange={setDifficulty}
-        disabled={state.winner !== null}
-      />
+      <div className="flex w-full max-w-sm gap-2">
+        <Button
+          variant={mode === "cpu" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("cpu")}
+        >
+          vs CPU
+        </Button>
+        <Button
+          variant={mode === "local" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("local")}
+        >
+          2 Player
+        </Button>
+      </div>
+
+      {mode === "cpu" ? (
+        <CpuDifficultyPicker
+          value={difficulty}
+          onChange={setDifficulty}
+          disabled={state.winner !== null}
+        />
+      ) : null}
 
       <div
         ref={fieldRef}
@@ -151,6 +204,7 @@ export function TicTacToeGame() {
               key={index}
               type="button"
               onClick={() => {
+                primeGameAudio();
                 playGameFeel("button");
                 feelTap();
                 dispatch({ type: "playMove", index });
@@ -172,12 +226,12 @@ export function TicTacToeGame() {
 
         {state.winner !== null ? (
           <StandardGameOverOverlay
-            message={statusMessage(state)}
-            score={state.winner === "X" ? WIN_SCORE : undefined}
+            message={statusMessage(state, mode)}
+            score={mode === "cpu" && state.winner === "X" ? WIN_SCORE : undefined}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />
@@ -191,7 +245,9 @@ export function TicTacToeGame() {
       ) : null}
 
       <p className="text-xs text-muted-foreground">
-        당신은 X입니다. CPU를 상대로 승리해보세요.
+        {mode === "local"
+          ? "같은 기기에서 X와 O가 번갈아 둡니다."
+          : "당신은 X입니다. CPU를 상대로 승리해보세요."}
       </p>
     </div>
   );

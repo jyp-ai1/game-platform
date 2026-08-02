@@ -37,6 +37,12 @@ import {
   type Enemy,
   type GalaxyState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "galaxy-defender";
 const PLAYER_KEY_SPEED = 300;
@@ -101,6 +107,7 @@ export function GalaxyDefenderGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
 
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -172,9 +179,23 @@ export function GalaxyDefenderGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
+    if (state.status === prevStatusRef.current) {
+      return;
+    }
+    if (state.status === "over") {
+      playGameOverAudio();
+    } else if (state.status === "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -185,6 +206,7 @@ export function GalaxyDefenderGame() {
       }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
+        primeGameAudio();
         keysRef.current.add(event.key);
       }
     }
@@ -216,14 +238,22 @@ export function GalaxyDefenderGame() {
   );
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -235,7 +265,7 @@ export function GalaxyDefenderGame() {
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Lives" value={state.lives} />
-          <ScoreBox label="Wave" value={state.wave} />
+          <ScoreBox label="Wave" value={`${state.wave} → ${state.wave + 1}`} />
         </div>
         <Button
           variant="outline"
@@ -252,7 +282,10 @@ export function GalaxyDefenderGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
-        onPointerDown={() => playGameFeel("button", fieldRef.current)}
+        onPointerDown={() => {
+          primeGameAudio();
+          playGameFeel("button", fieldRef.current);
+        }}
       >
         {state.enemies.map((enemy) => (
           <div
@@ -282,7 +315,7 @@ export function GalaxyDefenderGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

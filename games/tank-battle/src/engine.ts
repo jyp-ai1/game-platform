@@ -14,6 +14,10 @@ export const ENEMY_FIRE_COOLDOWN = 1.2; // seconds
 export const POINTS_PER_ENEMY = 100;
 export const ENEMIES_TOTAL = 5;
 
+export function enemiesRemaining(state: TankState): number {
+  return Math.max(0, state.enemiesTotal - state.enemiesDefeated);
+}
+
 export type TileType = "empty" | "brick" | "steel" | "water";
 export type Facing = "up" | "down" | "left" | "right";
 export type Status = "playing" | "over" | "won";

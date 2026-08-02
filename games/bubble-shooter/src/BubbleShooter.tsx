@@ -22,10 +22,17 @@ import { useEffect, useCallback, useReducer, useRef } from "react";
 import {
   computeScore,
   createInitialState,
+  MAX_SHOTS,
   shootColumn,
   type BubbleShooterState,
   type ColorId,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "bubble-shooter";
 const COLORS: Record<ColorId, string> = {
@@ -55,6 +62,7 @@ export function BubbleShooterGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -65,11 +73,12 @@ export function BubbleShooterGame() {
   }, [state.score]);
 
   useEffect(() => {
-    if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
-    } else if (state.status === "over") {
-      playGameFeel("wrong", fieldRef.current);
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    } else if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
     }
+    prevStatusRef.current = state.status;
   }, [state.status]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -87,18 +96,28 @@ export function BubbleShooterGame() {
     if (state.status !== "playing") {
       reportScore(GAME_SLUG, computeScore(state.score, state.status));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -108,7 +127,7 @@ export function BubbleShooterGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Score" value={state.score} />
-        <ScoreBox label="Shots" value={state.shots} />
+        <ScoreBox label="Shots Left" value={MAX_SHOTS - state.shots} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
@@ -122,6 +141,7 @@ export function BubbleShooterGame() {
                 type="button"
                 onClick={() => {
                   if (canPlayRef.current && state.status === "playing") {
+                    primeGameAudio();
                     playGameFeel("button", fieldRef.current);
                     dispatch({ type: "shoot", col: ci });
                   }
@@ -151,7 +171,7 @@ export function BubbleShooterGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

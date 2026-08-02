@@ -172,6 +172,7 @@ function clearLines(board: Cell[][]): { board: Cell[][]; cleared: number } {
 }
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
+export const SOFT_DROP_POINTS = 1;
 
 export function levelForLines(linesCleared: number): number {
   return 1 + Math.floor(linesCleared / 10);

@@ -27,6 +27,7 @@ import {
   type SimonColor,
   type SimonState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "simon";
 const PLAYBACK_STEP_MS = 600;
@@ -70,18 +71,20 @@ export function SimonGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevPhaseRef = useRef(state.phase);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("combo", fieldRef.current);
+      playGameFeel("match", fieldRef.current);
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
 
   useEffect(() => {
-    if (state.phase === "over") {
-      playGameFeel("wrong", fieldRef.current);
+    if (state.phase === "over" && prevPhaseRef.current !== "over") {
+      playGameOverAudio();
     }
+    prevPhaseRef.current = state.phase;
   }, [state.phase]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -144,20 +147,30 @@ export function SimonGame() {
     if (state.phase === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.phase, state.score, reportScore]);
 
   const highlightedColor =
     state.phase === "playback" ? state.sequence[state.playbackIndex] : null;
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -192,6 +205,7 @@ export function SimonGame() {
               aria-label={pad.label}
               disabled={disabled}
               onClick={() => {
+                primeGameAudio();
                 playGameFeel("button", fieldRef.current);
                 dispatch({ type: "submitInput", color: pad.color });
               }}
@@ -212,7 +226,7 @@ export function SimonGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

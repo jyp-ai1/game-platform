@@ -20,6 +20,7 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, throwDart, type DartsState } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "darts";
 
@@ -45,7 +46,7 @@ export function DartsGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLButtonElement>(null);
-  const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -53,12 +54,10 @@ export function DartsGame() {
   }, []);
   
   useEffect(() => {
-    if (state.score > prevScoreRef.current) {
-      const gain = state.score - prevScoreRef.current;
-      playGameFeel(gain >= 25 ? "combo" : "goal", fieldRef.current);
+    if (state.lastPoints !== null && state.lastPoints > 0) {
+      playGameFeel(state.lastPoints >= 25 ? "combo" : "goal", fieldRef.current);
     }
-    prevScoreRef.current = state.score;
-  }, [state.score]);
+  }, [state.lastPoints]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
@@ -72,14 +71,30 @@ export function DartsGame() {
   );
 
   useEffect(() => {
-    if (state.status === "over") {
-      reportScore(GAME_SLUG, state.score);
-      clearSave(GAME_SLUG);
+    if (
+      (state.status === "over" || state.status === "won") &&
+      prevStatusRef.current === "playing"
+    ) {
+      playGameOverAudio();
     }
-  }, [state.status, state.score, reportScore]);
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
+    if (state.status === "won" || state.status === "over") {
+      reportScore(
+        GAME_SLUG,
+        state.status === "won" ? 501 : 501 - state.scoreRemaining
+      );
+      clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
+    }
+  }, [state.status, state.scoreRemaining, reportScore]);
 
   function handleBoardClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (!canPlayRef.current || state.status !== "playing") return;
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     const rect = e.currentTarget.getBoundingClientRect();
     const xPct = ((e.clientX - rect.left) / rect.width) * 100;
@@ -87,16 +102,21 @@ export function DartsGame() {
     dispatch({ type: "throw", xPct, yPct });
   }
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
-    prevScoreRef.current = 0;
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
-    prevScoreRef.current = 0;
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -105,7 +125,7 @@ export function DartsGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
-          <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Remaining" value={state.scoreRemaining} />
           <ScoreBox label="Throws" value={state.throwsLeft} />
         </div>
         <Button
@@ -145,14 +165,18 @@ export function DartsGame() {
         ) : null}
         {feel.bursts.length ? <GameFeelLayer bursts={feel.bursts} /> : null}
       </button>
-      {state.status === "over" ? (
+      {state.status === "won" || state.status === "over" ? (
         <StandardGameOverOverlay
-          message={`Finished! ${state.score} pts`}
-          score={state.score}
+          message={
+            state.status === "won"
+              ? "501 Checkout!"
+              : `${state.scoreRemaining} left — out of throws`
+          }
+          score={state.status === "won" ? 501 : 501 - state.scoreRemaining}
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />
@@ -161,7 +185,7 @@ export function DartsGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Darts" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
-      <p className="text-xs text-muted-foreground">다트판을 탭해서 10번 던지세요.</p>
+      <p className="text-xs text-muted-foreground">501에서 시작 — 정확히 0이 되면 승리.</p>
     </div>
   );
 }

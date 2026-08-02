@@ -22,18 +22,23 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import {
   checkWin,
+  chordReveal,
   createEmptyBoard,
+  mineCountForDifficulty,
   placeMines,
   reveal,
   revealAllMines,
   toggleFlag,
   type Board,
+  type Difficulty,
 } from "./engine";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "minesweeper";
 const MAX_SCORE = 10000;
 const SCORE_PER_SECOND = 50;
 const MIN_SCORE = 100;
+const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
 
 type Status = "waiting" | "playing" | "won" | "lost";
 
@@ -42,27 +47,30 @@ interface State {
   status: Status;
   startedAt: number | null;
   flagMode: boolean;
+  difficulty: Difficulty;
 }
 
 type Action =
   | { type: "reveal"; row: number; col: number }
+  | { type: "chord"; row: number; col: number }
   | { type: "toggleFlag"; row: number; col: number }
   | { type: "toggleFlagMode" }
-  | { type: "restart" };
+  | { type: "restart"; difficulty?: Difficulty };
 
-function createInitialState(): State {
+function createInitialState(difficulty: Difficulty = "MEDIUM"): State {
   return {
     board: createEmptyBoard(),
     status: "waiting",
     startedAt: null,
     flagMode: false,
+    difficulty,
   };
 }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "restart":
-      return createInitialState();
+      return createInitialState(action.difficulty ?? state.difficulty);
     case "toggleFlagMode":
       return { ...state, flagMode: !state.flagMode };
     case "toggleFlag": {
@@ -70,6 +78,21 @@ function reducer(state: State, action: Action): State {
         return state;
       }
       return { ...state, board: toggleFlag(state.board, action.row, action.col) };
+    }
+    case "chord": {
+      if (state.status !== "playing") {
+        return state;
+      }
+      const center = state.board[action.row]?.[action.col];
+      if (!center?.revealed || center.adjacentMines === 0) {
+        return state;
+      }
+      const { board, hitMine } = chordReveal(state.board, action.row, action.col);
+      if (hitMine) {
+        return { ...state, board, status: "lost" };
+      }
+      const won = checkWin(board);
+      return { ...state, board, status: won ? "won" : "playing" };
     }
     case "reveal": {
       if (state.status === "won" || state.status === "lost") {
@@ -83,7 +106,12 @@ function reducer(state: State, action: Action): State {
       let board = state.board;
       let startedAt = state.startedAt;
       if (state.status === "waiting") {
-        board = placeMines(board, action.row, action.col);
+        board = placeMines(
+          board,
+          action.row,
+          action.col,
+          mineCountForDifficulty(state.difficulty)
+        );
         startedAt = Date.now();
       }
 
@@ -164,6 +192,8 @@ export function MinesweeperGame() {
     }
     if (state.status === "won" || state.status === "lost") {
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, elapsed, reportScore]);
 
@@ -175,16 +205,31 @@ export function MinesweeperGame() {
 
   useEffect(() => {
     if (state.status === "lost" && prevStatusRef.current !== "lost") {
-      playGameFeel("explosion", fieldRef.current);
+      playGameOverAudio();
     }
     if (state.status === "won" && prevStatusRef.current !== "won") {
-      playGameFeel("correct", fieldRef.current);
+      playStageClearAudio();
+    }
+    if (state.status === "playing" && prevStatusRef.current === "waiting") {
+      playGameFeel("pop", fieldRef.current);
     }
     prevStatusRef.current = state.status;
   }, [state.status]);
 
   function handleClick(row: number, col: number) {
     if (!canPlayRef.current) {
+      return;
+    }
+    primeGameAudio();
+    const cell = state.board[row]?.[col];
+    if (
+      !state.flagMode &&
+      cell?.revealed &&
+      cell.adjacentMines > 0 &&
+      state.status === "playing"
+    ) {
+      playGameFeel("button", fieldRef.current);
+      dispatch({ type: "chord", row, col });
       return;
     }
     if (state.flagMode) {
@@ -204,32 +249,57 @@ export function MinesweeperGame() {
     if (!canPlayRef.current) {
       return;
     }
+    primeGameAudio();
     playGameFeel("flag", fieldRef.current);
     dispatch({ type: "toggleFlag", row, col });
   }
 
-  function handleRetry() {
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
+  function handleRetry(difficulty?: Difficulty) {
     emitGameRetry(GAME_SLUG);
     clearSave(GAME_SLUG);
     setElapsed(0);
-    dispatch({ type: "restart" });
+    resetGameAudioPrime();
+    dispatch({ type: "restart", difficulty });
   }
 
   function handleNewGame() {
     onNewGame();
     setElapsed(0);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
+
+  const mineCount = mineCountForDifficulty(state.difficulty);
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
+      <div className="flex w-full max-w-sm items-center justify-between gap-2">
         <div className="rounded-lg bg-muted px-3 py-1.5 text-center">
           <div className="text-[10px] font-medium uppercase text-muted-foreground">
             Time
           </div>
           <div className="text-lg font-bold tabular-nums">{elapsed}s</div>
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {DIFFICULTIES.map((level) => (
+            <Button
+              key={level}
+              variant={state.difficulty === level ? "default" : "outline"}
+              size="sm"
+              className="min-h-9 px-2 text-xs"
+              disabled={state.status === "playing" && state.startedAt !== null}
+              onClick={() => handleRetry(level)}
+            >
+              {level === "EASY" ? "Easy" : level === "MEDIUM" ? "Normal" : "Hard"}
+            </Button>
+          ))}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -245,7 +315,7 @@ export function MinesweeperGame() {
             variant="outline"
             size="icon"
             aria-label="새 게임"
-            onClick={handleRetry}
+            onClick={() => handleRetry()}
           >
             <RotateCcw />
           </Button>
@@ -295,9 +365,9 @@ export function MinesweeperGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
-            onRetry={handleRetry}
-            onRestart={handleRetry}
+            onExit={handleExit}
+            onRetry={() => handleRetry()}
+            onRestart={() => handleRetry()}
           />
         ) : null}
 
@@ -314,7 +384,7 @@ export function MinesweeperGame() {
       ) : null}
 
       <p className="text-xs text-muted-foreground">
-        칸을 클릭해 열고, 우클릭(모바일은 깃발 모드)으로 지뢰를 표시하세요.
+        {mineCount}개 지뢰 · 칸을 클릭해 열고, 우클릭(모바일은 깃발 모드)으로 지뢰를 표시하세요.
       </p>
     </div>
   );

@@ -26,9 +26,17 @@ import {
   dropDisc,
   type Connect4State,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "connect4";
 const CPU_DELAY = 450;
+
+type GameMode = "cpu" | "local";
 
 type Action =
   | { type: "drop"; col: number }
@@ -59,7 +67,9 @@ export function Connect4Game() {
   }, []);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [mode, setMode] = useState<GameMode>("cpu");
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -76,38 +86,67 @@ export function Connect4Game() {
   );
 
   useEffect(() => {
-    if (!canPlayRef.current || state.winner !== null || state.current !== 2) return;
+    if (mode !== "cpu" || !canPlayRef.current || state.winner !== null || state.current !== 2) return;
     const id = setTimeout(() => dispatch({ type: "cpu", difficulty }), CPU_DELAY);
     return () => clearTimeout(id);
-  }, [state.current, state.winner, difficulty, canPlay]);
+  }, [mode, state.current, state.winner, difficulty, canPlay]);
 
   useEffect(() => {
-    if (state.winner !== null) {
-      reportScore(GAME_SLUG, computeScore(state));
-      clearSave(GAME_SLUG);
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (mode === "cpu" && state.winner === 1) {
+        playStageClearAudio();
+      } else if (mode === "cpu" && state.winner !== "draw") {
+        playGameOverAudio();
+      }
     }
-  }, [state.winner, reportScore]);
+    prevStatusRef.current = state.winner;
+  }, [state.winner, mode]);
+
+  useEffect(() => {
+    if (state.winner !== null && mode === "cpu") {
+      reportScore(GAME_SLUG, computeScore(state));
+    }
+    if (state.winner !== null) {
+      clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
+    }
+  }, [state.winner, reportScore, mode]);
 
   const humanTurn =
-    canPlayRef.current && state.current === 1 && state.winner === null;
+    canPlayRef.current && state.winner === null && (mode === "local" || state.current === 1);
   const msg =
     state.winner === 1
-      ? "You Win!"
+      ? mode === "local"
+        ? "Player 1 Wins!"
+        : "You Win!"
       : state.winner === 2
-        ? "CPU Wins!"
+        ? mode === "local"
+          ? "Player 2 Wins!"
+          : "CPU Wins!"
         : state.winner === "draw"
           ? "Draw"
           : humanTurn
-            ? "열을 탭해 디스크를 놓으세요"
+            ? mode === "local"
+              ? `Player ${state.current} — 열을 탭하세요`
+              : "열을 탭해 디스크를 놓으세요"
             : "CPU 차례...";
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -120,11 +159,31 @@ export function Connect4Game() {
           <RotateCcw />
         </Button>
       </div>
-      <CpuDifficultyPicker
-        value={difficulty}
-        onChange={setDifficulty}
-        disabled={state.winner !== null}
-      />
+      <div className="flex w-full max-w-sm gap-2">
+        <Button
+          variant={mode === "cpu" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("cpu")}
+        >
+          vs CPU
+        </Button>
+        <Button
+          variant={mode === "local" ? "default" : "outline"}
+          size="sm"
+          disabled={state.winner !== null}
+          onClick={() => setMode("local")}
+        >
+          2 Player
+        </Button>
+      </div>
+      {mode === "cpu" ? (
+        <CpuDifficultyPicker
+          value={difficulty}
+          onChange={setDifficulty}
+          disabled={state.winner !== null}
+        />
+      ) : null}
       <div ref={fieldRef} className="flex w-full max-w-sm flex-col gap-1">
         <div className="flex gap-1">
           {Array.from({ length: 7 }, (_, col) => (
@@ -134,6 +193,7 @@ export function Connect4Game() {
               disabled={!humanTurn}
               aria-label={`열 ${col + 1}`}
               onClick={() => {
+                primeGameAudio();
                 playGameFeel("button");
                 feelTap();
                 dispatch({ type: "drop", col });
@@ -167,11 +227,11 @@ export function Connect4Game() {
       {state.winner !== null ? (
         <StandardGameOverOverlay
           message={msg}
-          score={computeScore(state)}
+          score={mode === "cpu" ? computeScore(state) : undefined}
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />
@@ -180,6 +240,11 @@ export function Connect4Game() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Connect 4" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">
+        {mode === "local"
+          ? "같은 기기에서 두 명이 번갈아 디스크를 놓습니다."
+          : "열을 탭해 4개를 연속으로 맞추세요."}
+      </p>
     </div>
   );
 }

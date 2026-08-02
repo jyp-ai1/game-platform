@@ -23,6 +23,7 @@ export interface KakuroState {
   grid: Cell[][];
   entries: (number | null)[][];
   selected: [number, number] | null;
+  wrongFlash: [number, number] | null;
   status: "playing" | "won";
 }
 
@@ -62,6 +63,7 @@ export function createInitialState(): KakuroState {
     grid: LAYOUT.map((row) => row.map((c) => ({ ...c }))),
     entries: emptyEntries(),
     selected: null,
+    wrongFlash: null,
     status: "playing",
   };
 }
@@ -72,17 +74,21 @@ export function cellKind(grid: Cell[][], r: number, c: number): CellKind {
 
 export function selectCell(state: KakuroState, row: number, col: number): KakuroState {
   if (state.status === "won" || state.grid[row]![col]!.kind !== "entry") return state;
-  return { ...state, selected: [row, col] };
+  return { ...state, selected: [row, col], wrongFlash: null };
 }
 
 export function enterDigit(state: KakuroState, digit: number): KakuroState {
   if (state.status === "won" || !state.selected || digit < 1 || digit > 9) return state;
   const [row, col] = state.selected;
-  if (state.grid[row]![col]!.kind !== "entry") return state;
+  const cell = state.grid[row]![col]!;
+  if (cell.kind !== "entry") return state;
+  if (digit !== cell.solution) {
+    return { ...state, wrongFlash: [row, col] };
+  }
   const entries = state.entries.map((r) => [...r]);
   entries[row]![col] = digit;
   const won = checkWin(state.grid, entries);
-  return { ...state, entries, status: won ? "won" : "playing" };
+  return { ...state, entries, wrongFlash: null, status: won ? "won" : "playing" };
 }
 
 export function clearCell(state: KakuroState): KakuroState {
@@ -90,7 +96,11 @@ export function clearCell(state: KakuroState): KakuroState {
   const [row, col] = state.selected;
   const entries = state.entries.map((r) => [...r]);
   entries[row]![col] = null;
-  return { ...state, entries, status: "playing" };
+  return { ...state, entries, wrongFlash: null, status: "playing" };
+}
+
+export function clearWrongFlash(state: KakuroState): KakuroState {
+  return state.wrongFlash ? { ...state, wrongFlash: null } : state;
 }
 
 function checkWin(grid: Cell[][], entries: (number | null)[][]): boolean {

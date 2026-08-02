@@ -27,6 +27,12 @@ import {
   getLegalMoves,
   type CheckersState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "checkers";
 
@@ -61,6 +67,7 @@ export function CheckersGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -83,10 +90,23 @@ export function CheckersGame() {
   }, [state.current, state.winner, state.board, state.mustContinue, difficulty, canPlay]);
 
   useEffect(() => {
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (state.winner === 1) {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner]);
+
+  useEffect(() => {
     if (state.winner !== null) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
       setSelected(null);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.winner, reportScore]);
 
@@ -96,6 +116,7 @@ export function CheckersGame() {
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
+    primeGameAudio();
     playGameFeel("button");
     feelTap();
     if (state.mustContinue) {
@@ -144,14 +165,22 @@ export function CheckersGame() {
     : [];
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     setSelected(null);
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     setSelected(null);
     dispatch({ type: "restart" });
   }
@@ -225,7 +254,7 @@ export function CheckersGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

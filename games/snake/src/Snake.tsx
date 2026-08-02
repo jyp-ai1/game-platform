@@ -29,13 +29,15 @@ import {
   type Direction,
   type Position,
 } from "./engine";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "snake";
 const TICK_MS = 165;
+const MIN_TICK_MS = 85;
 const SWIPE_THRESHOLD = 24;
 const POINTS_PER_FOOD = 10;
 
-type Status = "playing" | "over";
+type Status = "playing" | "over" | "won";
 
 interface State {
   snake: Position[];
@@ -68,13 +70,13 @@ function reducer(state: State, action: Action): State {
     case "restart":
       return createInitialState();
     case "setDirection": {
-      if (state.status === "over" || isOpposite(action.direction, state.direction)) {
+      if (state.status !== "playing" || isOpposite(action.direction, state.direction)) {
         return state;
       }
       return { ...state, pendingDirection: action.direction };
     }
     case "tick": {
-      if (state.status === "over") {
+      if (state.status !== "playing") {
         return state;
       }
       const result = tick(state.snake, state.pendingDirection, state.food);
@@ -90,7 +92,7 @@ function reducer(state: State, action: Action): State {
             snake: result.snake,
             direction: state.pendingDirection,
             score,
-            status: "over",
+            status: "won",
           };
         }
         return {
@@ -134,7 +136,16 @@ export function SnakeGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
+  const sessionStartedRef = useRef(false);
   
+  useEffect(() => {
+    if (canPlay && !sessionStartedRef.current) {
+      sessionStartedRef.current = true;
+      playGameFeel("button", fieldRef.current);
+    }
+  }, [canPlay]);
+
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
       playGameFeel("pop", fieldRef.current);
@@ -143,9 +154,12 @@ export function SnakeGame() {
   }, [state.score]);
 
   useEffect(() => {
-    if (state.status === "over") {
-      playGameFeel("explosion", fieldRef.current);
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    } else if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
     }
+    prevStatusRef.current = state.status;
   }, [state.status]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -156,7 +170,7 @@ export function SnakeGame() {
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
-    () => (state.status === "over" ? null : state),
+    () => (state.status !== "playing" ? null : state),
     [state]
   );
 
@@ -164,14 +178,17 @@ export function SnakeGame() {
     if (state.status !== "playing" || !canPlay) {
       return;
     }
-    const id = setInterval(() => dispatch({ type: "tick" }), TICK_MS);
+    const ms = Math.max(MIN_TICK_MS, TICK_MS - Math.floor(state.score / 30) * 10);
+    const id = setInterval(() => dispatch({ type: "tick" }), ms);
     return () => clearInterval(id);
-  }, [state.status, canPlay]);
+  }, [state.status, canPlay, state.score]);
 
   useEffect(() => {
     if (state.status !== "playing") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -185,6 +202,7 @@ export function SnakeGame() {
         return;
       }
       event.preventDefault();
+      primeGameAudio();
       playGameFeel("button", fieldRef.current);
       dispatch({ type: "setDirection", direction });
     }
@@ -223,8 +241,15 @@ export function SnakeGame() {
         : dy > 0
           ? "down"
           : "up";
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     dispatch({ type: "setDirection", direction });
+  }
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
   }
 
   const snakeCells = new Set(state.snake.map((s) => `${s.x},${s.y}`));
@@ -233,12 +258,14 @@ export function SnakeGame() {
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -284,14 +311,14 @@ export function SnakeGame() {
           );
         })}
 
-        {state.status === "over" ? (
+        {state.status !== "playing" ? (
           <StandardGameOverOverlay
-            message="Game Over"
+            message={state.status === "won" ? "You Win!" : "Game Over"}
             score={state.score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

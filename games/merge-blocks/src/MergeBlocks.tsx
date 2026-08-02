@@ -21,6 +21,11 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, dropColumn, type MergeBlocksState } from "./engine";
+import {
+  playGameOverAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "merge-blocks";
 
@@ -45,6 +50,7 @@ export function MergeBlocksGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, state.score),
     fieldRef,
@@ -58,10 +64,18 @@ export function MergeBlocksGame() {
   );
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
-      playGameFeel("wrong", fieldRef.current);
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -73,14 +87,22 @@ export function MergeBlocksGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -104,6 +126,7 @@ export function MergeBlocksGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current && state.status === "playing") {
+                  primeGameAudio();
                   playGameFeel("button", fieldRef.current);
                   dispatch({ type: "drop", col: ci });
                 }
@@ -126,7 +149,7 @@ export function MergeBlocksGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

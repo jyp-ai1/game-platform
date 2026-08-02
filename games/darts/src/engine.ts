@@ -1,12 +1,14 @@
+export const STARTING_SCORE = 501;
+
 export interface DartsState {
-  score: number;
+  scoreRemaining: number;
   throwsLeft: number;
   lastPoints: number | null;
-  status: "playing" | "over";
+  status: "playing" | "won" | "over";
 }
 
 export function createInitialState(): DartsState {
-  return { score: 0, throwsLeft: 10, lastPoints: null, status: "playing" };
+  return { scoreRemaining: STARTING_SCORE, throwsLeft: 10, lastPoints: null, status: "playing" };
 }
 
 /** Ring scores: bull 50, inner 25, triple band, double band, outer */
@@ -29,9 +31,20 @@ export function throwDart(state: DartsState, xPct: number, yPct: number): DartsS
   if (state.status !== "playing" || state.throwsLeft <= 0) return state;
   const points = scoreFromClick(xPct, yPct);
   const throwsLeft = state.throwsLeft - 1;
-  const score = state.score + points;
+  const next = state.scoreRemaining - points;
+  if (next < 0) {
+    return {
+      ...state,
+      throwsLeft,
+      lastPoints: points,
+      status: throwsLeft <= 0 ? "over" : "playing",
+    };
+  }
+  if (next === 0) {
+    return { scoreRemaining: 0, throwsLeft, lastPoints: points, status: "won" };
+  }
   return {
-    score,
+    scoreRemaining: next,
     throwsLeft,
     lastPoints: points,
     status: throwsLeft <= 0 ? "over" : "playing",

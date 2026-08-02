@@ -21,6 +21,11 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { computeScore, createInitialState, tapTile, type SlidingPuzzleState } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "sliding-puzzle";
 
@@ -51,6 +56,7 @@ export function SlidingPuzzleGame() {
   const saveStatus = useAutoSave(GAME_SLUG, () => (state.status === "won" ? null : state), [state]);
 
   const prevMovesRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   useEffect(() => {
     if (state.moves > prevMovesRef.current && state.status === "playing") {
       playGameFeel("pop", fieldRef.current);
@@ -59,20 +65,36 @@ export function SlidingPuzzleGame() {
   }, [state.moves, state.status]);
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, computeScore(state.moves));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.moves, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -94,6 +116,7 @@ export function SlidingPuzzleGame() {
             disabled={tile === 0}
             onClick={() => {
               if (canPlayRef.current) {
+                primeGameAudio();
                 playGameFeel("button", fieldRef.current);
                 dispatch({ type: "tap", index: i });
               }
@@ -110,12 +133,12 @@ export function SlidingPuzzleGame() {
       </PuzzlePlayField>
       {state.status === "won" ? (
         <StandardGameOverOverlay
-          message={`Clear! ${computeScore(state.moves)} pts (${state.moves} moves)`}
+          message={`15-Puzzle Complete! ${computeScore(state.moves)} pts (${state.moves} moves)`}
           score={score}
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />
@@ -124,6 +147,9 @@ export function SlidingPuzzleGame() {
       {phase === "resume-prompt" ? (
         <ResumeDialog gameTitle="Sliding Puzzle" onResume={onResume} onNewGame={handleNewGame} />
       ) : null}
+      <p className="text-xs text-muted-foreground">
+        15-puzzle: 빈 칸 옆 타일을 탭해 1~15 순서로 맞추세요.
+      </p>
     </div>
   );
 }

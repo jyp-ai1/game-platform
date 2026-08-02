@@ -30,6 +30,12 @@ import {
   type Direction,
   type MazeState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "maze-runner";
 const TICK_MS = 130;
@@ -69,6 +75,7 @@ export function MazeRunnerGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -109,9 +116,23 @@ export function MazeRunnerGame() {
   }, [state.status, canPlay, tickMs]);
 
   useEffect(() => {
+    if (state.status === prevStatusRef.current) {
+      return;
+    }
+    if (state.status === "over") {
+      playGameOverAudio();
+    } else if (state.status === "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -125,6 +146,7 @@ export function MazeRunnerGame() {
         return;
       }
       event.preventDefault();
+      primeGameAudio();
       playGameFeel("button", fieldRef.current);
       dispatch({ type: "setDirection", direction });
     }
@@ -163,18 +185,27 @@ export function MazeRunnerGame() {
         : dy > 0
           ? "down"
           : "up";
+    primeGameAudio();
     dispatch({ type: "setDirection", direction });
   }
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -184,6 +215,7 @@ export function MazeRunnerGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
+          <ScoreBox label="Dots" value={state.dotsRemaining} />
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Lives" value={state.lives} />
         </div>
@@ -247,7 +279,7 @@ export function MazeRunnerGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

@@ -60,13 +60,20 @@ export function validMoves(board: Cell[][], player: 1 | 2): Array<[number, numbe
   return moves;
 }
 
-function count(board: Cell[][], player: 1 | 2): number {
+function countDiscs(board: Cell[][], player: 1 | 2): number {
   return board.flat().filter((x) => x === player).length;
 }
 
+export function discCounts(state: ReversiState): { black: number; white: number } {
+  return {
+    black: countDiscs(state.board, 1),
+    white: countDiscs(state.board, 2),
+  };
+}
+
 function endGame(board: Cell[][]): 1 | 2 | "draw" {
-  const b = count(board, 1);
-  const w = count(board, 2);
+  const b = countDiscs(board, 1);
+  const w = countDiscs(board, 2);
   if (b > w) return 1;
   if (w > b) return 2;
   return "draw";
@@ -129,7 +136,7 @@ export function cpuMove(
 }
 
 export function computeScore(state: ReversiState): number {
-  if (state.winner === 1) return count(state.board, 1) * 2;
+  if (state.winner === 1) return countDiscs(state.board, 1) * 2;
   if (state.winner === "draw") return 50;
-  return count(state.board, 1);
+  return countDiscs(state.board, 1);
 }

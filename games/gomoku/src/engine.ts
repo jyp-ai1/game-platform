@@ -7,7 +7,7 @@ export interface GomokuState {
   winningCells: Array<[number, number]>;
 }
 
-const SIZE = 9;
+const SIZE = 15;
 
 function empty(): Cell[][] {
   return Array.from({ length: SIZE }, () => Array(SIZE).fill(0) as Cell[]);

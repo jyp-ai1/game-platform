@@ -26,6 +26,7 @@ import {
   tickPower,
   type BasketballState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "basketball";
 const TICK_MS = 32;
@@ -59,6 +60,7 @@ export function BasketballGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -92,21 +94,43 @@ export function BasketballGame() {
   }, [state.status, canPlay]);
 
   useEffect(() => {
+    if (state.status !== "result" || !canPlay) return;
+    const id = window.setTimeout(() => dispatch({ type: "next" }), 1200);
+    return () => window.clearTimeout(id);
+  }, [state.status, state.shot, canPlay]);
+
+  useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -116,7 +140,7 @@ export function BasketballGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="Score" value={state.score} />
-        <ScoreBox label="Shot" value={state.shot} />
+        <ScoreBox label="Round" value={state.shot} />
         <ScoreBox label="Made" value={state.made} />
         <Button
           variant="outline"
@@ -145,6 +169,7 @@ export function BasketballGame() {
         <Button
           disabled={!canPlay}
           onClick={() => {
+            primeGameAudio();
             playGameFeel("button", fieldRef.current);
             dispatch({ type: "shoot" });
           }}
@@ -153,14 +178,11 @@ export function BasketballGame() {
         </Button>
       ) : null}
       {state.status === "result" ? (
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm font-medium">
-            {state.lastMade
-              ? `Swish! +${state.lastPoints}`
-              : "Miss — try again"}
-          </p>
-          <Button onClick={() => dispatch({ type: "next" })}>Next shot</Button>
-        </div>
+        <p className="text-sm font-medium">
+          {state.lastMade
+            ? `Swish! +${state.lastPoints}`
+            : "Miss — next round..."}
+        </p>
       ) : null}
       {state.status === "over" ? (
         <StandardGameOverOverlay
@@ -169,7 +191,7 @@ export function BasketballGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

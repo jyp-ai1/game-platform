@@ -1,6 +1,27 @@
 export const GRID_SIZE = 4;
 export const WIN_VALUE = 2048;
 
+export type Difficulty2048 = "easy" | "normal" | "hard";
+
+const FOUR_TILE_CHANCE: Record<Difficulty2048, number> = {
+  easy: 0.03,
+  normal: 0.1,
+  hard: 0.25,
+};
+
+export function fourTileChance(
+  difficulty: Difficulty2048,
+  maxTile = 2
+): number {
+  const base = FOUR_TILE_CHANCE[difficulty];
+  if (difficulty !== "hard") {
+    return base;
+  }
+  // Hard spawn curve: more 4-tiles as the board fills with high values.
+  const tier = Math.max(0, Math.floor(Math.log2(Math.max(maxTile, 8))) - 7);
+  return Math.min(0.35, base + tier * 0.025);
+}
+
 export type Grid = number[][];
 export type Direction = "up" | "down" | "left" | "right";
 
@@ -88,7 +109,10 @@ export function move(grid: Grid, direction: Direction): MoveResult {
   return { grid: result, scoreGained, moved: !gridsEqual(grid, result) };
 }
 
-export function addRandomTile(grid: Grid): Grid {
+export function addRandomTile(
+  grid: Grid,
+  difficulty: Difficulty2048 = "normal"
+): Grid {
   const emptyCells: Array<[number, number]> = [];
   grid.forEach((row, r) =>
     row.forEach((value, c) => {
@@ -104,12 +128,13 @@ export function addRandomTile(grid: Grid): Grid {
 
   const [r, c] = emptyCells[Math.floor(Math.random() * emptyCells.length)]!;
   const next = cloneGrid(grid);
-  next[r]![c] = Math.random() < 0.9 ? 2 : 4;
+  const chance = fourTileChance(difficulty, maxTile(grid));
+  next[r]![c] = Math.random() < chance ? 4 : 2;
   return next;
 }
 
-export function createInitialGrid(): Grid {
-  return addRandomTile(addRandomTile(createEmptyGrid()));
+export function createInitialGrid(difficulty: Difficulty2048 = "normal"): Grid {
+  return addRandomTile(addRandomTile(createEmptyGrid(), difficulty), difficulty);
 }
 
 export function hasMovesAvailable(grid: Grid): boolean {

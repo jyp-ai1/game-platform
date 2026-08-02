@@ -49,7 +49,7 @@ export function placeBlock(state: StackTowerState): StackTowerState {
   }
   const newBlock: Block = { x: left, width: overlap };
   const score = state.score + Math.round(overlap);
-  const nextWidth = Math.max(overlap - 1, 8);
+  const nextWidth = overlap;
   return {
     stack: [...state.stack, newBlock],
     current: { x: 0, width: nextWidth, dir: 1 },

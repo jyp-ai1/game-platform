@@ -1100,6 +1100,14 @@ export function SnakeIoGame({
     }
   }, [isStageMode, mySnake?.score, mySnake?.alive, stageIndex, stageOverlay]);
 
+  const prevStageOverlayRef = useRef(stageOverlay);
+  useEffect(() => {
+    if (stageOverlay === "stage-clear" && prevStageOverlayRef.current !== "stage-clear") {
+      playRankUpSound();
+    }
+    prevStageOverlayRef.current = stageOverlay;
+  }, [stageOverlay]);
+
   const postDeath = useCallback(
     (action: "exit" | "replay" | "spectator" | "invite") => {
       if (activeRoom) tryRecordPostDeathAction(activeRoom, action);

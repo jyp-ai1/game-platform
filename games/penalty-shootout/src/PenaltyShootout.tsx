@@ -26,6 +26,7 @@ import {
   type Direction,
   type PenaltyState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "penalty-shootout";
 
@@ -44,6 +45,7 @@ export function PenaltyShootoutGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -70,27 +72,44 @@ export function PenaltyShootoutGame() {
   );
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, computeRankingScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
   function handleShoot(dir: Direction) {
     if (!canPlayRef.current || state.status !== "playing") return;
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     dispatch({ type: "shoot", dir });
   }
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -101,6 +120,7 @@ export function PenaltyShootoutGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Goals" value={state.score} />
+          <ScoreBox label="Saves" value={state.saves} />
           <ScoreBox
             label="Round"
             value={state.status === "playing" ? state.round + 1 : state.round}
@@ -117,7 +137,9 @@ export function PenaltyShootoutGame() {
             ? "⚽ GOAL!"
             : state.lastResult === "save"
               ? "🧤 Saved"
-              : `Round ${state.round + 1}/${state.maxRounds}`}
+              : state.suddenDeath
+                ? "Sudden Death!"
+                : `Round ${state.round + 1}/${state.maxRounds}`}
         </p>
         <div className="grid grid-cols-3 gap-2">
           {(["left", "center", "right"] as const).map((dir) => (
@@ -136,12 +158,20 @@ export function PenaltyShootoutGame() {
       </div>
       {state.status === "over" ? (
         <StandardGameOverOverlay
-          message={`${state.score} goals!`}
+          message={
+            state.outcome === "win"
+              ? state.suddenDeath
+                ? `Sudden death win! ${state.score} goals`
+                : `${state.score} goals — you win!`
+              : state.suddenDeath
+                ? "Sudden death — saved!"
+                : `${state.score} goals — keeper wins`
+          }
           score={computeRankingScore(state)}
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

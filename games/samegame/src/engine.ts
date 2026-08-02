@@ -55,12 +55,15 @@ function findGroup(board: Board, row: number, col: number): [number, number][] {
   return group;
 }
 
-// Rewards bigger combos superlinearly (2 tiles = 10pts, 5 tiles = 100pts)
-// without the "0 points for the minimum clearable group" feel classic
-// SameGame's (n-2)^2 formula has.
+/** Classic SameGame scoring: (n − 2)² for groups of 2+ matching tiles. */
 export function computeGroupScore(size: number): number {
-  return size * (size - 1) * 5;
+  if (size < 2) return 0;
+  const n = size - 2;
+  return n * n;
 }
+
+/** Bonus for clearing every tile (classic SameGame board-clear reward). */
+export const BOARD_CLEAR_BONUS = 2000;
 
 // Tiles fall down within their column (gravity), then any fully-emptied
 // column collapses and columns to its right shift left to fill the gap --

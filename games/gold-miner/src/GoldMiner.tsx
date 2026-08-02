@@ -33,6 +33,7 @@ import {
   type GoldMinerState,
   type ItemType,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "gold-miner";
 const MAX_DT = 0.05;
@@ -82,6 +83,7 @@ export function GoldMinerGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -91,12 +93,14 @@ export function GoldMinerGame() {
     prevScoreRef.current = state.score;
   }, [state.score]);
 
+  const level = Math.floor(state.score / 500) + 1;
+  const levelTarget = level * 500;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    stageIndex: Math.floor(state.score / 500) + 1,
+    stageIndex: level,
     fieldRef,
   });
-  const diff = getGroupDifficulty(GAME_SLUG, Math.floor(state.score / 500) + 1);
+  const diff = getGroupDifficulty(GAME_SLUG, level);
   const lastTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -131,9 +135,18 @@ export function GoldMinerGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -144,6 +157,7 @@ export function GoldMinerGame() {
       }
       if (event.key === " ") {
         event.preventDefault();
+        primeGameAudio();
         playGameFeel("button", fieldRef.current);
         dispatch({ type: "fire" });
       }
@@ -156,6 +170,7 @@ export function GoldMinerGame() {
     if (!canPlayRef.current) {
       return;
     }
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     dispatch({ type: "fire" });
   }
@@ -163,14 +178,22 @@ export function GoldMinerGame() {
   const tip = hookTip(state.hookAngle, state.hookLength);
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -181,6 +204,7 @@ export function GoldMinerGame() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
+          <ScoreBox label="Goal" value={levelTarget} />
           <ScoreBox label="Time" value={Math.ceil(state.timeLeft)} />
         </div>
         <Button
@@ -209,8 +233,9 @@ export function GoldMinerGame() {
             y1={HOOK_ORIGIN_Y}
             x2={tip.x}
             y2={tip.y}
-            stroke="#a8a29e"
-            strokeWidth={3}
+            stroke={state.hookState === "retracting" ? "#fbbf24" : "#a8a29e"}
+            strokeWidth={state.hookState === "retracting" ? 4 : 3}
+            strokeDasharray={state.hookState === "retracting" ? "6 4" : undefined}
           />
         </svg>
 
@@ -245,7 +270,7 @@ export function GoldMinerGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

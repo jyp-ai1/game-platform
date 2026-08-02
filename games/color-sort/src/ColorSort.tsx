@@ -26,9 +26,19 @@ import {
   type ColorId,
   type ColorSortState,
 } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "color-sort";
-const COLORS: Record<ColorId, string> = { 1: "bg-red-500", 2: "bg-blue-500", 3: "bg-green-500" };
+const COLORS: Record<ColorId, string> = {
+  1: "bg-red-500",
+  2: "bg-blue-500",
+  3: "bg-green-500",
+  4: "bg-amber-400",
+};
 
 type Action = { type: "tap"; index: number } | { type: "restart" };
 
@@ -50,6 +60,7 @@ export function ColorSortGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
   const score = computeScore(state.moves);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
@@ -63,10 +74,18 @@ export function ColorSortGame() {
   );
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, score, reportScore]);
 
@@ -78,13 +97,21 @@ export function ColorSortGame() {
     prevMovesRef.current = state.moves;
   }, [state.moves, state.status]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -105,6 +132,7 @@ export function ColorSortGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current) {
+                  primeGameAudio();
                   playGameFeel("button", fieldRef.current);
                   dispatch({ type: "tap", index: ti });
                 }
@@ -129,7 +157,7 @@ export function ColorSortGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

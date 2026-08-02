@@ -21,7 +21,18 @@ import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { computeScore, createShuffledCards, type Card } from "./engine";
+import {
+  COMBO_BONUS,
+  computeScore,
+  computeStageScore,
+  createShuffledCards,
+  type Card,
+} from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 import {
   FINAL_MEMORY_STAGE,
   getMemoryStage,
@@ -37,6 +48,10 @@ interface State {
   cards: Card[];
   flipped: number[];
   moves: number;
+  mismatches: number;
+  comboStreak: number;
+  comboPeak: number;
+  totalScore: number;
   status: "playing" | "stage-clear" | "won";
 }
 
@@ -46,7 +61,7 @@ type Action =
   | { type: "restart" }
   | { type: "nextStage" };
 
-function buildStageState(stageIndex: number): State {
+function buildStageState(stageIndex: number, totalScore = 0): State {
   const stage = getMemoryStage(stageIndex);
   return {
     stageIndex,
@@ -54,6 +69,10 @@ function buildStageState(stageIndex: number): State {
     cards: createShuffledCards(stage.pairs),
     flipped: [],
     moves: 0,
+    mismatches: 0,
+    comboStreak: 0,
+    comboPeak: 0,
+    totalScore,
     status: "playing",
   };
 }
@@ -70,7 +89,7 @@ function reducer(state: State, action: Action): State {
       if (state.stageIndex >= FINAL_MEMORY_STAGE) {
         return { ...state, status: "won" };
       }
-      return buildStageState(state.stageIndex + 1);
+      return buildStageState(state.stageIndex + 1, state.totalScore);
     case "resolve":
       return { ...state, flipped: [] };
     case "flip": {
@@ -97,11 +116,24 @@ function reducer(state: State, action: Action): State {
           i === firstIndex || i === secondIndex ? { ...c, matched: true } : c
         );
         const allMatched = cards.every((c) => c.matched);
+        const comboStreak = state.comboStreak + 1;
+        const comboPeak = Math.max(state.comboPeak, comboStreak);
+        const stageScore = allMatched
+          ? computeStageScore(
+              moves,
+              state.stageIndex,
+              comboPeak,
+              state.mismatches === 0
+            )
+          : 0;
         return {
           ...state,
           cards,
           flipped: [],
           moves,
+          comboStreak,
+          comboPeak,
+          totalScore: allMatched ? state.totalScore + stageScore : state.totalScore,
           status: allMatched
             ? state.stageIndex >= FINAL_MEMORY_STAGE
               ? "won"
@@ -110,7 +142,13 @@ function reducer(state: State, action: Action): State {
         };
       }
 
-      return { ...state, flipped, moves };
+      return {
+        ...state,
+        flipped,
+        moves,
+        mismatches: state.mismatches + 1,
+        comboStreak: 0,
+      };
     }
     default:
       return state;
@@ -132,22 +170,28 @@ export function MemoryGame() {
     useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
-  const score = computeScore(state.moves, state.stageIndex);
+  const score =
+    state.status === "playing"
+      ? state.totalScore +
+        computeScore(state.moves, state.stageIndex) +
+        Math.max(0, state.comboStreak - 1) * COMBO_BONUS
+      : state.totalScore;
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
   });
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stageClearReported = useRef(false);
   const prevMatchedRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const [wrongFlash, setWrongFlash] = useState(false);
 
   useEffect(() => {
     const matched = state.cards.filter((c) => c.matched).length;
     if (matched > prevMatchedRef.current) {
-      playGameFeel("match");
+      playGameFeel(state.comboStreak >= 3 ? "combo" : "match");
     }
     prevMatchedRef.current = matched;
-  }, [state.cards]);
+  }, [state.cards, state.comboStreak]);
 
   useEffect(() => {
     if (state.flipped.length !== 2) {
@@ -189,10 +233,9 @@ export function MemoryGame() {
   useEffect(() => {
     if (state.status === "stage-clear" && !stageClearReported.current) {
       stageClearReported.current = true;
-      playGameFeel("goal");
-      const score = computeScore(state.moves, state.stageIndex);
-      recordStageClear(state.stageIndex, score);
-      reportScore(GAME_SLUG, score);
+      playStageClearAudio();
+      recordStageClear(state.stageIndex, state.totalScore);
+      reportScore(GAME_SLUG, state.totalScore);
     }
     if (state.status === "playing") {
       stageClearReported.current = false;
@@ -200,35 +243,54 @@ export function MemoryGame() {
   }, [state.status, state.moves, state.stageIndex, recordStageClear, reportScore]);
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
-      const score = computeScore(state.moves, state.stageIndex);
-      reportScore(GAME_SLUG, score);
+      reportScore(GAME_SLUG, state.totalScore);
       recordGameEnd({
-        score,
+        score: state.totalScore,
         outcome: "clear",
         stageReached: state.stageIndex,
       });
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.moves, state.stageIndex, reportScore, recordGameEnd]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleFlip(index: number) {
-    if (!canPlayRef.current) {
+    if (!canPlayRef.current || state.status !== "playing") {
       return;
     }
-    playGameFeel("flip");
+    primeGameAudio();
+    if (state.flipped.length === 0) {
+      playGameFeel("flip");
+    }
     dispatch({ type: "flip", index });
   }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetSession();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetSession();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -244,7 +306,9 @@ export function MemoryGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
-          <ScoreBox label="Stage" value={state.stageIndex} />
+          <ScoreBox label="Score" value={score} />
+          <ScoreBox label="Round" value={state.stageIndex} />
+          <ScoreBox label="Combo" value={state.comboStreak} />
           <ScoreBox label="Moves" value={state.moves} />
         </div>
         <Button
@@ -299,12 +363,16 @@ export function MemoryGame() {
 
         {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
-            message={`Stage ${state.stageIndex} Clear`}
+            message={
+              state.mismatches === 0
+                ? `Round ${state.stageIndex} Clear — Perfect!`
+                : `Round ${state.stageIndex} Clear`
+            }
             score={score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
             onContinue={() => dispatch({ type: "nextStage" })}
@@ -318,7 +386,7 @@ export function MemoryGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

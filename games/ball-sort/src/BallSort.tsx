@@ -26,6 +26,11 @@ import {
   type BallId,
   type BallSortState,
 } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "ball-sort";
 const LABELS: Record<BallId, string> = { 1: "🔴", 2: "🔵", 3: "🟢", 4: "🟡" };
@@ -50,6 +55,7 @@ export function BallSortGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
   const score = computeScore(state.moves);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
@@ -63,10 +69,18 @@ export function BallSortGame() {
   );
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
       reportScore(GAME_SLUG, score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, score, reportScore]);
 
@@ -78,13 +92,21 @@ export function BallSortGame() {
     prevMovesRef.current = state.moves;
   }, [state.moves, state.status]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -105,6 +127,7 @@ export function BallSortGame() {
               type="button"
               onClick={() => {
                 if (canPlayRef.current) {
+                  primeGameAudio();
                   playGameFeel("button", fieldRef.current);
                   dispatch({ type: "tap", index: ti });
                 }
@@ -130,7 +153,7 @@ export function BallSortGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

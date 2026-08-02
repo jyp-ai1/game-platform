@@ -9,7 +9,7 @@ export interface BowlingState {
   rollsInFrame: number;
 }
 
-const MAX_FRAMES = 5;
+export const MAX_FRAMES = 10;
 const TICK = 2.5;
 
 export function createInitialState(): BowlingState {

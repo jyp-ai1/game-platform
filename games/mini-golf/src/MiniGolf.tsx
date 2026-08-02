@@ -26,10 +26,12 @@ import {
   HOLE_R,
   MINI_GOLF_H,
   MINI_GOLF_W,
+  PAR,
   putt,
   tickAim,
   type MiniGolfState,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "mini-golf";
 const TICK_MS = 32;
@@ -57,6 +59,7 @@ export function MiniGolfGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
   const onCountdownComplete = useCallback(() => {
@@ -89,9 +92,18 @@ export function MiniGolfGame() {
   }, [state.status, canPlay]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.strokes, reportScore]);
 
@@ -99,15 +111,22 @@ export function MiniGolfGame() {
     Math.hypot(state.ballX - state.holeX, state.ballY - state.holeY) <=
     HOLE_R + BALL_R;
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -117,6 +136,7 @@ export function MiniGolfGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm justify-between">
         <ScoreBox label="Strokes" value={state.strokes} />
+        <ScoreBox label="Par" value={PAR} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
         </Button>
@@ -163,6 +183,7 @@ export function MiniGolfGame() {
       <Button
         disabled={state.status !== "aiming" || !canPlay}
         onClick={() => {
+          primeGameAudio();
           playGameFeel("button", fieldRef.current);
           dispatch({ type: "putt" });
         }}
@@ -176,7 +197,7 @@ export function MiniGolfGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

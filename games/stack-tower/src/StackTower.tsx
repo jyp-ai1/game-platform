@@ -21,6 +21,7 @@ import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { createInitialState, placeBlock, tick, type StackTowerState } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "stack-tower";
 const TICK_MS = 32;
@@ -53,6 +54,7 @@ export function StackTowerGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLButtonElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -84,21 +86,38 @@ export function StackTowerGame() {
   }, [state.status, canPlay, tickMs]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -108,6 +127,7 @@ export function StackTowerGame() {
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
       <div className="flex w-full max-w-sm items-center justify-between">
         <ScoreBox label="Height" value={state.stack.length} />
+        <ScoreBox label="Width" value={`${Math.round(state.current.width)}%`} />
         <ScoreBox label="Score" value={state.score} />
         <Button variant="outline" size="icon" aria-label="새 게임" onClick={handleRetry}>
           <RotateCcw />
@@ -119,6 +139,7 @@ export function StackTowerGame() {
         ref={fieldRef}
         onClick={() => {
           if (canPlayRef.current && state.status === "playing") {
+            primeGameAudio();
             playGameFeel("button", fieldRef.current);
             dispatch({ type: "place" });
           }
@@ -156,7 +177,7 @@ export function StackTowerGame() {
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

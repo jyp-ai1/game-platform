@@ -35,6 +35,8 @@ const STAGE_PATTERNS: readonly string[][] = [
 
 export const STAGE_COUNT = STAGE_PATTERNS.length;
 
+export const STAGE_NAMES = ["Full Wall", "Diamond", "Crosshatch"] as const;
+
 export const POWER_BRICK_KIND: Record<number, "widen" | "multiball"> = {
   10: "widen",
   24: "multiball",

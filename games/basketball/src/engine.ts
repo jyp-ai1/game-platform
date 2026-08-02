@@ -47,20 +47,8 @@ export function shoot(state: BasketballState): BasketballState {
   const lastPoints = made ? (diff <= 6 ? 3 : 2) : 0;
   const score = state.score + lastPoints;
   const madeCount = state.made + (made ? 1 : 0);
-  const nextShot = state.shot + 1;
-  if (nextShot > MAX_SHOTS) {
-    return {
-      ...state,
-      score,
-      made: madeCount,
-      lastMade: made,
-      lastPoints,
-      status: "over",
-    };
-  }
   return {
     ...state,
-    shot: nextShot,
     score,
     made: madeCount,
     power: 0,
@@ -73,5 +61,14 @@ export function shoot(state: BasketballState): BasketballState {
 
 export function nextShot(state: BasketballState): BasketballState {
   if (state.status !== "result") return state;
-  return { ...state, status: "aiming", lastMade: false, lastPoints: 0 };
+  if (state.shot >= MAX_SHOTS) {
+    return { ...state, status: "over" };
+  }
+  return {
+    ...state,
+    shot: state.shot + 1,
+    status: "aiming",
+    lastMade: false,
+    lastPoints: 0,
+  };
 }

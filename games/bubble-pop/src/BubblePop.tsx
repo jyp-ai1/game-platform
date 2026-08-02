@@ -38,6 +38,7 @@ import {
   step,
 } from "./engine";
 import { getBubbleStage } from "./bubble-stage-config";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "bubble-pop";
 const MAX_DT = 0.05;
@@ -121,6 +122,7 @@ export function BubblePopGame() {
   const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const stageClearReported = useRef(false);
+  const prevStatusRef = useRef(state.status);
   const particleIdRef = useRef(0);
   const [particles, setParticles] = useState<PopParticle[]>([]);
   const [comboLabel, setComboLabel] = useState<string | null>(null);
@@ -163,18 +165,12 @@ export function BubblePopGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
-    if (sessionActive) {
-      playGameFeel("button", fieldRef.current);
-    }
-  }, [sessionActive]);
-
-  useEffect(() => {
     if (state.lastPops.length === 0) {
       return;
     }
     if (state.lastPops.length >= 5) {
       playGameFeel("combo", fieldRef.current);
-      setComboLabel(`${state.lastPops.length}x COMBO!`);
+      setComboLabel(`${state.lastPops.length}x Pop!`);
     } else if (state.lastPops.length >= 3) {
       playGameFeel("combo", fieldRef.current);
       setComboLabel(`${state.lastPops.length}x Combo`);
@@ -216,13 +212,15 @@ export function BubblePopGame() {
   }, [particles.length]);
 
   useEffect(() => {
-    if (state.status === "over") {
-      playGameFeel("wrong", fieldRef.current);
-    } else if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
-    } else if (state.status === "stage-clear") {
-      playGameFeel("correct", fieldRef.current);
+    if (state.status === prevStatusRef.current) {
+      return;
     }
+    if (state.status === "over") {
+      playGameOverAudio();
+    } else if (state.status === "won" || state.status === "stage-clear") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
   }, [state.status]);
 
   useEffect(() => {
@@ -245,18 +243,28 @@ export function BubblePopGame() {
         stageReached: state.stageIndex,
       });
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, state.stageIndex, reportScore, recordGameEnd]);
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetSession();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetSession();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -267,6 +275,8 @@ export function BubblePopGame() {
       }
       if (event.code === "Space") {
         event.preventDefault();
+        primeGameAudio();
+        playGameFeel("button", fieldRef.current);
         dispatch({ type: "fire" });
       }
     }
@@ -298,6 +308,7 @@ export function BubblePopGame() {
     if (!canPlayRef.current) {
       return;
     }
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     dispatch({ type: "fire" });
   }, [canPlayRef]);
@@ -442,15 +453,16 @@ export function BubblePopGame() {
 
         {state.status === "stage-clear" ? (
           <StandardGameOverOverlay
-            message={`${getBubbleStage(state.stageIndex).label} — Stage ${state.stageIndex} Clear`}
+            variant="stage-clear"
+            stageLabel={`${getBubbleStage(state.stageIndex).label} — Stage ${state.stageIndex} Clear`}
             score={state.score}
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
-            onContinue={() => dispatch({ type: "nextStage" })}
+            onNextStage={() => dispatch({ type: "nextStage" })}
           />
         ) : null}
 
@@ -461,7 +473,7 @@ export function BubblePopGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

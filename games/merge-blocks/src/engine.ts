@@ -9,6 +9,7 @@ export interface MergeBlocksState {
 
 const ROWS = 6;
 const COLS = 4;
+export const SOFT_DROP_POINTS_PER_CELL = 1;
 
 function emptyGrid(): Cell[][] {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -47,7 +48,7 @@ export function dropColumn(state: MergeBlocksState, col: number): MergeBlocksSta
   while (row >= 0 && grid[row]![col] !== 0) row--;
   if (row < 0) return { ...state, status: "over" };
   grid[row]![col] = state.next;
-  let score = state.score;
+  let score = state.score + row * SOFT_DROP_POINTS_PER_CELL;
   // merge vertically in column only (simplified merge blocks)
   const colVals = grid.map((r) => r[col]!);
   const merged = mergeColumn(colVals);

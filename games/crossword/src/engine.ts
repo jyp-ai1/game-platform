@@ -15,6 +15,7 @@ export interface CrosswordState {
   clues: Clue[];
   selected: [number, number] | null;
   status: "playing" | "won";
+  elapsedSeconds: number;
 }
 
 const PUZZLE = {
@@ -54,7 +55,13 @@ export function createInitialState(): CrosswordState {
     clues: PUZZLE.clues,
     selected: null,
     status: "playing",
+    elapsedSeconds: 0,
   };
+}
+
+export function tickElapsed(state: CrosswordState): CrosswordState {
+  if (state.status !== "playing") return state;
+  return { ...state, elapsedSeconds: state.elapsedSeconds + 1 };
 }
 
 function isBlocked(r: number, c: number): boolean {

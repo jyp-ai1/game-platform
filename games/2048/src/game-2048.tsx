@@ -21,22 +21,26 @@ import {
 import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import type { CSSProperties, TouchEvent } from "react";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { TILE_STAGES, tileStageIndex, tileStageLabel } from "./2048-stage-config";
 import {
   addRandomTile,
   createInitialGrid,
+  fourTileChance,
   hasMovesAvailable,
   hasWon,
   maxTile,
   move,
+  type Difficulty2048,
   type Direction,
   type Grid,
 } from "./engine";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "2048";
 const SWIPE_THRESHOLD = 24;
+const DIFFICULTIES: Difficulty2048[] = ["easy", "normal", "hard"];
 
 type Status = "playing" | "won" | "over";
 
@@ -45,6 +49,7 @@ interface State {
   score: number;
   best: number;
   bestTile: number;
+  difficulty: Difficulty2048;
   status: Status;
   winAcknowledged: boolean;
   tileStagesReached: number[];
@@ -57,16 +62,18 @@ interface State {
 
 type Action =
   | { type: "move"; direction: Direction }
-  | { type: "restart" }
-  | { type: "continue" };
+  | { type: "restart"; difficulty?: Difficulty2048 }
+  | { type: "continue" }
+  | { type: "ensureDifficulty" };
 
-function createInitialState(): State {
+function createInitialState(difficulty: Difficulty2048 = "normal"): State {
   const progress = loadGameProgress(GAME_SLUG);
   return {
-    grid: createInitialGrid(),
+    grid: createInitialGrid(difficulty),
     score: 0,
     best: Math.max(getBestScore(GAME_SLUG), progress.bestScore),
     bestTile: progress.bestTile,
+    difficulty,
     status: "playing",
     winAcknowledged: false,
     tileStagesReached: [],
@@ -95,9 +102,15 @@ function mergeHighlightIndices(before: Grid, after: Grid): number[] {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "restart":
-      return { ...createInitialState(), best: state.best, bestTile: state.bestTile };
+      return {
+        ...createInitialState(action.difficulty ?? state.difficulty),
+        best: state.best,
+        bestTile: state.bestTile,
+      };
     case "continue":
       return { ...state, status: "playing", winAcknowledged: true };
+    case "ensureDifficulty":
+      return state.difficulty ? state : { ...state, difficulty: "normal" };
     case "move": {
       if (state.status === "over") {
         return state;
@@ -111,7 +124,7 @@ function reducer(state: State, action: Action): State {
         return { ...state, blockedPulse: state.blockedPulse + 1 };
       }
 
-      const grid = addRandomTile(result.grid);
+      const grid = addRandomTile(result.grid, state.difficulty ?? "normal");
       const score = state.score + result.scoreGained;
       const best = Math.max(state.best, score);
       const tile = maxTile(grid);
@@ -137,6 +150,7 @@ function reducer(state: State, action: Action): State {
         score,
         best,
         bestTile,
+        difficulty: state.difficulty,
         status,
         winAcknowledged: state.winAcknowledged,
         tileStagesReached,
@@ -173,19 +187,29 @@ export function Game2048() {
   const { recordStageClear, recordGameEnd, resetSession } =
     useGameSession(GAME_SLUG, sessionActive);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const difficulty = state.difficulty ?? "normal";
+  useEffect(() => {
+    if (!state.difficulty) {
+      dispatch({ type: "ensureDifficulty" });
+    }
+  }, [state.difficulty]);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const { reportScore } = useGameSDK();
   const gridRef = useRef<HTMLDivElement>(null);
+  const currentTile = maxTile(state.grid);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
-    stageIndex: tileStageIndex(state.bestTile),
+    stageIndex: tileStageIndex(currentTile),
     score: state.score,
     muteScoreGain: true,
     fieldRef: gridRef,
   });
   const reportedTiles = useRef<Set<number>>(new Set());
   const prevScoreRef = useRef(0);
+  const prevStagesLenRef = useRef(0);
   const lastBlockedRef = useRef(0);
+  const [stageClearMilestone, setStageClearMilestone] = useState<number | null>(null);
+  const prevStatusRef = useRef(state.status);
 
   const saveStatus = useAutoSave(
     GAME_SLUG,
@@ -199,16 +223,25 @@ export function Game2048() {
         reportedTiles.current.add(milestone);
         const stageIndex = TILE_STAGES.indexOf(milestone as (typeof TILE_STAGES)[number]) + 1;
         recordStageClear(stageIndex, state.score);
+        if (milestone < 2048) {
+          playStageClearAudio();
+          setStageClearMilestone(milestone);
+        }
       }
     }
   }, [state.tileStagesReached, state.score, recordStageClear]);
 
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
-      playGameFeel("merge", gridRef.current);
+      const stageJustCleared =
+        state.tileStagesReached.length > prevStagesLenRef.current;
+      if (!stageJustCleared) {
+        playGameFeel("merge", gridRef.current);
+      }
     }
     prevScoreRef.current = state.score;
-  }, [state.score]);
+    prevStagesLenRef.current = state.tileStagesReached.length;
+  }, [state.score, state.tileStagesReached]);
 
   useEffect(() => {
     if (state.blockedPulse <= lastBlockedRef.current) return;
@@ -217,17 +250,23 @@ export function Game2048() {
   }, [state.blockedPulse]);
 
   useEffect(() => {
-    if (state.status === "over") {
-      playGameFeel("wrong", gridRef.current);
-    } else if (state.status === "won" && !state.winAcknowledged) {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    } else if (
+      state.status === "won" &&
+      !state.winAcknowledged &&
+      prevStatusRef.current !== "won"
+    ) {
       playGameFeel("goal", gridRef.current);
     }
+    prevStatusRef.current = state.status;
   }, [state.status, state.winAcknowledged]);
 
   const reportedWinRef = useRef(false);
 
   useEffect(() => {
     if (state.status === "over") {
+      setStageClearMilestone(null);
       reportScore(GAME_SLUG, state.score);
       recordGameEnd({
         score: state.score,
@@ -236,6 +275,8 @@ export function Game2048() {
         stageReached: TILE_STAGES.filter((t) => state.bestTile >= t).length,
       });
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
     if (state.status === "won" && !state.winAcknowledged && !reportedWinRef.current) {
       reportedWinRef.current = true;
@@ -254,7 +295,7 @@ export function Game2048() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (!canPlayRef.current) {
+      if (!canPlayRef.current || stageClearMilestone !== null) {
         return;
       }
       const direction = DIRECTION_KEYS[event.key];
@@ -262,13 +303,13 @@ export function Game2048() {
         return;
       }
       event.preventDefault();
-      playGameFeel("button", gridRef.current);
+      primeGameAudio();
       dispatch({ type: "move", direction });
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [canPlayRef]);
+  }, [canPlayRef, stageClearMilestone]);
 
   const handleTouchStart = useCallback((event: TouchEvent) => {
     const touch = event.touches[0];
@@ -282,7 +323,7 @@ export function Game2048() {
     (event: TouchEvent) => {
       const start = touchStart.current;
       touchStart.current = null;
-      if (!canPlayRef.current) {
+      if (!canPlayRef.current || stageClearMilestone !== null) {
         return;
       }
       const touch = event.changedTouches[0];
@@ -306,10 +347,10 @@ export function Game2048() {
             ? "down"
             : "up";
 
+      primeGameAudio();
       dispatch({ type: "move", direction });
-      playGameFeel("button", gridRef.current);
     },
-    [canPlayRef]
+    [canPlayRef, stageClearMilestone]
   );
 
   const slideNudgeClass =
@@ -323,17 +364,27 @@ export function Game2048() {
             ? "translate-y-1"
             : "";
 
-  function handleRetry() {
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
+  function handleRetry(difficulty?: Difficulty2048) {
     emitGameRetry(GAME_SLUG);
     resetSession();
     reportedTiles.current.clear();
-    dispatch({ type: "restart" });
+    resetGameAudioPrime();
+    setStageClearMilestone(null);
+    dispatch({ type: "restart", difficulty });
   }
 
   function handleNewGame() {
     onNewGame();
     resetSession();
     reportedTiles.current.clear();
+    resetGameAudioPrime();
+    setStageClearMilestone(null);
     dispatch({ type: "restart" });
   }
 
@@ -346,8 +397,8 @@ export function Game2048() {
       <div className="flex w-full max-w-sm items-center justify-between">
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
-          <ScoreBox label="Tile" value={state.bestTile || 2} />
-          <ScoreBox label="Stage" value={tileStageIndex(state.bestTile)} />
+          <ScoreBox label="Tile" value={currentTile || 2} />
+          <ScoreBox label="Stage" value={tileStageIndex(currentTile)} />
           <ScoreBox label="Best" value={state.best} />
         </div>
         <Button
@@ -355,10 +406,24 @@ export function Game2048() {
           size="icon"
           className="min-h-11 min-w-11"
           aria-label="새 게임"
-          onClick={handleRetry}
+          onClick={() => handleRetry()}
         >
           <RotateCcw />
         </Button>
+      </div>
+
+      <div className="flex w-full max-w-sm flex-wrap gap-1">
+        {DIFFICULTIES.map((level) => (
+          <Button
+            key={level}
+            variant={difficulty === level ? "default" : "outline"}
+            size="sm"
+            className="min-h-9 flex-1 text-xs capitalize"
+            onClick={() => handleRetry(level)}
+          >
+            {level === "easy" ? "Easy" : level === "normal" ? "Normal" : "Hard"}
+          </Button>
+        ))}
       </div>
 
       <div
@@ -386,6 +451,20 @@ export function Game2048() {
           </div>
         ))}
 
+        {stageClearMilestone !== null ? (
+          <StandardGameOverOverlay
+            message={`Stage Clear — ${stageClearMilestone}!`}
+            score={state.score}
+            gameSlug={GAME_SLUG}
+            isNewBest={feel.isNewBest}
+            bestRecordDelta={feel.bestRecordDelta}
+            onExit={handleExit}
+            onRetry={() => handleRetry()}
+            onRestart={() => handleRetry()}
+            onContinue={() => setStageClearMilestone(null)}
+          />
+        ) : null}
+
         {showOverlay ? (
           <StandardGameOverOverlay
             message={state.status === "won" ? "You Win!" : "Game Over"}
@@ -393,9 +472,9 @@ export function Game2048() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
-            onRetry={handleRetry}
-            onRestart={handleRetry}
+            onExit={handleExit}
+            onRetry={() => handleRetry()}
+            onRestart={() => handleRetry()}
             onContinue={
               state.status === "won"
                 ? () => dispatch({ type: "continue" })
@@ -418,8 +497,9 @@ export function Game2048() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        목표: {tileStageLabel(state.bestTile)} → 다음{" "}
-        {TILE_STAGES[tileStageIndex(state.bestTile)] ?? 2048} · 방향키 또는 스와이프
+        목표: {tileStageLabel(currentTile)} → 다음{" "}
+        {TILE_STAGES[tileStageIndex(currentTile)] ?? 2048} · 4타일{" "}
+        {Math.round(fourTileChance(difficulty, currentTile) * 100)}% · 방향키 또는 스와이프
       </p>
     </div>
   );

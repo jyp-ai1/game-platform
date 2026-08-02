@@ -29,6 +29,12 @@ import {
   type Chess960State,
   type Move,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "chess960";
 
@@ -63,6 +69,7 @@ export function Chess960Game() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -85,10 +92,23 @@ export function Chess960Game() {
   }, [state.current, state.winner, state.board, difficulty, canPlay]);
 
   useEffect(() => {
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (state.winner === "w") {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner]);
+
+  useEffect(() => {
     if (state.winner !== null) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
       setSelected(null);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.winner, reportScore]);
 
@@ -98,6 +118,7 @@ export function Chess960Game() {
 
   function onCell(r: number, c: number) {
     if (!humanTurn) return;
+    primeGameAudio();
     playGameFeel("button");
     feelTap();
     const move = selected
@@ -138,14 +159,22 @@ export function Chess960Game() {
     : [];
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     setSelected(null);
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     setSelected(null);
     dispatch({ type: "restart" });
   }
@@ -205,7 +234,7 @@ export function Chess960Game() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

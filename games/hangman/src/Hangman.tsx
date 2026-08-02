@@ -26,6 +26,12 @@ import {
   guessLetter,
   type HangmanState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "hangman";
 const KEYBOARD_ROWS = [
@@ -57,6 +63,7 @@ export function HangmanGame() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevGuessedRef = useRef(0);
   const prevWrongRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   useEffect(() => {
     const correct = state.guessedLetters.filter((l) => state.word.includes(l)).length;
     if (correct > prevGuessedRef.current) {
@@ -73,9 +80,12 @@ export function HangmanGame() {
   }, [state.wrongGuesses]);
 
   useEffect(() => {
-    if (state.status === "won") {
-      playGameFeel("goal", fieldRef.current);
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    } else if (state.status === "lost" && prevStatusRef.current !== "lost") {
+      playGameOverAudio();
     }
+    prevStatusRef.current = state.status;
   }, [state.status]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
@@ -104,6 +114,8 @@ export function HangmanGame() {
     }
     if (state.status !== "playing") {
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.wrongGuesses, reportScore]);
 
@@ -115,6 +127,7 @@ export function HangmanGame() {
       if (event.key.length !== 1 || !/^[a-zA-Z]$/.test(event.key)) {
         return;
       }
+      primeGameAudio();
       playGameFeel("button", fieldRef.current);
       dispatch({ type: "guess", letter: event.key });
     }
@@ -125,14 +138,22 @@ export function HangmanGame() {
   const livesLeft = state.maxWrongGuesses - state.wrongGuesses;
   const interactive = canPlay && state.status === "playing";
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevGuessedRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevGuessedRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -181,6 +202,7 @@ export function HangmanGame() {
                     type="button"
                     disabled={guessed || !interactive}
                     onClick={() => {
+                      primeGameAudio();
                       playGameFeel("button", fieldRef.current);
                       dispatch({ type: "guess", letter });
                     }}
@@ -211,7 +233,7 @@ export function HangmanGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

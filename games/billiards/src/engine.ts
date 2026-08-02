@@ -22,6 +22,7 @@ export interface BilliardsState {
 const W = 100;
 const H = 60;
 const POCKET_R = 5;
+export const MAX_SHOTS = 15;
 
 export function createInitialState(): BilliardsState {
   return {
@@ -116,7 +117,7 @@ export function shoot(state: BilliardsState): BilliardsState {
     balls,
     score,
     shots,
-    status: allPocketed || shots >= 15 ? "over" : "aiming",
+    status: allPocketed || shots >= MAX_SHOTS ? "over" : "aiming",
     power: 0,
     powerDir: 1,
   };

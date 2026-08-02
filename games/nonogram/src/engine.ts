@@ -5,6 +5,7 @@ export interface NonogramState {
   marks: (boolean | null)[][];
   rowHints: number[][];
   colHints: number[][];
+  wrongFlash: [number, number] | null;
   status: "playing" | "won";
 }
 
@@ -27,6 +28,7 @@ export function createInitialState(): NonogramState {
     rowHints: ROW_HINTS,
     colHints: COL_HINTS,
     status: "playing",
+    wrongFlash: null,
   };
 }
 
@@ -34,9 +36,16 @@ export function toggleCell(state: NonogramState, row: number, col: number): Nono
   if (state.status === "won") return state;
   const marks = state.marks.map((r) => [...r]);
   const cur = marks[row]![col];
-  marks[row]![col] = cur === true ? null : true;
+  if (cur === true) {
+    marks[row]![col] = null;
+    return { ...state, marks, wrongFlash: null };
+  }
+  if (!state.solution[row]![col]) {
+    return { ...state, wrongFlash: [row, col] };
+  }
+  marks[row]![col] = true;
   const won = checkWin(state.solution, marks);
-  return { ...state, marks, status: won ? "won" : "playing" };
+  return { ...state, marks, wrongFlash: null, status: won ? "won" : "playing" };
 }
 
 export function markEmpty(state: NonogramState, row: number, col: number): NonogramState {
@@ -58,6 +67,10 @@ function checkWin(solution: boolean[][], marks: (boolean | null)[][]): boolean {
 
 export function computeScore(state: NonogramState): number {
   return state.status === "won" ? 450 : 0;
+}
+
+export function clearWrongFlash(state: NonogramState): NonogramState {
+  return state.wrongFlash ? { ...state, wrongFlash: null } : state;
 }
 
 export function formatHint(hints: number[]): string {

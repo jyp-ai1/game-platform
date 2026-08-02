@@ -3,12 +3,13 @@ export type Board = (number | null)[][]; // 9x9, null = empty cell
 export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
 export interface SudokuState {
-  puzzle: Board; // the fixed given cells (a cell is locked iff puzzle[r][c] !== null)
-  board: Board; // current working board (starts as a copy of puzzle)
-  solution: Board; // the complete solved board, used only to validate entries
+  puzzle: Board;
+  board: Board;
+  solution: Board;
   selectedCell: { row: number; col: number } | null;
   mistakes: number;
   maxMistakes: number;
+  difficulty: Difficulty;
   status: "playing" | "won" | "over";
 }
 
@@ -190,6 +191,7 @@ export function createInitialState(difficulty: Difficulty = "MEDIUM"): SudokuSta
     selectedCell: null,
     mistakes: 0,
     maxMistakes: MAX_MISTAKES,
+    difficulty,
     status: "playing",
   };
 }

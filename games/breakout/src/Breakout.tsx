@@ -34,6 +34,7 @@ import {
   type BreakoutState,
   type Rect,
 } from "./engine";
+import { playGameOverAudio, playStageClearAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "breakout";
 const PADDLE_KEY_SPEED = 320;
@@ -83,6 +84,7 @@ export function BreakoutGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -91,6 +93,17 @@ export function BreakoutGame() {
     }
     prevScoreRef.current = state.score;
   }, [state.score]);
+
+  useEffect(() => {
+    if (state.status !== "playing" && prevStatusRef.current === "playing") {
+      if (state.status === "won") {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
 
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...standardFeelFromState(state as unknown as Record<string, unknown>),
@@ -153,6 +166,8 @@ export function BreakoutGame() {
     if (state.status !== "playing") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -160,6 +175,7 @@ export function BreakoutGame() {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
+        primeGameAudio();
         keysRef.current.add(event.key);
       }
     }
@@ -179,6 +195,7 @@ export function BreakoutGame() {
       if (!canPlayRef.current) {
         return;
       }
+      primeGameAudio();
       const field = fieldRef.current;
       if (!field) {
         return;
@@ -191,14 +208,22 @@ export function BreakoutGame() {
     [canPlayRef]
   );
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -265,7 +290,7 @@ export function BreakoutGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

@@ -25,12 +25,19 @@ import {
   createInitialState,
   FIELD_HEIGHT,
   FIELD_WIDTH,
+  MATCH_TIME_LIMIT_SECONDS,
   movePlayerPaddle,
   PADDLE_RADIUS,
   PUCK_RADIUS,
   step,
   type AirHockeyState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "air-hockey";
 const MAX_DT = 0.05;
@@ -83,6 +90,7 @@ export function AirHockeyGame() {
   stateRef.current = state;
   const completeCountdownRef = useRef(completeCountdown);
   completeCountdownRef.current = completeCountdown;
+  const prevStatusRef = useRef(state.status);
   const onCountdownComplete = useCallback(() => {
     completeCountdownRef.current();
   }, []);
@@ -125,19 +133,40 @@ export function AirHockeyGame() {
   }, [state.playerScore]);
 
   useEffect(() => {
+    if (state.status !== "playing" && prevStatusRef.current === "playing") {
+      if (state.winner === "player") {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status, state.winner]);
+
+  useEffect(() => {
     if (state.status !== "playing") {
       reportScore(GAME_SLUG, state.playerScore);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.playerScore, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -167,6 +196,10 @@ export function AirHockeyGame() {
         <div className="flex gap-2">
           <ScoreBox label="You" value={state.playerScore} />
           <ScoreBox label="CPU" value={state.aiScore} />
+          <ScoreBox
+            label="Time"
+            value={Math.max(0, Math.ceil(MATCH_TIME_LIMIT_SECONDS - state.elapsedSeconds))}
+          />
         </div>
         <Button
           variant="outline"
@@ -183,7 +216,10 @@ export function AirHockeyGame() {
         className="relative w-full max-w-sm touch-none select-none overflow-hidden rounded-xl bg-muted transition-transform duration-150 active:scale-[0.99]"
         style={{ aspectRatio: `${FIELD_WIDTH} / ${FIELD_HEIGHT}` }}
         onPointerMove={handlePointerMove}
-        onPointerDown={() => playGameFeel("button", fieldRef.current)}
+        onPointerDown={() => {
+          primeGameAudio();
+          playGameFeel("button", fieldRef.current);
+        }}
       >
         <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/20" />
         <div
@@ -225,7 +261,7 @@ export function AirHockeyGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

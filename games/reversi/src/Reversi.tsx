@@ -15,7 +15,7 @@ import {
   useResumableGame,
   type CpuDifficulty,
 } from "@game-platform/game-sdk";
-import { Button, cn, ReadyCountdown } from "@game-platform/ui";
+import { Button, cn, ReadyCountdown, ScoreBox } from "@game-platform/ui";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
@@ -23,11 +23,18 @@ import {
   computeScore,
   cpuMove,
   createInitialState,
+  discCounts,
   placeDisc,
   resolvePass,
   validMoves,
   type ReversiState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "reversi";
 
@@ -64,6 +71,7 @@ export function ReversiGame() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [difficulty, setDifficulty] = useState<CpuDifficulty>("normal");
+  const prevStatusRef = useRef(state.winner);
   const { reportScore } = useGameSDK();
   const { fieldRef, feel, feelTap, FeelLayer } = useHumanVsCpuFeel(GAME_SLUG, {
     winner: state.winner,
@@ -88,16 +96,26 @@ export function ReversiGame() {
     return () => clearTimeout(id);
   }, [state.current, state.winner, state.board, difficulty, canPlay]);
 
+  const canPass =
+    humanTurn && humanMoves.length === 0 && state.winner === null;
+
   useEffect(() => {
-    if (!canPlayRef.current || state.winner !== null || state.current !== 1) return;
-    if (validMoves(state.board, 1).length > 0) return;
-    dispatch({ type: "pass" });
-  }, [state.current, state.winner, state.board, canPlay]);
+    if (state.winner !== null && prevStatusRef.current === null) {
+      if (state.winner === 1) {
+        playStageClearAudio();
+      } else {
+        playGameOverAudio();
+      }
+    }
+    prevStatusRef.current = state.winner;
+  }, [state.winner]);
 
   useEffect(() => {
     if (state.winner !== null) {
       reportScore(GAME_SLUG, computeScore(state));
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.winner, reportScore]);
 
@@ -108,26 +126,40 @@ export function ReversiGame() {
         ? "CPU Wins!"
         : state.winner === "draw"
           ? "Draw"
-          : humanTurn
-            ? "흑(당신) 차례"
-            : "CPU 차례...";
+          : canPass
+            ? "둘 곳 없음 — Pass 가능"
+            : humanTurn
+              ? "흑(당신) 차례"
+              : "CPU 차례...";
 
+  const discs = discCounts(state);
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   return (
     <div className="standard-game-shell relative flex flex-col items-center gap-4 mx-auto w-full max-w-md px-2 sm:px-0 landscape:gap-2 touch-manipulation">
       <SaveIndicator status={saveStatus} slug={GAME_SLUG} />
-      <div className="flex w-full max-w-sm items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{msg}</p>
+      <div className="flex w-full max-w-sm items-center justify-between gap-2">
+        <div className="flex gap-2">
+          <ScoreBox label="Black" value={discs.black} />
+          <ScoreBox label="White" value={discs.white} />
+        </div>
         <Button
           variant="outline"
           size="icon"
@@ -136,6 +168,21 @@ export function ReversiGame() {
         >
           <RotateCcw />
         </Button>
+      </div>
+      <div className="flex w-full max-w-sm items-center justify-between gap-2">
+        <p className="text-sm font-medium text-muted-foreground">{msg}</p>
+        {canPass ? (
+          <Button
+            size="sm"
+            onClick={() => {
+              primeGameAudio();
+              playGameFeel("button");
+              dispatch({ type: "pass" });
+            }}
+          >
+            Pass
+          </Button>
+        ) : null}
       </div>
       <CpuDifficultyPicker
         value={difficulty}
@@ -155,6 +202,7 @@ export function ReversiGame() {
                 type="button"
                 disabled={!valid}
                 onClick={() => {
+                  primeGameAudio();
                   playGameFeel("button");
                   feelTap();
                   dispatch({ type: "place", row: ri, col: ci });
@@ -179,7 +227,7 @@ export function ReversiGame() {
           gameSlug={GAME_SLUG}
           isNewBest={feel.isNewBest}
           bestRecordDelta={feel.bestRecordDelta}
-          onExit={feel.handleExit}
+          onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

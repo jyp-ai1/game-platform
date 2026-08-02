@@ -27,6 +27,7 @@ import {
   type ColorMatchState,
   type ColorName,
 } from "./engine";
+import { playGameOverAudio, primeGameAudio, resetGameAudioPrime } from "./game-audio-prime";
 
 const GAME_SLUG = "color-match";
 const TICK_MS = 100;
@@ -88,6 +89,7 @@ export function ColorMatchGame() {
   }, []);
 
   const sessionActive = phase === "ready" && !showCountdown;
+  const prevStatusRef = useRef(state.status);
   const { recordGameEnd, resetSession } = useGameSession(
     GAME_SLUG,
     sessionActive
@@ -112,6 +114,13 @@ export function ColorMatchGame() {
   }, [state.status, canPlay]);
 
   useEffect(() => {
+    if (state.status === "over" && prevStatusRef.current !== "over") {
+      playGameOverAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over") {
       reportScore(GAME_SLUG, state.score);
       recordGameEnd({
@@ -120,26 +129,30 @@ export function ColorMatchGame() {
         stageReached: state.round,
       });
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, state.round, reportScore, recordGameEnd]);
+
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
 
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
     resetSession();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
     resetSession();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
-
-  useEffect(() => {
-    if (state.status === "over") {
-      playGameFeel("wrong", fieldRef.current);
-    }
-  }, [state.status]);
 
   const interactive = canPlay && state.status === "playing";
 
@@ -147,6 +160,7 @@ export function ColorMatchGame() {
     if (!interactive) {
       return;
     }
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     const wasCorrect = color === state.targetColor;
     dispatch({ type: "select", color });
@@ -169,6 +183,10 @@ export function ColorMatchGame() {
         <div className="flex gap-2">
           <ScoreBox label="Score" value={state.score} />
           <ScoreBox label="Lives" value={state.lives} />
+          <ScoreBox
+            label="Time"
+            value={Math.max(0, Math.ceil(state.timeLeftMs / 1000))}
+          />
         </div>
         <Button
           variant="outline"
@@ -224,7 +242,7 @@ export function ColorMatchGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

@@ -41,6 +41,12 @@ import {
   step,
   type SpaceDefenderState,
 } from "./engine";
+import {
+  playGameOverAudio,
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "space-defender";
 const PLAYER_KEY_SPEED = 240;
@@ -83,6 +89,7 @@ export function SpaceDefenderGame() {
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
   const prevScoreRef = useRef(0);
+  const prevStatusRef = useRef(state.status);
   
   useEffect(() => {
     if (state.score > prevScoreRef.current) {
@@ -157,9 +164,23 @@ export function SpaceDefenderGame() {
   }, [canPlayRef]);
 
   useEffect(() => {
+    if (state.status === prevStatusRef.current) {
+      return;
+    }
+    if (state.status === "over") {
+      playGameOverAudio();
+    } else if (state.status === "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "over" || state.status === "won") {
       reportScore(GAME_SLUG, state.score);
       clearSave(GAME_SLUG);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.score, reportScore]);
 
@@ -170,6 +191,7 @@ export function SpaceDefenderGame() {
       }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === " ") {
         event.preventDefault();
+        primeGameAudio();
         keysRef.current.add(event.key);
       }
     }
@@ -204,19 +226,28 @@ export function SpaceDefenderGame() {
     if (!canPlayRef.current) {
       return;
     }
+    primeGameAudio();
     playGameFeel("button", fieldRef.current);
     dispatch({ type: "fire" });
   }, [canPlayRef]);
 
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     prevScoreRef.current = 0;
     dispatch({ type: "restart" });
   }
@@ -307,7 +338,7 @@ export function SpaceDefenderGame() {
             gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
             onRetry={handleRetry}
             onRestart={handleRetry}
           />

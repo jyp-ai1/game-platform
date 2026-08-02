@@ -27,6 +27,11 @@ import {
   tileColor,
   type JigsawState,
 } from "./engine";
+import {
+  playStageClearAudio,
+  primeGameAudio,
+  resetGameAudioPrime,
+} from "./game-audio-prime";
 
 const GAME_SLUG = "jigsaw";
 
@@ -50,6 +55,7 @@ export function JigsawGame() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { reportScore } = useGameSDK();
   const fieldRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(state.status);
   const score = computeScore(state.moves);
   const feel = useStandardGameFeel(GAME_SLUG, {
     ...feelWithScore(state as unknown as Record<string, unknown>, score),
@@ -62,20 +68,36 @@ export function JigsawGame() {
   );
 
   useEffect(() => {
+    if (state.status === "won" && prevStatusRef.current !== "won") {
+      playStageClearAudio();
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status === "won") {
       reportScore(GAME_SLUG, computeScore(state.moves));
       clearSave(GAME_SLUG);
-      playGameFeel("goal", fieldRef.current);
+      const guard = window.setTimeout(() => clearSave(GAME_SLUG), 400);
+      return () => window.clearTimeout(guard);
     }
   }, [state.status, state.moves, reportScore]);
 
+  function handleExit() {
+    clearSave(GAME_SLUG);
+    feel.handleExit();
+    window.setTimeout(() => clearSave(GAME_SLUG), 400);
+  }
+
   function handleRetry() {
     emitGameRetry(GAME_SLUG);
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
   function handleNewGame() {
     onNewGame();
+    resetGameAudioPrime();
     dispatch({ type: "restart" });
   }
 
@@ -109,6 +131,7 @@ export function JigsawGame() {
             disabled={tile === 0}
             onClick={() => {
               if (canPlayRef.current) {
+                primeGameAudio();
                 playGameFeel("button", fieldRef.current);
                 dispatch({ type: "tap", index: i });
               }
@@ -126,12 +149,12 @@ export function JigsawGame() {
       </PuzzlePlayField>
       {state.status === "won" ? (
         <StandardGameOverOverlay
-          message={`Complete! ${computeScore(state.moves)} pts`}
+          message={`15-Puzzle Complete! ${computeScore(state.moves)} pts`}
           score={computeScore(state.moves)}
           gameSlug={GAME_SLUG}
             isNewBest={feel.isNewBest}
             bestRecordDelta={feel.bestRecordDelta}
-            onExit={feel.handleExit}
+            onExit={handleExit}
           onRetry={handleRetry}
           onRestart={handleRetry}
         />

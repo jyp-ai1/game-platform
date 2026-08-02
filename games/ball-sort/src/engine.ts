@@ -1,4 +1,4 @@
-// Ball Sort — same mechanics as color sort, 5 tubes / 4 colors
+// Ball Sort — 4 colors × 4 balls, 6 tubes (4 filled + 2 empty)
 export type BallId = 1 | 2 | 3 | 4;
 
 export interface BallSortState {
@@ -9,24 +9,24 @@ export interface BallSortState {
 }
 
 const TUBE_CAPACITY = 4;
-const BALLS_PER_COLOR = 3;
+const BALLS_PER_COLOR = 4;
+const COLOR_COUNT = 4;
+const TUBE_COUNT = 6;
 
 function makeTubes(): BallId[][] {
   const balls: BallId[] = [];
-  for (let c = 1; c <= 4; c++) {
-    for (let i = 0; i < 3; i++) balls.push(c as BallId);
+  for (let c = 1; c <= COLOR_COUNT; c++) {
+    for (let i = 0; i < BALLS_PER_COLOR; i++) balls.push(c as BallId);
   }
   for (let i = balls.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [balls[i], balls[j]] = [balls[j]!, balls[i]!];
   }
-  return [
-    balls.slice(0, 3),
-    balls.slice(3, 6),
-    balls.slice(6, 9),
-    balls.slice(9, 12),
-    [],
-  ];
+  const tubes: BallId[][] = [[], [], [], [], [], []];
+  balls.forEach((ball, i) => {
+    tubes[i % 4]!.push(ball);
+  });
+  return tubes;
 }
 
 export function createInitialState(): BallSortState {
@@ -58,8 +58,10 @@ export function tapTube(state: BallSortState, index: number): BallSortState {
   if (dst.length > 0 && dst[dst.length - 1] !== ball) {
     return { ...state, selected: index };
   }
-  src.pop();
-  dst.push(ball);
+  let run = 1;
+  for (let i = src.length - 2; i >= 0 && src[i] === ball; i--) run++;
+  const moveCount = Math.min(run, TUBE_CAPACITY - dst.length);
+  for (let i = 0; i < moveCount; i++) dst.push(src.pop()!);
   const moves = state.moves + 1;
   return { tubes, selected: null, moves, status: isSorted(tubes) ? "won" : "playing" };
 }
