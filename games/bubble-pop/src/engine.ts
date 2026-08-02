@@ -306,13 +306,34 @@ function applyCeilingDrop(grid: (BubbleColor | null)[][]): {
   return { grid: shifted, overflow: false };
 }
 
+function resolveBubbleStatus(
+  grid: (BubbleColor | null)[][],
+  stageIndex: number,
+  currentStatus: BubblePopStatus
+): BubblePopStatus {
+  const bubblesRemaining = countGridBubbles(grid);
+  const reachedDangerLine = grid
+    .slice(DANGER_ROW)
+    .some((row) => row.some((cell) => cell !== null));
+
+  if (reachedDangerLine) {
+    return "over";
+  }
+  if (bubblesRemaining === 0) {
+    return stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear";
+  }
+  if (currentStatus === "stage-clear" || currentStatus === "won") {
+    return "playing";
+  }
+  return currentStatus === "over" ? "over" : "playing";
+}
+
 export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
   if (!state.flyingBubble) {
     if (state.lastPops.length > 0) {
       return { ...state, lastPops: [] };
     }
-    const idleRemaining = countGridBubbles(state.grid);
-    if (state.status === "playing" && idleRemaining === 0) {
+    if (state.status === "playing" && countGridBubbles(state.grid) === 0) {
       return {
         ...state,
         status: state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear",
@@ -415,18 +436,7 @@ export function step(state: BubblePopState, dtSeconds: number): BubblePopState {
     }
   }
 
-  let status: BubblePopStatus = state.status;
-  const reachedDangerLine =
-    grid.slice(DANGER_ROW).some((row) => row.some((cell) => cell !== null));
-  const bubblesRemaining = countGridBubbles(grid);
-  if (reachedDangerLine) {
-    status = "over";
-  } else if (bubblesRemaining === 0) {
-    status = state.stageIndex >= FINAL_BUBBLE_STAGE ? "won" : "stage-clear";
-  } else if (status === "stage-clear" || status === "won") {
-    // Never hold a clear state while bubbles remain (e.g. after ceiling drop).
-    status = "playing";
-  }
+  let status = resolveBubbleStatus(grid, state.stageIndex, state.status);
 
   return {
     ...state,

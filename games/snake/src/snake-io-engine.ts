@@ -342,7 +342,7 @@ export function createSnake(
     bodyRadiusScale: 1,
     aliveSinceTick: world.tick,
     totalKills: 0,
-    awaitingInput: true,
+    awaitingInput: world.living?.matchRule.humanAutoRespawn ? false : true,
   };
   return finalizeSnake(snake, pos, segmentCount, 0);
 }
@@ -402,6 +402,9 @@ export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direc
   if (!snake || !snake.alive || snake.spectating || isOpposite(direction, snake.direction)) return;
   snake.pendingDirection = direction;
   snake.desiredAngle = directionToAngle(direction);
+  if (snake.awaitingInput) {
+    snake.awaitingInput = false;
+  }
 }
 
 export function setBoost(world: SnakeIoWorld, deviceId: string, boosting: boolean): void {

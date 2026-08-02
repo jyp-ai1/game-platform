@@ -1012,6 +1012,7 @@ export function SnakeIoGame({
           if (isBotSnake(worldRef.current.snakes[input.deviceId]!)) continue;
           setInput(worldRef.current, input.deviceId, input.direction);
           setBoost(worldRef.current, input.deviceId, !!input.boosting);
+          worldRef.current.snakes[input.deviceId]!.awaitingInput = false;
         }
       }
       // Legacy single-input key (private rooms)
@@ -1021,6 +1022,7 @@ export function SnakeIoGame({
         if (snake && !isBotSnake(snake)) {
           setInput(worldRef.current, input.deviceId, input.direction);
           setBoost(worldRef.current, input.deviceId, !!input.boosting);
+          snake.awaitingInput = false;
         }
       }
       if (!worldRef.current) return;
@@ -1039,7 +1041,14 @@ export function SnakeIoGame({
           const idx = humans.findIndex((h) => h.deviceId === deviceId);
           ensureLocalSnake(next, deviceId, getLastNickname() || "Player", Math.max(0, idx));
           applyLocalHead(next);
-          camRef.current = { x: 0, y: 0 };
+          const head = resolveSnakeHead(next.snakes[deviceId]);
+          const layout = camLayoutRef.current;
+          if (head && layout.cellSize > 0) {
+            camRef.current = {
+              x: head.x * layout.cellSize - layout.camHalfX,
+              y: head.y * layout.cellSize - layout.camHalfY,
+            };
+          }
         }
         tickBotBrains(next);
         recordGlobalWorldTick(activeRoom, {
@@ -1056,9 +1065,16 @@ export function SnakeIoGame({
         environment: EnvironmentEngine.resolve(pc, next.tick + 1),
       };
 
-      const localSnake = next.snakes[deviceId];
-      if (localSnake) {
-        localSnake.awaitingInput = awaitingInputRef.current;
+      if (isGlobalWorld) {
+        for (const snake of Object.values(next.snakes)) {
+          if (isBotSnake(snake) || !snake.alive || snake.spectating) continue;
+          snake.awaitingInput = false;
+        }
+      } else {
+        const localSnake = next.snakes[deviceId];
+        if (localSnake) {
+          localSnake.awaitingInput = awaitingInputRef.current;
+        }
       }
 
       if (ux.events) {

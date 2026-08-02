@@ -104,14 +104,14 @@ export function GameOverOverlay({
         </div>
         {showStageActions ? (
           <div className="flex w-full max-w-sm flex-row gap-2">
-            <Button variant="outline" onClick={handleExit} className="h-12 flex-1">
-              종료
-            </Button>
             <Button
               onClick={handleNextStage}
               className="h-12 flex-1 bg-violet-600 text-base font-semibold hover:bg-violet-500"
             >
-              다음 Stage ▶
+              Next Stage
+            </Button>
+            <Button variant="outline" onClick={handleExit} className="h-12 flex-1">
+              Exit
             </Button>
           </div>
         ) : null}
@@ -136,17 +136,12 @@ export function GameOverOverlay({
         ) : null}
       </div>
       <div className="flex w-full max-w-sm flex-row gap-2">
-        {onContinue ? (
-          <Button onClick={onContinue} className="h-12 flex-1 font-semibold">
-            Continue
-          </Button>
-        ) : null}
         <Button onClick={handleRetry} className={cn("h-12 flex-1 gap-2 font-semibold")}>
           <RotateCcw className="size-4" />
           Retry
         </Button>
         <Button variant="outline" onClick={handleExit} className="h-12 flex-1">
-          종료
+          Exit
         </Button>
       </div>
     </div>

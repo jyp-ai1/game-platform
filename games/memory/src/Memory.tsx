@@ -363,27 +363,30 @@ export function MemoryGame() {
               onClick={() => handleFlip(index)}
               disabled={isFaceUp || card.matched}
               aria-label={isFaceUp ? card.symbol : "카드 뒤집기"}
-              className="aspect-square min-h-11"
+              className="aspect-square min-h-11 perspective-[800px]"
             >
               <span
                 className={cn(
-                  "flex h-full w-full flex-col items-center justify-center rounded-lg border-2 text-2xl font-bold shadow-md transition-all duration-200",
+                  "relative flex h-full w-full items-center justify-center rounded-xl text-2xl font-bold transition-all duration-200",
                   isFaceUp
-                    ? "border-primary/50 bg-primary/15 text-foreground"
-                    : "border-indigo-400/60 bg-gradient-to-br from-indigo-700 via-violet-700 to-indigo-900 text-white shadow-indigo-900/40 hover:brightness-110",
-                  card.matched && "ring-2 ring-primary/50 opacity-80",
+                    ? "border-2 border-primary/40 bg-card text-foreground shadow-[0_3px_0_0_hsl(var(--border)),0_6px_14px_rgba(0,0,0,0.12)]"
+                    : "border-2 border-primary/25 bg-gradient-to-br from-primary/15 via-muted to-primary/10 text-primary shadow-[0_4px_0_0_hsl(var(--border)),0_8px_18px_rgba(0,0,0,0.14)] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_hsl(var(--border)),0_10px_20px_rgba(0,0,0,0.16)]",
+                  card.matched && "ring-2 ring-primary/40 opacity-85",
                   sparkIndices.includes(index) && "ring-4 ring-amber-400/80 scale-105 animate-[pulse_0.4s_ease-out]"
                 )}
               >
-                {isFaceUp ? (
-                  card.symbol
-                ) : (
+                {!isFaceUp ? (
                   <>
-                    <span className="text-base leading-none opacity-90" aria-hidden>
-                      🎴
+                    <span
+                      className="pointer-events-none absolute inset-1.5 rounded-lg border border-primary/15 bg-[repeating-linear-gradient(135deg,hsl(var(--primary)/0.08)_0_4px,transparent_4px_8px)]"
+                      aria-hidden
+                    />
+                    <span className="relative text-lg font-black tracking-[0.25em] text-primary/50">
+                      ?
                     </span>
-                    <span className="mt-0.5 text-sm font-black tracking-widest">?</span>
                   </>
+                ) : (
+                  <span className="relative drop-shadow-sm">{card.symbol}</span>
                 )}
               </span>
             </button>
