@@ -42,6 +42,7 @@ import {
   lerpSegments,
   restartPlayerSnake,
   rehydrateWorldSnakes,
+  respreadClusteredSpawns,
   setBoost,
   setInput,
   spawnEventFood,
@@ -136,7 +137,6 @@ import { SNAKE_FEEL } from "./snake-feel-tuning";
 import {
   diagnoseLocalSpawn,
   ensureRenderableLocalSnake,
-  forceLocalSnakeToViewCenter,
   type Rc014SpawnDiag,
 } from "./snake-spawn-rc014";
 import { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
@@ -286,6 +286,8 @@ export function SnakeIoGame({
     camera: "FAIL",
     segments: 0,
     visible: "NO",
+    tick: 0,
+    sim: "FAIL",
   });
   const frameCounterRef = useRef(0);
   const [, bumpLocalInput] = useReducer((n: number) => n + 1, 0);
@@ -405,7 +407,6 @@ export function SnakeIoGame({
     spawnCameraLockRef.current = 3;
     const wr = worldRef.current;
     if (wr && (isGlobalWorld || immersiveWorld)) {
-      forceLocalSnakeToViewCenter(wr, deviceId);
       ensureRenderableLocalSnake(wr, deviceId);
     }
     const snake = worldRef.current?.snakes[deviceId];
@@ -890,11 +891,7 @@ export function SnakeIoGame({
         if (isGlobalWorld || immersiveWorld) {
           me.awaitingInput = false;
           me.spectating = false;
-          forceLocalSnakeToViewCenter(w, deviceId);
           ensureRenderableLocalSnake(w, deviceId);
-          zoomMultRef.current = 1;
-          renderAlphaRef.current = 1;
-          spawnCameraLockRef.current = 3;
         }
         applyLocalHead(w);
         rehydrateWorldSnakes(w);
@@ -912,15 +909,17 @@ export function SnakeIoGame({
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
+          if (shouldTickWorld && worldRef.current) {
+            return;
+          }
           const next = bindLocalPlayerSnake(structuredClone(state), r, {
             populationSync: isHost && !state.snakes[deviceId],
             reviveDead: isHost,
           });
           worldRef.current = next;
           setWorld(next);
-          if (isGlobalWorld || immersiveWorld) {
-            snapCameraToLocalSnake("applyRoom", { resetZoom: true });
-            requestAnimationFrame(() => snapCameraToLocalSnake("applyRoom-rAF", { resetZoom: true }));
+          if (!worldRef.current.snakes[deviceId]) {
+            snapCameraToLocalSnake("applyRoom-new", { resetZoom: true });
           }
           rc014Debug("SPAWN", "applyRoom global state", {
             isHost,
@@ -941,6 +940,10 @@ export function SnakeIoGame({
         const persisted = isGlobalWorld ? loadPersistedGlobalWorld(effectiveRoomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
         initial = bindLocalPlayerSnake(initial, r, { populationSync: true, reviveDead: true });
+        if (isGlobalWorld) {
+          const spread = respreadClusteredSpawns(initial);
+          if (spread > 0) rc014Debug("SPAWN", "respreadClusteredSpawns", { count: spread });
+        }
         if (isGlobalWorld && !persisted) warmGlobalWorld(initial);
         initial.objective = obj;
         initLivingWorld(initial, resolveSnakeMatchRule(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
@@ -959,7 +962,7 @@ export function SnakeIoGame({
     const current = getRoom(effectiveRoomCode);
     if (current) applyRoom(current);
     return unsub;
-  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId, applyLocalHead, immersiveWorld]);
+  }, [effectiveRoomCode, connected, isHost, isGlobalWorld, isLocalOnly, deviceId, applyLocalHead, immersiveWorld, shouldTickWorld, snapCameraToLocalSnake]);
 
   useEffect(() => {
     if (!world) return;
@@ -1483,7 +1486,7 @@ export function SnakeIoGame({
       const snake = worldRef.current.snakes[deviceId];
       if (snake) {
         snake.awaitingInput = false;
-        snake.invincibleUntil = undefined;
+        if (!isGlobalWorld) snake.invincibleUntil = undefined;
       }
     }
     diagInput(direction);
@@ -1768,6 +1771,9 @@ export function SnakeIoGame({
       }
 
       if (debugHud && isGlobalWorld && frameCounterRef.current % 4 === 0) {
+        const wt = worldRef.current?.tick ?? 0;
+        const prev = prevWorldTickRef.current;
+        const tickAdvancing = wt > prev.tick && performance.now() - prev.at < 3000;
         const diag = diagnoseLocalSpawn(
           worldRef.current,
           deviceId,
@@ -1775,7 +1781,8 @@ export function SnakeIoGame({
           camRef.current.x,
           camRef.current.y,
           viewportSize.w,
-          viewportSize.h
+          viewportSize.h,
+          tickAdvancing
         );
         setRc014Diag(diag);
       }
@@ -2019,6 +2026,8 @@ export function SnakeIoGame({
             <div>Camera : {rc014Diag.camera}</div>
             <div>Segments : {rc014Diag.segments}</div>
             <div>Visible : {rc014Diag.visible}</div>
+            <div>Tick : {rc014Diag.tick}</div>
+            <div>Sim : {rc014Diag.sim}</div>
           </div>
         ) : null}
 

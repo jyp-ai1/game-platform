@@ -261,20 +261,64 @@ function findSafePosition(world: SnakeIoWorld, excludeId: string): Vec {
   const now = Date.now();
   const recentDeaths = world.deathZones.filter((d) => now - d.at < 30_000);
 
-  for (let t = 0; t < 150; t++) {
+  for (let t = 0; t < 200; t++) {
     const margin = world.config.safeZoneRadius;
     const pos = {
       x: margin + Math.random() * (w - margin * 2),
       y: margin + Math.random() * (w - margin * 2),
     };
-    if (occupied(world, pos) || isBlocked(world, pos)) continue;
+    if (occupied(world, pos, minDist * 0.35) || isBlocked(world, pos)) continue;
     const tooClose = enemies.some((e) => Math.hypot(e.x - pos.x, e.y - pos.y) < minDist);
     if (tooClose) continue;
     const inCamp = recentDeaths.some((d) => Math.hypot(d.x - pos.x, d.y - pos.y) < campRadius);
     if (inCamp) continue;
     return pos;
   }
+  for (let t = 0; t < 80; t++) {
+    const margin = world.config.safeZoneRadius;
+    const pos = {
+      x: margin + Math.random() * (w - margin * 2),
+      y: margin + Math.random() * (w - margin * 2),
+    };
+    if (!isBlocked(world, pos)) return pos;
+  }
   return { x: w / 2, y: w / 2 };
+}
+
+/** RC-015 — exported safe random spawn for humans and bots. */
+export function findSafeSpawnPosition(world: SnakeIoWorld, excludeId: string): Vec {
+  return findSafePosition(world, excludeId);
+}
+
+export function relocateSnakeToSafeSpawn(
+  world: SnakeIoWorld,
+  snake: SnakeEntity,
+  now = Date.now()
+): void {
+  const pos = findSafePosition(world, snake.deviceId);
+  const segs = Math.max(getSegmentCount(snake), SNAKE_MVP_RC1.startingSegments);
+  const angle = Math.random() * Math.PI * 2;
+  finalizeSnake(snake, pos, segs, angle);
+  snake.invincibleUntil = now + SNAKE_MVP_RC1.spawnSafeMs;
+  snake.awaitingInput = false;
+  snake.spectating = false;
+  snake.alive = true;
+}
+
+/** RC-015 — respread snakes stuck at world center (persisted / bad spawn seed). */
+export function respreadClusteredSpawns(world: SnakeIoWorld, now = Date.now()): number {
+  const alive = Object.values(world.snakes).filter((s) => s.alive);
+  if (alive.length < 2) return 0;
+  const mid = world.config.worldSize / 2;
+  const clustered = alive.filter((s) => {
+    const h = s.segments[0];
+    return h && Math.hypot(h.x - mid, h.y - mid) < world.config.safeSpawnMinDistance;
+  });
+  if (clustered.length < Math.ceil(alive.length * 0.35)) return 0;
+  for (const snake of alive) {
+    relocateSnakeToSafeSpawn(world, snake, now);
+  }
+  return alive.length;
 }
 
 function finalizeSnake(
@@ -461,13 +505,16 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
   }
 
   let killer: SnakeEntity | undefined;
-  const hitOther = Object.values(world.snakes).some((other) => {
-    if (!other.alive || other.spectating || other.deviceId === snake.deviceId) return false;
-    if (other.invincibleUntil && now < other.invincibleUntil) return false;
-    const hit = other.segments.slice(1).some((s) => dist(s, head) < cr * 1.8);
-    if (hit) killer = other;
-    return hit;
-  });
+  const selfSpawnSafe = !!(snake.invincibleUntil && now < snake.invincibleUntil);
+  const hitOther = selfSpawnSafe
+    ? false
+    : Object.values(world.snakes).some((other) => {
+        if (!other.alive || other.spectating || other.deviceId === snake.deviceId) return false;
+        if (other.invincibleUntil && now < other.invincibleUntil) return false;
+        const hit = other.segments.slice(1).some((s) => dist(s, head) < cr * 1.8);
+        if (hit) killer = other;
+        return hit;
+      });
 
   if (hitOther && !(snake.invincibleUntil && now < snake.invincibleUntil)) {
     if (killer) {

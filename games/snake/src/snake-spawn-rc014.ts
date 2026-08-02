@@ -1,4 +1,4 @@
-/** RC-014 — Human spawn / render / camera visibility hotfix */
+/** RC-014/015 — Human spawn render visibility + random world spawn */
 import {
   getSegmentCount,
   rehydrateWorldSnakes,
@@ -7,39 +7,14 @@ import {
 import { initSnakePath, syncSegmentsFromPath } from "./snake-path-movement";
 import { resolveSnakeHead, SNAKE_MVP_RC1 } from "./snake-mvp-rc1";
 
-export function centerWorldPos(world: SnakeIoWorld): { x: number; y: number } {
-  const w = world.config.worldSize;
-  return { x: w / 2, y: w / 2 };
-}
-
-/** Force local human snake to world center so camera snap = viewport center. */
-export function forceLocalSnakeToViewCenter(world: SnakeIoWorld, deviceId: string): boolean {
-  const snake = world.snakes[deviceId];
-  if (!snake) return false;
-  snake.alive = true;
-  snake.spectating = false;
-  snake.awaitingInput = false;
-  snake.bodyRadiusScale = 1;
-  const pos = centerWorldPos(world);
-  const segs = Math.max(
-    snake.segmentCount ?? 0,
-    getSegmentCount(snake),
-    world.living?.matchRule.startingSegments ?? SNAKE_MVP_RC1.startingSegments
-  );
-  snake.segmentCount = segs;
-  initSnakePath(snake, pos.x, pos.y, snake.angle ?? 0);
-  syncSegmentsFromPath(snake);
-  return snake.segments.length > 0;
-}
-
-/** If segments empty, rebuild from head / world center before render. */
+/** If segments empty, rebuild from head before render. */
 export function ensureRenderableLocalSnake(world: SnakeIoWorld, deviceId: string): boolean {
   const snake = world.snakes[deviceId];
   if (!snake) return false;
   if (snake.segments.length === 0 || getSegmentCount(snake) === 0) {
-    const fallback = centerWorldPos(world);
-    const hx = snake.headX ?? snake.segments[0]?.x ?? fallback.x;
-    const hy = snake.headY ?? snake.segments[0]?.y ?? fallback.y;
+    const w = world.config.worldSize;
+    const hx = snake.headX ?? snake.segments[0]?.x ?? w / 2;
+    const hy = snake.headY ?? snake.segments[0]?.y ?? w / 2;
     snake.segmentCount = Math.max(
       snake.segmentCount ?? 0,
       world.living?.matchRule.startingSegments ?? SNAKE_MVP_RC1.startingSegments
@@ -56,6 +31,8 @@ export interface Rc014SpawnDiag {
   camera: "OK" | "FAIL";
   segments: number;
   visible: "YES" | "NO";
+  tick: number;
+  sim: "OK" | "FAIL";
 }
 
 export function diagnoseLocalSpawn(
@@ -65,7 +42,8 @@ export function diagnoseLocalSpawn(
   camX: number,
   camY: number,
   viewW: number,
-  viewH: number
+  viewH: number,
+  tickAdvancing: boolean
 ): Rc014SpawnDiag {
   const snake = world?.snakes[deviceId];
   const renderSegs = snake?.segments.length ?? 0;
@@ -90,5 +68,15 @@ export function diagnoseLocalSpawn(
     visible = spawn === "OK" && inView ? "YES" : "NO";
   }
 
-  return { spawn, camera, segments: renderSegs, visible };
+  const sim =
+    spawn === "OK" && !snake?.awaitingInput && tickAdvancing ? "OK" : "FAIL";
+
+  return {
+    spawn,
+    camera,
+    segments: renderSegs,
+    visible,
+    tick: world?.tick ?? 0,
+    sim,
+  };
 }

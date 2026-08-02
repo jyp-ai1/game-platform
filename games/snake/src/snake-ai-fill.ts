@@ -4,6 +4,7 @@ import { pickBotDifficulty, POPULATION_TARGET, type BotDifficulty } from "@game-
 import {
   createSnake,
   createSnakeAt,
+  findSafeSpawnPosition,
   isOpposite,
   restartPlayerSnake,
   retireSnakeNaturally,
@@ -269,10 +270,10 @@ function botSeedFromId(id: string): number {
 
 function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty: BotDifficulty): SnakeEntity {
   const role = roleForSlot(slot);
-  const pos = spawnPointForRole(world, role);
   const segs = world.living?.matchRule.startingSegments ?? 3;
   const id = botDeviceId(slot);
   const seed = botSeedFromId(id);
+  const pos = findSafeSpawnPosition(world, id);
   const snake = createSnakeAt(
     id,
     nicknameForRole(role, slot),
