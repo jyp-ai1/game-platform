@@ -290,7 +290,8 @@ export function SnakeIoGame({
   );
   void progressionStage;
   const isHost = isLocalOnly || room?.hostId === deviceId;
-  const shouldTickWorld = isLocalOnly || isHost;
+  // RC-SYNC-001: WORLD clients simulate locally; applyRoom merges host world around local snake.
+  const shouldTickWorld = isLocalOnly || isHost || isGlobalWorld;
   const mySnake = world?.snakes[deviceId];
   const isSpectating = !isStageMode && mySnake?.spectating && !mySnake?.alive;
   const stageConfig = isStageMode ? getSnakeStage(stageIndex) : null;
@@ -799,18 +800,22 @@ export function SnakeIoGame({
       return w;
     };
 
-    /** RC-PLAYABLE-002: bind once; preserve local snake across host syncs missing deviceId. */
+    /**
+     * RC-SYNC-001 A':
+     * host state = authoritative for bots / other players / food / killFeed / events
+     * local snake = engine worldRef override (position, direction, input, awaiting, segments)
+     * host missing local → attachLocalPlayer only (never clone-wipe then re-attach mid-move)
+     */
     const mergeGlobalWorldState = (raw: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
       const next = structuredClone(raw);
-      if (next.snakes[deviceId]) {
+      const local = worldRef.current?.snakes[deviceId];
+
+      if (local) {
+        next.snakes[deviceId] = structuredClone(local);
         localSpawnBoundRef.current = true;
         return next;
       }
-      const existing = worldRef.current?.snakes[deviceId];
-      if (localSpawnBoundRef.current && existing) {
-        next.snakes[deviceId] = structuredClone(existing);
-        return next;
-      }
+
       localSpawnBoundRef.current = true;
       return attachLocalPlayer(next, r);
     };
@@ -819,7 +824,7 @@ export function SnakeIoGame({
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
-          // RC-PLAYABLE-002: host tick owns worldRef — ignore subscribeRoom state echoes.
+          // Host tick owns worldRef — ignore subscribeRoom state echoes.
           if (isHost) {
             if (!worldRef.current) {
               const next = attachLocalPlayer(structuredClone(state), r);
@@ -829,9 +834,10 @@ export function SnakeIoGame({
             }
             return;
           }
+          // RC-SYNC-001 A': merge host world + local snake override → one render snapshot
           const next = mergeGlobalWorldState(state, r);
           worldRef.current = next;
-          setWorld((prev) => (prev?.tick === next.tick ? prev : next));
+          setWorld(next);
           return;
         }
         worldRef.current = state;
