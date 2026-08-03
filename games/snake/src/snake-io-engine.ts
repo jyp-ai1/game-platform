@@ -840,6 +840,12 @@ function killSnake(
     world.deathZones = [...world.deathZones.filter((d) => Date.now() - d.at < 30_000), { x: head.x, y: head.y, at: Date.now() }].slice(-40);
   }
   dropFoodFromSnake(world, snake);
+  // FIX-CORPSE-001: convert body → food, then clear corpse so it cannot linger in world/render
+  snake.segments = [];
+  snake.segmentCount = 0;
+  snake.path = [];
+  snake.headX = undefined;
+  snake.headY = undefined;
   if (killer && killer.deviceId !== snake.deviceId) {
     world.killFeed = [
       {
