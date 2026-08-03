@@ -12,6 +12,7 @@ import { death004Sample } from "./snake-death-004-trace";
 import { noteFixDeath001Sample } from "./snake-fix-death-001";
 import { noteFixDeath001Approach } from "./snake-fix-death-001-step2";
 import { noteExecOrder } from "./snake-exec-order-trace";
+import { noteDeath005 } from "./snake-death-005-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -824,6 +825,8 @@ function killSnake(
   killer?: SnakeEntity
 ): void {
   const victimBot = isBotEntity(snake);
+  const foodBefore = world.food.length;
+  const deathFoodBefore = world.food.filter((f) => f.tier === "death").length;
   deathTrace("kill_snake_enter", {
     tick: world.tick,
     victimId: snake.deviceId,
@@ -885,6 +888,25 @@ function killSnake(
       detail: { respawnAt: null, humanAuto, reason: "humanAutoRespawn=false" },
     });
   }
+
+  // RC-DEATH-005 observe — after all killSnake mutations (no gameplay change)
+  noteDeath005({
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot,
+    killerId: killer?.deviceId,
+    stillInWorld: !!world.snakes[snake.deviceId],
+    segmentsAfter: snake.segments.length,
+    segmentCountAfter: snake.segmentCount ?? null,
+    foodBefore,
+    foodAfter: world.food.length,
+    deathFoodBefore,
+    deathFoodAfter: world.food.filter((f) => f.tier === "death").length,
+    killFeedLen: world.killFeed.length,
+    killFeedHasVictim: world.killFeed.some((e) => e.victimId === snake.deviceId),
+    alive: snake.alive,
+    spectating: !!snake.spectating,
+  });
 }
 
 /** Natural bot retirement — death + food drop, removed from world (no respawn) */
