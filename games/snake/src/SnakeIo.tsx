@@ -794,10 +794,14 @@ export function SnakeIoGame({
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
-          // Host-authoritative WORLD: non-host clients render shared simulation.
+          // RC-PLAYABLE-001: bind local player when missing from WORLD registry.
           if (!isHost) {
-            worldRef.current = structuredClone(state);
-            setWorld(structuredClone(state));
+            let next = structuredClone(state);
+            if (!next.snakes[deviceId]) {
+              next = attachLocalPlayer(next, r);
+            }
+            worldRef.current = next;
+            setWorld(next);
             return;
           }
           if (!worldRef.current) {
@@ -806,8 +810,12 @@ export function SnakeIoGame({
             setWorld(next);
             return;
           }
-          worldRef.current = structuredClone(state);
-          setWorld(structuredClone(state));
+          let next = structuredClone(state);
+          if (!next.snakes[deviceId]) {
+            next = attachLocalPlayer(next, r);
+          }
+          worldRef.current = next;
+          setWorld(next);
           return;
         }
         worldRef.current = state;
