@@ -42,6 +42,7 @@ import {
   lerpSegments,
   restartPlayerSnake,
   rehydrateWorldSnakes,
+  damageSnake,
   setBoost,
   setInput,
   spawnEventFood,
@@ -131,6 +132,7 @@ import { initFixDeath001Step2, setFixDeath001Step2Focus } from "./snake-fix-deat
 import { beginExecOrderFrame, initExecOrderTrace } from "./snake-exec-order-trace";
 import { initDeath005Trace } from "./snake-death-005-trace";
 import { initDeath006Trace } from "./snake-death-006-trace";
+import { initDeath007Trace, noteDeath007Ux, setDeath007ForceDeath } from "./snake-death-007-trace";
 import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { initDeath003Trace } from "./snake-death-003-trace";
 import { initDeath004Trace } from "./snake-death-004-trace";
@@ -941,8 +943,49 @@ export function SnakeIoGame({
     initExecOrderTrace();
     initDeath005Trace();
     initDeath006Trace();
+    initDeath007Trace();
     return () => shutdownLoopDiag();
   }, [deviceId]);
+
+  useEffect(() => {
+    setDeath007ForceDeath(() => {
+      const w = worldRef.current;
+      const snake = w?.snakes[deviceId];
+      if (!w || !snake || !snake.alive) return false;
+      damageSnake(w, snake, 10_000);
+      setWorld(structuredClone(w));
+      return !w.snakes[deviceId]?.alive;
+    });
+  }, [deviceId]);
+
+  useEffect(() => {
+    if (!world) return;
+    const countdownDomVisible =
+      typeof document !== "undefined" &&
+      !!document.querySelector('[data-testid="death-ux-countdown"]');
+    const gameOverDomVisible =
+      typeof document !== "undefined" &&
+      !!document.querySelector('[data-testid="death-ux-gameover"]');
+    noteDeath007Ux({
+      isGlobalWorld,
+      isStageMode,
+      alive: !!mySnake?.alive,
+      spectating: !!mySnake?.spectating,
+      respawnSec,
+      hasRespawnAt: !!mySnake?.respawnAt,
+      countdownDomVisible,
+      gameOverDomVisible,
+    });
+  }, [
+    world,
+    world?.tick,
+    mySnake?.alive,
+    mySnake?.spectating,
+    mySnake?.respawnAt,
+    respawnSec,
+    isGlobalWorld,
+    isStageMode,
+  ]);
 
   useEffect(() => {
     if (!isEngineAuditEnabled()) return;
@@ -2316,7 +2359,10 @@ export function SnakeIoGame({
       ) : null}
 
       {!isStageMode && isGlobalWorld && mySnake && !mySnake.alive && respawnSec != null && respawnSec > 0 ? (
-        <div className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40">
+        <div
+          data-testid="death-ux-countdown"
+          className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40"
+        >
           <p className="text-7xl font-black tabular-nums text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.5)]">
             {respawnSec}
           </p>
@@ -2325,7 +2371,10 @@ export function SnakeIoGame({
       ) : null}
 
       {!isStageMode && mySnake && !mySnake.alive && !isGlobalWorld ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
+        <div
+          data-testid="death-ux-gameover"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+        >
           <div className="relative h-[min(100%,28rem)] w-full max-w-sm rounded-xl">
             <GameOverOverlay
               variant="game-over"
