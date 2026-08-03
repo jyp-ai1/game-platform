@@ -9,6 +9,7 @@ import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
 import { deathTrace } from "./snake-death-trace";
 import { death003 } from "./snake-death-003-trace";
 import { death004Sample } from "./snake-death-004-trace";
+import { noteFixDeath001Sample } from "./snake-fix-death-001";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -438,6 +439,23 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
   const head = snake.segments[0];
   if (!head) return false;
+
+  // FIX-DEATH-001 Step1: physics seg0 vs headX/Y identity (human only, throttled)
+  if (!isBotEntity(snake) && world.tick % 8 === 0) {
+    const headXY =
+      snake.headX != null && snake.headY != null ? { x: snake.headX, y: snake.headY } : null;
+    const deltaPhysicsVsHeadXY =
+      headXY != null ? Math.hypot(head.x - headXY.x, head.y - headXY.y) : null;
+    noteFixDeath001Sample({
+      tick: world.tick,
+      deviceId: snake.deviceId,
+      physicsSeg0: { x: head.x, y: head.y },
+      headXY,
+      deltaPhysicsVsHeadXY,
+      renderHead: null,
+      deltaPhysicsVsRender: null,
+    });
+  }
 
   const cr = SNAKE_FEEL.collisionRadius;
   const pickup = SNAKE_FEEL.foodPickupRadius;

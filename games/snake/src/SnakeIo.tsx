@@ -126,6 +126,7 @@ import {
   shutdownLoopDiag,
 } from "./snake-engine-diag";
 import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
+import { initFixDeath001, noteFixDeath001Sample } from "./snake-fix-death-001";
 import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { initDeath003Trace } from "./snake-death-003-trace";
 import { initDeath004Trace } from "./snake-death-004-trace";
@@ -922,6 +923,7 @@ export function SnakeIoGame({
     initDeathTrace();
     initDeath003Trace();
     initDeath004Trace();
+    initFixDeath001();
     return () => shutdownLoopDiag();
   }, []);
 
@@ -2019,6 +2021,24 @@ export function SnakeIoGame({
               const headRad = ((snake.angle ?? 0) * 180) / Math.PI;
               const isMe = snake.deviceId === deviceId;
               const highlight = isMe && spawnHighlightUntil > Date.now();
+              if (isMe && segs[0] && snake.segments[0] && world.tick % 8 === 0) {
+                const phys = snake.segments[0]!;
+                const rend = segs[0]!;
+                const headXY =
+                  snake.headX != null && snake.headY != null
+                    ? { x: snake.headX, y: snake.headY }
+                    : null;
+                noteFixDeath001Sample({
+                  tick: world.tick,
+                  deviceId: snake.deviceId,
+                  physicsSeg0: { x: phys.x, y: phys.y },
+                  headXY,
+                  deltaPhysicsVsHeadXY:
+                    headXY != null ? Math.hypot(phys.x - headXY.x, phys.y - headXY.y) : null,
+                  renderHead: { x: rend.x, y: rend.y },
+                  deltaPhysicsVsRender: Math.hypot(phys.x - rend.x, phys.y - rend.y),
+                });
+              }
               return segs.map((seg, i) => {
                 const isHead = i === 0;
                 const isTail = i === len - 1;
