@@ -7,6 +7,7 @@ import { FOOD_TIERS, rollFoodTier, type FoodTier } from "./snake-food-types";
 import { SNAKE_MVP_RC1 } from "./snake-mvp-rc1";
 import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
 import { deathTrace } from "./snake-death-trace";
+import { death003 } from "./snake-death-003-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -453,10 +454,118 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
   let killer: SnakeEntity | undefined;
   let nearestBodyD = Number.POSITIVE_INFINITY;
   let nearestBodyId: string | undefined;
+  const humanVictim = !isBotEntity(snake);
+  const traceHumans = humanVictim && (world.tick % 8 === 0);
+
+  if (traceHumans) {
+    death003("evaluator_enter", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      detail: {
+        snakesTotal: Object.keys(world.snakes).length,
+        invincibleUntil: snake.invincibleUntil ?? null,
+        now,
+        threshold: cr * 1.8,
+        head: { x: head.x, y: head.y },
+      },
+    });
+  }
+
   const hitOther = Object.values(world.snakes).some((other) => {
+    // --- RC-DEATH-003 observe reject path (human victims only) — outcome unchanged ---
+    if (humanVictim && traceHumans) {
+      if (!other.alive) {
+        death003("reject", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          otherId: other.deviceId,
+          reason: "other_not_alive",
+        });
+        return false;
+      }
+      if (other.spectating) {
+        death003("reject", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          otherId: other.deviceId,
+          reason: "other_spectating",
+        });
+        return false;
+      }
+      if (other.deviceId === snake.deviceId) {
+        death003("reject", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          otherId: other.deviceId,
+          reason: "self",
+        });
+        return false;
+      }
+      death003("candidate", {
+        tick: world.tick,
+        victimId: snake.deviceId,
+        otherId: other.deviceId,
+        detail: { otherBot: isBotEntity(other), segments: other.segments.length },
+      });
+      if (other.invincibleUntil && now < other.invincibleUntil) {
+        death003("reject", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          otherId: other.deviceId,
+          reason: "other_invincible",
+          detail: { remainingMs: other.invincibleUntil - now },
+        });
+        return false;
+      }
+      if (other.segments.length <= 1) {
+        death003("reject", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          otherId: other.deviceId,
+          reason: "body_empty",
+          detail: { segments: other.segments.length },
+        });
+        return false;
+      }
+      let best = Number.POSITIVE_INFINITY;
+      for (let i = 1; i < other.segments.length; i++) {
+        const d = dist(other.segments[i]!, head);
+        if (d < best) best = d;
+      }
+      death003("evaluate", {
+        tick: world.tick,
+        victimId: snake.deviceId,
+        otherId: other.deviceId,
+        detail: { nearestBodyD: best, threshold: cr * 1.8, hit: best < cr * 1.8 },
+      });
+      if (best < nearestBodyD) {
+        nearestBodyD = best;
+        nearestBodyId = other.deviceId;
+      }
+      const hit = best < cr * 1.8;
+      if (!hit) {
+        death003("reject", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          otherId: other.deviceId,
+          reason: "distance_gt_threshold",
+          detail: { nearestBodyD: best, threshold: cr * 1.8 },
+        });
+        return false;
+      }
+      death003("hit", {
+        tick: world.tick,
+        victimId: snake.deviceId,
+        otherId: other.deviceId,
+        detail: { nearestBodyD: best, threshold: cr * 1.8 },
+      });
+      killer = other;
+      return true;
+    }
+
+    // --- original path (bots + non-trace ticks) — identical gates ---
     if (!other.alive || other.spectating || other.deviceId === snake.deviceId) return false;
     if (other.invincibleUntil && now < other.invincibleUntil) return false;
-    // Body-only collision (head excluded) — observe distance for RC-DEATH-002
     let best = Number.POSITIVE_INFINITY;
     for (let i = 1; i < other.segments.length; i++) {
       const d = dist(other.segments[i]!, head);
@@ -507,6 +616,14 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
       snake.killStreak = 0;
       snake.lastKillerId = killer.deviceId;
     }
+    if (humanVictim) {
+      death003("kill_snake_call", {
+        tick: world.tick,
+        victimId: snake.deviceId,
+        otherId: killer?.deviceId,
+        detail: { nearestBodyD, threshold: cr * 1.8 },
+      });
+    }
     killSnake(snake, world.config, world, killer);
     return false;
   }
@@ -520,6 +637,15 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
       killerBot: killer ? isBotEntity(killer) : undefined,
       detail: { invincibleUntil: snake.invincibleUntil, now, remainingMs: snake.invincibleUntil - now },
     });
+    if (humanVictim) {
+      death003("reject", {
+        tick: world.tick,
+        victimId: snake.deviceId,
+        otherId: killer?.deviceId,
+        reason: "victim_invincible",
+        detail: { remainingMs: snake.invincibleUntil - now },
+      });
+    }
   }
 
   if (foodIdx >= 0) {
@@ -767,7 +893,17 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
       continue;
     }
 
-    if (snake.awaitingInput) continue;
+    if (snake.awaitingInput) {
+      if (!isBotEntity(snake) && world.tick % 16 === 0) {
+        death003("tick_skip", {
+          tick: world.tick,
+          victimId: snake.deviceId,
+          reason: "awaitingInput",
+          detail: { alive: snake.alive },
+        });
+      }
+      continue;
+    }
 
     applyFoodMagnet(world, snake);
     const boostActive = snake.boosting && getSegmentCount(snake) > SNAKE_FEEL.boostMinSegments;
