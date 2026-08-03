@@ -44,10 +44,17 @@ export interface FixDeath001S2Sample {
 const MAX = 200;
 const NEAR_BAND = 25; // observe turn/break when closer than this
 
+type PerSelf = {
+  lastBodyDist: number | null;
+  lastNearestId: string | null;
+};
+
 type Store = {
   rc: "FIX-DEATH-001";
   step: "approach_floor";
   enabled: boolean;
+  /** Local player only — set by SnakeIo; ignores other humans' traces */
+  focusId: string | null;
   samples: FixDeath001S2Sample[];
   series: { tick: number; minBodyDist: number; minHeadDist: number; nearestKind: NearestKind }[];
   absoluteMinBody: number;
@@ -57,10 +64,9 @@ type Store = {
   breakCounts: Record<string, number>;
   turnCounts: Record<string, number>;
   kindAtMin: NearestKind | null;
-  lastBodyDist: number | null;
-  lastSelfAngle: number | null;
-  lastOtherAngle: number | null;
-  lastNearestId: string | null;
+  perSelf: Record<string, PerSelf>;
+  /** Last focused sample vector for Playwright chase */
+  chaseHint: { dx: number; dy: number; bodyDist: number; kind: NearestKind } | null;
 };
 
 let store: Store = emptyStore();
@@ -70,6 +76,7 @@ function emptyStore(): Store {
     rc: "FIX-DEATH-001",
     step: "approach_floor",
     enabled: false,
+    focusId: null,
     samples: [],
     series: [],
     absoluteMinBody: Number.POSITIVE_INFINITY,
@@ -79,10 +86,8 @@ function emptyStore(): Store {
     breakCounts: {},
     turnCounts: {},
     kindAtMin: null,
-    lastBodyDist: null,
-    lastSelfAngle: null,
-    lastOtherAngle: null,
-    lastNearestId: null,
+    perSelf: {},
+    chaseHint: null,
   };
 }
 
@@ -135,13 +140,22 @@ function classifyBreak(opts: {
   return "none";
 }
 
-export function initFixDeath001Step2(): void {
+export function initFixDeath001Step2(focusId?: string): void {
+  const prevFocus = store.focusId;
   store = emptyStore();
   store.enabled = enabled();
+  store.focusId = focusId ?? prevFocus;
   publish();
   if (store.enabled) {
-    console.info("[FIX-DEATH-001][S2] approach floor probe ON — window.__FIX_DEATH_001_S2__");
+    console.info(
+      `[FIX-DEATH-001][S2] approach floor probe ON — window.__FIX_DEATH_001_S2__ focus=${store.focusId ?? "?"}`
+    );
   }
+}
+
+export function setFixDeath001Step2Focus(focusId: string): void {
+  store.focusId = focusId;
+  publish();
 }
 
 function publish(): void {
@@ -277,6 +291,7 @@ export interface ApproachObserveInput {
   nearestBodyDist: number;
   nearestBodyId: string | undefined;
   nearestSegIndex: number;
+  nearestSeg: { x: number; y: number } | null;
   other:
     | {
         id: string;
@@ -294,6 +309,7 @@ export function noteFixDeath001Approach(input: ApproachObserveInput): void {
   if (typeof window === "undefined") return;
   if (!store.enabled && !enabled()) return;
   store.enabled = true;
+  if (store.focusId && input.selfId !== store.focusId) return;
 
   const headDist =
     input.other?.head != null
@@ -304,12 +320,11 @@ export function noteFixDeath001Approach(input: ApproachObserveInput): void {
   const selfInv = !!(input.selfInvincibleUntil && input.now < input.selfInvincibleUntil);
   const otherInv = !!(input.other?.invincibleUntil && input.now < input.other.invincibleUntil);
 
+  const prev = store.perSelf[input.selfId] ?? { lastBodyDist: null, lastNearestId: null };
   const closingRate =
-    store.lastBodyDist != null && store.lastNearestId === input.nearestBodyId
-      ? store.lastBodyDist - bodyDist
-      : store.lastBodyDist != null
-        ? store.lastBodyDist - bodyDist
-        : null;
+    prev.lastBodyDist != null && prev.lastNearestId === input.nearestBodyId
+      ? prev.lastBodyDist - bodyDist
+      : null;
 
   // Heading toward nearest body: positive cos means moving closer along self heading
   let selfToward: boolean | null = null;
@@ -383,10 +398,20 @@ export function noteFixDeath001Approach(input: ApproachObserveInput): void {
   bump(store.breakCounts, breakReason);
   if (bodyDist < NEAR_BAND && turnActor !== "neither") bump(store.turnCounts, turnActor);
 
-  store.lastBodyDist = bodyDist;
-  store.lastSelfAngle = input.selfAngle;
-  store.lastOtherAngle = input.other?.angle ?? null;
-  store.lastNearestId = input.nearestBodyId ?? null;
+  store.perSelf[input.selfId] = {
+    lastBodyDist: bodyDist,
+    lastNearestId: input.nearestBodyId ?? null,
+  };
+
+  const target = input.nearestSeg ?? input.other?.head;
+  if (target) {
+    store.chaseHint = {
+      dx: target.x - input.selfHead.x,
+      dy: target.y - input.selfHead.y,
+      bodyDist,
+      kind,
+    };
+  }
 
   publish();
 

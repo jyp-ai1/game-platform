@@ -48,31 +48,46 @@ async function sample(page) {
   });
 }
 
-/** Steer toward nearest visible snake by sampling store + keyboard chase. */
+/** Steer toward nearest body via chaseHint from the probe store. */
 async function chaseTowardNearest(page) {
   const hint = await page.evaluate(() => {
     const s = window.__FIX_DEATH_001_S2__;
-    const last = s?.samples?.[s.samples.length - 1];
-    if (!last) return null;
-    return {
-      body: last.minBodyDist,
-      head: last.minHeadDist,
-      kind: last.nearestKind,
-      selfAngle: last.selfAngle,
-      otherAngle: last.otherAngle,
-    };
+    return s?.chaseHint ?? null;
   });
-  // Prefer boost + zig-zag toward cluster; alternate cardinal dirs aggressively
-  const dirs = ["ArrowRight", "ArrowUp", "ArrowLeft", "ArrowDown"];
-  const start = Math.floor(Math.random() * dirs.length);
-  for (let i = 0; i < 6; i++) {
-    const d = dirs[(start + i) % dirs.length];
-    await page.keyboard.down(d);
-    await page.keyboard.down("Space");
-    await page.waitForTimeout(hint && hint.body < 40 ? 900 : 450);
-    await page.keyboard.up("Space");
-    await page.keyboard.up(d);
+  let dir = "ArrowRight";
+  if (hint && Number.isFinite(hint.dx) && Number.isFinite(hint.dy)) {
+    dir = Math.abs(hint.dx) > Math.abs(hint.dy)
+      ? hint.dx > 0
+        ? "ArrowRight"
+        : "ArrowLeft"
+      : hint.dy > 0
+        ? "ArrowDown"
+        : "ArrowUp";
+  } else {
+    const dirs = ["ArrowRight", "ArrowUp", "ArrowLeft", "ArrowDown"];
+    dir = dirs[Math.floor(Math.random() * dirs.length)];
   }
+  const hold = hint && hint.bodyDist < 40 ? 1100 : 650;
+  await page.keyboard.down(dir);
+  await page.keyboard.down("Space");
+  await page.waitForTimeout(hold);
+  // micro adjust perpendicular if still far after hold
+  if (hint && hint.bodyDist > 8) {
+    const perp =
+      dir === "ArrowRight" || dir === "ArrowLeft"
+        ? hint.dy > 0
+          ? "ArrowDown"
+          : "ArrowUp"
+        : hint.dx > 0
+          ? "ArrowRight"
+          : "ArrowLeft";
+    await page.keyboard.up(dir);
+    await page.keyboard.down(perp);
+    await page.waitForTimeout(180);
+    await page.keyboard.up(perp);
+  }
+  await page.keyboard.up("Space");
+  await page.keyboard.up(dir);
 }
 
 const browser = await chromium.launch({ headless: true });

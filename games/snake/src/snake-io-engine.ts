@@ -664,6 +664,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     }
     if (obsId && obsOther && Number.isFinite(obsBody)) {
       const oh = obsOther.segments[0];
+      const nseg = obsIdx >= 0 ? obsOther.segments[obsIdx] : null;
       noteFixDeath001Approach({
         tick: world.tick,
         now,
@@ -675,6 +676,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
         nearestBodyDist: obsBody,
         nearestBodyId: obsId,
         nearestSegIndex: obsIdx,
+        nearestSeg: nseg ? { x: nseg.x, y: nseg.y } : null,
         other: {
           id: obsOther.deviceId,
           isBot: isBotEntity(obsOther),
