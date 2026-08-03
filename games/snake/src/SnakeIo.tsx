@@ -147,7 +147,7 @@ import {
   enterViewportFullscreen,
   exitViewportFullscreen,
   isViewportFullscreen,
-  measureGameBoardPx,
+  measureGameBoardRect,
 } from "./snake-fullscreen";
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
 import { SnakeMinimap } from "./snake-minimap";
@@ -212,7 +212,8 @@ export function SnakeIoGame({
   const zoomMultRef = useRef(1);
   const boardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [boardPx, setBoardPx] = useState(480);
+  const [boardW, setBoardW] = useState(480);
+  const [boardH, setBoardH] = useState(480);
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
   const prevSegmentsRef = useRef<Record<string, Vec[]>>({});
@@ -226,6 +227,7 @@ export function SnakeIoGame({
   const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
   const [goFlashUntil, setGoFlashUntil] = useState(0);
   const [respawnSec, setRespawnSec] = useState<number | null>(null);
+  const [killFeedClock, setKillFeedClock] = useState(0);
   const [worldHudFps, setWorldHudFps] = useState(60);
   const [worldHudPing, setWorldHudPing] = useState<number | null>(null);
   const lastStateAtRef = useRef(Date.now());
@@ -264,7 +266,7 @@ export function SnakeIoGame({
   stageOverlayRef.current = stageOverlay;
   const playerCountRef = useRef(1);
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
-  const camLayoutRef = useRef({ boardPx: 480, cellSize: 10, camHalf: 240 });
+  const camLayoutRef = useRef({ boardW: 480, boardH: 480, cellSize: 10, camHalfX: 240, camHalfY: 240 });
   const worldLayerRef = useRef<HTMLDivElement>(null);
   const renderAlphaRef = useRef(1);
   const frameCounterRef = useRef(0);
@@ -341,8 +343,8 @@ export function SnakeIoGame({
       const layout = camLayoutRef.current;
       if (head && layout.cellSize > 0) {
         camRef.current = {
-          x: head.x * layout.cellSize - layout.camHalf,
-          y: head.y * layout.cellSize - layout.camHalf,
+          x: head.x * layout.cellSize - layout.camHalfX,
+          y: head.y * layout.cellSize - layout.camHalfY,
         };
       }
     };
@@ -365,6 +367,12 @@ export function SnakeIoGame({
       sessionDeathsRef.current[latestKill.killerName] = (sessionDeathsRef.current[latestKill.killerName] ?? 0) + 1;
     }
   }, [latestKill, deviceId]);
+
+  useEffect(() => {
+    if (!isGlobalWorld || !world?.killFeed.length) return;
+    const id = window.setInterval(() => setKillFeedClock(Date.now()), 200);
+    return () => window.clearInterval(id);
+  }, [isGlobalWorld, world?.killFeed.length, world?.tick]);
 
   useEffect(() => {
     if (!isGlobalWorld || !mySnake || mySnake.alive) {
@@ -541,12 +549,12 @@ export function SnakeIoGame({
     const measure = () => {
       const nativeFs = isViewportFullscreen(viewportRef.current);
       const fs = nativeFs || pseudoFullscreen || worldLayout;
-      setBoardPx(
-        measureGameBoardPx({
-          fullscreen: fs,
-          containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
-        })
-      );
+      const rect = measureGameBoardRect({
+        fullscreen: fs,
+        containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
+      });
+      setBoardW(rect.w);
+      setBoardH(rect.h);
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -1587,8 +1595,8 @@ export function SnakeIoGame({
         camTarget = resolveSnakeHead(snake);
       }
       if (camTarget && layout.cellSize > 0) {
-        const targetX = camTarget.x * layout.cellSize - layout.camHalf;
-        const targetY = camTarget.y * layout.cellSize - layout.camHalf;
+        const targetX = camTarget.x * layout.cellSize - layout.camHalfX;
+        const targetY = camTarget.y * layout.cellSize - layout.camHalfY;
         const lerp = SNAKE_FEEL.cameraFollowLerp;
         camRef.current.x += (targetX - camRef.current.x) * lerp;
         camRef.current.y += (targetY - camRef.current.y) * lerp;
@@ -1609,7 +1617,7 @@ export function SnakeIoGame({
       const layer = worldLayerRef.current;
       if (layer && layout.cellSize > 0) {
         layer.style.transform = `translate(${-camRef.current.x + shakeX}px, ${-camRef.current.y + shakeY}px) scale(${zoomMultRef.current})`;
-        layer.style.transformOrigin = `${layout.camHalf + camRef.current.x}px ${layout.camHalf + camRef.current.y}px`;
+        layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
       }
 
       renderAlphaRef.current = Math.min(1, renderAlphaRef.current + SNAKE_FEEL.segmentLerpStep);
@@ -1715,8 +1723,9 @@ export function SnakeIoGame({
 
   const worldSize = world.config.worldSize;
   const isBoosting = mySnake?.boosting && mySnake.alive;
+  const boardMin = Math.min(boardW, boardH);
   const baseCellRaw =
-    (boardPx / SNAKE_FEEL.viewportCellsVisible) *
+    (boardMin / SNAKE_FEEL.viewportCellsVisible) *
     matchRule.cameraZoomMult *
     SNAKE_FEEL.baseCameraZoom;
   const baseCellSize = Math.min(
@@ -1727,8 +1736,9 @@ export function SnakeIoGame({
   const myLength = mySnake ? getSegmentCount(mySnake) : 0;
   const myKills = mySnake?.totalKills ?? 0;
   const myScore = mySnake?.score ?? 0;
-  const camHalf = boardPx / 2;
-  camLayoutRef.current = { boardPx, cellSize: baseCellSize, camHalf };
+  const camHalfX = boardW / 2;
+  const camHalfY = boardH / 2;
+  camLayoutRef.current = { boardW, boardH, cellSize: baseCellSize, camHalfX, camHalfY };
 
   const camX = camRef.current.x;
   const camY = camRef.current.y;
@@ -1789,10 +1799,10 @@ export function SnakeIoGame({
         <div
           className="relative"
           style={{
-            width: boardPx,
-            height: boardPx,
-            maxWidth: worldLayout ? "min(100dvw, 100dvh)" : "min(100vw, 100dvh)",
-            maxHeight: worldLayout ? "min(100dvw, 100dvh)" : "min(100vw, 100dvh)",
+            width: boardW,
+            height: boardH,
+            maxWidth: worldLayout || isGameFullscreen ? "100dvw" : "min(100vw, 100dvh)",
+            maxHeight: worldLayout || isGameFullscreen ? "100dvh" : "min(100vw, 100dvh)",
           }}
         >
         <div
@@ -1870,19 +1880,25 @@ export function SnakeIoGame({
           />
         ) : null}
 
-        {/* Kill Feed — WORLD sync via host state */}
+        {/* Kill Feed — soft, fades ~2s */}
         {isGlobalWorld && !immersivePlay && world.killFeed.length > 0 ? (
-          <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[11rem] space-y-1">
-            {world.killFeed.slice(0, 5).map((entry) => (
-              <div
-                key={`${entry.tick}-${entry.killerId}-${entry.victimId}`}
-                className="rounded border border-white/10 bg-black/60 px-2 py-1 text-[10px] text-white/90 backdrop-blur-sm"
-              >
-                <span className="font-semibold text-amber-300">{entry.killerName}</span>
-                {" killed "}
-                <span className="font-semibold text-red-300">{entry.victimName}</span>
-              </div>
-            ))}
+          <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[10rem] space-y-1">
+            {world.killFeed.slice(0, 4).map((entry) => {
+              const age = (killFeedClock || Date.now()) - (entry.at ?? killFeedClock || Date.now());
+              const life = Math.max(0, 1 - age / 2000);
+              if (life <= 0) return null;
+              return (
+                <div
+                  key={`${entry.tick}-${entry.killerId}-${entry.victimId}`}
+                  className="rounded border border-white/5 bg-black/30 px-2 py-1 text-[10px] text-white/70 backdrop-blur-[2px] transition-opacity"
+                  style={{ opacity: 0.25 + life * 0.55 }}
+                >
+                  <span className="font-semibold text-amber-200/80">{entry.killerName}</span>
+                  {" killed "}
+                  <span className="font-semibold text-red-200/80">{entry.victimName}</span>
+                </div>
+              );
+            })}
           </div>
         ) : null}
 
@@ -2245,7 +2261,7 @@ export function SnakeIoGame({
               top1Id={top1Id}
               camX={camX}
               camY={camY}
-              viewPx={boardPx}
+              viewPx={boardMin}
               cellSize={cellSize}
             />
           ) : null}
@@ -2263,7 +2279,7 @@ export function SnakeIoGame({
               top1Id={top1Id}
               camX={camX}
               camY={camY}
-              viewPx={boardPx}
+              viewPx={boardMin}
               cellSize={cellSize}
             />
           ) : null}

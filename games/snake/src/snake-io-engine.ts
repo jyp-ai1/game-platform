@@ -123,6 +123,8 @@ export interface KillFeedEntry {
   victimId: string;
   victimName: string;
   tick: number;
+  /** Client fade clock (ms since epoch) */
+  at?: number;
 }
 
 const DELTAS: Record<Direction, Vec> = {
@@ -794,17 +796,26 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
 function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
   if (snake.segments.length === 0) return;
-  const maxFood = Math.floor(world.config.foodCount * 2);
+  // 보석 수 = gemsEaten (없으면 몸 길이). 몸 궤적을 따라 1:1 배치.
+  const gemCount = Math.max(1, snake.gemsEaten ?? 0, snake.segments.length);
   const cfg = FOOD_TIERS.death;
-  const step = Math.max(1, Math.floor(snake.segments.length / 28));
+  const segs = snake.segments;
+  const maxFood = Math.floor(world.config.foodCount * 2) + gemCount;
 
-  for (let i = 0; i < snake.segments.length; i += step) {
+  for (let i = 0; i < gemCount; i++) {
     if (world.food.length >= maxFood) break;
-    const seg = snake.segments[i]!;
-    if (world.food.some((f) => dist(f, seg) < 0.5)) continue;
+    const t = gemCount === 1 ? 0 : i / (gemCount - 1);
+    const f = t * (segs.length - 1);
+    const i0 = Math.floor(f);
+    const i1 = Math.min(segs.length - 1, i0 + 1);
+    const u = f - i0;
+    const a = segs[i0]!;
+    const b = segs[i1]!;
+    const x = a.x + (b.x - a.x) * u;
+    const y = a.y + (b.y - a.y) * u;
     world.food.push({
-      x: seg.x,
-      y: seg.y,
+      x,
+      y,
       kind: cfg.kind,
       value: cfg.score,
       tier: "death",
@@ -855,6 +866,7 @@ function killSnake(
         victimId: snake.deviceId,
         victimName: snake.nickname,
         tick: world.tick,
+        at: Date.now(),
       },
       ...world.killFeed,
     ].slice(0, 12);
@@ -1047,8 +1059,20 @@ export function damageSnake(world: SnakeIoWorld, snake: SnakeEntity, amount: num
 export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
   world.tick += 1;
 
-  if (world.food.length < world.config.foodCount * 0.6) {
+  // 정기 보석 리스폰 — 맵 곳곳에 조금씩 보충
+  if (world.tick % 40 === 0) {
+    const target = world.config.foodCount;
+    const deficit = target - world.food.length;
+    if (deficit > 0) {
+      spawnFoodItems(world, Math.min(12, Math.max(2, Math.ceil(deficit * 0.12))));
+    }
+  } else if (world.food.length < world.config.foodCount * 0.6) {
     spawnFoodItems(world, Math.min(15, Math.ceil((world.config.foodCount - world.food.length) * 0.2)));
+  }
+
+  // Drop expired kill-feed entries (2s UI window)
+  if (world.killFeed.length > 0) {
+    world.killFeed = world.killFeed.filter((e) => !e.at || now - e.at < 2200);
   }
 
   for (const [i, snake] of Object.entries(world.snakes)) {

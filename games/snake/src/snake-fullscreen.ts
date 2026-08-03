@@ -49,22 +49,32 @@ export async function exitViewportFullscreen(): Promise<void> {
   }
 }
 
-/** Board size in px — fills viewport when fullscreen. */
-export function measureGameBoardPx(
-  opts: {
-    fullscreen: boolean;
-    containerWidth: number;
-  }
-): number {
-  if (typeof window === "undefined") return 480;
+/** Legacy square measure — kept for callers that only need one side. */
+export function measureGameBoardPx(opts: {
+  fullscreen: boolean;
+  containerWidth: number;
+}): number {
+  const { w, h } = measureGameBoardRect(opts);
+  return Math.min(w, h);
+}
+
+/** Board rect in px — fullscreen/world fills the entire viewport (landscape or portrait). */
+export function measureGameBoardRect(opts: {
+  fullscreen: boolean;
+  containerWidth: number;
+}): { w: number; h: number } {
+  if (typeof window === "undefined") return { w: 480, h: 480 };
   const vv = window.visualViewport;
-  const vw = vv?.width ?? window.innerWidth;
-  const vh = vv?.height ?? window.innerHeight;
+  const vw = Math.floor(vv?.width ?? window.innerWidth);
+  const vh = Math.floor(vv?.height ?? window.innerHeight);
 
   if (opts.fullscreen) {
-    return Math.max(280, Math.floor(Math.min(vw, vh)));
+    return {
+      w: Math.max(280, vw),
+      h: Math.max(280, vh),
+    };
   }
 
-  const cap = Math.min(opts.containerWidth || vw, vh * 0.65, 720);
-  return Math.max(320, Math.floor(cap));
+  const side = Math.max(320, Math.floor(Math.min(opts.containerWidth || vw, vh * 0.65, 720)));
+  return { w: side, h: side };
 }
