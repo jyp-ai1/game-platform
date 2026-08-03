@@ -15,6 +15,7 @@ import {
 } from "./snake-io-engine";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { PLAYTEST_AI } from "./snake-playtest-tuning";
+import { noteExecOrder } from "./snake-exec-order-trace";
 import { applyCharacterToSnake, randomSnakeHeadId } from "./snake-characters";
 
 export { POPULATION_TARGET as SNAKE_WORLD_TARGET };
@@ -427,6 +428,9 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   else if ((seed + world.tick) % 47 < 6) state = "wander";
   else state = "search";
   snake.botState = state;
+  if (state === "escape") {
+    noteExecOrder("escape", world.tick, snake.deviceId, { score: snake.score });
+  }
 
   let target: Vec;
   switch (state) {
@@ -449,6 +453,7 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   const baseMistake =
     diff === "easy" ? 0.08 : diff === "normal" ? 0.05 : diff === "hunter" ? 0.03 : 0.015;
   const mistake = baseMistake + ((seed % 17) / 17) * PLAYTEST_AI.mistakeVariance;
+  const prevDir = snake.pendingDirection;
   const dir = pickDirectionWithJitter(world, snake, target, seed);
   if (dir && Math.random() > mistake) {
     snake.pendingDirection = dir;
@@ -460,6 +465,13 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
     if (options.length > 0) {
       snake.pendingDirection = options[Math.floor(Math.random() * options.length)]!;
     }
+  }
+  if (snake.pendingDirection !== prevDir) {
+    noteExecOrder("turn", world.tick, snake.deviceId, {
+      from: prevDir,
+      to: snake.pendingDirection,
+      botState: state,
+    });
   }
 
   if (segCount > 5 && chasing) {

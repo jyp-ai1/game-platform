@@ -11,6 +11,7 @@ import { death003 } from "./snake-death-003-trace";
 import { death004Sample } from "./snake-death-004-trace";
 import { noteFixDeath001Sample } from "./snake-fix-death-001";
 import { noteFixDeath001Approach } from "./snake-fix-death-001-step2";
+import { noteExecOrder } from "./snake-exec-order-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -437,6 +438,14 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
   ensureSnakePath(snake);
   snake.desiredAngle = directionToAngle(snake.pendingDirection);
   advanceSnakePath(snake, speed);
+  // Physical turn+move this frame (after bot brain turn intent)
+  if (world.tick % 8 === 0) {
+    noteExecOrder("steering", world.tick, snake.deviceId, {
+      angle: snake.angle ?? null,
+      pending: snake.pendingDirection,
+      isBot: isBotEntity(snake),
+    });
+  }
 
   const head = snake.segments[0];
   if (!head) return false;
@@ -481,6 +490,10 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
   const collisionThreshold = cr * 1.8;
 
   if (traceHumans) {
+    noteExecOrder("collision", world.tick, snake.deviceId, {
+      threshold: collisionThreshold,
+      head: { x: head.x, y: head.y },
+    });
     death003("evaluator_enter", {
       tick: world.tick,
       victimId: snake.deviceId,
@@ -732,6 +745,11 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
         detail: { nearestBodyD, threshold: collisionThreshold },
       });
     }
+    noteExecOrder("killSnake", world.tick, snake.deviceId, {
+      killerId: killer?.deviceId,
+      nearestBodyD,
+      isBot: isBotEntity(snake),
+    });
     killSnake(snake, world.config, world, killer);
     return false;
   }

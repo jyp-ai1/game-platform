@@ -128,6 +128,7 @@ import {
 import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
 import { initFixDeath001, noteFixDeath001Sample } from "./snake-fix-death-001";
 import { initFixDeath001Step2, setFixDeath001Step2Focus } from "./snake-fix-death-001-step2";
+import { beginExecOrderFrame, initExecOrderTrace } from "./snake-exec-order-trace";
 import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { initDeath003Trace } from "./snake-death-003-trace";
 import { initDeath004Trace } from "./snake-death-004-trace";
@@ -927,6 +928,7 @@ export function SnakeIoGame({
     initFixDeath001();
     initFixDeath001Step2(deviceId);
     setFixDeath001Step2Focus(deviceId);
+    initExecOrderTrace();
     return () => shutdownLoopDiag();
   }, [deviceId]);
 
@@ -1055,6 +1057,7 @@ export function SnakeIoGame({
           applyLocalHead(next);
           camRef.current = { x: 0, y: 0 };
         }
+        beginExecOrderFrame(next.tick);
         tickBotBrains(next);
         recordGlobalWorldTick(activeRoom, {
           humans: r.players.length,
@@ -1063,6 +1066,7 @@ export function SnakeIoGame({
         });
       }
       if (isStageMode && stageConfig && stageConfig.aiCount > 0) {
+        beginExecOrderFrame(next.tick);
         tickBotBrains(next);
       }
       next.config = {
