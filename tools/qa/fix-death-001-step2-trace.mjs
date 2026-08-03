@@ -135,13 +135,12 @@ try {
       topTurn: s.summary?.topTurnActors?.[0] ?? null,
     });
     if (
-      s.sampleCount >= 30 &&
-      s.summary?.verdict &&
-      s.summary.verdict !== "unknown" &&
-      Date.now() - t0 > 35_000
+      (s.belowThresholdCount > 0 || (s.absoluteMinBody != null && s.absoluteMinBody < 1)) &&
+      Date.now() - t0 > 20_000
     ) {
       break;
     }
+    // Do not stop just because a coarse verdict exists — keep chasing through approach.
   }
 
   const final = await sample(page);
