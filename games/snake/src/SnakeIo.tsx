@@ -243,6 +243,7 @@ export function SnakeIoGame({
   const spawnTimeoutRef = useRef<number | undefined>(undefined);
   const onJoinTimeoutRef = useRef(onJoinTimeout);
   const gameReadyRef = useRef(false);
+  const localSpawnBoundRef = useRef(false);
   const connectDoneRef = useRef(false);
   const tickEpochRef = useRef(0);
   const [tickEpoch, setTickEpoch] = useState(0);
@@ -790,30 +791,37 @@ export function SnakeIoGame({
       return w;
     };
 
+    /** RC-PLAYABLE-002: bind once; preserve local snake across host syncs missing deviceId. */
+    const mergeGlobalWorldState = (raw: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
+      const next = structuredClone(raw);
+      if (next.snakes[deviceId]) {
+        localSpawnBoundRef.current = true;
+        return next;
+      }
+      const existing = worldRef.current?.snakes[deviceId];
+      if (localSpawnBoundRef.current && existing) {
+        next.snakes[deviceId] = structuredClone(existing);
+        return next;
+      }
+      localSpawnBoundRef.current = true;
+      return attachLocalPlayer(next, r);
+    };
+
     const applyRoom = (r: GameRoom) => {
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
-          // RC-PLAYABLE-001: bind local player when missing from WORLD registry.
-          if (!isHost) {
-            let next = structuredClone(state);
-            if (!next.snakes[deviceId]) {
-              next = attachLocalPlayer(next, r);
+          // RC-PLAYABLE-002: host tick owns worldRef — ignore subscribeRoom state echoes.
+          if (isHost) {
+            if (!worldRef.current) {
+              const next = attachLocalPlayer(structuredClone(state), r);
+              worldRef.current = next;
+              setWorld(next);
+              localSpawnBoundRef.current = true;
             }
-            worldRef.current = next;
-            setWorld(next);
             return;
           }
-          if (!worldRef.current) {
-            const next = attachLocalPlayer(structuredClone(state), r);
-            worldRef.current = next;
-            setWorld(next);
-            return;
-          }
-          let next = structuredClone(state);
-          if (!next.snakes[deviceId]) {
-            next = attachLocalPlayer(next, r);
-          }
+          const next = mergeGlobalWorldState(state, r);
           worldRef.current = next;
           setWorld(next);
           return;
@@ -830,6 +838,7 @@ export function SnakeIoGame({
         const persisted = isGlobalWorld ? loadPersistedGlobalWorld(effectiveRoomCode) : null;
         let initial = persisted ?? createInitialWorld(humans, cfg);
         initial = attachLocalPlayer(initial, r);
+        localSpawnBoundRef.current = true;
         if (isGlobalWorld && !persisted) warmGlobalWorld(initial);
         initial.objective = obj;
         initLivingWorld(initial, resolveSnakeMatchRule(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
