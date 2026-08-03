@@ -133,6 +133,7 @@ import { beginExecOrderFrame, initExecOrderTrace } from "./snake-exec-order-trac
 import { initDeath005Trace } from "./snake-death-005-trace";
 import { initDeath006Trace } from "./snake-death-006-trace";
 import { initDeath007Trace, noteDeath007Ux, setDeath007ForceDeath } from "./snake-death-007-trace";
+import { initLb001Trace, noteLb001Sample } from "./snake-lb-001-trace";
 import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { initDeath003Trace } from "./snake-death-003-trace";
 import { initDeath004Trace } from "./snake-death-004-trace";
@@ -944,6 +945,7 @@ export function SnakeIoGame({
     initDeath005Trace();
     initDeath006Trace();
     initDeath007Trace();
+    initLb001Trace();
     return () => shutdownLoopDiag();
   }, [deviceId]);
 
@@ -986,6 +988,33 @@ export function SnakeIoGame({
     isGlobalWorld,
     isStageMode,
   ]);
+
+  useEffect(() => {
+    if (!world || world.tick % 8 !== 0) return;
+    const me = world.snakes[deviceId];
+    const engineLength = me ? getSegmentCount(me) : 0;
+    const display = getDisplayRankings(world, 10);
+    const top10Lengths: Record<string, number> = {};
+    for (const r of display) {
+      const s = world.snakes[r.deviceId];
+      if (s) top10Lengths[r.deviceId] = getSegmentCount(s);
+    }
+    noteLb001Sample({
+      tick: world.tick,
+      deviceId,
+      alive: !!me?.alive,
+      engineLength,
+      hudLength: engineLength,
+      top10Lengths,
+      score: me?.score ?? 0,
+      rankings: world.rankings.map((r) => ({ deviceId: r.deviceId, score: r.score })),
+      snakes: Object.values(world.snakes).map((s) => ({
+        deviceId: s.deviceId,
+        alive: !!s.alive,
+        length: getSegmentCount(s),
+      })),
+    });
+  }, [world, world?.tick, deviceId]);
 
   useEffect(() => {
     if (!isEngineAuditEnabled()) return;
