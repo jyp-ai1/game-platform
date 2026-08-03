@@ -1884,7 +1884,7 @@ export function SnakeIoGame({
         {isGlobalWorld && !immersivePlay && world.killFeed.length > 0 ? (
           <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[10rem] space-y-1">
             {world.killFeed.slice(0, 4).map((entry) => {
-              const age = (killFeedClock || Date.now()) - (entry.at ?? killFeedClock || Date.now());
+              const age = (killFeedClock || Date.now()) - (entry.at ?? (killFeedClock || Date.now()));
               const life = Math.max(0, 1 - age / 2000);
               if (life <= 0) return null;
               return (
