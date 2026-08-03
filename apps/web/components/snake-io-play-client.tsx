@@ -159,6 +159,13 @@ function SnakeIoPlayInner({
   }, [practiceMode, params]);
 
   useEffect(() => {
+    if (!immersiveWorld || !worldEntered) return;
+    const root = document.documentElement;
+    root.classList.add("snake-world-immersive");
+    return () => root.classList.remove("snake-world-immersive");
+  }, [immersiveWorld, worldEntered]);
+
+  useEffect(() => {
     if (!isStageMode) return;
     const unsub = subscribePlatformAnalyticsEvents((event) => {
       if (event.type === "game-end" && event.gameSlug === "snake") {

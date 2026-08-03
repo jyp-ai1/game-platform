@@ -414,3 +414,15 @@
     max-width: min(100%, 100vw - 2rem) !important;
   }
 }
+
+/* RC-PLAYABLE-003 — WORLD immersive play: hide platform chrome */
+html.snake-world-immersive body > header,
+html.snake-world-immersive body > footer,
+html.snake-world-immersive body > nav {
+  display: none !important;
+}
+
+html.snake-world-immersive body {
+  overflow: hidden !important;
+  padding-bottom: 0 !important;
+}
