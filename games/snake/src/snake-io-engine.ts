@@ -6,6 +6,7 @@ import type { LivingWorldState } from "./snake-living-world";
 import { FOOD_TIERS, rollFoodTier, type FoodTier } from "./snake-food-types";
 import { SNAKE_MVP_RC1 } from "./snake-mvp-rc1";
 import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
+import { deathTrace } from "./snake-death-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -450,13 +451,54 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
   }
 
   let killer: SnakeEntity | undefined;
+  let nearestBodyD = Number.POSITIVE_INFINITY;
+  let nearestBodyId: string | undefined;
   const hitOther = Object.values(world.snakes).some((other) => {
     if (!other.alive || other.spectating || other.deviceId === snake.deviceId) return false;
     if (other.invincibleUntil && now < other.invincibleUntil) return false;
-    const hit = other.segments.slice(1).some((s) => dist(s, head) < cr * 1.8);
+    // Body-only collision (head excluded) — observe distance for RC-DEATH-002
+    let best = Number.POSITIVE_INFINITY;
+    for (let i = 1; i < other.segments.length; i++) {
+      const d = dist(other.segments[i]!, head);
+      if (d < best) best = d;
+    }
+    if (best < nearestBodyD) {
+      nearestBodyD = best;
+      nearestBodyId = other.deviceId;
+    }
+    const hit = best < cr * 1.8;
     if (hit) killer = other;
     return hit;
   });
+
+  // Trace near-miss for humans (throttled) — observe approach without changing collision
+  if (!isBotEntity(snake) && nearestBodyD < cr * 4 && world.tick % 8 === 0) {
+    deathTrace("near_miss", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      victimBot: false,
+      killerId: nearestBodyId,
+      killerBot: nearestBodyId ? nearestBodyId.startsWith("bot:") : undefined,
+      detail: { nearestBodyD, threshold: cr * 1.8, invincibleUntil: snake.invincibleUntil ?? null, now },
+    });
+  }
+
+  if (hitOther) {
+    deathTrace("collision_detect", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      victimBot: isBotEntity(snake),
+      killerId: killer?.deviceId,
+      killerBot: killer ? isBotEntity(killer) : undefined,
+      detail: {
+        nearestBodyD,
+        threshold: cr * 1.8,
+        victimInvincible: !!(snake.invincibleUntil && now < snake.invincibleUntil),
+        invincibleUntil: snake.invincibleUntil ?? null,
+        now,
+      },
+    });
+  }
 
   if (hitOther && !(snake.invincibleUntil && now < snake.invincibleUntil)) {
     if (killer) {
@@ -467,6 +509,17 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     }
     killSnake(snake, world.config, world, killer);
     return false;
+  }
+
+  if (hitOther && snake.invincibleUntil && now < snake.invincibleUntil) {
+    deathTrace("invincible_block", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      victimBot: isBotEntity(snake),
+      killerId: killer?.deviceId,
+      killerBot: killer ? isBotEntity(killer) : undefined,
+      detail: { invincibleUntil: snake.invincibleUntil, now, remainingMs: snake.invincibleUntil - now },
+    });
   }
 
   if (foodIdx >= 0) {
@@ -518,6 +571,15 @@ function killSnake(
   world: SnakeIoWorld,
   killer?: SnakeEntity
 ): void {
+  const victimBot = isBotEntity(snake);
+  deathTrace("kill_snake_enter", {
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot,
+    killerId: killer?.deviceId,
+    killerBot: killer ? isBotEntity(killer) : undefined,
+  });
+
   const head = snake.segments[0];
   if (head && config.antiCampEnabled) {
     world.deathZones = [...world.deathZones.filter((d) => Date.now() - d.at < 30_000), { x: head.x, y: head.y, at: Date.now() }].slice(-40);
@@ -534,14 +596,42 @@ function killSnake(
       },
       ...world.killFeed,
     ].slice(0, 12);
+    deathTrace("death_event_publish", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      victimBot,
+      killerId: killer.deviceId,
+      killerBot: isBotEntity(killer),
+      detail: { killFeedLen: world.killFeed.length },
+    });
   }
   snake.alive = false;
   snake.spectating = true;
+  deathTrace("alive_false", {
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot,
+    killerId: killer?.deviceId,
+    killerBot: killer ? isBotEntity(killer) : undefined,
+  });
+
   const humanAuto = world.living?.matchRule.humanAutoRespawn ?? false;
   if (isBotEntity(snake) || humanAuto) {
     snake.respawnAt = Date.now() + config.respawnMs;
+    deathTrace("respawn_scheduler", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      victimBot,
+      detail: { respawnAt: snake.respawnAt, humanAuto, respawnMs: config.respawnMs },
+    });
   } else {
     snake.respawnAt = undefined;
+    deathTrace("respawn_scheduler", {
+      tick: world.tick,
+      victimId: snake.deviceId,
+      victimBot,
+      detail: { respawnAt: null, humanAuto, reason: "humanAutoRespawn=false" },
+    });
   }
 }
 
@@ -556,6 +646,12 @@ export function retireSnakeNaturally(world: SnakeIoWorld, snake: SnakeEntity): v
 }
 
 function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, now: number): void {
+  deathTrace("respawn_execute", {
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot: isBotEntity(snake),
+    detail: { index },
+  });
   const pos = findSafePosition(world, snake.deviceId);
   snake.score = Math.max(0, snake.score - Math.round(20 * world.config.rewardRate));
   snake.color = COLORS[index % COLORS.length]!;
@@ -568,6 +664,18 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   snake.spectating = false;
   snake.aliveSinceTick = world.tick;
   finalizeSnake(snake, pos, 3, 0);
+  deathTrace("alive_true", {
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot: isBotEntity(snake),
+    detail: { invincibleUntil: snake.invincibleUntil, spawnShieldMs: world.config.spawnShieldMs },
+  });
+  deathTrace("spawn_complete", {
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot: isBotEntity(snake),
+    detail: { segments: getSegmentCount(snake), pos },
+  });
 }
 
 /** Full player restart — Retry: reset score/hp/snake, respawn, ready to play */
@@ -586,6 +694,18 @@ export function restartPlayerSnake(
     created.invincibleUntil = now + SNAKE_MVP_RC1.spawnSafeMs;
     world.snakes[deviceId] = created;
     updateRankings(world);
+    deathTrace("alive_true", {
+      tick: world.tick,
+      victimId: deviceId,
+      victimBot: false,
+      detail: { via: "restartPlayerSnake:create" },
+    });
+    deathTrace("spawn_complete", {
+      tick: world.tick,
+      victimId: deviceId,
+      victimBot: false,
+      detail: { via: "restartPlayerSnake:create", segments: getSegmentCount(created) },
+    });
     return;
   }
   const pos = findSafePosition(world, deviceId);
@@ -607,6 +727,18 @@ export function restartPlayerSnake(
   snake.nickname = nickname;
   finalizeSnake(snake, pos, SNAKE_MVP_RC1.startingSegments, 0);
   updateRankings(world);
+  deathTrace("alive_true", {
+    tick: world.tick,
+    victimId: deviceId,
+    victimBot: false,
+    detail: { via: "restartPlayerSnake:reset", invincibleUntil: snake.invincibleUntil },
+  });
+  deathTrace("spawn_complete", {
+    tick: world.tick,
+    victimId: deviceId,
+    victimBot: false,
+    detail: { via: "restartPlayerSnake:reset", segments: getSegmentCount(snake), pos },
+  });
 }
 
 export function damageSnake(world: SnakeIoWorld, snake: SnakeEntity, amount: number): void {

@@ -1,0 +1,63 @@
+{
+  "rc": "RC-DEATH-002",
+  "status": "INSTRUMENTED_PENDING_COLLECT",
+  "purpose": "Cause-finding ONLY — prove where Death pipeline breaks",
+  "gameplayChanged": false,
+  "commitPending": true,
+  "enable": "?debug=1 or localStorage.RC_DEATH_002=1",
+  "read": "window.__RC_DEATH_002__ / .summary()",
+  "files": [
+    "games/snake/src/snake-death-trace.ts",
+    "games/snake/src/snake-io-engine.ts",
+    "games/snake/src/SnakeIo.tsx",
+    "tools/qa/rc-death-002-trace.mjs"
+  ],
+  "stagesLogged": [
+    "near_miss",
+    "collision_detect",
+    "invincible_block",
+    "kill_snake_enter",
+    "death_event_publish",
+    "alive_false",
+    "respawn_scheduler",
+    "respawn_execute",
+    "alive_true",
+    "spawn_complete",
+    "merge_alive_conflict"
+  ],
+  "staticAnalysis": {
+    "collisionMask": "NO Player↔BOT exclusion — same path for all snakes; body segments only (head excluded via slice/i=1)",
+    "invincible": {
+      "spawnSafeMs": 2000,
+      "spawnShieldMs_world50": "Math.max(3000, 2000+count*100) ≈ 7000ms — not permanent",
+      "clearedOnFirstInput": "SnakeIo handleDirection sets invincibleUntil=undefined"
+    },
+    "hypothesesRanked": [
+      {
+        "id": "H1_merge_alive_conflict",
+        "why": "RC-SYNC-001 A' always prefers local snake over host; if host marks player dead but local still alive (or reverse), death never sticks / never appears",
+        "proofSignal": "merge_alive_conflict count > 0"
+      },
+      {
+        "id": "H2_no_collision_detect",
+        "why": "Player never enters body radius (tick freeze / bots far / length boost shrink but idle head)",
+        "proofSignal": "collision_detect=0 and near_miss low for human"
+      },
+      {
+        "id": "H3_invincible_block",
+        "why": "Collision occurs but victim invincibleUntil still future",
+        "proofSignal": "invincible_block > 0 with collision_detect"
+      },
+      {
+        "id": "H4_bot_only_death",
+        "why": "killSnake/alive_false only for bots — human never enters killSnake",
+        "proofSignal": "alive_false>0 but no event with victimBot=false"
+      }
+    ]
+  },
+  "collect": {
+    "localAttempt": "FAILED — localhost:3025 hung / timeout on goto; :3035 refused (lockfile another next)",
+    "next": "Preview deploy of instrumentation → run tools/qa/rc-death-002-trace.mjs against Preview WORLD&debug=1"
+  },
+  "passCriteria": "pipelineBreak string names the exact cut stage with counts — NOT 'player dies'"
+}

@@ -126,6 +126,7 @@ import {
   shutdownLoopDiag,
 } from "./snake-engine-diag";
 import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
+import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -813,8 +814,24 @@ export function SnakeIoGame({
     const mergeGlobalWorldState = (raw: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
       const next = structuredClone(raw);
       const local = worldRef.current?.snakes[deviceId];
+      const hostMe = next.snakes[deviceId];
 
       if (local) {
+        // RC-DEATH-002 observe only: host vs local alive mismatch (possible death wipe)
+        if (hostMe && hostMe.alive !== local.alive) {
+          deathTrace("merge_alive_conflict", {
+            tick: next.tick,
+            victimId: deviceId,
+            victimBot: false,
+            detail: {
+              hostAlive: hostMe.alive,
+              localAlive: local.alive,
+              hostSpectating: !!hostMe.spectating,
+              localSpectating: !!local.spectating,
+              adopted: "local",
+            },
+          });
+        }
         next.snakes[deviceId] = structuredClone(local);
         localSpawnBoundRef.current = true;
         return next;
@@ -900,6 +917,7 @@ export function SnakeIoGame({
 
   useEffect(() => {
     initLoopDiag();
+    initDeathTrace();
     return () => shutdownLoopDiag();
   }, []);
 
