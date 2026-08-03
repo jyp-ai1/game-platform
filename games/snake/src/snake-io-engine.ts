@@ -8,6 +8,7 @@ import { SNAKE_MVP_RC1 } from "./snake-mvp-rc1";
 import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
 import { deathTrace } from "./snake-death-trace";
 import { death003 } from "./snake-death-003-trace";
+import { death004Sample } from "./snake-death-004-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -454,8 +455,10 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
   let killer: SnakeEntity | undefined;
   let nearestBodyD = Number.POSITIVE_INFINITY;
   let nearestBodyId: string | undefined;
+  let nearestSeg: Vec | undefined;
   const humanVictim = !isBotEntity(snake);
   const traceHumans = humanVictim && (world.tick % 8 === 0);
+  const collisionThreshold = cr * 1.8;
 
   if (traceHumans) {
     death003("evaluator_enter", {
@@ -465,7 +468,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
         snakesTotal: Object.keys(world.snakes).length,
         invincibleUntil: snake.invincibleUntil ?? null,
         now,
-        threshold: cr * 1.8,
+        threshold: collisionThreshold,
         head: { x: head.x, y: head.y },
       },
     });
@@ -528,28 +531,34 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
         return false;
       }
       let best = Number.POSITIVE_INFINITY;
+      let bestSeg: Vec | undefined;
       for (let i = 1; i < other.segments.length; i++) {
-        const d = dist(other.segments[i]!, head);
-        if (d < best) best = d;
+        const seg = other.segments[i]!;
+        const d = dist(seg, head);
+        if (d < best) {
+          best = d;
+          bestSeg = seg;
+        }
       }
       death003("evaluate", {
         tick: world.tick,
         victimId: snake.deviceId,
         otherId: other.deviceId,
-        detail: { nearestBodyD: best, threshold: cr * 1.8, hit: best < cr * 1.8 },
+        detail: { nearestBodyD: best, threshold: collisionThreshold, hit: best < collisionThreshold },
       });
       if (best < nearestBodyD) {
         nearestBodyD = best;
         nearestBodyId = other.deviceId;
+        nearestSeg = bestSeg;
       }
-      const hit = best < cr * 1.8;
+      const hit = best < collisionThreshold;
       if (!hit) {
         death003("reject", {
           tick: world.tick,
           victimId: snake.deviceId,
           otherId: other.deviceId,
           reason: "distance_gt_threshold",
-          detail: { nearestBodyD: best, threshold: cr * 1.8 },
+          detail: { nearestBodyD: best, threshold: collisionThreshold },
         });
         return false;
       }
@@ -557,7 +566,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
         tick: world.tick,
         victimId: snake.deviceId,
         otherId: other.deviceId,
-        detail: { nearestBodyD: best, threshold: cr * 1.8 },
+        detail: { nearestBodyD: best, threshold: collisionThreshold },
       });
       killer = other;
       return true;
@@ -567,19 +576,46 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     if (!other.alive || other.spectating || other.deviceId === snake.deviceId) return false;
     if (other.invincibleUntil && now < other.invincibleUntil) return false;
     let best = Number.POSITIVE_INFINITY;
+    let bestSeg: Vec | undefined;
     for (let i = 1; i < other.segments.length; i++) {
-      const d = dist(other.segments[i]!, head);
-      if (d < best) best = d;
+      const seg = other.segments[i]!;
+      const d = dist(seg, head);
+      if (d < best) {
+        best = d;
+        bestSeg = seg;
+      }
     }
     if (best < nearestBodyD) {
       nearestBodyD = best;
       nearestBodyId = other.deviceId;
+      nearestSeg = bestSeg;
     }
-    const hit = best < cr * 1.8;
+    const hit = best < collisionThreshold;
     if (hit) killer = other;
     return hit;
   });
 
+  // RC-DEATH-004: once per human trace tick, dump nearest compare fields (no gameplay change)
+  if (traceHumans && nearestSeg && nearestBodyId && Number.isFinite(nearestBodyD)) {
+    death004Sample({
+      tick: world.tick,
+      victimId: snake.deviceId,
+      otherId: nearestBodyId,
+      head: { x: head.x, y: head.y },
+      segment: { x: nearestSeg.x, y: nearestSeg.y },
+      distance: nearestBodyD,
+      threshold: collisionThreshold,
+      headRadius: SNAKE_FEEL.headRadius,
+      segmentRadius: SNAKE_FEEL.bodyRadius,
+      collisionRadius: SNAKE_FEEL.collisionRadius,
+      thresholdFormula: "collisionRadius * 1.8",
+      worldSize: world.config.worldSize,
+      detail: {
+        foodPickupRadius: SNAKE_FEEL.foodPickupRadius,
+        segmentSpacing: SNAKE_FEEL.segmentSpacing,
+      },
+    });
+  }
   // Trace near-miss for humans (throttled) — observe approach without changing collision
   if (!isBotEntity(snake) && nearestBodyD < cr * 4 && world.tick % 8 === 0) {
     deathTrace("near_miss", {
@@ -588,7 +624,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
       victimBot: false,
       killerId: nearestBodyId,
       killerBot: nearestBodyId ? nearestBodyId.startsWith("bot:") : undefined,
-      detail: { nearestBodyD, threshold: cr * 1.8, invincibleUntil: snake.invincibleUntil ?? null, now },
+      detail: { nearestBodyD, threshold: collisionThreshold, invincibleUntil: snake.invincibleUntil ?? null, now },
     });
   }
 
@@ -601,7 +637,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
       killerBot: killer ? isBotEntity(killer) : undefined,
       detail: {
         nearestBodyD,
-        threshold: cr * 1.8,
+        threshold: collisionThreshold,
         victimInvincible: !!(snake.invincibleUntil && now < snake.invincibleUntil),
         invincibleUntil: snake.invincibleUntil ?? null,
         now,
@@ -621,7 +657,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
         tick: world.tick,
         victimId: snake.deviceId,
         otherId: killer?.deviceId,
-        detail: { nearestBodyD, threshold: cr * 1.8 },
+        detail: { nearestBodyD, threshold: collisionThreshold },
       });
     }
     killSnake(snake, world.config, world, killer);

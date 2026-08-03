@@ -128,6 +128,7 @@ import {
 import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
 import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { initDeath003Trace } from "./snake-death-003-trace";
+import { initDeath004Trace } from "./snake-death-004-trace";
 import { PlaytestHeatmap } from "./snake-playtest-heatmap";
 import { PlaytestLog } from "./snake-playtest-log";
 import { PlaytestObservation } from "./snake-playtest-observation";
@@ -920,6 +921,7 @@ export function SnakeIoGame({
     initLoopDiag();
     initDeathTrace();
     initDeath003Trace();
+    initDeath004Trace();
     return () => shutdownLoopDiag();
   }, []);
 
