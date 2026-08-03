@@ -13,6 +13,7 @@ import { noteFixDeath001Sample } from "./snake-fix-death-001";
 import { noteFixDeath001Approach } from "./snake-fix-death-001-step2";
 import { noteExecOrder } from "./snake-exec-order-trace";
 import { noteDeath005 } from "./snake-death-005-trace";
+import { noteDeath006Respawn, noteDeath006Timer } from "./snake-death-006-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -895,6 +896,14 @@ function killSnake(
     });
   }
 
+  noteDeath006Timer({
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot,
+    respawnAt: snake.respawnAt,
+    humanAuto,
+  });
+
   // RC-DEATH-005 observe — after all killSnake mutations (no gameplay change)
   noteDeath005({
     tick: world.tick,
@@ -955,6 +964,14 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
     victimId: snake.deviceId,
     victimBot: isBotEntity(snake),
     detail: { segments: getSegmentCount(snake), pos },
+  });
+  noteDeath006Respawn({
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot: isBotEntity(snake),
+    alive: snake.alive,
+    segments: getSegmentCount(snake),
+    awaitingInput: snake.awaitingInput,
   });
 }
 
