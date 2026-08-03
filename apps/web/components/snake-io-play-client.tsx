@@ -159,10 +159,8 @@ function SnakeIoPlayInner({
   }, [practiceMode, params]);
 
   useEffect(() => {
+    // RC-HUD-001: keep platform chrome / game HUD visible (no immersive shell class).
     if (!immersiveWorld || !worldEntered) return;
-    const root = document.documentElement;
-    root.classList.add("snake-world-immersive");
-    return () => root.classList.remove("snake-world-immersive");
   }, [immersiveWorld, worldEntered]);
 
   useEffect(() => {

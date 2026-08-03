@@ -267,9 +267,10 @@ export function SnakeIoGame({
   const activeRoom = effectiveRoomCode;
   const room = getRoom(activeRoom);
   const isGlobalWorld = isGlobalWorldRoom(effectiveRoomCode, "snake");
-  /** RC-PLAYABLE-003: WORLD = fullscreen canvas, no side panels. */
-  const immersivePlay = isGlobalWorld && !isStageMode;
-  const isGameFullscreen = isFullscreen || pseudoFullscreen || immersivePlay;
+  /** RC-HUD-001: WORLD fills viewport; multiplayer chrome stays visible (immersive hide off). */
+  const worldLayout = isGlobalWorld && !isStageMode;
+  const immersivePlay = false;
+  const isGameFullscreen = isFullscreen || pseudoFullscreen || worldLayout;
   const humanCount = room?.players.length ?? 1;
   const worldPopulation = world ? countWorldSnakes(world) : (isGlobalWorld ? SNAKE_WORLD_TARGET : humanCount);
   const playerCount = worldPopulation;
@@ -531,10 +532,10 @@ export function SnakeIoGame({
   useEffect(() => {
     const measure = () => {
       const nativeFs = isViewportFullscreen(viewportRef.current);
-      const fs = nativeFs || pseudoFullscreen;
+      const fs = nativeFs || pseudoFullscreen || worldLayout;
       setBoardPx(
         measureGameBoardPx({
-          fullscreen: fs || immersivePlay,
+          fullscreen: fs,
           containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
         })
       );
@@ -552,13 +553,16 @@ export function SnakeIoGame({
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-  }, [connected, world, pseudoFullscreen, isFullscreen, immersivePlay]);
+  }, [connected, world, pseudoFullscreen, isFullscreen, worldLayout]);
 
   useEffect(() => {
-    if (!immersivePlay || !connected || !world) return;
+    if (!worldLayout || !connected || !world) return;
     setPseudoFullscreen(true);
     document.body.style.overflow = "hidden";
-  }, [immersivePlay, connected, world]);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [worldLayout, connected, world]);
 
   useEffect(() => {
     if (practiceMode || roomCode) return;
@@ -1705,8 +1709,8 @@ export function SnakeIoGame({
       ref={boardRef}
       className={cn(
         "relative mx-auto flex w-full flex-col items-center overflow-hidden",
-        immersivePlay
-          ? "fixed inset-0 z-[110] h-[100dvh] w-[100dvw] max-w-none justify-center bg-black px-0"
+        worldLayout
+          ? "fixed inset-0 z-[110] h-[100dvh] w-[100dvw] max-w-none bg-black px-0"
           : isGameFullscreen
             ? "max-w-none px-0"
             : "max-w-6xl px-1 sm:px-2"
@@ -1715,55 +1719,51 @@ export function SnakeIoGame({
       <div
         className={cn(
           "flex w-full items-start justify-center gap-3",
-          immersivePlay ? "h-full items-center" : isGameFullscreen && "h-full"
+          (worldLayout || isGameFullscreen) && "h-full"
         )}
       >
-        {!immersivePlay ? (
-          <aside className="hidden w-40 shrink-0 pt-10 lg:block">
-            <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
-          </aside>
-        ) : null}
+        <aside className="hidden w-40 shrink-0 pt-10 lg:block">
+          <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
+        </aside>
 
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col items-center",
-          immersivePlay ? "h-full justify-center pb-0" : "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+          worldLayout ? "h-full justify-center pb-0" : "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
         )}
       >
       <div
         ref={viewportRef}
         className={cn(
           "relative flex w-full justify-center overflow-hidden bg-black",
-          immersivePlay || isGameFullscreen
+          worldLayout || isGameFullscreen
             ? "h-full w-full items-center justify-center"
             : "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
         )}
       >
-        {!immersivePlay ? (
-          <button
-            type="button"
-            onClick={() => void toggleFullscreen()}
-            className="absolute right-2 top-2 z-40 rounded-lg border border-white/15 bg-black/60 px-2.5 py-1.5 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/80"
-            aria-label={isFullscreen ? "Exit full screen" : "Full screen"}
-          >
-            {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => void toggleFullscreen()}
+          className="absolute right-2 top-2 z-40 rounded-lg border border-white/15 bg-black/60 px-2.5 py-1.5 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/80"
+          aria-label={isFullscreen ? "Exit full screen" : "Full screen"}
+        >
+          {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
+        </button>
 
-        {/* Game canvas wrapper — square; fills viewport when immersive/fullscreen */}
+        {/* Game canvas wrapper — square board; fullscreen uses largest fitting size */}
         <div
           className="relative"
           style={{
             width: boardPx,
             height: boardPx,
-            maxWidth: immersivePlay ? "100dvw" : "min(100vw, 100dvh)",
-            maxHeight: immersivePlay ? "100dvh" : "min(100vw, 100dvh)",
+            maxWidth: worldLayout ? "min(100dvw, 100dvh)" : "min(100vw, 100dvh)",
+            maxHeight: worldLayout ? "min(100dvw, 100dvh)" : "min(100vw, 100dvh)",
           }}
         >
         <div
           className={cn(
             "relative h-full w-full touch-none overflow-hidden border border-white/10",
-            immersivePlay ? "rounded-none border-0" : "rounded-xl"
+            worldLayout ? "rounded-none border-0" : "rounded-xl"
           )}
           style={{
             backgroundColor: seasonStyle.bg,
