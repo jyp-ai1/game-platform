@@ -166,17 +166,20 @@ export function noteLb001Sample(input: {
   const byLength = [...input.snakes]
     .filter((s) => s.alive)
     .sort((a, b) => b.length - a.length || a.deviceId.localeCompare(b.deviceId));
-  const byScore = [...input.rankings].sort((a, b) => b.score - a.score);
-  const myRankByScore = byScore.findIndex((r) => r.deviceId === input.deviceId) + 1 || byScore.length + 1;
-  const myRankByLength = byLength.findIndex((r) => r.deviceId === input.deviceId) + 1 || byLength.length + 1;
-
-  let orderMatch = true;
-  const aliveScoreOrder = byScore.filter((r) =>
+  // Official leaderboard order = rankings array as stored (Length after FIX-LB-001)
+  const rankingAliveOrder = input.rankings.filter((r) =>
     input.snakes.find((s) => s.deviceId === r.deviceId)?.alive
   );
-  const n = Math.min(10, byLength.length, aliveScoreOrder.length);
+  const myRankByScore =
+    rankingAliveOrder.findIndex((r) => r.deviceId === input.deviceId) + 1 ||
+    rankingAliveOrder.length + 1;
+  const myRankByLength =
+    byLength.findIndex((r) => r.deviceId === input.deviceId) + 1 || byLength.length + 1;
+
+  let orderMatch = true;
+  const n = Math.min(10, byLength.length, rankingAliveOrder.length);
   for (let i = 0; i < n; i++) {
-    if (aliveScoreOrder[i]!.deviceId !== byLength[i]!.deviceId) {
+    if (rankingAliveOrder[i]!.deviceId !== byLength[i]!.deviceId) {
       orderMatch = false;
       break;
     }

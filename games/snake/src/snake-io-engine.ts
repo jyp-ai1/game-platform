@@ -1127,9 +1127,15 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
 }
 
 export function updateRankings(world: SnakeIoWorld): void {
+  // FIX-LB-001: rank by Length (segment count). Score kept as stats only.
   world.rankings = Object.values(world.snakes)
     .map((s) => ({ deviceId: s.deviceId, nickname: s.nickname, score: s.score }))
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => {
+      const la = getSegmentCount(world.snakes[a.deviceId]!);
+      const lb = getSegmentCount(world.snakes[b.deviceId]!);
+      if (lb !== la) return lb - la;
+      return a.deviceId.localeCompare(b.deviceId);
+    });
 }
 
 export function getMyRank(world: SnakeIoWorld, deviceId: string): number {
