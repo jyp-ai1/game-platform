@@ -888,6 +888,8 @@ function killSnake(
     killerId: killer?.deviceId,
     killerBot: killer ? isBotEntity(killer) : undefined,
   });
+  // FIX-LB-002: drop from leaderboard immediately (do not wait for tick end / respawn)
+  updateRankings(world);
 
   const humanAuto = world.living?.matchRule.humanAutoRespawn ?? false;
   if (isBotEntity(snake) || humanAuto) {
@@ -1127,8 +1129,9 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
 }
 
 export function updateRankings(world: SnakeIoWorld): void {
-  // FIX-LB-001: rank by Length (segment count). Score kept as stats only.
+  // FIX-LB-001: rank by Length. FIX-LB-002: alive only (ghost removed immediately on death).
   world.rankings = Object.values(world.snakes)
+    .filter((s) => s.alive && !s.spectating)
     .map((s) => ({ deviceId: s.deviceId, nickname: s.nickname, score: s.score }))
     .sort((a, b) => {
       const la = getSegmentCount(world.snakes[a.deviceId]!);
