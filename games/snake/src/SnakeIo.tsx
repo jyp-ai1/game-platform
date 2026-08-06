@@ -234,7 +234,10 @@ export function SnakeIoGame({
   const [killFeedClock, setKillFeedClock] = useState(0);
   const [worldHudFps, setWorldHudFps] = useState(60);
   const [worldHudPing, setWorldHudPing] = useState<number | null>(null);
-  const lastStateAtRef = useRef(Date.now());
+  /** Guest: last host-state receive (performance.now). Host: unused for RTT. */
+  const lastStateAtRef = useRef<number | null>(null);
+  const pingEmaRef = useRef<number | null>(null);
+  const lastPingHudAtRef = useRef(0);
   const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
   const headCharacterRef = useRef<SnakeHeadId>(headCharacter);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
@@ -297,8 +300,6 @@ export function SnakeIoGame({
     ? Math.max(0, countWorldSnakes(world) - worldHudPlayers)
     : Math.max(0, SNAKE_WORLD_TARGET - worldHudPlayers);
   const worldTickHz = Math.round(1000 / balance.physicsTickMs);
-  const season = useMemo(() => Replay.multiplayer.season.current(), []);
-  const seasonStyle = Replay.multiplayer.season.palette[season];
   const progressionStage = useMemo(
     () => Replay.multiplayer.progression.stageFor(Replay.multiplayer.progression.snake, world?.snakes[deviceId]?.score ?? 0),
     [world?.snakes[deviceId]?.score, deviceId]
@@ -398,11 +399,23 @@ export function SnakeIoGame({
 
   useEffect(() => {
     if (!isGlobalWorld) return;
-    const updatedAt = room?.gameState?._updatedAt as string | undefined;
-    if (updatedAt) {
-      setWorldHudPing(Math.max(0, Math.round(Date.now() - new Date(updatedAt).getTime())));
+    const now = performance.now();
+    // Throttle React HUD updates — ping sample still updates via refs elsewhere.
+    if (now - lastPingHudAtRef.current < 250) return;
+    lastPingHudAtRef.current = now;
+    if (isHost) {
+      // Host has no network RTT for own sim; show local.
+      setWorldHudPing(0);
+      return;
     }
-  }, [isGlobalWorld, world?.tick, room?.gameState]);
+    const sample = pingEmaRef.current;
+    if (sample == null) {
+      setWorldHudPing(null);
+      return;
+    }
+    // Sanitize: never show the old "millions of ms" age-of-_updatedAt bug.
+    setWorldHudPing(Math.max(0, Math.min(999, Math.round(sample))));
+  }, [isGlobalWorld, isHost, world?.tick]);
 
   useEffect(() => {
     if (!isGlobalWorld) return;
@@ -875,6 +888,14 @@ export function SnakeIoGame({
             return;
           }
           // RC-SYNC-001 A': merge host world + local snake override → one render snapshot
+          const recvAt = performance.now();
+          if (lastStateAtRef.current != null) {
+            const gap = recvAt - lastStateAtRef.current;
+            // Inter-arrival ≈ sync interval; EMA softens spikes for HUD ping.
+            pingEmaRef.current =
+              pingEmaRef.current == null ? gap : pingEmaRef.current * 0.72 + gap * 0.28;
+          }
+          lastStateAtRef.current = recvAt;
           const next = mergeGlobalWorldState(state, r);
           worldRef.current = next;
           setWorld(next);
@@ -1127,8 +1148,9 @@ export function SnakeIoGame({
       }
       if (!worldRef.current) return;
 
-      const before = structuredClone(worldRef.current);
-      let next = structuredClone(worldRef.current);
+      // One deep clone per tick (was two) — `before` stays immutable once we only mutate `next`.
+      const before = worldRef.current;
+      let next = structuredClone(before);
 
       if (isGlobalWorld && r) {
         const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
@@ -1885,9 +1907,10 @@ export function SnakeIoGame({
             worldLayout ? "rounded-none border-0" : "rounded-xl"
           )}
           style={{
-            backgroundColor: seasonStyle.bg,
+            // Match Agar dark-navy board (visual only).
+            backgroundColor: "#0b1220",
             backgroundImage:
-              "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px), radial-gradient(circle at 30% 20%, rgba(120,80,255,0.08), transparent 40%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.06), transparent 35%)",
+              "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
             backgroundSize: `${cellSize}px ${cellSize}px`,
           }}
           onTouchStart={(e) => {

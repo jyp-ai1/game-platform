@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Sprint 17 — Agar.io Multiplayer scaffold (local WORLD + bots).
+ * Sprint 17 — Agar Multiplayer scaffold (local WORLD + bots).
  * Room sync follow-up: broadcast AgarWorld via multiplayer-sdk like Snake.
  */
 import {
@@ -14,10 +14,13 @@ import { Button, ScoreBox } from "@game-platform/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  AGAR_BOARD_BG,
+  AGAR_GRID_LINE,
   AGAR_TICK_MS,
   AGAR_WORLD,
   cameraFocus,
   createAgarWorld,
+  ejectMass,
   massToRadius,
   respawnPlayer,
   setPlayerAim,
@@ -29,6 +32,16 @@ import {
 
 const VIEW = 520;
 
+function snapshotWorld(w: AgarWorld): AgarWorld {
+  return {
+    tick: w.tick,
+    size: w.size,
+    food: w.food,
+    players: w.players,
+    rankings: w.rankings,
+  };
+}
+
 export function AgarGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
@@ -39,6 +52,7 @@ export function AgarGame() {
   const boardRef = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
   const reportedRef = useRef(false);
+  const lastEjectAtRef = useRef(0);
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
@@ -48,9 +62,11 @@ export function AgarGame() {
   useEffect(() => {
     if (!started) return;
     const id = window.setInterval(() => {
-      const next = tickAgarWorld(structuredClone(worldRef.current));
-      worldRef.current = next;
-      setWorld(next);
+      const w = worldRef.current;
+      tickAgarWorld(w);
+      const snap = snapshotWorld(w);
+      worldRef.current = snap;
+      setWorld(snap);
     }, AGAR_TICK_MS);
     return () => window.clearInterval(id);
   }, [started]);
@@ -80,10 +96,24 @@ export function AgarGame() {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         e.preventDefault();
-        const w = structuredClone(worldRef.current);
+        const w = worldRef.current;
         splitPlayer(w, deviceId);
-        worldRef.current = w;
-        setWorld(w);
+        const snap = snapshotWorld(w);
+        worldRef.current = snap;
+        setWorld(snap);
+        return;
+      }
+      if (e.code === "KeyW") {
+        e.preventDefault();
+        const now = performance.now();
+        // Throttle key-repeat so holding W does not dump mass in one frame burst.
+        if (now - lastEjectAtRef.current < 90) return;
+        lastEjectAtRef.current = now;
+        const w = worldRef.current;
+        ejectMass(w, deviceId);
+        const snap = snapshotWorld(w);
+        worldRef.current = snap;
+        setWorld(snap);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -100,10 +130,11 @@ export function AgarGame() {
 
   function handleRetry() {
     reportedRef.current = false;
-    const w = structuredClone(worldRef.current);
+    const w = worldRef.current;
     respawnPlayer(w, deviceId, nickname);
-    worldRef.current = w;
-    setWorld(w);
+    const snap = snapshotWorld(w);
+    worldRef.current = snap;
+    setWorld(snap);
   }
 
   const offsetX = VIEW / 2 - cam.x;
@@ -114,14 +145,19 @@ export function AgarGame() {
       <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2">
         <ScoreBox label="Mass" value={mass} />
         <ScoreBox label="Food" value={world.food.length} />
-        <p className="text-xs text-muted-foreground">Space = Split · 마우스 = 이동</p>
+        <p className="text-xs text-muted-foreground">
+          Space = 세포분열(Split) · W = 먹이 방출(Eject) · 마우스 = 이동
+        </p>
       </div>
 
       {!started ? (
         <div className="flex aspect-square w-full max-w-xl flex-col items-center justify-center gap-4 rounded-xl border bg-card/60 p-8">
-          <h2 className="text-xl font-semibold">Agar.io</h2>
+          <h2 className="text-xl font-semibold">Agar</h2>
           <p className="max-w-sm text-center text-sm text-muted-foreground">
             세포를 키워 TOP10에 올라가세요. 작을수록 빠르고, 크면 다른 세포를 삼킬 수 있습니다.
+          </p>
+          <p className="text-center text-xs text-muted-foreground">
+            Space = 세포분열 · W = 질량 방출 · 모바일 터치 조작은 추후 지원
           </p>
           <Button size="lg" onClick={handleStart}>
             ENTER WORLD
@@ -131,7 +167,8 @@ export function AgarGame() {
         <div className="relative w-full max-w-xl">
           <div
             ref={boardRef}
-            className="relative aspect-square w-full touch-none overflow-hidden rounded-xl border bg-[#0b1220]"
+            className="relative aspect-square w-full touch-none overflow-hidden rounded-xl border"
+            style={{ backgroundColor: AGAR_BOARD_BG }}
             onPointerMove={(e) => onPointer(e.clientX, e.clientY)}
             onPointerDown={(e) => {
               (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
@@ -141,8 +178,7 @@ export function AgarGame() {
             <div
               className="absolute inset-0"
               style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
+                backgroundImage: `linear-gradient(${AGAR_GRID_LINE} 1px, transparent 1px), linear-gradient(90deg, ${AGAR_GRID_LINE} 1px, transparent 1px)`,
                 backgroundSize: `${(40 / AGAR_WORLD) * VIEW}px ${(40 / AGAR_WORLD) * VIEW}px`,
                 backgroundPosition: `${offsetX}px ${offsetY}px`,
               }}

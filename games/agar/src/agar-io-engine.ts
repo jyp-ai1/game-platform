@@ -1,5 +1,5 @@
 /**
- * Agar.io MVP engine — mass / eat / split / bots / TOP10.
+ * Agar MVP engine — mass / eat / split / eject / bots / TOP10.
  * Host-authoritative world shape (ready for Room sync in a follow-up).
  */
 
@@ -8,7 +8,16 @@ export const AGAR_FOOD_TARGET = 220;
 export const AGAR_BOT_COUNT = 18;
 export const AGAR_START_MASS = 12;
 export const AGAR_MIN_SPLIT_MASS = 36;
+/** Minimum cell mass required to eject (classic W feed). */
+export const AGAR_MIN_EJECT_MASS = 32;
+/** Mass removed from the cell when ejecting. */
+export const AGAR_EJECT_COST = 14;
+/** Food pellet mass spawned by eject (slightly less than cost). */
+export const AGAR_EJECT_FOOD = 12;
 export const AGAR_TICK_MS = 33;
+/** Board / grid tone — shared visual target for Snake WORLD map. */
+export const AGAR_BOARD_BG = "#0b1220";
+export const AGAR_GRID_LINE = "rgba(255,255,255,0.04)";
 
 const COLORS = [
   "#22d3ee", "#a78bfa", "#f472b6", "#fbbf24", "#34d399",
@@ -154,6 +163,26 @@ export function splitPlayer(world: AgarWorld, playerId: string, now = Date.now()
     });
   }
   p.cells = next.slice(0, 16);
+}
+
+/** Classic W — eject mass as a feed pellet toward aim. */
+export function ejectMass(world: AgarWorld, playerId: string): void {
+  const p = world.players[playerId];
+  if (!p || !p.alive) return;
+  for (const cell of p.cells) {
+    if (cell.mass < AGAR_MIN_EJECT_MASS) continue;
+    cell.mass -= AGAR_EJECT_COST;
+    const ang = Math.atan2(p.aimY - cell.y, p.aimX - cell.x);
+    const r = massToRadius(cell.mass);
+    const dist = r + 10;
+    world.food.push({
+      id: `e${foodSeq++}`,
+      x: clamp(cell.x + Math.cos(ang) * dist, 4, world.size - 4),
+      y: clamp(cell.y + Math.sin(ang) * dist, 4, world.size - 4),
+      mass: AGAR_EJECT_FOOD,
+      color: p.color,
+    });
+  }
 }
 
 function speedForMass(mass: number): number {

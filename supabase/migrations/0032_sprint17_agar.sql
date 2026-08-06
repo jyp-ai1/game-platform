@@ -1,4 +1,4 @@
--- Sprint 17 Epic 1: Agar.io Multiplayer scaffold
+-- Sprint 17 Epic 1: Agar Multiplayer scaffold
 
 insert into public.games (
   slug, title, description, thumbnail_url, difficulty, status, sort_order,
@@ -7,8 +7,8 @@ insert into public.games (
 values
   (
     'agar',
-    'Agar.io',
-    '세포를 키워 다른 플레이어를 삼키세요. Split · Mass · TOP10.',
+    'Agar',
+    '세포를 키워 다른 플레이어를 삼키세요. Split · Eject · TOP10.',
     '/images/games/agar.png',
     'EASY',
     'ACTIVE',
@@ -16,7 +16,7 @@ values
     (select id from public.categories where slug = 'arcade' limit 1),
     true,
     array['arcade', 'multiplayer', 'realtime', 'agar'],
-    '마우스로 이동합니다. Space로 Split. 자신보다 작은 세포만 먹을 수 있습니다.'
+    '마우스로 이동합니다. Space = 세포분열(Split). W = 먹이 방출(Eject). 자신보다 작은 세포만 먹을 수 있습니다.'
   )
 on conflict (slug) do update set
   title = excluded.title,
