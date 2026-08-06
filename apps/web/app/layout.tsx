@@ -5,6 +5,7 @@ import "./globals.css";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { AuthProvider } from "@/components/auth-provider";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DeferredClientBridges } from "@/components/deferred-client-bridges";
 import { PolyfillInit } from "@/components/polyfill-init";
@@ -96,10 +97,12 @@ export default async function RootLayout({
         <PlatformFlagsSync flags={platformFlags} />
         <DeferredClientBridges />
         <JsonLdScript data={[organizationJsonLd(), webSiteJsonLd()]} />
-        <Header />
-        {children}
-        <Footer />
-        <MobileBottomNav />
+        <AuthProvider>
+          <Header />
+          {children}
+          <Footer />
+          <MobileBottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

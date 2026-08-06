@@ -3,7 +3,6 @@
 import {
   getLastNickname,
   getLevelProgress,
-  getDeviceId,
   getServerLevelProgressSnapshot,
   getServerNicknameSnapshot,
   setLastNickname,
@@ -17,6 +16,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { GuestIdentityPanel } from "@/components/guest-identity-panel";
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
+import { getPlayerId } from "@/lib/auth/player-id";
 import {
   ProfileHeatmapSection,
   ProfileHero2,
@@ -35,7 +35,7 @@ import { useMounted } from "@/lib/use-mounted";
 export function ProfileClient({ games }: { games: Game[] }) {
   const mounted = useMounted();
   useEffect(() => {
-    trackAnalyticsEvent("profile_open", { deviceId: getDeviceId() }).catch(() => {});
+    trackAnalyticsEvent("profile_open", { deviceId: getPlayerId() }).catch(() => {});
     recordAttendance();
   }, []);
 

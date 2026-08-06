@@ -8,6 +8,7 @@ import { mainNavItems } from "@/lib/main-nav";
 import { HeaderLevelBadge } from "./header-level-badge";
 import { MobileNav } from "./mobile-nav";
 import { SoundToggle } from "./sound-toggle";
+import { AuthHeaderControls } from "./auth-header-controls";
 
 export function Header() {
   return (
@@ -35,6 +36,7 @@ export function Header() {
         <div className="flex items-center gap-1">
           <HeaderLevelBadge />
           <SoundToggle />
+          <AuthHeaderControls />
           <Button
             variant="ghost"
             size="icon"
