@@ -42,6 +42,7 @@ import { GameCard } from "@/components/game-card";
 import { LIBRARY_COLLECTIONS } from "@/lib/library-store";
 import { getOnlineFriends } from "@/lib/social-store";
 import Link from "next/link";
+import { isMultiplayerGame } from "@game-platform/multiplayer-sdk";
 
 type PlayerFilter = "all" | "solo" | "multiplayer";
 
@@ -143,8 +144,8 @@ export function GamesDiscoveryBrowser({
         resolvedHotSlugs
       );
       if (difficulty !== "all") list = list.filter((g) => g.difficulty === difficulty);
-      if (players === "multiplayer") list = list.filter((g) => g.slug === "snake");
-      if (players === "solo") list = list.filter((g) => g.slug !== "snake");
+      if (players === "multiplayer") list = list.filter((g) => isMultiplayerGame(g.slug));
+      if (players === "solo") list = list.filter((g) => !isMultiplayerGame(g.slug));
       return list;
     },
     [games, category, sort, favorites, recentlyPlayed, query, resolvedHotSlugs, difficulty, players]

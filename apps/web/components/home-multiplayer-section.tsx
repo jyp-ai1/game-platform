@@ -3,11 +3,20 @@
 import type { Game } from "@game-platform/shared";
 import { Container } from "@game-platform/ui";
 
+import { GameCard } from "@/components/game-card";
 import { SnakeLiveGameCard } from "@/components/snake-live-game-card";
 
-/** Home bottom — multiplayer games (Snake first; extensible grid). */
-export function HomeMultiplayerSection({ snakeGame }: { snakeGame: Game | null }) {
-  if (!snakeGame) return null;
+/** Home bottom — multiplayer games (Snake first; Agar + others). */
+export function HomeMultiplayerSection({
+  snakeGame,
+  multiplayerGames = [],
+}: {
+  snakeGame: Game | null;
+  /** Extra realtime/party games (e.g. agar), excluding snake. */
+  multiplayerGames?: Game[];
+}) {
+  const extras = multiplayerGames.filter((g) => g.slug !== "snake");
+  if (!snakeGame && extras.length === 0) return null;
 
   return (
     <section
@@ -19,14 +28,17 @@ export function HomeMultiplayerSection({ snakeGame }: { snakeGame: Game | null }
           Multiplayer
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          실시간으로 함께 플레이 · 더 많은 멀티 게임이 곧 추가됩니다
+          실시간으로 함께 플레이 · Snake · Agar 외 멀티 게임
         </p>
 
         <div
-          className="mt-5 grid gap-4 sm:max-w-md"
+          className="mt-5 grid gap-4 sm:grid-cols-2 sm:max-w-2xl"
           data-testid="home-multiplayer-grid"
         >
-          <SnakeLiveGameCard game={snakeGame} />
+          {snakeGame ? <SnakeLiveGameCard game={snakeGame} /> : null}
+          {extras.map((game) => (
+            <GameCard key={game.id} game={game} />
+          ))}
         </div>
       </Container>
     </section>

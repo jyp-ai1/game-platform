@@ -91,10 +91,12 @@ export function HomeShell({
   games,
   snakeGame,
   popular,
+  multiplayerGames = [],
 }: {
   games: Game[];
   snakeGame: Game | null;
   popular: Game[];
+  multiplayerGames?: Game[];
 }) {
   const bootReady = useHomeBootDelay(500);
   const [showSkeleton, setShowSkeleton] = useState(true);
@@ -145,7 +147,10 @@ export function HomeShell({
             <HomeContinueHub games={games} />
             <HomeRuleRecommendations games={games} large />
             <HomePopularSection games={games} popular={popular} />
-            <HomeMultiplayerSection snakeGame={snakeGame} />
+            <HomeMultiplayerSection
+              snakeGame={snakeGame}
+              multiplayerGames={multiplayerGames}
+            />
           </>
         ) : null}
 

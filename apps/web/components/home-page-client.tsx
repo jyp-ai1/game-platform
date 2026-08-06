@@ -17,12 +17,21 @@ export function HomePageClient({
   games,
   snakeGame,
   popular,
+  multiplayerGames = [],
 }: {
   games: Game[];
   snakeGame: Game | null;
   popular: Game[];
+  multiplayerGames?: Game[];
 }) {
-  return <HomeShell games={games} snakeGame={snakeGame} popular={popular} />;
+  return (
+    <HomeShell
+      games={games}
+      snakeGame={snakeGame}
+      popular={popular}
+      multiplayerGames={multiplayerGames}
+    />
+  );
 }
 
 /** Warm home chunk while user is in-game — avoids blank skeleton on return navigation. */
