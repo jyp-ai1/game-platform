@@ -1,0 +1,338 @@
+/**
+ * Agar.io MVP engine — mass / eat / split / bots / TOP10.
+ * Host-authoritative world shape (ready for Room sync in a follow-up).
+ */
+
+export const AGAR_WORLD = 900;
+export const AGAR_FOOD_TARGET = 220;
+export const AGAR_BOT_COUNT = 18;
+export const AGAR_START_MASS = 12;
+export const AGAR_MIN_SPLIT_MASS = 36;
+export const AGAR_TICK_MS = 33;
+
+const COLORS = [
+  "#22d3ee", "#a78bfa", "#f472b6", "#fbbf24", "#34d399",
+  "#60a5fa", "#fb7185", "#c084fc", "#4ade80", "#f97316",
+];
+
+export type Vec = { x: number; y: number };
+
+export type AgarFood = { id: string; x: number; y: number; mass: number; color: string };
+
+export type AgarCell = {
+  x: number;
+  y: number;
+  mass: number;
+  /** Split impulse expiry (ms) */
+  boostUntil?: number;
+  mergeAt?: number;
+};
+
+export type AgarPlayer = {
+  id: string;
+  nickname: string;
+  color: string;
+  alive: boolean;
+  isBot: boolean;
+  cells: AgarCell[];
+  /** Desired move target in world coords */
+  aimX: number;
+  aimY: number;
+  score: number;
+};
+
+export type AgarWorld = {
+  tick: number;
+  size: number;
+  food: AgarFood[];
+  players: Record<string, AgarPlayer>;
+  rankings: Array<{ id: string; nickname: string; mass: number; color: string }>;
+};
+
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+export function massToRadius(mass: number): number {
+  return Math.sqrt(Math.max(1, mass)) * 2.2;
+}
+
+export function totalMass(p: AgarPlayer): number {
+  return p.cells.reduce((s, c) => s + c.mass, 0);
+}
+
+function randPos(size: number): Vec {
+  const m = 40;
+  return { x: m + Math.random() * (size - m * 2), y: m + Math.random() * (size - m * 2) };
+}
+
+function foodColor(): string {
+  const palette = ["#fde68a", "#86efac", "#fda4af", "#a5b4fc", "#67e8f9"];
+  return palette[Math.floor(Math.random() * palette.length)]!;
+}
+
+let foodSeq = 0;
+function spawnFood(world: AgarWorld, n: number): void {
+  for (let i = 0; i < n; i++) {
+    const pos = randPos(world.size);
+    world.food.push({
+      id: `f${foodSeq++}`,
+      x: pos.x,
+      y: pos.y,
+      mass: 1,
+      color: foodColor(),
+    });
+  }
+}
+
+function makePlayer(
+  id: string,
+  nickname: string,
+  isBot: boolean,
+  size: number,
+  colorIdx: number
+): AgarPlayer {
+  const pos = randPos(size);
+  return {
+    id,
+    nickname,
+    color: COLORS[colorIdx % COLORS.length]!,
+    alive: true,
+    isBot,
+    cells: [{ x: pos.x, y: pos.y, mass: AGAR_START_MASS }],
+    aimX: pos.x,
+    aimY: pos.y,
+    score: 0,
+  };
+}
+
+export function createAgarWorld(localId: string, nickname: string): AgarWorld {
+  const world: AgarWorld = {
+    tick: 0,
+    size: AGAR_WORLD,
+    food: [],
+    players: {},
+    rankings: [],
+  };
+  world.players[localId] = makePlayer(localId, nickname || "You", false, world.size, 0);
+  for (let i = 0; i < AGAR_BOT_COUNT; i++) {
+    const id = `bot:${i}`;
+    world.players[id] = makePlayer(id, `Cell${i + 1}`, true, world.size, i + 1);
+  }
+  spawnFood(world, AGAR_FOOD_TARGET);
+  updateRankings(world);
+  return world;
+}
+
+export function setPlayerAim(world: AgarWorld, playerId: string, x: number, y: number): void {
+  const p = world.players[playerId];
+  if (!p || !p.alive) return;
+  p.aimX = clamp(x, 0, world.size);
+  p.aimY = clamp(y, 0, world.size);
+}
+
+export function splitPlayer(world: AgarWorld, playerId: string, now = Date.now()): void {
+  const p = world.players[playerId];
+  if (!p || !p.alive) return;
+  const next: AgarCell[] = [];
+  for (const cell of p.cells) {
+    if (cell.mass < AGAR_MIN_SPLIT_MASS || next.length + p.cells.length > 8) {
+      next.push(cell);
+      continue;
+    }
+    const half = cell.mass / 2;
+    cell.mass = half;
+    const ang = Math.atan2(p.aimY - cell.y, p.aimX - cell.x);
+    const r = massToRadius(half);
+    next.push(cell);
+    next.push({
+      x: cell.x + Math.cos(ang) * r * 2.2,
+      y: cell.y + Math.sin(ang) * r * 2.2,
+      mass: half,
+      boostUntil: now + 420,
+      mergeAt: now + 8_000,
+    });
+  }
+  p.cells = next.slice(0, 16);
+}
+
+function speedForMass(mass: number): number {
+  return clamp(4.2 - Math.log2(mass + 1) * 0.55, 1.1, 4.2);
+}
+
+function moveCell(cell: AgarCell, aimX: number, aimY: number, size: number, now: number): void {
+  const dx = aimX - cell.x;
+  const dy = aimY - cell.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  let spd = speedForMass(cell.mass);
+  if (cell.boostUntil && now < cell.boostUntil) spd *= 2.4;
+  const step = Math.min(dist, spd);
+  cell.x = clamp(cell.x + (dx / dist) * step, 4, size - 4);
+  cell.y = clamp(cell.y + (dy / dist) * step, 4, size - 4);
+}
+
+function botAim(world: AgarWorld, bot: AgarPlayer): void {
+  const head = bot.cells[0];
+  if (!head) return;
+  // Prefer nearby food; flee larger players
+  let best: AgarFood | null = null;
+  let bestD = 180;
+  for (const f of world.food) {
+    const d = Math.hypot(f.x - head.x, f.y - head.y);
+    if (d < bestD) {
+      bestD = d;
+      best = f;
+    }
+  }
+  for (const other of Object.values(world.players)) {
+    if (other.id === bot.id || !other.alive) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    if (totalMass(other) > totalMass(bot) * 1.15) {
+      const d = Math.hypot(o.x - head.x, o.y - head.y);
+      if (d < 120) {
+        bot.aimX = clamp(head.x - (o.x - head.x), 0, world.size);
+        bot.aimY = clamp(head.y - (o.y - head.y), 0, world.size);
+        return;
+      }
+    }
+  }
+  if (best) {
+    bot.aimX = best.x;
+    bot.aimY = best.y;
+  } else if (world.tick % 40 === 0) {
+    const p = randPos(world.size);
+    bot.aimX = p.x;
+    bot.aimY = p.y;
+  }
+}
+
+function tryEatFood(world: AgarWorld, player: AgarPlayer): void {
+  for (const cell of player.cells) {
+    const r = massToRadius(cell.mass);
+    for (let i = world.food.length - 1; i >= 0; i--) {
+      const f = world.food[i]!;
+      if (Math.hypot(f.x - cell.x, f.y - cell.y) < r * 0.85) {
+        cell.mass += f.mass;
+        player.score += f.mass;
+        world.food.splice(i, 1);
+      }
+    }
+  }
+}
+
+function tryEatPlayers(world: AgarWorld, now: number): void {
+  const list = Object.values(world.players).filter((p) => p.alive);
+  for (const hunter of list) {
+    for (const prey of list) {
+      if (hunter.id === prey.id) continue;
+      for (const hc of hunter.cells) {
+        const hr = massToRadius(hc.mass);
+        for (let pi = prey.cells.length - 1; pi >= 0; pi--) {
+          const pc = prey.cells[pi]!;
+          if (hc.mass < pc.mass * 1.18) continue;
+          const pr = massToRadius(pc.mass);
+          const d = Math.hypot(hc.x - pc.x, hc.y - pc.y);
+          if (d < hr - pr * 0.35) {
+            hc.mass += pc.mass * 0.9;
+            hunter.score += Math.round(pc.mass);
+            prey.cells.splice(pi, 1);
+          }
+        }
+      }
+      if (prey.cells.length === 0) {
+        prey.alive = false;
+        // Respawn bots quickly; humans stay dead until restart
+        if (prey.isBot) {
+          const pos = randPos(world.size);
+          prey.alive = true;
+          prey.cells = [{ x: pos.x, y: pos.y, mass: AGAR_START_MASS }];
+          prey.aimX = pos.x;
+          prey.aimY = pos.y;
+        }
+      }
+    }
+  }
+  void now;
+}
+
+function mergeOwnCells(player: AgarPlayer, now: number): void {
+  if (player.cells.length < 2) return;
+  const kept: AgarCell[] = [];
+  for (const cell of player.cells) {
+    let merged = false;
+    if (cell.mergeAt && now >= cell.mergeAt) {
+      for (const k of kept) {
+        if (Math.hypot(k.x - cell.x, k.y - cell.y) < massToRadius(k.mass) + massToRadius(cell.mass)) {
+          k.mass += cell.mass;
+          merged = true;
+          break;
+        }
+      }
+    }
+    if (!merged) kept.push(cell);
+  }
+  player.cells = kept;
+}
+
+export function updateRankings(world: AgarWorld): void {
+  world.rankings = Object.values(world.players)
+    .filter((p) => p.alive)
+    .map((p) => ({
+      id: p.id,
+      nickname: p.nickname,
+      mass: Math.round(totalMass(p)),
+      color: p.color,
+    }))
+    .sort((a, b) => b.mass - a.mass)
+    .slice(0, 10);
+}
+
+export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
+  world.tick += 1;
+
+  for (const p of Object.values(world.players)) {
+    if (!p.alive) continue;
+    if (p.isBot) botAim(world, p);
+    for (const cell of p.cells) moveCell(cell, p.aimX, p.aimY, world.size, now);
+    mergeOwnCells(p, now);
+    tryEatFood(world, p);
+  }
+  tryEatPlayers(world, now);
+
+  if (world.food.length < AGAR_FOOD_TARGET * 0.7) {
+    spawnFood(world, Math.min(24, AGAR_FOOD_TARGET - world.food.length));
+  }
+
+  updateRankings(world);
+  return world;
+}
+
+export function respawnPlayer(world: AgarWorld, playerId: string, nickname?: string): void {
+  const existing = world.players[playerId];
+  const pos = randPos(world.size);
+  world.players[playerId] = {
+    id: playerId,
+    nickname: nickname || existing?.nickname || "You",
+    color: existing?.color || COLORS[0]!,
+    alive: true,
+    isBot: false,
+    cells: [{ x: pos.x, y: pos.y, mass: AGAR_START_MASS }],
+    aimX: pos.x,
+    aimY: pos.y,
+    score: existing?.score ?? 0,
+  };
+  updateRankings(world);
+}
+
+export function cameraFocus(player: AgarPlayer | undefined): Vec {
+  if (!player || player.cells.length === 0) return { x: AGAR_WORLD / 2, y: AGAR_WORLD / 2 };
+  const m = totalMass(player) || 1;
+  let x = 0;
+  let y = 0;
+  for (const c of player.cells) {
+    x += c.x * c.mass;
+    y += c.y * c.mass;
+  }
+  return { x: x / m, y: y / m };
+}

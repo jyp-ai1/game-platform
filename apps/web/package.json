@@ -12,6 +12,7 @@
   "dependencies": {
     "@game-platform/game-2048": "*",
     "@game-platform/game-air-hockey": "*",
+    "@game-platform/game-agar": "*",
     "@game-platform/game-archery": "*",
     "@game-platform/game-arkanoid-dx": "*",
     "@game-platform/game-ball-sort": "*",

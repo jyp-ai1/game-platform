@@ -230,7 +230,7 @@ export const PARTY_GAMES = new Set([
 ]);
 
 /** Tier3 realtime flagship candidates */
-export const REALTIME_GAMES = new Set(["snake"]);
+export const REALTIME_GAMES = new Set(["snake", "agar"]);
 
 export function getGameTier(slug: string): "single" | "party" | "realtime" {
   if (REALTIME_GAMES.has(slug)) return "realtime";

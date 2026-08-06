@@ -309,6 +309,10 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
       import("@game-platform/game-word-search").then((mod) => mod.WordSearchGame),
     { ssr: false, loading: Loading }
   ),
+  agar: dynamic(
+    () => import("@game-platform/game-agar").then((mod) => mod.AgarGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({
