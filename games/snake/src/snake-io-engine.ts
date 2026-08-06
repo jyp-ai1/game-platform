@@ -14,6 +14,7 @@ import { noteFixDeath001Approach } from "./snake-fix-death-001-step2";
 import { noteExecOrder } from "./snake-exec-order-trace";
 import { noteDeath005 } from "./snake-death-005-trace";
 import { noteDeath006Respawn, noteDeath006Timer } from "./snake-death-006-trace";
+import { noteLoot001Collect, noteLoot001Drop } from "./snake-loot-001-trace";
 import {
   advanceSnakePath,
   directionToAngle,
@@ -780,7 +781,18 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
   if (foodIdx >= 0) {
     const food = world.food[foodIdx]!;
+    const foodBeforeCollect = world.food.length;
+    const foodTier = food.tier ?? "small";
     world.food.splice(foodIdx, 1);
+    noteLoot001Collect({
+      tick: world.tick,
+      eaterId: snake.deviceId,
+      eaterBot: isBotEntity(snake),
+      foodTier,
+      foodValue: food.value,
+      foodBefore: foodBeforeCollect,
+      foodAfter: world.food.length,
+    });
     let mult = world.config.rewardRate * (world.expMultiplier ?? 1);
     if (food.kind === "golden_apple") mult *= 1.5;
     if (snake.powerUp?.kind === "double_score") mult *= 2;
@@ -796,14 +808,23 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 
 function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
   if (snake.segments.length === 0) return;
-  // 보석 수 = gemsEaten (없으면 몸 길이). 몸 궤적을 따라 1:1 배치.
-  const gemCount = Math.max(1, snake.gemsEaten ?? 0, snake.segments.length);
+  // FIX-LOOT-001: drop count = body length (CPO RC-LOOT-001). Always place death loot —
+  // ambient food soft-cap must not swallow corpse gems (observed food≈6k → +0 drops).
+  const gemCount = Math.max(1, snake.segments.length);
   const cfg = FOOD_TIERS.death;
   const segs = snake.segments;
-  const maxFood = Math.floor(world.config.foodCount * 2) + gemCount;
+  const softCap = Math.floor(world.config.foodCount * 2) + gemCount;
+
+  const evictAmbientToFit = (): void => {
+    while (world.food.length >= softCap) {
+      const idx = world.food.findIndex((f) => f.tier !== "death");
+      if (idx < 0) break;
+      world.food.splice(idx, 1);
+    }
+  };
 
   for (let i = 0; i < gemCount; i++) {
-    if (world.food.length >= maxFood) break;
+    evictAmbientToFit();
     const t = gemCount === 1 ? 0 : i / (gemCount - 1);
     const f = t * (segs.length - 1);
     const i0 = Math.floor(f);
@@ -839,6 +860,10 @@ function killSnake(
   const victimBot = isBotEntity(snake);
   const foodBefore = world.food.length;
   const deathFoodBefore = world.food.filter((f) => f.tier === "death").length;
+  const lengthAtDeath = Math.max(snake.segments.length, getSegmentCount(snake));
+  const gemsEaten = snake.gemsEaten ?? 0;
+  // CPO RC-LOOT-001: length-based expected drop (engine may still use gemsEaten max internally)
+  const expectedDrop = Math.max(1, lengthAtDeath);
   deathTrace("kill_snake_enter", {
     tick: world.tick,
     victimId: snake.deviceId,
@@ -852,6 +877,20 @@ function killSnake(
     world.deathZones = [...world.deathZones.filter((d) => Date.now() - d.at < 30_000), { x: head.x, y: head.y, at: Date.now() }].slice(-40);
   }
   dropFoodFromSnake(world, snake);
+  const deathFoodAfterDrop = world.food.filter((f) => f.tier === "death");
+  noteLoot001Drop({
+    tick: world.tick,
+    victimId: snake.deviceId,
+    victimBot,
+    lengthAtDeath,
+    gemsEaten,
+    expectedDrop,
+    foodBefore,
+    foodAfter: world.food.length,
+    deathFoodBefore,
+    deathFoodAfter: deathFoodAfterDrop.length,
+    samplePositions: deathFoodAfterDrop.slice(-Math.min(8, expectedDrop)).map((f) => ({ x: f.x, y: f.y })),
+  });
   // FIX-CORPSE-001: convert body → food, then clear corpse so it cannot linger in world/render
   snake.segments = [];
   snake.segmentCount = 0;

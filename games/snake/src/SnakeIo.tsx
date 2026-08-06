@@ -134,6 +134,7 @@ import { initDeath005Trace } from "./snake-death-005-trace";
 import { initDeath006Trace } from "./snake-death-006-trace";
 import { initDeath007Trace, noteDeath007Ux, setDeath007ForceDeath } from "./snake-death-007-trace";
 import { initLb001Trace, noteLb001Sample } from "./snake-lb-001-trace";
+import { initLoot001Trace } from "./snake-loot-001-trace";
 import { deathTrace, initDeathTrace } from "./snake-death-trace";
 import { initDeath003Trace } from "./snake-death-003-trace";
 import { initDeath004Trace } from "./snake-death-004-trace";
@@ -946,6 +947,7 @@ export function SnakeIoGame({
     initDeath006Trace();
     initDeath007Trace();
     initLb001Trace();
+    initLoot001Trace();
     return () => shutdownLoopDiag();
   }, [deviceId]);
 

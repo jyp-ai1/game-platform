@@ -1,0 +1,117 @@
+[
+  {
+    "t": 1785975912351,
+    "type": "info",
+    "text": "[RC-LOOT-001] loot drop probe ON — window.__RC_LOOT_001__"
+  },
+  {
+    "t": 1785975912362,
+    "type": "info",
+    "text": "[RC-LOOT-001] loot drop probe ON — window.__RC_LOOT_001__"
+  },
+  {
+    "t": 1785975917892,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975927097,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975927850,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975927872,
+    "type": "info",
+    "text": "[RC-LOOT-001] drop victim=bot:39 bot=true len=12 expected=12 added=12 truncated=false"
+  },
+  {
+    "t": 1785975927882,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  },
+  {
+    "t": 1785975928055,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975928072,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  },
+  {
+    "t": 1785975928312,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975928326,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  },
+  {
+    "t": 1785975929233,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  },
+  {
+    "t": 1785975929443,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  },
+  {
+    "t": 1785975942479,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:25 bot=true value=20"
+  },
+  {
+    "t": 1785975943493,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:25 bot=true value=20"
+  },
+  {
+    "t": 1785975944246,
+    "type": "info",
+    "text": "[RC-LOOT-001] drop victim=bot:25 bot=true len=13 expected=13 added=13 truncated=false"
+  },
+  {
+    "t": 1785975959293,
+    "type": "info",
+    "text": "[RC-LOOT-001] drop victim=f4fbaf50 bot=false len=4 expected=4 added=4 truncated=false"
+  },
+  {
+    "t": 1785975971199,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975971366,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975971455,
+    "type": "info",
+    "text": "[RC-LOOT-001] drop victim=bot:39 bot=true len=12 expected=12 added=12 truncated=false"
+  },
+  {
+    "t": 1785975971473,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  },
+  {
+    "t": 1785975973728,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:4 bot=true value=20"
+  },
+  {
+    "t": 1785975973795,
+    "type": "info",
+    "text": "[RC-LOOT-001] collect death-food eater=bot:46 bot=true value=20"
+  }
+]

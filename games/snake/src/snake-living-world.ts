@@ -175,7 +175,11 @@ export function tickLivingWorld(world: SnakeIoWorld, playerCount: number, now = 
         value: 12,
       });
     }
-    world.food = world.food.slice(0, Math.floor(world.config.foodCount * 2.5));
+    // FIX-LOOT-001: soft-cap must keep death loot (slice(0,n) previously dropped newest corpse gems)
+    const cap = Math.floor(world.config.foodCount * 2.5);
+    const death = world.food.filter((f) => f.tier === "death");
+    const ambient = world.food.filter((f) => f.tier !== "death");
+    world.food = [...death, ...ambient.slice(0, Math.max(0, cap - death.length))];
   }
 
   if (playerCount >= 8 && lw.matchRule.bossEnabled && world.tick === t.bossSpawnTick && !world.bossSpawned) {

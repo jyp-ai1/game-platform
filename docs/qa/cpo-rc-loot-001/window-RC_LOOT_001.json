@@ -1,0 +1,414 @@
+{
+  "summary": {
+    "enabled": true,
+    "dropCount": 4,
+    "collectCount": 60,
+    "deathCollects": 17,
+    "pass": {
+      "lengthDrop": true,
+      "worldRegistered": true,
+      "renderable": true,
+      "collectable": true
+    },
+    "passScore": "4 / 4",
+    "verdict": "PASS",
+    "proof": "drops=4 (bot=3, human=1); lengthOk=4; worldOk=4; deathCollects=17; last len=12 +12 truncated=false",
+    "lastDrop": {
+      "t": 1785975971454,
+      "tick": 175,
+      "victimId": "bot:39",
+      "victimBot": true,
+      "lengthAtDeath": 12,
+      "gemsEaten": 0,
+      "expectedDrop": 12,
+      "foodBefore": 4823,
+      "foodAfter": 4812,
+      "deathFoodBefore": 96,
+      "deathFoodAfter": 108,
+      "deathFoodAdded": 12,
+      "truncated": false,
+      "samplePositions": [
+        {
+          "x": 733.5909386175899,
+          "y": 706.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 707.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 707.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 708.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 708.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 709.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 709.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 710.2275709079659
+        }
+      ]
+    },
+    "lastCollect": {
+      "t": 1785975979075,
+      "tick": 170,
+      "eaterId": "bot:45",
+      "eaterBot": true,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4816,
+      "foodAfter": 4815
+    }
+  },
+  "drops": [
+    {
+      "t": 1785975927871,
+      "tick": 175,
+      "victimId": "bot:39",
+      "victimBot": true,
+      "lengthAtDeath": 12,
+      "gemsEaten": 0,
+      "expectedDrop": 12,
+      "foodBefore": 4825,
+      "foodAfter": 4812,
+      "deathFoodBefore": 96,
+      "deathFoodAfter": 108,
+      "deathFoodAdded": 12,
+      "truncated": false,
+      "samplePositions": [
+        {
+          "x": 733.5909386175899,
+          "y": 706.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 707.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 707.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 708.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 708.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 709.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 709.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 710.2275709079659
+        }
+      ]
+    },
+    {
+      "t": 1785975944246,
+      "tick": 207,
+      "victimId": "bot:25",
+      "victimBot": true,
+      "lengthAtDeath": 13,
+      "gemsEaten": 2,
+      "expectedDrop": 13,
+      "foodBefore": 4862,
+      "foodAfter": 4813,
+      "deathFoodBefore": 99,
+      "deathFoodAfter": 112,
+      "deathFoodAdded": 13,
+      "truncated": false,
+      "samplePositions": [
+        {
+          "x": 706.719563657898,
+          "y": 703.2805514113984
+        },
+        {
+          "x": 707.1291594420485,
+          "y": 703.5673114044347
+        },
+        {
+          "x": 707.3600490298192,
+          "y": 704.0108088658243
+        },
+        {
+          "x": 707.5909386175899,
+          "y": 704.454306327214
+        },
+        {
+          "x": 707.5909386175899,
+          "y": 704.954306327214
+        },
+        {
+          "x": 707.5909386175899,
+          "y": 705.454306327214
+        },
+        {
+          "x": 707.5909386175899,
+          "y": 705.954306327214
+        },
+        {
+          "x": 707.5909386175899,
+          "y": 706.454306327214
+        }
+      ]
+    },
+    {
+      "t": 1785975959291,
+      "tick": 221,
+      "victimId": "f4fbaf50-5176-4d8f-8adc-3d8efc148c0b",
+      "victimBot": false,
+      "lengthAtDeath": 4,
+      "gemsEaten": 0,
+      "expectedDrop": 4,
+      "foodBefore": 4826,
+      "foodAfter": 4804,
+      "deathFoodBefore": 112,
+      "deathFoodAfter": 116,
+      "deathFoodAdded": 4,
+      "truncated": false,
+      "samplePositions": [
+        {
+          "x": 457.0998753431061,
+          "y": 697.7379479103865
+        },
+        {
+          "x": 456.5998753431061,
+          "y": 697.7379479103865
+        },
+        {
+          "x": 456.0998753431061,
+          "y": 697.7379479103865
+        },
+        {
+          "x": 455.60036802063263,
+          "y": 697.7157570384923
+        }
+      ]
+    },
+    {
+      "t": 1785975971454,
+      "tick": 175,
+      "victimId": "bot:39",
+      "victimBot": true,
+      "lengthAtDeath": 12,
+      "gemsEaten": 0,
+      "expectedDrop": 12,
+      "foodBefore": 4823,
+      "foodAfter": 4812,
+      "deathFoodBefore": 96,
+      "deathFoodAfter": 108,
+      "deathFoodAdded": 12,
+      "truncated": false,
+      "samplePositions": [
+        {
+          "x": 733.5909386175899,
+          "y": 706.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 707.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 707.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 708.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 708.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 709.2275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 709.7275709079659
+        },
+        {
+          "x": 733.5909386175899,
+          "y": 710.2275709079659
+        }
+      ]
+    }
+  ],
+  "collects": [
+    {
+      "t": 1785975971255,
+      "tick": 174,
+      "eaterId": "f4fbaf50-5176-4d8f-8adc-3d8efc148c0b",
+      "eaterBot": false,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4821,
+      "foodAfter": 4820
+    },
+    {
+      "t": 1785975971365,
+      "tick": 175,
+      "eaterId": "bot:4",
+      "eaterBot": true,
+      "foodTier": "death",
+      "foodValue": 20,
+      "foodBefore": 4822,
+      "foodAfter": 4821
+    },
+    {
+      "t": 1785975971472,
+      "tick": 175,
+      "eaterId": "bot:46",
+      "eaterBot": true,
+      "foodTier": "death",
+      "foodValue": 20,
+      "foodBefore": 4812,
+      "foodAfter": 4811
+    },
+    {
+      "t": 1785975973727,
+      "tick": 176,
+      "eaterId": "bot:4",
+      "eaterBot": true,
+      "foodTier": "death",
+      "foodValue": 20,
+      "foodBefore": 4813,
+      "foodAfter": 4812
+    },
+    {
+      "t": 1785975973752,
+      "tick": 176,
+      "eaterId": "bot:17",
+      "eaterBot": true,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4814,
+      "foodAfter": 4813
+    },
+    {
+      "t": 1785975973757,
+      "tick": 176,
+      "eaterId": "bot:21",
+      "eaterBot": true,
+      "foodTier": "epic",
+      "foodValue": 20,
+      "foodBefore": 4815,
+      "foodAfter": 4814
+    },
+    {
+      "t": 1785975973794,
+      "tick": 176,
+      "eaterId": "bot:46",
+      "eaterBot": true,
+      "foodTier": "death",
+      "foodValue": 20,
+      "foodBefore": 4816,
+      "foodAfter": 4815
+    },
+    {
+      "t": 1785975974375,
+      "tick": 167,
+      "eaterId": "bot:8",
+      "eaterBot": true,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4812,
+      "foodAfter": 4811
+    },
+    {
+      "t": 1785975976552,
+      "tick": 168,
+      "eaterId": "bot:41",
+      "eaterBot": true,
+      "foodTier": "large",
+      "foodValue": 4,
+      "foodBefore": 4813,
+      "foodAfter": 4812
+    },
+    {
+      "t": 1785975979047,
+      "tick": 170,
+      "eaterId": "bot:16",
+      "eaterBot": true,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4814,
+      "foodAfter": 4813
+    },
+    {
+      "t": 1785975979061,
+      "tick": 170,
+      "eaterId": "bot:27",
+      "eaterBot": true,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4815,
+      "foodAfter": 4814
+    },
+    {
+      "t": 1785975979075,
+      "tick": 170,
+      "eaterId": "bot:45",
+      "eaterBot": true,
+      "foodTier": "small",
+      "foodValue": 1,
+      "foodBefore": 4816,
+      "foodAfter": 4815
+    }
+  ],
+  "deathFoodDom": 0,
+  "afterForcedDeath": {
+    "t": 1785975959291,
+    "tick": 221,
+    "victimId": "f4fbaf50-5176-4d8f-8adc-3d8efc148c0b",
+    "victimBot": false,
+    "lengthAtDeath": 4,
+    "gemsEaten": 0,
+    "expectedDrop": 4,
+    "foodBefore": 4826,
+    "foodAfter": 4804,
+    "deathFoodBefore": 112,
+    "deathFoodAfter": 116,
+    "deathFoodAdded": 4,
+    "truncated": false,
+    "samplePositions": [
+      {
+        "x": 457.0998753431061,
+        "y": 697.7379479103865
+      },
+      {
+        "x": 456.5998753431061,
+        "y": 697.7379479103865
+      },
+      {
+        "x": 456.0998753431061,
+        "y": 697.7379479103865
+      },
+      {
+        "x": 455.60036802063263,
+        "y": 697.7157570384923
+      }
+    ]
+  }
+}

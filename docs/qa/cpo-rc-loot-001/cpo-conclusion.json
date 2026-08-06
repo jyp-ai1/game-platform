@@ -1,0 +1,25 @@
+{
+  "rc": "RC-LOOT-001",
+  "fix": "FIX-LOOT-001",
+  "commit": "local-uncommitted",
+  "base": "http://localhost:3002",
+  "verdict": "PASS",
+  "passScore": "4 / 4",
+  "pass": {
+    "lengthDrop": true,
+    "worldRegistered": true,
+    "renderable": true,
+    "collectable": true
+  },
+  "before": {
+    "verdict": "FAIL_LENGTH",
+    "passScore": "0 / 4",
+    "proof": "food≈6650 blocked maxFood; deathFoodAdded=0"
+  },
+  "root_cause": "dropFoodFromSnake skipped all gems when world.food.length >= foodCount*2; food storm slice(0,n) also dropped newest death gems",
+  "change": "Always place length-based death loot (evict ambient if needed); food-storm soft-cap preserves tier=death",
+  "proof": "drops=4 lengthOk=4 worldOk=4 deathCollects=17; last len=12 +12",
+  "collision": "HOLD",
+  "death_lb": "FROZEN",
+  "next": "Commit/Push → Preview re-verify → RC-AUTH-001"
+}

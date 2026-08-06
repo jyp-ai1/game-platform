@@ -1,0 +1,21 @@
+{
+  "rc": "RC-LOOT-001",
+  "commit": "fix-loot-001",
+  "base": "http://localhost:3002",
+  "verdict": "PASS",
+  "passScore": "4 / 4",
+  "media": [
+    "page@5fda656d287a45f8d0a384d5110f130f.webm",
+    "page@9bd72a2b079420a85b6642a1cb8d49cb.webm",
+    "page@da24e2c04527b6f3b89116d181df3578.webm",
+    "page@ff9e2cb77efcbf36bff369a97a6884cb.webm"
+  ],
+  "files": [
+    "01-start.png",
+    "02-after-death-loot.png",
+    "03-after-collect-window.png",
+    "rc-loot-001-report.json",
+    "window-RC_LOOT_001.json",
+    "console-RC_LOOT_001.json"
+  ]
+}
