@@ -236,16 +236,24 @@ export function PlatformGameCard({
         ) : null}
 
         {actions ? (
-          <div className="mt-auto flex flex-wrap gap-2 pt-1">
+          <div
+            className={cn(
+              "mt-auto flex flex-wrap gap-2 pt-1",
+              live && !actions.secondary && "flex-col"
+            )}
+          >
             {actions.primary.href ? (
               <Button
                 className={cn(
                   "gap-1.5 motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
-                  live && "bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
+                  live &&
+                    "w-full bg-gradient-to-r from-emerald-500 to-cyan-400 text-emerald-950 hover:from-emerald-400 hover:to-cyan-300",
+                  live && actions.secondary && "w-auto"
                 )}
                 nativeButton={false}
                 render={
                   <GameCardPlayLink href={actions.primary.href}>
+                    {live ? <Zap className="size-4" /> : null}
                     {actions.primary.label}
                   </GameCardPlayLink>
                 }
@@ -254,7 +262,9 @@ export function PlatformGameCard({
               <Button
                 className={cn(
                   "gap-1.5 motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
-                  live && "bg-emerald-500 text-emerald-950 hover:bg-emerald-400"
+                  live &&
+                    "w-full bg-gradient-to-r from-emerald-500 to-cyan-400 text-emerald-950 hover:from-emerald-400 hover:to-cyan-300",
+                  live && actions.secondary && "w-auto flex-1"
                 )}
                 onClick={actions.primary.onClick}
                 disabled={actions.primary.loading}

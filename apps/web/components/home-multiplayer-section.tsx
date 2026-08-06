@@ -1,22 +1,28 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
+import { REALTIME_GAMES } from "@game-platform/multiplayer-sdk";
 import { Container } from "@game-platform/ui";
 
-import { GameCard } from "@/components/game-card";
-import { SnakeLiveGameCard } from "@/components/snake-live-game-card";
+import { LiveMultiplayerGameCard } from "@/components/live-multiplayer-game-card";
 
-/** Home bottom — multiplayer games (Snake first; Agar + others). */
+/** Home bottom — realtime multiplayer games share one LIVE card pattern. */
 export function HomeMultiplayerSection({
   snakeGame,
   multiplayerGames = [],
 }: {
   snakeGame: Game | null;
-  /** Extra realtime/party games (e.g. agar), excluding snake. */
+  /** Extra realtime games (e.g. agar), excluding snake. */
   multiplayerGames?: Game[];
 }) {
-  const extras = multiplayerGames.filter((g) => g.slug !== "snake");
-  if (!snakeGame && extras.length === 0) return null;
+  const extras = multiplayerGames.filter(
+    (g) => g.slug !== "snake" && REALTIME_GAMES.has(g.slug)
+  );
+  const cards: Game[] = [];
+  if (snakeGame) cards.push(snakeGame);
+  cards.push(...extras);
+
+  if (cards.length === 0) return null;
 
   return (
     <section
@@ -35,9 +41,8 @@ export function HomeMultiplayerSection({
           className="mt-5 grid gap-4 sm:grid-cols-2 sm:max-w-2xl"
           data-testid="home-multiplayer-grid"
         >
-          {snakeGame ? <SnakeLiveGameCard game={snakeGame} /> : null}
-          {extras.map((game) => (
-            <GameCard key={game.id} game={game} />
+          {cards.map((game) => (
+            <LiveMultiplayerGameCard key={game.id} game={game} />
           ))}
         </div>
       </Container>
