@@ -1,0 +1,207 @@
+[
+  {
+    "t": 1785751566212,
+    "type": "info",
+    "text": "[RC-DEATH-002] pipeline trace ON — window.__RC_DEATH_002__"
+  },
+  {
+    "t": 1785751584853,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:13(bot) killer=bot:5(bot) {nearestBodyD: 0.2955159997775115, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751584847}"
+  },
+  {
+    "t": 1785751584853,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:13(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751584860,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:13(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751584860,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:13(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751584860,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:13(bot) {respawnAt: 1785751585659, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751597123,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:28(bot) killer=bot:5(bot) {nearestBodyD: 0.4972924588105052, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751597119}"
+  },
+  {
+    "t": 1785751597123,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:28(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751597128,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:28(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751597128,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:28(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751597128,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:28(bot) {respawnAt: 1785751597926, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751627294,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:33(bot) killer=bot:5(bot) {nearestBodyD: 0.07204259265753013, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751627278}"
+  },
+  {
+    "t": 1785751627294,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:33(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751627295,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:33(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751627295,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:33(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751627295,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:33(bot) {respawnAt: 1785751628095, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751644348,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:18(bot) killer=bot:5(bot) {nearestBodyD: 0.267896535297434, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751644343}"
+  },
+  {
+    "t": 1785751644349,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:18(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751644353,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:18(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751644354,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:18(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751644354,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:18(bot) {respawnAt: 1785751645153, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751660718,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:23(bot) killer=bot:5(bot) {nearestBodyD: 0.25156580242824683, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751660714}"
+  },
+  {
+    "t": 1785751660718,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:23(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751660723,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:23(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751660723,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:23(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751660724,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:23(bot) {respawnAt: 1785751661523, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751662558,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:42(bot) killer=bot:8(bot) {nearestBodyD: 0.18620230182219255, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751662553}"
+  },
+  {
+    "t": 1785751662558,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:42(bot) killer=bot:8(bot) "
+  },
+  {
+    "t": 1785751662559,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:42(bot) killer=bot:8(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751662559,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:42(bot) killer=bot:8(bot) "
+  },
+  {
+    "t": 1785751662560,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:42(bot) {respawnAt: 1785751663359, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751664323,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:38(bot) killer=bot:5(bot) {nearestBodyD: 0.5377336574917772, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217502, now: 1785751664319}"
+  },
+  {
+    "t": 1785751664323,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:38(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751664329,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:38(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751664329,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:38(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751664329,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:38(bot) {respawnAt: 1785751665128, humanAuto: false, respawnMs: 800}"
+  },
+  {
+    "t": 1785751664811,
+    "type": "info",
+    "text": "[RC-DEATH-002] collision_detect victim=bot:8(bot) killer=bot:5(bot) {nearestBodyD: 0.174822055800032, threshold: 0.5760000000000001, victimInvincible: false, invincibleUntil: 1785143217501, now: 1785751664808}"
+  },
+  {
+    "t": 1785751664811,
+    "type": "info",
+    "text": "[RC-DEATH-002] kill_snake_enter victim=bot:8(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751664819,
+    "type": "info",
+    "text": "[RC-DEATH-002] death_event_publish victim=bot:8(bot) killer=bot:5(bot) {killFeedLen: 12}"
+  },
+  {
+    "t": 1785751664819,
+    "type": "info",
+    "text": "[RC-DEATH-002] alive_false victim=bot:8(bot) killer=bot:5(bot) "
+  },
+  {
+    "t": 1785751664819,
+    "type": "info",
+    "text": "[RC-DEATH-002] respawn_scheduler victim=bot:8(bot) {respawnAt: 1785751665619, humanAuto: false, respawnMs: 800}"
+  }
+]

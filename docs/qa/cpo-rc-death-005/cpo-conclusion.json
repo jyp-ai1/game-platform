@@ -1,0 +1,17 @@
+{
+  "rc": "RC-DEATH-005",
+  "fix": "FIX-CORPSE-001",
+  "commit": "3bc412f",
+  "preview": "https://game29-b6l8zl2nc-jyp-ai1s-projects.vercel.app",
+  "verdict": "PASS",
+  "passScore": "3 / 3",
+  "pass": {
+    "corpseGone": true,
+    "gemSpawned": true,
+    "killFeed": true
+  },
+  "proof": "deaths=5 bot; corpseRemain=0; gemOk=5; feedOk=5; segmentsAfter=0 deathFood ok",
+  "change": "killSnake: after dropFoodFromSnake clear segments, segmentCount, path, headX/Y",
+  "collision": "HOLD",
+  "next": "RC-DEATH-006 / FIX-RESPAWN-001 — Respawn timer + control recovery (not Retry UI yet)"
+}

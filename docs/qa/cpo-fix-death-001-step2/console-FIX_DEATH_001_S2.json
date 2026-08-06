@@ -1,0 +1,77 @@
+[
+  {
+    "t": 1785768722673,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] approach floor probe ON — window.__FIX_DEATH_001_S2__ focus=be021ad3-8c29-4b24-bb7d-3bde52b9beec"
+  },
+  {
+    "t": 1785768727573,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=26.21 head=25.73 kind=human close=n/a turn=neither break=none botState=-"
+  },
+  {
+    "t": 1785768733755,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=60.87 head=66.34 kind=bot close=-1.75 turn=both break=none botState=chase"
+  },
+  {
+    "t": 1785768740435,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=64.57 head=67.00 kind=bot close=4.59 turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768747232,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=63.02 head=67.25 kind=bot close=0.04 turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768763590,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=48.40 head=59.30 kind=bot close=2.95 turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768777839,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=21.12 head=20.71 kind=bot close=13.25 turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768792739,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=6.16 head=5.81 kind=bot close=12.39 turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768803981,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=22.88 head=22.38 kind=bot close=n/a turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768810990,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=43.69 head=45.80 kind=bot close=-9.57 turn=both break=none botState=chase"
+  },
+  {
+    "t": 1785768818685,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=39.64 head=46.44 kind=bot close=4.05 turn=neither break=none botState=chase"
+  },
+  {
+    "t": 1785768826764,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=17.22 head=24.54 kind=bot close=-0.57 turn=other break=other_turn_away botState=search"
+  },
+  {
+    "t": 1785768833309,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=6.89 head=6.55 kind=bot close=n/a turn=neither break=none botState=wander"
+  },
+  {
+    "t": 1785768840180,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=39.84 head=40.84 kind=bot close=-8.46 turn=both break=none botState=search"
+  },
+  {
+    "t": 1785768848535,
+    "type": "info",
+    "text": "[FIX-DEATH-001][S2] body=27.91 head=28.07 kind=bot close=5.43 turn=neither break=none botState=wander"
+  }
+]

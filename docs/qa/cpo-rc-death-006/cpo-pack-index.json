@@ -1,0 +1,21 @@
+{
+  "rc": "RC-DEATH-006",
+  "commit": "c30376e",
+  "preview": "https://game29-l8i4jgo2s-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-l8i4jgo2s-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "verdict": "PASS",
+  "pass": {
+    "timerStarts": true,
+    "snakeCreated": true,
+    "aliveTrue": true,
+    "controlReady": true,
+    "corpseGone": true
+  },
+  "passScore": "5 / 5",
+  "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5",
+  "media": [
+    "page@29171cfd9cd36faf8cbed1b6c4bcd6e5.webm",
+    "page@bc89fc95e1d93bf983962606ff68b3ea.webm"
+  ],
+  "next": "RC-007 Retry / Death UX (or Closed Alpha Candidate checkpoint)"
+}

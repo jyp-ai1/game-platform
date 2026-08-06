@@ -1,0 +1,27 @@
+[
+  {
+    "t": 1785819763108,
+    "type": "info",
+    "text": "[RC-LB-001] Leaderboard integrity probe ON — window.__RC_LB_001__"
+  },
+  {
+    "t": 1785819767249,
+    "type": "info",
+    "text": "[RC-LB-001] len=12 hud=12 rankS=2 rankL=2 orderMatch=true dup=0 ghostDead=0"
+  },
+  {
+    "t": 1785819793465,
+    "type": "info",
+    "text": "[RC-LB-001] len=4 hud=4 rankS=27 rankL=27 orderMatch=true dup=0 ghostDead=0"
+  },
+  {
+    "t": 1785819809431,
+    "type": "info",
+    "text": "[RC-LB-001] len=4 hud=4 rankS=39 rankL=39 orderMatch=true dup=0 ghostDead=0"
+  },
+  {
+    "t": 1785819825531,
+    "type": "info",
+    "text": "[RC-LB-001] len=3 hud=3 rankS=46 rankL=46 orderMatch=true dup=0 ghostDead=0"
+  }
+]

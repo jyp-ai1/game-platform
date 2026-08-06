@@ -1,0 +1,137 @@
+[
+  {
+    "t": 1785775711120,
+    "type": "info",
+    "text": "[RC-DEATH-007] Death UX probe ON — window.__RC_DEATH_007__"
+  },
+  {
+    "t": 1785775719894,
+    "type": "info",
+    "text": "[RC-DEATH-007] alive alive=false sec=null overlay=false countdown=false policy=false"
+  },
+  {
+    "t": 1785775720338,
+    "type": "info",
+    "text": "[RC-DEATH-007] countdown alive=false sec=1 overlay=true countdown=true policy=true"
+  },
+  {
+    "t": 1785775720750,
+    "type": "info",
+    "text": "[RC-DEATH-007] countdown alive=false sec=1 overlay=true countdown=true policy=true"
+  },
+  {
+    "t": 1785775720886,
+    "type": "info",
+    "text": "[RC-DEATH-007] alive alive=false sec=null overlay=false countdown=false policy=false"
+  },
+  {
+    "t": 1785775721069,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775721295,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775721549,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775721792,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775722024,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775722234,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775722451,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775722744,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775722879,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775723182,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775723443,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775723609,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775723670,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775723959,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775724142,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775724316,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775724756,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775724930,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775725115,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775725347,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775725392,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  },
+  {
+    "t": 1785775725567,
+    "type": "info",
+    "text": "[RC-DEATH-007] respawned alive=true sec=null overlay=false countdown=false policy=true"
+  }
+]

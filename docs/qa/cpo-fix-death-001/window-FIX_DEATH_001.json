@@ -1,0 +1,701 @@
+{
+  "enabled": true,
+  "summary": {
+    "enabled": true,
+    "mismatchPhysicsCount": 0,
+    "mismatchRenderCount": 35,
+    "maxDeltaPhysics": 0,
+    "maxDeltaRender": 2.400000000000091,
+    "sampleCount": 90,
+    "verdict": "RENDER_INTERP_ONLY",
+    "proof": "physics seg0≈headXY (maxΔ=0.000); render lerp differs (maxΔ=2.400) — expected interp, not collision source bug"
+  },
+  "mismatchPhysicsCount": 0,
+  "mismatchRenderCount": 35,
+  "maxDeltaPhysics": 0,
+  "maxDeltaRender": 2.400000000000091,
+  "samples": [
+    {
+      "t": 1785767363764,
+      "tick": 384,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 705.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 705.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767363770,
+      "tick": 384,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1169.5905871449781,
+        "y": 1041.1394822804875
+      },
+      "headXY": {
+        "x": 1169.5905871449781,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767363777,
+      "tick": 384,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1169.5905871449781,
+        "y": 1041.1394822804875
+      },
+      "headXY": {
+        "x": 1169.5905871449781,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1170.558868744978,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsRender": 0.9682815999999548
+    },
+    {
+      "t": 1785767364793,
+      "tick": 392,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 713.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 713.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767364800,
+      "tick": 392,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1160.790587144978,
+        "y": 1041.1394822804875
+      },
+      "headXY": {
+        "x": 1160.790587144978,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767364832,
+      "tick": 392,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1160.790587144978,
+        "y": 1041.1394822804875
+      },
+      "headXY": {
+        "x": 1160.790587144978,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1163.190587144978,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsRender": 2.400000000000091
+    },
+    {
+      "t": 1785767364933,
+      "tick": 392,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1160.790587144978,
+        "y": 1041.1394822804875
+      },
+      "headXY": {
+        "x": 1160.790587144978,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1161.990587144978,
+        "y": 1041.1394822804875
+      },
+      "deltaPhysicsVsRender": 1.2000000000000455
+    },
+    {
+      "t": 1785767365909,
+      "tick": 400,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 721.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 721.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767365916,
+      "tick": 400,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1043.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1043.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767365942,
+      "tick": 400,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1043.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1043.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1154.5035922221987,
+        "y": 1041.601261456029
+      },
+      "deltaPhysicsVsRender": 2.157888444446466
+    },
+    {
+      "t": 1785767367085,
+      "tick": 408,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 729.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 729.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767367098,
+      "tick": 408,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1051.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1051.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767367165,
+      "tick": 408,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1051.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1051.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1050.18323557335
+      },
+      "deltaPhysicsVsRender": 1.409024000000045
+    },
+    {
+      "t": 1785767368520,
+      "tick": 416,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 737.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 737.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767368538,
+      "tick": 416,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1059.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1059.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767368696,
+      "tick": 416,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1059.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1059.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1057.59225957335
+      },
+      "deltaPhysicsVsRender": 2
+    },
+    {
+      "t": 1785767369993,
+      "tick": 424,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 745.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 745.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767370014,
+      "tick": 424,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1067.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1067.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767370134,
+      "tick": 424,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1067.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1067.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1065.59225957335
+      },
+      "deltaPhysicsVsRender": 2
+    },
+    {
+      "t": 1785767371478,
+      "tick": 432,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 753.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 753.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767371487,
+      "tick": 432,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1075.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1075.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767371556,
+      "tick": 432,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1075.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1075.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1073.59225957335
+      },
+      "deltaPhysicsVsRender": 2
+    },
+    {
+      "t": 1785767372491,
+      "tick": 440,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 761.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 761.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767372510,
+      "tick": 440,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1083.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1083.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767372533,
+      "tick": 440,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1083.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1083.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1081.59225957335
+      },
+      "deltaPhysicsVsRender": 2
+    },
+    {
+      "t": 1785767374619,
+      "tick": 448,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 769.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 769.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767374635,
+      "tick": 448,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1091.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1091.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767374751,
+      "tick": 448,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1091.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1091.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1090.18323557335
+      },
+      "deltaPhysicsVsRender": 1.409024000000045
+    },
+    {
+      "t": 1785767376084,
+      "tick": 456,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 777.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 777.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767376102,
+      "tick": 456,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1099.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1099.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767376193,
+      "tick": 456,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1153.67148103041,
+        "y": 1099.59225957335
+      },
+      "headXY": {
+        "x": 1153.67148103041,
+        "y": 1099.59225957335
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1153.67148103041,
+        "y": 1097.7633315733501
+      },
+      "deltaPhysicsVsRender": 1.8289279999999053
+    },
+    {
+      "t": 1785767378858,
+      "tick": 464,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 785.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 785.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767378874,
+      "tick": 464,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1158.943910122444,
+        "y": 1103.1831981909397
+      },
+      "headXY": {
+        "x": 1158.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767378971,
+      "tick": 464,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1158.943910122444,
+        "y": 1103.1831981909397
+      },
+      "headXY": {
+        "x": 1158.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1156.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsRender": 2
+    },
+    {
+      "t": 1785767381105,
+      "tick": 472,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 793.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 793.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767381135,
+      "tick": 472,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1166.943910122444,
+        "y": 1103.1831981909397
+      },
+      "headXY": {
+        "x": 1166.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767381317,
+      "tick": 472,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1166.943910122444,
+        "y": 1103.1831981909397
+      },
+      "headXY": {
+        "x": 1166.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1164.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsRender": 2
+    },
+    {
+      "t": 1785767383611,
+      "tick": 480,
+      "deviceId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "physicsSeg0": {
+        "x": 801.1140279419493,
+        "y": 728.4964456569866
+      },
+      "headXY": {
+        "x": 801.1140279419493,
+        "y": 728.4964456569866
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767383638,
+      "tick": 480,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1174.943910122444,
+        "y": 1103.1831981909397
+      },
+      "headXY": {
+        "x": 1174.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": null,
+      "deltaPhysicsVsRender": null
+    },
+    {
+      "t": 1785767383818,
+      "tick": 480,
+      "deviceId": "13b2d5c1-16ac-4a2f-a7c7-564fc8764f1f",
+      "physicsSeg0": {
+        "x": 1174.943910122444,
+        "y": 1103.1831981909397
+      },
+      "headXY": {
+        "x": 1174.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsHeadXY": 0,
+      "renderHead": {
+        "x": 1172.943910122444,
+        "y": 1103.1831981909397
+      },
+      "deltaPhysicsVsRender": 2
+    }
+  ]
+}

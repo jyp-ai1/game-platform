@@ -1,0 +1,17 @@
+{
+  "rc": "FIX-DEATH-001",
+  "step": "render_vs_physics",
+  "commit": "4ab7ea6",
+  "preview": "https://game29-h9u1a8x24-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-h9u1a8x24-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "verdict": "RENDER_INTERP_ONLY",
+  "proof": "physics seg0≈headXY (maxΔ=0.000); render lerp differs (maxΔ=2.400) — expected interp, not collision source bug",
+  "maxDeltaPhysics": 0,
+  "maxDeltaRender": 2.400000000000091,
+  "sampleCount": 90,
+  "media": [
+    "page@89e8d177c11a84fa9a8d94db6d1a55ed.webm",
+    "playwright-trace.zip"
+  ],
+  "next": "NO_FIX this step → Step2 human trajectory / approach floor"
+}

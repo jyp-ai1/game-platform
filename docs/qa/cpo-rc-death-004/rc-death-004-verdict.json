@@ -1,0 +1,24 @@
+{
+  "rc": "RC-DEATH-004",
+  "status": "PASS",
+  "commit": "57f1330",
+  "preview": "https://game29-9wbbt20i4-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-9wbbt20i4-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "case": "2_same_unit_far",
+  "oneLinerExample": "candidate self=(734.0,37.7) other=(575.7,116.9) distance=176.94 threshold=0.58 reject=distance_gt_threshold",
+  "fields": {
+    "human_xy": "world units (e.g. 734, 38) within worldSize=1400",
+    "other_xy": "world units (e.g. 576, 117) same scale",
+    "distance": "min=13.45 world units (same scale)",
+    "threshold": "0.576 = collisionRadius(0.32)*1.8 — feel-radius family",
+    "reject": "distance_gt_threshold"
+  },
+  "verdict": "NOT unit/coordinate mismatch. distance and threshold share world-unit family; player never closes to threshold. FIX-DEATH-001 next (not RC-DEATH-005 instrumentation).",
+  "gate": {
+    "RC-DEATH-001": "PASS",
+    "RC-DEATH-002": "PASS",
+    "RC-DEATH-003": "PASS",
+    "RC-DEATH-004": "PASS",
+    "RC-DEATH-005": "FORBIDDEN — next is FIX-DEATH-001"
+  }
+}

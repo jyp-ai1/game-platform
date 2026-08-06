@@ -1,0 +1,616 @@
+{
+  "rc": "RC-DEATH-006",
+  "commit": "c30376e",
+  "base": "https://game29-l8i4jgo2s-jyp-ai1s-projects.vercel.app",
+  "startedAt": "2026-08-03T16:37:48.428Z",
+  "snapshots": [
+    {
+      "elapsedMs": 1990,
+      "eventCount": 15,
+      "completedCycles": 5,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=3 completed=3 timed=3 spawned=3 alive=3"
+    },
+    {
+      "elapsedMs": 3668,
+      "eventCount": 17,
+      "completedCycles": 5,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=3 completed=3 timed=3 spawned=3 alive=3"
+    },
+    {
+      "elapsedMs": 4892,
+      "eventCount": 21,
+      "completedCycles": 7,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=3 completed=3 timed=3 spawned=3 alive=3"
+    },
+    {
+      "elapsedMs": 6285,
+      "eventCount": 21,
+      "completedCycles": 7,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=3 completed=3 timed=3 spawned=3 alive=3"
+    },
+    {
+      "elapsedMs": 7556,
+      "eventCount": 21,
+      "completedCycles": 7,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=3 completed=3 timed=3 spawned=3 alive=3"
+    },
+    {
+      "elapsedMs": 9119,
+      "eventCount": 22,
+      "completedCycles": 7,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=4 completed=3 timed=4 spawned=3 alive=3"
+    },
+    {
+      "elapsedMs": 11085,
+      "eventCount": 24,
+      "completedCycles": 8,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=4 completed=4 timed=4 spawned=4 alive=4"
+    },
+    {
+      "elapsedMs": 12652,
+      "eventCount": 25,
+      "completedCycles": 8,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=4 timed=5 spawned=4 alive=4"
+    },
+    {
+      "elapsedMs": 13765,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 14959,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 16376,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 17658,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 19047,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 20293,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 21430,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 22748,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 24409,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    },
+    {
+      "elapsedMs": 25779,
+      "eventCount": 27,
+      "completedCycles": 9,
+      "verdict": "PASS",
+      "passScore": "5 / 5",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+    }
+  ],
+  "url": "https://game29-l8i4jgo2s-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "endedAt": "2026-08-03T16:38:33.664Z",
+  "final": {
+    "enabled": true,
+    "eventCount": 27,
+    "completedCycles": 9,
+    "summary": {
+      "enabled": true,
+      "eventCount": 27,
+      "completedCycles": 5,
+      "pass": {
+        "timerStarts": true,
+        "snakeCreated": true,
+        "aliveTrue": true,
+        "controlReady": true,
+        "corpseGone": true
+      },
+      "passScore": "5 / 5",
+      "verdict": "PASS",
+      "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5",
+      "cycles": [
+        {
+          "victimId": "bot:39",
+          "victimBot": true,
+          "timerScheduled": true,
+          "respawnExecuted": true,
+          "aliveTrue": true,
+          "segmentsAfter": 3,
+          "corpseCleared": true,
+          "controlReady": true,
+          "respawnAt": 1785775091366,
+          "timerMs": 800
+        },
+        {
+          "victimId": "bot:44",
+          "victimBot": true,
+          "timerScheduled": true,
+          "respawnExecuted": true,
+          "aliveTrue": true,
+          "segmentsAfter": 3,
+          "corpseCleared": true,
+          "controlReady": true,
+          "respawnAt": 1785775091371,
+          "timerMs": 800
+        },
+        {
+          "victimId": "bot:5",
+          "victimBot": true,
+          "timerScheduled": true,
+          "respawnExecuted": true,
+          "aliveTrue": true,
+          "segmentsAfter": 3,
+          "corpseCleared": true,
+          "controlReady": true,
+          "respawnAt": 1785775080131,
+          "timerMs": 800
+        },
+        {
+          "victimId": "bot:34",
+          "victimBot": true,
+          "timerScheduled": true,
+          "respawnExecuted": true,
+          "aliveTrue": true,
+          "segmentsAfter": 3,
+          "corpseCleared": true,
+          "controlReady": true,
+          "respawnAt": 1785775097289,
+          "timerMs": 800
+        },
+        {
+          "victimId": "bot:4",
+          "victimBot": true,
+          "timerScheduled": true,
+          "respawnExecuted": true,
+          "aliveTrue": true,
+          "segmentsAfter": 3,
+          "corpseCleared": true,
+          "controlReady": true,
+          "respawnAt": 1785775101043,
+          "timerMs": 800
+        }
+      ]
+    },
+    "cycles": [
+      {
+        "victimId": "bot:39",
+        "victimBot": true,
+        "timerScheduled": true,
+        "respawnExecuted": true,
+        "aliveTrue": true,
+        "segmentsAfter": 3,
+        "corpseCleared": true,
+        "controlReady": true,
+        "respawnAt": 1785775091366,
+        "timerMs": 800
+      },
+      {
+        "victimId": "bot:44",
+        "victimBot": true,
+        "timerScheduled": true,
+        "respawnExecuted": true,
+        "aliveTrue": true,
+        "segmentsAfter": 3,
+        "corpseCleared": true,
+        "controlReady": true,
+        "respawnAt": 1785775091371,
+        "timerMs": 800
+      },
+      {
+        "victimId": "bot:5",
+        "victimBot": true,
+        "timerScheduled": true,
+        "respawnExecuted": true,
+        "aliveTrue": true,
+        "segmentsAfter": 3,
+        "corpseCleared": true,
+        "controlReady": true,
+        "respawnAt": 1785775080131,
+        "timerMs": 800
+      },
+      {
+        "victimId": "bot:34",
+        "victimBot": true,
+        "timerScheduled": true,
+        "respawnExecuted": true,
+        "aliveTrue": true,
+        "segmentsAfter": 3,
+        "corpseCleared": true,
+        "controlReady": true,
+        "respawnAt": 1785775097289,
+        "timerMs": 800
+      },
+      {
+        "victimId": "bot:4",
+        "victimBot": true,
+        "timerScheduled": true,
+        "respawnExecuted": true,
+        "aliveTrue": true,
+        "segmentsAfter": 3,
+        "corpseCleared": true,
+        "controlReady": true,
+        "respawnAt": 1785775101043,
+        "timerMs": 800
+      }
+    ],
+    "events": [
+      {
+        "t": 1785775076751,
+        "tick": 172,
+        "phase": "timer_scheduled",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775077550,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775076763,
+        "tick": 172,
+        "phase": "timer_scheduled",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775077563,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775078344,
+        "tick": 173,
+        "phase": "respawn_execute",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775078345,
+        "tick": 173,
+        "phase": "control_ready",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775078354,
+        "tick": 173,
+        "phase": "respawn_execute",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775078354,
+        "tick": 173,
+        "phase": "control_ready",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775079331,
+        "tick": 174,
+        "phase": "timer_scheduled",
+        "victimId": "bot:5",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775080131,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775080180,
+        "tick": 175,
+        "phase": "respawn_execute",
+        "victimId": "bot:5",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775080181,
+        "tick": 175,
+        "phase": "control_ready",
+        "victimId": "bot:5",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775086923,
+        "tick": 172,
+        "phase": "timer_scheduled",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775087723,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775086934,
+        "tick": 172,
+        "phase": "timer_scheduled",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775087734,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775087789,
+        "tick": 173,
+        "phase": "respawn_execute",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775087789,
+        "tick": 173,
+        "phase": "control_ready",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775087793,
+        "tick": 173,
+        "phase": "respawn_execute",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775087793,
+        "tick": 173,
+        "phase": "control_ready",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775090566,
+        "tick": 172,
+        "phase": "timer_scheduled",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775091366,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775090571,
+        "tick": 172,
+        "phase": "timer_scheduled",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775091371,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775091454,
+        "tick": 174,
+        "phase": "respawn_execute",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775091454,
+        "tick": 174,
+        "phase": "control_ready",
+        "victimId": "bot:39",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775091459,
+        "tick": 174,
+        "phase": "respawn_execute",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775091459,
+        "tick": 174,
+        "phase": "control_ready",
+        "victimId": "bot:44",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775096489,
+        "tick": 191,
+        "phase": "timer_scheduled",
+        "victimId": "bot:34",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775097289,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775097338,
+        "tick": 194,
+        "phase": "respawn_execute",
+        "victimId": "bot:34",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775097339,
+        "tick": 194,
+        "phase": "control_ready",
+        "victimId": "bot:34",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      },
+      {
+        "t": 1785775100243,
+        "tick": 200,
+        "phase": "timer_scheduled",
+        "victimId": "bot:4",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785775101043,
+          "timerMs": 800,
+          "humanAuto": true
+        }
+      },
+      {
+        "t": 1785775101101,
+        "tick": 203,
+        "phase": "respawn_execute",
+        "victimId": "bot:4",
+        "victimBot": true,
+        "detail": {
+          "alive": true,
+          "segments": 3,
+          "awaitingInput": null
+        }
+      },
+      {
+        "t": 1785775101101,
+        "tick": 203,
+        "phase": "control_ready",
+        "victimId": "bot:4",
+        "victimBot": true,
+        "detail": {
+          "segments": 3
+        }
+      }
+    ]
+  },
+  "verdict": "PASS",
+  "pass": {
+    "timerStarts": true,
+    "snakeCreated": true,
+    "aliveTrue": true,
+    "controlReady": true,
+    "corpseGone": true
+  },
+  "passScore": "5 / 5",
+  "proof": "cycles=5 completed=5 timed=5 spawned=5 alive=5"
+}

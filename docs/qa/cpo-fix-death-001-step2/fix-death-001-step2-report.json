@@ -1,0 +1,1750 @@
+{
+  "rc": "FIX-DEATH-001",
+  "step": "approach_floor",
+  "commit": "4a6d37f",
+  "base": "https://game29-6j4xkw6qz-jyp-ai1s-projects.vercel.app",
+  "startedAt": "2026-08-03T14:52:01.966Z",
+  "snapshots": [
+    {
+      "elapsedMs": 2255,
+      "sampleCount": 4,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 4817,
+      "sampleCount": 6,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 7450,
+      "sampleCount": 9,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 10254,
+      "sampleCount": 11,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 13016,
+      "sampleCount": 14,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 16298,
+      "sampleCount": 17,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 20936,
+      "sampleCount": 19,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 29097,
+      "sampleCount": 22,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 36046,
+      "sampleCount": 25,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 42874,
+      "sampleCount": 28,
+      "absoluteMinBody": 26.209809424710098,
+      "absoluteMinHead": 25.729747988932573,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=26.210 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 50038,
+      "sampleCount": 31,
+      "absoluteMinBody": 21.11744299082347,
+      "absoluteMinHead": 20.712423213002868,
+      "floorHitsAt13": 0,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=21.117 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 58326,
+      "sampleCount": 34,
+      "absoluteMinBody": 8.536401456344063,
+      "absoluteMinHead": 12.28262739148606,
+      "floorHitsAt13": 2,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=8.536 thr=0.5760000000000001; topBreak=n/a; topTurn=n/a",
+      "topBreak": null,
+      "topTurn": null
+    },
+    {
+      "elapsedMs": 66512,
+      "sampleCount": 37,
+      "absoluteMinBody": 6.158984730990312,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=6.159 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 71140,
+      "sampleCount": 40,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 76043,
+      "sampleCount": 43,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 80378,
+      "sampleCount": 47,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 84679,
+      "sampleCount": 50,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 88650,
+      "sampleCount": 53,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 92728,
+      "sampleCount": 56,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 3,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 96834,
+      "sampleCount": 59,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 1
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 1
+      }
+    },
+    {
+      "elapsedMs": 101026,
+      "sampleCount": 63,
+      "absoluteMinBody": 2.6458590495968606,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=2.646 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 2
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 2
+      }
+    },
+    {
+      "elapsedMs": 104716,
+      "sampleCount": 67,
+      "absoluteMinBody": 1.9889054801905786,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=other",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 3
+      },
+      "topTurn": {
+        "actor": "other",
+        "count": 3
+      }
+    },
+    {
+      "elapsedMs": 107937,
+      "sampleCount": 69,
+      "absoluteMinBody": 1.9889054801905786,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 3
+      },
+      "topTurn": {
+        "actor": "both",
+        "count": 4
+      }
+    },
+    {
+      "elapsedMs": 112094,
+      "sampleCount": 73,
+      "absoluteMinBody": 1.9889054801905786,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 3
+      },
+      "topTurn": {
+        "actor": "both",
+        "count": 4
+      }
+    },
+    {
+      "elapsedMs": 116310,
+      "sampleCount": 76,
+      "absoluteMinBody": 1.9889054801905786,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 3
+      },
+      "topTurn": {
+        "actor": "both",
+        "count": 4
+      }
+    },
+    {
+      "elapsedMs": 123363,
+      "sampleCount": 80,
+      "absoluteMinBody": 1.9889054801905786,
+      "absoluteMinHead": 5.808441872103009,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both",
+      "topBreak": {
+        "reason": "other_turn_away",
+        "count": 3
+      },
+      "topTurn": {
+        "actor": "both",
+        "count": 4
+      }
+    }
+  ],
+  "console": [
+    {
+      "t": 1785768722673,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] approach floor probe ON — window.__FIX_DEATH_001_S2__ focus=be021ad3-8c29-4b24-bb7d-3bde52b9beec"
+    },
+    {
+      "t": 1785768727573,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=26.21 head=25.73 kind=human close=n/a turn=neither break=none botState=-"
+    },
+    {
+      "t": 1785768733755,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=60.87 head=66.34 kind=bot close=-1.75 turn=both break=none botState=chase"
+    },
+    {
+      "t": 1785768740435,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=64.57 head=67.00 kind=bot close=4.59 turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768747232,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=63.02 head=67.25 kind=bot close=0.04 turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768763590,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=48.40 head=59.30 kind=bot close=2.95 turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768777839,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=21.12 head=20.71 kind=bot close=13.25 turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768792739,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=6.16 head=5.81 kind=bot close=12.39 turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768803981,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=22.88 head=22.38 kind=bot close=n/a turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768810990,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=43.69 head=45.80 kind=bot close=-9.57 turn=both break=none botState=chase"
+    },
+    {
+      "t": 1785768818685,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=39.64 head=46.44 kind=bot close=4.05 turn=neither break=none botState=chase"
+    },
+    {
+      "t": 1785768826764,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=17.22 head=24.54 kind=bot close=-0.57 turn=other break=other_turn_away botState=search"
+    },
+    {
+      "t": 1785768833309,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=6.89 head=6.55 kind=bot close=n/a turn=neither break=none botState=wander"
+    },
+    {
+      "t": 1785768840180,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=39.84 head=40.84 kind=bot close=-8.46 turn=both break=none botState=search"
+    },
+    {
+      "t": 1785768848535,
+      "type": "info",
+      "text": "[FIX-DEATH-001][S2] body=27.91 head=28.07 kind=bot close=5.43 turn=neither break=none botState=wander"
+    }
+  ],
+  "url": "https://game29-6j4xkw6qz-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "endedAt": "2026-08-03T14:54:12.783Z",
+  "final": {
+    "enabled": true,
+    "sampleCount": 80,
+    "absoluteMinBody": 1.9889054801905786,
+    "absoluteMinHead": 5.808441872103009,
+    "floorHitsAt13": 5,
+    "belowThresholdCount": 0,
+    "breakCounts": {
+      "none": 72,
+      "other_turn_away": 3,
+      "opening_no_turn": 1,
+      "both_turn_away": 3,
+      "other_escape_ai": 1
+    },
+    "turnCounts": {
+      "other": 3,
+      "both": 4
+    },
+    "series": [
+      {
+        "tick": 288,
+        "minBodyDist": 26.209809424710098,
+        "minHeadDist": 25.729747988932573,
+        "nearestKind": "human"
+      },
+      {
+        "tick": 288,
+        "minBodyDist": 80.98764351726524,
+        "minHeadDist": 80.73644818962377,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 296,
+        "minBodyDist": 72.13933799883218,
+        "minHeadDist": 71.96437460193982,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 304,
+        "minBodyDist": 64.06029932150624,
+        "minHeadDist": 69.22299651354524,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 312,
+        "minBodyDist": 66.77634939300798,
+        "minHeadDist": 69.17751410436651,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 320,
+        "minBodyDist": 59.125455650284835,
+        "minHeadDist": 59.105132302758854,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 328,
+        "minBodyDist": 60.873156154152895,
+        "minHeadDist": 66.33615104631583,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 336,
+        "minBodyDist": 60.646435588301465,
+        "minHeadDist": 64.2820038136576,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 344,
+        "minBodyDist": 62.004443278944954,
+        "minHeadDist": 67.14235414822207,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 352,
+        "minBodyDist": 65.83074782623594,
+        "minHeadDist": 70.93486946086934,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 360,
+        "minBodyDist": 66.90381695382631,
+        "minHeadDist": 70.93486946086934,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 368,
+        "minBodyDist": 69.15211452182517,
+        "minHeadDist": 70.93486946086934,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 376,
+        "minBodyDist": 64.56564247842103,
+        "minHeadDist": 66.99972109232057,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 384,
+        "minBodyDist": 63.15000149538449,
+        "minHeadDist": 68.27736851846815,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 392,
+        "minBodyDist": 64.07473030386657,
+        "minHeadDist": 66.6093949928289,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 400,
+        "minBodyDist": 61.299569269572864,
+        "minHeadDist": 66.08257263339414,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 408,
+        "minBodyDist": 64.51723888654922,
+        "minHeadDist": 67.56798291509955,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 416,
+        "minBodyDist": 63.056614842734916,
+        "minHeadDist": 68.51108953115838,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 424,
+        "minBodyDist": 63.018597529389154,
+        "minHeadDist": 67.24758614357967,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 432,
+        "minBodyDist": 64.55689091443507,
+        "minHeadDist": 69.00464350030256,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 440,
+        "minBodyDist": 65.09808523531147,
+        "minHeadDist": 70.69967139816725,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 448,
+        "minBodyDist": 60.976366986861414,
+        "minHeadDist": 61.43666513017728,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 456,
+        "minBodyDist": 57.54805999878279,
+        "minHeadDist": 65.49192305900324,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 464,
+        "minBodyDist": 51.34624896121963,
+        "minHeadDist": 58.79234796527457,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 472,
+        "minBodyDist": 48.3960123029075,
+        "minHeadDist": 59.2988094194787,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 480,
+        "minBodyDist": 51.52852815347118,
+        "minHeadDist": 62.56836771441102,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 488,
+        "minBodyDist": 42.59683911265399,
+        "minHeadDist": 44.35835771285912,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 496,
+        "minBodyDist": 43.47932975824728,
+        "minHeadDist": 45.06274540074604,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 504,
+        "minBodyDist": 40.03927710718814,
+        "minHeadDist": 40.59262862092494,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 512,
+        "minBodyDist": 34.36916955249193,
+        "minHeadDist": 33.900054028114305,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 520,
+        "minBodyDist": 21.11744299082347,
+        "minHeadDist": 20.712423213002868,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 528,
+        "minBodyDist": 12.32091144170036,
+        "minHeadDist": 12.28262739148606,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 536,
+        "minBodyDist": 12.2646244346064,
+        "minHeadDist": 19.614316096199406,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 544,
+        "minBodyDist": 8.536401456344063,
+        "minHeadDist": 24.96547393077722,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 552,
+        "minBodyDist": 12.938442731861462,
+        "minHeadDist": 24.96547393077722,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 560,
+        "minBodyDist": 18.551094770164337,
+        "minHeadDist": 18.129412349676755,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 568,
+        "minBodyDist": 6.158984730990312,
+        "minHeadDist": 5.808441872103009,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 576,
+        "minBodyDist": 4.263476222734343,
+        "minHeadDist": 12.786513483451456,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 584,
+        "minBodyDist": 2.6458590495968606,
+        "minHeadDist": 20.909992295841263,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 592,
+        "minBodyDist": 9.643277029390935,
+        "minHeadDist": 9.210086381928365,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 600,
+        "minBodyDist": 5.106573924193305,
+        "minHeadDist": 9.700762243468143,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 608,
+        "minBodyDist": 19.145971881541108,
+        "minHeadDist": 19.38510061979876,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 616,
+        "minBodyDist": 22.876861863617105,
+        "minHeadDist": 22.378442675361363,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 624,
+        "minBodyDist": 22.876861863617105,
+        "minHeadDist": 22.378442675361363,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 632,
+        "minBodyDist": 19.9547254145489,
+        "minHeadDist": 22.74486971559626,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 640,
+        "minBodyDist": 18.47782409563003,
+        "minHeadDist": 18.941018832968847,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 648,
+        "minBodyDist": 25.79274828919803,
+        "minHeadDist": 25.9377268974834,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 656,
+        "minBodyDist": 34.12374714399191,
+        "minHeadDist": 35.46025477437396,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 664,
+        "minBodyDist": 43.69318151842657,
+        "minHeadDist": 45.8049523601825,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 672,
+        "minBodyDist": 49.71858004428599,
+        "minHeadDist": 51.99052456067427,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 680,
+        "minBodyDist": 49.71858004428599,
+        "minHeadDist": 53.488189238708166,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 688,
+        "minBodyDist": 48.086214671236675,
+        "minHeadDist": 53.225907102175405,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 696,
+        "minBodyDist": 46.28016914769195,
+        "minHeadDist": 46.22653416581808,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 704,
+        "minBodyDist": 43.682012004024344,
+        "minHeadDist": 50.1338848187872,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 712,
+        "minBodyDist": 39.63552618418753,
+        "minHeadDist": 46.436641689140814,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 720,
+        "minBodyDist": 30.268365907661885,
+        "minHeadDist": 29.83251289584509,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 728,
+        "minBodyDist": 21.30603031088343,
+        "minHeadDist": 24.549296239768523,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 736,
+        "minBodyDist": 13.540442643709977,
+        "minHeadDist": 24.549296239768523,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 744,
+        "minBodyDist": 12.434315839473088,
+        "minHeadDist": 18.943500214019508,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 752,
+        "minBodyDist": 16.647880479086673,
+        "minHeadDist": 17.28997713892474,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 760,
+        "minBodyDist": 17.215820984956625,
+        "minHeadDist": 24.54109553567969,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 768,
+        "minBodyDist": 16.859295490849924,
+        "minHeadDist": 16.360215552199918,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 776,
+        "minBodyDist": 9.975598344641334,
+        "minHeadDist": 12.993140624005962,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 784,
+        "minBodyDist": 1.9889054801905786,
+        "minHeadDist": 12.342571704835532,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 792,
+        "minBodyDist": 4.41040076316456,
+        "minHeadDist": 13.60641086778389,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 800,
+        "minBodyDist": 11.805201690524754,
+        "minHeadDist": 18.65069327387195,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 808,
+        "minBodyDist": 6.886399349945918,
+        "minHeadDist": 6.554089017740116,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 816,
+        "minBodyDist": 10.444119174333581,
+        "minHeadDist": 11.404589412230376,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 824,
+        "minBodyDist": 22.530271512712616,
+        "minHeadDist": 22.657836174452648,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 832,
+        "minBodyDist": 30.600243685777343,
+        "minHeadDist": 30.229457653814997,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 840,
+        "minBodyDist": 30.699467137986534,
+        "minHeadDist": 30.229457653814997,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 848,
+        "minBodyDist": 31.38350239697229,
+        "minHeadDist": 31.26353786560327,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 856,
+        "minBodyDist": 39.84302275555548,
+        "minHeadDist": 40.84237877422599,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 864,
+        "minBodyDist": 43.43030782064623,
+        "minHeadDist": 43.19045630618343,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 872,
+        "minBodyDist": 33.96642386812925,
+        "minHeadDist": 34.4257913472566,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 880,
+        "minBodyDist": 36.72924868040777,
+        "minHeadDist": 36.92325677353983,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 888,
+        "minBodyDist": 36.54183880269103,
+        "minHeadDist": 36.44867683245576,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 896,
+        "minBodyDist": 33.332804797780256,
+        "minHeadDist": 34.20361338823573,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 904,
+        "minBodyDist": 27.90646959734282,
+        "minHeadDist": 28.06916337358479,
+        "nearestKind": "bot"
+      },
+      {
+        "tick": 912,
+        "minBodyDist": 30.00337328029839,
+        "minHeadDist": 29.605558951858626,
+        "nearestKind": "bot"
+      }
+    ],
+    "samples": [
+      {
+        "t": 1785768801143,
+        "tick": 600,
+        "minBodyDist": 5.106573924193305,
+        "minHeadDist": 9.700762243468143,
+        "nearestId": "bot:33",
+        "nearestKind": "bot",
+        "nearestSegIndex": 13,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 4.53670310519763,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": -7.853981633974483
+      },
+      {
+        "t": 1785768802367,
+        "tick": 608,
+        "minBodyDist": 19.145971881541108,
+        "minHeadDist": 19.38510061979876,
+        "nearestId": "bot:5",
+        "nearestKind": "bot",
+        "nearestSegIndex": 6,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": null,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 3.141592653589793
+      },
+      {
+        "t": 1785768803978,
+        "tick": 616,
+        "minBodyDist": 22.876861863617105,
+        "minHeadDist": 22.378442675361363,
+        "nearestId": "bot:18",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": null,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 3.141592653589793,
+        "otherAngle": -3.1415926535897936
+      },
+      {
+        "t": 1785768805254,
+        "tick": 624,
+        "minBodyDist": 22.876861863617105,
+        "minHeadDist": 22.378442675361363,
+        "nearestId": "bot:18",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 0,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 3.141592653589793,
+        "otherAngle": -3.1415926535897936
+      },
+      {
+        "t": 1785768806321,
+        "tick": 632,
+        "minBodyDist": 19.9547254145489,
+        "minHeadDist": 22.74486971559626,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": null,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 3.141592653589793,
+        "otherAngle": -1.5707963267948966
+      },
+      {
+        "t": 1785768807681,
+        "tick": 640,
+        "minBodyDist": 18.47782409563003,
+        "minHeadDist": 18.941018832968847,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 1.4769013189188698,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 2.661592653589793,
+        "otherAngle": 0
+      },
+      {
+        "t": 1785768808861,
+        "tick": 648,
+        "minBodyDist": 25.79274828919803,
+        "minHeadDist": 25.9377268974834,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 5,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -7.314924193568,
+        "turnActor": "both",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 0
+      },
+      {
+        "t": 1785768809972,
+        "tick": 656,
+        "minBodyDist": 34.12374714399191,
+        "minHeadDist": 35.46025477437396,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -8.330998854793883,
+        "turnActor": "both",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 0
+      },
+      {
+        "t": 1785768810970,
+        "tick": 664,
+        "minBodyDist": 43.69318151842657,
+        "minHeadDist": 45.8049523601825,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -9.569434374434657,
+        "turnActor": "both",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 0
+      },
+      {
+        "t": 1785768812370,
+        "tick": 672,
+        "minBodyDist": 49.71858004428599,
+        "minHeadDist": 51.99052456067427,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -6.025398525859423,
+        "turnActor": "other",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 0
+      },
+      {
+        "t": 1785768813671,
+        "tick": 680,
+        "minBodyDist": 49.71858004428599,
+        "minHeadDist": 53.488189238708166,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 0,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": -1.44
+      },
+      {
+        "t": 1785768814894,
+        "tick": 688,
+        "minBodyDist": 48.086214671236675,
+        "minHeadDist": 53.225907102175405,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 13,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 1.6323653730493177,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": -1.5707963267948966,
+        "otherAngle": -2.5307963267948965
+      },
+      {
+        "t": 1785768816211,
+        "tick": 696,
+        "minBodyDist": 46.28016914769195,
+        "minHeadDist": 46.22653416581808,
+        "nearestId": "bot:8",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 1.806045523544725,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": -3.1415926535897936
+      },
+      {
+        "t": 1785768817410,
+        "tick": 704,
+        "minBodyDist": 43.682012004024344,
+        "minHeadDist": 50.1338848187872,
+        "nearestId": "bot:23",
+        "nearestKind": "bot",
+        "nearestSegIndex": 16,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": null,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 5.6723889803846905
+      },
+      {
+        "t": 1785768818682,
+        "tick": 712,
+        "minBodyDist": 39.63552618418753,
+        "minHeadDist": 46.436641689140814,
+        "nearestId": "bot:23",
+        "nearestKind": "bot",
+        "nearestSegIndex": 26,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 4.0464858198368105,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": -1.5707963267948966,
+        "otherAngle": 6.283185307179586
+      },
+      {
+        "t": 1785768820375,
+        "tick": 720,
+        "minBodyDist": 30.268365907661885,
+        "minHeadDist": 29.83251289584509,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "wander",
+        "closingRate": null,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 34.077519189487724
+      },
+      {
+        "t": 1785768821635,
+        "tick": 728,
+        "minBodyDist": 21.30603031088343,
+        "minHeadDist": 24.549296239768523,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": 8.962335596778455,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 31.546722862692835
+      },
+      {
+        "t": 1785768822810,
+        "tick": 736,
+        "minBodyDist": 13.540442643709977,
+        "minHeadDist": 24.549296239768523,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 27,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": 7.7655876671734525,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 31.41592653589793
+      },
+      {
+        "t": 1785768824292,
+        "tick": 744,
+        "minBodyDist": 12.434315839473088,
+        "minHeadDist": 18.943500214019508,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 27,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": 1.1061268042368884,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 1.44,
+        "otherAngle": 29.365130209103036
+      },
+      {
+        "t": 1785768825613,
+        "tick": 752,
+        "minBodyDist": 16.647880479086673,
+        "minHeadDist": 17.28997713892474,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 4,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -4.213564639613585,
+        "turnActor": "both",
+        "breakReason": "both_turn_away",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 29.71433388230814
+      },
+      {
+        "t": 1785768826756,
+        "tick": 760,
+        "minBodyDist": 17.215820984956625,
+        "minHeadDist": 24.54109553567969,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 20,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -0.5679405058699523,
+        "turnActor": "other",
+        "breakReason": "other_turn_away",
+        "selfAngle": 0,
+        "otherAngle": 31.41592653589793
+      },
+      {
+        "t": 1785768827759,
+        "tick": 768,
+        "minBodyDist": 16.859295490849924,
+        "minHeadDist": 16.360215552199918,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 0.35652549410670176,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 33.466722862692826
+      },
+      {
+        "t": 1785768828929,
+        "tick": 776,
+        "minBodyDist": 9.975598344641334,
+        "minHeadDist": 12.993140624005962,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 12,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 6.88369714620859,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": -1.5707963267948966,
+        "otherAngle": 35.99751918948771
+      },
+      {
+        "t": 1785768830150,
+        "tick": 784,
+        "minBodyDist": 1.9889054801905786,
+        "minHeadDist": 12.342571704835532,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 27,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": 7.986692864450755,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": -1.5707963267948966,
+        "otherAngle": 34.55751918948772
+      },
+      {
+        "t": 1785768831249,
+        "tick": 792,
+        "minBodyDist": 4.41040076316456,
+        "minHeadDist": 13.60641086778389,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 26,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -2.4214952829739813,
+        "turnActor": "other",
+        "breakReason": "other_turn_away",
+        "selfAngle": -1.5707963267948966,
+        "otherAngle": 35.64831551628262
+      },
+      {
+        "t": 1785768832263,
+        "tick": 800,
+        "minBodyDist": 11.805201690524754,
+        "minHeadDist": 18.65069327387195,
+        "nearestId": "bot:16",
+        "nearestKind": "bot",
+        "nearestSegIndex": 18,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "chase",
+        "closingRate": -7.394800927360194,
+        "turnActor": "both",
+        "breakReason": "both_turn_away",
+        "selfAngle": -1.0907963267948966,
+        "otherAngle": 35.99751918948771
+      },
+      {
+        "t": 1785768833303,
+        "tick": 808,
+        "minBodyDist": 6.886399349945918,
+        "minHeadDist": 6.554089017740116,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "wander",
+        "closingRate": null,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 34.94751551628262
+      },
+      {
+        "t": 1785768834767,
+        "tick": 816,
+        "minBodyDist": 10.444119174333581,
+        "minHeadDist": 11.404589412230376,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "escape",
+        "closingRate": -3.5577198243876627,
+        "turnActor": "both",
+        "breakReason": "other_escape_ai",
+        "selfAngle": 0,
+        "otherAngle": 34.55751918948772
+      },
+      {
+        "t": 1785768835768,
+        "tick": 824,
+        "minBodyDist": 22.530271512712616,
+        "minHeadDist": 22.657836174452648,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -12.086152338379035,
+        "turnActor": "both",
+        "breakReason": "both_turn_away",
+        "selfAngle": 0,
+        "otherAngle": 32.98672286269283
+      },
+      {
+        "t": 1785768836849,
+        "tick": 832,
+        "minBodyDist": 30.600243685777343,
+        "minHeadDist": 30.229457653814997,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -8.069972173064727,
+        "turnActor": "self",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 31.80592286269283
+      },
+      {
+        "t": 1785768837974,
+        "tick": 840,
+        "minBodyDist": 30.699467137986534,
+        "minHeadDist": 30.229457653814997,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -0.09922345220919127,
+        "turnActor": "self",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 31.41592653589793
+      },
+      {
+        "t": 1785768839106,
+        "tick": 848,
+        "minBodyDist": 31.38350239697229,
+        "minHeadDist": 31.26353786560327,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -0.6840352589857552,
+        "turnActor": "self",
+        "breakReason": "none",
+        "selfAngle": 0,
+        "otherAngle": 29.841526535897934
+      },
+      {
+        "t": 1785768840181,
+        "tick": 856,
+        "minBodyDist": 39.84302275555548,
+        "minHeadDist": 40.84237877422599,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -8.459520358583191,
+        "turnActor": "both",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 28.274333882308138
+      },
+      {
+        "t": 1785768841548,
+        "tick": 864,
+        "minBodyDist": 43.43030782064623,
+        "minHeadDist": 43.19045630618343,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -3.5872850650907466,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 2.9243963267948967,
+        "otherAngle": 26.30633388230814
+      },
+      {
+        "t": 1785768842996,
+        "tick": 872,
+        "minBodyDist": 33.96642386812925,
+        "minHeadDist": 34.4257913472566,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": 9.46388395251698,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 3.141592653589793,
+        "otherAngle": 27.09713755551324
+      },
+      {
+        "t": 1785768844344,
+        "tick": 880,
+        "minBodyDist": 36.72924868040777,
+        "minHeadDist": 36.92325677353983,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -2.7628248122785237,
+        "turnActor": "both",
+        "breakReason": "none",
+        "selfAngle": 4.71238898038469,
+        "otherAngle": 29.455133882308136
+      },
+      {
+        "t": 1785768845520,
+        "tick": 888,
+        "minBodyDist": 36.54183880269103,
+        "minHeadDist": 36.44867683245576,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": 0.187409877716739,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 4.232388980384689,
+        "otherAngle": 29.845130209103036
+      },
+      {
+        "t": 1785768846472,
+        "tick": 896,
+        "minBodyDist": 33.332804797780256,
+        "minHeadDist": 34.20361338823573,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": 3.2090340049107766,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 3.141592653589793,
+        "otherAngle": 28.667933882308137
+      },
+      {
+        "t": 1785768848525,
+        "tick": 904,
+        "minBodyDist": 27.90646959734282,
+        "minHeadDist": 28.06916337358479,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 2,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "wander",
+        "closingRate": 5.4263352004374354,
+        "turnActor": "neither",
+        "breakReason": "none",
+        "selfAngle": 2.181592653589793,
+        "otherAngle": 29.845130209103036
+      },
+      {
+        "t": 1785768851422,
+        "tick": 912,
+        "minBodyDist": 30.00337328029839,
+        "minHeadDist": 29.605558951858626,
+        "nearestId": "bot:42",
+        "nearestKind": "bot",
+        "nearestSegIndex": 1,
+        "threshold": 0.5760000000000001,
+        "selfInvincible": false,
+        "otherInvincible": false,
+        "otherBotState": "search",
+        "closingRate": -2.0969036829555705,
+        "turnActor": "self",
+        "breakReason": "none",
+        "selfAngle": 1.5707963267948966,
+        "otherAngle": 31.41592653589793
+      }
+    ],
+    "summary": {
+      "enabled": true,
+      "sampleCount": 80,
+      "absoluteMinBody": 1.9889054801905786,
+      "absoluteMinHead": 5.808441872103009,
+      "threshold": 0.5760000000000001,
+      "canReachCollisionRadius": false,
+      "floorHitsAt13": 5,
+      "belowThresholdCount": 0,
+      "kindAtMin": "bot",
+      "topBreakReasons": [
+        {
+          "reason": "other_turn_away",
+          "count": 3
+        },
+        {
+          "reason": "both_turn_away",
+          "count": 3
+        },
+        {
+          "reason": "opening_no_turn",
+          "count": 1
+        },
+        {
+          "reason": "other_escape_ai",
+          "count": 1
+        }
+      ],
+      "topTurnActors": [
+        {
+          "actor": "both",
+          "count": 4
+        },
+        {
+          "actor": "other",
+          "count": 3
+        }
+      ],
+      "verdict": "FLOOR_NEAR_13",
+      "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both"
+    }
+  },
+  "verdict": "FLOOR_NEAR_13",
+  "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both"
+}

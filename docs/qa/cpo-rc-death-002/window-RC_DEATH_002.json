@@ -1,0 +1,966 @@
+{
+  "enabled": true,
+  "counts": {
+    "collision_detect": 8,
+    "kill_snake_enter": 8,
+    "death_event_publish": 8,
+    "alive_false": 8,
+    "respawn_scheduler": 8
+  },
+  "events": [
+    {
+      "t": 1785751584850,
+      "stage": "collision_detect",
+      "tick": 388,
+      "victimId": "bot:13",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.2955159997775115,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751584847
+      }
+    },
+    {
+      "t": 1785751584852,
+      "stage": "kill_snake_enter",
+      "tick": 388,
+      "victimId": "bot:13",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751584859,
+      "stage": "death_event_publish",
+      "tick": 388,
+      "victimId": "bot:13",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751584859,
+      "stage": "alive_false",
+      "tick": 388,
+      "victimId": "bot:13",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751584860,
+      "stage": "respawn_scheduler",
+      "tick": 388,
+      "victimId": "bot:13",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751585659,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751597122,
+      "stage": "collision_detect",
+      "tick": 473,
+      "victimId": "bot:28",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.4972924588105052,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751597119
+      }
+    },
+    {
+      "t": 1785751597122,
+      "stage": "kill_snake_enter",
+      "tick": 473,
+      "victimId": "bot:28",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751597126,
+      "stage": "death_event_publish",
+      "tick": 473,
+      "victimId": "bot:28",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751597126,
+      "stage": "alive_false",
+      "tick": 473,
+      "victimId": "bot:28",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751597126,
+      "stage": "respawn_scheduler",
+      "tick": 473,
+      "victimId": "bot:28",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751597926,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751627288,
+      "stage": "collision_detect",
+      "tick": 601,
+      "victimId": "bot:33",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.07204259265753013,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751627278
+      }
+    },
+    {
+      "t": 1785751627289,
+      "stage": "kill_snake_enter",
+      "tick": 601,
+      "victimId": "bot:33",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751627295,
+      "stage": "death_event_publish",
+      "tick": 601,
+      "victimId": "bot:33",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751627295,
+      "stage": "alive_false",
+      "tick": 601,
+      "victimId": "bot:33",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751627295,
+      "stage": "respawn_scheduler",
+      "tick": 601,
+      "victimId": "bot:33",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751628095,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751644347,
+      "stage": "collision_detect",
+      "tick": 676,
+      "victimId": "bot:18",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.267896535297434,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751644343
+      }
+    },
+    {
+      "t": 1785751644347,
+      "stage": "kill_snake_enter",
+      "tick": 676,
+      "victimId": "bot:18",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751644352,
+      "stage": "death_event_publish",
+      "tick": 676,
+      "victimId": "bot:18",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751644353,
+      "stage": "alive_false",
+      "tick": 676,
+      "victimId": "bot:18",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751644353,
+      "stage": "respawn_scheduler",
+      "tick": 676,
+      "victimId": "bot:18",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751645153,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751660717,
+      "stage": "collision_detect",
+      "tick": 780,
+      "victimId": "bot:23",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.25156580242824683,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751660714
+      }
+    },
+    {
+      "t": 1785751660717,
+      "stage": "kill_snake_enter",
+      "tick": 780,
+      "victimId": "bot:23",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751660723,
+      "stage": "death_event_publish",
+      "tick": 780,
+      "victimId": "bot:23",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751660723,
+      "stage": "alive_false",
+      "tick": 780,
+      "victimId": "bot:23",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751660723,
+      "stage": "respawn_scheduler",
+      "tick": 780,
+      "victimId": "bot:23",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751661523,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751662557,
+      "stage": "collision_detect",
+      "tick": 793,
+      "victimId": "bot:42",
+      "victimBot": true,
+      "killerId": "bot:8",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.18620230182219255,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751662553
+      }
+    },
+    {
+      "t": 1785751662558,
+      "stage": "kill_snake_enter",
+      "tick": 793,
+      "victimId": "bot:42",
+      "victimBot": true,
+      "killerId": "bot:8",
+      "killerBot": true
+    },
+    {
+      "t": 1785751662559,
+      "stage": "death_event_publish",
+      "tick": 793,
+      "victimId": "bot:42",
+      "victimBot": true,
+      "killerId": "bot:8",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751662559,
+      "stage": "alive_false",
+      "tick": 793,
+      "victimId": "bot:42",
+      "victimBot": true,
+      "killerId": "bot:8",
+      "killerBot": true
+    },
+    {
+      "t": 1785751662559,
+      "stage": "respawn_scheduler",
+      "tick": 793,
+      "victimId": "bot:42",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751663359,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751664322,
+      "stage": "collision_detect",
+      "tick": 806,
+      "victimId": "bot:38",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.5377336574917772,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217502,
+        "now": 1785751664319
+      }
+    },
+    {
+      "t": 1785751664323,
+      "stage": "kill_snake_enter",
+      "tick": 806,
+      "victimId": "bot:38",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751664328,
+      "stage": "death_event_publish",
+      "tick": 806,
+      "victimId": "bot:38",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751664328,
+      "stage": "alive_false",
+      "tick": 806,
+      "victimId": "bot:38",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751664328,
+      "stage": "respawn_scheduler",
+      "tick": 806,
+      "victimId": "bot:38",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751665128,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    },
+    {
+      "t": 1785751664810,
+      "stage": "collision_detect",
+      "tick": 810,
+      "victimId": "bot:8",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "nearestBodyD": 0.174822055800032,
+        "threshold": 0.5760000000000001,
+        "victimInvincible": false,
+        "invincibleUntil": 1785143217501,
+        "now": 1785751664808
+      }
+    },
+    {
+      "t": 1785751664810,
+      "stage": "kill_snake_enter",
+      "tick": 810,
+      "victimId": "bot:8",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751664818,
+      "stage": "death_event_publish",
+      "tick": 810,
+      "victimId": "bot:8",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true,
+      "detail": {
+        "killFeedLen": 12
+      }
+    },
+    {
+      "t": 1785751664819,
+      "stage": "alive_false",
+      "tick": 810,
+      "victimId": "bot:8",
+      "victimBot": true,
+      "killerId": "bot:5",
+      "killerBot": true
+    },
+    {
+      "t": 1785751664819,
+      "stage": "respawn_scheduler",
+      "tick": 810,
+      "victimId": "bot:8",
+      "victimBot": true,
+      "detail": {
+        "respawnAt": 1785751665619,
+        "humanAuto": false,
+        "respawnMs": 800
+      }
+    }
+  ],
+  "last": {
+    "t": 1785751664819,
+    "stage": "respawn_scheduler",
+    "tick": 810,
+    "victimId": "bot:8",
+    "victimBot": true,
+    "detail": {
+      "respawnAt": 1785751665619,
+      "humanAuto": false,
+      "respawnMs": 800
+    }
+  },
+  "summary": {
+    "enabled": true,
+    "counts": {
+      "collision_detect": 8,
+      "kill_snake_enter": 8,
+      "death_event_publish": 8,
+      "alive_false": 8,
+      "respawn_scheduler": 8
+    },
+    "pipelineBreak": "alive_false only for bots — human death never observed",
+    "lastHumanDeath": null,
+    "recent": [
+      {
+        "t": 1785751584850,
+        "stage": "collision_detect",
+        "tick": 388,
+        "victimId": "bot:13",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.2955159997775115,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751584847
+        }
+      },
+      {
+        "t": 1785751584852,
+        "stage": "kill_snake_enter",
+        "tick": 388,
+        "victimId": "bot:13",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751584859,
+        "stage": "death_event_publish",
+        "tick": 388,
+        "victimId": "bot:13",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751584859,
+        "stage": "alive_false",
+        "tick": 388,
+        "victimId": "bot:13",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751584860,
+        "stage": "respawn_scheduler",
+        "tick": 388,
+        "victimId": "bot:13",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751585659,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751597122,
+        "stage": "collision_detect",
+        "tick": 473,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.4972924588105052,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751597119
+        }
+      },
+      {
+        "t": 1785751597122,
+        "stage": "kill_snake_enter",
+        "tick": 473,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751597126,
+        "stage": "death_event_publish",
+        "tick": 473,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751597126,
+        "stage": "alive_false",
+        "tick": 473,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751597126,
+        "stage": "respawn_scheduler",
+        "tick": 473,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751597926,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751627288,
+        "stage": "collision_detect",
+        "tick": 601,
+        "victimId": "bot:33",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.07204259265753013,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751627278
+        }
+      },
+      {
+        "t": 1785751627289,
+        "stage": "kill_snake_enter",
+        "tick": 601,
+        "victimId": "bot:33",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751627295,
+        "stage": "death_event_publish",
+        "tick": 601,
+        "victimId": "bot:33",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751627295,
+        "stage": "alive_false",
+        "tick": 601,
+        "victimId": "bot:33",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751627295,
+        "stage": "respawn_scheduler",
+        "tick": 601,
+        "victimId": "bot:33",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751628095,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751644347,
+        "stage": "collision_detect",
+        "tick": 676,
+        "victimId": "bot:18",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.267896535297434,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751644343
+        }
+      },
+      {
+        "t": 1785751644347,
+        "stage": "kill_snake_enter",
+        "tick": 676,
+        "victimId": "bot:18",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751644352,
+        "stage": "death_event_publish",
+        "tick": 676,
+        "victimId": "bot:18",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751644353,
+        "stage": "alive_false",
+        "tick": 676,
+        "victimId": "bot:18",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751644353,
+        "stage": "respawn_scheduler",
+        "tick": 676,
+        "victimId": "bot:18",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751645153,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751660717,
+        "stage": "collision_detect",
+        "tick": 780,
+        "victimId": "bot:23",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.25156580242824683,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751660714
+        }
+      },
+      {
+        "t": 1785751660717,
+        "stage": "kill_snake_enter",
+        "tick": 780,
+        "victimId": "bot:23",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751660723,
+        "stage": "death_event_publish",
+        "tick": 780,
+        "victimId": "bot:23",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751660723,
+        "stage": "alive_false",
+        "tick": 780,
+        "victimId": "bot:23",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751660723,
+        "stage": "respawn_scheduler",
+        "tick": 780,
+        "victimId": "bot:23",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751661523,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751662557,
+        "stage": "collision_detect",
+        "tick": 793,
+        "victimId": "bot:42",
+        "victimBot": true,
+        "killerId": "bot:8",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.18620230182219255,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751662553
+        }
+      },
+      {
+        "t": 1785751662558,
+        "stage": "kill_snake_enter",
+        "tick": 793,
+        "victimId": "bot:42",
+        "victimBot": true,
+        "killerId": "bot:8",
+        "killerBot": true
+      },
+      {
+        "t": 1785751662559,
+        "stage": "death_event_publish",
+        "tick": 793,
+        "victimId": "bot:42",
+        "victimBot": true,
+        "killerId": "bot:8",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751662559,
+        "stage": "alive_false",
+        "tick": 793,
+        "victimId": "bot:42",
+        "victimBot": true,
+        "killerId": "bot:8",
+        "killerBot": true
+      },
+      {
+        "t": 1785751662559,
+        "stage": "respawn_scheduler",
+        "tick": 793,
+        "victimId": "bot:42",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751663359,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751664322,
+        "stage": "collision_detect",
+        "tick": 806,
+        "victimId": "bot:38",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.5377336574917772,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217502,
+          "now": 1785751664319
+        }
+      },
+      {
+        "t": 1785751664323,
+        "stage": "kill_snake_enter",
+        "tick": 806,
+        "victimId": "bot:38",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751664328,
+        "stage": "death_event_publish",
+        "tick": 806,
+        "victimId": "bot:38",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751664328,
+        "stage": "alive_false",
+        "tick": 806,
+        "victimId": "bot:38",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751664328,
+        "stage": "respawn_scheduler",
+        "tick": 806,
+        "victimId": "bot:38",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751665128,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      },
+      {
+        "t": 1785751664810,
+        "stage": "collision_detect",
+        "tick": 810,
+        "victimId": "bot:8",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "nearestBodyD": 0.174822055800032,
+          "threshold": 0.5760000000000001,
+          "victimInvincible": false,
+          "invincibleUntil": 1785143217501,
+          "now": 1785751664808
+        }
+      },
+      {
+        "t": 1785751664810,
+        "stage": "kill_snake_enter",
+        "tick": 810,
+        "victimId": "bot:8",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751664818,
+        "stage": "death_event_publish",
+        "tick": 810,
+        "victimId": "bot:8",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true,
+        "detail": {
+          "killFeedLen": 12
+        }
+      },
+      {
+        "t": 1785751664819,
+        "stage": "alive_false",
+        "tick": 810,
+        "victimId": "bot:8",
+        "victimBot": true,
+        "killerId": "bot:5",
+        "killerBot": true
+      },
+      {
+        "t": 1785751664819,
+        "stage": "respawn_scheduler",
+        "tick": 810,
+        "victimId": "bot:8",
+        "victimBot": true,
+        "detail": {
+          "respawnAt": 1785751665619,
+          "humanAuto": false,
+          "respawnMs": 800
+        }
+      }
+    ]
+  }
+}

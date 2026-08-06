@@ -1,0 +1,1395 @@
+{
+  "enabled": true,
+  "summary": {
+    "enabled": true,
+    "eventCount": 400,
+    "sampleFrames": 135,
+    "dominantOrder": "turn",
+    "orderCounts": {
+      "turn → steering → collision": 16,
+      "turn": 106,
+      "steering → collision": 11,
+      "turn → killSnake": 1,
+      "killSnake": 1
+    },
+    "table": [
+      {
+        "phase": "turn",
+        "ran": true,
+        "firstRank": 1
+      },
+      {
+        "phase": "steering",
+        "ran": true,
+        "firstRank": 2
+      },
+      {
+        "phase": "killSnake",
+        "ran": true,
+        "firstRank": 2
+      },
+      {
+        "phase": "collision",
+        "ran": true,
+        "firstRank": 3
+      },
+      {
+        "phase": "escape",
+        "ran": false,
+        "firstRank": null
+      }
+    ],
+    "proof": "dominant: turn (106 frames)",
+    "exampleFrame": 212,
+    "exampleOrder": [
+      "turn"
+    ]
+  },
+  "byFrame": {
+    "2": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "3": [
+      "turn"
+    ],
+    "4": [
+      "turn"
+    ],
+    "8": [
+      "turn"
+    ],
+    "9": [
+      "turn"
+    ],
+    "10": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "11": [
+      "turn"
+    ],
+    "14": [
+      "turn"
+    ],
+    "16": [
+      "turn"
+    ],
+    "17": [
+      "turn"
+    ],
+    "18": [
+      "steering",
+      "collision"
+    ],
+    "19": [
+      "turn"
+    ],
+    "20": [
+      "turn"
+    ],
+    "22": [
+      "turn"
+    ],
+    "23": [
+      "turn"
+    ],
+    "26": [
+      "steering",
+      "collision"
+    ],
+    "28": [
+      "turn"
+    ],
+    "32": [
+      "turn"
+    ],
+    "34": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "37": [
+      "turn"
+    ],
+    "38": [
+      "turn"
+    ],
+    "39": [
+      "turn"
+    ],
+    "40": [
+      "turn"
+    ],
+    "41": [
+      "turn"
+    ],
+    "42": [
+      "steering",
+      "collision"
+    ],
+    "44": [
+      "turn"
+    ],
+    "46": [
+      "turn"
+    ],
+    "47": [
+      "turn"
+    ],
+    "48": [
+      "turn"
+    ],
+    "49": [
+      "turn"
+    ],
+    "50": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "51": [
+      "turn"
+    ],
+    "52": [
+      "turn"
+    ],
+    "53": [
+      "turn"
+    ],
+    "56": [
+      "turn"
+    ],
+    "57": [
+      "turn"
+    ],
+    "58": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "59": [
+      "turn"
+    ],
+    "60": [
+      "turn"
+    ],
+    "61": [
+      "turn"
+    ],
+    "62": [
+      "turn"
+    ],
+    "63": [
+      "turn"
+    ],
+    "64": [
+      "turn"
+    ],
+    "65": [
+      "turn"
+    ],
+    "66": [
+      "steering",
+      "collision"
+    ],
+    "68": [
+      "turn"
+    ],
+    "69": [
+      "turn"
+    ],
+    "70": [
+      "turn"
+    ],
+    "71": [
+      "turn"
+    ],
+    "74": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "75": [
+      "turn"
+    ],
+    "80": [
+      "turn"
+    ],
+    "82": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "83": [
+      "turn",
+      "killSnake"
+    ],
+    "86": [
+      "turn"
+    ],
+    "88": [
+      "turn"
+    ],
+    "89": [
+      "turn"
+    ],
+    "90": [
+      "steering",
+      "collision"
+    ],
+    "91": [
+      "killSnake"
+    ],
+    "92": [
+      "turn"
+    ],
+    "94": [
+      "turn"
+    ],
+    "95": [
+      "turn"
+    ],
+    "98": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "99": [
+      "turn"
+    ],
+    "100": [
+      "turn"
+    ],
+    "101": [
+      "turn"
+    ],
+    "104": [
+      "turn"
+    ],
+    "106": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "107": [
+      "turn"
+    ],
+    "110": [
+      "turn"
+    ],
+    "112": [
+      "turn"
+    ],
+    "113": [
+      "turn"
+    ],
+    "114": [
+      "steering",
+      "collision"
+    ],
+    "118": [
+      "turn"
+    ],
+    "119": [
+      "turn"
+    ],
+    "121": [
+      "turn"
+    ],
+    "122": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "123": [
+      "turn"
+    ],
+    "124": [
+      "turn"
+    ],
+    "125": [
+      "turn"
+    ],
+    "126": [
+      "turn"
+    ],
+    "129": [
+      "turn"
+    ],
+    "130": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "131": [
+      "turn"
+    ],
+    "132": [
+      "turn"
+    ],
+    "134": [
+      "turn"
+    ],
+    "135": [
+      "turn"
+    ],
+    "136": [
+      "turn"
+    ],
+    "137": [
+      "turn"
+    ],
+    "138": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "139": [
+      "turn"
+    ],
+    "140": [
+      "turn"
+    ],
+    "141": [
+      "turn"
+    ],
+    "142": [
+      "turn"
+    ],
+    "143": [
+      "turn"
+    ],
+    "144": [
+      "turn"
+    ],
+    "146": [
+      "steering",
+      "collision"
+    ],
+    "147": [
+      "turn"
+    ],
+    "149": [
+      "turn"
+    ],
+    "151": [
+      "turn"
+    ],
+    "153": [
+      "turn"
+    ],
+    "154": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "158": [
+      "turn"
+    ],
+    "160": [
+      "turn"
+    ],
+    "161": [
+      "turn"
+    ],
+    "162": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "163": [
+      "turn"
+    ],
+    "164": [
+      "turn"
+    ],
+    "165": [
+      "turn"
+    ],
+    "166": [
+      "turn"
+    ],
+    "167": [
+      "turn"
+    ],
+    "170": [
+      "steering",
+      "collision"
+    ],
+    "172": [
+      "turn"
+    ],
+    "173": [
+      "turn"
+    ],
+    "176": [
+      "turn"
+    ],
+    "177": [
+      "turn"
+    ],
+    "178": [
+      "steering",
+      "collision"
+    ],
+    "179": [
+      "turn"
+    ],
+    "182": [
+      "turn"
+    ],
+    "184": [
+      "turn"
+    ],
+    "185": [
+      "turn"
+    ],
+    "186": [
+      "steering",
+      "collision"
+    ],
+    "188": [
+      "turn"
+    ],
+    "191": [
+      "turn"
+    ],
+    "192": [
+      "turn"
+    ],
+    "194": [
+      "steering",
+      "collision"
+    ],
+    "196": [
+      "turn"
+    ],
+    "197": [
+      "turn"
+    ],
+    "198": [
+      "turn"
+    ],
+    "201": [
+      "turn"
+    ],
+    "202": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "203": [
+      "turn"
+    ],
+    "209": [
+      "turn"
+    ],
+    "210": [
+      "turn",
+      "steering",
+      "collision"
+    ],
+    "212": [
+      "turn"
+    ]
+  },
+  "events": [
+    {
+      "t": 1785769762127,
+      "seq": 631,
+      "frame": 186,
+      "worldTick": 472,
+      "phase": "steering",
+      "actorId": "bot:42",
+      "detail": {
+        "angle": -7.463985307179587,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769762128,
+      "seq": 632,
+      "frame": 186,
+      "worldTick": 472,
+      "phase": "steering",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769762128,
+      "seq": 633,
+      "frame": 186,
+      "worldTick": 472,
+      "phase": "collision",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 793.1140279419493,
+          "y": 728.4964456569866
+        }
+      }
+    },
+    {
+      "t": 1785769762135,
+      "seq": 634,
+      "frame": 186,
+      "worldTick": 472,
+      "phase": "steering",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769762135,
+      "seq": 635,
+      "frame": 186,
+      "worldTick": 472,
+      "phase": "collision",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 1482.6053215941927,
+          "y": 750.6171276929304
+        }
+      }
+    },
+    {
+      "t": 1785769762259,
+      "seq": 636,
+      "frame": 187,
+      "worldTick": 472,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769762384,
+      "seq": 637,
+      "frame": 188,
+      "worldTick": 473,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769762385,
+      "seq": 638,
+      "frame": 188,
+      "worldTick": 473,
+      "phase": "turn",
+      "actorId": "bot:16",
+      "detail": {
+        "from": "up",
+        "to": "left",
+        "botState": "search"
+      }
+    },
+    {
+      "t": 1785769762501,
+      "seq": 639,
+      "frame": 189,
+      "worldTick": 474,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769762636,
+      "seq": 640,
+      "frame": 190,
+      "worldTick": 475,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769762771,
+      "seq": 641,
+      "frame": 191,
+      "worldTick": 476,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769762771,
+      "seq": 642,
+      "frame": 191,
+      "worldTick": 476,
+      "phase": "turn",
+      "actorId": "bot:8",
+      "detail": {
+        "from": "right",
+        "to": "up",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769762887,
+      "seq": 643,
+      "frame": 192,
+      "worldTick": 477,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769762887,
+      "seq": 644,
+      "frame": 192,
+      "worldTick": 477,
+      "phase": "turn",
+      "actorId": "bot:23",
+      "detail": {
+        "from": "right",
+        "to": "down",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769763012,
+      "seq": 645,
+      "frame": 193,
+      "worldTick": 478,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763146,
+      "seq": 646,
+      "frame": 194,
+      "worldTick": 479,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763146,
+      "seq": 647,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:8",
+      "detail": {
+        "angle": -7.853981633974483,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763147,
+      "seq": 648,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:16",
+      "detail": {
+        "angle": -3.141592653589793,
+        "pending": "left",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763147,
+      "seq": 649,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:18",
+      "detail": {
+        "angle": -1.5707963267948966,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763148,
+      "seq": 650,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:23",
+      "detail": {
+        "angle": 1.44,
+        "pending": "down",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763148,
+      "seq": 651,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:28",
+      "detail": {
+        "angle": -4.71238898038469,
+        "pending": "down",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763149,
+      "seq": 652,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:33",
+      "detail": {
+        "angle": -1.5707963267948966,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763151,
+      "seq": 653,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:38",
+      "detail": {
+        "angle": 1.5707963267948966,
+        "pending": "down",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763152,
+      "seq": 654,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "bot:42",
+      "detail": {
+        "angle": -7.853981633974483,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769763152,
+      "seq": 655,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769763153,
+      "seq": 656,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "collision",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 801.1140279419493,
+          "y": 728.4964456569866
+        }
+      }
+    },
+    {
+      "t": 1785769763157,
+      "seq": 657,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "steering",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769763158,
+      "seq": 658,
+      "frame": 194,
+      "worldTick": 480,
+      "phase": "collision",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 1490.6053215941927,
+          "y": 750.6171276929304
+        }
+      }
+    },
+    {
+      "t": 1785769763270,
+      "seq": 659,
+      "frame": 195,
+      "worldTick": 480,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763388,
+      "seq": 660,
+      "frame": 196,
+      "worldTick": 481,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763389,
+      "seq": 661,
+      "frame": 196,
+      "worldTick": 481,
+      "phase": "turn",
+      "actorId": "bot:33",
+      "detail": {
+        "from": "up",
+        "to": "right",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769763510,
+      "seq": 662,
+      "frame": 197,
+      "worldTick": 482,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763510,
+      "seq": 663,
+      "frame": 197,
+      "worldTick": 482,
+      "phase": "turn",
+      "actorId": "bot:28",
+      "detail": {
+        "from": "down",
+        "to": "right",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769763647,
+      "seq": 664,
+      "frame": 198,
+      "worldTick": 483,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763647,
+      "seq": 665,
+      "frame": 198,
+      "worldTick": 483,
+      "phase": "turn",
+      "actorId": "bot:23",
+      "detail": {
+        "from": "down",
+        "to": "right",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769763777,
+      "seq": 666,
+      "frame": 199,
+      "worldTick": 484,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769763910,
+      "seq": 667,
+      "frame": 200,
+      "worldTick": 485,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764013,
+      "seq": 668,
+      "frame": 201,
+      "worldTick": 486,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764013,
+      "seq": 669,
+      "frame": 201,
+      "worldTick": 486,
+      "phase": "turn",
+      "actorId": "bot:38",
+      "detail": {
+        "from": "down",
+        "to": "right",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769764139,
+      "seq": 670,
+      "frame": 202,
+      "worldTick": 487,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764139,
+      "seq": 671,
+      "frame": 202,
+      "worldTick": 487,
+      "phase": "turn",
+      "actorId": "bot:42",
+      "detail": {
+        "from": "up",
+        "to": "down",
+        "botState": "search"
+      }
+    },
+    {
+      "t": 1785769764140,
+      "seq": 672,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:8",
+      "detail": {
+        "angle": -7.853981633974483,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764140,
+      "seq": 673,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:16",
+      "detail": {
+        "angle": -3.141592653589793,
+        "pending": "left",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764141,
+      "seq": 674,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:18",
+      "detail": {
+        "angle": -1.5707963267948966,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764141,
+      "seq": 675,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:23",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764142,
+      "seq": 676,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:28",
+      "detail": {
+        "angle": -6.283185307179586,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764142,
+      "seq": 677,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:33",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764143,
+      "seq": 678,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:38",
+      "detail": {
+        "angle": 0.6107963267948966,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764144,
+      "seq": 679,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "bot:42",
+      "detail": {
+        "angle": -7.460381633974483,
+        "pending": "down",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769764144,
+      "seq": 680,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769764145,
+      "seq": 681,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "collision",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 809.1140279419493,
+          "y": 728.4964456569866
+        }
+      }
+    },
+    {
+      "t": 1785769764151,
+      "seq": 682,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "steering",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769764152,
+      "seq": 683,
+      "frame": 202,
+      "worldTick": 488,
+      "phase": "collision",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 1498.6053215941927,
+          "y": 750.6171276929304
+        }
+      }
+    },
+    {
+      "t": 1785769764269,
+      "seq": 684,
+      "frame": 203,
+      "worldTick": 488,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764270,
+      "seq": 685,
+      "frame": 203,
+      "worldTick": 488,
+      "phase": "turn",
+      "actorId": "bot:28",
+      "detail": {
+        "from": "right",
+        "to": "up",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769764403,
+      "seq": 686,
+      "frame": 204,
+      "worldTick": 489,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764514,
+      "seq": 687,
+      "frame": 205,
+      "worldTick": 490,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764645,
+      "seq": 688,
+      "frame": 206,
+      "worldTick": 491,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764789,
+      "seq": 689,
+      "frame": 207,
+      "worldTick": 492,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769764892,
+      "seq": 690,
+      "frame": 208,
+      "worldTick": 493,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769765011,
+      "seq": 691,
+      "frame": 209,
+      "worldTick": 494,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769765012,
+      "seq": 692,
+      "frame": 209,
+      "worldTick": 494,
+      "phase": "turn",
+      "actorId": "bot:8",
+      "detail": {
+        "from": "up",
+        "to": "right",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769765149,
+      "seq": 693,
+      "frame": 210,
+      "worldTick": 495,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769765149,
+      "seq": 694,
+      "frame": 210,
+      "worldTick": 495,
+      "phase": "turn",
+      "actorId": "bot:23",
+      "detail": {
+        "from": "right",
+        "to": "down",
+        "botState": "chase"
+      }
+    },
+    {
+      "t": 1785769765150,
+      "seq": 695,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:8",
+      "detail": {
+        "angle": -6.893981633974482,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765150,
+      "seq": 696,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:16",
+      "detail": {
+        "angle": -3.141592653589793,
+        "pending": "left",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765151,
+      "seq": 697,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:18",
+      "detail": {
+        "angle": -1.5707963267948966,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765151,
+      "seq": 698,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:23",
+      "detail": {
+        "angle": 0.48,
+        "pending": "down",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765151,
+      "seq": 699,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:28",
+      "detail": {
+        "angle": -7.853981633974483,
+        "pending": "up",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765152,
+      "seq": 700,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:33",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765152,
+      "seq": 701,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:38",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765153,
+      "seq": 702,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "bot:42",
+      "detail": {
+        "angle": -4.71238898038469,
+        "pending": "down",
+        "isBot": true
+      }
+    },
+    {
+      "t": 1785769765153,
+      "seq": 703,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769765154,
+      "seq": 704,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "collision",
+      "actorId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 817.1140279419493,
+          "y": 728.4964456569866
+        }
+      }
+    },
+    {
+      "t": 1785769765159,
+      "seq": 705,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "steering",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "angle": 0,
+        "pending": "right",
+        "isBot": false
+      }
+    },
+    {
+      "t": 1785769765159,
+      "seq": 706,
+      "frame": 210,
+      "worldTick": 496,
+      "phase": "collision",
+      "actorId": "1c404f66-e535-483d-afd0-19e2038ebbce",
+      "detail": {
+        "threshold": 0.5760000000000001,
+        "head": {
+          "x": 1506.6053215941927,
+          "y": 750.6171276929304
+        }
+      }
+    },
+    {
+      "t": 1785769765277,
+      "seq": 707,
+      "frame": 211,
+      "worldTick": 496,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769765393,
+      "seq": 708,
+      "frame": 212,
+      "worldTick": 497,
+      "phase": "tick_begin"
+    },
+    {
+      "t": 1785769765393,
+      "seq": 709,
+      "frame": 212,
+      "worldTick": 497,
+      "phase": "turn",
+      "actorId": "bot:16",
+      "detail": {
+        "from": "left",
+        "to": "down",
+        "botState": "search"
+      }
+    },
+    {
+      "t": 1785769765554,
+      "seq": 710,
+      "frame": 213,
+      "worldTick": 498,
+      "phase": "tick_begin"
+    }
+  ]
+}

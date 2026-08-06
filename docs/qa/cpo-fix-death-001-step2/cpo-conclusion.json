@@ -1,0 +1,29 @@
+{
+  "rc": "FIX-DEATH-001",
+  "step": "approach_floor",
+  "commit_probe": "4a6d37f",
+  "commit_collector": "0c541c0",
+  "preview": "https://game29-6j4xkw6qz-jyp-ai1s-projects.vercel.app",
+  "question": "Can human approach collision radius (threshold=0.576)?",
+  "answers": {
+    "canReachCollisionRadius": false,
+    "absoluteMinBody": 1.9889054801905786,
+    "absoluteMinHead": 5.808441872103009,
+    "kindAtMin": "bot",
+    "thirteenIsHardFloor": false,
+    "whoTurnsAway": ["other", "both"],
+    "systemsInterrupting": ["other_turn_away", "both_turn_away", "other_escape_ai", "opening_no_turn"],
+    "spawnProtectionDominant": false
+  },
+  "proof": {
+    "sampleCount": 80,
+    "belowThresholdCount": 0,
+    "floorHitsAt13": 5,
+    "closestSequence": [
+      { "tick": 784, "body": 1.989, "closingRate": 7.99, "botState": "chase", "break": "none" },
+      { "tick": 792, "body": 4.41, "closingRate": -2.42, "botState": "chase", "break": "other_turn_away" }
+    ]
+  },
+  "cpo_conclusion": "13 is not a hard floor. Human can approach to ~2.0 bodyDist but did not sample under threshold 0.576. Interruptions near contact are dominated by other turn-away (and both), with occasional bot escape AI — not spawn protection / not render / not collision math.",
+  "next": "FIX-DEATH-002 candidate: other-bot turn/escape near contact — wait for CPO pick one fix; do not change threshold/radius yet"
+}

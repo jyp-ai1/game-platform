@@ -1,0 +1,20 @@
+{
+  "rc": "RC-DEATH-007",
+  "commit": "3ca5b38",
+  "preview": "https://game29-6nedfj7bs-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-6nedfj7bs-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "forcedDeath": true,
+  "verdict": "PASS",
+  "pass": {
+    "deathOverlay": true,
+    "countdown": true,
+    "retryExitPolicy": true,
+    "overlayRemoved": true
+  },
+  "passScore": "4 / 4",
+  "proof": "samples=62 overlay=true countdown=true policy=true removed=true",
+  "media": [
+    "page@8cbfbf2be0a2baa635cef7651a8eb2eb.webm"
+  ],
+  "next": "Leaderboard/HUD Epic or Closed Alpha Candidate"
+}

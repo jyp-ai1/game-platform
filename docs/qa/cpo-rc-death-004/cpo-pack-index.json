@@ -1,0 +1,21 @@
+{
+  "rc": "RC-DEATH-004",
+  "commit": "57f1330",
+  "preview": "https://game29-9wbbt20i4-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-9wbbt20i4-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "case": "2_same_unit_far",
+  "proof": "same unit family; minDistance=13.451 vs threshold=0.5760000000000001 (ratio=23.4x) — far reject, not unit bug",
+  "artifacts": {
+    "report": "rc-death-004-report.json",
+    "windowStore": "window-RC_DEATH_004.json",
+    "console": "console-RC_DEATH_004.json",
+    "screenshots": [
+      "01-start.png",
+      "02-end.png"
+    ],
+    "playwrightTrace": "media/playwright-trace.zip",
+    "videos": [
+      "page@c281f965edc3aa045c3f89acc8cad00a.webm"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "rc": "RC-LB-001",
+  "commit": "4dd807e",
+  "preview": "https://game29-2phc3i1za-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-2phc3i1za-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "verdict": "PASS",
+  "pass": {
+    "lengthSync": true,
+    "rankSync": true,
+    "noDuplicate": true,
+    "noDeadGhost": true
+  },
+  "passScore": "4 / 4",
+  "proof": "samples=34 lenMismatch=0 rankMismatch=0 dup=0 ghost=0 maxLen=12",
+  "disconnect": "SKIPPED_SINGLE_TAB",
+  "media": [
+    "page@0ffa022871ecc39956f01fe88a701717.webm",
+    "page@496e11a21df996b86aea471fc6f84e22.webm",
+    "page@ae3ff775188a6ebaff816b865af1f581.webm"
+  ],
+  "next": "Closed Alpha QA Report v1.0 (Collision Known Issue) or HUD Polish"
+}

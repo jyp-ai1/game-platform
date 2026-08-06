@@ -1,0 +1,2373 @@
+{
+  "rc": "RC-DEATH-004",
+  "commit": "57f1330",
+  "base": "https://game29-9wbbt20i4-jyp-ai1s-projects.vercel.app",
+  "startedAt": "2026-08-03T11:39:07.081Z",
+  "samples": [
+    {
+      "elapsedMs": 16971,
+      "sampleCount": 23,
+      "case": "2_same_unit_far",
+      "proof": "same unit family; minDistance=34.300 vs threshold=0.5760000000000001 (ratio=59.5x) — far reject, not unit bug",
+      "last": {
+        "t": 1785757183944,
+        "tick": 368,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 725.8243439696734,
+          "y": 60.117438651667776
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 160.46247664344642,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      "minDistance": 34.300197055225894,
+      "threshold": 0.5760000000000001,
+      "ratio": 59.54895322087828
+    },
+    {
+      "elapsedMs": 27014,
+      "sampleCount": 41,
+      "case": "2_same_unit_far",
+      "proof": "same unit family; minDistance=13.451 vs threshold=0.5760000000000001 (ratio=23.4x) — far reject, not unit bug",
+      "last": {
+        "t": 1785757194288,
+        "tick": 440,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 733.9686055647293,
+          "y": 37.688725470086
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 176.94045647821966,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      "minDistance": 13.450531679273812,
+      "threshold": 0.5760000000000001,
+      "ratio": 23.351617498739255
+    }
+  ],
+  "console": [
+    {
+      "t": 1785757151030,
+      "type": "info",
+      "text": "[RC-DEATH-004] distance/threshold unit probe ON — window.__RC_DEATH_004__"
+    },
+    {
+      "t": 1785757154835,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=81.313 thr=0.5760000000000001 head=(609.1,728.5) seg=(686.3,702.9)"
+    },
+    {
+      "t": 1785757156928,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=73.761 thr=0.5760000000000001 head=(617.1,728.5) seg=(686.3,702.9)"
+    },
+    {
+      "t": 1785757159396,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=81.313 thr=0.5760000000000001 head=(609.1,728.5) seg=(686.3,702.9)"
+    },
+    {
+      "t": 1785757162347,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=81.313 thr=0.5760000000000001 head=(609.1,728.5) seg=(686.3,702.9)"
+    },
+    {
+      "t": 1785757164366,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=57.718 thr=0.5760000000000001 head=(617.1,728.5) seg=(565.3,703.2)"
+    },
+    {
+      "t": 1785757166492,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=65.001 thr=0.5760000000000001 head=(625.1,728.5) seg=(565.3,703.2)"
+    },
+    {
+      "t": 1785757166515,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=153.783 thr=0.5760000000000001 head=(726.7,87.5) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757168487,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=70.195 thr=0.5760000000000001 head=(633.1,728.5) seg=(698.9,704.0)"
+    },
+    {
+      "t": 1785757168526,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=161.840 thr=0.5760000000000001 head=(734.9,87.5) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757170344,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=68.791 thr=0.5760000000000001 head=(641.1,728.5) seg=(705.4,704.0)"
+    },
+    {
+      "t": 1785757170372,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=171.092 thr=0.5760000000000001 head=(744.3,87.5) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757172608,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=67.090 thr=0.5760000000000001 head=(649.1,728.5) seg=(709.5,699.3)"
+    },
+    {
+      "t": 1785757172621,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=176.458 thr=0.5760000000000001 head=(748.9,82.8) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757174644,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=64.269 thr=0.5760000000000001 head=(657.1,728.5) seg=(709.5,691.3)"
+    },
+    {
+      "t": 1785757174660,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=178.412 thr=0.5760000000000001 head=(748.9,73.8) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757177287,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=63.263 thr=0.5760000000000001 head=(665.1,728.5) seg=(711.3,685.2)"
+    },
+    {
+      "t": 1785757177313,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=180.794 thr=0.5760000000000001 head=(748.9,64.8) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757179376,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=57.374 thr=0.5760000000000001 head=(673.1,728.5) seg=(716.8,691.3)"
+    },
+    {
+      "t": 1785757179391,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=177.603 thr=0.5760000000000001 head=(744.0,60.1) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757182702,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=44.581 thr=0.5760000000000001 head=(681.1,728.5) seg=(714.5,698.9)"
+    },
+    {
+      "t": 1785757182711,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=169.288 thr=0.5760000000000001 head=(735.2,60.1) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757183940,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=34.300 thr=0.5760000000000001 head=(689.1,728.5) seg=(706.5,698.9)"
+    },
+    {
+      "t": 1785757183953,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=160.462 thr=0.5760000000000001 head=(725.8,60.1) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757185054,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=28.770 thr=0.5760000000000001 head=(697.1,728.5) seg=(698.8,699.8)"
+    },
+    {
+      "t": 1785757185065,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=153.310 thr=0.5760000000000001 head=(719.1,62.6) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757186064,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=23.075 thr=0.5760000000000001 head=(705.1,728.5) seg=(701.1,705.8)"
+    },
+    {
+      "t": 1785757186074,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=150.419 thr=0.5760000000000001 head=(719.1,71.4) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757187082,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=24.626 thr=0.5760000000000001 head=(713.1,728.5) seg=(703.6,705.8)"
+    },
+    {
+      "t": 1785757187091,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=153.208 thr=0.5760000000000001 head=(723.4,76.0) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757188082,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=14.903 thr=0.5760000000000001 head=(721.1,728.5) seg=(732.2,718.6)"
+    },
+    {
+      "t": 1785757188096,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=160.931 thr=0.5760000000000001 head=(731.4,76.0) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757189586,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=13.451 thr=0.5760000000000001 head=(729.1,728.5) seg=(731.5,715.3)"
+    },
+    {
+      "t": 1785757189602,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=165.120 thr=0.5760000000000001 head=(734.0,69.7) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757190907,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=21.959 thr=0.5760000000000001 head=(737.1,728.5) seg=(731.3,707.3)"
+    },
+    {
+      "t": 1785757190914,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=167.581 thr=0.5760000000000001 head=(734.0,61.7) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757192012,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=31.562 thr=0.5760000000000001 head=(745.1,728.5) seg=(724.7,704.4)"
+    },
+    {
+      "t": 1785757192027,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=170.383 thr=0.5760000000000001 head=(734.0,53.7) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757193166,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=30.153 thr=0.5760000000000001 head=(753.1,728.5) seg=(766.8,701.6)"
+    },
+    {
+      "t": 1785757193177,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=173.508 thr=0.5760000000000001 head=(734.0,45.7) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757194286,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=19.714 thr=0.5760000000000001 head=(761.1,728.5) seg=(766.8,709.6)"
+    },
+    {
+      "t": 1785757194304,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=176.940 thr=0.5760000000000001 head=(734.0,37.7) seg=(575.7,116.9)"
+    },
+    {
+      "t": 1785757195364,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=11.138 thr=0.5760000000000001 head=(769.1,728.5) seg=(766.8,717.6)"
+    },
+    {
+      "t": 1785757195370,
+      "type": "info",
+      "text": "[RC-DEATH-004] dist=180.662 thr=0.5760000000000001 head=(734.0,29.7) seg=(575.7,116.9)"
+    }
+  ],
+  "url": "https://game29-9wbbt20i4-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "endedAt": "2026-08-03T11:39:54.907Z",
+  "final": {
+    "enabled": true,
+    "sampleCount": 41,
+    "last": {
+      "t": 1785757194288,
+      "tick": 440,
+      "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+      "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+      "head": {
+        "x": 733.9686055647293,
+        "y": 37.688725470086
+      },
+      "segment": {
+        "x": 575.7312944459854,
+        "y": 116.86497512003226
+      },
+      "distance": 176.94045647821966,
+      "threshold": 0.5760000000000001,
+      "headRadius": 0.38,
+      "segmentRadius": 0.3,
+      "collisionRadius": 0.32,
+      "thresholdFormula": "collisionRadius * 1.8",
+      "worldSize": 1400,
+      "detail": {
+        "foodPickupRadius": 1.75,
+        "segmentSpacing": 0.5
+      }
+    },
+    "summary": {
+      "enabled": true,
+      "sampleCount": 41,
+      "case": "2_same_unit_far",
+      "proof": "same unit family; minDistance=13.451 vs threshold=0.5760000000000001 (ratio=23.4x) — far reject, not unit bug",
+      "minDistance": 13.450531679273812,
+      "maxDistance": 180.79390174745075,
+      "threshold": 0.5760000000000001,
+      "ratioMinDistOverThreshold": 23.351617498739255,
+      "headMagMedian": 949.5930551402156,
+      "segMagMedian": 982.4195932232662,
+      "worldSize": 1400,
+      "recent": [
+        {
+          "t": 1785757156893,
+          "tick": 296,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 617.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 686.3077363128532,
+            "y": 702.9437731611932
+          },
+          "distance": 73.76115745970212,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757159158,
+          "tick": 288,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 609.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 686.3077363128532,
+            "y": 702.9437731611932
+          },
+          "distance": 81.31302284215874,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757162318,
+          "tick": 288,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 609.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 686.3077363128532,
+            "y": 702.9437731611932
+          },
+          "distance": 81.31302284215874,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757164349,
+          "tick": 296,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "070adaef-5e27-4be8-bbaf-3fdd5211e92d",
+          "head": {
+            "x": 617.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 565.2507828092555,
+            "y": 703.1673840593457
+          },
+          "distance": 57.71791365868113,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757166472,
+          "tick": 304,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "070adaef-5e27-4be8-bbaf-3fdd5211e92d",
+          "head": {
+            "x": 625.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 565.2507828092555,
+            "y": 703.1673840593457
+          },
+          "distance": 65.00130367334236,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757166494,
+          "tick": 304,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 726.686182644946,
+            "y": 87.50897385827005
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 153.78281139724712,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757168473,
+          "tick": 312,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 633.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 698.9114119520548,
+            "y": 704.0402284907849
+          },
+          "distance": 70.19545783491763,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757168503,
+          "tick": 312,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 734.8861826449461,
+            "y": 87.50897385827005
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 161.839591100893,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757170326,
+          "tick": 320,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 641.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 705.4114119520548,
+            "y": 704.0402284907849
+          },
+          "distance": 68.79142496433248,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757170356,
+          "tick": 320,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 744.2861826449464,
+            "y": 87.50897385827005
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 171.09215395758162,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757172591,
+          "tick": 328,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 649.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 709.5023505696447,
+            "y": 699.2677993987508
+          },
+          "distance": 67.0899640175467,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757172607,
+          "tick": 328,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 748.8771212625363,
+            "y": 82.83654476623589
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 176.45795934536417,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757174607,
+          "tick": 336,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 657.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 709.5023505696447,
+            "y": 691.2677993987506
+          },
+          "distance": 64.26903181131927,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757174626,
+          "tick": 336,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 748.8771212625363,
+            "y": 73.83654476623587
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 178.41222817592558,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757177281,
+          "tick": 344,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 665.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 711.279050487583,
+            "y": 685.2420726355299
+          },
+          "distance": 63.26254889046276,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757177299,
+          "tick": 344,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 748.8771212625363,
+            "y": 64.83654476623586
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 180.79390174745075,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757179330,
+          "tick": 352,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 673.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 716.8274974548103,
+            "y": 691.3362847959743
+          },
+          "distance": 57.373730679363526,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757179361,
+          "tick": 352,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 744.0243439696739,
+            "y": 60.117438651667776
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 177.60302197094225,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757182595,
+          "tick": 360,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 681.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 714.4566568968587,
+            "y": 698.903596200409
+          },
+          "distance": 44.58102336851889,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757182618,
+          "tick": 360,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 735.2243439696737,
+            "y": 60.117438651667776
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 169.28767155819122,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757183934,
+          "tick": 368,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 689.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 706.4566568968587,
+            "y": 698.903596200409
+          },
+          "distance": 34.300197055225894,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757183944,
+          "tick": 368,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 725.8243439696734,
+            "y": 60.117438651667776
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 160.46247664344642,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757185042,
+          "tick": 376,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 697.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 698.7829019810431,
+            "y": 699.7749711601009
+          },
+          "distance": 28.769918975096452,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757185051,
+          "tick": 376,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 719.1052378551052,
+            "y": 62.57021594453026
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 153.31017096920618,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757186060,
+          "tick": 384,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 705.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 701.1381473713029,
+            "y": 705.766963910033
+          },
+          "distance": 23.074595701704872,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757186069,
+          "tick": 384,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 719.1052378551052,
+            "y": 71.37021594453027
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 150.41895080447276,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757187067,
+          "tick": 392,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:5",
+          "head": {
+            "x": 713.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 703.6381473713029,
+            "y": 705.766963910033
+          },
+          "distance": 24.625630003600865,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757187076,
+          "tick": 392,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 723.3776669471393,
+            "y": 75.96115456212016
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 153.20761681125182,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757188078,
+          "tick": 400,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:16",
+          "head": {
+            "x": 721.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 732.2349958748333,
+            "y": 718.5755122862187
+          },
+          "distance": 14.903048235560759,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757188087,
+          "tick": 400,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 731.3776669471393,
+            "y": 75.96115456212016
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 160.93140094152486,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757189578,
+          "tick": 408,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:16",
+          "head": {
+            "x": 729.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 731.5310521800227,
+            "y": 715.264862369726
+          },
+          "distance": 13.450531679273812,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757189587,
+          "tick": 408,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 733.9686055647293,
+            "y": 69.688725470086
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 165.1200931477577,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757190900,
+          "tick": 416,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:16",
+          "head": {
+            "x": 737.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 731.3001625922519,
+            "y": 707.3213649083362
+          },
+          "distance": 21.958712963565805,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757190909,
+          "tick": 416,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 733.9686055647293,
+            "y": 61.688725470086
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 167.58121957881593,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757191989,
+          "tick": 424,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:16",
+          "head": {
+            "x": 745.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 724.7328963247677,
+            "y": 704.3972238341977
+          },
+          "distance": 31.562050289245523,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757191999,
+          "tick": 424,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 733.9686055647293,
+            "y": 53.688725470086
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 170.38276071810338,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757193158,
+          "tick": 432,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:42",
+          "head": {
+            "x": 753.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 766.7634541629171,
+            "y": 701.6097595586082
+          },
+          "distance": 30.152955502145687,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757193169,
+          "tick": 432,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 733.9686055647293,
+            "y": 45.688725470086
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 173.50822788652303,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757194280,
+          "tick": 440,
+          "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+          "otherId": "bot:42",
+          "head": {
+            "x": 761.1140279419493,
+            "y": 728.4964456569866
+          },
+          "segment": {
+            "x": 766.7634541629171,
+            "y": 709.6097595586082
+          },
+          "distance": 19.71352146129246,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        },
+        {
+          "t": 1785757194288,
+          "tick": 440,
+          "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+          "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+          "head": {
+            "x": 733.9686055647293,
+            "y": 37.688725470086
+          },
+          "segment": {
+            "x": 575.7312944459854,
+            "y": 116.86497512003226
+          },
+          "distance": 176.94045647821966,
+          "threshold": 0.5760000000000001,
+          "headRadius": 0.38,
+          "segmentRadius": 0.3,
+          "collisionRadius": 0.32,
+          "thresholdFormula": "collisionRadius * 1.8",
+          "worldSize": 1400,
+          "detail": {
+            "foodPickupRadius": 1.75,
+            "segmentSpacing": 0.5
+          }
+        }
+      ]
+    },
+    "samples": [
+      {
+        "t": 1785757154811,
+        "tick": 288,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 609.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 686.3077363128532,
+          "y": 702.9437731611932
+        },
+        "distance": 81.31302284215874,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757156893,
+        "tick": 296,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 617.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 686.3077363128532,
+          "y": 702.9437731611932
+        },
+        "distance": 73.76115745970212,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757159158,
+        "tick": 288,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 609.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 686.3077363128532,
+          "y": 702.9437731611932
+        },
+        "distance": 81.31302284215874,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757162318,
+        "tick": 288,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 609.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 686.3077363128532,
+          "y": 702.9437731611932
+        },
+        "distance": 81.31302284215874,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757164349,
+        "tick": 296,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "070adaef-5e27-4be8-bbaf-3fdd5211e92d",
+        "head": {
+          "x": 617.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 565.2507828092555,
+          "y": 703.1673840593457
+        },
+        "distance": 57.71791365868113,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757166472,
+        "tick": 304,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "070adaef-5e27-4be8-bbaf-3fdd5211e92d",
+        "head": {
+          "x": 625.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 565.2507828092555,
+          "y": 703.1673840593457
+        },
+        "distance": 65.00130367334236,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757166494,
+        "tick": 304,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 726.686182644946,
+          "y": 87.50897385827005
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 153.78281139724712,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757168473,
+        "tick": 312,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 633.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 698.9114119520548,
+          "y": 704.0402284907849
+        },
+        "distance": 70.19545783491763,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757168503,
+        "tick": 312,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 734.8861826449461,
+          "y": 87.50897385827005
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 161.839591100893,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757170326,
+        "tick": 320,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 641.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 705.4114119520548,
+          "y": 704.0402284907849
+        },
+        "distance": 68.79142496433248,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757170356,
+        "tick": 320,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 744.2861826449464,
+          "y": 87.50897385827005
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 171.09215395758162,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757172591,
+        "tick": 328,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 649.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 709.5023505696447,
+          "y": 699.2677993987508
+        },
+        "distance": 67.0899640175467,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757172607,
+        "tick": 328,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 748.8771212625363,
+          "y": 82.83654476623589
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 176.45795934536417,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757174607,
+        "tick": 336,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 657.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 709.5023505696447,
+          "y": 691.2677993987506
+        },
+        "distance": 64.26903181131927,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757174626,
+        "tick": 336,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 748.8771212625363,
+          "y": 73.83654476623587
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 178.41222817592558,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757177281,
+        "tick": 344,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 665.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 711.279050487583,
+          "y": 685.2420726355299
+        },
+        "distance": 63.26254889046276,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757177299,
+        "tick": 344,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 748.8771212625363,
+          "y": 64.83654476623586
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 180.79390174745075,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757179330,
+        "tick": 352,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 673.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 716.8274974548103,
+          "y": 691.3362847959743
+        },
+        "distance": 57.373730679363526,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757179361,
+        "tick": 352,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 744.0243439696739,
+          "y": 60.117438651667776
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 177.60302197094225,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757182595,
+        "tick": 360,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 681.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 714.4566568968587,
+          "y": 698.903596200409
+        },
+        "distance": 44.58102336851889,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757182618,
+        "tick": 360,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 735.2243439696737,
+          "y": 60.117438651667776
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 169.28767155819122,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757183934,
+        "tick": 368,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 689.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 706.4566568968587,
+          "y": 698.903596200409
+        },
+        "distance": 34.300197055225894,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757183944,
+        "tick": 368,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 725.8243439696734,
+          "y": 60.117438651667776
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 160.46247664344642,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757185042,
+        "tick": 376,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 697.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 698.7829019810431,
+          "y": 699.7749711601009
+        },
+        "distance": 28.769918975096452,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757185051,
+        "tick": 376,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 719.1052378551052,
+          "y": 62.57021594453026
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 153.31017096920618,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757186060,
+        "tick": 384,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 705.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 701.1381473713029,
+          "y": 705.766963910033
+        },
+        "distance": 23.074595701704872,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757186069,
+        "tick": 384,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 719.1052378551052,
+          "y": 71.37021594453027
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 150.41895080447276,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757187067,
+        "tick": 392,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:5",
+        "head": {
+          "x": 713.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 703.6381473713029,
+          "y": 705.766963910033
+        },
+        "distance": 24.625630003600865,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757187076,
+        "tick": 392,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 723.3776669471393,
+          "y": 75.96115456212016
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 153.20761681125182,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757188078,
+        "tick": 400,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:16",
+        "head": {
+          "x": 721.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 732.2349958748333,
+          "y": 718.5755122862187
+        },
+        "distance": 14.903048235560759,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757188087,
+        "tick": 400,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 731.3776669471393,
+          "y": 75.96115456212016
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 160.93140094152486,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757189578,
+        "tick": 408,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:16",
+        "head": {
+          "x": 729.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 731.5310521800227,
+          "y": 715.264862369726
+        },
+        "distance": 13.450531679273812,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757189587,
+        "tick": 408,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 733.9686055647293,
+          "y": 69.688725470086
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 165.1200931477577,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757190900,
+        "tick": 416,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:16",
+        "head": {
+          "x": 737.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 731.3001625922519,
+          "y": 707.3213649083362
+        },
+        "distance": 21.958712963565805,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757190909,
+        "tick": 416,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 733.9686055647293,
+          "y": 61.688725470086
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 167.58121957881593,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757191989,
+        "tick": 424,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:16",
+        "head": {
+          "x": 745.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 724.7328963247677,
+          "y": 704.3972238341977
+        },
+        "distance": 31.562050289245523,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757191999,
+        "tick": 424,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 733.9686055647293,
+          "y": 53.688725470086
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 170.38276071810338,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757193158,
+        "tick": 432,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:42",
+        "head": {
+          "x": 753.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 766.7634541629171,
+          "y": 701.6097595586082
+        },
+        "distance": 30.152955502145687,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757193169,
+        "tick": 432,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 733.9686055647293,
+          "y": 45.688725470086
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 173.50822788652303,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757194280,
+        "tick": 440,
+        "victimId": "550f64e0-f7b2-4270-b1d6-c677c8647963",
+        "otherId": "bot:42",
+        "head": {
+          "x": 761.1140279419493,
+          "y": 728.4964456569866
+        },
+        "segment": {
+          "x": 766.7634541629171,
+          "y": 709.6097595586082
+        },
+        "distance": 19.71352146129246,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      },
+      {
+        "t": 1785757194288,
+        "tick": 440,
+        "victimId": "b23c1e89-adf4-4707-851b-b4ef48823f22",
+        "otherId": "9cbf8a9b-8e2a-4e1b-b2e4-96bc277058f7",
+        "head": {
+          "x": 733.9686055647293,
+          "y": 37.688725470086
+        },
+        "segment": {
+          "x": 575.7312944459854,
+          "y": 116.86497512003226
+        },
+        "distance": 176.94045647821966,
+        "threshold": 0.5760000000000001,
+        "headRadius": 0.38,
+        "segmentRadius": 0.3,
+        "collisionRadius": 0.32,
+        "thresholdFormula": "collisionRadius * 1.8",
+        "worldSize": 1400,
+        "detail": {
+          "foodPickupRadius": 1.75,
+          "segmentSpacing": 0.5
+        }
+      }
+    ]
+  },
+  "case": "2_same_unit_far",
+  "proof": "same unit family; minDistance=13.451 vs threshold=0.5760000000000001 (ratio=23.4x) — far reject, not unit bug"
+}

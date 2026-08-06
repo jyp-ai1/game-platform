@@ -1,0 +1,32 @@
+[
+  {
+    "t": 1785771340214,
+    "type": "info",
+    "text": "[RC-DEATH-005] corpse→gem probe ON — window.__RC_DEATH_005__"
+  },
+  {
+    "t": 1785771360672,
+    "type": "info",
+    "text": "[RC-DEATH-005] bot bot:5 corpseCleared=true segs=0 deathFood+31 feed=true stillInWorld=true"
+  },
+  {
+    "t": 1785771361565,
+    "type": "info",
+    "text": "[RC-DEATH-005] bot bot:13 corpseCleared=true segs=0 deathFood+14 feed=true stillInWorld=true"
+  },
+  {
+    "t": 1785771384358,
+    "type": "info",
+    "text": "[RC-DEATH-005] bot bot:33 corpseCleared=true segs=0 deathFood+10 feed=true stillInWorld=true"
+  },
+  {
+    "t": 1785771387771,
+    "type": "info",
+    "text": "[RC-DEATH-005] bot bot:16 corpseCleared=true segs=0 deathFood+22 feed=true stillInWorld=true"
+  },
+  {
+    "t": 1785771408180,
+    "type": "info",
+    "text": "[RC-DEATH-005] bot bot:28 corpseCleared=true segs=0 deathFood+24 feed=true stillInWorld=true"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "rc": "RC-DEATH-007",
+  "commit": "3ca5b38",
+  "preview": "https://game29-6nedfj7bs-jyp-ai1s-projects.vercel.app",
+  "verdict": "PASS",
+  "passScore": "4 / 4",
+  "pass": {
+    "deathOverlay": true,
+    "countdown": true,
+    "retryExitPolicy": true,
+    "overlayRemoved": true
+  },
+  "proof": "forceLocalDeath → WORLD countdown overlay visible → policy (no GameOver Retry on WORLD) → respawn → overlay removed",
+  "policy": "WORLD = countdown only; private room = GameOver Retry/Exit",
+  "fix": "FIX-RETRY-001 not required for WORLD path",
+  "collision": "HOLD",
+  "next": "Leaderboard/HUD Epic or Closed Alpha Candidate checkpoint"
+}

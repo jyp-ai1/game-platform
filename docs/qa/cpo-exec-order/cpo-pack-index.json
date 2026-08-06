@@ -1,0 +1,46 @@
+{
+  "rc": "EXEC-ORDER",
+  "commit": "d0b7954",
+  "preview": "https://game29-766pr1w7a-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-766pr1w7a-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "dominantOrder": "turn",
+  "proof": "dominant: turn (106 frames)",
+  "table": [
+    {
+      "phase": "turn",
+      "ran": true,
+      "firstRank": 1
+    },
+    {
+      "phase": "steering",
+      "ran": true,
+      "firstRank": 2
+    },
+    {
+      "phase": "killSnake",
+      "ran": true,
+      "firstRank": 2
+    },
+    {
+      "phase": "collision",
+      "ran": true,
+      "firstRank": 3
+    },
+    {
+      "phase": "escape",
+      "ran": false,
+      "firstRank": null
+    }
+  ],
+  "ranks": {
+    "turn": 1,
+    "steering": 2,
+    "killSnake": 2,
+    "collision": 3,
+    "escape": null
+  },
+  "media": [
+    "page@bdf67d8ec0fb3205fb9c4e0ba65f7a65.webm"
+  ],
+  "next": "Root Cause LOCK → FIX-DEATH-002 one fix"
+}

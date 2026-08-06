@@ -1,0 +1,22 @@
+{
+  "rc": "RC-DEATH-003",
+  "commit": "80625bd",
+  "preview": "https://game29-b2zcgyoc4-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-b2zcgyoc4-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "case": "B_reject",
+  "proof": "candidate>0 but all rejected; top reason=distance_gt_threshold ×1232",
+  "artifacts": {
+    "report": "rc-death-003-report.json",
+    "windowStore": "window-RC_DEATH_003.json",
+    "console": "console-RC_DEATH_003.json",
+    "screenshots": [
+      "01-start.png",
+      "02-mid.png",
+      "03-end.png"
+    ],
+    "playwrightTrace": "media/playwright-trace.zip",
+    "videos": [
+      "page@63696931909a507796a2902ddb8d8b50.webm"
+    ]
+  }
+}

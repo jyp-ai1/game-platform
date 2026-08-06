@@ -1,0 +1,20 @@
+{
+  "rc": "RC-DEATH-006",
+  "commit": "c30376e",
+  "preview": "https://game29-l8i4jgo2s-jyp-ai1s-projects.vercel.app",
+  "verdict": "PASS",
+  "passScore": "6 / 6 (engine path)",
+  "checklist": {
+    "Death": true,
+    "RespawnTimer": true,
+    "RespawnExecute": true,
+    "AliveTrue": true,
+    "InputRecovery": true,
+    "MoveOK": true,
+    "CorpseRemoved": true
+  },
+  "proof": "cycles=5 completed=5 on Preview c30376e; timer→respawn→alive→segments→control; corpse gone",
+  "note": "Observed via bot death→respawn cycles (human death still rare under Collision HOLD). WORLD humanAutoRespawn=true; Global countdown UI exists for local human death.",
+  "fix": "FIX-RESPAWN-001 not needed",
+  "next": "RC-007 Retry / Death UX"
+}

@@ -1,0 +1,47 @@
+{
+  "rc": "FIX-DEATH-001",
+  "step": "approach_floor",
+  "commit": "4a6d37f",
+  "preview": "https://game29-6j4xkw6qz-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-6j4xkw6qz-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "verdict": "FLOOR_NEAR_13",
+  "proof": "absMinBody=1.989 thr=0.5760000000000001; topBreak=other_turn_away; topTurn=both",
+  "absoluteMinBody": 1.9889054801905786,
+  "absoluteMinHead": 5.808441872103009,
+  "canReachCollisionRadius": false,
+  "topBreakReasons": [
+    {
+      "reason": "other_turn_away",
+      "count": 3
+    },
+    {
+      "reason": "both_turn_away",
+      "count": 3
+    },
+    {
+      "reason": "opening_no_turn",
+      "count": 1
+    },
+    {
+      "reason": "other_escape_ai",
+      "count": 1
+    }
+  ],
+  "topTurnActors": [
+    {
+      "actor": "both",
+      "count": 4
+    },
+    {
+      "actor": "other",
+      "count": 3
+    }
+  ],
+  "media": [
+    "page@491efbb2c8e52025877793a9fae86c20.webm",
+    "page@805a9750198c42449fd4bd7e2cf20757.webm",
+    "page@eff06107374d35e7fb62893c8f4d727e.webm",
+    "playwright-trace.zip"
+  ],
+  "next": "Cause candidate from verdict → FIX-DEATH-002 one fix only after CPO confirm"
+}

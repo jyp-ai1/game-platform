@@ -1,0 +1,21 @@
+{
+  "rc": "RC-LB-001 + FIX-LB-001 + FIX-LB-002",
+  "commits": ["a8a9af8", "4dd807e"],
+  "preview": "https://game29-2phc3i1za-jyp-ai1s-projects.vercel.app",
+  "verdict": "PASS",
+  "passScore": "4 / 4",
+  "pass": {
+    "lengthSync": true,
+    "rankSync": true,
+    "noDuplicate": true,
+    "noDeadGhost": true
+  },
+  "proof": "samples=34 lenMismatch=0 rankMismatch=0 dup=0 ghost=0 afterDeathGhost=0",
+  "fixes": {
+    "FIX-LB-001": "rank by Length DESC",
+    "FIX-LB-002": "alive-only rankings + updateRankings on killSnake"
+  },
+  "leaderboard": "COMPLETE",
+  "collision": "HOLD (Known Issue)",
+  "next": "Closed Alpha Candidate review"
+}

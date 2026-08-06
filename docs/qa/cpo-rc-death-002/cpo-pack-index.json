@@ -1,0 +1,28 @@
+{
+  "rc": "RC-DEATH-002",
+  "commit": "c75caf5",
+  "preview": "https://game29-3n8tqgp4v-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-3n8tqgp4v-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "pipelineBreak": "alive_false only for bots — human death never observed",
+  "counts": {
+    "collision_detect": 8,
+    "kill_snake_enter": 8,
+    "death_event_publish": 8,
+    "alive_false": 8,
+    "respawn_scheduler": 8
+  },
+  "artifacts": {
+    "report": "rc-death-002-report.json",
+    "windowStore": "window-RC_DEATH_002.json",
+    "console": "console-RC_DEATH_002.json",
+    "screenshots": [
+      "01-start.png",
+      "02-mid.png",
+      "03-end.png"
+    ],
+    "playwrightTrace": "media/playwright-trace.zip",
+    "videos": [
+      "page@37fea6520fb53933b4d3bb56d541372c.webm"
+    ]
+  }
+}

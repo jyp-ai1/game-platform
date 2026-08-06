@@ -1,0 +1,142 @@
+[
+  {
+    "t": 1785775069690,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn probe ON — window.__RC_DEATH_006__"
+  },
+  {
+    "t": 1785775076755,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:39"
+  },
+  {
+    "t": 1785775076765,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:44"
+  },
+  {
+    "t": 1785775078347,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:39 segs=3"
+  },
+  {
+    "t": 1785775078347,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:39 segs=3"
+  },
+  {
+    "t": 1785775078356,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:44 segs=3"
+  },
+  {
+    "t": 1785775078356,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:44 segs=3"
+  },
+  {
+    "t": 1785775079336,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:5"
+  },
+  {
+    "t": 1785775080183,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:5 segs=3"
+  },
+  {
+    "t": 1785775080183,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:5 segs=3"
+  },
+  {
+    "t": 1785775086926,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:39"
+  },
+  {
+    "t": 1785775086944,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:44"
+  },
+  {
+    "t": 1785775087793,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:39 segs=3"
+  },
+  {
+    "t": 1785775087793,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:39 segs=3"
+  },
+  {
+    "t": 1785775087796,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:44 segs=3"
+  },
+  {
+    "t": 1785775087796,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:44 segs=3"
+  },
+  {
+    "t": 1785775090566,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:39"
+  },
+  {
+    "t": 1785775090572,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:44"
+  },
+  {
+    "t": 1785775091455,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:39 segs=3"
+  },
+  {
+    "t": 1785775091455,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:39 segs=3"
+  },
+  {
+    "t": 1785775091463,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:44 segs=3"
+  },
+  {
+    "t": 1785775091463,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:44 segs=3"
+  },
+  {
+    "t": 1785775096490,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:34"
+  },
+  {
+    "t": 1785775097339,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:34 segs=3"
+  },
+  {
+    "t": 1785775097339,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:34 segs=3"
+  },
+  {
+    "t": 1785775100244,
+    "type": "info",
+    "text": "[RC-DEATH-006] timer_scheduled bot bot:4"
+  },
+  {
+    "t": 1785775101101,
+    "type": "info",
+    "text": "[RC-DEATH-006] respawn_execute bot bot:4 segs=3"
+  },
+  {
+    "t": 1785775101101,
+    "type": "info",
+    "text": "[RC-DEATH-006] control_ready bot bot:4 segs=3"
+  }
+]

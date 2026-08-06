@@ -169,8 +169,9 @@ export function death004Sample(sample: Omit<Death004Sample, "t">): void {
   store.last = full;
   publish();
   if (typeof console !== "undefined") {
+    const reject = full.distance > full.threshold ? "distance_gt_threshold" : "none";
     console.info(
-      `[RC-DEATH-004] dist=${full.distance.toFixed(3)} thr=${full.threshold} head=(${full.head.x.toFixed(1)},${full.head.y.toFixed(1)}) seg=(${full.segment.x.toFixed(1)},${full.segment.y.toFixed(1)})`
+      `[RC-DEATH-004] candidate self=(${full.head.x.toFixed(1)},${full.head.y.toFixed(1)}) other=(${full.segment.x.toFixed(1)},${full.segment.y.toFixed(1)}) distance=${full.distance.toFixed(2)} threshold=${full.threshold.toFixed(2)} reject=${reject}`
     );
   }
 }

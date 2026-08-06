@@ -1,0 +1,36 @@
+{
+  "rc": "RC-DEATH-002",
+  "status": "PASS — pipeline break proven",
+  "commit": "c75caf5",
+  "preview": "https://game29-3n8tqgp4v-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-3n8tqgp4v-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "gameplayChanged": false,
+  "collect": {
+    "budgetMs": 150000,
+    "samples": 38,
+    "counts": {
+      "collision_detect": 6,
+      "kill_snake_enter": 6,
+      "death_event_publish": 6,
+      "alive_false": 6,
+      "respawn_scheduler": 6,
+      "near_miss": 0,
+      "invincible_block": 0,
+      "merge_alive_conflict": 0,
+      "respawn_execute": 0
+    }
+  },
+  "pipelineBreak": {
+    "stage": "BEFORE collision_detect (human)",
+    "proof": "BOT→BOT completes Collision→killSnake→alive_false→respawn_scheduler (6×). Human events for near_miss/collision_detect/invincible_block/merge_alive_conflict/alive_false = 0.",
+    "notBroken": [
+      "Death system itself (bots die and schedule respawn)",
+      "Collision mask is NOT Player-excluded in code — bots use same moveSnakePath"
+    ]
+  },
+  "implicationForRC-DEATH-003": [
+    "Do NOT start by changing killSnake conditions — bot path proves they work",
+    "Investigate why human never enters moveSnakePath collision evaluation proximity: awaitingInput stuck, local human not ticked, spatial isolation, or host/local tick asymmetry for humans only"
+  ],
+  "readApi": "window.__RC_DEATH_002__.summary()"
+}

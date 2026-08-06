@@ -1,0 +1,32 @@
+{
+  "rc": "EXEC-ORDER",
+  "commit": "d0b7954",
+  "preview": "https://game29-766pr1w7a-jyp-ai1s-projects.vercel.app",
+  "grouping": "host_frame (tickBotBrains + tickWorld same loop; not raw world.tick)",
+  "question": "Per host frame, what is actual order of escape / turn / steering / collision / killSnake?",
+  "dominantMultiPhase": "turn → steering → collision",
+  "orderCountsTop": {
+    "turn": 106,
+    "turn → steering → collision": 16,
+    "steering → collision": 11
+  },
+  "table": [
+    { "phase": "escape", "ran": false, "firstRank": null, "note": "not fired this window; code runs in tickBotBrains before turn" },
+    { "phase": "turn", "ran": true, "firstRank": 1 },
+    { "phase": "steering", "ran": true, "firstRank": 2 },
+    { "phase": "collision", "ran": true, "firstRank": 3 },
+    { "phase": "killSnake", "ran": true, "firstRank": 4, "note": "after collision when hit; human kill not observed" }
+  ],
+  "actual_order": [
+    "1 escape (bot brain; if flee) — before turn",
+    "2 turn (bot pendingDirection)",
+    "3 steering (advanceSnakePath move+angle)",
+    "4 collision evaluate",
+    "5 killSnake"
+  ],
+  "static_code_confirm": "SnakeIo: tickBotBrains → tickWorld; moveSnakePath: advance then collide then kill",
+  "root_cause_implication": "AI turn/escape intent is applied BEFORE collision evaluation in the same host frame. other_turn_away is timing-order capable: bots can steer away before this frame's collision sample lands under threshold.",
+  "investigation": "COMPLETE",
+  "root_cause": "LOCK_CANDIDATE — pre-collision AI decision order",
+  "fix": "HOLD until CPO picks single FIX-DEATH-002 target"
+}

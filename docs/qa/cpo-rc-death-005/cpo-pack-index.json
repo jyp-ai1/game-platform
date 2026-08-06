@@ -1,0 +1,20 @@
+{
+  "rc": "RC-DEATH-005",
+  "commit": "3bc412f",
+  "preview": "https://game29-b6l8zl2nc-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-b6l8zl2nc-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "verdict": "PASS",
+  "pass": {
+    "corpseGone": true,
+    "gemSpawned": true,
+    "killFeed": true
+  },
+  "passScore": "3 / 3",
+  "proof": "deaths=5 (bot=5, human=0); corpseRemain=0; gemOk=5; feedOk=5; last segs=0 deathFood+24",
+  "media": [
+    "page@2ab66e05573df5663328e64747641c0f.webm",
+    "page@4a6b86581654adaf64622b646a90a87d.webm",
+    "page@59dd850146d27fbbabd0dd6d4779e9f0.webm"
+  ],
+  "next": "RC-DEATH-006 Respawn"
+}

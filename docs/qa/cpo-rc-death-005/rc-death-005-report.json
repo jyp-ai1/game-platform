@@ -1,0 +1,614 @@
+{
+  "rc": "RC-DEATH-005",
+  "commit": "3bc412f",
+  "base": "https://game29-b6l8zl2nc-jyp-ai1s-projects.vercel.app",
+  "startedAt": "2026-08-03T15:35:39.445Z",
+  "snapshots": [
+    {
+      "elapsedMs": 1057,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 1955,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 2795,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 3632,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 4458,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 5389,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 6264,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 7194,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 8146,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 9021,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 9984,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 10896,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 11735,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 12619,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 13477,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 14345,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 15218,
+      "deathCount": 0,
+      "verdict": "NO_DEATH",
+      "passScore": "0 / 3",
+      "proof": "no killSnake snapshots yet"
+    },
+    {
+      "elapsedMs": 16073,
+      "deathCount": 1,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=1 (bot=1, human=0); corpseRemain=0; gemOk=1; feedOk=1; last segs=0 deathFood+31"
+    },
+    {
+      "elapsedMs": 16897,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 17791,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 18897,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 19862,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 20837,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 21746,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 22574,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 23598,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 24555,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 25713,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 26803,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 27898,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 28836,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 29765,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 30679,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 31650,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 32581,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 33444,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 34362,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 35353,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 36312,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 37342,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 38340,
+      "deathCount": 2,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=2 (bot=2, human=0); corpseRemain=0; gemOk=2; feedOk=2; last segs=0 deathFood+14"
+    },
+    {
+      "elapsedMs": 39373,
+      "deathCount": 3,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=3 (bot=3, human=0); corpseRemain=0; gemOk=3; feedOk=3; last segs=0 deathFood+10"
+    },
+    {
+      "elapsedMs": 40334,
+      "deathCount": 3,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=3 (bot=3, human=0); corpseRemain=0; gemOk=3; feedOk=3; last segs=0 deathFood+10"
+    },
+    {
+      "elapsedMs": 41464,
+      "deathCount": 3,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=3 (bot=3, human=0); corpseRemain=0; gemOk=3; feedOk=3; last segs=0 deathFood+10"
+    },
+    {
+      "elapsedMs": 42503,
+      "deathCount": 3,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=3 (bot=3, human=0); corpseRemain=0; gemOk=3; feedOk=3; last segs=0 deathFood+10"
+    },
+    {
+      "elapsedMs": 43549,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 44558,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 45563,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 46597,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 47503,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 48437,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 49413,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 50424,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 51289,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 52309,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 53338,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 54233,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 55215,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 56133,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 57246,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 58228,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 59155,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 60020,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 61141,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 62233,
+      "deathCount": 4,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=4 (bot=4, human=0); corpseRemain=0; gemOk=4; feedOk=4; last segs=0 deathFood+22"
+    },
+    {
+      "elapsedMs": 63303,
+      "deathCount": 5,
+      "verdict": "PASS",
+      "passScore": "3 / 3",
+      "proof": "deaths=5 (bot=5, human=0); corpseRemain=0; gemOk=5; feedOk=5; last segs=0 deathFood+24"
+    }
+  ],
+  "url": "https://game29-b6l8zl2nc-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "endedAt": "2026-08-03T15:36:48.545Z",
+  "final": {
+    "enabled": true,
+    "deathCount": 5,
+    "summary": {
+      "enabled": true,
+      "deathCount": 5,
+      "botDeaths": 5,
+      "humanDeaths": 0,
+      "pass": {
+        "corpseGone": true,
+        "gemSpawned": true,
+        "killFeed": true
+      },
+      "passScore": "3 / 3",
+      "verdict": "PASS",
+      "proof": "deaths=5 (bot=5, human=0); corpseRemain=0; gemOk=5; feedOk=5; last segs=0 deathFood+24",
+      "last": {
+        "t": 1785771408179,
+        "tick": 697,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "killerId": "bot:18",
+        "stillInWorld": true,
+        "segmentsAfter": 0,
+        "segmentCountAfter": 0,
+        "corpseCleared": true,
+        "foodBefore": 4503,
+        "foodAfter": 4527,
+        "deathFoodAdded": 24,
+        "deathFoodTotal": 322,
+        "killFeedLen": 12,
+        "killFeedHasVictim": true,
+        "alive": false,
+        "spectating": true
+      }
+    },
+    "deaths": [
+      {
+        "t": 1785771360670,
+        "tick": 400,
+        "victimId": "bot:5",
+        "victimBot": true,
+        "killerId": "bot:13",
+        "stillInWorld": true,
+        "segmentsAfter": 0,
+        "segmentCountAfter": 0,
+        "corpseCleared": true,
+        "foodBefore": 4344,
+        "foodAfter": 4375,
+        "deathFoodAdded": 31,
+        "deathFoodTotal": 300,
+        "killFeedLen": 12,
+        "killFeedHasVictim": true,
+        "alive": false,
+        "spectating": true
+      },
+      {
+        "t": 1785771361565,
+        "tick": 407,
+        "victimId": "bot:13",
+        "victimBot": true,
+        "killerId": "bot:16",
+        "stillInWorld": true,
+        "segmentsAfter": 0,
+        "segmentCountAfter": 0,
+        "corpseCleared": true,
+        "foodBefore": 4380,
+        "foodAfter": 4394,
+        "deathFoodAdded": 14,
+        "deathFoodTotal": 309,
+        "killFeedLen": 12,
+        "killFeedHasVictim": true,
+        "alive": false,
+        "spectating": true
+      },
+      {
+        "t": 1785771384358,
+        "tick": 546,
+        "victimId": "bot:33",
+        "victimBot": true,
+        "killerId": "bot:28",
+        "stillInWorld": true,
+        "segmentsAfter": 0,
+        "segmentCountAfter": 0,
+        "corpseCleared": true,
+        "foodBefore": 4436,
+        "foodAfter": 4446,
+        "deathFoodAdded": 10,
+        "deathFoodTotal": 298,
+        "killFeedLen": 12,
+        "killFeedHasVictim": true,
+        "alive": false,
+        "spectating": true
+      },
+      {
+        "t": 1785771387771,
+        "tick": 565,
+        "victimId": "bot:16",
+        "victimBot": true,
+        "killerId": "bot:28",
+        "stillInWorld": true,
+        "segmentsAfter": 0,
+        "segmentCountAfter": 0,
+        "corpseCleared": true,
+        "foodBefore": 4450,
+        "foodAfter": 4472,
+        "deathFoodAdded": 22,
+        "deathFoodTotal": 317,
+        "killFeedLen": 12,
+        "killFeedHasVictim": true,
+        "alive": false,
+        "spectating": true
+      },
+      {
+        "t": 1785771408179,
+        "tick": 697,
+        "victimId": "bot:28",
+        "victimBot": true,
+        "killerId": "bot:18",
+        "stillInWorld": true,
+        "segmentsAfter": 0,
+        "segmentCountAfter": 0,
+        "corpseCleared": true,
+        "foodBefore": 4503,
+        "foodAfter": 4527,
+        "deathFoodAdded": 24,
+        "deathFoodTotal": 322,
+        "killFeedLen": 12,
+        "killFeedHasVictim": true,
+        "alive": false,
+        "spectating": true
+      }
+    ]
+  },
+  "verdict": "PASS",
+  "pass": {
+    "corpseGone": true,
+    "gemSpawned": true,
+    "killFeed": true
+  },
+  "passScore": "3 / 3",
+  "proof": "deaths=5 (bot=5, human=0); corpseRemain=0; gemOk=5; feedOk=5; last segs=0 deathFood+24"
+}
