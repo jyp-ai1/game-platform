@@ -6,9 +6,10 @@
 export const AGAR_WORLD = 900;
 export const AGAR_FOOD_TARGET = 220;
 export const AGAR_BOT_COUNT = 18;
-export const AGAR_START_MASS = 12;
-/** Reachable after a short feed streak from start mass 12. */
-export const AGAR_MIN_SPLIT_MASS = 28;
+/** Tuned minimum so first eats / presence feel quick (not Snake L10). */
+export const AGAR_START_MASS = 18;
+/** Reachable after a short feed streak from start mass. */
+export const AGAR_MIN_SPLIT_MASS = 32;
 /** Minimum cell mass required to eject (classic W feed). */
 export const AGAR_MIN_EJECT_MASS = 32;
 /** Mass removed from the cell when ejecting. */
@@ -16,6 +17,8 @@ export const AGAR_EJECT_COST = 14;
 /** Food pellet mass spawned by eject (slightly less than cost). */
 export const AGAR_EJECT_FOOD = 12;
 export const AGAR_TICK_MS = 33;
+/** Split-attack boost window (ms) — forward eject for absorb. */
+export const AGAR_SPLIT_BOOST_MS = 640;
 /** Board / grid tone — shared visual target for Snake WORLD map. */
 export const AGAR_BOARD_BG = "#0b1220";
 export const AGAR_GRID_LINE = "rgba(255,255,255,0.04)";
@@ -35,6 +38,9 @@ export type AgarCell = {
   mass: number;
   /** Split impulse expiry (ms) */
   boostUntil?: number;
+  /** Unit direction of split launch (Space = Split Attack). */
+  boostDirX?: number;
+  boostDirY?: number;
   mergeAt?: number;
 };
 
@@ -153,13 +159,19 @@ export function splitPlayer(world: AgarWorld, playerId: string, now = Date.now()
     const half = cell.mass / 2;
     cell.mass = half;
     const ang = Math.atan2(p.aimY - cell.y, p.aimX - cell.x);
+    const dirX = Math.cos(ang);
+    const dirY = Math.sin(ang);
     const r = massToRadius(half);
+    // Launch split cell forward so it can attack/absorb smaller opponents.
+    const launch = r * 3.6 + 14;
     next.push(cell);
     next.push({
-      x: cell.x + Math.cos(ang) * r * 2.2,
-      y: cell.y + Math.sin(ang) * r * 2.2,
+      x: clamp(cell.x + dirX * launch, 4, world.size - 4),
+      y: clamp(cell.y + dirY * launch, 4, world.size - 4),
       mass: half,
-      boostUntil: now + 420,
+      boostUntil: now + AGAR_SPLIT_BOOST_MS,
+      boostDirX: dirX,
+      boostDirY: dirY,
       mergeAt: now + 8_000,
     });
   }
@@ -191,11 +203,22 @@ function speedForMass(mass: number): number {
 }
 
 function moveCell(cell: AgarCell, aimX: number, aimY: number, size: number, now: number): void {
+  // Split Attack: ballistic forward while boost is active.
+  if (
+    cell.boostUntil &&
+    now < cell.boostUntil &&
+    cell.boostDirX != null &&
+    cell.boostDirY != null
+  ) {
+    const boostSpd = speedForMass(cell.mass) * 3.4;
+    cell.x = clamp(cell.x + cell.boostDirX * boostSpd, 4, size - 4);
+    cell.y = clamp(cell.y + cell.boostDirY * boostSpd, 4, size - 4);
+    return;
+  }
   const dx = aimX - cell.x;
   const dy = aimY - cell.y;
   const dist = Math.hypot(dx, dy) || 1;
-  let spd = speedForMass(cell.mass);
-  if (cell.boostUntil && now < cell.boostUntil) spd *= 2.4;
+  const spd = speedForMass(cell.mass);
   const step = Math.min(dist, spd);
   cell.x = clamp(cell.x + (dx / dist) * step, 4, size - 4);
   cell.y = clamp(cell.y + (dy / dist) * step, 4, size - 4);
@@ -251,11 +274,37 @@ function tryEatFood(world: AgarWorld, player: AgarPlayer): void {
   }
 }
 
+/** Agar-local death drop — pellets/gems at death site (not shared loot core). */
+function dropDeathMass(
+  world: AgarWorld,
+  x: number,
+  y: number,
+  mass: number,
+  color: string
+): void {
+  const n = Math.min(14, Math.max(4, Math.round(mass / 6)));
+  const per = Math.max(1, Math.round((mass * 0.4) / n));
+  for (let i = 0; i < n; i++) {
+    const ang = (Math.PI * 2 * i) / n + Math.random() * 0.2;
+    const dist = 6 + Math.random() * 22;
+    world.food.push({
+      id: `d${foodSeq++}`,
+      x: clamp(x + Math.cos(ang) * dist, 4, world.size - 4),
+      y: clamp(y + Math.sin(ang) * dist, 4, world.size - 4),
+      mass: per,
+      color: i % 2 === 0 ? color : "#fbbf24",
+    });
+  }
+}
+
 function tryEatPlayers(world: AgarWorld, now: number): void {
   const list = Object.values(world.players).filter((p) => p.alive);
   for (const hunter of list) {
     for (const prey of list) {
       if (hunter.id === prey.id) continue;
+      let deathX = prey.aimX;
+      let deathY = prey.aimY;
+      let dropped = 0;
       for (const hc of hunter.cells) {
         const hr = massToRadius(hc.mass);
         for (let pi = prey.cells.length - 1; pi >= 0; pi--) {
@@ -267,13 +316,17 @@ function tryEatPlayers(world: AgarWorld, now: number): void {
           if (d < hr - pr * 0.28) {
             hc.mass += pc.mass * 0.9;
             hunter.score += Math.round(pc.mass);
+            deathX = pc.x;
+            deathY = pc.y;
+            dropped += pc.mass;
             prey.cells.splice(pi, 1);
           }
         }
       }
       if (prey.cells.length === 0) {
         prey.alive = false;
-        // Respawn bots quickly; humans stay dead until restart
+        if (dropped > 0) dropDeathMass(world, deathX, deathY, dropped, prey.color);
+        // Respawn bots quickly; humans stay dead until restart (no auto-respawn)
         if (prey.isBot) {
           const pos = randPos(world.size);
           prey.alive = true;

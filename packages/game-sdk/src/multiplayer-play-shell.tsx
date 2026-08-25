@@ -122,7 +122,7 @@ export function MultiplayerPlayShell({
           {children}
         </div>
         {sideHud ? (
-          <aside className="hidden w-36 shrink-0 sm:block">{sideHud}</aside>
+          <aside className="hidden w-40 shrink-0 sm:block">{sideHud}</aside>
         ) : null}
       </div>
       {sideHud ? <div className="w-full max-w-xl sm:hidden">{sideHud}</div> : null}
@@ -144,14 +144,18 @@ export function MultiplayerSideRankHud({
     <div className="rounded-lg border border-white/10 bg-black/55 p-2 text-[11px] backdrop-blur">
       <p className="mb-1 font-semibold text-amber-200">{title}</p>
       <ol className="space-y-0.5">
-        {entries.map((r, i) => (
-          <li key={r.id} className="flex justify-between gap-1">
-            <span className={r.id === selfId ? "text-cyan-300" : "text-white/80"}>
-              {i + 1}. {r.label}
-            </span>
-            <span className="font-mono text-white/60">{r.value}</span>
-          </li>
-        ))}
+        {entries.map((r, i) => {
+          const isSelf = selfId != null && r.id === selfId;
+          return (
+            <li key={r.id} className="flex justify-between gap-1">
+              <span className={isSelf ? "font-semibold text-emerald-300" : "text-white/80"}>
+                {i + 1}. {isSelf ? "★ " : ""}
+                {r.label}
+              </span>
+              <span className="font-mono text-white/60">{r.value}</span>
+            </li>
+          );
+        })}
       </ol>
     </div>
   );

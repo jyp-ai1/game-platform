@@ -1,8 +1,7 @@
 "use client";
 
 /**
- * Sprint 17 — Agar Multiplayer scaffold (local WORLD + bots).
- * MP-UX-001: shared entry (character+color) + play shell chrome.
+ * AGAR-UX/FUN-001 — Snake-parity MP shell UX + Agar growth/split/absorb fun.
  */
 import {
   getDeviceId,
@@ -16,9 +15,9 @@ import {
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
-import { ScoreBox } from "@game-platform/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { AgarMinimap } from "./agar-minimap";
 import {
   AGAR_BOARD_BG,
   AGAR_BOT_COUNT,
@@ -60,6 +59,14 @@ function snapshotWorld(w: AgarWorld): AgarWorld {
 function applyLocalLook(w: AgarWorld, localId: string, color: string): void {
   const p = w.players[localId];
   if (p) p.color = color;
+}
+
+function localRank(world: AgarWorld, id: string): number {
+  const sorted = Object.values(world.players)
+    .filter((p) => p.alive)
+    .sort((a, b) => totalMass(b) - totalMass(a));
+  const idx = sorted.findIndex((p) => p.id === id);
+  return idx >= 0 ? idx + 1 : 0;
 }
 
 export function AgarGame() {
@@ -106,6 +113,7 @@ export function AgarGame() {
   const me = world.players[deviceId];
   const alive = !!me?.alive;
   const mass = me ? Math.round(totalMass(me)) : 0;
+  const rank = localRank(world, deviceId);
   const cam = cameraFocus(me);
 
   useEffect(() => {
@@ -209,16 +217,28 @@ export function AgarGame() {
     );
   }
 
+  const topRanks = world.rankings.map((r, i) => ({ id: r.id, rank: i + 1 }));
+  const playerList = Object.values(world.players);
+
   const rankHud = (
-    <MultiplayerSideRankHud
-      title="TOP 10"
-      selfId={deviceId}
-      entries={world.rankings.map((r) => ({
-        id: r.id,
-        label: r.nickname.slice(0, 8),
-        value: r.mass,
-      }))}
-    />
+    <div className="flex w-full flex-col gap-2">
+      <MultiplayerSideRankHud
+        title="TOP 10"
+        selfId={deviceId}
+        entries={world.rankings.map((r) => ({
+          id: r.id,
+          label: r.nickname.slice(0, 8),
+          value: `L:${r.mass}`,
+        }))}
+      />
+      <AgarMinimap
+        players={playerList}
+        worldSize={world.size}
+        selfId={deviceId}
+        topRanks={topRanks}
+        viewSize={VIEW}
+      />
+    </div>
   );
 
   return (
@@ -226,11 +246,13 @@ export function AgarGame() {
       onExit={() => setStarted(false)}
       sideHud={rankHud}
       topBar={
-        <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2">
-          <ScoreBox label="Mass" value={mass} />
-          <ScoreBox label="Food" value={world.food.length} />
-          <p className="text-xs text-muted-foreground">Room {roomCode}</p>
-          <p className="text-xs text-muted-foreground">Space = Split · W = Eject</p>
+        <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2 text-xs font-semibold tracking-wide text-white/90">
+          <span className="rounded-md bg-black/55 px-2.5 py-1">YOU</span>
+          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">L:{mass}</span>
+          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
+            RANK {rank > 0 ? `#${rank}` : "—"}
+          </span>
+          <span className="text-[10px] font-normal text-white/45">Space = Split · W = Eject</span>
         </div>
       }
     >
@@ -266,11 +288,12 @@ export function AgarGame() {
                 key={f.id}
                 className="absolute rounded-full"
                 style={{
-                  left: f.x - 2,
-                  top: f.y - 2,
-                  width: 4,
-                  height: 4,
+                  left: f.x - (f.mass > 2 ? 3 : 2),
+                  top: f.y - (f.mass > 2 ? 3 : 2),
+                  width: f.mass > 2 ? 6 : 4,
+                  height: f.mass > 2 ? 6 : 4,
                   backgroundColor: f.color,
+                  boxShadow: f.mass > 2 ? `0 0 6px ${f.color}` : undefined,
                 }}
               />
             ))}
