@@ -1,0 +1,67 @@
+{
+  "task": "FIX-SNAKE-UX-001",
+  "step": 1,
+  "status": "READY_FOR_CEO_TEST",
+  "branch": "content-factory",
+  "commit": "0f719f0",
+  "deploymentTarget": {
+    "vercelProject": "game29",
+    "githubRepository": "jyp-ai1/game-platform",
+    "production": "HOLD"
+  },
+  "previewVisitUrl": "https://game29-g70s2qh3a-jyp-ai1s-projects.vercel.app",
+  "productionHold": true,
+  "cpoGate": "HOLD until CEO",
+  "changed": [
+    "games/snake/src/SnakeIo.tsx — time-based renderAlpha between physics ticks (visual only); ping via ResourceTiming on /vercel.svg",
+    "games/snake/src/snake-feel-tuning.ts — cameraFollowLerp 0.52→0.22; baseCameraZoom 1.4→1.28; viewportCellsVisible 50→56",
+    "games/snake/src/snake-mvp-rc1.ts — cameraFollowLerp sync 0.22",
+    "games/snake/src/snake-io-engine.ts — respawnSnake finalizeSnake segments 3→SNAKE_MVP_RC1.startingSegments (10)"
+  ],
+  "notChanged": [
+    "Death / killSnake / collision / head identity (FIX-DEATH)",
+    "Leaderboard ranking",
+    "Loot drop logic",
+    "Respawn engine structure / timers / humanAutoRespawn",
+    "World sync protocol",
+    "Step 2 (minimap/TOP10/fullscreen)",
+    "Step 3 (growth/bomber thumb)",
+    "Production deploy"
+  ],
+  "ping": {
+    "rootCause": "HUD used wall-clock await on fetch HEAD `/`. During movement, structuredClone+React commit stalls the main thread; promise resume after fetch completes inflated displayed RTT (CEO 30→800ms). Not a true network spike / sync storm.",
+    "fix": "Probe static /vercel.svg; prefer PerformanceResourceTiming (responseEnd-requestStart) so post-response main-thread delay is excluded.",
+    "before": {
+      "ceoObservedHudMs": { "idle": 30, "moving": 800 },
+      "probeBase": "https://game29-ijhz37nyg-jyp-ai1s-projects.vercel.app",
+      "homeHeadIdleAvgMs": 89,
+      "homeHeadIdleMaxMs": 218,
+      "staticGetIdleAvgMs": 77,
+      "staticGetIdleSteadyMs": "29–42 after warm",
+      "evidence": "docs/qa/cpo-fix-snake-ux-001/step1/ping-before.json"
+    },
+    "after": {
+      "probeBase": "https://game29-g70s2qh3a-jyp-ai1s-projects.vercel.app",
+      "staticGetIdleSteadyMs": "28–38 after warm",
+      "staticGetIdleAvgMs": 229,
+      "staticGetIdleMaxMs": 914,
+      "note": "Node wall-clock still shows cold spikes; in-game HUD uses ResourceTiming network RTT (should stay near idle ~30ms while moving). CEO should confirm HUD while actively steering.",
+      "evidence": "docs/qa/cpo-fix-snake-ux-001/step1/ping-after.json"
+    }
+  },
+  "respawnLength": {
+    "policy": "start AND respawn = L10",
+    "constant": "SNAKE_MVP_RC1.startingSegments = 10",
+    "proof": "docs/qa/cpo-fix-snake-ux-001/step1/respawn-length-proof.json"
+  },
+  "ceoTestChecklist": [
+    "Open Preview Visit URL (not Production, not branch alias alone)",
+    "Home → Quick Play / 바로 참가 → WORLD",
+    "Movement feels smoother between physics steps (no physics/death regression)",
+    "Camera less jittery on large map; nearby enemies more visible",
+    "HUD ping while idle ~ tens of ms; while moving should NOT jump to ~800ms",
+    "Die once → respawn length = 10 (same as fresh start L10)",
+    "Confirm death/LB/loot/collision unchanged from FIX-DEATH baseline"
+  ],
+  "stop": "Step 2/3 NOT started"
+}

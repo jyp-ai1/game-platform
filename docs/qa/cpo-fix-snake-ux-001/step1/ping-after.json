@@ -1,0 +1,86 @@
+{
+  "at": "2026-08-25T07:54:58.088Z",
+  "base": "https://game29-g70s2qh3a-jyp-ai1s-projects.vercel.app",
+  "commit": "0f719f0",
+  "staticGet": {
+    "label": "after_static_vercel_svg",
+    "min": 28,
+    "avg": 229,
+    "max": 914,
+    "samples": [
+      {
+        "wall": 914,
+        "status": 200
+      },
+      {
+        "wall": 256,
+        "status": 200
+      },
+      {
+        "wall": 272,
+        "status": 200
+      },
+      {
+        "wall": 35,
+        "status": 200
+      },
+      {
+        "wall": 34,
+        "status": 200
+      },
+      {
+        "wall": 258,
+        "status": 200
+      },
+      {
+        "wall": 28,
+        "status": 200
+      },
+      {
+        "wall": 38,
+        "status": 200
+      }
+    ]
+  },
+  "homeHead": {
+    "label": "after_home_HEAD_for_compare",
+    "min": 41,
+    "avg": 188,
+    "max": 807,
+    "samples": [
+      {
+        "wall": 807,
+        "status": 200
+      },
+      {
+        "wall": 250,
+        "status": 200
+      },
+      {
+        "wall": 44,
+        "status": 200
+      },
+      {
+        "wall": 61,
+        "status": 200
+      },
+      {
+        "wall": 129,
+        "status": 200
+      },
+      {
+        "wall": 44,
+        "status": 200
+      },
+      {
+        "wall": 124,
+        "status": 200
+      },
+      {
+        "wall": 41,
+        "status": 200
+      }
+    ]
+  },
+  "note": "Node wall-clock idle probe. In-browser HUD now uses ResourceTiming responseEnd-requestStart on /vercel.svg so main-thread stalls during move no longer inflate ping."
+}
