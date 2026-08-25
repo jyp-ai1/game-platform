@@ -1,0 +1,20 @@
+﻿{
+    "features":  [
+                     "2-8p",
+                     "bomb",
+                     "explosion",
+                     "death",
+                     "round",
+                     "LB"
+                 ],
+    "changed":  [
+                    "games/bomber/** MVP engine+UI",
+                    "apps/web playable + game-player + local MVP title fallback",
+                    "multiplayer-sdk PARTY_GAMES + maxPlayers 8"
+                ],
+    "tests":  "local smoke TITLE+START PASS @ /games/bomber/play?room=ROOM",
+    "knownIssues":  "Supabase catalog row for bomber not yet created — LOCAL_MVP_TITLES fallback",
+    "evidence":  "docs/qa/cpo-sprint17-step8-bomber/",
+    "status":  "PASS",
+    "task":  "STEP8_BOMBER_MVP"
+}

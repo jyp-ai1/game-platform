@@ -226,7 +226,7 @@ export const localStorageTransport: MultiplayerTransport = {
 export const PARTY_GAMES = new Set([
   "tic-tac-toe", "connect4", "air-hockey", "tank-battle",
   "mini-golf", "checkers", "reversi", "gomoku", "domino",
-  "table-tennis", "billiards", "shuffleboard",
+  "table-tennis", "billiards", "shuffleboard", "bomber",
 ]);
 
 /** Tier3 realtime flagship candidates */
@@ -244,5 +244,6 @@ export function isMultiplayerGame(slug: string): boolean {
 
 export function defaultMaxPlayers(slug: string): MaxPlayers {
   if (REALTIME_GAMES.has(slug)) return 50;
+  if (slug === "bomber") return 8;
   return 2;
 }

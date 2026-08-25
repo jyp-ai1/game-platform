@@ -313,6 +313,10 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
     () => import("@game-platform/game-agar").then((mod) => mod.AgarGame),
     { ssr: false, loading: Loading }
   ),
+  bomber: dynamic(
+    () => import("@game-platform/game-bomber").then((mod) => mod.BomberGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

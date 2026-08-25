@@ -1,0 +1,23 @@
+{
+  "name": "@game-platform/game-bomber",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@game-platform/game-sdk": "*",
+    "@game-platform/multiplayer-sdk": "*",
+    "@game-platform/shared": "*",
+    "@game-platform/ui": "*"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
