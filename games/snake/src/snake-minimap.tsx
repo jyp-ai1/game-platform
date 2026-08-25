@@ -21,6 +21,14 @@ interface SnakeMinimapProps {
   className?: string;
 }
 
+function validYouMarker(snake: SnakeEntity | undefined): { x: number; y: number } | null {
+  // ONE condition: exists AND alive AND valid position (not spectating)
+  if (!snake || !snake.alive || snake.spectating) return null;
+  const head = resolveSnakeHead(snake);
+  if (!head || !Number.isFinite(head.x) || !Number.isFinite(head.y)) return null;
+  return head;
+}
+
 /** Minimap — self ★ green (alive only), leader yellow, human blue, bot gray + TOP10 #. */
 export function SnakeMinimap({
   snakes,
@@ -41,6 +49,12 @@ export function SnakeMinimap({
   const viewW = Math.min(100 - viewLeft, (viewPx / worldPx) * 100);
   const viewH = Math.min(100 - viewTop, (viewPx / worldPx) * 100);
   const rankById = new Map(topRanks.map((r) => [r.deviceId, r.rank]));
+
+  const me = snakes.find((s) => s.deviceId === deviceId);
+  const youHead = validYouMarker(me);
+  const youRank = rankById.get(deviceId);
+  const youLeft = youHead ? `${(youHead.x / worldSize) * 100}%` : "50%";
+  const youTop = youHead ? `${(youHead.y / worldSize) * 100}%` : "50%";
 
   return (
     <div
@@ -69,39 +83,15 @@ export function SnakeMinimap({
           }}
         />
         {snakes.map((s) => {
-          // Hide dead / spectating — YOU reappears immediately when alive on respawn
+          if (s.deviceId === deviceId) return null;
           if (!s.alive || s.spectating) return null;
           const head = resolveSnakeHead(s);
           if (!head) return null;
-          const isMe = s.deviceId === deviceId;
           const isTop1 = s.deviceId === top1Id;
           const isBot = isBotSnake(s);
           const rank = rankById.get(s.deviceId);
           const left = `${(head.x / worldSize) * 100}%`;
           const top = `${(head.y / worldSize) * 100}%`;
-          if (isMe) {
-            return (
-              <div
-                key={s.deviceId}
-                className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
-                style={{ left, top }}
-                title="You"
-              >
-                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] leading-none text-yellow-200">
-                  ★
-                </span>
-                <div
-                  className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_12px_#22c55e]"
-                  style={{ width: compact ? 10 : 12, height: compact ? 10 : 12 }}
-                />
-                {rank != null && rank <= 10 ? (
-                  <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none text-emerald-200">
-                    {rank}
-                  </span>
-                ) : null}
-              </div>
-            );
-          }
           const dotColor = isTop1 ? "#eab308" : isBot ? "#9ca3af" : "#3b82f6";
           return (
             <div
@@ -136,6 +126,32 @@ export function SnakeMinimap({
             </div>
           );
         })}
+        {/* Stable YOU marker — update position; hide via opacity (no create/destroy flicker) */}
+        <div
+          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 transition-none"
+          style={{
+            left: youLeft,
+            top: youTop,
+            opacity: youHead ? 1 : 0,
+            pointerEvents: "none",
+            visibility: youHead ? "visible" : "hidden",
+          }}
+          title="You"
+          aria-hidden={!youHead}
+        >
+          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] leading-none text-yellow-200">
+            ★
+          </span>
+          <div
+            className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_12px_#22c55e]"
+            style={{ width: compact ? 10 : 12, height: compact ? 10 : 12 }}
+          />
+          {youRank != null && youRank <= 10 ? (
+            <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none text-emerald-200">
+              {youRank}
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );

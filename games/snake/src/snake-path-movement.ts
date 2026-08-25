@@ -134,10 +134,28 @@ export function advanceSnakePath(
   syncSegmentsFromPath(snake);
 }
 
-/** Smootherstep — stronger continuous blend between physics ticks (visual only). */
+/** Smootherstep — continuous blend between physics ticks (visual only). */
 function smoothRenderAlpha(alpha: number): number {
   const t = Math.max(0, Math.min(1, alpha));
   return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+/** Visual-only head sample between ticks — same blend as interpolateSnakeRender. */
+export function interpolateSnakeHead(
+  snake: SnakeEntity,
+  prev: { headX: number; headY: number } | undefined,
+  alpha: number
+): Vec | null {
+  const curX = snake.headX ?? snake.segments[0]?.x;
+  const curY = snake.headY ?? snake.segments[0]?.y;
+  if (curX == null || curY == null) return null;
+  if (!prev) return { x: curX, y: curY };
+  const blend = smoothRenderAlpha(alpha);
+  if (blend >= 1) return { x: curX, y: curY };
+  return {
+    x: prev.headX + (curX - prev.headX) * blend,
+    y: prev.headY + (curY - prev.headY) * blend,
+  };
 }
 
 /** Interpolate head + path for 60fps render between physics ticks. */

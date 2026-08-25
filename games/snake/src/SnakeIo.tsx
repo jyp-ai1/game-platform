@@ -38,6 +38,7 @@ import {
   getSpectatorTarget,
   captureSnakeSnapshot,
   interpolateSnakeRender,
+  interpolateSnakeHead,
   getSegmentCount,
   lerpSegments,
   restartPlayerSnake,
@@ -131,6 +132,13 @@ import {
 import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
 import { initFixDeath001, noteFixDeath001Sample } from "./snake-fix-death-001";
 import { initFixDeath001Step2, setFixDeath001Step2Focus } from "./snake-fix-death-001-step2";
+import {
+  initSnakeMoveDebug,
+  noteFullscreenDebug,
+  noteSnakeMoveFrame,
+  noteSnakeMoveInput,
+  noteSnakeMoveTick,
+} from "./snake-move-debug";
 import { beginExecOrderFrame, initExecOrderTrace } from "./snake-exec-order-trace";
 import { initDeath005Trace } from "./snake-death-005-trace";
 import { initDeath006Trace } from "./snake-death-006-trace";
@@ -152,6 +160,7 @@ import { applyCharacterToSnake, resolveHeadEmoji, segmentBodyColor, type SnakeHe
 import {
   enterViewportFullscreen,
   exitViewportFullscreen,
+  getActiveFullscreenElement,
   isViewportFullscreen,
   measureGameBoardRect,
 } from "./snake-fullscreen";
@@ -988,6 +997,7 @@ export function SnakeIoGame({
 
   useEffect(() => {
     initLoopDiag();
+    initSnakeMoveDebug();
     initDeathTrace();
     initDeath003Trace();
     initDeath004Trace();
@@ -1155,6 +1165,7 @@ export function SnakeIoGame({
       if (isPausedRef.current) return;
       if (epoch !== tickEpochRef.current) return;
       diagTick();
+      noteSnakeMoveTick();
       const pc = playerCountRef.current;
       const r = getRoom(activeRoom);
       const gs = r?.gameState as Record<string, unknown> | undefined;
@@ -1460,6 +1471,7 @@ export function SnakeIoGame({
       transitionGamePhase("PLAYING", `input=${direction}`);
     }
     markFirstMove(activeRoom);
+    noteSnakeMoveInput();
     const payload = { deviceId, direction, boosting: boostingRef.current };
     if (shouldTickWorld && worldRef.current) {
       setInput(worldRef.current, deviceId, direction);
@@ -1647,12 +1659,29 @@ export function SnakeIoGame({
 
   const toggleFullscreen = useCallback(async () => {
     const el = viewportRef.current;
-    if (!el) return;
-    if (isGameFullscreen) {
+    if (!el) {
+      noteFullscreenDebug("click-no-el", {});
+      return;
+    }
+    // Use actual FS state — worldLayout must NOT block enter (isGameFullscreen includes layout)
+    const nativeNow = isViewportFullscreen(el);
+    const inFs = nativeNow || pseudoFullscreen;
+    noteFullscreenDebug("click", {
+      inFs,
+      nativeNow,
+      pseudoFullscreen,
+      worldLayout,
+      beforeEl: getActiveFullscreenElement()?.tagName ?? null,
+    });
+    if (inFs) {
       await exitViewportFullscreen();
       setPseudoFullscreen(false);
       document.body.style.overflow = "";
       setIsFullscreen(false);
+      noteFullscreenDebug("exit", {
+        afterEl: getActiveFullscreenElement()?.tagName ?? null,
+        fullscreenElement: !!document.fullscreenElement,
+      });
       return;
     }
     const mode = await enterViewportFullscreen(el);
@@ -1661,7 +1690,13 @@ export function SnakeIoGame({
       document.body.style.overflow = "hidden";
     }
     setIsFullscreen(mode === "native" || mode === "pseudo");
-  }, [isGameFullscreen]);
+    noteFullscreenDebug("enter", {
+      mode,
+      afterEl: getActiveFullscreenElement()?.tagName ?? null,
+      fullscreenElement: !!document.fullscreenElement,
+      matchesViewport: getActiveFullscreenElement() === el,
+    });
+  }, [pseudoFullscreen, worldLayout]);
 
   useEffect(() => {
     const syncFs = () => {
@@ -1717,13 +1752,26 @@ export function SnakeIoGame({
         (targetFov - zoomMultRef.current) * SNAKE_FEEL.cameraZoomLerp;
 
       const layout = camLayoutRef.current;
+      // FIX-SNAKE-UX-002: camera follows SAME interpolated head as on-screen draw (not stepped physics)
+      const tickMsForAlpha = Math.max(16, physicsTickMsRef.current);
+      const elapsedForAlpha = lastPhysicsTickAtRef.current
+        ? performance.now() - lastPhysicsTickAtRef.current
+        : tickMsForAlpha;
+      renderAlphaRef.current = Math.min(1, elapsedForAlpha / tickMsForAlpha);
+
       let camTarget: Vec | null = null;
       if (bossCam) {
         camTarget = { x: bossCam.x, y: bossCam.y };
       } else if (isSpectating) {
-        camTarget = resolveSnakeHead(watchSnake ?? undefined);
+        const watch = watchSnake ?? undefined;
+        const snap = watch ? prevSnakeSnapRef.current[watch.deviceId] : undefined;
+        camTarget = watch
+          ? interpolateSnakeHead(watch, snap, renderAlphaRef.current) ?? resolveSnakeHead(watch)
+          : null;
       } else if (snake?.alive && !snake.spectating) {
-        camTarget = resolveSnakeHead(snake);
+        const snap = prevSnakeSnapRef.current[deviceId];
+        camTarget =
+          interpolateSnakeHead(snake, snap, renderAlphaRef.current) ?? resolveSnakeHead(snake);
       }
       if (camTarget && layout.cellSize > 0) {
         const targetX = camTarget.x * layout.cellSize - layout.camHalfX;
@@ -1751,15 +1799,39 @@ export function SnakeIoGame({
         layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
       }
 
-      // FIX-SNAKE-UX-001 Step1/2: time-based alpha (smootherstep in interpolateSnakeRender; visual only)
-      const tickMs = Math.max(16, physicsTickMsRef.current);
-      const elapsed = lastPhysicsTickAtRef.current
-        ? performance.now() - lastPhysicsTickAtRef.current
-        : tickMs;
-      renderAlphaRef.current = Math.min(1, elapsed / tickMs);
-      if (frameCounterRef.current % 2 === 0) {
-        setRenderAlpha(renderAlphaRef.current);
+      // Sample existing interp every frame while alpha advances; skip setState when idle at 1
+      setRenderAlpha((prev) => {
+        const next = renderAlphaRef.current;
+        return Math.abs(prev - next) < 0.008 ? prev : next;
+      });
+
+      if (frameCounterRef.current % 4 === 0) {
+        const w = worldRef.current;
+        if (w) {
+          const renderHeadById: Record<string, { x: number; y: number } | null> = {};
+          const interpUsedById: Record<string, boolean> = {};
+          for (const s of Object.values(w.snakes)) {
+            if (!s.alive || s.spectating) continue;
+            const snap = prevSnakeSnapRef.current[s.deviceId];
+            interpUsedById[s.deviceId] = !!snap;
+            if (snap) {
+              const segs = interpolateSnakeRender(s, snap, renderAlphaRef.current);
+              renderHeadById[s.deviceId] = segs[0] ?? null;
+            } else {
+              renderHeadById[s.deviceId] = resolveSnakeHead(s);
+            }
+          }
+          noteSnakeMoveFrame({
+            alpha: renderAlphaRef.current,
+            tickMs: tickMsForAlpha,
+            localId: deviceId,
+            snakes: Object.values(w.snakes),
+            renderHeadById,
+            interpUsedById,
+          });
+        }
       }
+
       if (frameCounterRef.current % 3 === 0) {
         setParticles((p) => tickParticles(p));
         setScorePopups((pop) => tickScorePopups(pop));
@@ -2187,6 +2259,8 @@ export function SnakeIoGame({
               </div>
             ) : null}
             {Object.values(world.snakes).map((snake) => {
+              // FIX-SNAKE-UX-002: skip dead/spectating — prevents "stationary worm" ghosts
+              if (!snake.alive || snake.spectating) return null;
               const snap = prevSnakeSnapRef.current[snake.deviceId];
               const segs = snap
                 ? interpolateSnakeRender(snake, snap, renderAlpha)
@@ -2250,9 +2324,8 @@ export function SnakeIoGame({
                     key={`${snake.deviceId}-${i}`}
                     className={cn(
                       "absolute rounded-full origin-center",
-                      (!snake.alive || snake.spectating) && "opacity-25",
                       isHead && "z-10",
-                      isMe && snake.alive && "ring-2 ring-white/90",
+                      isMe && "ring-2 ring-white/90",
                       snake.boosting && isHead && "ring-2 ring-amber-300/60"
                     )}
                     style={{

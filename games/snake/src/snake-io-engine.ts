@@ -1361,7 +1361,7 @@ export function directionAngle(dir: Direction): number {
   return (directionToAngle(dir) * 180) / Math.PI;
 }
 
-export { captureSnakeSnapshot, interpolateSnakeRender, getSegmentCount } from "./snake-path-movement";
+export { captureSnakeSnapshot, interpolateSnakeRender, interpolateSnakeHead, getSegmentCount } from "./snake-path-movement";
 
 export function getDeathPosition(snake: SnakeEntity): Vec | null {
   return snake.segments[0] ?? null;

@@ -23,7 +23,7 @@ export async function enterViewportFullscreen(el: HTMLElement): Promise<"native"
       await req({ navigationUI: "hide" });
       return "native";
     } catch {
-      /* fall through */
+      /* fall through — mobile / policy / unsupported */
     }
   }
   if (webkitReq) {
@@ -34,6 +34,7 @@ export async function enterViewportFullscreen(el: HTMLElement): Promise<"native"
       /* fall through */
     }
   }
+  // Graceful fallback — no throw on mobile / unsupported
   return "pseudo";
 }
 

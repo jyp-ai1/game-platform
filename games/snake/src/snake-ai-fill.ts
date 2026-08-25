@@ -402,6 +402,8 @@ export function tickBotBrains(world: SnakeIoWorld): void {
   for (let i = 0; i < batchSize; i++) {
     const snake = bots[(offset + i * 2) % bots.length];
     if (!snake) continue;
+    // FIX-SNAKE-UX-002: bots stuck with awaitingInput never advance in tickWorld
+    if (snake.awaitingInput) snake.awaitingInput = false;
     const phase = snake.botPhase ?? 0;
     if ((world.tick + phase) % PLAYTEST_AI.thinkInterval !== 0) continue;
     runBotBrain(world, snake);

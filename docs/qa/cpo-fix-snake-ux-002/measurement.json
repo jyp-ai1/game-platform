@@ -1,0 +1,44 @@
+{
+  "task": "FIX-SNAKE-UX-002",
+  "phase": "measurement",
+  "method": "static+codepath (pre-fix) + runtime ?debug=snake-move",
+  "balance": {
+    "baseTickMs": 120,
+    "speedMult_1p": 1.15,
+    "physicsTickMs_1p": 104,
+    "physicsTickMs_20p": 120,
+    "baseSpeed": 1.0,
+    "deltaPerPhysicsUpdate": 1.0,
+    "posChangeMs": "~104–120ms (not 50ms / not 20Hz despite comments)"
+  },
+  "renderPath": {
+    "interpolateSnakeRenderApplied": true,
+    "localAndBots": "yes when prevSnakeSnapRef has snapshot",
+    "alphaUpdateBefore": "every 2 RAF frames",
+    "cameraTargetBefore": "resolveSnakeHead = PHYSICS (stepped)",
+    "mismatch": "camera chased discrete physics while draw used interp → 벅벅 on screen"
+  },
+  "human_expected": {
+    "tick_ms": 104,
+    "fps": "~60 (RAF)",
+    "pos_change_ms": 104,
+    "delta_per_update": 1.0
+  },
+  "bot_expected": {
+    "tick_ms": 104,
+    "fps": "~60",
+    "pos_change_ms": 104,
+    "delta_per_update": 1.0,
+    "brainBatchRatio": 0.55,
+    "thinkInterval": 3,
+    "movement": "advanceSnakePath every tick regardless of brain"
+  },
+  "frozen_root_cause": {
+    "primary": "dead/spectating snakes still rendered at opacity-25 looked stationary",
+    "secondary": "bots with awaitingInput=true skipped in tickWorld (cleared in tickBotBrains)",
+    "not": "physics grid / killSnake / ranking algorithm"
+  },
+  "fullscreen_root_cause": "toggleFullscreen used isGameFullscreen which includes worldLayout → always took EXIT branch in WORLD",
+  "minimap_flicker": "YOU marker create/destroy on alive gate; unified to stable marker + opacity",
+  "top10": "L:n already mapped from getSegmentCount; self highlight strengthened with ★ + accent row"
+}

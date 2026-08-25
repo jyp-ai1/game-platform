@@ -46,11 +46,11 @@ export const SNAKE_FEEL = {
   segmentLerpStep: 0.34,
   headLerpStep: 0.55,
   /**
-   * FIX-SNAKE-UX-001 Step2 — visual only (physics grid unchanged).
-   * denser faint subdivision so cell-step edges are not readable as movement units.
+   * FIX-SNAKE-UX-002 — visual only (physics grid unchanged).
+   * Grid lines amplify cell-step perception; keep opacity 0 (no visible grid).
    */
-  visualGridSubdiv: 2,
-  visualGridLineOpacity: 0.012,
+  visualGridSubdiv: 1,
+  visualGridLineOpacity: 0,
   growthAnimMs: 150,
   eatPopAnimMs: 150,
   eatPopPeak: 1.08,

@@ -34,18 +34,24 @@ export function SnakeRankingPanel({
     >
       <p className={cn("font-semibold text-amber-300", compact ? "mb-0.5" : "mb-1")}>{title}</p>
       <ol className={cn("space-y-0.5", compact && "grid grid-cols-2 gap-x-2 gap-y-0.5")}>
-        {entries.slice(0, 10).map((r, i) => (
-          <li
-            key={r.deviceId}
-            className={cn(
-              "truncate",
-              r.deviceId === deviceId ? "font-bold text-emerald-300" : "text-white/75"
-            )}
-          >
-            {i + 1}. {r.nickname.length > 8 ? `${r.nickname.slice(0, 7)}…` : r.nickname}{" "}
-            <span className="text-white/50">L:{r.length}</span>
-          </li>
-        ))}
+        {entries.slice(0, 10).map((r, i) => {
+          const isSelf = r.deviceId === deviceId;
+          return (
+            <li
+              key={r.deviceId}
+              className={cn(
+                "truncate",
+                isSelf
+                  ? "rounded-sm bg-emerald-500/20 font-bold text-emerald-200 ring-1 ring-emerald-400/50"
+                  : "text-white/75"
+              )}
+            >
+              {isSelf ? "★ " : ""}
+              {i + 1}. {r.nickname.length > 8 ? `${r.nickname.slice(0, 7)}…` : r.nickname}{" "}
+              <span className={cn(isSelf ? "text-emerald-100" : "text-white/70")}>L:{r.length}</span>
+            </li>
+          );
+        })}
       </ol>
     </div>
   );
