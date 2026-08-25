@@ -1,0 +1,63 @@
+{
+  "task": "FIX-PERF-001",
+  "status": "CHANGED",
+  "commit": "36ff567",
+  "branch": "content-factory",
+  "deploymentTarget": {
+    "vercelProject": "game29",
+    "githubRepository": "jyp-ai1/game-platform",
+    "production": "HOLD"
+  },
+  "previewVisitUrl": "https://game29-ijhz37nyg-jyp-ai1s-projects.vercel.app",
+  "productionHold": true,
+  "fixAppliedThisStep": true,
+  "changed": [
+    "games/snake/src/snake-io-engine.ts — cullAmbientFood toward config.foodCount; spawn/boost/event respect cap; death loot preserved",
+    "games/snake/src/snake-living-world.ts — food storm fills to foodCount only (was 2.5× soft-cap)",
+    "games/snake/src/SnakeIo.tsx — viewport food cull (budget 420 DOM); real RTT ping via fetch HEAD; cull on merge/tick"
+  ],
+  "notChanged": [
+    "Collision",
+    "Death loop",
+    "Leaderboard integrity",
+    "Loot drop count / death-tier preserve logic (kept)",
+    "Auth"
+  ],
+  "metrics": {
+    "before": {
+      "source": "RC-PERF-001 @ f241285",
+      "fpsHudAvg": 6,
+      "fpsHudEnd": 2,
+      "foods": 4943,
+      "players": 18,
+      "bots": 32,
+      "snakesAlive": 50,
+      "hudPing": null,
+      "realRttAvgMs": 229
+    },
+    "after": {
+      "source": "docs/qa/cpo-fix-perf-001 (same probe style + DOM food count)",
+      "fpsHudAvg": 60,
+      "fpsHudMin": 55,
+      "fpsHudEnd": 59,
+      "foodDomNodesApprox": 338,
+      "foodsSimTarget": "ambient ≤ config.foodCount (~2400 @50p); death preserved above",
+      "players": 19,
+      "bots": 31,
+      "snakesAlive": 50,
+      "hudPingAvgMs": 23,
+      "hudPingNote": "real RTT EMA (fetch HEAD) — not sync gap / _updatedAt age",
+      "realRttAvgMs": 17,
+      "tickHz": 8
+    }
+  },
+  "ceoTestRequired": true,
+  "cpoGate": "HOLD — CEO retest on Preview before Production",
+  "evidence": [
+    "docs/qa/cpo-fix-perf-001/rc-perf-001-report.json",
+    "docs/qa/cpo-fix-perf-001/01-world-start.png",
+    "docs/qa/cpo-fix-perf-001/02-world-end.png",
+    "docs/qa/cpo-fix-perf-001/03-food-dom.png",
+    "docs/qa/cpo-rc-perf-001/cpo-conclusion.json"
+  ]
+}

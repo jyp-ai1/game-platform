@@ -1,0 +1,272 @@
+[
+  {
+    "t": 1787626028799,
+    "type": "info",
+    "text": "[ENTRY] ENGINE_CREATE PASS 0ms"
+  },
+  {
+    "t": 1787626028800,
+    "type": "info",
+    "text": "[ENTRY] ENGINE_READY PASS 0ms"
+  },
+  {
+    "t": 1787626028828,
+    "type": "info",
+    "text": "[LOOP] diagnostics ON — FRAME/TICK/INPUT/SIM/RENDER every 2s"
+  },
+  {
+    "t": 1787626028833,
+    "type": "warning",
+    "text": "[LOOP] TICK blocked: not connected"
+  },
+  {
+    "t": 1787626029991,
+    "type": "info",
+    "text": "[LOOP] TICK mounted interval=126ms"
+  },
+  {
+    "t": 1787626030829,
+    "type": "info",
+    "text": "[LOOP] FRAME=109 TICK=6 INPUT=0 SIM=6 RENDER=50 worldSnakes=50 me=YES PHASE=COUNTDOWN"
+  },
+  {
+    "t": 1787626031848,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#1)"
+  },
+  {
+    "t": 1787626032830,
+    "type": "info",
+    "text": "[LOOP] FRAME=229 TICK=22 INPUT=1 SIM=22 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626033569,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#2)"
+  },
+  {
+    "t": 1787626034828,
+    "type": "info",
+    "text": "[LOOP] FRAME=348 TICK=38 INPUT=2 SIM=38 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626035582,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#3)"
+  },
+  {
+    "t": 1787626036828,
+    "type": "info",
+    "text": "[LOOP] FRAME=468 TICK=54 INPUT=3 SIM=54 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626037599,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#4)"
+  },
+  {
+    "t": 1787626038829,
+    "type": "info",
+    "text": "[LOOP] FRAME=587 TICK=70 INPUT=4 SIM=70 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626039605,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#5)"
+  },
+  {
+    "t": 1787626040840,
+    "type": "info",
+    "text": "[LOOP] FRAME=707 TICK=86 INPUT=5 SIM=86 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626041625,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#6)"
+  },
+  {
+    "t": 1787626042829,
+    "type": "info",
+    "text": "[LOOP] FRAME=826 TICK=101 INPUT=6 SIM=101 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626043639,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#7)"
+  },
+  {
+    "t": 1787626044829,
+    "type": "info",
+    "text": "[LOOP] FRAME=944 TICK=117 INPUT=7 SIM=117 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626045655,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#8)"
+  },
+  {
+    "t": 1787626046829,
+    "type": "info",
+    "text": "[LOOP] FRAME=1064 TICK=133 INPUT=8 SIM=133 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626047672,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#9)"
+  },
+  {
+    "t": 1787626048829,
+    "type": "info",
+    "text": "[LOOP] FRAME=1183 TICK=149 INPUT=9 SIM=149 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626049686,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#10)"
+  },
+  {
+    "t": 1787626050829,
+    "type": "info",
+    "text": "[LOOP] FRAME=1302 TICK=165 INPUT=10 SIM=165 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626051704,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#11)"
+  },
+  {
+    "t": 1787626052829,
+    "type": "info",
+    "text": "[LOOP] FRAME=1422 TICK=181 INPUT=11 SIM=181 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626053721,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#12)"
+  },
+  {
+    "t": 1787626054831,
+    "type": "info",
+    "text": "[LOOP] FRAME=1542 TICK=197 INPUT=12 SIM=197 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626055730,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#13)"
+  },
+  {
+    "t": 1787626056845,
+    "type": "info",
+    "text": "[LOOP] FRAME=1662 TICK=213 INPUT=13 SIM=213 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626057749,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#14)"
+  },
+  {
+    "t": 1787626058827,
+    "type": "info",
+    "text": "[LOOP] FRAME=1781 TICK=228 INPUT=14 SIM=228 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626059763,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#15)"
+  },
+  {
+    "t": 1787626060848,
+    "type": "info",
+    "text": "[LOOP] FRAME=1897 TICK=244 INPUT=15 SIM=244 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626061771,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#16)"
+  },
+  {
+    "t": 1787626062827,
+    "type": "info",
+    "text": "[LOOP] FRAME=2015 TICK=260 INPUT=16 SIM=260 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626063795,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#17)"
+  },
+  {
+    "t": 1787626064828,
+    "type": "info",
+    "text": "[LOOP] FRAME=2135 TICK=276 INPUT=17 SIM=276 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626065807,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#18)"
+  },
+  {
+    "t": 1787626066833,
+    "type": "info",
+    "text": "[LOOP] FRAME=2255 TICK=292 INPUT=18 SIM=292 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626067822,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#19)"
+  },
+  {
+    "t": 1787626068833,
+    "type": "info",
+    "text": "[LOOP] FRAME=2375 TICK=308 INPUT=19 SIM=308 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626069838,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#20)"
+  },
+  {
+    "t": 1787626070828,
+    "type": "info",
+    "text": "[LOOP] FRAME=2495 TICK=324 INPUT=20 SIM=324 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626071856,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#21)"
+  },
+  {
+    "t": 1787626072861,
+    "type": "info",
+    "text": "[LOOP] FRAME=2616 TICK=340 INPUT=21 SIM=340 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626073870,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#22)"
+  },
+  {
+    "t": 1787626074836,
+    "type": "info",
+    "text": "[LOOP] FRAME=2735 TICK=355 INPUT=22 SIM=355 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626075887,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#23)"
+  },
+  {
+    "t": 1787626076836,
+    "type": "info",
+    "text": "[LOOP] FRAME=2853 TICK=371 INPUT=23 SIM=371 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  },
+  {
+    "t": 1787626077901,
+    "type": "info",
+    "text": "[LOOP] INPUT RIGHT (#24)"
+  },
+  {
+    "t": 1787626078828,
+    "type": "info",
+    "text": "[LOOP] FRAME=2972 TICK=387 INPUT=24 SIM=387 RENDER=50 worldSnakes=50 me=YES PHASE=PLAYING"
+  }
+]
