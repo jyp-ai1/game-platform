@@ -1,7 +1,7 @@
 # FIX-SNAKE-UX-001 Step2 — QA Checklist
 
-**Preview Visit URL:** _(fill after deploy)_  
-**Commit:** _(fill after commit)_  
+**Preview Visit URL:** https://game29-mq2dk0akn-jyp-ai1s-projects.vercel.app  
+**Commit:** `581bafb`  
 **Production:** HOLD
 
 ## Candidate files (touched)

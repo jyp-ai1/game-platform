@@ -1,0 +1,34 @@
+{
+  "task": "FIX-SNAKE-UX-001",
+  "step": 2,
+  "status": "READY_FOR_CEO_TEST",
+  "branch": "content-factory",
+  "commit": "581bafb",
+  "deploymentTarget": {
+    "vercelProject": "game29",
+    "githubRepository": "jyp-ai1/game-platform",
+    "production": "HOLD"
+  },
+  "previewVisitUrl": "https://game29-mq2dk0akn-jyp-ai1s-projects.vercel.app",
+  "productionHold": true,
+  "cpoGate": "HOLD until CEO",
+  "changed": [
+    "snake-path-movement.ts — smootherstep render interpolation (visual only)",
+    "snake-feel-tuning.ts — visualGridSubdiv=2, visualGridLineOpacity=0.012",
+    "SnakeIo.tsx — soft denser grid; side HUD relative layout + sideHudPx; fullscreen includes TOP10/minimap",
+    "snake-minimap.tsx — resolveSnakeHead YOU; hide dead; topRanks 1-10 markers",
+    "snake-ranking-panel.tsx — L:n display",
+    "snake-fullscreen.ts — sideHudPx gutter"
+  ],
+  "notChanged": [
+    "Death / killSnake / collision",
+    "Leaderboard ranking algorithm / updateRankings core",
+    "Loot dropFoodFromSnake",
+    "Respawn engine structure",
+    "Auth",
+    "Step 3",
+    "Production deploy"
+  ],
+  "frozenRespected": true,
+  "stop": "Production HOLD; Step 3 NOT started"
+}
