@@ -1,4 +1,4 @@
-import { Palette, Home, Map, Compass, User, Users } from "lucide-react";
+import { Home, Map, Compass, User, Users, Sparkles } from "lucide-react";
 
 export interface MainNavItem {
   label: string;
@@ -31,6 +31,12 @@ export const mainNavItems: MainNavItem[] = [
     href: "/community",
     icon: Users,
     match: (p) => p.startsWith("/community"),
+  },
+  {
+    label: "AI Creator · SOON",
+    href: "/creator",
+    icon: Sparkles,
+    match: (p) => p.startsWith("/creator") || p.startsWith("/studio"),
   },
   {
     label: "Profile",

@@ -5,6 +5,11 @@ import { GameDetailTemplate } from "@/components/game-detail-template";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { selectRelated } from "@/lib/game-sections";
+import {
+  buildLocalMvpGame,
+  getGameOrLocalMvp,
+  mergeLocalMvpGames,
+} from "@/lib/local-mvp-games";
 import { isPlayableSlug } from "@/lib/playable-games";
 import {
   breadcrumbJsonLd,
@@ -25,7 +30,7 @@ export async function generateMetadata({
   params,
 }: GamePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const game = await getGameBySlug(slug);
+  const game = (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug);
 
   if (!game) {
     return { title: "Game Not Found", robots: { index: false, follow: false } };
@@ -36,11 +41,15 @@ export async function generateMetadata({
 
 export default async function GamePage({ params }: GamePageProps) {
   const { slug } = await params;
-  const [game, allGames, rankingEnabled] = await Promise.all([
+  const [dbGame, rawGames, rankingEnabled] = await Promise.all([
     getGameBySlug(slug),
     getGames(),
     isFeatureEnabled("ranking"),
   ]);
+  const allGames = mergeLocalMvpGames(rawGames);
+  const game = dbGame
+    ? getGameOrLocalMvp([dbGame], slug)
+    : getGameOrLocalMvp(allGames, slug);
 
   if (!game || game.status === "HIDDEN") {
     notFound();

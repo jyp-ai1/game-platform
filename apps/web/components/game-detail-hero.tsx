@@ -13,6 +13,7 @@ export function GameDetailHero({ game }: { game: Game }) {
             src={game.thumbnailUrl}
             alt=""
             fill
+            unoptimized={game.thumbnailUrl.startsWith("/images/")}
             className="object-cover opacity-90"
             priority
           />

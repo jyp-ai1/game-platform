@@ -156,6 +156,7 @@ export function PlatformGameCard({
             src={game.thumbnailUrl}
             alt={`${game.title} thumbnail`}
             fill
+            unoptimized={game.thumbnailUrl.startsWith("/images/")}
             className={cn(
               "object-cover motion-base transition-transform",
               hero

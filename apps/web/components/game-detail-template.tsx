@@ -50,7 +50,13 @@ export function GameDetailTemplate({
                 <SnakeMultiplayerEntry variant="start" />
               ) : (
                 <Link
-                  href={`/games/${slug}/play`}
+                  href={
+                    slug === "agar"
+                      ? "/games/agar/play?room=WORLD"
+                      : slug === "bomber"
+                        ? "/games/bomber/play?room=ROOM"
+                        : `/games/${slug}/play`
+                  }
                   className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
                 >
                   Play

@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 
 import { HomePageSkeleton } from "@/components/home-page-skeleton";
 import { HomeBrandHero } from "@/components/home-brand-hero";
-import { HomeMultiplayerSection } from "@/components/home-multiplayer-section";
+import { HomeCatalogSections } from "@/components/home-catalog-sections";
+import { HomeSearchStub } from "@/components/home-search-stub";
 import { ReplayTogetherStrip } from "@/components/replay-together-strip";
 import { useHomeBootDelay } from "@/lib/use-home-boot-delay";
 
@@ -49,48 +50,10 @@ const ReplayTimelineStrip = dynamic(
   { ssr: false, loading: () => null }
 );
 
-function HomePopularSection({ games, popular }: { games: Game[]; popular: Game[] }) {
-  return (
-    <section
-      aria-labelledby="home-popular-heading"
-      className="border-t border-white/5 py-5 sm:py-6"
-      data-testid="home-popular-section"
-    >
-      <Container>
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 id="home-popular-heading" className="text-base font-semibold">
-              Popular
-            </h2>
-            <p className="text-xs text-muted-foreground">{games.length}개 게임</p>
-          </div>
-          <Link
-            href="/games"
-            className="motion-base shrink-0 rounded-xl border border-white/15 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/40"
-          >
-            Browse All →
-          </Link>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {popular.map((g) => (
-            <Link
-              key={g.slug}
-              href={`/games/${g.slug}`}
-              className="motion-base rounded-full border border-white/10 bg-card/60 px-4 py-2 text-sm transition-colors hover:border-primary/40"
-            >
-              {g.title}
-            </Link>
-          ))}
-        </div>
-      </Container>
-    </section>
-  );
-}
-
 export function HomeShell({
   games,
   snakeGame,
-  popular,
+  popular: _popular,
   multiplayerGames = [],
 }: {
   games: Game[];
@@ -145,12 +108,22 @@ export function HomeShell({
         {bootReady ? (
           <>
             <HomeContinueHub games={games} />
-            <HomeRuleRecommendations games={games} large />
-            <HomePopularSection games={games} popular={popular} />
-            <HomeMultiplayerSection
+            <HomeSearchStub games={games} />
+            <HomeCatalogSections
+              games={games}
               snakeGame={snakeGame}
               multiplayerGames={multiplayerGames}
             />
+            <HomeRuleRecommendations games={games} large />
+            <div className="border-t border-white/5 py-4 text-center">
+              <Link
+                href="/creator"
+                className="inline-flex items-center gap-2 rounded-xl border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-400/15"
+                data-testid="home-ai-creator-soon"
+              >
+                AI Creator · SOON
+              </Link>
+            </div>
           </>
         ) : null}
 

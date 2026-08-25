@@ -7,7 +7,8 @@ export const AGAR_WORLD = 900;
 export const AGAR_FOOD_TARGET = 220;
 export const AGAR_BOT_COUNT = 18;
 export const AGAR_START_MASS = 12;
-export const AGAR_MIN_SPLIT_MASS = 36;
+/** Reachable after a short feed streak from start mass 12. */
+export const AGAR_MIN_SPLIT_MASS = 28;
 /** Minimum cell mass required to eject (classic W feed). */
 export const AGAR_MIN_EJECT_MASS = 32;
 /** Mass removed from the cell when ejecting. */
@@ -259,10 +260,11 @@ function tryEatPlayers(world: AgarWorld, now: number): void {
         const hr = massToRadius(hc.mass);
         for (let pi = prey.cells.length - 1; pi >= 0; pi--) {
           const pc = prey.cells[pi]!;
-          if (hc.mass < pc.mass * 1.18) continue;
+          // Slightly larger cell wins — classic Agar eat feel (MVP).
+          if (hc.mass < pc.mass * 1.12) continue;
           const pr = massToRadius(pc.mass);
           const d = Math.hypot(hc.x - pc.x, hc.y - pc.y);
-          if (d < hr - pr * 0.35) {
+          if (d < hr - pr * 0.28) {
             hc.mass += pc.mass * 0.9;
             hunter.score += Math.round(pc.mass);
             prey.cells.splice(pi, 1);
