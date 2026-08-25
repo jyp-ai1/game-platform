@@ -26,6 +26,8 @@ import {
 
 import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
+import { trackGame29Min } from "@/lib/analytics-min";
+import { getDeviceId } from "@game-platform/game-sdk";
 import { PRACTICE_URL } from "@/lib/snake-entry";
 
 const PRACTICE_FALLBACK_MSG =
@@ -121,11 +123,17 @@ function SnakeIoPlayInner({
   useEffect(() => {
     resetEntryStatus();
     entryLog("PLAY_PAGE_MOUNT");
+    // Sprint17 STEP5 — minimal session envelope (no big analytics system).
+    const roomId = practiceMode ? "PRACTICE" : room ?? "unknown";
+    const deviceId = getDeviceId();
+    trackGame29Min("session_start", { gameId: "snake", roomId, deviceId });
+    trackGame29Min("game_start", { gameId: "snake", roomId, deviceId });
     return () => {
+      trackGame29Min("game_end", { gameId: "snake", roomId, deviceId });
       entryLog("PLAY_PAGE_UNMOUNT");
       resetEngineSession();
     };
-  }, []);
+  }, [practiceMode, room]);
 
   useEffect(() => {
     if (room && !practiceMode) {

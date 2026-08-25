@@ -1,0 +1,28 @@
+﻿{
+    "fields":  [
+                   "user_id",
+                   "game_id",
+                   "session_id",
+                   "room_id",
+                   "timestamp"
+               ],
+    "events":  [
+                   "session_start",
+                   "game_start",
+                   "game_end"
+               ],
+    "notChanged":  [
+                       "Death",
+                       "Loot",
+                       "LB",
+                       "Collision",
+                       "big analytics system"
+                   ],
+    "changed":  [
+                    "apps/web/lib/analytics-min.ts",
+                    "apps/web/components/snake-io-play-client.tsx"
+                ],
+    "reuse":  "trackAnalyticsEvent via trackGame29Min",
+    "status":  "PASS",
+    "task":  "STEP5_ANALYTICS_MINIMUM"
+}

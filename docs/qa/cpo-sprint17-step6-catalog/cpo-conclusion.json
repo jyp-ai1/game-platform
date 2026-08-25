@@ -1,0 +1,14 @@
+﻿{
+    "existingGameInterface":  "packages/shared/src/types.ts Game",
+    "changed":  [
+                    "apps/web/lib/game-catalog.ts"
+                ],
+    "note":  "Minimal view-model over existing Game rows; no DB schema. Snake → realtime + WORLD playHref.",
+    "notChanged":  [
+                       "Supabase schema",
+                       "home redesign"
+                   ],
+    "snakeRepresentable":  true,
+    "status":  "PASS",
+    "task":  "STEP6_GAME_CATALOG_MODEL"
+}
