@@ -151,7 +151,7 @@ export function resolveGlobalWorldRule(): MatchRuleConfig {
     humanAutoRespawn: true,
     foodDensityMult: 1.38,
     boostCostMult: 0.75,
-    startingSegments: 12,
+    startingSegments: 10,
     cameraZoomMult: 1.0,
     safeZoneRadiusMult: 1.2,
     scoreTarget: 1200,

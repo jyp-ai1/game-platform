@@ -1,0 +1,30 @@
+﻿{
+    "fakeHud":  false,
+    "task":  "STEP3_WORLD_PLAYER_TARGET",
+    "notChanged":  [
+                       "Collision",
+                       "Death",
+                       "Loot",
+                       "Leaderboard",
+                       "bot fill counts",
+                       "HUD formulas"
+                   ],
+    "status":  "CLARIFIED_NO_CODE",
+    "observed":  {
+                     "local":  "Players 13 + Bots 37 = 50",
+                     "preview":  "Players 16 + Bots 34 = 50; Ping HUD capped 999"
+                 },
+    "note":  "Not inventing numbers. Elevated Players likely stale remote room sessions treated as humans (syncSnakePopulation).",
+    "definitions":  {
+                        "Engine":  "packages/replay-engine/.../population.ts POPULATION_TARGET=50",
+                        "Players_HUD":  "room.players.length (room-registered human slots, capped 20 in syncSnakePopulation)",
+                        "Bots_HUD":  "countWorldSnakes(world) - room.players.length",
+                        "Total":  "Players + Bots ≈ POPULATION_TARGET 50 (HUMAN_MAX 20 + BOT_MAX 30)"
+                    },
+    "botPolicyProposal":  [
+                              "Keep total target 50",
+                              "Optional later: prune stale room presence so Players ≈ active humans",
+                              "Optional later: HUD Players/Bots via countHumanSnakes/countBotSnakes for snake-truth",
+                              "No edit this step — not a clear fabricated-HUD bug"
+                          ]
+}

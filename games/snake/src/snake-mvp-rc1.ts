@@ -1,8 +1,8 @@
 /** Snake MVP RC1 — fixed spec. All gameplay tuning references this file. */
 
 export const SNAKE_MVP_RC1 = {
-  /** Initial worm — 10–12 segments, ~5px spacing at default cell size */
-  startingSegments: 12,
+  /** Initial worm — spawn/respawn length (human + shared restart path) */
+  startingSegments: 10,
   /** World-units between path samples (~5px when cellSize ≈ 10) */
   segmentSpacing: 0.5,
   headScale: 1.5,

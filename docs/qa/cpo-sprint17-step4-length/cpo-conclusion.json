@@ -1,0 +1,20 @@
+﻿{
+    "changed":  [
+                    "games/snake/src/snake-mvp-rc1.ts startingSegments 12→10",
+                    "games/snake/src/snake-match-rules.ts Global World startingSegments 12→10"
+                ],
+    "status":  "PASS",
+    "task":  "STEP4_INITIAL_LENGTH",
+    "verified":  {
+                     "base":  "http://localhost:3020",
+                     "lengthHud":  10,
+                     "segments":  10
+                 },
+    "notChanged":  [
+                       "Death",
+                       "Loot",
+                       "Leaderboard",
+                       "Collision",
+                       "respawn timer logic"
+                   ]
+}
