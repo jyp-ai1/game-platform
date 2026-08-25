@@ -86,6 +86,22 @@ export {
 export { useStandardGameFeel, standardFeelFromState, feelWithScore, type StandardGameFeelOptions } from "./use-standard-game-feel";
 export { StandardGameOverOverlay } from "./standard-game-over-overlay";
 export { StandardGameShell } from "./standard-game-shell";
+
+export {
+  enterViewportFullscreen,
+  exitViewportFullscreen,
+  getActiveFullscreenElement,
+  isViewportFullscreen,
+} from "./multiplayer-fullscreen";
+export {
+  MP_PLAYER_COLORS,
+  MultiplayerEntrySelect,
+  type MpStyleOption,
+} from "./multiplayer-entry-select";
+export {
+  MultiplayerPlayShell,
+  MultiplayerSideRankHud,
+} from "./multiplayer-play-shell";
 export { GameFeelLayer } from "./game-feel-layer";
 export { playGameFeel, type GameFeelEvent } from "./game-feel-events";
 export { PuzzlePlayField } from "./puzzle-play-field";

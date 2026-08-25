@@ -14,6 +14,8 @@ export {
   SNAKE_HEAD_IDS,
   loadSnakeHeadCharacter,
   saveSnakeHeadCharacter,
+  loadSnakeBodyColor,
+  saveSnakeBodyColor,
   resolveHeadEmoji,
   type SnakeHeadId,
 } from "./snake-characters";

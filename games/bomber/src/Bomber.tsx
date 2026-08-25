@@ -1,14 +1,19 @@
 "use client";
 
-/** Sprint17 STEP8 — Bomber MVP (2–8p): move, bomb, blast, death, round, LB. */
+/** Sprint17 STEP8 — Bomber MVP. MP-UX-001: shared entry + play shell. */
 import {
   getDeviceId,
   getLastNickname,
+  MP_PLAYER_COLORS,
+  MultiplayerEntrySelect,
+  MultiplayerPlayShell,
+  MultiplayerSideRankHud,
   StandardGameOverOverlay,
   useGameSDK,
+  type MpStyleOption,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
-import { Button, ScoreBox } from "@game-platform/ui";
+import { ScoreBox } from "@game-platform/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -21,6 +26,14 @@ import {
 } from "./bomber-engine";
 
 const CELL = 28;
+
+const BOMBER_STYLES: MpStyleOption[] = [
+  { id: "bomber", label: "Bomber", emoji: "💣" },
+  { id: "hero", label: "Hero", emoji: "🧑" },
+  { id: "ninja", label: "Ninja", emoji: "🥷" },
+  { id: "robot", label: "Robot", emoji: "🤖" },
+  { id: "ghost", label: "Ghost", emoji: "👻" },
+];
 
 function snap(w: BomberWorld): BomberWorld {
   return {
@@ -38,6 +51,11 @@ function snap(w: BomberWorld): BomberWorld {
   };
 }
 
+function applyLocalLook(w: BomberWorld, localId: string, color: string): void {
+  const p = w.players[localId];
+  if (p) p.color = color;
+}
+
 export function BomberGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
@@ -50,7 +68,11 @@ export function BomberGame() {
   const worldRef = useRef(world);
   worldRef.current = world;
   const [started, setStarted] = useState(false);
+  const [styleId, setStyleId] = useState(BOMBER_STYLES[0]!.id);
+  const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
   const reportedRef = useRef(false);
+
+  const styleEmoji = BOMBER_STYLES.find((s) => s.id === styleId)?.emoji ?? "💣";
 
   useEffect(() => {
     let mounted = true;
@@ -133,132 +155,147 @@ export function BomberGame() {
   const handleStart = useCallback(() => {
     reportedRef.current = false;
     const next = createBomberWorld(deviceId, nickname, 3);
+    applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
     setStarted(true);
-  }, [deviceId, nickname]);
+  }, [deviceId, nickname, color]);
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
     const next = createBomberWorld(deviceId, nickname, 3);
+    applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
-  }, [deviceId, nickname]);
+  }, [deviceId, nickname, color]);
 
   const width = world.cols * CELL;
   const height = world.rows * CELL;
   const living = Object.values(world.players).filter((p) => p.alive).length;
+  const botCount = Object.values(world.players).filter((p) => p.isBot).length;
+
+  if (!started) {
+    return (
+      <MultiplayerEntrySelect
+        title="Bomber"
+        subtitle="캐릭터 · 색상 선택 후 PLAY"
+        styles={BOMBER_STYLES}
+        styleId={styleId}
+        onStyleChange={setStyleId}
+        colors={MP_PLAYER_COLORS}
+        color={color}
+        onColorChange={setColor}
+        onPlay={handleStart}
+        players={1}
+        bots={botCount}
+        roomCode={roomCode}
+      />
+    );
+  }
+
+  const rankHud = (
+    <MultiplayerSideRankHud
+      title="TOP"
+      selfId={deviceId}
+      entries={world.rankings.map((r) => ({
+        id: r.id,
+        label: r.nickname.slice(0, 7),
+        value: `W${r.wins}`,
+      }))}
+    />
+  );
 
   return (
-    <div className="flex w-full flex-col items-center gap-3">
-      <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2">
-        <ScoreBox label="Round" value={world.round} />
-        <ScoreBox label="Alive" value={living} />
-        <ScoreBox label="Wins" value={me?.wins ?? 0} />
-        <p className="text-xs text-muted-foreground">Room {roomCode} · 2–8p · Space=Bomb · WASD/Arrows</p>
-      </div>
-
-      {!started ? (
-        <div className="flex aspect-square w-full max-w-xl flex-col items-center justify-center gap-4 rounded-xl border bg-card/60 p-8">
-          <h2 className="text-xl font-semibold">Bomber</h2>
-          <p className="max-w-sm text-center text-sm text-muted-foreground">
-            폭탄을 설치하고 폭발로 상대를 제거하세요. 라운드 승자가 TOP에 기록됩니다.
-          </p>
-          <Button size="lg" onClick={handleStart}>
-            START MATCH
-          </Button>
+    <MultiplayerPlayShell
+      onExit={() => setStarted(false)}
+      sideHud={rankHud}
+      topBar={
+        <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2">
+          <ScoreBox label="Round" value={world.round} />
+          <ScoreBox label="Alive" value={living} />
+          <ScoreBox label="Wins" value={me?.wins ?? 0} />
+          <p className="text-xs text-muted-foreground">Room {roomCode} · Space=Bomb · WASD</p>
         </div>
-      ) : (
-        <div className="relative w-full max-w-xl">
-          <div
-            className="relative mx-auto overflow-hidden rounded-xl border"
-            style={{ width, height, background: "#0f172a" }}
-          >
-            {world.grid.map((row, y) =>
-              row.map((cell, x) => (
-                <div
-                  key={`c-${x}-${y}`}
-                  className="absolute"
-                  style={{
-                    left: x * CELL,
-                    top: y * CELL,
-                    width: CELL - 1,
-                    height: CELL - 1,
-                    background:
-                      cell === "hard" ? "#334155" : cell === "soft" ? "#78716c" : "#1e293b",
-                  }}
-                />
-              ))
-            )}
-            {world.bombs.map((b) => (
+      }
+    >
+      <>
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden"
+          style={{ width, height, background: "#0f172a" }}
+        >
+          {world.grid.map((row, y) =>
+            row.map((cell, x) => (
               <div
-                key={b.id}
-                className="absolute rounded-full bg-zinc-200"
+                key={`c-${x}-${y}`}
+                className="absolute"
                 style={{
-                  left: b.x * CELL + 6,
-                  top: b.y * CELL + 6,
-                  width: CELL - 12,
-                  height: CELL - 12,
+                  left: x * CELL,
+                  top: y * CELL,
+                  width: CELL - 1,
+                  height: CELL - 1,
+                  background:
+                    cell === "hard" ? "#334155" : cell === "soft" ? "#78716c" : "#1e293b",
                 }}
               />
-            ))}
-            {world.blasts.flatMap((bl) =>
-              bl.cells.map((c, i) => (
-                <div
-                  key={`${bl.id}-${i}`}
-                  className="absolute bg-orange-400/80"
-                  style={{ left: c.x * CELL, top: c.y * CELL, width: CELL - 1, height: CELL - 1 }}
-                />
-              ))
-            )}
-            {Object.values(world.players).map((p) =>
-              p.alive ? (
-                <div
-                  key={p.id}
-                  className="absolute rounded-sm"
-                  style={{
-                    left: p.x * CELL + 4,
-                    top: p.y * CELL + 4,
-                    width: CELL - 8,
-                    height: CELL - 8,
-                    backgroundColor: p.color,
-                    boxShadow: p.id === deviceId ? `0 0 8px ${p.color}` : undefined,
-                  }}
-                  title={p.nickname}
-                />
-              ) : null
-            )}
-            <aside className="absolute right-2 top-2 w-32 rounded-lg border border-white/10 bg-black/55 p-2 text-[11px] backdrop-blur">
-              <p className="mb-1 font-semibold text-amber-200">TOP</p>
-              <ol className="space-y-0.5">
-                {world.rankings.map((r, i) => (
-                  <li key={r.id} className="flex justify-between gap-1">
-                    <span className={r.id === deviceId ? "text-cyan-300" : "text-white/80"}>
-                      {i + 1}. {r.nickname.slice(0, 7)}
-                    </span>
-                    <span className="font-mono text-white/60">W{r.wins}</span>
-                  </li>
-                ))}
-              </ol>
-            </aside>
-            {world.roundOverAt ? (
-              <div className="absolute inset-x-0 bottom-3 text-center text-sm font-semibold text-amber-200">
-                Round clear · next…
-              </div>
-            ) : null}
-          </div>
-
-          {!alive && !world.roundOverAt ? (
-            <StandardGameOverOverlay
-              gameSlug="bomber"
-              score={me?.wins ?? 0}
-              onRestart={handleRetry}
-              onRetry={handleRetry}
-              onExit={() => setStarted(false)}
+            ))
+          )}
+          {world.bombs.map((b) => (
+            <div
+              key={b.id}
+              className="absolute rounded-full bg-zinc-200"
+              style={{
+                left: b.x * CELL + 6,
+                top: b.y * CELL + 6,
+                width: CELL - 12,
+                height: CELL - 12,
+              }}
             />
+          ))}
+          {world.blasts.flatMap((bl) =>
+            bl.cells.map((c, i) => (
+              <div
+                key={`${bl.id}-${i}`}
+                className="absolute bg-orange-400/80"
+                style={{ left: c.x * CELL, top: c.y * CELL, width: CELL - 1, height: CELL - 1 }}
+              />
+            ))
+          )}
+          {Object.values(world.players).map((p) =>
+            p.alive ? (
+              <div
+                key={p.id}
+                className="absolute flex items-center justify-center rounded-sm text-sm"
+                style={{
+                  left: p.x * CELL + 4,
+                  top: p.y * CELL + 4,
+                  width: CELL - 8,
+                  height: CELL - 8,
+                  backgroundColor: p.color,
+                  boxShadow: p.id === deviceId ? `0 0 8px ${p.color}` : undefined,
+                }}
+                title={p.nickname}
+              >
+                {p.id === deviceId ? styleEmoji : null}
+              </div>
+            ) : null
+          )}
+          {world.roundOverAt ? (
+            <div className="absolute inset-x-0 bottom-3 text-center text-sm font-semibold text-amber-200">
+              Round clear · next…
+            </div>
           ) : null}
         </div>
-      )}
-    </div>
+
+        {!alive && !world.roundOverAt ? (
+          <StandardGameOverOverlay
+            gameSlug="bomber"
+            score={me?.wins ?? 0}
+            onRestart={handleRetry}
+            onRetry={handleRetry}
+            onExit={() => setStarted(false)}
+          />
+        ) : null}
+      </>
+    </MultiplayerPlayShell>
   );
 }

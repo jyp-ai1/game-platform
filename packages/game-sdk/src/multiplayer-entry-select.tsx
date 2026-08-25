@@ -1,0 +1,146 @@
+"use client";
+
+import { Button, cn } from "@game-platform/ui";
+
+export type MpStyleOption = {
+  id: string;
+  label: string;
+  emoji: string;
+};
+
+/** Shared player color palette for Snake / Agar / Bomber entry. */
+export const MP_PLAYER_COLORS = [
+  "#22d3ee",
+  "#a78bfa",
+  "#f472b6",
+  "#fbbf24",
+  "#34d399",
+  "#60a5fa",
+  "#fb7185",
+  "#f97316",
+  "#4ade80",
+  "#eab308",
+] as const;
+
+export function MultiplayerEntrySelect({
+  title,
+  subtitle,
+  styles,
+  styleId,
+  onStyleChange,
+  colors = MP_PLAYER_COLORS,
+  color,
+  onColorChange,
+  onPlay,
+  players,
+  bots,
+  roomCode,
+  playLabel = "PLAY",
+}: {
+  title: string;
+  subtitle?: string;
+  styles: readonly MpStyleOption[];
+  styleId: string;
+  onStyleChange: (id: string) => void;
+  colors?: readonly string[];
+  color: string;
+  onColorChange: (color: string) => void;
+  onPlay: () => void;
+  players?: number;
+  bots?: number;
+  roomCode?: string;
+  playLabel?: string;
+}) {
+  const selected = styles.find((s) => s.id === styleId) ?? styles[0];
+
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 px-4 py-8">
+      <div className="text-center">
+        <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Multiplayer</p>
+        <h2 className="mt-1 text-xl font-bold">{title}</h2>
+        {subtitle ? <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p> : null}
+        {(players != null || bots != null || roomCode) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {roomCode ? <span className="mr-2">Room {roomCode}</span> : null}
+            {players != null ? <span className="mr-2">Players {players}</span> : null}
+            {bots != null ? <span>Bots {bots}</span> : null}
+          </p>
+        )}
+      </div>
+
+      <div className="w-full space-y-2">
+        <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Character
+        </p>
+        <div className="grid w-full grid-cols-5 gap-2 sm:gap-3">
+          {styles.map((s) => {
+            const active = s.id === styleId;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => onStyleChange(s.id)}
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-xl border p-2 transition sm:p-3",
+                  active
+                    ? "border-cyan-400 bg-cyan-500/20 ring-2 ring-cyan-400/60"
+                    : "border-white/10 bg-muted/30 hover:border-white/25"
+                )}
+                aria-pressed={active}
+              >
+                <span className="text-2xl sm:text-3xl" aria-hidden>
+                  {s.emoji}
+                </span>
+                <span className="text-[9px] font-medium text-muted-foreground sm:text-[10px]">
+                  {s.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="w-full space-y-2">
+        <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Color
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {colors.map((c) => {
+            const active = c.toLowerCase() === color.toLowerCase();
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => onColorChange(c)}
+                className={cn(
+                  "size-8 rounded-full border-2 transition sm:size-9",
+                  active ? "scale-110 border-white ring-2 ring-white/50" : "border-white/20 hover:border-white/50"
+                )}
+                style={{ backgroundColor: c }}
+                aria-label={`Color ${c}`}
+                aria-pressed={active}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        <div
+          className="flex size-16 items-center justify-center rounded-full border-2 border-white/30 text-3xl shadow-lg"
+          style={{ backgroundColor: color }}
+          aria-hidden
+        >
+          {selected?.emoji ?? "?"}
+        </div>
+        <Button
+          size="lg"
+          className="h-14 min-w-[220px] text-base font-bold bg-cyan-600 hover:bg-cyan-500"
+          onClick={onPlay}
+        >
+          {playLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}

@@ -18,9 +18,12 @@ import { SnakeIoPlayMeta } from "@/components/snake-io-play-meta";
 import { SnakeDebugOverlay } from "@/components/snake-debug-overlay";
 import type { Game } from "@game-platform/shared";
 import {
+  loadSnakeBodyColor,
   loadSnakeHeadCharacter,
+  saveSnakeBodyColor,
   saveSnakeHeadCharacter,
   SnakeCharacterSelect,
+  SNAKE_HEAD_CHARACTERS,
   type SnakeHeadId,
 } from "@game-platform/game-snake";
 
@@ -108,6 +111,9 @@ function SnakeIoPlayInner({
   const isStageMode = room?.toUpperCase() === "STAGE";
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
   const [headCharacter, setHeadCharacter] = useState<SnakeHeadId>(() => loadSnakeHeadCharacter());
+  const [bodyColor, setBodyColor] = useState(() =>
+    loadSnakeBodyColor(SNAKE_HEAD_CHARACTERS[loadSnakeHeadCharacter()].bodyColor)
+  );
   const [characterReady, setCharacterReady] = useState(false);
   const [worldEntered, setWorldEntered] = useState(!immersiveWorld);
   const [showPostGameMeta, setShowPostGameMeta] = useState(false);
@@ -250,9 +256,18 @@ function SnakeIoPlayInner({
     return (
       <SnakeCharacterSelect
         value={headCharacter}
-        onChange={setHeadCharacter}
+        onChange={(id) => {
+          setHeadCharacter(id);
+          setBodyColor(SNAKE_HEAD_CHARACTERS[id].bodyColor);
+        }}
+        color={bodyColor}
+        onColorChange={setBodyColor}
+        players={1}
+        bots={practiceMode ? 0 : 49}
+        roomCode={practiceMode ? "PRACTICE" : room?.toUpperCase() ?? undefined}
         onConfirm={() => {
           saveSnakeHeadCharacter(headCharacter);
+          saveSnakeBodyColor(bodyColor);
           setCharacterReady(true);
         }}
       />
@@ -286,6 +301,7 @@ function SnakeIoPlayInner({
           practiceMode={practiceMode}
           onJoinTimeout={goPractice}
           headCharacter={headCharacter}
+          bodyColor={bodyColor}
         />
       </SnakePlayErrorBoundary>
       {sessionSummary ? (

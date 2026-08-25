@@ -193,10 +193,12 @@ export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
   headCharacter = "frog",
+  bodyColor,
 }: {
   practiceMode?: boolean;
   onJoinTimeout?: () => void;
   headCharacter?: SnakeHeadId;
+  bodyColor?: string;
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -240,6 +242,7 @@ export function SnakeIoGame({
   const lastPingHudAtRef = useRef(0);
   const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
   const headCharacterRef = useRef<SnakeHeadId>(headCharacter);
+  const bodyColorRef = useRef<string | undefined>(bodyColor);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [renderAlpha, setRenderAlpha] = useState(1);
@@ -475,13 +478,14 @@ export function SnakeIoGame({
 
   useEffect(() => {
     headCharacterRef.current = headCharacter;
+    bodyColorRef.current = bodyColor;
     const s = worldRef.current?.snakes[deviceId];
-    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacter);
-  }, [headCharacter, deviceId]);
+    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacter, bodyColor);
+  }, [headCharacter, bodyColor, deviceId]);
 
   const applyLocalHead = useCallback((w: SnakeIoWorld) => {
     const s = w.snakes[deviceId];
-    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current);
+    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current, bodyColorRef.current);
   }, [deviceId]);
 
   const initStageWorld = useCallback(
@@ -1443,7 +1447,7 @@ export function SnakeIoGame({
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && !isSpectating && !awaitingInputRef.current) {
+      if (e.key === "Escape" && isLocalOnly && !isSpectating && !awaitingInputRef.current) {
         e.preventDefault();
         setIsPaused((p) => !p);
         return;
@@ -1496,7 +1500,7 @@ export function SnakeIoGame({
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [handleDirection, isSpectating, shouldTickWorld, deviceId, activeRoom, isGlobalWorld]);
+  }, [handleDirection, isSpectating, shouldTickWorld, deviceId, activeRoom, isGlobalWorld, isLocalOnly]);
 
   const handleRetry = useCallback(() => {
     if (!activeRoom || !worldRef.current) return;
@@ -1888,7 +1892,7 @@ export function SnakeIoGame({
           className="absolute right-2 top-2 z-40 rounded-lg border border-white/15 bg-black/60 px-2.5 py-1.5 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/80"
           aria-label={isFullscreen ? "Exit full screen" : "Full screen"}
         >
-          {isFullscreen ? "⛶ Exit" : "⛶ Full Screen"}
+          {isFullscreen ? "전체화면 종료" : "전체화면"}
         </button>
 
         {/* Game canvas wrapper — square board; fullscreen uses largest fitting size */}
@@ -1940,19 +1944,21 @@ export function SnakeIoGame({
             >
               나가기
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-8 border-white/20 bg-black/70 px-2.5 text-xs text-white hover:bg-black/90"
-              onClick={() => setIsPaused(true)}
-            >
-              Pause
-            </Button>
+            {isLocalOnly ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-8 border-white/20 bg-black/70 px-2.5 text-xs text-white hover:bg-black/90"
+                onClick={() => setIsPaused(true)}
+              >
+                Pause
+              </Button>
+            ) : null}
           </div>
         ) : null}
 
-        {isPaused ? (
+        {isPaused && isLocalOnly ? (
           <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 rounded-xl bg-black/75 backdrop-blur-sm">
             <p className="text-lg font-semibold text-white">Paused</p>
             <Button type="button" size="sm" onClick={() => setIsPaused(false)}>

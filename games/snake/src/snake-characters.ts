@@ -57,6 +57,8 @@ export const SNAKE_HEAD_CHARACTERS: Record<SnakeHeadId, SnakeHeadCharacter> = {
 };
 
 const STORAGE_KEY = "replay:snake-head-character";
+const COLOR_STORAGE_KEY = "replay:snake-body-color";
+
 
 export interface SnakeBodyAppearance {
   headCharacter?: string;
@@ -91,13 +93,28 @@ export function resolveHeadEmoji(headId?: string): string {
 }
 
 /** Apply head + body appearance from character selection */
-export function applyCharacterToSnake(snake: SnakeBodyAppearance, headId: SnakeHeadId): void {
+export function loadSnakeBodyColor(fallback?: string): string {
+  if (typeof window === "undefined") return fallback ?? "#22c55e";
+  const raw = window.localStorage.getItem(COLOR_STORAGE_KEY);
+  return raw && /^#[0-9a-fA-F]{6}$/.test(raw) ? raw : (fallback ?? "#22c55e");
+}
+
+export function saveSnakeBodyColor(color: string): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(COLOR_STORAGE_KEY, color);
+}
+
+export function applyCharacterToSnake(
+  snake: SnakeBodyAppearance,
+  headId: SnakeHeadId,
+  colorOverride?: string
+): void {
   const c = SNAKE_HEAD_CHARACTERS[headId];
   snake.headCharacter = headId;
-  snake.bodyColor = c.bodyColor;
-  snake.bodyColorAlt = c.bodyColorAlt;
-  snake.bodyPattern = c.bodyPattern;
-  snake.color = c.bodyColor;
+  snake.bodyColor = colorOverride || c.bodyColor;
+  snake.bodyColorAlt = colorOverride ? undefined : c.bodyColorAlt;
+  snake.bodyPattern = colorOverride ? "normal" : c.bodyPattern;
+  snake.color = colorOverride || c.bodyColor;
 }
 
 export function segmentBodyColor(snake: SnakeBodyAppearance, segmentIndex: number): string {
