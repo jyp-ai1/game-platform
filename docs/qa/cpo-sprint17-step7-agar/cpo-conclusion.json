@@ -1,0 +1,10 @@
+﻿{
+    "commit":  "65306ed",
+    "changed":  [
+                    "games/agar/src/Agar.tsx room join/leave + Room HUD"
+                ],
+    "tests":  "local smoke PASS",
+    "evidence":  "docs/qa/cpo-sprint17-step7-agar/",
+    "status":  "PASS",
+    "task":  "STEP7_AGAR_MVP"
+}
