@@ -99,8 +99,12 @@ export {
   type MpStyleOption,
 } from "./multiplayer-entry-select";
 export {
+  MultiplayerDeathOverlay,
+  MultiplayerMinimap,
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
+  MultiplayerYouBar,
+  type MpMinimapDot,
 } from "./multiplayer-play-shell";
 export { GameFeelLayer } from "./game-feel-layer";
 export { playGameFeel, type GameFeelEvent } from "./game-feel-events";

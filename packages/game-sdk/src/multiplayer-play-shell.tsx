@@ -1,7 +1,14 @@
 "use client";
 
 import { cn } from "@game-platform/ui";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 
 import {
   enterViewportFullscreen,
@@ -132,7 +139,7 @@ export function MultiplayerPlayShell({
 
 /** Compact ranking card for side HUD (outside playfield). */
 export function MultiplayerSideRankHud({
-  title = "TOP",
+  title = "TOP 10",
   entries,
   selfId,
 }: {
@@ -141,7 +148,10 @@ export function MultiplayerSideRankHud({
   selfId?: string;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-black/55 p-2 text-[11px] backdrop-blur">
+    <div
+      data-testid="mp-top10"
+      className="rounded-lg border border-white/10 bg-black/55 p-2 text-[11px] backdrop-blur"
+    >
       <p className="mb-1 font-semibold text-amber-200">{title}</p>
       <ol className="space-y-0.5">
         {entries.map((r, i) => {
@@ -158,5 +168,223 @@ export function MultiplayerSideRankHud({
         })}
       </ol>
     </div>
+  );
+}
+
+/** In-game chrome: YOU · L:metric · optional RANK. */
+export function MultiplayerYouBar({
+  metric,
+  rank,
+  extra,
+  className,
+}: {
+  /** Display metric already formatted, e.g. "L:42" */
+  metric: string;
+  rank?: number;
+  extra?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      data-testid="mp-you-bar"
+      className={cn(
+        "flex w-full max-w-xl flex-wrap items-center justify-between gap-2 text-xs font-semibold tracking-wide text-white/90",
+        className
+      )}
+    >
+      <span className="rounded-md bg-black/55 px-2.5 py-1">
+        ★ YOU
+      </span>
+      <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">{metric}</span>
+      {rank != null ? (
+        <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
+          RANK {rank > 0 ? `#${rank}` : "—"}
+        </span>
+      ) : null}
+      {extra}
+    </div>
+  );
+}
+
+export type MpMinimapDot = {
+  id: string;
+  /** Normalized 0–1 world position */
+  x: number;
+  y: number;
+  kind: "self" | "leader" | "human" | "bot";
+  rank?: number;
+  alive?: boolean;
+  title?: string;
+};
+
+/** Shared minimap — self ★ green, leader yellow, human blue, bot gray. */
+export function MultiplayerMinimap({
+  dots,
+  viewRect,
+  compact = false,
+}: {
+  dots: MpMinimapDot[];
+  /** Viewport rectangle in % of world (0–100). */
+  viewRect?: { left: number; top: number; width: number; height: number };
+  compact?: boolean;
+}) {
+  const self = dots.find((d) => d.kind === "self");
+  const selfAlive = self?.alive !== false;
+
+  return (
+    <div
+      data-testid="mp-minimap"
+      className={
+        compact
+          ? "w-full max-w-[6rem] shrink-0 rounded-lg border border-white/15 bg-black/50 p-1.5"
+          : "mt-2 w-full shrink-0 rounded-lg border border-white/15 bg-black/50 p-2"
+      }
+    >
+      <p
+        className={
+          compact
+            ? "mb-0.5 text-[7px] font-semibold uppercase tracking-wide text-muted-foreground"
+            : "mb-1 text-[8px] font-semibold uppercase tracking-wide text-muted-foreground"
+        }
+      >
+        Minimap
+      </p>
+      <div className="relative aspect-square w-full overflow-hidden rounded-md bg-black/30">
+        {viewRect ? (
+          <div
+            className="pointer-events-none absolute border border-white/40 bg-white/5"
+            style={{
+              left: `${viewRect.left}%`,
+              top: `${viewRect.top}%`,
+              width: `${viewRect.width}%`,
+              height: `${viewRect.height}%`,
+            }}
+          />
+        ) : null}
+        {dots.map((d) => {
+          if (d.kind === "self") return null;
+          if (d.alive === false) return null;
+          const color =
+            d.kind === "leader" ? "#eab308" : d.kind === "bot" ? "#9ca3af" : "#3b82f6";
+          const size = d.kind === "leader" ? 6 : 4;
+          return (
+            <div
+              key={d.id}
+              className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${d.x * 100}%`, top: `${d.y * 100}%` }}
+              title={d.title}
+            >
+              <div
+                className="rounded-full"
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: color,
+                  boxShadow: d.kind === "leader" ? "0 0 4px #eab308" : undefined,
+                }}
+              />
+              {d.rank != null && d.rank <= 10 ? (
+                <span
+                  className={
+                    compact
+                      ? "absolute left-1/2 top-full -translate-x-1/2 text-[7px] font-bold leading-none text-white/80"
+                      : "absolute left-1/2 top-full -translate-x-1/2 text-[8px] font-bold leading-none text-white/80"
+                  }
+                >
+                  {d.rank}
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
+        {self ? (
+          <div
+            className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${self.x * 100}%`,
+              top: `${self.y * 100}%`,
+              opacity: selfAlive ? 1 : 0,
+              visibility: selfAlive ? "visible" : "hidden",
+              pointerEvents: "none",
+            }}
+            title="You"
+            aria-hidden={!selfAlive}
+          >
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] leading-none text-yellow-200">
+              ★
+            </span>
+            <div
+              className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_10px_#22c55e]"
+              style={{ width: compact ? 10 : 12, height: compact ? 10 : 12 }}
+            />
+            {self.rank != null && self.rank <= 10 ? (
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none text-emerald-200">
+                {self.rank}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Death chrome above canvas/HUD — portal + high z-index so Retry/Exit stay clickable.
+ * Game logic stays in the caller; shell only owns presentation.
+ */
+export function MultiplayerDeathOverlay({
+  score,
+  metric,
+  onRetry,
+  onExit,
+  title = "Death",
+}: {
+  score: number;
+  /** Game-specific line, e.g. "L:128" or "Wins 2" */
+  metric?: string;
+  onRetry: () => void;
+  onExit: () => void;
+  title?: string;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      data-testid="mp-death-overlay"
+      className="pointer-events-none fixed inset-0 z-[200] flex items-end justify-center bg-gradient-to-t from-black/75 via-black/30 to-transparent p-6 pb-10 sm:items-center sm:bg-black/40 sm:via-transparent"
+      role="presentation"
+    >
+      <div
+        className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-black/80 px-5 py-5 text-center shadow-xl backdrop-blur-md"
+        role="dialog"
+        aria-label={title}
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">{title}</p>
+        <p className="text-3xl font-bold tabular-nums text-white">{score.toLocaleString()}</p>
+        {metric ? <p className="text-sm font-medium text-white/70">{metric}</p> : null}
+        <div className="mt-1 flex w-full gap-2">
+          <button
+            type="button"
+            data-testid="mp-death-retry"
+            className="h-11 flex-1 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
+            onClick={onRetry}
+          >
+            RETRY
+          </button>
+          <button
+            type="button"
+            data-testid="mp-death-exit"
+            className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
+            onClick={onExit}
+          >
+            EXIT
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }

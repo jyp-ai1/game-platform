@@ -1,16 +1,18 @@
 "use client";
 
 /**
- * AGAR-UX/FUN-001 — Snake-parity MP shell UX + Agar growth/split/absorb fun.
+ * Agar — shared MP shell UX (entry / YOU / TOP10 / minimap / death).
+ * AGAR-FUN-002 (Space/W/eat balance) deferred.
  */
 import {
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
+  MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
-  StandardGameOverOverlay,
+  MultiplayerYouBar,
   useGameSDK,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
@@ -241,22 +243,25 @@ export function AgarGame() {
     </div>
   );
 
+  const finalScore = Math.max(mass, me?.score ?? 0);
+
   return (
-    <MultiplayerPlayShell
-      onExit={() => setStarted(false)}
-      sideHud={rankHud}
-      topBar={
-        <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2 text-xs font-semibold tracking-wide text-white/90">
-          <span className="rounded-md bg-black/55 px-2.5 py-1">YOU</span>
-          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">L:{mass}</span>
-          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
-            RANK {rank > 0 ? `#${rank}` : "—"}
-          </span>
-          <span className="text-[10px] font-normal text-white/45">Space = Split · W = Eject</span>
-        </div>
-      }
-    >
-      <>
+    <>
+      <MultiplayerPlayShell
+        onExit={() => setStarted(false)}
+        sideHud={rankHud}
+        topBar={
+          <MultiplayerYouBar
+            metric={`L:${mass}`}
+            rank={rank}
+            extra={
+              <span className="text-[10px] font-normal text-white/45">
+                Space = Split · W = Eject
+              </span>
+            }
+          />
+        }
+      >
         <div
           ref={boardRef}
           className="absolute inset-0 touch-none overflow-hidden"
@@ -313,7 +318,7 @@ export function AgarGame() {
                           height: r * 2,
                           backgroundColor: p.color,
                           boxShadow: p.id === deviceId ? `0 0 12px ${p.color}` : undefined,
-                          zIndex: Math.round(c.mass),
+                          zIndex: Math.min(50, Math.round(c.mass)),
                         }}
                         title={p.nickname}
                       >
@@ -325,17 +330,16 @@ export function AgarGame() {
             )}
           </div>
         </div>
+      </MultiplayerPlayShell>
 
-        {!alive ? (
-          <StandardGameOverOverlay
-            gameSlug="agar"
-            score={Math.max(mass, me?.score ?? 0)}
-            onRestart={handleRetry}
-            onRetry={handleRetry}
-            onExit={() => setStarted(false)}
-          />
-        ) : null}
-      </>
-    </MultiplayerPlayShell>
+      {!alive ? (
+        <MultiplayerDeathOverlay
+          score={finalScore}
+          metric={`L:${finalScore}`}
+          onRetry={handleRetry}
+          onExit={() => setStarted(false)}
+        />
+      ) : null}
+    </>
   );
 }

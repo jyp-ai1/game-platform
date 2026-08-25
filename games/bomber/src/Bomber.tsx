@@ -1,15 +1,20 @@
 "use client";
 
-/** Sprint17 STEP8 / STEP4 — Bomber MVP + round ladder + map presets. */
+/** Sprint17 STEP8 / STEP4 — Bomber MVP + round ladder + map presets.
+ * MP-COMMON-SHELL-001 — shared entry / YOU / TOP10 / minimap / death chrome.
+ */
 import {
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
+  MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
+  MultiplayerMinimap,
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
-  StandardGameOverOverlay,
+  MultiplayerYouBar,
   useGameSDK,
+  type MpMinimapDot,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
@@ -64,6 +69,11 @@ function applyLocalLook(w: BomberWorld, localId: string, color: string): void {
   if (p) p.color = color;
 }
 
+function localRank(world: BomberWorld, id: string): number {
+  const idx = world.rankings.findIndex((r) => r.id === id);
+  return idx >= 0 ? idx + 1 : 0;
+}
+
 export function BomberGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
@@ -106,6 +116,9 @@ export function BomberGame() {
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
+  const wins = me?.wins ?? 0;
+  const kills = me?.kills ?? 0;
+  const rank = localRank(world, deviceId);
 
   useEffect(() => {
     if (!started) return;
@@ -126,8 +139,8 @@ export function BomberGame() {
     if (!world.matchOver && Object.values(world.players).filter((p) => p.alive).length > 0) return;
     if (!world.matchOver) return;
     reportedRef.current = true;
-    void reportScore("bomber", me?.wins ?? 0);
-  }, [started, alive, world.matchOver, world.players, me?.wins, reportScore]);
+    void reportScore("bomber", wins);
+  }, [started, alive, world.matchOver, world.players, wins, reportScore]);
 
   useEffect(() => {
     if (!started) return;
@@ -185,7 +198,7 @@ export function BomberGame() {
   const height = world.rows * CELL;
   const botCount = Object.values(world.players).filter((p) => p.isBot).length;
   const timeLeft = remainingTimeSec(world, nowTick);
-  const hearts = alive ? "❤️" : "🖤";
+  const showDeath = world.matchOver || (!alive && world.round >= world.maxRounds && !!world.roundOverAt);
 
   if (!started) {
     return (
@@ -206,41 +219,67 @@ export function BomberGame() {
     );
   }
 
+  const top1Id = world.rankings[0]?.id ?? null;
+  const minimapDots: MpMinimapDot[] = Object.values(world.players).map((p) => ({
+    id: p.id,
+    x: (p.x + 0.5) / world.cols,
+    y: (p.y + 0.5) / world.rows,
+    kind:
+      p.id === deviceId
+        ? ("self" as const)
+        : p.id === top1Id
+          ? ("leader" as const)
+          : p.isBot
+            ? ("bot" as const)
+            : ("human" as const),
+    rank: localRank(world, p.id) || undefined,
+    alive: p.alive,
+    title: `${p.nickname} L:${p.wins}`,
+  }));
+
   const rankHud = (
-    <MultiplayerSideRankHud
-      title="TOP"
-      selfId={deviceId}
-      entries={world.rankings.map((r) => ({
-        id: r.id,
-        label: r.nickname.slice(0, 7),
-        value: `W${r.wins}`,
-      }))}
-    />
+    <div className="flex w-full flex-col gap-2">
+      <MultiplayerSideRankHud
+        title="TOP 10"
+        selfId={deviceId}
+        entries={world.rankings.map((r) => ({
+          id: r.id,
+          label: r.nickname.slice(0, 7),
+          value: `L:${r.wins}`,
+        }))}
+      />
+      <MultiplayerMinimap dots={minimapDots} />
+    </div>
   );
 
   return (
-    <MultiplayerPlayShell
-      onExit={() => setStarted(false)}
-      sideHud={rankHud}
-      topBar={
-        <div
-          data-testid="bomber-round-hud"
-          className="flex w-full max-w-xl flex-wrap items-center justify-center gap-3 text-xs font-semibold tracking-wide text-white/90"
-        >
-          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
-            ROUND {world.round} / {world.maxRounds || BOMBER_MAX_ROUNDS}
-          </span>
-          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">TIME {timeLeft}</span>
-          <span className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/70">
-            AI {botCount} · YOU {hearts}
-          </span>
-          <span className="text-[10px] font-normal text-white/40">
-            Map {world.mapId + 1} · {world.difficulty.label}
-          </span>
-        </div>
-      }
-    >
-      <>
+    <>
+      <MultiplayerPlayShell
+        onExit={() => setStarted(false)}
+        sideHud={rankHud}
+        topBar={
+          <MultiplayerYouBar
+            metric={`L:${wins}`}
+            rank={rank}
+            extra={
+              <>
+                <span
+                  data-testid="bomber-round-hud"
+                  className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
+                >
+                  ROUND {world.round} / {world.maxRounds || BOMBER_MAX_ROUNDS}
+                </span>
+                <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
+                  TIME {timeLeft}
+                </span>
+                <span className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/70">
+                  {alive ? "❤️" : "🖤"} · K{kills}
+                </span>
+              </>
+            }
+          />
+        }
+      >
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden"
           style={{ width, height, background: "#0f172a" }}
@@ -306,23 +345,22 @@ export function BomberGame() {
               Round clear · next map…
             </div>
           ) : null}
+          {!alive && !world.matchOver ? (
+            <div className="absolute inset-x-0 bottom-4 z-20 text-center text-xs text-white/70">
+              Spectating · next round soon
+            </div>
+          ) : null}
         </div>
+      </MultiplayerPlayShell>
 
-        {(world.matchOver || (!alive && world.round >= world.maxRounds && !!world.roundOverAt)) && (
-          <StandardGameOverOverlay
-            gameSlug="bomber"
-            score={me?.wins ?? 0}
-            onRestart={handleRetry}
-            onRetry={handleRetry}
-            onExit={() => setStarted(false)}
-          />
-        )}
-        {!alive && !world.matchOver ? (
-          <div className="absolute inset-x-0 bottom-4 z-20 text-center text-xs text-white/70">
-            Spectating · next round soon
-          </div>
-        ) : null}
-      </>
-    </MultiplayerPlayShell>
+      {showDeath ? (
+        <MultiplayerDeathOverlay
+          score={wins}
+          metric={`L:${wins} · Kills ${kills}`}
+          onRetry={handleRetry}
+          onExit={() => setStarted(false)}
+        />
+      ) : null}
+    </>
   );
 }
