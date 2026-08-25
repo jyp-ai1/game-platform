@@ -17,8 +17,10 @@ mkdirSync(join(OUT, "media"), { recursive: true });
 async function enter(page) {
   const url = `${BASE}/flagship/snake-io/play?room=WORLD&debug=1`;
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
-  await page.getByRole("button", { name: "START", exact: true }).click({ timeout: 15_000 }).catch(() => {});
-  await page.getByRole("button", { name: /ENTER WORLD/i }).click({ timeout: 15_000 }).catch(() => {});
+  // MP-UX-001 shell: character/color → PLAY (legacy START / ENTER WORLD kept as fallback)
+  await page.getByRole("button", { name: "PLAY", exact: true }).click({ timeout: 20_000 }).catch(() => {});
+  await page.getByRole("button", { name: "START", exact: true }).click({ timeout: 8_000 }).catch(() => {});
+  await page.getByRole("button", { name: /ENTER WORLD/i }).click({ timeout: 8_000 }).catch(() => {});
   const board = page.locator(".touch-none").first();
   await board.waitFor({ timeout: 90_000 });
   await page.waitForTimeout(1200);

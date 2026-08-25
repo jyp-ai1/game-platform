@@ -1,20 +1,29 @@
 {
   "rc": "MP-UX-001",
   "followUp": "Bomber home LIVE entry",
-  "status": "FIXED",
+  "status": "PASS",
   "branch": "content-factory",
+  "commit": "f241285",
+  "previewVisitUrl": "https://game29-ajil8k11b-jyp-ai1s-projects.vercel.app",
+  "deploymentTarget": "game29",
+  "productionHold": true,
   "ceoTest": {
-    "homeBomberLiveCard": "PASS_EXPECTED",
-    "characterColorSelect": "PASS_EXPECTED (MultiplayerEntrySelect in Bomber.tsx)",
-    "play": "PASS_EXPECTED"
+    "homeBomberLiveCard": "PASS",
+    "characterColorSelect": "PASS",
+    "play": "PASS_EXPECTED (PLAY CTA on MultiplayerEntrySelect)"
+  },
+  "smoke": {
+    "homeCards": ["Snake", "Agar", "Bomber"],
+    "evidence": [
+      "docs/qa/cpo-mp-ux-001-bomber/01-home-multiplayer.png",
+      "docs/qa/cpo-mp-ux-001-bomber/02-bomber-entry-select.png",
+      "docs/qa/cpo-mp-ux-001-bomber/smoke.json"
+    ]
   },
   "changes": [
-    "REALTIME_GAMES += bomber (moved out of PARTY_GAMES)",
-    "Home page builds multiplayerGames from REALTIME_GAMES; local MVP Game stub if DB row missing",
-    "Home Multiplayer strip copy + 3-col grid",
-    "Live card playHref bomber → /games/bomber/play?room=ROOM",
-    "PlatformGameCard genre label includes bomber"
-  ],
-  "noFixPerf": true,
-  "productionHold": true
+    "REALTIME_GAMES += bomber (removed from PARTY_GAMES)",
+    "Home page builds multiplayerGames from REALTIME_GAMES; local MVP Game stub if DB missing",
+    "Live card room query fixed (no double ?room=)",
+    "Bomber play → MultiplayerEntrySelect (character + color) → PLAY"
+  ]
 }

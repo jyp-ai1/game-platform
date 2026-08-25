@@ -1,0 +1,20 @@
+{
+  "rc": "MP-UX-001",
+  "followUp": "Bomber home LIVE entry",
+  "base": "https://game29-ajil8k11b-jyp-ai1s-projects.vercel.app",
+  "home": {
+    "gridVisible": true,
+    "hasBomber": true,
+    "hasJoin": true,
+    "cardTexts": "🟢LIVE\n\n50 Players\n\nSnake\n\n실시간 멀티플레이\n\n4.8\n50 Players\n바로 참가\n\n🟢LIVE\n\n50 Players\n\nAgar\n\n실시간 멀티플레이\n\n4.5\n50 Players\n바로 참가\n\n🟢LIVE\n\n50 Players\n\nBomber\n\n실시간 멀티플레이\n\n4.3\n50 Players\n바로 참가"
+  },
+  "entry": {
+    "ok": true,
+    "url": "https://game29-ajil8k11b-jyp-ai1s-projects.vercel.app/games/bomber/play?room=ROOM?room=GL-BOMB",
+    "shot": "docs\\qa\\cpo-mp-ux-001-bomber\\02-bomber-entry-select.png"
+  },
+  "ceoTest": {
+    "homeBomberLiveCard": "PASS",
+    "characterColorSelect": "PASS"
+  }
+}

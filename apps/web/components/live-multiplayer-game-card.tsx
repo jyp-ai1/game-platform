@@ -57,8 +57,8 @@ function readLiveMeta(slug: string) {
 
 function playHrefForSlug(slug: string): string {
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
-  if (slug === "bomber") return "/games/bomber/play?room=ROOM";
-  if (slug === "agar") return "/games/agar/play?room=WORLD";
+  if (slug === "bomber") return "/games/bomber/play";
+  if (slug === "agar") return "/games/agar/play";
   return `/games/${slug}/play`;
 }
 
@@ -109,12 +109,20 @@ export function LiveMultiplayerGameCard({
       }
       try {
         const { href } = await quickPlayGlobal(slug);
-        // Prefer /play path for agar scaffold; keep room query when present.
+        // Prefer /play path for agar/bomber scaffold; keep room query when present.
         const playBase = playHrefForSlug(slug);
         const roomMatch = href.match(/[?&]room=([^&]+)/);
-        router.push(roomMatch ? `${playBase}?room=${roomMatch[1]}` : playBase);
+        const fallbackRoom = slug === "bomber" ? "ROOM" : slug === "agar" ? "WORLD" : null;
+        const room = roomMatch?.[1] ?? fallbackRoom;
+        router.push(room ? `${playBase}?room=${room}` : playBase);
       } catch {
-        router.push(playHrefForSlug(slug));
+        const fallback =
+          slug === "bomber"
+            ? "/games/bomber/play?room=ROOM"
+            : slug === "agar"
+              ? "/games/agar/play?room=WORLD"
+              : playHrefForSlug(slug);
+        router.push(fallback);
       }
     } finally {
       setJoining(false);

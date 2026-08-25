@@ -1,24 +1,69 @@
 {
   "rc": "RC-PERF-001",
+  "mode": "MEASURE_ONLY",
   "status": "MEASURED",
-  "commit": "0012f4e",
-  "base": "http://localhost:3020",
-  "summary": {
-    "hudPingMin": null,
-    "hudPingMax": null,
-    "hudPingAvg": null,
-    "realRttAvgMs": 397,
-    "hudVsReal": null,
-    "fpsAvg": 2,
-    "lastPlayers": 13,
-    "lastBots": 37,
-    "lastFoods": 4830,
-    "lastSnakesAlive": 50,
-    "lastTickHz": 8,
-    "reactHudMutPerSec": 0.46,
-    "payloadAvgBytes": 869,
-    "staleUpdatedAtBug": "FIXED_IN_HEAD — no multi-million ms ping observed when HUD shows numbers"
-  },
+  "commit": "f241285",
+  "base": "https://game29-ajil8k11b-jyp-ai1s-projects.vercel.app",
+  "previewVisitUrl": "https://game29-ajil8k11b-jyp-ai1s-projects.vercel.app",
+  "productionHold": true,
   "fixAppliedThisStep": false,
-  "priorFixDocumented": "HEAD 0012f4e already replaced stale _updatedAt age with inter-arrival EMA + 0–999 clamp (SnakeIo.tsx)."
+  "population": {
+    "players": 18,
+    "bots": 32,
+    "snakesAlive": 50,
+    "foods": 4943,
+    "note": "Matches CEO target band (~18 humans / ~32 bots)."
+  },
+  "metrics": {
+    "fpsHudAvg": 6,
+    "fpsHudEnd": 2,
+    "tickHz": 8,
+    "engineTickAdvancing": true,
+    "payloadProbeAvgBytes": 867,
+    "payloadNote": "JSON size of __SNAKE_ENGINE_AUDIT__ snapshot @500ms — NOT wire sync payload.",
+    "reactHudMutPerSec": 0.77,
+    "realRttAvgMs": 229,
+    "realRttMethod": "fetch HEAD / origin",
+    "hudPingMs": null,
+    "hudVsReal": "HUD ping != network RTT. Guest HUD = state receive inter-arrival EMA. Null until >=2 state receives. Host = 0. This run: guest Ping — (null)."
+  },
+  "rootCauseCandidates": [
+    {
+      "rank": 1,
+      "id": "FOOD_RENDER_LOAD",
+      "evidence": "foods≈4943 with snakesAlive=50; HUD FPS avg 6 → end 2 under headless probe",
+      "hypothesis": "Canvas draw of ~5k foods + 50 snakes dominates frame time; perceived severe lag is render-bound more than network RTT (229ms)."
+    },
+    {
+      "rank": 2,
+      "id": "GUEST_SYNC_CADENCE",
+      "evidence": "isHost=false, Tick 8Hz, HUD Ping —, room WORLD-4 connected; payload probe ~867B is audit snapshot not wire",
+      "hypothesis": "Guest applies world at ~8Hz sim tick; when frames drop to 2 FPS, input/feel lag compounds even if RTT is hundreds of ms."
+    },
+    {
+      "rank": 3,
+      "id": "AI_SIM_COST",
+      "evidence": "aiAlive=32, simCount advancing, tick running ok @8Hz",
+      "hypothesis": "Host-side AI fill (32 bots) keeps sim busy; guest still pays for rendering all AI snakes locally from synced state."
+    },
+    {
+      "rank": 4,
+      "id": "PROBE_FLOOR",
+      "evidence": "Headless Chromium; prior local measure also showed FPS 1–7",
+      "hypothesis": "Absolute FPS numbers are lower-bound under CI/headless GPU; CEO device lag directionally matches but magnitude may differ."
+    }
+  ],
+  "notInvestigatedThisStep": [
+    "death/LB/loot/collision",
+    "wire-level world payload size (needs transport instrumentation)",
+    "optimize / FIX-PERF code"
+  ],
+  "evidence": [
+    "docs/qa/cpo-rc-perf-001/rc-perf-001-report.json",
+    "docs/qa/cpo-rc-perf-001/01-world-start.png",
+    "docs/qa/cpo-rc-perf-001/02-world-end.png",
+    "docs/qa/cpo-rc-perf-001/console-RC_PERF_001.json",
+    "tools/qa/rc-perf-001-probe.mjs"
+  ],
+  "nextStepHint": "CPO: pick ONE rank-1 candidate for FIX-PERF later — do not optimize in this ticket."
 }
