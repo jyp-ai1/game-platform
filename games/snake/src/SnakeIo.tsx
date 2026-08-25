@@ -598,9 +598,14 @@ export function SnakeIoGame({
     const measure = () => {
       const nativeFs = isViewportFullscreen(viewportRef.current);
       const fs = nativeFs || pseudoFullscreen || worldLayout;
+      // FIX-SNAKE-UX-001 Step2: reserve side HUD so minimap/TOP10 stay relative to play area (no right clip)
+      const lg =
+        typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+      const sideHudPx = !immersivePlay && lg ? (showMinimap ? 280 : 168) : 0;
       const rect = measureGameBoardRect({
         fullscreen: fs,
         containerWidth: boardRef.current?.clientWidth ?? window.innerWidth,
+        sideHudPx,
       });
       setBoardW(rect.w);
       setBoardH(rect.h);
@@ -618,7 +623,7 @@ export function SnakeIoGame({
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-  }, [connected, world, pseudoFullscreen, isFullscreen, worldLayout]);
+  }, [connected, world, pseudoFullscreen, isFullscreen, worldLayout, immersivePlay, showMinimap]);
 
   useEffect(() => {
     if (!worldLayout || !connected || !world) return;
@@ -1746,7 +1751,7 @@ export function SnakeIoGame({
         layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
       }
 
-      // FIX-SNAKE-UX-001 Step1: time-based alpha between physics ticks (smooth 60fps visuals)
+      // FIX-SNAKE-UX-001 Step1/2: time-based alpha (smootherstep in interpolateSnakeRender; visual only)
       const tickMs = Math.max(16, physicsTickMsRef.current);
       const elapsed = lastPhysicsTickAtRef.current
         ? performance.now() - lastPhysicsTickAtRef.current
@@ -1877,8 +1882,15 @@ export function SnakeIoGame({
   const rankingEntries = top10.slice(0, 10).map((r) => ({
     deviceId: r.deviceId,
     nickname: r.nickname,
+    // Display only — Length from existing Length-based rankings / live segment count
     length: world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?",
   }));
+  const minimapTopRanks = top10.slice(0, 10).map((r, i) => ({
+    deviceId: r.deviceId,
+    rank: i + 1,
+  }));
+  const visualGridPx = cellSize / SNAKE_FEEL.visualGridSubdiv;
+  const visualGridLine = `rgba(255,255,255,${SNAKE_FEEL.visualGridLineOpacity})`;
 
   // FIX-PERF-001: viewport cull food DOM — was mapping ~5k nodes every paint (FOOD_RENDER_LOAD)
   const FOOD_RENDER_BUDGET = 420;
@@ -1904,7 +1916,7 @@ export function SnakeIoGame({
     <div
       ref={boardRef}
       className={cn(
-        "relative mx-auto flex w-full flex-col items-center overflow-hidden",
+        "relative mx-auto flex w-full flex-col items-center overflow-x-clip overflow-y-hidden",
         worldLayout
           ? "fixed inset-0 z-[110] h-[100dvh] w-[100dvw] max-w-none bg-black px-0"
           : isGameFullscreen
@@ -1913,30 +1925,30 @@ export function SnakeIoGame({
       )}
     >
       <div
-        className={cn(
-          "flex w-full items-start justify-center gap-3",
-          (worldLayout || isGameFullscreen) && "h-full"
-        )}
-      >
-        <aside className="hidden w-40 shrink-0 pt-10 lg:block">
-          <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
-        </aside>
-
-      <div
-        className={cn(
-          "flex min-w-0 flex-1 flex-col items-center",
-          worldLayout ? "h-full justify-center pb-0" : "pb-[calc(8.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
-        )}
-      >
-      <div
         ref={viewportRef}
         className={cn(
-          "relative flex w-full justify-center overflow-hidden bg-black",
+          "relative flex w-full items-start justify-center gap-[clamp(0.35rem,1.2vw,0.75rem)] overflow-hidden bg-black",
           worldLayout || isGameFullscreen
-            ? "h-full w-full items-center justify-center"
+            ? "h-full min-h-0 items-center [&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen"
             : "[&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:items-center [&:fullscreen]:justify-center"
         )}
       >
+        {/* TOP10 — beside play area (relative %), never overlays canvas */}
+        {!immersivePlay ? (
+          <aside
+            className="hidden shrink-0 self-start pt-2 lg:block"
+            style={{ width: "clamp(7.5rem, 11vw, 10rem)" }}
+          >
+            <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
+          </aside>
+        ) : null}
+
+        <div
+          className={cn(
+            "relative flex min-w-0 flex-col items-center",
+            worldLayout || isGameFullscreen ? "h-full justify-center" : null
+          )}
+        >
         <button
           type="button"
           onClick={() => void toggleFullscreen()}
@@ -1952,8 +1964,8 @@ export function SnakeIoGame({
           style={{
             width: boardW,
             height: boardH,
-            maxWidth: worldLayout || isGameFullscreen ? "100dvw" : "min(100vw, 100dvh)",
-            maxHeight: worldLayout || isGameFullscreen ? "100dvh" : "min(100vw, 100dvh)",
+            maxWidth: worldLayout || isGameFullscreen ? "100%" : "min(100vw, 100dvh)",
+            maxHeight: worldLayout || isGameFullscreen ? "100%" : "min(100vw, 100dvh)",
           }}
         >
         <div
@@ -1964,9 +1976,9 @@ export function SnakeIoGame({
           style={{
             // Match Agar dark-navy board (visual only).
             backgroundColor: "#0b1220",
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-            backgroundSize: `${cellSize}px ${cellSize}px`,
+            // FIX-SNAKE-UX-001 Step2: denser + fainter visual grid (physics grid unchanged)
+            backgroundImage: `linear-gradient(${visualGridLine} 1px, transparent 1px), linear-gradient(90deg, ${visualGridLine} 1px, transparent 1px)`,
+            backgroundSize: `${visualGridPx}px ${visualGridPx}px`,
           }}
           onTouchStart={(e) => {
             const t = e.touches[0];
@@ -2396,10 +2408,15 @@ export function SnakeIoGame({
         </div>
         ) : null}
         </div>
-      </div>
 
+        {/* Mobile TOP10 + minimap — below board, not over playfield */}
         {!immersivePlay ? (
-        <div className="mt-2 flex w-full max-w-sm items-start gap-2 px-1 lg:hidden">
+        <div
+          className={cn(
+            "mt-2 flex w-full max-w-sm items-start gap-2 px-1 lg:hidden",
+            worldLayout || isGameFullscreen ? "pb-2" : "pb-[env(safe-area-inset-bottom,0px)]"
+          )}
+        >
           <SnakeRankingPanel
             compact
             entries={rankingEntries}
@@ -2413,6 +2430,7 @@ export function SnakeIoGame({
               worldSize={worldSize}
               deviceId={deviceId}
               top1Id={top1Id}
+              topRanks={minimapTopRanks}
               camX={camX}
               camY={camY}
               viewPx={boardMin}
@@ -2421,22 +2439,25 @@ export function SnakeIoGame({
           ) : null}
         </div>
         ) : null}
-      </div>
+        </div>
 
-        {!immersivePlay ? (
-        <aside className="hidden w-28 shrink-0 pt-10 lg:block">
-          {showMinimap ? (
-            <SnakeMinimap
-              snakes={Object.values(world.snakes)}
-              worldSize={worldSize}
-              deviceId={deviceId}
-              top1Id={top1Id}
-              camX={camX}
-              camY={camY}
-              viewPx={boardMin}
-              cellSize={cellSize}
-            />
-          ) : null}
+        {/* Desktop minimap — beside play area (relative width), inside fullscreen target */}
+        {showMinimap ? (
+        <aside
+          className="hidden shrink-0 self-start pt-2 lg:block"
+          style={{ width: "clamp(5.5rem, 9vw, 9rem)" }}
+        >
+          <SnakeMinimap
+            snakes={Object.values(world.snakes)}
+            worldSize={worldSize}
+            deviceId={deviceId}
+            top1Id={top1Id}
+            topRanks={minimapTopRanks}
+            camX={camX}
+            camY={camY}
+            viewPx={boardMin}
+            cellSize={cellSize}
+          />
         </aside>
         ) : null}
       </div>

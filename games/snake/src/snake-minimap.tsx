@@ -4,42 +4,50 @@ import { cn } from "@game-platform/ui";
 
 import { isBotSnake } from "./snake-ai-fill";
 import type { SnakeEntity } from "./snake-io-engine";
+import { resolveSnakeHead } from "./snake-mvp-rc1";
 
 interface SnakeMinimapProps {
   snakes: SnakeEntity[];
   worldSize: number;
   deviceId: string;
   top1Id: string | null;
+  /** Rank markers 1–10 from existing display rankings (no new calc). */
+  topRanks?: { deviceId: string; rank: number }[];
   camX: number;
   camY: number;
   viewPx: number;
   cellSize: number;
   compact?: boolean;
+  className?: string;
 }
 
-/** Minimap — self ★ green, leader yellow, human blue, bot gray. */
+/** Minimap — self ★ green (alive only), leader yellow, human blue, bot gray + TOP10 #. */
 export function SnakeMinimap({
   snakes,
   worldSize,
   deviceId,
   top1Id,
+  topRanks = [],
   camX,
   camY,
   viewPx,
   cellSize,
   compact = false,
+  className,
 }: SnakeMinimapProps) {
   const worldPx = worldSize * cellSize;
   const viewLeft = Math.max(0, Math.min(100, (camX / worldPx) * 100));
   const viewTop = Math.max(0, Math.min(100, (camY / worldPx) * 100));
   const viewW = Math.min(100 - viewLeft, (viewPx / worldPx) * 100);
   const viewH = Math.min(100 - viewTop, (viewPx / worldPx) * 100);
+  const rankById = new Map(topRanks.map((r) => [r.deviceId, r.rank]));
 
   return (
     <div
       className={cn(
         "shrink-0 rounded-xl border border-white/15 bg-black/50 p-2",
-        compact ? "w-24 p-1.5" : "w-36"
+        compact ? "w-full max-w-[6rem] p-1.5" : "w-full max-w-[9rem]",
+        className
       )}
     >
       <p
@@ -61,11 +69,14 @@ export function SnakeMinimap({
           }}
         />
         {snakes.map((s) => {
-          const head = s.segments[0];
-          if (!head || !s.alive) return null;
+          // Hide dead / spectating — YOU reappears immediately when alive on respawn
+          if (!s.alive || s.spectating) return null;
+          const head = resolveSnakeHead(s);
+          if (!head) return null;
           const isMe = s.deviceId === deviceId;
           const isTop1 = s.deviceId === top1Id;
           const isBot = isBotSnake(s);
+          const rank = rankById.get(s.deviceId);
           const left = `${(head.x / worldSize) * 100}%`;
           const top = `${(head.y / worldSize) * 100}%`;
           if (isMe) {
@@ -76,11 +87,18 @@ export function SnakeMinimap({
                 style={{ left, top }}
                 title="You"
               >
-                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] leading-none text-yellow-200">★</span>
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] leading-none text-yellow-200">
+                  ★
+                </span>
                 <div
                   className="rounded-full border-2 border-white bg-emerald-500 shadow-[0_0_12px_#22c55e]"
                   style={{ width: compact ? 10 : 12, height: compact ? 10 : 12 }}
                 />
+                {rank != null && rank <= 10 ? (
+                  <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none text-emerald-200">
+                    {rank}
+                  </span>
+                ) : null}
               </div>
             );
           }
@@ -89,19 +107,33 @@ export function SnakeMinimap({
             <div
               key={s.deviceId}
               className={cn(
-                "absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
-                isTop1 ? "z-10" : "opacity-90"
+                "absolute -translate-x-1/2 -translate-y-1/2",
+                isTop1 || (rank != null && rank <= 10) ? "z-10" : "opacity-90"
               )}
-              style={{
-                left,
-                top,
-                width: isTop1 ? 6 : 4,
-                height: isTop1 ? 6 : 4,
-                backgroundColor: dotColor,
-                boxShadow: isTop1 ? "0 0 4px #eab308" : undefined,
-              }}
+              style={{ left, top }}
               title={s.nickname}
-            />
+            >
+              <div
+                className="rounded-full"
+                style={{
+                  width: isTop1 ? 6 : 4,
+                  height: isTop1 ? 6 : 4,
+                  backgroundColor: dotColor,
+                  boxShadow: isTop1 ? "0 0 4px #eab308" : undefined,
+                }}
+              />
+              {rank != null && rank <= 10 ? (
+                <span
+                  className={cn(
+                    "absolute left-1/2 top-full -translate-x-1/2 font-bold leading-none",
+                    compact ? "text-[7px]" : "text-[8px]",
+                    isTop1 ? "text-amber-200" : "text-white/80"
+                  )}
+                >
+                  {rank}
+                </span>
+              ) : null}
+            </div>
           );
         })}
       </div>

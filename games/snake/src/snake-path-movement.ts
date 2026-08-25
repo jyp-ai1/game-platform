@@ -134,10 +134,10 @@ export function advanceSnakePath(
   syncSegmentsFromPath(snake);
 }
 
-/** Smoothstep for render interpolation between physics ticks. */
+/** Smootherstep — stronger continuous blend between physics ticks (visual only). */
 function smoothRenderAlpha(alpha: number): number {
   const t = Math.max(0, Math.min(1, alpha));
-  return t * t * (3 - 2 * t);
+  return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 /** Interpolate head + path for 60fps render between physics ticks. */

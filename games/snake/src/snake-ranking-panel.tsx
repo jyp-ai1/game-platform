@@ -43,7 +43,7 @@ export function SnakeRankingPanel({
             )}
           >
             {i + 1}. {r.nickname.length > 8 ? `${r.nickname.slice(0, 7)}…` : r.nickname}{" "}
-            <span className="text-white/50">L{r.length}</span>
+            <span className="text-white/50">L:{r.length}</span>
           </li>
         ))}
       </ol>

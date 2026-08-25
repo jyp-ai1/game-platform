@@ -58,23 +58,27 @@ export function measureGameBoardPx(opts: {
   return Math.min(w, h);
 }
 
-/** Board rect in px — fullscreen/world fills the entire viewport (landscape or portrait). */
+/** Board rect in px — fullscreen/world fills viewport; optional side HUD reserve (no fixed-px clip). */
 export function measureGameBoardRect(opts: {
   fullscreen: boolean;
   containerWidth: number;
+  /** Left+right HUD gutters so minimap/TOP10 sit beside play area without clipping. */
+  sideHudPx?: number;
 }): { w: number; h: number } {
   if (typeof window === "undefined") return { w: 480, h: 480 };
   const vv = window.visualViewport;
   const vw = Math.floor(vv?.width ?? window.innerWidth);
   const vh = Math.floor(vv?.height ?? window.innerHeight);
+  const sideHud = Math.max(0, opts.sideHudPx ?? 0);
 
   if (opts.fullscreen) {
     return {
-      w: Math.max(280, vw),
+      w: Math.max(280, vw - sideHud),
       h: Math.max(280, vh),
     };
   }
 
-  const side = Math.max(320, Math.floor(Math.min(opts.containerWidth || vw, vh * 0.65, 720)));
+  const availW = Math.max(280, (opts.containerWidth || vw) - sideHud);
+  const side = Math.max(320, Math.floor(Math.min(availW, vh * 0.65, 720)));
   return { w: side, h: side };
 }

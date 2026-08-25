@@ -45,6 +45,12 @@ export const SNAKE_FEEL = {
   /** Fallback step if time-based alpha unavailable; prefer tick-elapsed alpha in SnakeIo */
   segmentLerpStep: 0.34,
   headLerpStep: 0.55,
+  /**
+   * FIX-SNAKE-UX-001 Step2 — visual only (physics grid unchanged).
+   * denser faint subdivision so cell-step edges are not readable as movement units.
+   */
+  visualGridSubdiv: 2,
+  visualGridLineOpacity: 0.012,
   growthAnimMs: 150,
   eatPopAnimMs: 150,
   eatPopPeak: 1.08,
