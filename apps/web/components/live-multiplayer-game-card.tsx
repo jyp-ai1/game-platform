@@ -57,6 +57,8 @@ function readLiveMeta(slug: string) {
 
 function playHrefForSlug(slug: string): string {
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
+  if (slug === "bomber") return "/games/bomber/play?room=ROOM";
+  if (slug === "agar") return "/games/agar/play?room=WORLD";
   return `/games/${slug}/play`;
 }
 

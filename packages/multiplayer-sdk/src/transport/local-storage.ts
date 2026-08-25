@@ -226,11 +226,11 @@ export const localStorageTransport: MultiplayerTransport = {
 export const PARTY_GAMES = new Set([
   "tic-tac-toe", "connect4", "air-hockey", "tank-battle",
   "mini-golf", "checkers", "reversi", "gomoku", "domino",
-  "table-tennis", "billiards", "shuffleboard", "bomber",
+  "table-tennis", "billiards", "shuffleboard",
 ]);
 
-/** Tier3 realtime flagship candidates */
-export const REALTIME_GAMES = new Set(["snake", "agar"]);
+/** Tier3 realtime flagship candidates (home LIVE strip) */
+export const REALTIME_GAMES = new Set(["snake", "agar", "bomber"]);
 
 export function getGameTier(slug: string): "single" | "party" | "realtime" {
   if (REALTIME_GAMES.has(slug)) return "realtime";
@@ -243,7 +243,7 @@ export function isMultiplayerGame(slug: string): boolean {
 }
 
 export function defaultMaxPlayers(slug: string): MaxPlayers {
-  if (REALTIME_GAMES.has(slug)) return 50;
   if (slug === "bomber") return 8;
+  if (REALTIME_GAMES.has(slug)) return 50;
   return 2;
 }

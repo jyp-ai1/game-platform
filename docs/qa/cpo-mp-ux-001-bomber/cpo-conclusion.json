@@ -1,0 +1,20 @@
+{
+  "rc": "MP-UX-001",
+  "followUp": "Bomber home LIVE entry",
+  "status": "FIXED",
+  "branch": "content-factory",
+  "ceoTest": {
+    "homeBomberLiveCard": "PASS_EXPECTED",
+    "characterColorSelect": "PASS_EXPECTED (MultiplayerEntrySelect in Bomber.tsx)",
+    "play": "PASS_EXPECTED"
+  },
+  "changes": [
+    "REALTIME_GAMES += bomber (moved out of PARTY_GAMES)",
+    "Home page builds multiplayerGames from REALTIME_GAMES; local MVP Game stub if DB row missing",
+    "Home Multiplayer strip copy + 3-col grid",
+    "Live card playHref bomber → /games/bomber/play?room=ROOM",
+    "PlatformGameCard genre label includes bomber"
+  ],
+  "noFixPerf": true,
+  "productionHold": true
+}

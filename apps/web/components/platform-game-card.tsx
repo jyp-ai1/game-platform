@@ -21,7 +21,9 @@ export function platformGameRating(slug: string): string {
 }
 
 function genreLabel(game: Game): string {
-  if (game.slug === "snake" || game.slug === "agar") return "실시간 멀티플레이";
+  if (game.slug === "snake" || game.slug === "agar" || game.slug === "bomber") {
+    return "실시간 멀티플레이";
+  }
   if (game.tags.includes("multiplayer")) return "멀티플레이";
   const cat = game.category?.name;
   if (cat) return cat;
