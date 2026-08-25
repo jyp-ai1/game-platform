@@ -1,0 +1,85 @@
+{
+  "at": "2026-08-25T07:14:20.894Z",
+  "base": "https://game29-ijhz37nyg-jyp-ai1s-projects.vercel.app",
+  "homeHead": {
+    "label": "before_wall_HEAD_home",
+    "min": 55,
+    "avg": 89,
+    "max": 218,
+    "samples": [
+      {
+        "wall": 218,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 76,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 64,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 55,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 66,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 55,
+        "ok": true,
+        "status": 200
+      }
+    ]
+  },
+  "staticGet": {
+    "label": "before_wall_GET_vercel_svg",
+    "min": 29,
+    "avg": 77,
+    "max": 288,
+    "samples": [
+      {
+        "wall": 288,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 29,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 38,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 42,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 33,
+        "ok": true,
+        "status": 200
+      },
+      {
+        "wall": 32,
+        "ok": true,
+        "status": 200
+      }
+    ]
+  },
+  "ceoObserved": {
+    "idleMs": 30,
+    "movingHudMs": 800,
+    "method": "wall-clock fetch HEAD /"
+  }
+}

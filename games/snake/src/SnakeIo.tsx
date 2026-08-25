@@ -238,7 +238,8 @@ export function SnakeIoGame({
   const [killFeedClock, setKillFeedClock] = useState(0);
   const [worldHudFps, setWorldHudFps] = useState(60);
   const [worldHudPing, setWorldHudPing] = useState<number | null>(null);
-  /** FIX-PERF-001: real RTT EMA (fetch HEAD) — never inter-arrival / _updatedAt age. */
+  /** FIX-PERF-001: real RTT EMA — never inter-arrival / _updatedAt age. */
+  /** FIX-SNAKE-UX-001 Step1: prefer ResourceTiming network RTT (not wall-clock after main-thread stall). */
   const pingEmaRef = useRef<number | null>(null);
   const lastPingHudAtRef = useRef(0);
   const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
@@ -280,6 +281,9 @@ export function SnakeIoGame({
   const camLayoutRef = useRef({ boardW: 480, boardH: 480, cellSize: 10, camHalfX: 240, camHalfY: 240 });
   const worldLayerRef = useRef<HTMLDivElement>(null);
   const renderAlphaRef = useRef(1);
+  /** FIX-SNAKE-UX-001 Step1: time-based blend between physics ticks (visual only). */
+  const lastPhysicsTickAtRef = useRef(0);
+  const physicsTickMsRef = useRef(50);
   const frameCounterRef = useRef(0);
   const [, bumpLocalInput] = useReducer((n: number) => n + 1, 0);
   onJoinTimeoutRef.current = onJoinTimeout;
@@ -297,6 +301,7 @@ export function SnakeIoGame({
   const playerCount = worldPopulation;
   playerCountRef.current = playerCount;
   const balance = useMemo(() => Replay.multiplayer.balance("snake", playerCount), [playerCount]);
+  physicsTickMsRef.current = balance.physicsTickMs;
   const ux = useMemo(() => Replay.multiplayer.ux(playerCount), [playerCount]);
   const showMinimap = !immersivePlay && (isGlobalWorld || ux.minimap);
   const worldHudPlayers = room?.players.length ?? 0;
@@ -401,16 +406,30 @@ export function SnakeIoGame({
     return () => window.clearInterval(id);
   }, [isGlobalWorld, mySnake?.alive, mySnake?.respawnAt, world?.tick]);
 
-  // FIX-PERF-001: Ping = real RTT sample only (else "—"). Never sync-gap / _updatedAt age.
+  // FIX-PERF-001 / FIX-SNAKE-UX-001 Step1:
+  // Prefer PerformanceResourceTiming network RTT. Wall-clock await after fetch HEAD `/`
+  // inflated to ~800ms while moving because structuredClone+React commit blocked the
+  // main thread — not because true network RTT spiked. Probe a static asset, not `/`.
   useEffect(() => {
     if (!isGlobalWorld) return;
     let cancelled = false;
     const sampleRtt = async () => {
+      const url = `${window.location.origin}/vercel.svg?rtt=${Date.now()}`;
       const t0 = performance.now();
       try {
-        await fetch(`${window.location.origin}/`, { method: "HEAD", cache: "no-store" });
+        await fetch(url, { method: "GET", cache: "no-store", credentials: "omit" });
         if (cancelled) return;
-        const rtt = performance.now() - t0;
+        const wall = performance.now() - t0;
+        let networkMs = wall;
+        const entries = performance.getEntriesByName(url) as PerformanceResourceTiming[];
+        const rt = entries.length ? entries[entries.length - 1] : undefined;
+        if (rt && rt.responseStart > 0 && rt.requestStart > 0) {
+          // Server wait + transfer transfer; ignores post-response JS delay on busy main thread
+          networkMs = Math.max(0, rt.responseEnd - rt.requestStart);
+        } else if (rt && rt.duration > 0) {
+          networkMs = rt.duration;
+        }
+        const rtt = networkMs > 0 && networkMs < wall ? networkMs : Math.min(wall, networkMs || wall);
         pingEmaRef.current =
           pingEmaRef.current == null ? rtt : pingEmaRef.current * 0.65 + rtt * 0.35;
         const now = performance.now();
@@ -1548,6 +1567,8 @@ export function SnakeIoGame({
       prevSnakeSnapRef.current = Object.fromEntries(
         Object.entries(prev.snakes).map(([id, s]) => [id, captureSnakeSnapshot(s)])
       );
+      // Visual-only reset — physics/collision still use current snake.headX/Y + segments
+      lastPhysicsTickAtRef.current = performance.now();
       setRenderAlpha(0);
       renderAlphaRef.current = 0;
       for (const [id, s] of Object.entries(world.snakes)) {
@@ -1725,7 +1746,12 @@ export function SnakeIoGame({
         layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
       }
 
-      renderAlphaRef.current = Math.min(1, renderAlphaRef.current + SNAKE_FEEL.segmentLerpStep);
+      // FIX-SNAKE-UX-001 Step1: time-based alpha between physics ticks (smooth 60fps visuals)
+      const tickMs = Math.max(16, physicsTickMsRef.current);
+      const elapsed = lastPhysicsTickAtRef.current
+        ? performance.now() - lastPhysicsTickAtRef.current
+        : tickMs;
+      renderAlphaRef.current = Math.min(1, elapsed / tickMs);
       if (frameCounterRef.current % 2 === 0) {
         setRenderAlpha(renderAlphaRef.current);
       }

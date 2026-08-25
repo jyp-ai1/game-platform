@@ -1051,7 +1051,8 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   snake.alive = true;
   snake.spectating = false;
   snake.aliveSinceTick = world.tick;
-  finalizeSnake(snake, pos, 3, 0);
+  // FIX-SNAKE-UX-001 Step1: respawn length = start length (L10), not hardcoded 3
+  finalizeSnake(snake, pos, SNAKE_MVP_RC1.startingSegments, 0);
   deathTrace("alive_true", {
     tick: world.tick,
     victimId: snake.deviceId,

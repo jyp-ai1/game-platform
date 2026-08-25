@@ -1,0 +1,37 @@
+{
+  "task": "FIX-SNAKE-UX-001 Step1",
+  "policy": "start AND respawn both L10",
+  "constant": "SNAKE_MVP_RC1.startingSegments",
+  "value": 10,
+  "startPaths": [
+    {
+      "fn": "createSnake",
+      "file": "games/snake/src/snake-io-engine.ts",
+      "uses": "SNAKE_MVP_RC1.startingSegments (default arg)"
+    },
+    {
+      "fn": "restartPlayerSnake",
+      "file": "games/snake/src/snake-io-engine.ts",
+      "uses": "finalizeSnake(..., SNAKE_MVP_RC1.startingSegments, 0)"
+    },
+    {
+      "fn": "resolveGlobalWorldRule",
+      "file": "games/snake/src/snake-match-rules.ts",
+      "uses": "startingSegments: 10"
+    }
+  ],
+  "respawnPath": {
+    "fn": "respawnSnake",
+    "file": "games/snake/src/snake-io-engine.ts",
+    "before": "finalizeSnake(snake, pos, 3, 0)",
+    "after": "finalizeSnake(snake, pos, SNAKE_MVP_RC1.startingSegments, 0)",
+    "proof": "hardcoded 3 replaced with shared L10 constant — no respawn engine restructure"
+  },
+  "notChanged": [
+    "Death / killSnake",
+    "Leaderboard",
+    "Loot / dropFoodFromSnake",
+    "Collision",
+    "Respawn timer / humanAutoRespawn policy"
+  ]
+}

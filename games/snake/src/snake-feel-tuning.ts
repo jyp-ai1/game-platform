@@ -33,18 +33,18 @@ export const SNAKE_FEEL = {
   magnetPull: 0.32,
   magnetPullClose: 0.58,
   /** Camera — smooth lag follow; never snap or shake (Sprint 7.2: 0.08–0.10) */
-  /** Player-led camera — tight head lock (Slither: you drag the view). */
-  cameraFollowLerp: 0.52,
-  /** Base zoom-in — worm reads larger, eating feels satisfying (1.3–1.5) */
-  baseCameraZoom: 1.4,
+  /** FIX-SNAKE-UX-001 Step1: damp follow so 20Hz head steps don't jitter the view. */
+  cameraFollowLerp: 0.22,
+  /** Base zoom-in — slight pull-back vs 1.4 so nearby enemies stay in frame */
+  baseCameraZoom: 1.28,
   /** Slither-like viewport — cells visible on screen (not world-size scaled) */
-  viewportCellsVisible: 50,
+  viewportCellsVisible: 56,
   minCellPx: 8,
   maxCellPx: 14,
   maxViewportPx: 720,
-  /** Visual motion smoothness — lower step = longer blend between 20Hz ticks */
-  segmentLerpStep: 0.18,
-  headLerpStep: 0.52,
+  /** Fallback step if time-based alpha unavailable; prefer tick-elapsed alpha in SnakeIo */
+  segmentLerpStep: 0.34,
+  headLerpStep: 0.55,
   growthAnimMs: 150,
   eatPopAnimMs: 150,
   eatPopPeak: 1.08,

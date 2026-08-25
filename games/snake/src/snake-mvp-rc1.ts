@@ -20,7 +20,7 @@ export const SNAKE_MVP_RC1 = {
   eatPopAnimMs: 150,
   eatPopPeak: 1.08,
   growthAnimMs: 150,
-  cameraFollowLerp: 0.52,
+  cameraFollowLerp: 0.22,
   spawnHighlightMs: 2000,
   spawnSafeMs: 2000,
   /** Humans never auto-respawn — Retry button only */
