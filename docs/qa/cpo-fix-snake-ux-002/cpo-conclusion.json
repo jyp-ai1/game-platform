@@ -1,0 +1,29 @@
+{
+  "task": "FIX-SNAKE-UX-002",
+  "step": "Step2 FAIL fix (NOT Step3)",
+  "status": "READY_FOR_CEO_TEST",
+  "branch": "content-factory",
+  "commit": "6c5b733",
+  "deploymentTarget": {
+    "vercelProject": "game29",
+    "githubRepository": "jyp-ai1/game-platform",
+    "production": "HOLD"
+  },
+  "previewVisitUrl": "https://game29-p1jm0q0kn-jyp-ai1s-projects.vercel.app",
+  "typecheck": "PASS",
+  "measurement": {
+    "human": { "tickMs": 104, "fps": 60, "posChangeMs": 104, "delta": 1.0 },
+    "bot": { "tickMs": 104, "fps": 60, "posChangeMs": 104, "delta": 1.0 },
+    "interpolateOnDraw": true,
+    "frozenRootCause": "dead ghosts opacity-25 + bot awaitingInput stall"
+  },
+  "fixes": {
+    "movement": "camera=interpolateSnakeHead; denser alpha sample; grid opacity 0",
+    "minimapYou": "stable marker + exists&&alive&&validPos",
+    "top10": "L:n + ★ self row",
+    "fullscreen": "toggle ignores worldLayout; fullscreenElement logged under ?debug=snake-move"
+  },
+  "frozenUntouched": ["Death", "LB algorithm", "Collision", "Loot", "Auth"],
+  "productionHold": true,
+  "step3": "NOT started"
+}
