@@ -10,6 +10,7 @@ import {
   StandardGameOverOverlay,
   useGameSDK,
 } from "@game-platform/game-sdk";
+import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
 import { Button, ScoreBox } from "@game-platform/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -45,6 +46,10 @@ function snapshotWorld(w: AgarWorld): AgarWorld {
 export function AgarGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
+  const roomCode = useMemo(() => {
+    if (typeof window === "undefined") return "WORLD";
+    return new URLSearchParams(window.location.search).get("room")?.toUpperCase() || "WORLD";
+  }, []);
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<AgarWorld>(() => createAgarWorld(deviceId, nickname));
   const worldRef = useRef(world);
@@ -53,6 +58,27 @@ export function AgarGame() {
   const [started, setStarted] = useState(false);
   const reportedRef = useRef(false);
   const lastEjectAtRef = useRef(0);
+
+  useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      try {
+        await ensureRoom(roomCode);
+        if (!mounted) return;
+        joinRoom(roomCode, { nickname });
+      } catch {
+        /* local MVP still playable without transport */
+      }
+    })();
+    return () => {
+      mounted = false;
+      try {
+        leaveRoom(roomCode);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [roomCode, nickname]);
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
@@ -145,6 +171,7 @@ export function AgarGame() {
       <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2">
         <ScoreBox label="Mass" value={mass} />
         <ScoreBox label="Food" value={world.food.length} />
+        <p className="text-xs text-muted-foreground">Room {roomCode}</p>
         <p className="text-xs text-muted-foreground">
           Space = 세포분열(Split) · W = 먹이 방출(Eject) · 마우스 = 이동
         </p>

@@ -1,0 +1,27 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "name": "TITLE_AGAR",
+      "ok": true
+    },
+    {
+      "name": "NO_AGARIO",
+      "ok": true
+    },
+    {
+      "name": "SPAWN_HUD",
+      "ok": true,
+      "mass": true,
+      "top10": true,
+      "room": true,
+      "splitHint": true,
+      "ejectHint": true
+    },
+    {
+      "name": "SPLIT_EJECT_KEYS",
+      "ok": true
+    }
+  ],
+  "url": "http://localhost:3020/games/agar/play?room=WORLD"
+}
