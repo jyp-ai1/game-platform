@@ -10,11 +10,20 @@ export const metadata = buildHomeMetadata();
 export const revalidate = 60;
 
 /** Local MVP card when Supabase catalog row is missing (Bomber). */
-const LOCAL_MVP_MULTIPLAYER: Record<string, Pick<Game, "title" | "description">> = {
+const LOCAL_MVP_MULTIPLAYER: Record<
+  string,
+  Pick<Game, "title" | "description" | "thumbnailUrl">
+> = {
   bomber: {
     title: "Bomber",
     description: "캐릭터 · 색상 선택 후 바로 참가",
+    thumbnailUrl: "/images/games/bomber.png",
   },
+};
+
+/** Fallback thumb when catalog row exists but thumbnail is empty. */
+const MULTIPLAYER_THUMB_FALLBACK: Record<string, string> = {
+  bomber: "/images/games/bomber.png",
 };
 
 function localMvpGame(slug: string): Game | null {
@@ -26,7 +35,7 @@ function localMvpGame(slug: string): Game | null {
     slug,
     title: meta.title,
     description: meta.description,
-    thumbnailUrl: null,
+    thumbnailUrl: meta.thumbnailUrl ?? null,
     difficulty: "MEDIUM",
     status: "ACTIVE",
     sortOrder: 900,
@@ -53,8 +62,10 @@ export default async function Home() {
   for (const slug of REALTIME_GAMES) {
     if (slug === "snake") continue;
     const fromDb = games.find((g) => g.slug === slug);
-    if (fromDb) multiplayerGames.push(fromDb);
-    else {
+    if (fromDb) {
+      const thumb = fromDb.thumbnailUrl ?? MULTIPLAYER_THUMB_FALLBACK[slug] ?? null;
+      multiplayerGames.push(thumb === fromDb.thumbnailUrl ? fromDb : { ...fromDb, thumbnailUrl: thumb });
+    } else {
       const local = localMvpGame(slug);
       if (local) multiplayerGames.push(local);
     }

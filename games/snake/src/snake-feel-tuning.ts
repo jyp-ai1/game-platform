@@ -54,7 +54,8 @@ export const SNAKE_FEEL = {
   growthAnimMs: 150,
   eatPopAnimMs: 150,
   eatPopPeak: 1.08,
-  growthThreshold: 2,
+  /** Keep in sync with SNAKE_MVP_RC1.growthFoodPerSegment */
+  growthThreshold: 1,
   tailWaveAmp: 0.12,
   tailWaveAmpBoost: 0.04,
   /** Juice — eat / kill feedback (camera never shakes) */
@@ -74,7 +75,14 @@ export const SNAKE_FEEL = {
 
 /** World / spawn polish — density & growth pacing */
 export const SNAKE_POLISH = {
-  foodDensityMult: 2.0,
+  /** Batch fill rate toward ambient cap (cap itself = config.foodCount — untouched) */
+  foodDensityMult: 2.2,
+  /**
+   * SPRINT-17 Step 3 — bias new ambient gems toward alive snakes (early play area),
+   * without raising ambient hard-cap. Chance of near-player spawn per item.
+   */
+  nearPlayerFoodChance: 0.42,
+  nearPlayerFoodRadius: 20,
   bossHpMult: 0.85,
   bossDamagePerHit: 10,
   safeZoneRadiusMult: 1.12,

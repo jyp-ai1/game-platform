@@ -107,11 +107,11 @@ export interface SnakeEntity {
   /** Per-bot desync — fake crowd prevention */
   botPhase?: number;
   botSeed?: number;
-  /** Gems eaten — every 2 gems = +1 body segment */
+  /** Gems eaten — growthFoodPerSegment gems = +1 body segment */
   gemsEaten?: number;
   /** Boost energy gauge (0–100) */
   boostEnergy?: number;
-  /** @deprecated use gemsEaten % 2 for HUD */
+  /** @deprecated use gemsEaten % growthFoodPerSegment for HUD */
   growthBuffer?: number;
   /** Client-side growth pulse timestamp (ms) — set on eat */
   lastGrowthAt?: number;
@@ -214,6 +214,27 @@ function occupied(world: SnakeIoWorld, pos: Vec, minDist = 1.2): boolean {
   return world.food.some((f) => dist(f, pos) < 0.8);
 }
 
+function randPosNearAliveSnake(world: SnakeIoWorld, radius: number): Vec | null {
+  const alive: Vec[] = [];
+  for (const snake of Object.values(world.snakes)) {
+    if (!snake.alive || snake.spectating) continue;
+    const head = snake.headX != null && snake.headY != null
+      ? { x: snake.headX, y: snake.headY }
+      : snake.segments[0];
+    if (head) alive.push(head);
+  }
+  if (alive.length === 0) return null;
+  const anchor = alive[Math.floor(Math.random() * alive.length)]!;
+  const ang = Math.random() * Math.PI * 2;
+  const r = Math.random() * radius;
+  const w = world.config.worldSize;
+  const m = 2;
+  return {
+    x: Math.min(w - m, Math.max(m, anchor.x + Math.cos(ang) * r)),
+    y: Math.min(w - m, Math.max(m, anchor.y + Math.sin(ang) * r)),
+  };
+}
+
 export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
   // FIX-PERF-001: never grow ambient past designed density (foodDensityMult used to 2× overrun).
   let ambient = 0;
@@ -226,10 +247,18 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
   const n = Math.min(room, wanted);
   const w = world.config.worldSize;
   for (let i = 0; i < n; i++) {
-    let pos = randPos(w);
+    const preferNear =
+      Math.random() < SNAKE_POLISH.nearPlayerFoodChance
+        ? randPosNearAliveSnake(world, SNAKE_POLISH.nearPlayerFoodRadius)
+        : null;
+    let pos = preferNear ?? randPos(w);
     let tries = 0;
     while ((occupied(world, pos) || isBlocked(world, pos)) && tries < 100) {
-      pos = randPos(w);
+      const retryNear =
+        preferNear && tries < 40
+          ? randPosNearAliveSnake(world, SNAKE_POLISH.nearPlayerFoodRadius)
+          : null;
+      pos = retryNear ?? randPos(w);
       tries++;
     }
     const tier = rollFoodTier();

@@ -1614,8 +1614,9 @@ export function SnakeIoGame({
         setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, isGlobalWorld ? Math.max(vis.particleCount, 6) : vis.particleCount));
         setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y, delta, vis.color));
         const buf = me.gemsEaten ?? 0;
+        const perSeg = SNAKE_MVP_RC1.growthFoodPerSegment;
         setScorePopups((pop) =>
-          spawnScorePopup(pop, head.x, head.y - 0.8, `${buf % 2}/2`, "#94a3b8")
+          spawnScorePopup(pop, head.x, head.y - 0.8, `${buf % perSeg}/${perSeg}`, "#94a3b8")
         );
         if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 3);
         if (me.boosting) {

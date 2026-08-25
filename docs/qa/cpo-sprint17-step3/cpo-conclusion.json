@@ -1,0 +1,12 @@
+﻿{
+  "sprint": "SPRINT-17",
+  "step": 3,
+  "focus": ["snake-early-growth", "gem-near-player-density", "bomber-thumbnail"],
+  "growthFoodPerSegment": { "before": 2, "after": 1 },
+  "foodDensityMult": { "before": 2.0, "after": 2.2 },
+  "nearPlayerFoodChance": 0.42,
+  "nearPlayerFoodRadius": 20,
+  "ambientCapLogic": "untouched (cullAmbientFood / foodCount)",
+  "bomberThumb": "/images/games/bomber.png",
+  "notDone": ["Step4", "Step5", "Fullscreen", "Production"]
+}

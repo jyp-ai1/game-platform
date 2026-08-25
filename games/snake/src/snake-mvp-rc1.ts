@@ -11,8 +11,8 @@ export const SNAKE_MVP_RC1 = {
   /** Movement @ 20Hz — RC5: slither-like pace */
   baseSpeed: 1.0,
   boostSpeedMult: 1.2,
-  /** 2 food pickups → +1 segment */
-  growthFoodPerSegment: 2,
+  /** SPRINT-17 Step 3 — 1 food pickup → +1 segment (was 2; faster L10→L20 early growth) */
+  growthFoodPerSegment: 1,
   /** Per-food body thickness gain (max 140%) */
   bodyRadiusPerFood: 0.004,
   bodyRadiusMax: 1.4,
