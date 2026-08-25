@@ -48,7 +48,9 @@ import {
   spawnEventFood,
   spawnWorldBoss,
   tickWorld,
+  cullAmbientFood,
   type Direction,
+  type FoodItem,
   type SnakeIoWorld,
   type Vec,
 } from "./snake-io-engine";
@@ -236,8 +238,7 @@ export function SnakeIoGame({
   const [killFeedClock, setKillFeedClock] = useState(0);
   const [worldHudFps, setWorldHudFps] = useState(60);
   const [worldHudPing, setWorldHudPing] = useState<number | null>(null);
-  /** Guest: last host-state receive (performance.now). Host: unused for RTT. */
-  const lastStateAtRef = useRef<number | null>(null);
+  /** FIX-PERF-001: real RTT EMA (fetch HEAD) — never inter-arrival / _updatedAt age. */
   const pingEmaRef = useRef<number | null>(null);
   const lastPingHudAtRef = useRef(0);
   const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
@@ -400,25 +401,33 @@ export function SnakeIoGame({
     return () => window.clearInterval(id);
   }, [isGlobalWorld, mySnake?.alive, mySnake?.respawnAt, world?.tick]);
 
+  // FIX-PERF-001: Ping = real RTT sample only (else "—"). Never sync-gap / _updatedAt age.
   useEffect(() => {
     if (!isGlobalWorld) return;
-    const now = performance.now();
-    // Throttle React HUD updates — ping sample still updates via refs elsewhere.
-    if (now - lastPingHudAtRef.current < 250) return;
-    lastPingHudAtRef.current = now;
-    if (isHost) {
-      // Host has no network RTT for own sim; show local.
-      setWorldHudPing(0);
-      return;
-    }
-    const sample = pingEmaRef.current;
-    if (sample == null) {
-      setWorldHudPing(null);
-      return;
-    }
-    // Sanitize: never show the old "millions of ms" age-of-_updatedAt bug.
-    setWorldHudPing(Math.max(0, Math.min(999, Math.round(sample))));
-  }, [isGlobalWorld, isHost, world?.tick]);
+    let cancelled = false;
+    const sampleRtt = async () => {
+      const t0 = performance.now();
+      try {
+        await fetch(`${window.location.origin}/`, { method: "HEAD", cache: "no-store" });
+        if (cancelled) return;
+        const rtt = performance.now() - t0;
+        pingEmaRef.current =
+          pingEmaRef.current == null ? rtt : pingEmaRef.current * 0.65 + rtt * 0.35;
+        const now = performance.now();
+        if (now - lastPingHudAtRef.current < 400) return;
+        lastPingHudAtRef.current = now;
+        setWorldHudPing(Math.max(0, Math.min(999, Math.round(pingEmaRef.current))));
+      } catch {
+        /* keep previous or — */
+      }
+    };
+    void sampleRtt();
+    const id = window.setInterval(() => void sampleRtt(), 2500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [isGlobalWorld]);
 
   useEffect(() => {
     if (!isGlobalWorld) return;
@@ -849,6 +858,8 @@ export function SnakeIoGame({
      */
     const mergeGlobalWorldState = (raw: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
       const next = structuredClone(raw);
+      // FIX-PERF-001: persisted / host overshoot → cull ambient on apply (death preserved)
+      cullAmbientFood(next);
       const local = worldRef.current?.snakes[deviceId];
       const hostMe = next.snakes[deviceId];
 
@@ -892,14 +903,6 @@ export function SnakeIoGame({
             return;
           }
           // RC-SYNC-001 A': merge host world + local snake override → one render snapshot
-          const recvAt = performance.now();
-          if (lastStateAtRef.current != null) {
-            const gap = recvAt - lastStateAtRef.current;
-            // Inter-arrival ≈ sync interval; EMA softens spikes for HUD ping.
-            pingEmaRef.current =
-              pingEmaRef.current == null ? gap : pingEmaRef.current * 0.72 + gap * 0.28;
-          }
-          lastStateAtRef.current = recvAt;
           const next = mergeGlobalWorldState(state, r);
           worldRef.current = next;
           setWorld(next);
@@ -1155,6 +1158,8 @@ export function SnakeIoGame({
       // One deep clone per tick (was two) — `before` stays immutable once we only mutate `next`.
       const before = worldRef.current;
       let next = structuredClone(before);
+      // FIX-PERF-001: cap ambient before sim so clone payload + render stay near foodCount
+      cullAmbientFood(next);
 
       if (isGlobalWorld && r) {
         const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
@@ -1849,6 +1854,26 @@ export function SnakeIoGame({
     length: world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?",
   }));
 
+  // FIX-PERF-001: viewport cull food DOM — was mapping ~5k nodes every paint (FOOD_RENDER_LOAD)
+  const FOOD_RENDER_BUDGET = 420;
+  const foodMarginCells = 3;
+  const viewMinX = camX / cellSize - foodMarginCells;
+  const viewMaxX = (camX + boardW) / cellSize + foodMarginCells;
+  const viewMinY = camY / cellSize - foodMarginCells;
+  const viewMaxY = (camY + boardH) / cellSize + foodMarginCells;
+  const visibleFoods: FoodItem[] = [];
+  const foodAll = world.food;
+  for (let i = 0; i < foodAll.length; i++) {
+    const f = foodAll[i]!;
+    if (f.x < viewMinX || f.x > viewMaxX || f.y < viewMinY || f.y > viewMaxY) continue;
+    visibleFoods.push(f);
+  }
+  if (visibleFoods.length > FOOD_RENDER_BUDGET) {
+    // Prefer death gems, then keep first N in view
+    visibleFoods.sort((a, b) => (a.tier === "death" ? 0 : 1) - (b.tier === "death" ? 0 : 1));
+    visibleFoods.length = FOOD_RENDER_BUDGET;
+  }
+
   return (
     <div
       ref={boardRef}
@@ -2081,7 +2106,7 @@ export function SnakeIoGame({
               <div key={e.id} className="absolute animate-pulse rounded-full border-2 border-amber-300/60"
                 style={{ left: (e.x - e.radius) * cellSize, top: (e.y - e.radius) * cellSize, width: e.radius * 2 * cellSize, height: e.radius * 2 * cellSize }} />
             ))}
-            {world.food.map((f, i) => {
+            {visibleFoods.map((f, i) => {
               const tier = f.tier ?? tierFromKind(f.kind, f.value);
               const vis = getFoodVisual(tier);
               const size = Math.max(vis.sizePx, cellSize * (vis.sizePx / 18));
@@ -2094,7 +2119,7 @@ export function SnakeIoGame({
               const magnetOpacity = magneted ? 0.85 + (1 - fd / magnetR) * 0.15 : 1;
               return (
                 <div
-                  key={i}
+                  key={f.id ?? `${tier}-${Math.round(f.x * 4)}-${Math.round(f.y * 4)}-${i}`}
                   className={cn(
                     "absolute rounded-full transition-transform duration-75",
                     tier === "epic" && "animate-pulse",

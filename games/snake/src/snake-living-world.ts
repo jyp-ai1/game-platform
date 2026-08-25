@@ -3,7 +3,7 @@ import type { FoodKind } from "@game-platform/shared";
 
 import { loadWorldTuning, type SnakeWorldTuning } from "./snake-balance-tuner";
 import { SNAKE_POLISH } from "./snake-feel-tuning";
-import { damageSnake, spawnWorldBoss, type Direction, type SnakeIoWorld, type Vec } from "./snake-io-engine";
+import { cullAmbientFood, damageSnake, spawnWorldBoss, type Direction, type SnakeIoWorld, type Vec } from "./snake-io-engine";
 import type { MatchRuleConfig } from "./snake-match-rules";
 
 export interface WorldAnnouncement {
@@ -165,7 +165,16 @@ export function tickLivingWorld(world: SnakeIoWorld, playerCount: number, now = 
   }
 
   if (lw.foodStormUntil > now && world.tick % 8 === 0) {
-    const extra = Math.ceil(world.config.foodCount * 0.08 * t.foodStormMultiplier);
+    // FIX-PERF-001: storm fills toward foodCount only (was 2.5× overrun → ~5k DOM foods)
+    let ambient = 0;
+    for (const f of world.food) {
+      if (f.tier !== "death") ambient += 1;
+    }
+    const room = Math.max(0, world.config.foodCount - ambient);
+    const extra = Math.min(
+      room,
+      Math.ceil(world.config.foodCount * 0.08 * t.foodStormMultiplier)
+    );
     for (let i = 0; i < extra; i++) {
       const w = world.config.worldSize;
       world.food.push({
@@ -173,13 +182,11 @@ export function tickLivingWorld(world: SnakeIoWorld, playerCount: number, now = 
         y: Math.floor(Math.random() * w),
         kind: "normal" as FoodKind,
         value: 12,
+        tier: "small",
       });
     }
-    // FIX-LOOT-001: soft-cap must keep death loot (slice(0,n) previously dropped newest corpse gems)
-    const cap = Math.floor(world.config.foodCount * 2.5);
-    const death = world.food.filter((f) => f.tier === "death");
-    const ambient = world.food.filter((f) => f.tier !== "death");
-    world.food = [...death, ...ambient.slice(0, Math.max(0, cap - death.length))];
+    // FIX-LOOT-001 + FIX-PERF-001: keep death loot; ambient ≤ foodCount
+    cullAmbientFood(world);
   }
 
   if (playerCount >= 8 && lw.matchRule.bossEnabled && world.tick === t.bossSpawnTick && !world.bossSpawned) {

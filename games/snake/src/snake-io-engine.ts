@@ -43,6 +43,42 @@ export interface FoodItem {
   kind: FoodKind;
   value: number;
   tier?: FoodTier;
+  /** Stable React key — FIX-PERF-001 */
+  id?: number;
+}
+
+let foodIdSeq = 1;
+function nextFoodId(): number {
+  foodIdSeq += 1;
+  return foodIdSeq;
+}
+
+/**
+ * FIX-PERF-001: hard-cap ambient food toward config.foodCount.
+ * Death-tier corpse gems are always preserved (FIX-LOOT-001).
+ */
+export function cullAmbientFood(world: SnakeIoWorld, ambientCap = world.config.foodCount): void {
+  const cap = Math.max(0, Math.floor(ambientCap));
+  let ambient = 0;
+  for (const f of world.food) {
+    if (f.tier !== "death") ambient += 1;
+  }
+  if (ambient <= cap) return;
+
+  const death: FoodItem[] = [];
+  const keep: FoodItem[] = [];
+  // Prefer newer ambient (tail of array) — death loot appended last stays intact via death bucket.
+  for (let i = world.food.length - 1; i >= 0; i--) {
+    const f = world.food[i]!;
+    if (f.tier === "death") {
+      death.push(f);
+    } else if (keep.length < cap) {
+      keep.push(f);
+    }
+  }
+  death.reverse();
+  keep.reverse();
+  world.food = death.length ? [...death, ...keep] : keep;
 }
 
 export interface SnakeEntity {
@@ -179,7 +215,15 @@ function occupied(world: SnakeIoWorld, pos: Vec, minDist = 1.2): boolean {
 }
 
 export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
-  const n = Math.max(1, Math.round(count * SNAKE_POLISH.foodDensityMult));
+  // FIX-PERF-001: never grow ambient past designed density (foodDensityMult used to 2× overrun).
+  let ambient = 0;
+  for (const f of world.food) {
+    if (f.tier !== "death") ambient += 1;
+  }
+  const room = Math.max(0, world.config.foodCount - ambient);
+  if (room <= 0) return;
+  const wanted = Math.max(1, Math.round(count * SNAKE_POLISH.foodDensityMult));
+  const n = Math.min(room, wanted);
   const w = world.config.worldSize;
   for (let i = 0; i < n; i++) {
     let pos = randPos(w);
@@ -191,6 +235,7 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
     const tier = rollFoodTier();
     const cfg = FOOD_TIERS[tier];
     world.food.push({
+      id: nextFoodId(),
       x: pos.x,
       y: pos.y,
       kind: cfg.kind,
@@ -809,22 +854,13 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
 function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
   if (snake.segments.length === 0) return;
   // FIX-LOOT-001: drop count = body length (CPO RC-LOOT-001). Always place death loot —
-  // ambient food soft-cap must not swallow corpse gems (observed food≈6k → +0 drops).
+  // ambient soft-cap must not swallow corpse gems. FIX-PERF-001: ambient ≤ foodCount.
   const gemCount = Math.max(1, snake.segments.length);
   const cfg = FOOD_TIERS.death;
   const segs = snake.segments;
-  const softCap = Math.floor(world.config.foodCount * 2) + gemCount;
-
-  const evictAmbientToFit = (): void => {
-    while (world.food.length >= softCap) {
-      const idx = world.food.findIndex((f) => f.tier !== "death");
-      if (idx < 0) break;
-      world.food.splice(idx, 1);
-    }
-  };
 
   for (let i = 0; i < gemCount; i++) {
-    evictAmbientToFit();
+    cullAmbientFood(world, world.config.foodCount);
     const t = gemCount === 1 ? 0 : i / (gemCount - 1);
     const f = t * (segs.length - 1);
     const i0 = Math.floor(f);
@@ -835,6 +871,7 @@ function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
     const x = a.x + (b.x - a.x) * u;
     const y = a.y + (b.y - a.y) * u;
     world.food.push({
+      id: nextFoodId(),
       x,
       y,
       kind: cfg.kind,
@@ -847,8 +884,17 @@ function dropFoodFromSnake(world: SnakeIoWorld, snake: SnakeEntity): void {
 function dropBoostTailFood(world: SnakeIoWorld, snake: SnakeEntity): void {
   const tail = snake.segments[snake.segments.length - 1];
   if (!tail) return;
+  // FIX-PERF-001: boost trail must not unbounded-grow ambient food
+  cullAmbientFood(world, Math.max(0, world.config.foodCount - 1));
   const cfg = FOOD_TIERS.small;
-  world.food.push({ x: tail.x, y: tail.y, kind: cfg.kind, value: cfg.score, tier: "small" });
+  world.food.push({
+    id: nextFoodId(),
+    x: tail.x,
+    y: tail.y,
+    kind: cfg.kind,
+    value: cfg.score,
+    tier: "small",
+  });
 }
 
 function killSnake(
@@ -1100,15 +1146,23 @@ export function damageSnake(world: SnakeIoWorld, snake: SnakeEntity, amount: num
 export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
   world.tick += 1;
 
-  // 정기 보석 리스폰 — 맵 곳곳에 조금씩 보충
+  // FIX-PERF-001: enforce ambient soft-cap every tick (boost/storm/refill cannot runaway)
+  if (world.tick % 8 === 0) {
+    cullAmbientFood(world);
+  }
+
+  // 정기 보석 리스폰 — 맵 곳곳에 조금씩 보충 (ambient only vs foodCount)
+  let ambientCount = 0;
+  for (const f of world.food) {
+    if (f.tier !== "death") ambientCount += 1;
+  }
   if (world.tick % 40 === 0) {
-    const target = world.config.foodCount;
-    const deficit = target - world.food.length;
+    const deficit = world.config.foodCount - ambientCount;
     if (deficit > 0) {
       spawnFoodItems(world, Math.min(12, Math.max(2, Math.ceil(deficit * 0.12))));
     }
-  } else if (world.food.length < world.config.foodCount * 0.6) {
-    spawnFoodItems(world, Math.min(15, Math.ceil((world.config.foodCount - world.food.length) * 0.2)));
+  } else if (ambientCount < world.config.foodCount * 0.6) {
+    spawnFoodItems(world, Math.min(15, Math.ceil((world.config.foodCount - ambientCount) * 0.2)));
   }
 
   // Drop expired kill-feed entries (2s UI window)
@@ -1226,10 +1280,11 @@ export function spawnEventFood(world: SnakeIoWorld, event: WorldEvent): void {
     : event.kind === "treasure_rain" ? 18
     : event.kind === "team_battle" ? 12 : 3;
   for (let i = 0; i < count; i++) {
+    cullAmbientFood(world, Math.max(0, world.config.foodCount - 1));
     const x = event.x + Math.floor(Math.random() * event.radius * 2) - event.radius;
     const y = event.y + Math.floor(Math.random() * event.radius * 2) - event.radius;
     if (!occupied(world, { x, y }) && !isBlocked(world, { x, y })) {
-      world.food.push({ x, y, kind, value });
+      world.food.push({ id: nextFoodId(), x, y, kind, value });
     }
   }
 }
