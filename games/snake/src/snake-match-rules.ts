@@ -17,7 +17,7 @@ export interface MatchRuleConfig {
   collapseEnabled: boolean;
   safeZoneDrift: boolean;
   respawnEnabled: boolean;
-  /** WORLD: humans auto-respawn after countdown (no Retry overlay) */
+  /** WORLD: when true, humans auto-respawn after countdown (no Retry overlay). Preview UX prefers false so Death Loot stays visible. */
   humanAutoRespawn?: boolean;
   foodDensityMult: number;
   boostCostMult: number;
@@ -148,7 +148,8 @@ export function resolveGlobalWorldRule(): MatchRuleConfig {
     collapseEnabled: false,
     safeZoneDrift: false,
     respawnEnabled: true,
-    humanAutoRespawn: true,
+    // STEP 3.5 — gate auto-respawn; Death Overlay + Retry (death/loot algorithms untouched)
+    humanAutoRespawn: false,
     foodDensityMult: 1.38,
     boostCostMult: 0.75,
     startingSegments: 10,

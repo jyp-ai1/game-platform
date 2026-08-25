@@ -6,12 +6,15 @@ export function getActiveFullscreenElement(): Element | null {
   return document.fullscreenElement ?? d.webkitFullscreenElement ?? null;
 }
 
+/** True when el is the FS target, or nested in / contains the FS element. */
 export function isViewportFullscreen(el: HTMLElement | null): boolean {
   if (!el) return false;
-  return getActiveFullscreenElement() === el;
+  const active = getActiveFullscreenElement();
+  if (!active) return false;
+  return active === el || el.contains(active) || active.contains(el);
 }
 
-export async function enterViewportFullscreen(el: HTMLElement): Promise<"native" | "pseudo"> {
+async function tryRequestFullscreen(el: HTMLElement): Promise<boolean> {
   const req = el.requestFullscreen?.bind(el) as
     | ((opts?: FullscreenOptions) => Promise<void>)
     | undefined;
@@ -20,21 +23,38 @@ export async function enterViewportFullscreen(el: HTMLElement): Promise<"native"
 
   if (req) {
     try {
-      await req({ navigationUI: "hide" });
-      return "native";
+      await req();
+      if (getActiveFullscreenElement()) return true;
     } catch {
-      /* fall through — mobile / policy / unsupported */
+      /* try with options */
+    }
+    try {
+      await req({ navigationUI: "hide" });
+      if (getActiveFullscreenElement()) return true;
+    } catch {
+      /* fall through */
     }
   }
   if (webkitReq) {
     try {
       await webkitReq.call(el);
-      return "native";
+      if (getActiveFullscreenElement()) return true;
     } catch {
       /* fall through */
     }
   }
-  // Graceful fallback — no throw on mobile / unsupported
+  return false;
+}
+
+/**
+ * Click → requestFullscreen. Prefer the play viewport; fall back to documentElement
+ * so document.fullscreenElement is set on Chrome Preview.
+ */
+export async function enterViewportFullscreen(el: HTMLElement): Promise<"native" | "pseudo"> {
+  if (await tryRequestFullscreen(el)) return "native";
+  if (typeof document !== "undefined" && document.documentElement) {
+    if (await tryRequestFullscreen(document.documentElement)) return "native";
+  }
   return "pseudo";
 }
 

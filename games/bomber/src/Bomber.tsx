@@ -1,6 +1,6 @@
 "use client";
 
-/** Sprint17 STEP8 — Bomber MVP. MP-UX-001: shared entry + play shell. */
+/** Sprint17 STEP8 / STEP4 — Bomber MVP + round ladder + map presets. */
 import {
   getDeviceId,
   getLastNickname,
@@ -13,13 +13,14 @@ import {
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
-import { ScoreBox } from "@game-platform/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  BOMBER_MAX_ROUNDS,
   BOMBER_TICK_MS,
   createBomberWorld,
   plantBomb,
+  remainingTimeSec,
   tickBomberWorld,
   tryMove,
   type BomberWorld,
@@ -39,6 +40,8 @@ function snap(w: BomberWorld): BomberWorld {
   return {
     tick: w.tick,
     round: w.round,
+    maxRounds: w.maxRounds,
+    mapId: w.mapId,
     cols: w.cols,
     rows: w.rows,
     grid: w.grid.map((r) => r.slice()),
@@ -48,6 +51,11 @@ function snap(w: BomberWorld): BomberWorld {
     rankings: w.rankings.slice(),
     roundOverAt: w.roundOverAt,
     winnerId: w.winnerId,
+    roundStartedAt: w.roundStartedAt,
+    timeLimitSec: w.timeLimitSec,
+    difficulty: w.difficulty,
+    fuseMs: w.fuseMs,
+    matchOver: w.matchOver,
   };
 }
 
@@ -64,12 +72,13 @@ export function BomberGame() {
     return new URLSearchParams(window.location.search).get("room")?.toUpperCase() || "ROOM";
   }, []);
   const { reportScore } = useGameSDK();
-  const [world, setWorld] = useState<BomberWorld>(() => createBomberWorld(deviceId, nickname, 3));
+  const [world, setWorld] = useState<BomberWorld>(() => createBomberWorld(deviceId, nickname));
   const worldRef = useRef(world);
   worldRef.current = world;
   const [started, setStarted] = useState(false);
   const [styleId, setStyleId] = useState(BOMBER_STYLES[0]!.id);
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
+  const [nowTick, setNowTick] = useState(() => Date.now());
   const reportedRef = useRef(false);
 
   const styleEmoji = BOMBER_STYLES.find((s) => s.id === styleId)?.emoji ?? "💣";
@@ -106,16 +115,19 @@ export function BomberGame() {
       const next = snap(w);
       worldRef.current = next;
       setWorld(next);
+      setNowTick(Date.now());
     }, BOMBER_TICK_MS);
     return () => window.clearInterval(id);
   }, [started]);
 
   useEffect(() => {
-    if (!started || alive || reportedRef.current) return;
-    if (Object.values(world.players).filter((p) => p.alive).length > 0) return;
+    if (!started || reportedRef.current) return;
+    if (!world.matchOver && alive) return;
+    if (!world.matchOver && Object.values(world.players).filter((p) => p.alive).length > 0) return;
+    if (!world.matchOver) return;
     reportedRef.current = true;
     void reportScore("bomber", me?.wins ?? 0);
-  }, [started, alive, world.players, me?.wins, reportScore]);
+  }, [started, alive, world.matchOver, world.players, me?.wins, reportScore]);
 
   useEffect(() => {
     if (!started) return;
@@ -154,7 +166,7 @@ export function BomberGame() {
 
   const handleStart = useCallback(() => {
     reportedRef.current = false;
-    const next = createBomberWorld(deviceId, nickname, 3);
+    const next = createBomberWorld(deviceId, nickname);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
@@ -163,7 +175,7 @@ export function BomberGame() {
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
-    const next = createBomberWorld(deviceId, nickname, 3);
+    const next = createBomberWorld(deviceId, nickname);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
@@ -171,8 +183,9 @@ export function BomberGame() {
 
   const width = world.cols * CELL;
   const height = world.rows * CELL;
-  const living = Object.values(world.players).filter((p) => p.alive).length;
   const botCount = Object.values(world.players).filter((p) => p.isBot).length;
+  const timeLeft = remainingTimeSec(world, nowTick);
+  const hearts = alive ? "❤️" : "🖤";
 
   if (!started) {
     return (
@@ -210,11 +223,20 @@ export function BomberGame() {
       onExit={() => setStarted(false)}
       sideHud={rankHud}
       topBar={
-        <div className="flex w-full max-w-xl flex-wrap items-center justify-between gap-2">
-          <ScoreBox label="Round" value={world.round} />
-          <ScoreBox label="Alive" value={living} />
-          <ScoreBox label="Wins" value={me?.wins ?? 0} />
-          <p className="text-xs text-muted-foreground">Room {roomCode} · Space=Bomb · WASD</p>
+        <div
+          data-testid="bomber-round-hud"
+          className="flex w-full max-w-xl flex-wrap items-center justify-center gap-3 text-xs font-semibold tracking-wide text-white/90"
+        >
+          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
+            ROUND {world.round} / {world.maxRounds || BOMBER_MAX_ROUNDS}
+          </span>
+          <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">TIME {timeLeft}</span>
+          <span className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/70">
+            AI {botCount} · YOU {hearts}
+          </span>
+          <span className="text-[10px] font-normal text-white/40">
+            Map {world.mapId + 1} · {world.difficulty.label}
+          </span>
         </div>
       }
     >
@@ -279,14 +301,14 @@ export function BomberGame() {
               </div>
             ) : null
           )}
-          {world.roundOverAt ? (
+          {world.roundOverAt && !world.matchOver ? (
             <div className="absolute inset-x-0 bottom-3 text-center text-sm font-semibold text-amber-200">
-              Round clear · next…
+              Round clear · next map…
             </div>
           ) : null}
         </div>
 
-        {!alive && !world.roundOverAt ? (
+        {(world.matchOver || (!alive && world.round >= world.maxRounds && !!world.roundOverAt)) && (
           <StandardGameOverOverlay
             gameSlug="bomber"
             score={me?.wins ?? 0}
@@ -294,6 +316,11 @@ export function BomberGame() {
             onRetry={handleRetry}
             onExit={() => setStarted(false)}
           />
+        )}
+        {!alive && !world.matchOver ? (
+          <div className="absolute inset-x-0 bottom-4 z-20 text-center text-xs text-white/70">
+            Spectating · next round soon
+          </div>
         ) : null}
       </>
     </MultiplayerPlayShell>

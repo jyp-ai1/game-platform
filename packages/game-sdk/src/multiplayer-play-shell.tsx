@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import {
   enterViewportFullscreen,
   exitViewportFullscreen,
+  getActiveFullscreenElement,
   isViewportFullscreen,
 } from "./multiplayer-fullscreen";
 
@@ -29,15 +30,17 @@ export function MultiplayerPlayShell({
   className?: string;
   boardClassName?: string;
 }) {
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const isGameFullscreen = isFullscreen || pseudoFullscreen;
 
   const toggleFullscreen = useCallback(async () => {
-    const el = viewportRef.current;
+    const el = shellRef.current;
     if (!el) return;
-    if (isGameFullscreen) {
+    const nativeNow = isViewportFullscreen(el) || !!getActiveFullscreenElement();
+    const inFs = nativeNow || pseudoFullscreen;
+    if (inFs) {
       await exitViewportFullscreen();
       setPseudoFullscreen(false);
       document.body.style.overflow = "";
@@ -50,11 +53,12 @@ export function MultiplayerPlayShell({
       document.body.style.overflow = "hidden";
     }
     setIsFullscreen(mode === "native" || mode === "pseudo");
-  }, [isGameFullscreen]);
+  }, [pseudoFullscreen]);
 
   useEffect(() => {
     const syncFs = () => {
-      const native = isViewportFullscreen(viewportRef.current);
+      const native =
+        isViewportFullscreen(shellRef.current) || !!getActiveFullscreenElement();
       setIsFullscreen(native || pseudoFullscreen);
       if (!native && !pseudoFullscreen) document.body.style.overflow = "";
     };
@@ -69,6 +73,8 @@ export function MultiplayerPlayShell({
 
   return (
     <div
+      ref={shellRef}
+      data-mp-fs-shell
       className={cn(
         "flex w-full flex-col items-center gap-3",
         isGameFullscreen && "fixed inset-0 z-50 bg-black p-3",
@@ -91,6 +97,7 @@ export function MultiplayerPlayShell({
         )}
         <button
           type="button"
+          data-testid="mp-fullscreen-toggle"
           onClick={() => void toggleFullscreen()}
           className="rounded-lg border border-white/20 bg-black/70 px-3 py-1.5 text-xs font-medium text-white hover:bg-black/90"
           aria-label={isGameFullscreen ? "Exit fullscreen" : "Fullscreen"}
@@ -100,7 +107,6 @@ export function MultiplayerPlayShell({
       </div>
 
       <div
-        ref={viewportRef}
         className={cn(
           "flex w-full max-w-xl items-start gap-2",
           isGameFullscreen && "max-w-none flex-1 items-center justify-center"

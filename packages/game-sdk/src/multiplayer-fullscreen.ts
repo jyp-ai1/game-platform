@@ -8,10 +8,12 @@ export function getActiveFullscreenElement(): Element | null {
 
 export function isViewportFullscreen(el: HTMLElement | null): boolean {
   if (!el) return false;
-  return getActiveFullscreenElement() === el;
+  const active = getActiveFullscreenElement();
+  if (!active) return false;
+  return active === el || el.contains(active) || active.contains(el);
 }
 
-export async function enterViewportFullscreen(el: HTMLElement): Promise<"native" | "pseudo"> {
+async function tryRequestFullscreen(el: HTMLElement): Promise<boolean> {
   const req = el.requestFullscreen?.bind(el) as
     | ((opts?: FullscreenOptions) => Promise<void>)
     | undefined;
@@ -20,8 +22,14 @@ export async function enterViewportFullscreen(el: HTMLElement): Promise<"native"
 
   if (req) {
     try {
+      await req();
+      if (getActiveFullscreenElement()) return true;
+    } catch {
+      /* try with options */
+    }
+    try {
       await req({ navigationUI: "hide" });
-      return "native";
+      if (getActiveFullscreenElement()) return true;
     } catch {
       /* fall through */
     }
@@ -29,10 +37,18 @@ export async function enterViewportFullscreen(el: HTMLElement): Promise<"native"
   if (webkitReq) {
     try {
       await webkitReq.call(el);
-      return "native";
+      if (getActiveFullscreenElement()) return true;
     } catch {
       /* fall through */
     }
+  }
+  return false;
+}
+
+export async function enterViewportFullscreen(el: HTMLElement): Promise<"native" | "pseudo"> {
+  if (await tryRequestFullscreen(el)) return "native";
+  if (typeof document !== "undefined" && document.documentElement) {
+    if (await tryRequestFullscreen(document.documentElement)) return "native";
   }
   return "pseudo";
 }

@@ -1665,7 +1665,7 @@ export function SnakeIoGame({
       return;
     }
     // Use actual FS state — worldLayout must NOT block enter (isGameFullscreen includes layout)
-    const nativeNow = isViewportFullscreen(el);
+    const nativeNow = isViewportFullscreen(el) || !!getActiveFullscreenElement();
     const inFs = nativeNow || pseudoFullscreen;
     noteFullscreenDebug("click", {
       inFs,
@@ -1701,7 +1701,8 @@ export function SnakeIoGame({
 
   useEffect(() => {
     const syncFs = () => {
-      const native = isViewportFullscreen(viewportRef.current);
+      const native =
+        isViewportFullscreen(viewportRef.current) || !!getActiveFullscreenElement();
       setIsFullscreen(native || pseudoFullscreen);
       if (!native && !pseudoFullscreen) document.body.style.overflow = "";
     };
@@ -2564,42 +2565,50 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {!isStageMode && isGlobalWorld && mySnake && !mySnake.alive && respawnSec != null && respawnSec > 0 ? (
+      {/* STEP 3.5 — Death Overlay (WORLD + room): defer respawn; world stays visible for Death Loot */}
+      {!isStageMode && mySnake && !mySnake.alive ? (
         <div
-          data-testid="death-ux-countdown"
-          className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40"
+          data-testid="death-ux-overlay"
+          className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center bg-gradient-to-t from-black/70 via-black/25 to-transparent p-6 pb-10 sm:items-center sm:bg-black/35 sm:via-transparent"
         >
-          <p className="text-7xl font-black tabular-nums text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.5)]">
-            {respawnSec}
-          </p>
-          <p className="mt-2 text-sm font-semibold tracking-widest text-white/80">RESPAWN</p>
-        </div>
-      ) : null}
-
-      {!isStageMode && mySnake && !mySnake.alive && !isGlobalWorld ? (
-        <div
-          data-testid="death-ux-gameover"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
-        >
-          <div className="relative h-[min(100%,28rem)] w-full max-w-sm rounded-xl">
-            <GameOverOverlay
-              variant="game-over"
-              score={Math.round(mySnake.score ?? 0)}
-              gameSlug="snake"
-              onRestart={() => {}}
-              onRetry={handleRetry}
-              onExit={() => {
-                emitGameExit("snake");
-                postDeath("exit");
-                if (activeRoom && !isLocalOnly) {
-                  try {
-                    leaveRoom(activeRoom);
-                  } catch {
-                    /* ignore */
+          <div
+            className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-black/55 px-5 py-5 text-center shadow-xl backdrop-blur-sm"
+            role="dialog"
+            aria-label="Death"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Death</p>
+            <p className="text-3xl font-bold tabular-nums text-white">
+              {Math.round(mySnake.score ?? 0).toLocaleString()}
+            </p>
+            <p className="text-[11px] text-white/55">보석이 죽은 자리에 남았습니다</p>
+            <div className="mt-1 flex w-full gap-2">
+              <button
+                type="button"
+                data-testid="death-ux-retry"
+                className="h-11 flex-1 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
+                onClick={handleRetry}
+              >
+                다시 시작
+              </button>
+              <button
+                type="button"
+                data-testid="death-ux-exit"
+                className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
+                onClick={() => {
+                  emitGameExit("snake");
+                  postDeath("exit");
+                  if (activeRoom && !isLocalOnly) {
+                    try {
+                      leaveRoom(activeRoom);
+                    } catch {
+                      /* ignore */
+                    }
                   }
-                }
-              }}
-            />
+                }}
+              >
+                나가기
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
