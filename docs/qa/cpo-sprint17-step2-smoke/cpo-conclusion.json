@@ -1,0 +1,22 @@
+﻿{
+    "local":  {
+                  "evidence":  "docs/qa/cpo-sprint17-step2-smoke",
+                  "pass":  true,
+                  "base":  "http://localhost:3020"
+              },
+    "preview":  {
+                    "visitUrl":  "https://game29-dnmwx8aew-jyp-ai1s-projects.vercel.app",
+                    "pass":  true,
+                    "evidence":  "docs/qa/cpo-sprint17-step2-smoke-preview",
+                    "note":  "Retry with 5s settle; YOU visible; HUD Players+Bots=50; Ping capped 999 (not millions)",
+                    "worldUrl":  "https://game29-dnmwx8aew-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD"
+                },
+    "task":  "STEP2_SNAKE_SMOKE",
+    "notTouched":  [
+                       "Death",
+                       "Respawn",
+                       "Loot",
+                       "Leaderboard",
+                       "Collision"
+                   ]
+}

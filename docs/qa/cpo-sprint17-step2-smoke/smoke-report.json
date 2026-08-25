@@ -1,0 +1,49 @@
+{
+  "task": "STEP2_SNAKE_SMOKE",
+  "commit": "6c25fe9",
+  "base": "http://localhost:3020",
+  "startedAt": "2026-08-25T00:51:19.991Z",
+  "url": "http://localhost:3020/flagship/snake-io/play?room=WORLD&debug=1",
+  "endedAt": "2026-08-25T00:51:39.226Z",
+  "steps": [
+    {
+      "name": "HOME",
+      "ok": true,
+      "title": "Re:Play | 무료 온라인 게임 플랫폼",
+      "t": "2026-08-25T00:51:20.816Z"
+    },
+    {
+      "name": "ENTRY_PAGE",
+      "ok": true,
+      "t": "2026-08-25T00:51:21.169Z"
+    },
+    {
+      "name": "WORLD_PLAYING",
+      "ok": true,
+      "phase": "PLAYING",
+      "exists": true,
+      "alive": true,
+      "segments": 12,
+      "snakes": 50,
+      "foods": 4812,
+      "t": "2026-08-25T00:51:30.359Z"
+    },
+    {
+      "name": "MOVE",
+      "ok": true,
+      "t": "2026-08-25T00:51:34.739Z"
+    },
+    {
+      "name": "EXIT_CLICK",
+      "ok": true,
+      "t": "2026-08-25T00:51:38.544Z"
+    },
+    {
+      "name": "LOGOUT_HOME",
+      "ok": true,
+      "path": "/",
+      "t": "2026-08-25T00:51:39.226Z"
+    }
+  ],
+  "pass": true
+}

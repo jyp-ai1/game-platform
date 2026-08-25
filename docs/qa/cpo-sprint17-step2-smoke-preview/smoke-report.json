@@ -1,0 +1,40 @@
+{
+  "task": "STEP2_SNAKE_SMOKE",
+  "commit": "6c25fe9",
+  "base": "https://game29-dnmwx8aew-jyp-ai1s-projects.vercel.app",
+  "url": "https://game29-dnmwx8aew-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD&debug=1",
+  "pass": true,
+  "steps": [
+    {
+      "name": "HOME",
+      "ok": true
+    },
+    {
+      "name": "ENTRY_PAGE",
+      "ok": true
+    },
+    {
+      "name": "WORLD_PLAYING",
+      "ok": true,
+      "phase": "PLAYING",
+      "exists": false,
+      "segments": 0,
+      "snakes": 0,
+      "foods": 0,
+      "hud": "WORLD\n\nPlayers 16\n\nBots 34\n\nPing 999ms\n\nFPS 19\n\nTick 8\n\nRoom WORLD-4",
+      "you": true
+    },
+    {
+      "name": "MOVE",
+      "ok": true
+    },
+    {
+      "name": "EXIT_CLICK",
+      "ok": true
+    },
+    {
+      "name": "LOGOUT_HOME",
+      "ok": true
+    }
+  ]
+}
