@@ -1,0 +1,41 @@
+﻿{
+    "previewAlias":  "https://game29-git-content-factory-jyp-ai1s-projects.vercel.app",
+    "workingTree":  "dirty — unrelated QA/docs/e2e mods; no Sprint17 step commits pending",
+    "previewVisit":  "https://game29-cfqe9syc8-jyp-ai1s-projects.vercel.app",
+    "productionAge":  "19d (2026-08-06)",
+    "sync":  "origin/content-factory == HEAD (0 ahead / 0 behind)",
+    "head":  "0012f4e27ad1c1fbd525bd329e0eb0f741a70004",
+    "previewAge":  "19d STALE vs HEAD 0012f4e",
+    "task":  "STEP 0 BASELINE",
+    "productionDeploy":  "https://game29-ircq3lr7d-jyp-ai1s-projects.vercel.app",
+    "productionUrl":  "https://game29.vercel.app",
+    "productionWorldUrl":  "https://game29.vercel.app/flagship/snake-io/play?room=WORLD",
+    "passEpics":  [
+                      "RC-AUTH-001 Google login UI/session/User ID merge",
+                      "Death Loop CLOSED (FIX-CORPSE / RC-DEATH-* / FIX-LB / FIX-LOOT lineage)",
+                      "FIX-LB-001 Length ranking CLOSED",
+                      "FIX-LB-002 dead removed from rankings CLOSED",
+                      "FIX-LOOT-001 death gems CLOSED",
+                      "Agar scaffold + catalog + Space/W + rename (HEAD, Preview not yet redeployed)"
+                  ],
+    "buildInfo":  "/api/build-info → HTTP 404",
+    "branch":  "content-factory",
+    "priorInFlight":  [
+                          "0012f4e Agar W eject + rename + map tone + lag HUD",
+                          "4fcb513 Multiplayer home LIVE cards",
+                          "8835de9 Agar in catalog/home",
+                          "52c3b7f Agar Sprint17 scaffold",
+                          "4355a13 RC-AUTH-001 Google login"
+                      ],
+    "vercelProject":  "game29",
+    "closedDoNotTouch":  [
+                             "Death Loop",
+                             "Leaderboard",
+                             "Loot"
+                         ],
+    "headMessage":  "feat(agar/snake): classic W eject, Agar rename, map tone, lag HUD wins",
+    "hold":  [
+                 "Collision HOLD — do not touch"
+             ],
+    "timestamp":  "2026-08-25T00:43:03.2793563Z"
+}

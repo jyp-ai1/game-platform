@@ -1,0 +1,24 @@
+{
+  "rc": "RC-PERF-001",
+  "status": "MEASURED",
+  "commit": "0012f4e",
+  "base": "http://localhost:3020",
+  "summary": {
+    "hudPingMin": null,
+    "hudPingMax": null,
+    "hudPingAvg": null,
+    "realRttAvgMs": 397,
+    "hudVsReal": null,
+    "fpsAvg": 2,
+    "lastPlayers": 13,
+    "lastBots": 37,
+    "lastFoods": 4830,
+    "lastSnakesAlive": 50,
+    "lastTickHz": 8,
+    "reactHudMutPerSec": 0.46,
+    "payloadAvgBytes": 869,
+    "staleUpdatedAtBug": "FIXED_IN_HEAD — no multi-million ms ping observed when HUD shows numbers"
+  },
+  "fixAppliedThisStep": false,
+  "priorFixDocumented": "HEAD 0012f4e already replaced stale _updatedAt age with inter-arrival EMA + 0–999 clamp (SnakeIo.tsx)."
+}

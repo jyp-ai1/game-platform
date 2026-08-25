@@ -1,0 +1,910 @@
+{
+  "rc": "RC-PERF-001",
+  "mode": "MEASURE_ONLY",
+  "commit": "0012f4e",
+  "base": "http://localhost:3020",
+  "startedAt": "2026-08-25T00:46:49.368Z",
+  "snapshots": [
+    {
+      "elapsedMs": 3731,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "fail",
+        "snakesAlive": 0,
+        "snakesTotal": 0,
+        "foods": 0,
+        "aiAlive": 0,
+        "localWouldRender": false
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": false,
+        "blockedReason": "not connected",
+        "lastWorldTick": 0,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 0
+      },
+      "auditRoom": {
+        "status": "fail",
+        "code": "WORLD",
+        "players": 0,
+        "connected": false,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 121,
+        "tick": 35,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 8,
+      "hudMutationsPerSec": 0.6,
+      "payloadAvgBytes": 849
+    },
+    {
+      "elapsedMs": 7293,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 1\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 1,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "fail",
+        "snakesAlive": 0,
+        "snakesTotal": 0,
+        "foods": 0,
+        "aiAlive": 0,
+        "localWouldRender": false
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": false,
+        "blockedReason": "not connected",
+        "lastWorldTick": 0,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 0
+      },
+      "auditRoom": {
+        "status": "fail",
+        "code": "WORLD",
+        "players": 0,
+        "connected": false,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 130,
+        "tick": 39,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 10,
+      "hudMutationsPerSec": 0.59,
+      "payloadAvgBytes": 849
+    },
+    {
+      "elapsedMs": 9493,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "fail",
+        "snakesAlive": 0,
+        "snakesTotal": 0,
+        "foods": 0,
+        "aiAlive": 0,
+        "localWouldRender": false
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": false,
+        "blockedReason": "not connected",
+        "lastWorldTick": 0,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 0
+      },
+      "auditRoom": {
+        "status": "fail",
+        "code": "WORLD",
+        "players": 0,
+        "connected": false,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 137,
+        "tick": 42,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 11,
+      "hudMutationsPerSec": 0.58,
+      "payloadAvgBytes": 849
+    },
+    {
+      "elapsedMs": 13377,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4852,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 207,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 44
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 141,
+        "tick": 44,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 13,
+      "hudMutationsPerSec": 0.56,
+      "payloadAvgBytes": 850
+    },
+    {
+      "elapsedMs": 15577,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4852,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 207,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 44
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 148,
+        "tick": 48,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 13,
+      "hudMutationsPerSec": 0.52,
+      "payloadAvgBytes": 852
+    },
+    {
+      "elapsedMs": 18973,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4852,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 207,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 44
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 152,
+        "tick": 50,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 15,
+      "hudMutationsPerSec": 0.52,
+      "payloadAvgBytes": 854
+    },
+    {
+      "elapsedMs": 23583,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 1\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 1,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4852,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 207,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 44
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 157,
+        "tick": 52,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 16,
+      "hudMutationsPerSec": 0.48,
+      "payloadAvgBytes": 855
+    },
+    {
+      "elapsedMs": 26202,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 1\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 1,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 49,
+        "snakesTotal": 50,
+        "foods": 4816,
+        "aiAlive": 36,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 220,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 56
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 161,
+        "tick": 55,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 16,
+      "hudMutationsPerSec": 0.45,
+      "payloadAvgBytes": 857
+    },
+    {
+      "elapsedMs": 30574,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 49,
+        "snakesTotal": 50,
+        "foods": 4816,
+        "aiAlive": 36,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 220,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 56
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 169,
+        "tick": 60,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 17,
+      "hudMutationsPerSec": 0.42,
+      "payloadAvgBytes": 859
+    },
+    {
+      "elapsedMs": 33472,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 3\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 3,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 49,
+        "snakesTotal": 50,
+        "foods": 4816,
+        "aiAlive": 36,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 220,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 56
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 175,
+        "tick": 62,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 18,
+      "hudMutationsPerSec": 0.42,
+      "payloadAvgBytes": 860
+    },
+    {
+      "elapsedMs": 37174,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 1\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 1,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4830,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 230,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 67
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 181,
+        "tick": 64,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 19,
+      "hudMutationsPerSec": 0.41,
+      "payloadAvgBytes": 862
+    },
+    {
+      "elapsedMs": 39552,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 1\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 1,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4830,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 230,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 67
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 186,
+        "tick": 67,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 21,
+      "hudMutationsPerSec": 0.43,
+      "payloadAvgBytes": 864
+    },
+    {
+      "elapsedMs": 42221,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 3\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 3,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4830,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 230,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 67
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 196,
+        "tick": 71,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 23,
+      "hudMutationsPerSec": 0.44,
+      "payloadAvgBytes": 867
+    },
+    {
+      "elapsedMs": 44958,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 2\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 2,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4830,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 230,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 67
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 201,
+        "tick": 73,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 24,
+      "hudMutationsPerSec": 0.44,
+      "payloadAvgBytes": 868
+    },
+    {
+      "elapsedMs": 47129,
+      "hud": {
+        "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 7\n\nTick 8\n\nRoom WORLD-4",
+        "players": 13,
+        "bots": 37,
+        "pingMs": null,
+        "fps": 7,
+        "tickHz": 8,
+        "isHost": false
+      },
+      "auditRender": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4830,
+        "aiAlive": 37,
+        "localWouldRender": true
+      },
+      "auditTick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 230,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 67
+      },
+      "auditRoom": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "loop": {
+        "frame": 219,
+        "tick": 82,
+        "worldSnakeCount": 50,
+        "phase": "PLAYING"
+      },
+      "hudMutations": 26,
+      "hudMutationsPerSec": 0.46,
+      "payloadAvgBytes": 869
+    }
+  ],
+  "priorPingFix": "HEAD 0012f4e already replaced stale _updatedAt age with inter-arrival EMA + 0–999 clamp (SnakeIo.tsx).",
+  "url": "http://localhost:3020/flagship/snake-io/play?room=WORLD&debug=1",
+  "rtt": {
+    "samples": [
+      321,
+      858,
+      331,
+      942,
+      693
+    ],
+    "avg": 629
+  },
+  "endedAt": "2026-08-25T00:47:55.303Z",
+  "final": {
+    "hud": {
+      "text": "WORLD\n\nPlayers 13\n\nBots 37\n\nPing —\n\nFPS 7\n\nTick 8\n\nRoom WORLD-4",
+      "players": 13,
+      "bots": 37,
+      "pingMs": null,
+      "fps": 7,
+      "tickHz": 8,
+      "isHost": false
+    },
+    "audit": {
+      "updatedAt": 1787618865265,
+      "room": {
+        "status": "ok",
+        "code": "WORLD-4",
+        "players": 13,
+        "connected": true,
+        "shouldTickWorld": true,
+        "isGlobalWorld": true,
+        "isHost": false
+      },
+      "localPlayer": {
+        "status": "ok",
+        "deviceId": "f81606bc-8163-4c17-b2b3-5a74a253e8ec",
+        "registeredInRoom": true,
+        "inWorldState": true,
+        "inWorldRef": true,
+        "registryGap": false,
+        "gamePhase": "PLAYING",
+        "spawnTrace": "OK — PLAYER_CREATE len=12"
+      },
+      "localSnake": {
+        "status": "ok",
+        "exists": true,
+        "alive": true,
+        "segments": 12,
+        "head": "388.6,404.4",
+        "tail": "383.1,404.4"
+      },
+      "input": {
+        "status": "ok",
+        "lastDirection": "right",
+        "boost": false,
+        "count": 12,
+        "blockedReason": null
+      },
+      "tick": {
+        "status": "fail",
+        "hz": 8,
+        "running": false,
+        "mounted": true,
+        "blockedReason": null,
+        "lastWorldTick": 230,
+        "worldTickAdvancing": false,
+        "errors": 0,
+        "lastError": null,
+        "simCount": 67
+      },
+      "render": {
+        "status": "ok",
+        "snakesAlive": 50,
+        "snakesTotal": 50,
+        "foods": 4830,
+        "aiAlive": 37,
+        "localWouldRender": true
+      }
+    },
+    "loop": {
+      "enabled": true,
+      "frame": 219,
+      "tick": 82,
+      "tickErrors": 0,
+      "lastTickError": null,
+      "input": 16,
+      "simulation": 82,
+      "renderSnakes": 50,
+      "worldSnakeCount": 50,
+      "localPlayerPresent": true,
+      "phase": "PLAYING",
+      "tickMounted": true,
+      "tickBlockedReason": null,
+      "lastInput": "right",
+      "startedAt": 1787618811037
+    },
+    "hudMutations": 26,
+    "hudMutationsPerSec": 0.46,
+    "payloadRecentBytes": [
+      868,
+      868,
+      868,
+      868,
+      868,
+      868,
+      868,
+      868,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869,
+      869
+    ],
+    "payloadAvgBytes": 869,
+    "payloadSamples": 20,
+    "note": "HUD ping = guest state inter-arrival EMA (capped 0–999), NOT Date.now()-_updatedAt age. Host shows 0."
+  },
+  "rttFinal": {
+    "samples": [
+      479,
+      264,
+      285,
+      667,
+      288
+    ],
+    "avg": 397
+  },
+  "summary": {
+    "hudPingMin": null,
+    "hudPingMax": null,
+    "hudPingAvg": null,
+    "realRttAvgMs": 397,
+    "hudVsReal": null,
+    "fpsAvg": 2,
+    "lastPlayers": 13,
+    "lastBots": 37,
+    "lastFoods": 4830,
+    "lastSnakesAlive": 50,
+    "lastTickHz": 8,
+    "reactHudMutPerSec": 0.46,
+    "payloadAvgBytes": 869,
+    "staleUpdatedAtBug": "FIXED_IN_HEAD — no multi-million ms ping observed when HUD shows numbers"
+  }
+}
