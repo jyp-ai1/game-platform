@@ -2092,18 +2092,19 @@ export function SnakeIoGame({
             handleDirection(dir);
           }}
         >
-        {mySnake?.alive && !isSpectating && !awaitingInput ? (
+        {mySnake?.alive && !isSpectating ? (
           <div className="pointer-events-auto absolute left-2 top-2 z-40 flex gap-1.5">
             <Button
               type="button"
               size="sm"
               variant="outline"
+              data-testid="mp-snake-exit"
               className="h-8 border-white/20 bg-black/70 px-2.5 text-xs text-white hover:bg-black/90"
               onClick={handleQuitGame}
             >
               나가기
             </Button>
-            {isLocalOnly ? (
+            {isLocalOnly && !awaitingInput ? (
               <Button
                 type="button"
                 size="sm"
