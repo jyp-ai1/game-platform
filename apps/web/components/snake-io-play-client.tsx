@@ -246,25 +246,45 @@ function SnakeIoPlayInner({
 
   if (!characterReady) {
     return (
-      <SnakeCharacterSelect
-        value={headCharacter}
-        onChange={(id) => {
-          setHeadCharacter(id);
-          setBodyColor(SNAKE_HEAD_CHARACTERS[id].bodyColor);
-        }}
-        color={bodyColor}
-        onColorChange={setBodyColor}
-        difficulty={aiDifficulty}
-        onDifficultyChange={setAiDifficulty}
-        players={1}
-        bots={practiceMode ? 0 : 49}
-        roomCode={practiceMode ? "PRACTICE" : room?.toUpperCase() ?? undefined}
-        onConfirm={() => {
-          saveSnakeHeadCharacter(headCharacter);
-          saveSnakeBodyColor(bodyColor);
-          setCharacterReady(true);
-        }}
-      />
+      <div className="flex h-full min-h-0 flex-col bg-black">
+        <header className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-black/80 px-3 py-2">
+          <button
+            type="button"
+            data-testid="mp-play-back-detail"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+                return;
+              }
+              router.replace("/games/snake");
+            }}
+            className="text-xs font-medium text-white/70 transition hover:text-white"
+          >
+            ← Snake
+          </button>
+        </header>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <SnakeCharacterSelect
+            value={headCharacter}
+            onChange={(id) => {
+              setHeadCharacter(id);
+              setBodyColor(SNAKE_HEAD_CHARACTERS[id].bodyColor);
+            }}
+            color={bodyColor}
+            onColorChange={setBodyColor}
+            difficulty={aiDifficulty}
+            onDifficultyChange={setAiDifficulty}
+            players={1}
+            bots={practiceMode ? 0 : 49}
+            roomCode={practiceMode ? "PRACTICE" : room?.toUpperCase() ?? undefined}
+            onConfirm={() => {
+              saveSnakeHeadCharacter(headCharacter);
+              saveSnakeBodyColor(bodyColor);
+              setCharacterReady(true);
+            }}
+          />
+        </div>
+      </div>
     );
   }
 

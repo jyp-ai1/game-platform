@@ -20,8 +20,13 @@ export interface GameCatalogEntry {
   isFlagship: boolean;
 }
 
+/** Home / catalog cards land here — Detail only, never Character lobby. */
+export function detailHrefForCatalogSlug(slug: string): string {
+  return `/games/${slug}`;
+}
+
 export function playHrefForCatalogSlug(slug: string): string {
-  // Always land on Character/Color entry (flagship Snake or /games/{slug}/play).
+  // Detail CTA → Character/Color entry (flagship Snake or /games/{slug}/play).
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
   if (slug === "agar") return "/games/agar/play?room=WORLD";
   if (slug === "bomber") return "/games/bomber/play?room=ROOM";

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { LiveMultiplayerGameCard } from "@/components/live-multiplayer-game-card";
 import { PlatformGameCard } from "@/components/platform-game-card";
 import { selectNew, selectPopular } from "@/lib/game-sections";
-import { playHrefForCatalogSlug } from "@/lib/game-catalog";
+import { detailHrefForCatalogSlug } from "@/lib/game-catalog";
 
 /**
  * Sprint 17 Step 5 — home catalog strips (인기 / 최신 / Multiplayer).
@@ -46,7 +46,7 @@ export function HomeCatalogSections({
             game={game}
             className="min-w-[240px] max-w-[280px] shrink-0"
             actions={{
-              primary: { label: "PLAY", href: playHrefForCatalogSlug(game.slug) },
+              primary: { label: "상세 보기", href: detailHrefForCatalogSlug(game.slug) },
             }}
           />
         ))}
@@ -64,7 +64,7 @@ export function HomeCatalogSections({
             game={game}
             className="min-w-[240px] max-w-[280px] shrink-0"
             actions={{
-              primary: { label: "PLAY", href: playHrefForCatalogSlug(game.slug) },
+              primary: { label: "상세 보기", href: detailHrefForCatalogSlug(game.slug) },
             }}
           />
         ))}

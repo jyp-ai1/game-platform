@@ -1,11 +1,11 @@
 import type { Game } from "@game-platform/shared";
 
 import { PlatformGameCard } from "@/components/platform-game-card";
-import { SNAKE_QUICK_PLAY_MARKER } from "@/lib/snake-entry";
+import { detailHrefForCatalogSlug } from "@/lib/game-catalog";
 import { getGameBalanceMeta } from "@/lib/game-balance";
 import { isRecentlyCreated } from "@/lib/game-sections";
 
-/** Catalog game card — delegates to unified PlatformGameCard. */
+/** Catalog game card — Detail only (never Character lobby). */
 export function GameCard({
   game,
   isHot,
@@ -18,20 +18,6 @@ export function GameCard({
   const isComingSoon = game.status === "COMING_SOON";
   const isMaintenance = game.status === "MAINTENANCE";
   const isNew = !isComingSoon && !isMaintenance && isRecentlyCreated(game.createdAt);
-  const isSnake = game.slug === "snake";
-
-  if (isSnake && !isComingSoon && !isMaintenance) {
-    return (
-      <PlatformGameCard
-        game={game}
-        isHot={isHot}
-        isNew={isNew}
-        actions={{
-          primary: { label: "플레이", href: SNAKE_QUICK_PLAY_MARKER },
-        }}
-      />
-    );
-  }
 
   return (
     <div className="relative">
@@ -41,8 +27,8 @@ export function GameCard({
         isNew={isNew}
         actions={{
           primary: {
-            label: isMaintenance ? "점검 중" : isComingSoon ? "Coming Soon" : "플레이",
-            href: `/games/${game.slug}`,
+            label: isMaintenance ? "점검 중" : isComingSoon ? "Coming Soon" : "상세 보기",
+            href: detailHrefForCatalogSlug(game.slug),
           },
         }}
       />

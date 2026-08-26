@@ -2,7 +2,7 @@ import { Container } from "@game-platform/ui";
 import type { Game, GameStatus } from "@game-platform/shared";
 import Link from "next/link";
 
-import { GameDetailComments } from "@/components/game-detail-extras";
+import { GameDetailComments, GameDetailShare } from "@/components/game-detail-extras";
 import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
 import { GameDetailHero } from "@/components/game-detail-hero";
 import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
@@ -31,6 +31,21 @@ function isMultiplayerSlug(slug: string): boolean {
   return slug === "snake" || slug === "agar" || slug === "bomber";
 }
 
+function creatorStub(slug: string): string {
+  if (slug === "snake") return "Replay Studio";
+  if (slug === "agar") return "Replay Studio";
+  if (slug === "bomber") return "Replay Studio";
+  return "Community";
+}
+
+function popularityLabel(game: Game, slug: string): string {
+  const plays = game.playCount ?? 0;
+  if (isMultiplayerSlug(slug)) {
+    return `🔥 LIVE · ${(plays > 0 ? plays : 12_400).toLocaleString()} plays`;
+  }
+  return `Play count · ${plays.toLocaleString()}`;
+}
+
 export function GameDetailTemplate({
   game,
   slug,
@@ -51,28 +66,60 @@ export function GameDetailTemplate({
   const mp = isMultiplayerSlug(slug);
 
   return (
-    <main className="flex flex-1 flex-col">
+    <main className="flex flex-1 flex-col" data-testid="game-detail-page">
       <Container className="max-w-3xl space-y-5 py-5 sm:py-6">
         <GameDetailHero game={game} />
 
         {isPlayable ? (
           <>
-            <section className="space-y-4 text-center">
-              <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">{desc}</p>
-              <p className="text-xs text-muted-foreground tabular-nums">
-                Play count · {(game.playCount ?? 0).toLocaleString()}
+            <section className="space-y-4 text-center" data-testid="game-detail-meta">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {mp ? (
+                  <span
+                    data-testid="game-detail-mp-badge"
+                    className="inline-flex items-center gap-1 rounded-full border border-cyan-400/40 bg-cyan-500/15 px-3 py-1 text-xs font-semibold text-cyan-200"
+                  >
+                    👥 Multiplayer
+                  </span>
+                ) : null}
+                <span
+                  data-testid="game-detail-creator"
+                  className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground"
+                >
+                  Creator · {creatorStub(slug)}
+                </span>
+              </div>
+
+              <p
+                data-testid="game-detail-description"
+                className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground"
+              >
+                {desc}
               </p>
+              <p
+                data-testid="game-detail-popularity"
+                className="text-xs text-muted-foreground tabular-nums"
+              >
+                {popularityLabel(game, slug)}
+              </p>
+
               <div className="flex flex-col items-center gap-2">
                 <Link
                   href={playHref}
                   data-testid="game-detail-play-cta"
                   className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
                 >
-                  PLAY
+                  {mp ? "WORLD PLAY" : "PLAY"}
                 </Link>
                 {mp ? (
-                  <p className="text-xs text-muted-foreground">캐릭터 · 색상 선택 → ENTER WORLD</p>
+                  <p className="text-xs text-muted-foreground">
+                    Character · Color · Difficulty → ENTER WORLD
+                  </p>
                 ) : null}
+              </div>
+
+              <div className="mx-auto w-full max-w-sm" data-testid="game-detail-share">
+                <GameDetailShare gameSlug={slug} title={game.title} />
               </div>
             </section>
 

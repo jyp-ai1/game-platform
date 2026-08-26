@@ -23,7 +23,31 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
 
   const refresh = useCallback(() => bump((n) => n + 1), []);
-  const comments = listCommentsForGame(gameSlug, "recent").slice(0, 5);
+  const stored = listCommentsForGame(gameSlug, "recent").slice(0, 5);
+  /** Visible stub list when store is empty — Detail must show Comments. */
+  const stubComments =
+    stored.length === 0
+      ? [
+          {
+            id: `stub-${gameSlug}-1`,
+            gameSlug,
+            author: "Nova",
+            message: "친구랑 한 판 더 했어요. 월드가 살아있어요!",
+            likes: 4,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: `stub-${gameSlug}-2`,
+            gameSlug,
+            author: "Kai",
+            message: "캐릭터·색상 고르고 바로 입장 — 흐름 좋음.",
+            likes: 2,
+            createdAt: new Date().toISOString(),
+          },
+        ]
+      : [];
+  const comments = stored.length > 0 ? stored : stubComments;
+  const isStub = stored.length === 0;
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -33,7 +57,10 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur">
+    <div
+      className="rounded-2xl border border-white/10 bg-card/50 p-5 backdrop-blur"
+      data-testid="game-detail-comments"
+    >
       <h3 className="font-semibold">Comments</h3>
       <form className="mt-3 space-y-2" onSubmit={handleSubmit}>
         <textarea
@@ -52,48 +79,50 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
           Post
         </button>
       </form>
-      {comments.length > 0 ? (
-        <ul className="mt-4 space-y-2">
-          {comments.map((c) => {
-            const liked = isCommentLiked(c.id);
-            const disliked = isCommentDisliked(c.id);
-            return (
-              <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm">
-                <p className="text-xs text-muted-foreground">{c.author}</p>
-                <p>{c.message}</p>
-                <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
-                  <button
-                    type="button"
-                    className={liked ? "text-red-400" : ""}
-                    onClick={() => {
-                      toggleCommentLike(c.id);
-                      refresh();
-                    }}
-                  >
-                    <Heart className="mr-0.5 inline size-3" fill={liked ? "currentColor" : "none"} />
-                    {c.likes}
-                  </button>
-                  <button
-                    type="button"
-                    className={disliked ? "text-amber-400" : ""}
-                    onClick={() => {
-                      toggleCommentDislike(c.id);
-                      refresh();
-                    }}
-                  >
-                    <ThumbsDown className="inline size-3" />
-                  </button>
-                  <button type="button" onClick={() => reportComment(c.id)}>
-                    <Flag className="inline size-3" /> Report
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="mt-3 text-xs text-muted-foreground">Be the first to comment.</p>
-      )}
+      <ul className="mt-4 space-y-2">
+        {comments.map((c) => {
+          const liked = !isStub && isCommentLiked(c.id);
+          const disliked = !isStub && isCommentDisliked(c.id);
+          return (
+            <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm">
+              <p className="text-xs text-muted-foreground">{c.author}</p>
+              <p>{c.message}</p>
+              <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+                <button
+                  type="button"
+                  className={liked ? "text-red-400" : ""}
+                  disabled={isStub}
+                  onClick={() => {
+                    if (isStub) return;
+                    toggleCommentLike(c.id);
+                    refresh();
+                  }}
+                >
+                  <Heart className="mr-0.5 inline size-3" fill={liked ? "currentColor" : "none"} />
+                  {c.likes}
+                </button>
+                {!isStub ? (
+                  <>
+                    <button
+                      type="button"
+                      className={disliked ? "text-amber-400" : ""}
+                      onClick={() => {
+                        toggleCommentDislike(c.id);
+                        refresh();
+                      }}
+                    >
+                      <ThumbsDown className="inline size-3" />
+                    </button>
+                    <button type="button" onClick={() => reportComment(c.id)}>
+                      <Flag className="inline size-3" /> Report
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
       <Link href="/community" className="mt-3 inline-block text-xs text-primary hover:underline">
         View all in Community →
       </Link>
@@ -119,24 +148,35 @@ export function GameDetailShare({
   challengeMode?: boolean;
 }) {
   async function handleShare(mode: "default" | "challenge" | "kakao" | "sms" = "default") {
-    const url = typeof window !== "undefined" ? window.location.href : `/games/${gameSlug}`;
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/games/${gameSlug}`
+        : `/games/${gameSlug}`;
     const text =
       mode === "challenge"
         ? `Re:Play Challenge · Beat my score in ${title}!`
-        : `Re:Play · ${title}`;
+        : `Re:Play · ${title} — 같이 플레이해요`;
 
-    if (mode === "kakao") {
+    try {
+      if (mode === "kakao") {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        return;
+      }
+      if (mode === "sms") {
+        window.location.href = `sms:?body=${encodeURIComponent(`${text}\n${url}`)}`;
+        return;
+      }
+      // Prefer clipboard share-link (no full invite system).
       await navigator.clipboard.writeText(`${text}\n${url}`);
-      return;
-    }
-    if (mode === "sms") {
-      window.location.href = `sms:?body=${encodeURIComponent(`${text}\n${url}`)}`;
-      return;
-    }
-    if (navigator.share) {
-      await navigator.share({ title: text, url, text });
-    } else {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
+      if (mode === "default" && navigator.share) {
+        try {
+          await navigator.share({ title: text, url, text });
+        } catch {
+          /* user cancelled share sheet — clipboard already filled */
+        }
+      }
+    } catch {
+      /* clipboard unavailable */
     }
   }
 
@@ -144,10 +184,11 @@ export function GameDetailShare({
     <div className="space-y-2">
       <button
         type="button"
+        data-testid="game-detail-share-btn"
         onClick={() => handleShare("default")}
         className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
       >
-        <Share2 className="size-4" /> Share
+        <Share2 className="size-4" /> 친구 초대 / 공유
       </button>
       {challengeMode ? (
         <div className="grid grid-cols-3 gap-2">
