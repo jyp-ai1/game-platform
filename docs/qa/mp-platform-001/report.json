@@ -1,8 +1,206 @@
 {
-  "measuredAt": "2026-08-26T06:36:25.745Z",
-  "base": "http://localhost:3000",
-  "levels": [],
-  "gem": {},
-  "invite": {},
-  "error": "page.goto: Timeout 90000ms exceeded.\nCall log:\n  - navigating to \"http://localhost:3000/games/snake\", waiting until \"domcontentloaded\"\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\qa\\mp-platform-001\\run.mjs:91:14"
+  "measuredAt": "2026-08-26T06:45:52.121Z",
+  "base": "https://game29-6nvumz7vo-jyp-ai1s-projects.vercel.app",
+  "levels": [
+    {
+      "length": 10,
+      "forced": true,
+      "fps": 59.9,
+      "frameTime": 16.71,
+      "frameMsP95": 16.8,
+      "result": "playable",
+      "stats": {
+        "tick": 199,
+        "localLength": 10,
+        "snakeCount": 50,
+        "foodTotal": 2622,
+        "deathFoodTotal": 222,
+        "foodCountCap": 2400,
+        "worldSize": 1400,
+        "hudFps": 59,
+        "canvas": {
+          "frameMs": 0.5,
+          "segmentDrawCount": 10,
+          "foodDrawCount": 5,
+          "foodTotal": 2622,
+          "deathFoodTotal": 222,
+          "snakeCount": 50,
+          "localLength": 10
+        },
+        "domSegmentNodes": 0,
+        "hasWorldCanvas": true
+      }
+    },
+    {
+      "length": 100,
+      "forced": true,
+      "fps": 59.8,
+      "frameTime": 16.71,
+      "frameMsP95": 16.8,
+      "result": "playable",
+      "stats": {
+        "tick": 221,
+        "localLength": 100,
+        "snakeCount": 50,
+        "foodTotal": 2616,
+        "deathFoodTotal": 216,
+        "foodCountCap": 2400,
+        "worldSize": 1400,
+        "hudFps": 59,
+        "canvas": {
+          "frameMs": 1.800000011920929,
+          "segmentDrawCount": 76,
+          "foodDrawCount": 5,
+          "foodTotal": 2617,
+          "deathFoodTotal": 217,
+          "snakeCount": 50,
+          "localLength": 100
+        },
+        "domSegmentNodes": 0,
+        "hasWorldCanvas": true
+      }
+    },
+    {
+      "length": 200,
+      "forced": true,
+      "fps": 57.7,
+      "frameTime": 17.34,
+      "frameMsP95": 16.8,
+      "result": "playable",
+      "stats": {
+        "tick": 242,
+        "localLength": 200,
+        "snakeCount": 50,
+        "foodTotal": 2619,
+        "deathFoodTotal": 219,
+        "foodCountCap": 2400,
+        "worldSize": 1400,
+        "hudFps": 57,
+        "canvas": {
+          "frameMs": 5.899999976158142,
+          "segmentDrawCount": 76,
+          "foodDrawCount": 5,
+          "foodTotal": 2619,
+          "deathFoodTotal": 219,
+          "snakeCount": 50,
+          "localLength": 200
+        },
+        "domSegmentNodes": 0,
+        "hasWorldCanvas": true
+      }
+    },
+    {
+      "length": 300,
+      "forced": true,
+      "fps": 51.8,
+      "frameTime": 19.31,
+      "frameMsP95": 33.4,
+      "result": "playable",
+      "stats": {
+        "tick": 263,
+        "localLength": 300,
+        "snakeCount": 50,
+        "foodTotal": 2615,
+        "deathFoodTotal": 215,
+        "foodCountCap": 2400,
+        "worldSize": 1400,
+        "hudFps": 52,
+        "canvas": {
+          "frameMs": 6.800000011920929,
+          "segmentDrawCount": 76,
+          "foodDrawCount": 5,
+          "foodTotal": 2615,
+          "deathFoodTotal": 215,
+          "snakeCount": 50,
+          "localLength": 300
+        },
+        "domSegmentNodes": 0,
+        "hasWorldCanvas": true
+      }
+    },
+    {
+      "length": 400,
+      "forced": true,
+      "fps": 31.4,
+      "frameTime": 31.81,
+      "frameMsP95": 83.3,
+      "result": "soft",
+      "stats": {
+        "tick": 284,
+        "localLength": 400,
+        "snakeCount": 50,
+        "foodTotal": 2615,
+        "deathFoodTotal": 215,
+        "foodCountCap": 2400,
+        "worldSize": 1400,
+        "hudFps": 29,
+        "canvas": {
+          "frameMs": 14.299999952316284,
+          "segmentDrawCount": 76,
+          "foodDrawCount": 5,
+          "foodTotal": 2615,
+          "deathFoodTotal": 215,
+          "snakeCount": 50,
+          "localLength": 400
+        },
+        "domSegmentNodes": 0,
+        "hasWorldCanvas": true
+      }
+    }
+  ],
+  "gem": {
+    "ambientRender": "PASS",
+    "deathRender": "PASS",
+    "deathCollision": "PASS",
+    "visibleGemCollect": "PASS",
+    "killed": true,
+    "beforeDeath": {
+      "tick": 287,
+      "localLength": 80,
+      "snakeCount": 50,
+      "foodTotal": 2615,
+      "deathFoodTotal": 215,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 29,
+      "canvas": {
+        "frameMs": 1.600000023841858,
+        "segmentDrawCount": 76,
+        "foodDrawCount": 5,
+        "foodTotal": 2615,
+        "deathFoodTotal": 215,
+        "snakeCount": 50,
+        "localLength": 80
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    },
+    "afterDeath": {
+      "tick": 170,
+      "localLength": 0,
+      "snakeCount": 49,
+      "foodTotal": 2631,
+      "deathFoodTotal": 231,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 43,
+      "canvas": {
+        "frameMs": 0.5999999642372131,
+        "segmentDrawCount": 12,
+        "foodDrawCount": 91,
+        "foodTotal": 2631,
+        "deathFoodTotal": 231,
+        "snakeCount": 49,
+        "localLength": 0
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    }
+  },
+  "invite": {
+    "detailShareButton": "PASS",
+    "webShare": "N/A desktop",
+    "copyLink": "PASS",
+    "copiedUrl": "https://game29-6nvumz7vo-jyp-ai1s-projects.vercel.app/games/snake?invite=455ed1995c01"
+  }
 }
