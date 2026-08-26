@@ -207,7 +207,7 @@ function SnakeIoPlayInner({
     const sourceNow = params.get("source")?.toUpperCase() ?? "";
     // Invite / pinned WORLD-*: never auto-dump to PRACTICE
     if (/^WORLD-[A-Z0-9]+$/.test(roomNow) || sourceNow === "INVITE") {
-      entryLogFail("PRACTICE_BLOCKED", `invite keep-room ${roomNow}`);
+      entryLogFail("JOIN", `invite keep-room ${roomNow} — practice blocked`);
       return;
     }
     entryLog("PRACTICE_FALLBACK");
@@ -222,7 +222,7 @@ function SnakeIoPlayInner({
     const roomNow = params.get("room")?.toUpperCase() ?? "";
     const sourceNow = params.get("source")?.toUpperCase() ?? "";
     if (/^WORLD-[A-Z0-9]+$/.test(roomNow) || sourceNow === "INVITE") {
-      entryLogFail("JOIN_TIMEOUT", `invite keep-room ${roomNow} — retry in-game`);
+      entryLogFail("TIMEOUT", `invite keep-room ${roomNow} — retry in-game`);
       return;
     }
     goPractice();

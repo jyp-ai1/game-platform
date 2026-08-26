@@ -971,7 +971,7 @@ export function SnakeIoGame({
         // Invite / pinned WORLD-*: stay on room + show retry — NEVER PRACTICE / new WORLD.
         if (isInviteWorldShard) {
           setInviteConnectBlocked(true);
-          entryLog("INVITE_RETRY_WAIT", targetCode);
+          entryTrace("CONNECT", "FAIL", `invite retry wait ${targetCode}`);
           return;
         }
         onJoinTimeoutRef.current?.();
