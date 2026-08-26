@@ -1,4 +1,12 @@
-export { buildCategoryMetadata, buildGameMetadata, buildGamesListMetadata, buildHomeMetadata, absoluteUrl, SEO_HOME_KEYWORDS } from "./metadata";
+export {
+  buildCategoryMetadata,
+  buildGameMetadata,
+  buildGamesListMetadata,
+  buildHomeMetadata,
+  absoluteUrl,
+  absoluteAssetUrl,
+  SEO_HOME_KEYWORDS,
+} from "./metadata";
 export {
   breadcrumbJsonLd,
   categoryJsonLd,

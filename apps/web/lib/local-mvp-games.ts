@@ -4,11 +4,18 @@
  */
 import type { Game } from "@game-platform/shared";
 
-/** Cache-bust so browsers that cached a prior 404 refetch the asset. */
+/** Cache-bust so browsers / Kakao OG cache that stored a prior miss refetch. */
 export const LOCAL_GAME_THUMBS: Record<string, string> = {
   bomber: "/images/games/bomber.png?v=2",
-  agar: "/images/games/agar.png",
-  snake: "/images/games/snake.png",
+  agar: "/images/games/agar.png?v=2",
+  snake: "/images/games/snake.png?v=2",
+};
+
+/** Intrinsic sizes for og:image:width / height (static public thumbs). */
+export const LOCAL_GAME_OG_DIMS: Record<string, { width: number; height: number }> = {
+  snake: { width: 1024, height: 576 },
+  agar: { width: 1024, height: 1024 },
+  bomber: { width: 1280, height: 800 },
 };
 
 const LOCAL_MVP_META: Record<
