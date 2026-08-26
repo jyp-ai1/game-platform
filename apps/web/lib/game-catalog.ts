@@ -21,10 +21,11 @@ export interface GameCatalogEntry {
 }
 
 export function playHrefForCatalogSlug(slug: string): string {
+  // Always land on Character/Color entry (flagship Snake or /games/{slug}/play).
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
   if (slug === "agar") return "/games/agar/play?room=WORLD";
   if (slug === "bomber") return "/games/bomber/play?room=ROOM";
-  return `/games/${slug}`;
+  return `/games/${slug}/play`;
 }
 
 /** Represent an existing Game row in the catalog model. */

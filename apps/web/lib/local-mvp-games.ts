@@ -25,6 +25,11 @@ const LOCAL_MVP_META: Record<
     description: "세포를 키우고 Split으로 사냥하세요. Space = Split.",
     tags: ["multiplayer", "realtime"],
   },
+  snake: {
+    title: "Snake",
+    description: "캐릭터 · 색상 선택 후 ENTER WORLD. 보석을 먹고 살아남으세요.",
+    tags: ["multiplayer", "realtime"],
+  },
 };
 
 export function resolveLocalThumb(
@@ -62,7 +67,7 @@ export function buildLocalMvpGame(slug: string): Game | null {
 /** Prefer DB row; fill missing MVP slugs; always force known local thumbs. */
 export function mergeLocalMvpGames(
   games: Game[],
-  mvpSlugs: readonly string[] = ["bomber", "agar"]
+  mvpSlugs: readonly string[] = ["bomber", "agar", "snake"]
 ): Game[] {
   const bySlug = new Map(games.map((g) => [g.slug, g]));
   for (const slug of mvpSlugs) {

@@ -9,6 +9,7 @@ import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameStatusBlock } from "@/components/game-status-block";
+import { playHrefForCatalogSlug } from "@/lib/game-catalog";
 
 function shortDescription(game: Game, slug: string): string {
   if (slug === "snake") {
@@ -24,6 +25,10 @@ function shortDescription(game: Game, slug: string): string {
   if (!raw) return "방향키와 버튼으로 플레이하세요.";
   const first = raw.split(/[.!?]\s/)[0] ?? raw;
   return first.length > 120 ? `${first.slice(0, 117)}…` : first;
+}
+
+function isMultiplayerSlug(slug: string): boolean {
+  return slug === "snake" || slug === "agar" || slug === "bomber";
 }
 
 export function GameDetailTemplate({
@@ -42,6 +47,8 @@ export function GameDetailTemplate({
   allGames?: Game[];
 }) {
   const desc = shortDescription(game, slug);
+  const playHref = playHrefForCatalogSlug(slug);
+  const mp = isMultiplayerSlug(slug);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -55,20 +62,18 @@ export function GameDetailTemplate({
               <p className="text-xs text-muted-foreground tabular-nums">
                 Play count · {(game.playCount ?? 0).toLocaleString()}
               </p>
-              <Link
-                href={
-                  slug === "snake"
-                    ? "/flagship/snake-io/play?room=WORLD"
-                    : slug === "agar"
-                      ? "/games/agar/play?room=WORLD"
-                      : slug === "bomber"
-                        ? "/games/bomber/play?room=ROOM"
-                        : `/games/${slug}/play`
-                }
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
-              >
-                캐릭터 선택
-              </Link>
+              <div className="flex flex-col items-center gap-2">
+                <Link
+                  href={playHref}
+                  data-testid="game-detail-play-cta"
+                  className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
+                >
+                  PLAY
+                </Link>
+                {mp ? (
+                  <p className="text-xs text-muted-foreground">캐릭터 · 색상 선택 → ENTER WORLD</p>
+                ) : null}
+              </div>
             </section>
 
             <hr className="border-white/10" />

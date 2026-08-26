@@ -26,7 +26,7 @@ export function GamePlayClient({ slug, title }: { slug: string; title: string })
 
   return (
     <div ref={rootRef} tabIndex={-1} className="flex h-full min-h-0 flex-col outline-none">
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-black/80 px-3 py-2">
+      <header className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-black/80 px-3 py-2">
         <button
           type="button"
           onClick={() => router.push(`/games/${slug}`)}
@@ -34,9 +34,6 @@ export function GamePlayClient({ slug, title }: { slug: string; title: string })
         >
           ← {title}
         </button>
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-400/90">
-          Playing
-        </span>
       </header>
       <div className="min-h-0 flex-1 overflow-hidden">
         <GamePlayer slug={slug as PlayableSlug} instantPlay fullscreen />

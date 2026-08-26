@@ -1,18 +1,16 @@
-import { Container } from "@game-platform/ui";
-
-function Shimmer({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-white/10 ${className ?? ""}`} aria-hidden />;
-}
-
-export default function GameDetailLoading() {
+/**
+ * Shared loading for /games/[slug] and nested /play.
+ * Must NOT look like a dead detail page (empty CTA pills) — that is the CEO
+ * "cannot play from detail" failure mode during client navigation to /play.
+ */
+export default function GameSegmentLoading() {
   return (
-    <Container className="py-8" data-testid="game-detail-skeleton">
-      <Shimmer className="mb-4 h-8 w-48" />
-      <Shimmer className="mb-6 h-64 w-full rounded-2xl" />
-      <div className="flex gap-2">
-        <Shimmer className="h-10 w-32" />
-        <Shimmer className="h-10 w-32" />
-      </div>
-    </Container>
+    <div
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3 bg-black"
+      data-testid="game-play-loading"
+    >
+      <div className="size-8 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+      <p className="text-sm text-white/70">Entering…</p>
+    </div>
   );
 }
