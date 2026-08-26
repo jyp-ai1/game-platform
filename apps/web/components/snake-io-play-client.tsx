@@ -203,13 +203,30 @@ function SnakeIoPlayInner({
   }, []);
 
   const goPractice = useCallback(() => {
+    const roomNow = params.get("room")?.toUpperCase() ?? "";
+    const sourceNow = params.get("source")?.toUpperCase() ?? "";
+    // Invite / pinned WORLD-*: never auto-dump to PRACTICE
+    if (/^WORLD-[A-Z0-9]+$/.test(roomNow) || sourceNow === "INVITE") {
+      entryLogFail("PRACTICE_BLOCKED", `invite keep-room ${roomNow}`);
+      return;
+    }
     entryLog("PRACTICE_FALLBACK");
     emitEngagementEvent({
       type: "practice-fallback",
       message: PRACTICE_FALLBACK_MSG,
     });
     router.replace(PRACTICE_URL);
-  }, [router]);
+  }, [router, params]);
+
+  const handleInviteJoinTimeout = useCallback(() => {
+    const roomNow = params.get("room")?.toUpperCase() ?? "";
+    const sourceNow = params.get("source")?.toUpperCase() ?? "";
+    if (/^WORLD-[A-Z0-9]+$/.test(roomNow) || sourceNow === "INVITE") {
+      entryLogFail("JOIN_TIMEOUT", `invite keep-room ${roomNow} — retry in-game`);
+      return;
+    }
+    goPractice();
+  }, [params, goPractice]);
 
   const handleRematch = useCallback(async () => {
     if (!loop) return;
@@ -294,7 +311,7 @@ function SnakeIoPlayInner({
       <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
         <SnakeIoGame
           practiceMode={practiceMode}
-          onJoinTimeout={goPractice}
+          onJoinTimeout={handleInviteJoinTimeout}
           onExitToLobby={() => setCharacterReady(false)}
           headCharacter={headCharacter}
           bodyColor={bodyColor}

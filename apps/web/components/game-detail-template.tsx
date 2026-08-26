@@ -9,6 +9,7 @@ import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameStatusBlock } from "@/components/game-status-block";
+import { SnakeWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug } from "@/lib/game-catalog";
 
 function shortDescription(game: Game, slug: string): string {
@@ -104,13 +105,22 @@ export function GameDetailTemplate({
               </p>
 
               <div className="flex flex-col items-center gap-2">
-                <Link
-                  href={playHref}
-                  data-testid="game-detail-play-cta"
-                  className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
-                >
-                  {mp ? "WORLD PLAY" : "PLAY"}
-                </Link>
+                {slug === "snake" ? (
+                  <SnakeWorldPlayLink
+                    data-testid="game-detail-play-cta"
+                    className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
+                  >
+                    WORLD PLAY
+                  </SnakeWorldPlayLink>
+                ) : (
+                  <Link
+                    href={playHref}
+                    data-testid="game-detail-play-cta"
+                    className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
+                  >
+                    {mp ? "WORLD PLAY" : "PLAY"}
+                  </Link>
+                )}
                 {mp ? (
                   <p className="text-xs text-muted-foreground">
                     Character · Color · Difficulty → ENTER WORLD

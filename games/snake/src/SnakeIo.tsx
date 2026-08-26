@@ -209,21 +209,31 @@ type PeerPresencePayload = {
 
 const ACTIVE_ROOM_KEY = "play29:active-room";
 
+/** Concrete shard only — never pin bare WORLD (wipes invite WORLD-YXT → cluster WORLD-4 split). */
+function isConcreteWorldShard(code: string): boolean {
+  return /^WORLD-[A-Z0-9]+$/.test(code.toUpperCase());
+}
+
 function sendPlayerInput(roomCode: string, globalWorld: boolean, payload: PlayerInputPayload): void {
   send(roomCode, globalWorld ? `input:${payload.deviceId}` : "input", payload);
 }
 
 function pinActiveRoom(code: string): void {
   if (typeof window === "undefined") return;
+  const upper = code.toUpperCase();
+  // Bare WORLD / PRACTICE / STAGE must not overwrite a pinned invite shard.
+  if (!isConcreteWorldShard(upper)) return;
   try {
-    window.localStorage.setItem(ACTIVE_ROOM_KEY, code);
+    window.localStorage.setItem(ACTIVE_ROOM_KEY, upper);
   } catch {
     /* ignore */
   }
   const url = new URL(window.location.href);
-  if (url.searchParams.get("room")?.toUpperCase() === code) return;
-  url.searchParams.set("room", code);
+  const prevRoom = url.searchParams.get("room")?.toUpperCase() ?? "";
+  if (prevRoom === upper) return;
+  url.searchParams.set("room", upper);
   url.searchParams.delete("invite");
+  // Keep source=invite across room pin so PC/Mobile HUD SOURCE stays identical.
   window.history.replaceState({}, "", `${url.pathname}${url.search}`);
 }
 
@@ -297,6 +307,20 @@ export function SnakeIoGame({
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
   const isStageMode = roomCode === "STAGE" || params.get("mode") === "stage";
+  const joinSourceParam = params.get("source")?.toUpperCase() ?? "";
+  /** Explicit WORLD-* in URL = pinned room — never invent another WORLD or PRACTICE. */
+  const isPinnedWorldJoin = isConcreteWorldShard(roomCode);
+  /** Invite evidence: source=invite, or alphabetic WORLD-XXX shard (not numeric cluster WORLD-2/3/4). */
+  const isInviteShardCode = isPinnedWorldJoin && !/^WORLD-\d+$/.test(roomCode);
+  const roomJoinSource: "INVITE" | "QUICK" | "PRACTICE" | "STAGE" = practiceMode
+    ? "PRACTICE"
+    : isStageMode
+      ? "STAGE"
+      : joinSourceParam === "INVITE" || isInviteShardCode
+        ? "INVITE"
+        : "QUICK";
+  const [inviteRetryToken, setInviteRetryToken] = useState(0);
+  const [inviteConnectBlocked, setInviteConnectBlocked] = useState(false);
   const isLocalOnly = practiceMode || isStageMode;
   const { reportScore } = useGameSDK();
   const [sessionRoom, setSessionRoom] = useState(roomCode);
@@ -575,10 +599,12 @@ export function SnakeIoGame({
     setSessionRoom(roomCode);
     gameReadyRef.current = false;
     connectDoneRef.current = false;
-    if (roomCode && roomCode !== "PRACTICE" && roomCode !== "STAGE") {
+    setInviteConnectBlocked(false);
+    // Only pin concrete WORLD-* — never bare WORLD (MP-INVITE-003 room split).
+    if (isConcreteWorldShard(roomCode)) {
       pinActiveRoom(roomCode);
     }
-  }, [roomCode]);
+  }, [roomCode, inviteRetryToken]);
 
   useEffect(() => {
     resetGamePhase();
@@ -796,13 +822,14 @@ export function SnakeIoGame({
     connectDoneRef.current = true;
 
     let active = true;
-    // Invite WORLD-* shards: mobile/slow networks need longer join + retries (avoid PRACTICE fallback).
-    const isInviteWorldShard = /^WORLD-[A-Z0-9]+$/.test(roomCode);
+    // Invite / pinned WORLD-* shards: never invent another room or dump to PRACTICE.
+    const isInviteWorldShard = isConcreteWorldShard(roomCode);
     const CONNECT_TIMEOUT_MS = isInviteWorldShard ? 15_000 : 5_000;
     const MAX_ATTEMPTS = isInviteWorldShard ? 3 : 1;
     const SPAWN_TIMEOUT_MS = isInviteWorldShard ? 25_000 : 12_000;
 
     const finishConnect = (r: GameRoom, code: string): void => {
+      setInviteConnectBlocked(false);
       if (code !== sessionRoom) setSessionRoom(code);
       pinActiveRoom(code);
       start(code);
@@ -841,7 +868,7 @@ export function SnakeIoGame({
           } catch {
             pinned = null;
           }
-          if (pinned && /^WORLD-[A-Z0-9]+$/.test(pinned)) {
+          if (pinned && isConcreteWorldShard(pinned)) {
             targetCode = pinned;
           } else {
             targetCode = await resolveAvailableCluster("snake");
@@ -941,6 +968,12 @@ export function SnakeIoGame({
           { room: targetCode, recordCrash: true }
         );
         connectDoneRef.current = false;
+        // Invite / pinned WORLD-*: stay on room + show retry — NEVER PRACTICE / new WORLD.
+        if (isInviteWorldShard) {
+          setInviteConnectBlocked(true);
+          entryLog("INVITE_RETRY_WAIT", targetCode);
+          return;
+        }
         onJoinTimeoutRef.current?.();
       }
     };
@@ -950,7 +983,7 @@ export function SnakeIoGame({
       active = false;
       if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
     };
-  }, [roomCode, practiceMode, isStageMode, deviceId, initStageWorld]);
+  }, [roomCode, practiceMode, isStageMode, deviceId, initStageWorld, inviteRetryToken]);
 
   useEffect(() => {
     if (!effectiveRoomCode || !connected || isLocalOnly) return;
@@ -1334,18 +1367,41 @@ export function SnakeIoGame({
         const humans = Object.values(w?.snakes ?? {}).filter((s) => !s.isBot && !s.deviceId.startsWith("bot:"));
         const peers = humans.filter((s) => s.deviceId !== deviceId);
         const top = w ? getDisplayRankings(w, 10) : [];
+        const me = w?.snakes[deviceId];
+        const food = w?.food ?? [];
+        let death = 0;
+        let ambient = 0;
+        const values: number[] = [];
+        for (const f of food) {
+          if (f.tier === "death") death += 1;
+          else {
+            ambient += 1;
+            values.push(f.value);
+          }
+        }
         return {
           urlRoom: typeof window !== "undefined"
             ? new URLSearchParams(window.location.search).get("room")?.toUpperCase() ?? null
             : null,
+          source:
+            typeof window !== "undefined"
+              ? new URLSearchParams(window.location.search).get("source")?.toUpperCase() ?? null
+              : null,
           sessionRoom: activeRoom,
+          roomJoinSource,
           roomPlayers: r?.players.map((p) => p.deviceId) ?? [],
           localDeviceId: deviceId,
-          foodTotal: w?.food.length ?? 0,
+          localLength: me ? getSegmentCount(me) : 0,
+          foodTotal: food.length,
+          ambientFood: ambient,
+          deathFood: death,
+          ambientGemValues: values.slice(0, 40),
           peerIds: peers.map((p) => p.deviceId),
           peerNicknames: peers.map((p) => p.nickname),
           top10: top.map((t) => ({ id: t.deviceId, nickname: t.nickname, score: t.score })),
           roomHud: document.querySelector('[data-testid="snake-room-label"]')?.textContent ?? null,
+          modeHud: document.querySelector('[data-testid="snake-mode-label"]')?.textContent ?? null,
+          sourceHud: document.querySelector('[data-testid="snake-source-label"]')?.textContent ?? null,
         };
       },
     };
@@ -1353,7 +1409,7 @@ export function SnakeIoGame({
     return () => {
       delete (window as unknown as { __MP_PLATFORM_001__?: MpApi }).__MP_PLATFORM_001__;
     };
-  }, [deviceId, worldHudFps, activeRoom]);
+  }, [deviceId, worldHudFps, activeRoom, roomJoinSource]);
 
   useEffect(() => {
     if (!activeRoom || !shouldTickWorld || !connected) {
@@ -2208,7 +2264,29 @@ export function SnakeIoGame({
   if (!connected || !world) {
     return (
       <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-2">
-        <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>
+        {inviteConnectBlocked && isPinnedWorldJoin ? (
+          <>
+            <p className="text-center text-sm text-amber-200" data-testid="snake-invite-retry">
+              게임 방에 연결하는 중...
+            </p>
+            <p className="text-center text-xs text-white/50">ROOM {roomCode} · SOURCE INVITE</p>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setInviteConnectBlocked(false);
+                setConnected(false);
+                setInviteRetryToken((n) => n + 1);
+              }}
+            >
+              다시 시도
+            </Button>
+          </>
+        ) : (
+          <p className="text-center text-muted-foreground">
+            {isPinnedWorldJoin ? "게임 방에 연결하는 중..." : `Connecting… ${ux.label} · ${playerCount}P`}
+          </p>
+        )}
         <div
           className="w-full animate-pulse rounded-xl border border-white/10 bg-white/5"
           style={{ aspectRatio: "1", maxHeight: SNAKE_FEEL.maxViewportPx }}
@@ -2380,6 +2458,10 @@ export function SnakeIoGame({
           <SnakeWorldHud
             className="absolute right-2 top-12 z-40"
             roomCode={effectiveRoomCode}
+            mode="WORLD"
+            source={
+              roomJoinSource === "INVITE" ? "INVITE" : "QUICK"
+            }
             players={worldHudPlayers}
             bots={worldHudBots}
             pingMs={worldHudPing}

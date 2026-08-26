@@ -253,9 +253,11 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
   const wanted = Math.max(1, Math.round(count * SNAKE_POLISH.foodDensityMult));
   const n = Math.min(room, wanted);
   const w = world.config.worldSize;
+  // Large fills (world init): almost no near-player bias — prevents L10→L500 gem pile at spawn.
+  const nearChance = n >= 20 ? Math.min(0.06, SNAKE_POLISH.nearPlayerFoodChance) : SNAKE_POLISH.nearPlayerFoodChance;
   for (let i = 0; i < n; i++) {
     const preferNear =
-      Math.random() < SNAKE_POLISH.nearPlayerFoodChance
+      Math.random() < nearChance
         ? randPosNearAliveSnake(world, SNAKE_POLISH.nearPlayerFoodRadius)
         : null;
     let pos = preferNear ?? randPos(w);
@@ -269,14 +271,16 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
       tries++;
     }
     const tier = rollFoodTier();
-    const cfg = FOOD_TIERS[tier];
+    // Ambient only — death loot is exclusively from dropFoodFromSnake (not rollFoodTier).
+    const ambientTier = tier === "death" ? "small" : tier;
+    const cfg = FOOD_TIERS[ambientTier];
     world.food.push({
       id: nextFoodId(),
       x: pos.x,
       y: pos.y,
       kind: cfg.kind,
       value: cfg.score,
-      tier,
+      tier: ambientTier,
     });
   }
 }
@@ -289,13 +293,14 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
   snake.lastGrowthAt = Date.now();
 }
 
-/** Length gain by gem tier — Small +1 · Medium +2 · Large +3 (CEO SN-001) */
+/** Length gain by gem tier — Small +1 · Medium +2 · Large +3 (CEO SN-001 / MP-INVITE-003) */
 function gemLengthGain(tier: FoodTier): number {
   if (tier === "small") return 1;
   if (tier === "medium") return 2;
   if (tier === "large") return 3;
   if (tier === "epic") return 5;
-  if (tier === "death") return 3;
+  // Death loot: modest length so corpse piles near spawn aren't an L500 vacuum.
+  if (tier === "death") return 1;
   return 1;
 }
 

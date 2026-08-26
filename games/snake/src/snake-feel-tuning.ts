@@ -75,14 +75,14 @@ export const SNAKE_FEEL = {
 
 /** World / spawn polish — density & growth pacing */
 export const SNAKE_POLISH = {
-  /** Batch fill rate toward ambient cap (cap itself = config.foodCount — untouched) */
-  foodDensityMult: 2.2,
+  /** Batch fill rate toward ambient cap (1.0 = no overrun; was 2.2 → near-spawn flood) */
+  foodDensityMult: 1.0,
   /**
-   * SPRINT-17 Step 3 — bias new ambient gems toward alive snakes (early play area),
-   * without raising ambient hard-cap. Chance of near-player spawn per item.
+   * Bias ambient gems toward alive snakes — keep LOW so start isn't a gem pile (L500 spike).
+   * Large batch spawns (world init) further damp this in spawnFoodItems.
    */
-  nearPlayerFoodChance: 0.42,
-  nearPlayerFoodRadius: 20,
+  nearPlayerFoodChance: 0.12,
+  nearPlayerFoodRadius: 10,
   bossHpMult: 0.85,
   bossDamagePerHit: 10,
   safeZoneRadiusMult: 1.12,

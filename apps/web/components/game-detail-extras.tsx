@@ -206,7 +206,8 @@ export function GameDetailShare({
     const invite = resolveInviteRoomCode(gameSlug);
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://game29.vercel.app";
-    return `${origin}/games/${gameSlug}?invite=${encodeURIComponent(invite)}`;
+    // Embed concrete room id — both devices join the same WORLD-* (never bare WORLD).
+    return `${origin}/games/${gameSlug}?invite=${encodeURIComponent(invite)}&source=invite`;
   }
 
   async function copyText(text: string): Promise<boolean> {

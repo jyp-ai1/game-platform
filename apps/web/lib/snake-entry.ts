@@ -40,7 +40,7 @@ export async function enterSnakeRoom(router: AppRouterInstance, roomCode: string
   }
   if (/^WORLD-[A-Z0-9]+$/.test(upper)) {
     entryTrace("CLICK", "START", `join-world-shard ${upper}`);
-    const href = `/flagship/snake-io/play?room=${encodeURIComponent(upper)}`;
+    const href = `/flagship/snake-io/play?room=${encodeURIComponent(upper)}&source=invite`;
     entryTrace("ROUTE", "START", href);
     router.push(href);
     entryTrace("ROUTE", "PASS", href, 0);
@@ -53,6 +53,7 @@ export async function enterSnakeRoom(router: AppRouterInstance, roomCode: string
     router.push(`/flagship/snake-io/play?room=${encodeURIComponent(roomCode)}`);
   } catch (err) {
     entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
+    // Non-WORLD rooms only — never invent PRACTICE when an invite room was requested.
     entryTrace("PRACTICE_FALLBACK", "PASS", "join-room-fail");
     router.push(PRACTICE_URL);
   }

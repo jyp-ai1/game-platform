@@ -39,8 +39,13 @@ export default async function GamePlayPage({ params, searchParams }: GamePlayPag
       firstParam(q.room)?.toUpperCase() ||
       firstParam(q.invite)?.toUpperCase() ||
       "WORLD";
+    const fromInvite =
+      !!firstParam(q.invite) || firstParam(q.source)?.toLowerCase() === "invite";
     const debug = firstParam(q.debug) === "1" ? "&debug=1" : "";
-    redirect(`/flagship/snake-io/play?room=${encodeURIComponent(room)}${debug}`);
+    const source = fromInvite ? "&source=invite" : "";
+    redirect(
+      `/flagship/snake-io/play?room=${encodeURIComponent(room)}${source}${debug}`
+    );
   }
 
   const game = (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug);

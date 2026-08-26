@@ -51,9 +51,11 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
   const invite = firstParam(q.invite)?.trim().toUpperCase();
   if (invite) {
     if (slug === "snake") {
-      redirect(`/flagship/snake-io/play?room=${encodeURIComponent(invite)}`);
+      redirect(
+        `/flagship/snake-io/play?room=${encodeURIComponent(invite)}&source=invite`
+      );
     }
-    redirect(`/games/${slug}/play?room=${encodeURIComponent(invite)}`);
+    redirect(`/games/${slug}/play?room=${encodeURIComponent(invite)}&source=invite`);
   }
 
   const [dbGame, rawGames, rankingEnabled] = await Promise.all([
