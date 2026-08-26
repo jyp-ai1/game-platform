@@ -40,7 +40,6 @@ import {
   interpolateSnakeRender,
   interpolateSnakeHead,
   getSegmentCount,
-  lerpSegments,
   restartPlayerSnake,
   rehydrateWorldSnakes,
   damageSnake,
@@ -51,7 +50,6 @@ import {
   tickWorld,
   cullAmbientFood,
   type Direction,
-  type FoodItem,
   type SnakeIoWorld,
   type Vec,
 } from "./snake-io-engine";
@@ -130,7 +128,7 @@ import {
   shutdownLoopDiag,
 } from "./snake-engine-diag";
 import { isEngineAuditEnabled, recordSpawnAudit, updateEngineAudit } from "./snake-engine-audit-store";
-import { initFixDeath001, noteFixDeath001Sample } from "./snake-fix-death-001";
+import { initFixDeath001 } from "./snake-fix-death-001";
 import { initFixDeath001Step2, setFixDeath001Step2Focus } from "./snake-fix-death-001-step2";
 import {
   initSnakeMoveDebug,
@@ -156,7 +154,7 @@ import { refreshWorldTuningFromTelemetry } from "./snake-balance-tuner";
 import { recordSnakeSessionEnd } from "./snake-session-recap";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { SNAKE_MVP_RC1, resolveSnakeHead } from "./snake-mvp-rc1";
-import { applyCharacterToSnake, resolveHeadEmoji, segmentBodyColor, type SnakeHeadId } from "./snake-characters";
+import { applyCharacterToSnake, type SnakeHeadId } from "./snake-characters";
 import {
   enterViewportFullscreen,
   exitViewportFullscreen,
@@ -165,6 +163,8 @@ import {
   measureGameBoardRect,
 } from "./snake-fullscreen";
 import { getFoodVisual, tierFromKind } from "./snake-food-types";
+import { drawWorldCanvas, getWorldCanvasStats } from "./snake-world-canvas";
+import { initSnakePath } from "./snake-path-movement";
 import { SnakeMinimap } from "./snake-minimap";
 import { SnakeWorldHud } from "./snake-world-hud";
 import { SnakeMobileControls } from "./snake-mobile-controls";
@@ -248,6 +248,8 @@ export function SnakeIoGame({
   const awaitingInputRef = useRef(true);
   const [awaitingInput, setAwaitingInput] = useState(true);
   const [spawnHighlightUntil, setSpawnHighlightUntil] = useState(0);
+  const spawnHighlightUntilRef = useRef(0);
+  spawnHighlightUntilRef.current = spawnHighlightUntil;
   const [goFlashUntil, setGoFlashUntil] = useState(0);
   const [respawnSec, setRespawnSec] = useState<number | null>(null);
   const [killFeedClock, setKillFeedClock] = useState(0);
@@ -264,7 +266,8 @@ export function SnakeIoGame({
   const onExitToLobbyRef = useRef(onExitToLobby);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [renderAlpha, setRenderAlpha] = useState(1);
+  // MP-PLATFORM-001: render alpha lives on ref only — canvas draws each RAF without setState
+  const renderAlphaRef = useRef(1);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopup[]>([]);
   const prevSegCountRef = useRef<Record<string, number>>({});
@@ -297,7 +300,8 @@ export function SnakeIoGame({
   const prevWorldTickRef = useRef({ tick: 0, at: 0 });
   const camLayoutRef = useRef({ boardW: 480, boardH: 480, cellSize: 10, camHalfX: 240, camHalfY: 240 });
   const worldLayerRef = useRef<HTMLDivElement>(null);
-  const renderAlphaRef = useRef(1);
+  const worldCanvasRef = useRef<HTMLCanvasElement>(null);
+  const worldCanvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
   /** FIX-SNAKE-UX-001 Step1: time-based blend between physics ticks (visual only). */
   const lastPhysicsTickAtRef = useRef(0);
   const physicsTickMsRef = useRef(50);
@@ -1161,6 +1165,68 @@ export function SnakeIoGame({
     diagWorldSnakes(Object.keys(world.snakes).length, !!world.snakes[deviceId]);
   }, [world, deviceId]);
 
+  /** MP-PLATFORM-001 — measure/force length for L10…L400 perf probes (no gameplay change). */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    type MpApi = {
+      getStats: () => Record<string, unknown>;
+      forceLocalLength: (n: number) => boolean;
+      killLocalForLoot: () => boolean;
+    };
+    const api: MpApi = {
+      getStats: () => {
+        const w = worldRef.current;
+        const me = w?.snakes[deviceId];
+        const canvas = getWorldCanvasStats();
+        const food = w?.food ?? [];
+        let death = 0;
+        for (const f of food) if (f.tier === "death") death += 1;
+        return {
+          tick: w?.tick ?? 0,
+          localLength: me ? getSegmentCount(me) : 0,
+          snakeCount: w ? Object.values(w.snakes).filter((s) => s.alive).length : 0,
+          foodTotal: food.length,
+          deathFoodTotal: death,
+          foodCountCap: w?.config.foodCount ?? null,
+          worldSize: w?.config.worldSize ?? null,
+          hudFps: worldHudFps,
+          canvas,
+          domSegmentNodes: document.querySelectorAll("[data-snake-seg]").length,
+          hasWorldCanvas: !!document.querySelector('[data-testid="snake-world-canvas"]'),
+        };
+      },
+      forceLocalLength: (n: number) => {
+        const w = worldRef.current;
+        const snake = w?.snakes[deviceId];
+        if (!w || !snake?.alive) return false;
+        const hx = snake.headX ?? snake.segments[0]?.x ?? 0;
+        const hy = snake.headY ?? snake.segments[0]?.y ?? 0;
+        const angle = snake.angle ?? 0;
+        snake.segmentCount = Math.max(1, Math.floor(n));
+        snake.score = Math.max(snake.score, snake.segmentCount);
+        initSnakePath(snake, hx, hy, angle);
+        const next = structuredClone(w);
+        worldRef.current = next;
+        setWorld(next);
+        return true;
+      },
+      killLocalForLoot: () => {
+        const w = worldRef.current;
+        const snake = w?.snakes[deviceId];
+        if (!w || !snake?.alive || snake.segments.length === 0) return false;
+        damageSnake(w, snake, 9999);
+        const next = structuredClone(w);
+        worldRef.current = next;
+        setWorld(next);
+        return true;
+      },
+    };
+    (window as unknown as { __MP_PLATFORM_001__?: MpApi }).__MP_PLATFORM_001__ = api;
+    return () => {
+      delete (window as unknown as { __MP_PLATFORM_001__?: MpApi }).__MP_PLATFORM_001__;
+    };
+  }, [deviceId, worldHudFps]);
+
   useEffect(() => {
     if (!activeRoom || !shouldTickWorld || !connected) {
       const reasons: string[] = [];
@@ -1606,7 +1672,6 @@ export function SnakeIoGame({
       );
       // Visual-only reset — physics/collision still use current snake.headX/Y + segments
       lastPhysicsTickAtRef.current = performance.now();
-      setRenderAlpha(0);
       renderAlphaRef.current = 0;
       for (const [id, s] of Object.entries(world.snakes)) {
         const prevS = prev.snakes[id];
@@ -1821,11 +1886,51 @@ export function SnakeIoGame({
         layer.style.transformOrigin = `${layout.camHalfX + camRef.current.x}px ${layout.camHalfY + camRef.current.y}px`;
       }
 
-      // Sample existing interp every frame while alpha advances; skip setState when idle at 1
-      setRenderAlpha((prev) => {
-        const next = renderAlphaRef.current;
-        return Math.abs(prev - next) < 0.008 ? prev : next;
-      });
+      // MP-PLATFORM-001: draw snakes+gems on canvas (no React segment/food DOM)
+      const canvas = worldCanvasRef.current;
+      const wLive = worldRef.current;
+      if (canvas && wLive && layout.cellSize > 0) {
+        const dpr = typeof window !== "undefined" ? Math.min(2, window.devicePixelRatio || 1) : 1;
+        const cssW = layout.boardW;
+        const cssH = layout.boardH;
+        if (canvas.width !== Math.floor(cssW * dpr) || canvas.height !== Math.floor(cssH * dpr)) {
+          canvas.width = Math.floor(cssW * dpr);
+          canvas.height = Math.floor(cssH * dpr);
+          canvas.style.width = `${cssW}px`;
+          canvas.style.height = `${cssH}px`;
+          worldCanvasCtxRef.current = null;
+        }
+        let ctx = worldCanvasCtxRef.current;
+        if (!ctx) {
+          ctx = canvas.getContext("2d");
+          worldCanvasCtxRef.current = ctx;
+        }
+        if (ctx) {
+          const z = zoomMultRef.current || 1;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          if (z !== 1) {
+            ctx.translate(cssW / 2, cssH / 2);
+            ctx.scale(z, z);
+            ctx.translate(-cssW / 2, -cssH / 2);
+          }
+          drawWorldCanvas({
+            ctx,
+            world: wLive,
+            camX: camRef.current.x,
+            camY: camRef.current.y,
+            cellSize: layout.cellSize,
+            boardW: cssW,
+            boardH: cssH,
+            renderAlpha: renderAlphaRef.current,
+            deviceId,
+            prevSnaps: prevSnakeSnapRef.current,
+            prevSegments: prevSegmentsRef.current,
+            growthUntil: growthUntilRef.current,
+            eatPopUntil: eatPopUntilRef.current,
+            spawnHighlightUntil: spawnHighlightUntilRef.current,
+          });
+        }
+      }
 
       if (frameCounterRef.current % 4 === 0) {
         const w = worldRef.current;
@@ -1987,26 +2092,6 @@ export function SnakeIoGame({
   }));
   const visualGridPx = cellSize / SNAKE_FEEL.visualGridSubdiv;
   const visualGridLine = `rgba(255,255,255,${SNAKE_FEEL.visualGridLineOpacity})`;
-
-  // FIX-PERF-001: viewport cull food DOM — was mapping ~5k nodes every paint (FOOD_RENDER_LOAD)
-  const FOOD_RENDER_BUDGET = 420;
-  const foodMarginCells = 3;
-  const viewMinX = camX / cellSize - foodMarginCells;
-  const viewMaxX = (camX + boardW) / cellSize + foodMarginCells;
-  const viewMinY = camY / cellSize - foodMarginCells;
-  const viewMaxY = (camY + boardH) / cellSize + foodMarginCells;
-  const visibleFoods: FoodItem[] = [];
-  const foodAll = world.food;
-  for (let i = 0; i < foodAll.length; i++) {
-    const f = foodAll[i]!;
-    if (f.x < viewMinX || f.x > viewMaxX || f.y < viewMinY || f.y > viewMaxY) continue;
-    visibleFoods.push(f);
-  }
-  if (visibleFoods.length > FOOD_RENDER_BUDGET) {
-    // Prefer death gems, then keep first N in view
-    visibleFoods.sort((a, b) => (a.tier === "death" ? 0 : 1) - (b.tier === "death" ? 0 : 1));
-    visibleFoods.length = FOOD_RENDER_BUDGET;
-  }
 
   return (
     <div
@@ -2184,9 +2269,17 @@ export function SnakeIoGame({
             </>
           ) : null}
         </div>
+          {/* MP-PLATFORM-001: viewport canvas — snakes + gems (camera baked in draw) */}
+          <canvas
+            ref={worldCanvasRef}
+            data-testid="snake-world-canvas"
+            className="pointer-events-none absolute inset-0 z-[1]"
+            width={boardW}
+            height={boardH}
+          />
           <div
             ref={worldLayerRef}
-            className="absolute origin-top-left"
+            className="pointer-events-none absolute origin-top-left z-[2]"
             style={{
               width: worldSize * cellSize,
               height: worldSize * cellSize,
@@ -2241,39 +2334,7 @@ export function SnakeIoGame({
               <div key={e.id} className="absolute animate-pulse rounded-full border-2 border-amber-300/60"
                 style={{ left: (e.x - e.radius) * cellSize, top: (e.y - e.radius) * cellSize, width: e.radius * 2 * cellSize, height: e.radius * 2 * cellSize }} />
             ))}
-            {visibleFoods.map((f, i) => {
-              const tier = f.tier ?? tierFromKind(f.kind, f.value);
-              const vis = getFoodVisual(tier);
-              const size = Math.max(vis.sizePx, cellSize * (vis.sizePx / 18));
-              const offset = (cellSize - size) / 2;
-              const myHead = resolveSnakeHead(mySnake ?? undefined);
-              const magnetR = isBoosting ? SNAKE_FEEL.magnetRadiusBoost : SNAKE_FEEL.magnetRadius;
-              const fd = myHead ? Math.hypot(f.x - myHead.x, f.y - myHead.y) : 999;
-              const magneted = fd < magnetR && fd > 0.05;
-              const magnetScale = magneted ? 1 + (1 - fd / magnetR) * 0.4 : 1;
-              const magnetOpacity = magneted ? 0.85 + (1 - fd / magnetR) * 0.15 : 1;
-              return (
-                <div
-                  key={f.id ?? `${tier}-${Math.round(f.x * 4)}-${Math.round(f.y * 4)}-${i}`}
-                  className={cn(
-                    "absolute rounded-full transition-transform duration-75",
-                    tier === "epic" && "animate-pulse",
-                    tier === "death" && "animate-pulse ring-2 ring-red-400/50",
-                    tier !== "small" && "ring-1 ring-white/30",
-                    magneted && "z-10"
-                  )}
-                  style={{
-                    left: f.x * cellSize + offset - (size * (magnetScale - 1)) / 2,
-                    top: f.y * cellSize + offset - (size * (magnetScale - 1)) / 2,
-                    width: size * magnetScale,
-                    height: size * magnetScale,
-                    backgroundColor: vis.color,
-                    boxShadow: magneted ? `${vis.glow}, 0 0 12px ${vis.color}` : vis.glow,
-                    opacity: magnetOpacity,
-                  }}
-                />
-              );
-            })}
+            {/* foods + snake bodies → snake-world-canvas (MP-PLATFORM-001) */}
             {world.boss && !world.boss.defeated ? (
               <div className="absolute flex flex-col items-center" style={{ left: (world.boss.x - 2) * cellSize, top: (world.boss.y - 2) * cellSize, width: cellSize * 5, height: cellSize * 5 }}>
                 <div className="absolute inset-0 animate-pulse rounded-full border-4 border-red-500/60 bg-red-500/20" />
@@ -2283,108 +2344,6 @@ export function SnakeIoGame({
                 </div>
               </div>
             ) : null}
-            {Object.values(world.snakes).map((snake) => {
-              // FIX-SNAKE-UX-002: skip dead/spectating — prevents "stationary worm" ghosts
-              if (!snake.alive || snake.spectating) return null;
-              const snap = prevSnakeSnapRef.current[snake.deviceId];
-              const segs = snap
-                ? interpolateSnakeRender(snake, snap, renderAlpha)
-                : lerpSegments(
-                    prevSegmentsRef.current[snake.deviceId],
-                    snake.segments,
-                    renderAlpha,
-                    Math.min(1, renderAlpha * (SNAKE_FEEL.headLerpStep / SNAKE_FEEL.segmentLerpStep)),
-                    snake.boosting ? SNAKE_FEEL.tailWaveAmpBoost : SNAKE_FEEL.tailWaveAmp
-                  );
-              const growing = (growthUntilRef.current[snake.deviceId] ?? 0) > Date.now();
-              const growthLeft = (growthUntilRef.current[snake.deviceId] ?? 0) - Date.now();
-              const tailPopScale = growing
-                ? 0.9 + Math.sin((1 - Math.max(0, growthLeft) / SNAKE_FEEL.growthAnimMs) * Math.PI) * 0.2
-                : 1;
-              const eatPopLeft = (eatPopUntilRef.current[snake.deviceId] ?? 0) - Date.now();
-              const eatPopScale =
-                eatPopLeft > 0
-                  ? 1 +
-                    (SNAKE_FEEL.eatPopPeak - 1) *
-                      Math.sin((1 - Math.max(0, eatPopLeft) / SNAKE_FEEL.eatPopAnimMs) * Math.PI)
-                  : 1;
-              const radiusScale = snake.bodyRadiusScale ?? 1;
-              const len = segs.length;
-              const headRad = ((snake.angle ?? 0) * 180) / Math.PI;
-              const isMe = snake.deviceId === deviceId;
-              const highlight = isMe && spawnHighlightUntil > Date.now();
-              if (isMe && segs[0] && snake.segments[0] && world.tick % 8 === 0) {
-                const phys = snake.segments[0]!;
-                const rend = segs[0]!;
-                const headXY =
-                  snake.headX != null && snake.headY != null
-                    ? { x: snake.headX, y: snake.headY }
-                    : null;
-                noteFixDeath001Sample({
-                  tick: world.tick,
-                  deviceId: snake.deviceId,
-                  physicsSeg0: { x: phys.x, y: phys.y },
-                  headXY,
-                  deltaPhysicsVsHeadXY:
-                    headXY != null ? Math.hypot(phys.x - headXY.x, phys.y - headXY.y) : null,
-                  renderHead: { x: rend.x, y: rend.y },
-                  deltaPhysicsVsRender: Math.hypot(phys.x - rend.x, phys.y - rend.y),
-                });
-              }
-              return segs.map((seg, i) => {
-                const isHead = i === 0;
-                const isTail = i === len - 1;
-              const segBase = cellSize * 0.72;
-                const segSize = isHead
-                  ? segBase * SNAKE_MVP_RC1.headScale
-                  : isTail
-                    ? segBase * SNAKE_MVP_RC1.tailScale
-                    : segBase * SNAKE_MVP_RC1.bodyScale;
-                const growthScale = growing && i >= len - 2 ? tailPopScale : 1;
-                const size = segSize * radiusScale * eatPopScale * growthScale;
-                const pulse = highlight ? 1 + Math.sin(Date.now() / 120) * 0.12 : 1;
-                const fill = segmentBodyColor(snake, i);
-                return (
-                  <div
-                    key={`${snake.deviceId}-${i}`}
-                    className={cn(
-                      "absolute rounded-full origin-center",
-                      isHead && "z-10",
-                      isMe && "ring-2 ring-white/90",
-                      snake.boosting && isHead && "ring-2 ring-amber-300/60"
-                    )}
-                    style={{
-                      left: seg.x * cellSize + (cellSize - size * pulse) / 2,
-                      top: seg.y * cellSize + (cellSize - size * pulse) / 2,
-                      width: size * pulse,
-                      height: size * pulse,
-                      backgroundColor: fill,
-                      opacity: isTail ? 0.75 : isHead ? 1 : 0.92,
-                      boxShadow: highlight
-                        ? "0 0 18px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.45)"
-                        : isHead
-                          ? snake.invincibleUntil && Date.now() < snake.invincibleUntil
-                            ? "0 0 10px white"
-                            : snake.boosting
-                              ? `0 0 14px ${fill}, 0 0 20px #fbbf2488`
-                              : `0 0 8px ${fill}`
-                          : undefined,
-                      transform: isHead ? `rotate(${headRad}deg)` : undefined,
-                    }}
-                  >
-                    {isHead && snake.headCharacter ? (
-                      <span
-                        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                        style={{ fontSize: Math.max(8, size * 0.72), lineHeight: 1 }}
-                        aria-hidden
-                      >
-                        {resolveHeadEmoji(snake.headCharacter)}
-                      </span>
-                    ) : null}
-                  </div>
-                );
-              });
-            })}
             {Object.values(world.snakes).map((snake) => {
               if (!snake.alive || !snake.segments[0]) return null;
               const head = resolveSnakeHead(snake);

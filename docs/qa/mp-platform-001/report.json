@@ -1,0 +1,8 @@
+{
+  "measuredAt": "2026-08-26T06:36:25.745Z",
+  "base": "http://localhost:3000",
+  "levels": [],
+  "gem": {},
+  "invite": {},
+  "error": "page.goto: Timeout 90000ms exceeded.\nCall log:\n  - navigating to \"http://localhost:3000/games/snake\", waiting until \"domcontentloaded\"\n\n    at C:\\Users\\김성길\\Documents\\GitHub\\game-platform\\docs\\qa\\mp-platform-001\\run.mjs:91:14"
+}

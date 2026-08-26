@@ -147,68 +147,123 @@ export function GameDetailShare({
   title: string;
   challengeMode?: boolean;
 }) {
-  async function handleShare(mode: "default" | "challenge" | "kakao" | "sms" = "default") {
-    const url =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/games/${gameSlug}`
-        : `/games/${gameSlug}`;
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+
+  function buildInviteUrl(): string {
+    const invite =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID().replace(/-/g, "").slice(0, 12)
+        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "https://game29.vercel.app";
+    return `${origin}/games/${gameSlug}?invite=${invite}`;
+  }
+
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        return ok;
+      } catch {
+        return false;
+      }
+    }
+  }
+
+  async function handleShare(mode: "default" | "challenge" | "sms" = "default") {
+    const url = buildInviteUrl();
     const text =
       mode === "challenge"
         ? `Re:Play Challenge · Beat my score in ${title}!`
         : `Re:Play · ${title} — 같이 플레이해요`;
+    const payload = `${text}\n${url}`;
 
-    try {
-      if (mode === "kakao") {
-        await navigator.clipboard.writeText(`${text}\n${url}`);
+    if (mode === "sms") {
+      window.location.href = `sms:?body=${encodeURIComponent(payload)}`;
+      return;
+    }
+
+    const canWebShare =
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      // Prefer OS share sheet on touch / coarse pointers (mobile); desktop → copy primary
+      (navigator.maxTouchPoints > 0 ||
+        window.matchMedia("(pointer: coarse)").matches);
+
+    if (mode === "default" && canWebShare) {
+      try {
+        await navigator.share({ title: text, text, url });
+        setShareStatus("shared");
+        window.setTimeout(() => setShareStatus("idle"), 2000);
         return;
-      }
-      if (mode === "sms") {
-        window.location.href = `sms:?body=${encodeURIComponent(`${text}\n${url}`)}`;
-        return;
-      }
-      // Prefer clipboard share-link (no full invite system).
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      if (mode === "default" && navigator.share) {
-        try {
-          await navigator.share({ title: text, url, text });
-        } catch {
-          /* user cancelled share sheet — clipboard already filled */
+      } catch (err) {
+        // User cancel → still offer copy; AbortError = cancelled
+        if (err && typeof err === "object" && "name" in err && (err as { name: string }).name === "AbortError") {
+          return;
         }
       }
-    } catch {
-      /* clipboard unavailable */
     }
+
+    const ok = await copyText(url);
+    setShareStatus(ok ? "copied" : "error");
+    window.setTimeout(() => setShareStatus("idle"), 2200);
   }
+
+  const statusLabel =
+    shareStatus === "copied"
+      ? "링크 복사됨"
+      : shareStatus === "shared"
+        ? "공유됨"
+        : shareStatus === "error"
+          ? "복사 실패 — 주소를 직접 복사하세요"
+          : null;
 
   return (
     <div className="space-y-2">
       <button
         type="button"
         data-testid="game-detail-share-btn"
-        onClick={() => handleShare("default")}
+        onClick={() => void handleShare("default")}
         className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
       >
         <Share2 className="size-4" /> 친구 초대 / 공유
       </button>
+      {statusLabel ? (
+        <p
+          data-testid="game-detail-share-status"
+          className="text-center text-xs text-emerald-300"
+          role="status"
+        >
+          {statusLabel}
+        </p>
+      ) : (
+        <p className="text-center text-[11px] text-muted-foreground">
+          모바일: 공유 시트 · PC: 초대 링크 복사
+        </p>
+      )}
       {challengeMode ? (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => handleShare("challenge")}
+            onClick={() => void handleShare("challenge")}
             className="rounded-xl border border-primary/20 bg-primary/5 py-2 text-xs font-medium"
           >
             Challenge Friends
           </button>
           <button
             type="button"
-            onClick={() => handleShare("kakao")}
-            className="rounded-xl border border-white/10 py-2 text-xs"
-          >
-            Kakao
-          </button>
-          <button
-            type="button"
-            onClick={() => handleShare("sms")}
+            onClick={() => void handleShare("sms")}
             className="rounded-xl border border-white/10 py-2 text-xs"
           >
             SMS
