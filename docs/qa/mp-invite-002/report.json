@@ -1,147 +1,154 @@
 {
-  "room": "WORLD-INV645",
-  "invitePath": "/games/snake?invite=WORLD-INV645",
-  "playUrl": "https://game29-56okiglt4-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-INV645",
-  "preview": "https://game29-56okiglt4-jyp-ai1s-projects.vercel.app",
+  "room": "WORLD-INV927",
+  "invitePath": "/games/snake?invite=WORLD-INV927",
+  "playUrl": "https://game29-861i28t09-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-INV927",
+  "preview": "https://game29-861i28t09-jyp-ai1s-projects.vercel.app",
   "pc": {
-    "urlRoom": "WORLD-INV645",
-    "sessionRoom": "WORLD-INV645",
+    "urlRoom": "WORLD-INV927",
+    "sessionRoom": "WORLD-INV927",
     "roomPlayers": [
-      "ca280726-f8af-47aa-b177-68e257b03e3a",
-      "8c420105-1d1b-456b-8545-ba8c70b50c07"
+      "3142ccfd-aca2-4f5b-b0df-628d36c9cc2a",
+      "68d698e2-6a50-411c-ae2a-d701f8678ca1"
     ],
-    "localDeviceId": "ca280726-f8af-47aa-b177-68e257b03e3a",
-    "foodTotal": 2944,
+    "localDeviceId": "3142ccfd-aca2-4f5b-b0df-628d36c9cc2a",
+    "foodTotal": 2964,
     "peerIds": [
-      "8c420105-1d1b-456b-8545-ba8c70b50c07"
+      "68d698e2-6a50-411c-ae2a-d701f8678ca1"
     ],
     "peerNicknames": [
       ""
     ],
     "top10": [
       {
-        "id": "8c420105-1d1b-456b-8545-ba8c70b50c07",
+        "id": "3142ccfd-aca2-4f5b-b0df-628d36c9cc2a",
         "nickname": "",
-        "score": 10
+        "score": 80
       },
       {
-        "id": "bot:12",
+        "id": "68d698e2-6a50-411c-ae2a-d701f8678ca1",
+        "nickname": "",
+        "score": 55
+      },
+      {
+        "id": "bot:25",
+        "nickname": "BOT Farmer",
+        "score": 97
+      },
+      {
+        "id": "bot:26",
+        "nickname": "BOT Alpha",
+        "score": 52
+      },
+      {
+        "id": "bot:2",
         "nickname": "BOT Apex",
-        "score": 178
+        "score": 27
       },
       {
-        "id": "bot:20",
-        "nickname": "BOT Farmer",
-        "score": 82
+        "id": "bot:21",
+        "nickname": "BOT Alpha",
+        "score": 25
       },
       {
-        "id": "bot:45",
+        "id": "bot:22",
+        "nickname": "BOT Apex",
+        "score": 18
+      },
+      {
+        "id": "bot:5",
         "nickname": "BOT Farmer",
-        "score": 81
+        "score": 18
+      },
+      {
+        "id": "bot:33",
+        "nickname": "BOT Wander",
+        "score": 15
       },
       {
         "id": "bot:42",
         "nickname": "BOT Apex",
-        "score": 63
+        "score": 14
+      }
+    ],
+    "roomHud": "ROOM: WORLD-INV927"
+  },
+  "mobile": {
+    "urlRoom": "WORLD-INV927",
+    "sessionRoom": "WORLD-INV927",
+    "roomPlayers": [
+      "3142ccfd-aca2-4f5b-b0df-628d36c9cc2a",
+      "68d698e2-6a50-411c-ae2a-d701f8678ca1"
+    ],
+    "localDeviceId": "68d698e2-6a50-411c-ae2a-d701f8678ca1",
+    "foodTotal": 2918,
+    "peerIds": [
+      "3142ccfd-aca2-4f5b-b0df-628d36c9cc2a"
+    ],
+    "peerNicknames": [
+      ""
+    ],
+    "top10": [
+      {
+        "id": "3142ccfd-aca2-4f5b-b0df-628d36c9cc2a",
+        "nickname": "",
+        "score": 80
       },
       {
-        "id": "bot:17",
-        "nickname": "BOT Apex",
-        "score": 22
+        "id": "68d698e2-6a50-411c-ae2a-d701f8678ca1",
+        "nickname": "",
+        "score": 55
       },
       {
-        "id": "bot:27",
-        "nickname": "BOT Apex",
-        "score": 22
+        "id": "bot:19",
+        "nickname": "BOT Remnant",
+        "score": 103
       },
       {
-        "id": "bot:47",
-        "nickname": "BOT Apex",
-        "score": 21
+        "id": "bot:40",
+        "nickname": "BOT Farmer",
+        "score": 89
       },
       {
-        "id": "bot:3",
+        "id": "bot:18",
         "nickname": "BOT Wander",
-        "score": 20
+        "score": 34
       },
       {
         "id": "bot:37",
         "nickname": "BOT Apex",
-        "score": 20
-      }
-    ],
-    "roomHud": "ROOM: WORLD-INV645"
-  },
-  "mobile": {
-    "urlRoom": "PRACTICE",
-    "sessionRoom": "PRACTICE",
-    "roomPlayers": [],
-    "localDeviceId": "8c420105-1d1b-456b-8545-ba8c70b50c07",
-    "foodTotal": 2436,
-    "peerIds": [],
-    "peerNicknames": [],
-    "top10": [
-      {
-        "id": "8c420105-1d1b-456b-8545-ba8c70b50c07",
-        "nickname": "Player",
-        "score": 55
+        "score": 18
       },
       {
-        "id": "bot:6",
-        "nickname": "BOT Alpha",
-        "score": 61
-      },
-      {
-        "id": "bot:20",
-        "nickname": "BOT Farmer",
-        "score": 28
+        "id": "bot:2",
+        "nickname": "BOT Apex",
+        "score": 16
       },
       {
         "id": "bot:31",
         "nickname": "BOT Alpha",
-        "score": 27
-      },
-      {
-        "id": "bot:44",
-        "nickname": "BOT Remnant",
-        "score": 26
-      },
-      {
-        "id": "bot:27",
-        "nickname": "BOT Apex",
-        "score": 25
-      },
-      {
-        "id": "bot:12",
-        "nickname": "BOT Apex",
-        "score": 20
-      },
-      {
-        "id": "bot:29",
-        "nickname": "BOT Remnant",
-        "score": 20
-      },
-      {
-        "id": "bot:1",
-        "nickname": "BOT Alpha",
-        "score": 19
-      },
-      {
-        "id": "bot:17",
-        "nickname": "BOT Apex",
         "score": 16
+      },
+      {
+        "id": "bot:33",
+        "nickname": "BOT Wander",
+        "score": 14
+      },
+      {
+        "id": "bot:11",
+        "nickname": "BOT Alpha",
+        "score": 13
       }
     ],
-    "roomHud": null
+    "roomHud": "ROOM: WORLD-INV927"
   },
   "gates": {
     "sameInviteUrl": true,
-    "sameRoom": false,
+    "sameRoom": true,
     "aSeesB": true,
-    "bSeesA": false,
+    "bSeesA": true,
     "sharedFood": true,
     "top10Peer": true,
-    "roomHudVisible": false,
+    "roomHudVisible": true,
     "spaceBoostCopy": true,
     "arrowsRemoved": true,
     "mobileBoostCopy": true
