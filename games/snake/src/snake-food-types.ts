@@ -27,7 +27,7 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   medium: {
     tier: "medium",
     kind: "meteor",
-    score: 2,
+    score: 3,
     sizePx: 8,
     color: "#f97316",
     glow: "0 0 10px #fb923c",
@@ -37,7 +37,7 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
   large: {
     tier: "large",
     kind: "meteor",
-    score: 4,
+    score: 6,
     sizePx: 12,
     color: "#22d3ee",
     glow: "0 0 14px #22d3ee",

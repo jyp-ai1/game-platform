@@ -227,7 +227,45 @@ function moveCell(cell: AgarCell, aimX: number, aimY: number, size: number, now:
 function botAim(world: AgarWorld, bot: AgarPlayer): void {
   const head = bot.cells[0];
   if (!head) return;
-  // Prefer nearby food; flee larger players
+  const myMass = totalMass(bot);
+
+  // Avoid larger cells first
+  for (const other of Object.values(world.players)) {
+    if (other.id === bot.id || !other.alive) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    if (totalMass(other) > myMass * 1.12) {
+      const d = Math.hypot(o.x - head.x, o.y - head.y);
+      if (d < 140) {
+        bot.aimX = clamp(head.x - (o.x - head.x) * 1.4, 0, world.size);
+        bot.aimY = clamp(head.y - (o.y - head.y) * 1.4, 0, world.size);
+        return;
+      }
+    }
+  }
+
+  // Chase smaller cells (Normal AI — not overpowered)
+  let prey: AgarPlayer | null = null;
+  let preyD = 160;
+  for (const other of Object.values(world.players)) {
+    if (other.id === bot.id || !other.alive) continue;
+    const oMass = totalMass(other);
+    if (oMass >= myMass * 0.88) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    const d = Math.hypot(o.x - head.x, o.y - head.y);
+    if (d < preyD) {
+      preyD = d;
+      prey = other;
+    }
+  }
+  if (prey?.cells[0] && preyD < 150) {
+    bot.aimX = prey.cells[0].x;
+    bot.aimY = prey.cells[0].y;
+    return;
+  }
+
+  // Prefer nearby food
   let best: AgarFood | null = null;
   let bestD = 180;
   for (const f of world.food) {
@@ -237,19 +275,6 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
       best = f;
     }
   }
-  for (const other of Object.values(world.players)) {
-    if (other.id === bot.id || !other.alive) continue;
-    const o = other.cells[0];
-    if (!o) continue;
-    if (totalMass(other) > totalMass(bot) * 1.15) {
-      const d = Math.hypot(o.x - head.x, o.y - head.y);
-      if (d < 120) {
-        bot.aimX = clamp(head.x - (o.x - head.x), 0, world.size);
-        bot.aimY = clamp(head.y - (o.y - head.y), 0, world.size);
-        return;
-      }
-    }
-  }
   if (best) {
     bot.aimX = best.x;
     bot.aimY = best.y;
@@ -257,6 +282,28 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
     const p = randPos(world.size);
     bot.aimX = p.x;
     bot.aimY = p.y;
+  }
+}
+
+/** Occasional split-attack when chasing a clearly smaller cell (Normal tier). */
+function botMaybeSplit(world: AgarWorld, bot: AgarPlayer, now: number): void {
+  const head = bot.cells[0];
+  if (!head || head.mass < AGAR_MIN_SPLIT_MASS) return;
+  if (bot.cells.length >= 4) return;
+  if (world.tick % 17 !== (bot.id.charCodeAt(0) % 17)) return;
+  const myMass = totalMass(bot);
+  for (const other of Object.values(world.players)) {
+    if (!other.alive || other.id === bot.id) continue;
+    if (totalMass(other) > myMass * 0.7) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    const d = Math.hypot(o.x - head.x, o.y - head.y);
+    if (d > 35 && d < 95 && Math.random() < 0.035) {
+      bot.aimX = o.x;
+      bot.aimY = o.y;
+      splitPlayer(world, bot.id, now);
+      return;
+    }
   }
 }
 
@@ -377,7 +424,10 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
 
   for (const p of Object.values(world.players)) {
     if (!p.alive) continue;
-    if (p.isBot) botAim(world, p);
+    if (p.isBot) {
+      botAim(world, p);
+      botMaybeSplit(world, p, now);
+    }
     for (const cell of p.cells) moveCell(cell, p.aimX, p.aimY, world.size, now);
     mergeOwnCells(p, now);
     tryEatFood(world, p);

@@ -141,14 +141,28 @@ export function AgarGame() {
       const el = boardRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
+      // Fullscreen-safe: map client → board local via getBoundingClientRect (CSS scale OK)
       const localX = ((clientX - rect.left) / rect.width) * VIEW;
       const localY = ((clientY - rect.top) / rect.height) * VIEW;
-      const worldX = cam.x - VIEW / 2 + localX;
-      const worldY = cam.y - VIEW / 2 + localY;
+      const focus = cameraFocus(worldRef.current.players[deviceId]);
+      const worldX = focus.x - VIEW / 2 + localX;
+      const worldY = focus.y - VIEW / 2 + localY;
       setPlayerAim(worldRef.current, deviceId, worldX, worldY);
     },
-    [cam.x, cam.y, deviceId]
+    [deviceId]
   );
+
+  // Fullscreen: keep aim tracking even if pointer leaves the scaled board briefly
+  useEffect(() => {
+    if (!started || !alive) return;
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "touch" && e.buttons === 0) return;
+      onPointer(e.clientX, e.clientY);
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [started, alive, onPointer]);
 
   useEffect(() => {
     if (!started) return;

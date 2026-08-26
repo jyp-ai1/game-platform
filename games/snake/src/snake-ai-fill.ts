@@ -397,13 +397,33 @@ export function ensureLocalSnake(
 export function tickBotBrains(world: SnakeIoWorld): void {
   const bots = Object.values(world.snakes).filter((s) => isBotSnake(s) && s.alive && !s.spectating);
   const batchSize = Math.max(1, Math.floor(bots.length * PLAYTEST_AI.brainBatchRatio));
-  const offset = world.tick % bots.length;
+  const offset = world.tick % Math.max(1, bots.length);
 
   for (let i = 0; i < batchSize; i++) {
     const snake = bots[(offset + i * 2) % bots.length];
     if (!snake) continue;
     // FIX-SNAKE-UX-002: bots stuck with awaitingInput never advance in tickWorld
     if (snake.awaitingInput) snake.awaitingInput = false;
+
+    const hx = snake.headX ?? snake.segments[0]?.x ?? 0;
+    const hy = snake.headY ?? snake.segments[0]?.y ?? 0;
+    const lastMove = snake.lastMoveTick ?? snake.aliveSinceTick ?? 0;
+    const idleTicks = world.tick - lastMove;
+    const barelyMoved =
+      snake.lastHeadX != null &&
+      Math.hypot(hx - snake.lastHeadX, hy - (snake.lastHeadY ?? hy)) < 0.08;
+    // Live AI must not sit motionless for long (brief turns OK)
+    if (idleTicks > 36 || (barelyMoved && idleTicks > 24)) {
+      const dirs: Direction[] = ["up", "down", "left", "right"];
+      const seed = snake.botSeed ?? 0;
+      const forced = dirs[(world.tick + seed) % dirs.length]!;
+      if (!isOpposite(forced, snake.direction)) snake.pendingDirection = forced;
+      else snake.pendingDirection = dirs[(world.tick + seed + 1) % dirs.length]!;
+      snake.lastMoveTick = world.tick;
+      runBotBrain(world, snake);
+      continue;
+    }
+
     const phase = snake.botPhase ?? 0;
     if ((world.tick + phase) % PLAYTEST_AI.thinkInterval !== 0) continue;
     runBotBrain(world, snake);
@@ -412,7 +432,7 @@ export function tickBotBrains(world: SnakeIoWorld): void {
 
 function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   const role = snake.botRole ?? "farmer";
-  const diff: BotDifficulty = snake.botDifficulty ?? "easy";
+  const diff: BotDifficulty = snake.botDifficulty ?? "normal";
   const seed = snake.botSeed ?? 0;
   const head = snake.segments[0];
   if (!head) return;
@@ -422,11 +442,15 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   const threatNear = flee != null;
   const chasing = role === "aggressive" || role === "hunter";
   const segCount = snake.segmentCount ?? snake.segments.length;
+  // Closed Alpha Normal: track player / food / danger; occasional attack
+  const humanPrey = pickPrey(world, snake, { humansOnly: true });
+  const anyPrey = pickPrey(world, snake, { botsOk: true, humansOnly: false });
 
   let state: NonNullable<SnakeEntity["botState"]> = "search";
-  if (threatNear && snake.score < 50) state = "escape";
+  if (threatNear) state = "escape";
+  else if (humanPrey && (chasing || (seed + world.tick) % 53 < 8)) state = "chase";
   else if (food && (role === "farmer" || role === "scavenger" || role === "explorer")) state = "chase";
-  else if (chasing && pickPrey(world, snake, { humansOnly: role === "hunter", botsOk: role === "aggressive" })) state = "chase";
+  else if (chasing && anyPrey) state = "chase";
   else if ((seed + world.tick) % 47 < 6) state = "wander";
   else state = "search";
   snake.botState = state;
@@ -446,7 +470,10 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
       };
       break;
     case "chase":
-      target = resolveTarget(world, snake, role);
+      target =
+        humanPrey && (chasing || (seed + world.tick) % 53 < 8)
+          ? humanPrey
+          : resolveTarget(world, snake, role);
       break;
     default:
       target = food ?? { x: head.x + ((seed % 5) - 2) * 8, y: head.y + ((seed % 7) - 3) * 8 };

@@ -17,6 +17,7 @@ import { noteDeath006Respawn, noteDeath006Timer } from "./snake-death-006-trace"
 import { noteLoot001Collect, noteLoot001Drop } from "./snake-loot-001-trace";
 import {
   advanceSnakePath,
+  angleToDirection,
   directionToAngle,
   ensureSnakePath,
   getSegmentCount,
@@ -132,8 +133,12 @@ export interface SnakeEntity {
   bodyColor?: string;
   bodyColorAlt?: string;
   bodyPattern?: string;
-  /** Sprint 8.1 — cumulative thickness from eating (1.0 … 1.4) */
+  /** Sprint 8.1 — cumulative thickness from eating (1.0 … 1.4) — RENDER feel only */
   bodyRadiusScale?: number;
+  /** Stuck-AI probe — last tick head actually translated */
+  lastMoveTick?: number;
+  lastHeadX?: number;
+  lastHeadY?: number;
 }
 
 export interface SnakeIoWorld {
@@ -282,17 +287,31 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
   snake.lastGrowthAt = Date.now();
 }
 
-function applyGemGrowth(snake: SnakeEntity): void {
-  snake.gemsEaten = (snake.gemsEaten ?? 0) + 1;
-  snake.growthBuffer = snake.gemsEaten % SNAKE_MVP_RC1.growthFoodPerSegment;
-  const scale = snake.bodyRadiusScale ?? 1;
+/** Length gain by gem tier — Small +1 · Medium +3 · Large +6 */
+function gemLengthGain(tier: FoodTier): number {
+  if (tier === "small") return 1;
+  if (tier === "medium") return 3;
+  if (tier === "large") return 6;
+  if (tier === "epic") return 10;
+  if (tier === "death") return 4;
+  return 1;
+}
+
+/**
+ * Grow length from gem tier. bodyRadiusScale = render/feel only (gentle log of length).
+ * Does NOT touch SNAKE_FEEL.collisionRadius / collision threshold (Collision HOLD).
+ */
+function applyGemGrowth(snake: SnakeEntity, tier: FoodTier = "small"): void {
+  const gain = gemLengthGain(tier);
+  snake.gemsEaten = (snake.gemsEaten ?? 0) + gain;
+  snake.growthBuffer = 0;
+  growSnakeSegments(snake, gain);
+  const len = getSegmentCount(snake);
+  const start = SNAKE_MVP_RC1.startingSegments;
   snake.bodyRadiusScale = Math.min(
     SNAKE_MVP_RC1.bodyRadiusMax,
-    scale + SNAKE_MVP_RC1.bodyRadiusPerFood
+    1 + Math.log2(1 + Math.max(0, len - start)) * 0.08
   );
-  if (snake.gemsEaten % SNAKE_MVP_RC1.growthFoodPerSegment === 0) {
-    growSnakeSegments(snake, 1);
-  }
 }
 
 function spawnWorldBoss(world: SnakeIoWorld): void {
@@ -516,7 +535,44 @@ function applyFoodMagnet(world: SnakeIoWorld, snake: SnakeEntity): void {
 function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, speed: number): boolean {
   ensureSnakePath(snake);
   snake.desiredAngle = directionToAngle(snake.pendingDirection);
+  const prevX = snake.headX ?? snake.segments[0]?.x ?? 0;
+  const prevY = snake.headY ?? snake.segments[0]?.y ?? 0;
   advanceSnakePath(snake, speed);
+
+  // Boundary soft clamp — keep snake in world / on minimap. Separate from Collision kill logic.
+  {
+    const wSize = world.config.worldSize;
+    const margin = 0.45;
+    let hx = snake.headX ?? prevX;
+    let hy = snake.headY ?? prevY;
+    const cx = Math.min(wSize - margin, Math.max(margin, hx));
+    const cy = Math.min(wSize - margin, Math.max(margin, hy));
+    if (cx !== hx || cy !== hy) {
+      snake.headX = cx;
+      snake.headY = cy;
+      if (snake.path?.[0]) {
+        snake.path[0].x = cx;
+        snake.path[0].y = cy;
+      }
+      // Nudge heading inward so soft clamp doesn't pin the head forever
+      if (cx <= margin) snake.desiredAngle = 0;
+      else if (cx >= wSize - margin) snake.desiredAngle = Math.PI;
+      if (cy <= margin) snake.desiredAngle = Math.PI / 2;
+      else if (cy >= wSize - margin) snake.desiredAngle = -Math.PI / 2;
+      snake.angle = snake.desiredAngle;
+      snake.direction = angleToDirection(snake.angle);
+      snake.pendingDirection = snake.direction;
+      syncSegmentsFromPath(snake);
+    }
+  }
+
+  const moved = Math.hypot((snake.headX ?? prevX) - prevX, (snake.headY ?? prevY) - prevY);
+  if (moved > 0.02) {
+    snake.lastMoveTick = world.tick;
+    snake.lastHeadX = snake.headX;
+    snake.lastHeadY = snake.headY;
+  }
+
   // Physical turn+move this frame (after bot brain turn intent)
   if (world.tick % 8 === 0) {
     noteExecOrder("steering", world.tick, snake.deviceId, {
@@ -874,7 +930,7 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     snake.score += Math.round(baseScore * mult);
     snake.foodEaten = (snake.foodEaten ?? 0) + 1;
     world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
-    applyGemGrowth(snake);
+    applyGemGrowth(snake, foodTier);
     spawnFoodItems(world, 1);
   }
   return true;
@@ -1252,14 +1308,17 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
 }
 
 export function updateRankings(world: SnakeIoWorld): void {
-  // FIX-LB-001: rank by Length. FIX-LB-002: alive only (ghost removed immediately on death).
+  // FIX-LB-001: rank by Length. FIX-LB-002: alive only.
+  // MP-PLATFORM-UX-002: store Length in score so Engine L = Ranking L = HUD L = TOP10 L.
   world.rankings = Object.values(world.snakes)
     .filter((s) => s.alive && !s.spectating)
-    .map((s) => ({ deviceId: s.deviceId, nickname: s.nickname, score: s.score }))
+    .map((s) => ({
+      deviceId: s.deviceId,
+      nickname: s.nickname,
+      score: getSegmentCount(s),
+    }))
     .sort((a, b) => {
-      const la = getSegmentCount(world.snakes[a.deviceId]!);
-      const lb = getSegmentCount(world.snakes[b.deviceId]!);
-      if (lb !== la) return lb - la;
+      if (b.score !== a.score) return b.score - a.score;
       return a.deviceId.localeCompare(b.deviceId);
     });
 }

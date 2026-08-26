@@ -354,6 +354,7 @@ export function MultiplayerDeathOverlay({
   return createPortal(
     <div
       data-testid="mp-death-overlay"
+      data-death-ux="overlay"
       className="pointer-events-none fixed inset-0 z-[200] flex items-end justify-center bg-gradient-to-t from-black/75 via-black/30 to-transparent p-6 pb-10 sm:items-center sm:bg-black/40 sm:via-transparent"
       role="presentation"
     >
@@ -369,6 +370,7 @@ export function MultiplayerDeathOverlay({
           <button
             type="button"
             data-testid="mp-death-retry"
+            data-death-ux="retry"
             className="h-11 flex-1 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
             onClick={onRetry}
           >
@@ -377,6 +379,7 @@ export function MultiplayerDeathOverlay({
           <button
             type="button"
             data-testid="mp-death-exit"
+            data-death-ux="exit"
             className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
             onClick={onExit}
           >

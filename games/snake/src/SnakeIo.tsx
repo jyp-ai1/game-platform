@@ -1,6 +1,6 @@
 "use client";
 
-import { getDeviceId, getLastNickname, useGameSDK, emitGameExit, emitGameRetry } from "@game-platform/game-sdk";
+import { getDeviceId, getLastNickname, useGameSDK, emitGameExit, emitGameRetry, MultiplayerDeathOverlay } from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
@@ -1953,11 +1953,13 @@ export function SnakeIoGame({
   const camX = camRef.current.x;
   const camY = camRef.current.y;
   const top1Id = world.rankings[0]?.deviceId ?? null;
+  // Display Length from live segment count — rankings.score also stores Length (TOP10 sync)
   const rankingEntries = top10.slice(0, 10).map((r) => ({
     deviceId: r.deviceId,
     nickname: r.nickname,
-    // Display only — Length from existing Length-based rankings / live segment count
-    length: world.snakes[r.deviceId] ? getSegmentCount(world.snakes[r.deviceId]!) : "?",
+    length: world.snakes[r.deviceId]
+      ? getSegmentCount(world.snakes[r.deviceId]!)
+      : r.score,
   }));
   const minimapTopRanks = top10.slice(0, 10).map((r, i) => ({
     deviceId: r.deviceId,
@@ -2565,52 +2567,24 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {/* STEP 3.5 — Death Overlay (WORLD + room): defer respawn; world stays visible for Death Loot */}
+      {/* STEP 3.5 — Death Overlay via shared portal (z-[200]) so Retry/Exit stay above HUD/map */}
       {!isStageMode && mySnake && !mySnake.alive ? (
-        <div
-          data-testid="death-ux-overlay"
-          className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center bg-gradient-to-t from-black/70 via-black/25 to-transparent p-6 pb-10 sm:items-center sm:bg-black/35 sm:via-transparent"
-        >
-          <div
-            className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-black/55 px-5 py-5 text-center shadow-xl backdrop-blur-sm"
-            role="dialog"
-            aria-label="Death"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Death</p>
-            <p className="text-3xl font-bold tabular-nums text-white">
-              {Math.round(mySnake.score ?? 0).toLocaleString()}
-            </p>
-            <p className="text-[11px] text-white/55">보석이 죽은 자리에 남았습니다</p>
-            <div className="mt-1 flex w-full gap-2">
-              <button
-                type="button"
-                data-testid="death-ux-retry"
-                className="h-11 flex-1 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
-                onClick={handleRetry}
-              >
-                다시 시작
-              </button>
-              <button
-                type="button"
-                data-testid="death-ux-exit"
-                className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
-                onClick={() => {
-                  emitGameExit("snake");
-                  postDeath("exit");
-                  if (activeRoom && !isLocalOnly) {
-                    try {
-                      leaveRoom(activeRoom);
-                    } catch {
-                      /* ignore */
-                    }
-                  }
-                }}
-              >
-                나가기
-              </button>
-            </div>
-          </div>
-        </div>
+        <MultiplayerDeathOverlay
+          score={Math.round(mySnake.score ?? 0)}
+          metric={`L:${getSegmentCount(mySnake)}`}
+          onRetry={handleRetry}
+          onExit={() => {
+            emitGameExit("snake");
+            postDeath("exit");
+            if (activeRoom && !isLocalOnly) {
+              try {
+                leaveRoom(activeRoom);
+              } catch {
+                /* ignore */
+              }
+            }
+          }}
+        />
       ) : null}
 
       {!isSpectating && mySnake?.alive && !awaitingInput && !isPaused ? (

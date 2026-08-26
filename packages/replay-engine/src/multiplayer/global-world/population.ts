@@ -6,7 +6,7 @@ export const POPULATION_TARGET = HUMAN_MAX + BOT_MAX;
 export type BotDifficulty = "easy" | "normal" | "hunter" | "legend";
 
 export function pickBotDifficulty(humanCount: number): BotDifficulty {
-  if (humanCount < 5) return "easy";
+  // Closed Alpha default floor: Normal (Easy reserved for sparse rooms only via override)
   if (humanCount < 15) return "normal";
   if (humanCount < 35) return "hunter";
   return "legend";
