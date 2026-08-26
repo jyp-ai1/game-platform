@@ -796,8 +796,11 @@ export function SnakeIoGame({
     connectDoneRef.current = true;
 
     let active = true;
-    const CONNECT_TIMEOUT_MS = 5000;
-    const MAX_ATTEMPTS = 1;
+    // Invite WORLD-* shards: mobile/slow networks need longer join + retries (avoid PRACTICE fallback).
+    const isInviteWorldShard = /^WORLD-[A-Z0-9]+$/.test(roomCode);
+    const CONNECT_TIMEOUT_MS = isInviteWorldShard ? 15_000 : 5_000;
+    const MAX_ATTEMPTS = isInviteWorldShard ? 3 : 1;
+    const SPAWN_TIMEOUT_MS = isInviteWorldShard ? 25_000 : 12_000;
 
     const finishConnect = (r: GameRoom, code: string): void => {
       if (code !== sessionRoom) setSessionRoom(code);
@@ -817,9 +820,14 @@ export function SnakeIoGame({
       setConnected(true);
       spawnTimeoutRef.current = window.setTimeout(() => {
         if (!active || worldRef.current) return;
+        // Pinned invite rooms: never dump to PRACTICE — keep waiting / provisional spawn handles it.
+        if (isInviteWorldShard) {
+          entryLogFail("SPAWN", `world not ready keep-room ${code}`, { room: code });
+          return;
+        }
         entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
         onJoinTimeoutRef.current?.();
-      }, 12_000);
+      }, SPAWN_TIMEOUT_MS);
     };
 
     const attemptConnect = async (attemptIndex: number): Promise<void> => {
@@ -1055,8 +1063,15 @@ export function SnakeIoGame({
         setWorld(state);
         return;
       }
-      if (!worldRef.current && isHost) {
-        spawnTrace("SPAWN_REQUEST");
+      // Host creates world; invitee (WORLD-*) provisionally spawns if host state not yet synced
+      // (mobile was falling to PRACTICE after SPAWN timeout while waiting for host gameState).
+      const inviteeNeedsProvisional =
+        !worldRef.current &&
+        !isHost &&
+        isGlobalWorld &&
+        /^WORLD-[A-Z0-9]+$/.test(effectiveRoomCode);
+      if (!worldRef.current && (isHost || inviteeNeedsProvisional)) {
+        spawnTrace(isHost ? "SPAWN_REQUEST" : "SPAWN_REQUEST invitee-provisional");
         const cfg = Replay.multiplayer.balance("snake", isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length));
         const obj = Replay.multiplayer.objectives.create(Replay.multiplayer.objectives.pick(isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length)));
         const humans = humansForRoom(r);
@@ -1071,7 +1086,7 @@ export function SnakeIoGame({
         sessionMomentsRef.current = [];
         worldRef.current = initial;
         setWorld(initial);
-        if (isGlobalWorld) {
+        if (isGlobalWorld && isHost) {
           setJoinBrief(buildJoinBrief(initial));
           setTimeout(() => setJoinBrief(null), 4500);
         }
