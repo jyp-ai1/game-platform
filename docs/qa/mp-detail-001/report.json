@@ -1,0 +1,117 @@
+{
+  "commit": "46759bc",
+  "preview": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app",
+  "at": "2026-08-26T06:14:28.538Z",
+  "results": [
+    {
+      "slug": "snake",
+      "steps": {
+        "homeToDetail": "PASS",
+        "detailToPlay": "PASS",
+        "playToCharacter": "PASS",
+        "characterToGame": "PASS",
+        "gameToExit": "PASS",
+        "lobbyToDetail": "PASS"
+      },
+      "detailUi": {
+        "thumbnail": "PASS",
+        "description": "PASS",
+        "multiplayer": "PASS",
+        "shareInvite": "PASS",
+        "comments": "PASS"
+      },
+      "urls": {
+        "detail": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/snake",
+        "afterPlayClick": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD",
+        "afterExit": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD",
+        "afterBack": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/snake"
+      },
+      "errors": [
+        "Error"
+      ],
+      "raw": {
+        "homeToDetail": true,
+        "detailToPlay": true,
+        "playToCharacter": true,
+        "characterToGame": true,
+        "gameToExit": true,
+        "lobbyToDetail": true
+      }
+    },
+    {
+      "slug": "agar",
+      "steps": {
+        "homeToDetail": "PASS",
+        "detailToPlay": "PASS",
+        "playToCharacter": "PASS",
+        "characterToGame": "PASS",
+        "gameToExit": "PASS",
+        "lobbyToDetail": "PASS"
+      },
+      "detailUi": {
+        "thumbnail": "PASS",
+        "description": "PASS",
+        "multiplayer": "PASS",
+        "shareInvite": "PASS",
+        "comments": "PASS"
+      },
+      "urls": {
+        "detail": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/agar",
+        "afterPlayClick": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD",
+        "afterExit": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD",
+        "afterBack": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/agar"
+      },
+      "errors": [],
+      "raw": {
+        "homeToDetail": true,
+        "detailToPlay": true,
+        "playToCharacter": true,
+        "characterToGame": true,
+        "gameToExit": true,
+        "lobbyToDetail": true
+      }
+    },
+    {
+      "slug": "bomber",
+      "steps": {
+        "homeToDetail": "PASS",
+        "detailToPlay": "PASS",
+        "playToCharacter": "PASS",
+        "characterToGame": "PASS",
+        "gameToExit": "PASS",
+        "lobbyToDetail": "PASS"
+      },
+      "detailUi": {
+        "thumbnail": "PASS",
+        "description": "PASS",
+        "multiplayer": "PASS",
+        "shareInvite": "PASS",
+        "comments": "PASS"
+      },
+      "urls": {
+        "detail": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/bomber",
+        "afterPlayClick": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/bomber/play?room=ROOM",
+        "afterExit": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/bomber/play?room=ROOM",
+        "afterBack": "https://game29-9z73bylys-jyp-ai1s-projects.vercel.app/games/bomber"
+      },
+      "errors": [],
+      "raw": {
+        "homeToDetail": true,
+        "detailToPlay": true,
+        "playToCharacter": true,
+        "characterToGame": true,
+        "gameToExit": true,
+        "lobbyToDetail": true
+      }
+    }
+  ],
+  "detailUi": {
+    "thumbnail": "PASS",
+    "description": "PASS",
+    "multiplayer": "PASS",
+    "shareInvite": "PASS",
+    "comments": "PASS"
+  },
+  "allFlowPass": true,
+  "allDetailPass": true
+}
