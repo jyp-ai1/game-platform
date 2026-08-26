@@ -24,10 +24,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AgarMinimap } from "./agar-minimap";
 import {
   AGAR_BOARD_BG,
-  AGAR_BOT_COUNT,
   AGAR_GRID_LINE,
   AGAR_TICK_MS,
   AGAR_WORLD,
+  agarBotCountForDifficulty,
   cameraFocus,
   createAgarWorld,
   ejectMass,
@@ -238,7 +238,7 @@ export function AgarGame() {
         onPlay={handleStart}
         playLabel="ENTER WORLD"
         players={1}
-        bots={AGAR_BOT_COUNT}
+        bots={agarBotCountForDifficulty(aiDifficulty)}
         roomCode={roomCode}
       />
     );

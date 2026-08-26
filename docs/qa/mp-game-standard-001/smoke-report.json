@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "checks": [
+    "difficulty emoji labels",
+    "default normal",
+    "creator metadata shape",
+    "catalog difficulty+gameType",
+    "detail difficulty strip + MpWorldPlayLink",
+    "agar bot count by difficulty",
+    "bomber WORLD room + difficulty wiring"
+  ]
+}

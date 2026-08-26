@@ -14,10 +14,11 @@ export type MpAiDifficulty = "easy" | "normal" | "hard";
 export const MP_AI_DIFFICULTIES: readonly {
   id: MpAiDifficulty;
   label: string;
+  emoji: string;
 }[] = [
-  { id: "easy", label: "Easy" },
-  { id: "normal", label: "Normal" },
-  { id: "hard", label: "Hard" },
+  { id: "easy", label: "Easy", emoji: "🟢" },
+  { id: "normal", label: "Normal", emoji: "🟡" },
+  { id: "hard", label: "Hard", emoji: "🔴" },
 ] as const;
 
 export const DEFAULT_MP_AI_DIFFICULTY: MpAiDifficulty = "normal";
@@ -149,7 +150,7 @@ export function MultiplayerEntrySelect({
       {onDifficultyChange ? (
         <div className="w-full space-y-2" data-testid="mp-ai-difficulty">
           <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            AI Difficulty
+            Difficulty
           </p>
           <div className="flex items-center justify-center gap-2">
             {MP_AI_DIFFICULTIES.map((d) => {
@@ -167,8 +168,9 @@ export function MultiplayerEntrySelect({
                       : "border-white/10 bg-muted/30 text-muted-foreground hover:border-white/25"
                   )}
                   aria-pressed={active}
+                  aria-label={`${d.label} difficulty`}
                 >
-                  {d.label}
+                  <span aria-hidden>{d.emoji}</span> {d.label}
                 </button>
               );
             })}

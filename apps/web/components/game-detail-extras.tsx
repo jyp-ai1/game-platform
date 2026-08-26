@@ -141,32 +141,38 @@ export function GameDetailRating({ gameSlug }: { gameSlug: string }) {
 
 const ACTIVE_ROOM_KEY = "play29:active-room";
 
+function makeWorldInviteCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let suffix = "";
+  for (let i = 0; i < 3; i++) {
+    suffix += alphabet[Math.floor(Math.random() * alphabet.length)]!;
+  }
+  return `WORLD-${suffix}`;
+}
+
 /** Pin invite to a real multiplayer room id (not a disposable UUID). */
 function resolveInviteRoomCode(gameSlug: string): string {
   if (typeof window !== "undefined") {
     try {
       const active = window.localStorage.getItem(ACTIVE_ROOM_KEY)?.toUpperCase();
       // Prefer a pinned WORLD-* shard (bare WORLD re-resolves per client → split worlds)
-      if (gameSlug === "snake" && active && /^WORLD-[A-Z0-9]+$/.test(active)) {
+      if (active && /^WORLD-[A-Z0-9]+$/.test(active)) {
         return active;
       }
-      if (gameSlug !== "snake" && active) return active;
+      if (gameSlug !== "snake" && gameSlug !== "agar" && gameSlug !== "bomber" && active) {
+        return active;
+      }
     } catch {
       /* ignore */
     }
   }
 
-  if (gameSlug === "snake") {
-    // Dedicated invite shard so both clients join the same WORLD-* room.
-    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let suffix = "";
-    for (let i = 0; i < 3; i++) {
-      suffix += alphabet[Math.floor(Math.random() * alphabet.length)]!;
-    }
-    const code = `WORLD-${suffix}`;
+  // Snake / Agar / Bomber — same WORLD-* invite UX (do not deepen Snake-only invite).
+  if (gameSlug === "snake" || gameSlug === "agar" || gameSlug === "bomber") {
+    const code = makeWorldInviteCode();
     createRoom({
-      gameSlug: "snake",
-      maxPlayers: 50,
+      gameSlug,
+      maxPlayers: gameSlug === "snake" ? 50 : 8,
       matchMode: "public",
       code,
     });

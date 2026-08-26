@@ -59,6 +59,13 @@ export type AgarPlayer = {
 
 export type AgarAiDifficulty = "easy" | "normal" | "hard";
 
+/** Fewer / normal / more bots by session difficulty. */
+export function agarBotCountForDifficulty(tier: AgarAiDifficulty = "normal"): number {
+  if (tier === "easy") return 12;
+  if (tier === "hard") return 24;
+  return AGAR_BOT_COUNT;
+}
+
 export type AgarWorld = {
   tick: number;
   size: number;
@@ -140,7 +147,8 @@ export function createAgarWorld(
     aiDifficulty,
   };
   world.players[localId] = makePlayer(localId, nickname || "You", false, world.size, 0);
-  for (let i = 0; i < AGAR_BOT_COUNT; i++) {
+  const botCount = agarBotCountForDifficulty(aiDifficulty);
+  for (let i = 0; i < botCount; i++) {
     const id = `bot:${i}`;
     world.players[id] = makePlayer(id, `Cell${i + 1}`, true, world.size, i + 1);
   }

@@ -1,4 +1,5 @@
 import { Container } from "@game-platform/ui";
+import { MP_AI_DIFFICULTIES, DEFAULT_MP_AI_DIFFICULTY } from "@game-platform/game-sdk";
 import type { Game, GameStatus } from "@game-platform/shared";
 import Link from "next/link";
 
@@ -9,7 +10,7 @@ import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameStatusBlock } from "@/components/game-status-block";
-import { SnakeWorldPlayLink } from "@/components/snake-world-play-link";
+import { MpWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug } from "@/lib/game-catalog";
 
 function shortDescription(game: Game, slug: string): string {
@@ -104,21 +105,52 @@ export function GameDetailTemplate({
                 {popularityLabel(game, slug)}
               </p>
 
+              {mp ? (
+                <div
+                  className="flex flex-wrap items-center justify-center gap-2"
+                  data-testid="game-detail-difficulty"
+                  aria-label="Difficulty"
+                >
+                  {MP_AI_DIFFICULTIES.map((d) => {
+                    const isDefault = d.id === DEFAULT_MP_AI_DIFFICULTY;
+                    return (
+                      <span
+                        key={d.id}
+                        data-testid={`game-detail-diff-${d.id}`}
+                        className={
+                          isDefault
+                            ? "inline-flex items-center rounded-full border border-cyan-400/50 bg-cyan-500/15 px-3 py-1 text-xs font-semibold text-cyan-100"
+                            : "inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground"
+                        }
+                      >
+                        <span aria-hidden>{d.emoji}</span> {d.label}
+                        {isDefault ? (
+                          <span className="ml-1 text-[10px] font-normal text-cyan-200/80">
+                            default
+                          </span>
+                        ) : null}
+                      </span>
+                    );
+                  })}
+                </div>
+              ) : null}
+
               <div className="flex flex-col items-center gap-2">
-                {slug === "snake" ? (
-                  <SnakeWorldPlayLink
+                {mp && (slug === "snake" || slug === "agar" || slug === "bomber") ? (
+                  <MpWorldPlayLink
+                    slug={slug as "snake" | "agar" | "bomber"}
                     data-testid="game-detail-play-cta"
                     className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
                   >
                     WORLD PLAY
-                  </SnakeWorldPlayLink>
+                  </MpWorldPlayLink>
                 ) : (
                   <Link
                     href={playHref}
                     data-testid="game-detail-play-cta"
                     className="inline-flex min-h-12 min-w-[220px] items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
                   >
-                    {mp ? "WORLD PLAY" : "PLAY"}
+                    PLAY
                   </Link>
                 )}
                 {mp ? (

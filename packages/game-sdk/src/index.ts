@@ -102,6 +102,15 @@ export {
   type MpStyleOption,
 } from "./multiplayer-entry-select";
 export {
+  buildCreatorGameMeta,
+  isMultiplayerGameSlug,
+  resolveGameType,
+  toSessionDifficulty,
+  type CreatorGameMeta,
+  type GameType,
+  type SessionDifficulty,
+} from "./game-metadata";
+export {
   MultiplayerDeathOverlay,
   MultiplayerMinimap,
   MultiplayerPlayShell,

@@ -81,8 +81,8 @@ export function BomberGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
   const roomCode = useMemo(() => {
-    if (typeof window === "undefined") return "ROOM";
-    return new URLSearchParams(window.location.search).get("room")?.toUpperCase() || "ROOM";
+    if (typeof window === "undefined") return "WORLD";
+    return new URLSearchParams(window.location.search).get("room")?.toUpperCase() || "WORLD";
   }, []);
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<BomberWorld>(() => createBomberWorld(deviceId, nickname));
