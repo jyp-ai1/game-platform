@@ -11,6 +11,12 @@
 | Easy / Normal / Hard | PASS (default Normal) |
 | Single Game Metadata | PASS (`difficulty` + `gameType`) |
 
+## Preview
+
+https://game29-3lct6dc29-jyp-ai1s-projects.vercel.app
+
+Commit: `f1806d2`
+
 ## Changes (related only)
 
 - Shared entry Difficulty: 🟢 Easy · 🟡 Normal · 🔴 Hard
