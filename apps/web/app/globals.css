@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @source "../../../packages/ui/src";
+@source "../../../packages/game-sdk/src/**/*.{ts,tsx}";
 @source "../../../games/*/src/**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));

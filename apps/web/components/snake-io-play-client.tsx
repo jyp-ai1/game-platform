@@ -95,13 +95,11 @@ class SnakePlayErrorBoundary extends Component<
 function SnakeIoPlayInner({
   practiceMode = false,
   debugMode = false,
-  immersiveWorld = false,
   showMetaAfterExit = false,
   gameMeta,
 }: {
   practiceMode?: boolean;
   debugMode?: boolean;
-  immersiveWorld?: boolean;
   showMetaAfterExit?: boolean;
   gameMeta?: Game;
 }) {
@@ -115,7 +113,6 @@ function SnakeIoPlayInner({
     loadSnakeBodyColor(SNAKE_HEAD_CHARACTERS[loadSnakeHeadCharacter()].bodyColor)
   );
   const [characterReady, setCharacterReady] = useState(false);
-  const [worldEntered, setWorldEntered] = useState(!immersiveWorld);
   const [showPostGameMeta, setShowPostGameMeta] = useState(false);
   const [sessionSummary, setSessionSummary] = useState<{
     score: number;
@@ -171,11 +168,6 @@ function SnakeIoPlayInner({
       });
     }
   }, [practiceMode, params]);
-
-  useEffect(() => {
-    // RC-HUD-001: keep platform chrome / game HUD visible (no immersive shell class).
-    if (!immersiveWorld || !worldEntered) return;
-  }, [immersiveWorld, worldEntered]);
 
   useEffect(() => {
     if (!isStageMode) return;
@@ -274,25 +266,6 @@ function SnakeIoPlayInner({
     );
   }
 
-  if (immersiveWorld && !worldEntered) {
-    return (
-      <div className="flex h-full min-h-[100dvh] flex-col items-center justify-center gap-5 bg-black px-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-400/90">Live Multiplayer</p>
-        <h1 className="text-3xl font-black text-white sm:text-4xl">Snake WORLD</h1>
-        <p className="max-w-sm text-sm text-white/60">
-          같은 맵에서 실시간으로 경쟁합니다. 방향키로 움직이고 Space로 부스트하세요.
-        </p>
-        <button
-          type="button"
-          className="rounded-xl bg-emerald-500 px-10 py-3.5 text-base font-bold text-black shadow-[0_0_24px_rgba(16,185,129,0.45)] transition hover:bg-emerald-400"
-          onClick={() => setWorldEntered(true)}
-        >
-          ENTER WORLD
-        </button>
-      </div>
-    );
-  }
-
   return (
     <>
       {debugMode ? <SnakeDebugOverlay /> : null}
@@ -333,9 +306,7 @@ export function SnakeIoPlayClient({
 } = {}) {
   const params = useSearchParams();
   const practiceMode = params.get("room")?.toUpperCase() === "PRACTICE";
-  const room = params.get("room")?.toUpperCase() ?? "";
   const debugMode = params.get("debug") === "1";
-  const immersiveWorld = room === "WORLD" || room.startsWith("WORLD-");
   const sdk = useMemo(() => ({ submitScore }), []);
 
   useEffect(() => {
@@ -348,7 +319,6 @@ export function SnakeIoPlayClient({
       <SnakeIoPlayInner
         practiceMode={practiceMode}
         debugMode={debugMode}
-        immersiveWorld={immersiveWorld}
         showMetaAfterExit={showMetaAfterExit}
         gameMeta={gameMeta}
       />

@@ -115,13 +115,13 @@ export function MultiplayerPlayShell({
 
       <div
         className={cn(
-          "flex w-full max-w-xl items-start gap-2",
+          "flex w-full max-w-2xl flex-col items-stretch gap-2 sm:flex-row sm:items-start",
           isGameFullscreen && "max-w-none flex-1 items-center justify-center"
         )}
       >
         <div
           className={cn(
-            "relative aspect-square min-w-0 flex-1 overflow-hidden rounded-xl border border-white/10 bg-black",
+            "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black",
             isGameFullscreen && "max-h-[min(100dvh,100dvw)] max-w-[min(100dvh,100dvw)]",
             boardClassName
           )}
@@ -129,10 +129,9 @@ export function MultiplayerPlayShell({
           {children}
         </div>
         {sideHud ? (
-          <aside className="hidden w-40 shrink-0 sm:block">{sideHud}</aside>
+          <aside className="w-full shrink-0 sm:w-40">{sideHud}</aside>
         ) : null}
       </div>
-      {sideHud ? <div className="w-full max-w-xl sm:hidden">{sideHud}</div> : null}
     </div>
   );
 }

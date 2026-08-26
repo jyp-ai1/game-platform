@@ -39,7 +39,7 @@ export function SnakeCharacterSelect({
   return (
     <MultiplayerEntrySelect
       title="Snake"
-      subtitle="스타일 · 색상 선택 후 PLAY"
+      subtitle="스타일 · 색상 선택 후 ENTER WORLD"
       styles={SNAKE_STYLES}
       styleId={value}
       onStyleChange={(id) => onChange(id as SnakeHeadId)}
@@ -47,6 +47,7 @@ export function SnakeCharacterSelect({
       color={color}
       onColorChange={onColorChange}
       onPlay={onConfirm}
+      playLabel="ENTER WORLD"
       players={players}
       bots={bots}
       roomCode={roomCode}

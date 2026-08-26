@@ -7,11 +7,11 @@ export const AGAR_WORLD = 900;
 export const AGAR_FOOD_TARGET = 220;
 export const AGAR_BOT_COUNT = 18;
 /** Tuned minimum so first eats / presence feel quick (not Snake L10). */
-export const AGAR_START_MASS = 18;
-/** Reachable after a short feed streak from start mass. */
-export const AGAR_MIN_SPLIT_MASS = 32;
+export const AGAR_START_MASS = 36;
+/** Split available from spawn (Space must work on first press in Preview). */
+export const AGAR_MIN_SPLIT_MASS = 36;
 /** Minimum cell mass required to eject (classic W feed). */
-export const AGAR_MIN_EJECT_MASS = 32;
+export const AGAR_MIN_EJECT_MASS = 36;
 /** Mass removed from the cell when ejecting. */
 export const AGAR_EJECT_COST = 14;
 /** Food pellet mass spawned by eject (slightly less than cost). */

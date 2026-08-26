@@ -287,13 +287,13 @@ function growSnakeSegments(snake: SnakeEntity, extra: number): void {
   snake.lastGrowthAt = Date.now();
 }
 
-/** Length gain by gem tier — Small +1 · Medium +3 · Large +6 */
+/** Length gain by gem tier — Small +1 · Medium +2 · Large +3 (CEO SN-001) */
 function gemLengthGain(tier: FoodTier): number {
   if (tier === "small") return 1;
-  if (tier === "medium") return 3;
-  if (tier === "large") return 6;
-  if (tier === "epic") return 10;
-  if (tier === "death") return 4;
+  if (tier === "medium") return 2;
+  if (tier === "large") return 3;
+  if (tier === "epic") return 5;
+  if (tier === "death") return 3;
   return 1;
 }
 
@@ -310,7 +310,7 @@ function applyGemGrowth(snake: SnakeEntity, tier: FoodTier = "small"): void {
   const start = SNAKE_MVP_RC1.startingSegments;
   snake.bodyRadiusScale = Math.min(
     SNAKE_MVP_RC1.bodyRadiusMax,
-    1 + Math.log2(1 + Math.max(0, len - start)) * 0.08
+    1 + Math.log2(1 + Math.max(0, len - start)) * 0.12
   );
 }
 

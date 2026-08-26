@@ -2,7 +2,7 @@
 
 /**
  * Agar — shared MP shell UX (entry / YOU / TOP10 / minimap / death).
- * AGAR-FUN-002 (Space/W/eat balance) deferred.
+ * Space/W wired; spawn mass allows immediate Split/Eject.
  */
 import {
   getDeviceId,
@@ -218,7 +218,7 @@ export function AgarGame() {
     return (
       <MultiplayerEntrySelect
         title="Agar"
-        subtitle="세포 · 색상 선택 후 PLAY"
+        subtitle="세포 · 색상 선택 후 ENTER WORLD"
         styles={AGAR_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
@@ -226,6 +226,7 @@ export function AgarGame() {
         color={color}
         onColorChange={setColor}
         onPlay={handleStart}
+        playLabel="ENTER WORLD"
         players={1}
         bots={AGAR_BOT_COUNT}
         roomCode={roomCode}

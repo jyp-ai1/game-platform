@@ -6,7 +6,6 @@ import { GameDetailComments } from "@/components/game-detail-extras";
 import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
 import { GameDetailHero } from "@/components/game-detail-hero";
 import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
-import { SnakeMultiplayerEntry } from "@/components/snake-multiplayer-entry";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameStatusBlock } from "@/components/game-status-block";
@@ -56,22 +55,20 @@ export function GameDetailTemplate({
               <p className="text-xs text-muted-foreground tabular-nums">
                 Play count · {(game.playCount ?? 0).toLocaleString()}
               </p>
-              {slug === "snake" ? (
-                <SnakeMultiplayerEntry variant="start" />
-              ) : (
-                <Link
-                  href={
-                    slug === "agar"
+              <Link
+                href={
+                  slug === "snake"
+                    ? "/flagship/snake-io/play?room=WORLD"
+                    : slug === "agar"
                       ? "/games/agar/play?room=WORLD"
                       : slug === "bomber"
                         ? "/games/bomber/play?room=ROOM"
                         : `/games/${slug}/play`
-                  }
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
-                >
-                  PLAY
-                </Link>
-              )}
+                }
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-10 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110"
+              >
+                캐릭터 선택
+              </Link>
             </section>
 
             <hr className="border-white/10" />
