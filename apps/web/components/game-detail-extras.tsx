@@ -1,6 +1,7 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
+import { createRoom } from "@game-platform/multiplayer-sdk";
 import Link from "next/link";
 import { Share2, ThumbsDown, Heart, Flag } from "lucide-react";
 import { useCallback, useState, useSyncExternalStore, type FormEvent } from "react";
@@ -138,6 +139,54 @@ export function GameDetailRating({ gameSlug }: { gameSlug: string }) {
   );
 }
 
+const ACTIVE_ROOM_KEY = "play29:active-room";
+
+/** Pin invite to a real multiplayer room id (not a disposable UUID). */
+function resolveInviteRoomCode(gameSlug: string): string {
+  if (typeof window !== "undefined") {
+    try {
+      const active = window.localStorage.getItem(ACTIVE_ROOM_KEY)?.toUpperCase();
+      // Prefer a pinned WORLD-* shard (bare WORLD re-resolves per client → split worlds)
+      if (gameSlug === "snake" && active && /^WORLD-\d+$/.test(active)) {
+        return active;
+      }
+      if (gameSlug !== "snake" && active) return active;
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (gameSlug === "snake") {
+    // Dedicated invite shard so both clients join the same WORLD-* room.
+    const n = 10 + Math.floor(Math.random() * 90);
+    const code = `WORLD-${n}`;
+    createRoom({
+      gameSlug: "snake",
+      maxPlayers: 50,
+      matchMode: "public",
+      code,
+    });
+    try {
+      window.localStorage.setItem(ACTIVE_ROOM_KEY, code);
+    } catch {
+      /* ignore */
+    }
+    return code;
+  }
+
+  const room = createRoom({
+    gameSlug,
+    maxPlayers: 8,
+    matchMode: "friends",
+  });
+  try {
+    window.localStorage.setItem(ACTIVE_ROOM_KEY, room.code);
+  } catch {
+    /* ignore */
+  }
+  return room.code;
+}
+
 export function GameDetailShare({
   gameSlug,
   title,
@@ -150,13 +199,10 @@ export function GameDetailShare({
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   function buildInviteUrl(): string {
-    const invite =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID().replace(/-/g, "").slice(0, 12)
-        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    const invite = resolveInviteRoomCode(gameSlug);
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://game29.vercel.app";
-    return `${origin}/games/${gameSlug}?invite=${invite}`;
+    return `${origin}/games/${gameSlug}?invite=${encodeURIComponent(invite)}`;
   }
 
   async function copyText(text: string): Promise<boolean> {

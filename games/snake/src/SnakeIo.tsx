@@ -49,6 +49,7 @@ import {
   spawnWorldBoss,
   tickWorld,
   cullAmbientFood,
+  updateRankings,
   type Direction,
   type SnakeIoWorld,
   type Vec,
@@ -195,8 +196,82 @@ const DIRECTION_KEYS: Record<string, Direction> = {
 
 type PlayerInputPayload = { deviceId: string; direction: Direction; boosting?: boolean };
 
+/** Lightweight cross-client presence for TOP10 / minimap (identity + length + pos). */
+type PeerPresencePayload = {
+  deviceId: string;
+  nickname: string;
+  length: number;
+  score: number;
+  alive: boolean;
+  x: number;
+  y: number;
+};
+
+const ACTIVE_ROOM_KEY = "play29:active-room";
+
 function sendPlayerInput(roomCode: string, globalWorld: boolean, payload: PlayerInputPayload): void {
   send(roomCode, globalWorld ? `input:${payload.deviceId}` : "input", payload);
+}
+
+function pinActiveRoom(code: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ACTIVE_ROOM_KEY, code);
+  } catch {
+    /* ignore */
+  }
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("room")?.toUpperCase() === code) return;
+  url.searchParams.set("room", code);
+  url.searchParams.delete("invite");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+}
+
+function applyPeerPresence(
+  world: SnakeIoWorld,
+  peer: PeerPresencePayload,
+  localId: string
+): void {
+  if (!peer?.deviceId || peer.deviceId === localId) return;
+  let snake = world.snakes[peer.deviceId];
+  if (!snake) {
+    snake = {
+      deviceId: peer.deviceId,
+      nickname: peer.nickname || "Player",
+      segments: [{ x: peer.x, y: peer.y }],
+      direction: "right",
+      pendingDirection: "right",
+      score: peer.score,
+      alive: peer.alive,
+      color: "#38bdf8",
+      invincibleUntil: 0,
+      hp: 100,
+      gemsEaten: 0,
+      bodyRadiusScale: 1,
+      aliveSinceTick: world.tick,
+      totalKills: 0,
+      isBot: false,
+      awaitingInput: false,
+      segmentCount: Math.max(1, peer.length),
+      headX: peer.x,
+      headY: peer.y,
+    };
+    world.snakes[peer.deviceId] = snake;
+  } else {
+    snake.nickname = peer.nickname || snake.nickname;
+    snake.alive = peer.alive;
+    snake.spectating = !peer.alive;
+    snake.isBot = false;
+    snake.segmentCount = Math.max(1, peer.length);
+    snake.score = peer.score;
+    snake.headX = peer.x;
+    snake.headY = peer.y;
+    if (snake.segments[0]) {
+      snake.segments[0] = { x: peer.x, y: peer.y };
+    } else {
+      snake.segments = [{ x: peer.x, y: peer.y }];
+    }
+  }
 }
 
 /** Flagship Snake.io — Events · Teams · Objectives · Spectator 2.0 */
@@ -498,6 +573,9 @@ export function SnakeIoGame({
     setSessionRoom(roomCode);
     gameReadyRef.current = false;
     connectDoneRef.current = false;
+    if (roomCode && roomCode !== "PRACTICE" && roomCode !== "STAGE") {
+      pinActiveRoom(roomCode);
+    }
   }, [roomCode]);
 
   useEffect(() => {
@@ -721,6 +799,7 @@ export function SnakeIoGame({
 
     const finishConnect = (r: GameRoom, code: string): void => {
       if (code !== sessionRoom) setSessionRoom(code);
+      pinActiveRoom(code);
       start(code);
       entryTrace("CONNECT", "PASS", code);
       entryTrace("JOIN", "PASS", `${r.players.length} players`);
@@ -745,7 +824,18 @@ export function SnakeIoGame({
       let targetCode = roomCode;
       if (isGlobalWorldRoom(roomCode, "snake") && roomCode === "WORLD") {
         try {
-          targetCode = await resolveAvailableCluster("snake");
+          // Prefer invite-pinned shard (play29:active-room) so share + PLAY land together
+          let pinned: string | null = null;
+          try {
+            pinned = window.localStorage.getItem(ACTIVE_ROOM_KEY)?.toUpperCase() ?? null;
+          } catch {
+            pinned = null;
+          }
+          if (pinned && /^WORLD-\d+$/.test(pinned)) {
+            targetCode = pinned;
+          } else {
+            targetCode = await resolveAvailableCluster("snake");
+          }
         } catch (err) {
           recordJoinRoomDebug({
             roomCode,
@@ -1319,6 +1409,29 @@ export function SnakeIoGame({
 
       next = tickWorld(next);
       diagSimulation();
+
+      // Invite same-WORLD: peer identity+length for TOP10 / minimap (after local sim)
+      if (gs) {
+        for (const [key, val] of Object.entries(gs)) {
+          if (!key.startsWith("peer:") || !val || typeof val !== "object") continue;
+          applyPeerPresence(next, val as PeerPresencePayload, deviceId);
+        }
+        updateRankings(next);
+      }
+      const localForPeer = next.snakes[deviceId];
+      if (localForPeer && next.tick % 5 === 0) {
+        const head = localForPeer.segments[0];
+        send(activeRoom, `peer:${deviceId}`, {
+          deviceId,
+          nickname: localForPeer.nickname,
+          length: getSegmentCount(localForPeer),
+          score: localForPeer.score,
+          alive: !!(localForPeer.alive && !localForPeer.spectating),
+          x: localForPeer.headX ?? head?.x ?? 0,
+          y: localForPeer.headY ?? head?.y ?? 0,
+        } satisfies PeerPresencePayload);
+      }
+
       if (isGlobalWorld && isHost) {
         respawnDeadBots(next, SNAKE_WORLD_TARGET);
         persistGlobalWorldState(activeRoom, next);
@@ -2266,6 +2379,10 @@ export function SnakeIoGame({
               <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
                 {isBoosting ? "⚡ BOOST" : "Boost"}
               </p>
+              <p className="mt-0.5 text-[10px] text-white/45">
+                <span className="hidden lg:inline">Space = Boost</span>
+                <span className="lg:hidden">Boost 홀드</span>
+              </p>
             </>
           ) : null}
         </div>
@@ -2414,7 +2531,11 @@ export function SnakeIoGame({
               YOU
             </p>
             <p className="animate-pulse rounded-lg border border-white/20 bg-black/70 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
-              방향키를 누르면 시작
+              움직여서 시작
+            </p>
+            <p className="rounded-lg border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur-sm">
+              <span className="hidden lg:inline">Space = Boost</span>
+              <span className="lg:hidden">Boost 홀드</span>
             </p>
           </div>
         ) : null}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { GameDetailTemplate } from "@/components/game-detail-template";
 import { JsonLdScript } from "@/components/json-ld-script";
@@ -22,6 +22,11 @@ import { getGameBySlug, getGames } from "@/lib/supabase/games";
 
 interface GamePageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 export const revalidate = 60;
@@ -39,8 +44,18 @@ export async function generateMetadata({
   return buildGameMetadata(game);
 }
 
-export default async function GamePage({ params }: GamePageProps) {
+export default async function GamePage({ params, searchParams }: GamePageProps) {
   const { slug } = await params;
+  const q = await searchParams;
+  // Invite token = room code — land both clients in the same multiplayer room.
+  const invite = firstParam(q.invite)?.trim().toUpperCase();
+  if (invite) {
+    if (slug === "snake") {
+      redirect(`/flagship/snake-io/play?room=${encodeURIComponent(invite)}`);
+    }
+    redirect(`/games/${slug}/play?room=${encodeURIComponent(invite)}`);
+  }
+
   const [dbGame, rawGames, rankingEnabled] = await Promise.all([
     getGameBySlug(slug),
     getGames(),

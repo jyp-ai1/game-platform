@@ -34,7 +34,11 @@ export default async function GamePlayPage({ params, searchParams }: GamePlayPag
 
   if (slug === "snake") {
     const q = await searchParams;
-    const room = firstParam(q.room)?.toUpperCase() || "WORLD";
+    // invite= maps to the same room join path as room=
+    const room =
+      firstParam(q.room)?.toUpperCase() ||
+      firstParam(q.invite)?.toUpperCase() ||
+      "WORLD";
     const debug = firstParam(q.debug) === "1" ? "&debug=1" : "";
     redirect(`/flagship/snake-io/play?room=${encodeURIComponent(room)}${debug}`);
   }
