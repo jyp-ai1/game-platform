@@ -1,0 +1,714 @@
+{
+  "room": "WORLD-I361",
+  "invitePath": "/games/snake?invite=WORLD-I361&source=invite",
+  "playUrl": "https://game29-kuddtg8s0-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-I361&source=invite",
+  "preview": "https://game29-kuddtg8s0-jyp-ai1s-projects.vercel.app",
+  "pc": {
+    "hud": {
+      "ROOM": "WORLD-I361",
+      "MODE": "WORLD",
+      "SOURCE": "INVITE"
+    },
+    "spawn": {
+      "urlRoom": "WORLD-I361",
+      "source": "INVITE",
+      "sessionRoom": "WORLD-I361",
+      "roomJoinSource": "INVITE",
+      "roomPlayers": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1"
+      ],
+      "localDeviceId": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+      "localLength": 10,
+      "foodTotal": 2595,
+      "ambientFood": 2400,
+      "deathFood": 195,
+      "ambientGemValues": [
+        20,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        2,
+        3,
+        3,
+        1,
+        2,
+        2,
+        3,
+        3,
+        20,
+        1,
+        2,
+        1,
+        1,
+        3,
+        1,
+        2,
+        20,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "peerIds": [],
+      "peerNicknames": [],
+      "top10": [
+        {
+          "id": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+          "nickname": "",
+          "score": 10
+        },
+        {
+          "id": "bot:14",
+          "nickname": "BOT Remnant",
+          "score": 20
+        },
+        {
+          "id": "bot:42",
+          "nickname": "BOT Apex",
+          "score": 20
+        },
+        {
+          "id": "bot:22",
+          "nickname": "BOT Apex",
+          "score": 18
+        },
+        {
+          "id": "bot:12",
+          "nickname": "BOT Apex",
+          "score": 17
+        },
+        {
+          "id": "bot:18",
+          "nickname": "BOT Wander",
+          "score": 15
+        },
+        {
+          "id": "bot:26",
+          "nickname": "BOT Alpha",
+          "score": 13
+        },
+        {
+          "id": "bot:7",
+          "nickname": "BOT Apex",
+          "score": 13
+        },
+        {
+          "id": "bot:11",
+          "nickname": "BOT Alpha",
+          "score": 12
+        },
+        {
+          "id": "bot:38",
+          "nickname": "BOT Wander",
+          "score": 12
+        }
+      ],
+      "roomHud": "ROOM: WORLD-I361",
+      "modeHud": "MODE: WORLD",
+      "sourceHud": "SOURCE: INVITE",
+      "tick": 98,
+      "snakeCount": 48,
+      "deathFoodTotal": 195,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 8,
+      "canvas": {
+        "frameMs": 0.5,
+        "segmentDrawCount": 10,
+        "foodDrawCount": 118,
+        "foodTotal": 2595,
+        "deathFoodTotal": 195,
+        "snakeCount": 48,
+        "localLength": 10
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    },
+    "evidence": {
+      "urlRoom": "WORLD-I361",
+      "source": "INVITE",
+      "sessionRoom": "WORLD-I361",
+      "roomJoinSource": "INVITE",
+      "roomPlayers": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+        "230388f2-1ca3-415b-9c5e-e015a872c6fd"
+      ],
+      "localDeviceId": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+      "localLength": 28,
+      "foodTotal": 2667,
+      "ambientFood": 2400,
+      "deathFood": 267,
+      "ambientGemValues": [
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        2,
+        3,
+        3,
+        1,
+        2,
+        3,
+        3,
+        20,
+        1,
+        2,
+        1,
+        1,
+        3,
+        1,
+        2,
+        20,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        2,
+        1,
+        2
+      ],
+      "peerIds": [
+        "230388f2-1ca3-415b-9c5e-e015a872c6fd"
+      ],
+      "peerNicknames": [
+        ""
+      ],
+      "top10": [
+        {
+          "id": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+          "nickname": "",
+          "score": 28
+        },
+        {
+          "id": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+          "nickname": "",
+          "score": 24
+        },
+        {
+          "id": "bot:39",
+          "nickname": "BOT Remnant",
+          "score": 31
+        },
+        {
+          "id": "bot:22",
+          "nickname": "BOT Apex",
+          "score": 30
+        },
+        {
+          "id": "bot:26",
+          "nickname": "BOT Alpha",
+          "score": 28
+        },
+        {
+          "id": "bot:7",
+          "nickname": "BOT Apex",
+          "score": 20
+        },
+        {
+          "id": "bot:1",
+          "nickname": "BOT Alpha",
+          "score": 19
+        },
+        {
+          "id": "bot:36",
+          "nickname": "BOT Alpha",
+          "score": 19
+        },
+        {
+          "id": "bot:38",
+          "nickname": "BOT Wander",
+          "score": 18
+        },
+        {
+          "id": "bot:18",
+          "nickname": "BOT Wander",
+          "score": 16
+        }
+      ],
+      "roomHud": "ROOM: WORLD-I361",
+      "modeHud": "MODE: WORLD",
+      "sourceHud": "SOURCE: INVITE",
+      "tick": 181,
+      "snakeCount": 50,
+      "deathFoodTotal": 267,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 7,
+      "canvas": {
+        "frameMs": 1.9000000357627869,
+        "segmentDrawCount": 28,
+        "foodDrawCount": 109,
+        "foodTotal": 2667,
+        "deathFoodTotal": 267,
+        "snakeCount": 50,
+        "localLength": 28
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    }
+  },
+  "mobile": {
+    "hud": {
+      "ROOM": "WORLD-I361",
+      "MODE": "WORLD",
+      "SOURCE": "INVITE"
+    },
+    "spawn": {
+      "urlRoom": "WORLD-I361",
+      "source": "INVITE",
+      "sessionRoom": "WORLD-I361",
+      "roomJoinSource": "INVITE",
+      "roomPlayers": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+        "230388f2-1ca3-415b-9c5e-e015a872c6fd"
+      ],
+      "localDeviceId": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+      "localLength": 10,
+      "foodTotal": 2530,
+      "ambientFood": 2400,
+      "deathFood": 130,
+      "ambientGemValues": [
+        2,
+        3,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1,
+        3,
+        20,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "peerIds": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1"
+      ],
+      "peerNicknames": [
+        ""
+      ],
+      "top10": [
+        {
+          "id": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+          "nickname": "",
+          "score": 10
+        },
+        {
+          "id": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+          "nickname": "",
+          "score": 10
+        },
+        {
+          "id": "bot:12",
+          "nickname": "BOT Apex",
+          "score": 15
+        },
+        {
+          "id": "bot:22",
+          "nickname": "BOT Apex",
+          "score": 14
+        },
+        {
+          "id": "bot:2",
+          "nickname": "BOT Apex",
+          "score": 13
+        },
+        {
+          "id": "bot:26",
+          "nickname": "BOT Alpha",
+          "score": 13
+        },
+        {
+          "id": "bot:31",
+          "nickname": "BOT Alpha",
+          "score": 13
+        },
+        {
+          "id": "bot:11",
+          "nickname": "BOT Alpha",
+          "score": 12
+        },
+        {
+          "id": "bot:10",
+          "nickname": "BOT Farmer",
+          "score": 11
+        },
+        {
+          "id": "bot:17",
+          "nickname": "BOT Apex",
+          "score": 11
+        }
+      ],
+      "roomHud": "ROOM: WORLD-I361",
+      "modeHud": "MODE: WORLD",
+      "sourceHud": "SOURCE: INVITE",
+      "tick": 123,
+      "snakeCount": 46,
+      "deathFoodTotal": 130,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 8,
+      "canvas": {
+        "frameMs": 1.100000023841858,
+        "segmentDrawCount": 10,
+        "foodDrawCount": 76,
+        "foodTotal": 2513,
+        "deathFoodTotal": 113,
+        "snakeCount": 39,
+        "localLength": 10
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    },
+    "evidence": {
+      "urlRoom": "WORLD-I361",
+      "source": "INVITE",
+      "sessionRoom": "WORLD-I361",
+      "roomJoinSource": "INVITE",
+      "roomPlayers": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+        "230388f2-1ca3-415b-9c5e-e015a872c6fd"
+      ],
+      "localDeviceId": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+      "localLength": 24,
+      "foodTotal": 2594,
+      "ambientFood": 2400,
+      "deathFood": 194,
+      "ambientGemValues": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        3,
+        1,
+        1,
+        2,
+        1,
+        2,
+        3,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "peerIds": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1"
+      ],
+      "peerNicknames": [
+        ""
+      ],
+      "top10": [
+        {
+          "id": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+          "nickname": "",
+          "score": 28
+        },
+        {
+          "id": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+          "nickname": "",
+          "score": 24
+        },
+        {
+          "id": "bot:20",
+          "nickname": "BOT Farmer",
+          "score": 25
+        },
+        {
+          "id": "bot:32",
+          "nickname": "BOT Apex",
+          "score": 22
+        },
+        {
+          "id": "bot:22",
+          "nickname": "BOT Apex",
+          "score": 17
+        },
+        {
+          "id": "bot:10",
+          "nickname": "BOT Farmer",
+          "score": 16
+        },
+        {
+          "id": "bot:14",
+          "nickname": "BOT Remnant",
+          "score": 16
+        },
+        {
+          "id": "bot:45",
+          "nickname": "BOT Farmer",
+          "score": 14
+        },
+        {
+          "id": "bot:31",
+          "nickname": "BOT Alpha",
+          "score": 13
+        },
+        {
+          "id": "bot:4",
+          "nickname": "BOT Remnant",
+          "score": 13
+        }
+      ],
+      "roomHud": "ROOM: WORLD-I361",
+      "modeHud": "MODE: WORLD",
+      "sourceHud": "SOURCE: INVITE",
+      "tick": 170,
+      "snakeCount": 49,
+      "deathFoodTotal": 194,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 17,
+      "canvas": {
+        "frameMs": 1.800000011920929,
+        "segmentDrawCount": 24,
+        "foodDrawCount": 22,
+        "foodTotal": 2596,
+        "deathFoodTotal": 196,
+        "snakeCount": 49,
+        "localLength": 24
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    },
+    "afterEat": {
+      "urlRoom": "WORLD-I361",
+      "source": "INVITE",
+      "sessionRoom": "WORLD-I361",
+      "roomJoinSource": "INVITE",
+      "roomPlayers": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+        "230388f2-1ca3-415b-9c5e-e015a872c6fd"
+      ],
+      "localDeviceId": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+      "localLength": 24,
+      "foodTotal": 2592,
+      "ambientFood": 2400,
+      "deathFood": 192,
+      "ambientGemValues": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        3,
+        1,
+        1,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        20,
+        1,
+        1,
+        20,
+        3,
+        1,
+        1
+      ],
+      "peerIds": [
+        "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1"
+      ],
+      "peerNicknames": [
+        ""
+      ],
+      "top10": [
+        {
+          "id": "e73aaa0f-ef38-482e-859c-c81a9b3fc2e1",
+          "nickname": "",
+          "score": 28
+        },
+        {
+          "id": "230388f2-1ca3-415b-9c5e-e015a872c6fd",
+          "nickname": "",
+          "score": 24
+        },
+        {
+          "id": "bot:32",
+          "nickname": "BOT Apex",
+          "score": 31
+        },
+        {
+          "id": "bot:20",
+          "nickname": "BOT Farmer",
+          "score": 25
+        },
+        {
+          "id": "bot:4",
+          "nickname": "BOT Remnant",
+          "score": 24
+        },
+        {
+          "id": "bot:10",
+          "nickname": "BOT Farmer",
+          "score": 22
+        },
+        {
+          "id": "bot:31",
+          "nickname": "BOT Alpha",
+          "score": 22
+        },
+        {
+          "id": "bot:14",
+          "nickname": "BOT Remnant",
+          "score": 21
+        },
+        {
+          "id": "bot:40",
+          "nickname": "BOT Farmer",
+          "score": 17
+        },
+        {
+          "id": "bot:2",
+          "nickname": "BOT Apex",
+          "score": 15
+        }
+      ],
+      "roomHud": "ROOM: WORLD-I361",
+      "modeHud": "MODE: WORLD",
+      "sourceHud": "SOURCE: INVITE",
+      "tick": 207,
+      "snakeCount": 49,
+      "deathFoodTotal": 192,
+      "foodCountCap": 2400,
+      "worldSize": 1400,
+      "hudFps": 8,
+      "canvas": {
+        "frameMs": 1.699999988079071,
+        "segmentDrawCount": 24,
+        "foodDrawCount": 23,
+        "foodTotal": 2594,
+        "deathFoodTotal": 194,
+        "snakeCount": 49,
+        "localLength": 24
+      },
+      "domSegmentNodes": 0,
+      "hasWorldCanvas": true
+    }
+  },
+  "gates": {
+    "sameRoom": true,
+    "aSeesB": true,
+    "bSeesA": true,
+    "initialLength10": true,
+    "noL500": true,
+    "naturalGrowth": true,
+    "noPracticeFallback": true,
+    "sourceInvite": true
+  },
+  "gem": {
+    "initialLength": 10,
+    "afterEatLength": 24,
+    "foodTotal": 2595,
+    "foodCountCap": 2400,
+    "ambientFood": 2400,
+    "deathFood": 195,
+    "ambientGemValuesSample": [
+      1,
+      2,
+      3,
+      20
+    ]
+  }
+}

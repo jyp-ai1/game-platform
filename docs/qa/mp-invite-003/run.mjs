@@ -19,7 +19,7 @@ const ROOM = `WORLD-I${Math.floor(Math.random() * 900 + 100)}`;
 const invitePath = `/games/snake?invite=${encodeURIComponent(ROOM)}&source=invite`;
 const playUrl = `${base}/flagship/snake-io/play?room=${encodeURIComponent(ROOM)}&source=invite`;
 
-async function enterWorld(page, label) {
+async function enterWorld(page, label, { move = true } = {}) {
   await page.goto(playUrl, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await page.waitForTimeout(1500);
   const enter = page.getByRole("button", { name: /ENTER WORLD|입장|시작|Play|ENTER/i }).first();
@@ -27,10 +27,24 @@ async function enterWorld(page, label) {
     await enter.click({ force: true });
   }
   await page.waitForSelector('[data-testid="snake-world-canvas"], canvas', { timeout: 60_000 });
-  await page.keyboard.press("ArrowRight");
-  await page.waitForTimeout(600);
-  await page.keyboard.press("ArrowRight");
+  // Wait for world + local snake spawn without eating yet
+  await page.waitForFunction(
+    () => {
+      const api = window.__MP_PLATFORM_001__;
+      const s = api?.getStats?.();
+      return s && s.localLength > 0 && s.hasWorldCanvas;
+    },
+    { timeout: 30_000 }
+  ).catch(() => null);
+  await page.waitForTimeout(800);
+  const spawnProbe = await probe(page);
+  if (move) {
+    await page.keyboard.press("ArrowRight");
+    await page.waitForTimeout(400);
+    await page.keyboard.press("ArrowRight");
+  }
   await page.screenshot({ path: path.join(OUT, `${label}-playing.png`), fullPage: true });
+  return spawnProbe;
 }
 
 async function probe(page) {
@@ -81,16 +95,20 @@ const mobile = await browser.newContext({
 const pageA = await pc.newPage();
 const pageB = await mobile.newPage();
 
-await enterWorld(pageA, "pc");
-await enterWorld(pageB, "mobile");
+const spawnA = await enterWorld(pageA, "pc", { move: false });
+const spawnB = await enterWorld(pageB, "mobile", { move: false });
+
+// Dismiss awaiting-input gently (one tap) then settle peers
+await pageA.keyboard.press("ArrowRight");
+await pageB.keyboard.press("ArrowRight");
 await pageA.waitForTimeout(4000);
 await pageB.waitForTimeout(1000);
 
 const beforeA = await probe(pageA);
 const beforeB = await probe(pageB);
 
-await eatNearby(pageB, 10);
-await pageB.waitForTimeout(2000);
+await eatNearby(pageB, 6);
+await pageB.waitForTimeout(1500);
 const afterB = await probe(pageB);
 
 const parseHud = (ev) => ({
@@ -118,13 +136,13 @@ const practiceRedirect =
   /fallback=1/.test(pageA.url()) ||
   /fallback=1/.test(pageB.url());
 
-const initialLen = beforeB.localLength ?? beforeA.localLength;
+const initialLen = spawnB.localLength ?? spawnA.localLength;
 const afterLen = afterB.localLength ?? initialLen;
 const l500Spike = afterLen != null && afterLen >= 200;
 const naturalGrowth =
   initialLen === 10 && afterLen != null && afterLen >= 10 && afterLen < 80;
 
-const ambientValues = beforeA.ambientGemValues || beforeB.ambientGemValues || [];
+const ambientValues = spawnA.ambientGemValues || spawnB.ambientGemValues || [];
 const uniqueVals = [...new Set(ambientValues)].sort((a, b) => a - b);
 
 const report = {
@@ -132,8 +150,8 @@ const report = {
   invitePath,
   playUrl,
   preview: base,
-  pc: { hud: pcHud, evidence: beforeA },
-  mobile: { hud: mobileHud, evidence: beforeB, afterEat: afterB },
+  pc: { hud: pcHud, spawn: spawnA, evidence: beforeA },
+  mobile: { hud: mobileHud, spawn: spawnB, evidence: beforeB, afterEat: afterB },
   gates: {
     sameRoom: !!sameRoom,
     aSeesB: !!aSeesPeer,
@@ -147,9 +165,10 @@ const report = {
   gem: {
     initialLength: initialLen,
     afterEatLength: afterLen,
-    foodTotal: beforeA.foodTotal ?? beforeB.foodTotal,
-    ambientFood: beforeA.ambientFood ?? beforeB.ambientFood,
-    deathFood: beforeA.deathFood ?? beforeB.deathFood,
+    foodTotal: spawnA.foodTotal ?? spawnB.foodTotal,
+    foodCountCap: spawnA.foodCountCap ?? spawnB.foodCountCap,
+    ambientFood: spawnA.ambientFood ?? spawnB.ambientFood,
+    deathFood: spawnA.deathFood ?? spawnB.deathFood,
     ambientGemValuesSample: uniqueVals,
   },
 };
