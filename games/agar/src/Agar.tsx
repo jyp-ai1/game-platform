@@ -5,6 +5,7 @@
  * Space/W wired; spawn mass allows immediate Split/Eject.
  */
 import {
+  DEFAULT_MP_AI_DIFFICULTY,
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
@@ -14,6 +15,7 @@ import {
   MultiplayerSideRankHud,
   MultiplayerYouBar,
   useGameSDK,
+  type MpAiDifficulty,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
@@ -55,6 +57,7 @@ function snapshotWorld(w: AgarWorld): AgarWorld {
     food: w.food,
     players: w.players,
     rankings: w.rankings,
+    aiDifficulty: w.aiDifficulty,
   };
 }
 
@@ -86,6 +89,7 @@ export function AgarGame() {
   const [started, setStarted] = useState(false);
   const [styleId, setStyleId] = useState(AGAR_STYLES[0]!.id);
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
+  const [aiDifficulty, setAiDifficulty] = useState<MpAiDifficulty>(DEFAULT_MP_AI_DIFFICULTY);
   const reportedRef = useRef(false);
   const lastEjectAtRef = useRef(0);
 
@@ -194,7 +198,7 @@ export function AgarGame() {
 
   function handleStart() {
     reportedRef.current = false;
-    const next = createAgarWorld(deviceId, nickname);
+    const next = createAgarWorld(deviceId, nickname, aiDifficulty);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
@@ -211,6 +215,10 @@ export function AgarGame() {
     setWorld(snap);
   }
 
+  function exitToLobby() {
+    setStarted(false);
+  }
+
   const offsetX = VIEW / 2 - cam.x;
   const offsetY = VIEW / 2 - cam.y;
 
@@ -225,6 +233,8 @@ export function AgarGame() {
         colors={MP_PLAYER_COLORS}
         color={color}
         onColorChange={setColor}
+        difficulty={aiDifficulty}
+        onDifficultyChange={setAiDifficulty}
         onPlay={handleStart}
         playLabel="ENTER WORLD"
         players={1}
@@ -263,7 +273,7 @@ export function AgarGame() {
   return (
     <>
       <MultiplayerPlayShell
-        onExit={() => setStarted(false)}
+        onExit={exitToLobby}
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
@@ -352,7 +362,7 @@ export function AgarGame() {
           score={finalScore}
           metric={`L:${finalScore}`}
           onRetry={handleRetry}
-          onExit={() => setStarted(false)}
+          onExit={exitToLobby}
         />
       ) : null}
     </>

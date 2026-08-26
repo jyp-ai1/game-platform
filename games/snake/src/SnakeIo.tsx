@@ -203,13 +203,19 @@ function sendPlayerInput(roomCode: string, globalWorld: boolean, payload: Player
 export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
+  onExitToLobby,
   headCharacter = "frog",
   bodyColor,
+  aiDifficulty = "normal",
 }: {
   practiceMode?: boolean;
   onJoinTimeout?: () => void;
+  /** Exit / Death EXIT → Character lobby (not home). */
+  onExitToLobby?: () => void;
   headCharacter?: SnakeHeadId;
   bodyColor?: string;
+  /** Entry AI tier — Easy weaker / Normal default / Hard stronger. */
+  aiDifficulty?: "easy" | "normal" | "hard";
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -254,6 +260,8 @@ export function SnakeIoGame({
   const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
   const headCharacterRef = useRef<SnakeHeadId>(headCharacter);
   const bodyColorRef = useRef<string | undefined>(bodyColor);
+  const aiDifficultyRef = useRef(aiDifficulty);
+  const onExitToLobbyRef = useRef(onExitToLobby);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [renderAlpha, setRenderAlpha] = useState(1);
@@ -296,6 +304,8 @@ export function SnakeIoGame({
   const frameCounterRef = useRef(0);
   const [, bumpLocalInput] = useReducer((n: number) => n + 1, 0);
   onJoinTimeoutRef.current = onJoinTimeout;
+  aiDifficultyRef.current = aiDifficulty;
+  onExitToLobbyRef.current = onExitToLobby;
 
   const effectiveRoomCode = sessionRoom || roomCode;
   const activeRoom = effectiveRoomCode;
@@ -521,6 +531,7 @@ export function SnakeIoGame({
   }, [headCharacter, bodyColor, deviceId]);
 
   const applyLocalHead = useCallback((w: SnakeIoWorld) => {
+    w.sessionAiDifficulty = aiDifficultyRef.current;
     const s = w.snakes[deviceId];
     if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current, bodyColorRef.current);
   }, [deviceId]);
@@ -532,6 +543,7 @@ export function SnakeIoGame({
       const cfg = Replay.multiplayer.balance("snake", pop);
       const humans = [{ deviceId, nickname: getLastNickname() || "Player" }];
       const initial = createInitialWorld(humans, cfg);
+      initial.sessionAiDifficulty = aiDifficultyRef.current;
       syncSnakePopulation(initial, humans, pop, deviceId);
       const rule = buildStageMatchRule(stage);
       initLivingWorld(initial, rule);
@@ -684,6 +696,7 @@ export function SnakeIoGame({
       const cfg = Replay.multiplayer.balance("snake", SNAKE_WORLD_TARGET);
       const humans = [{ deviceId, nickname: getLastNickname() || "Player" }];
       let initial = createInitialWorld(humans, cfg);
+      initial.sessionAiDifficulty = aiDifficultyRef.current;
       syncSnakePopulation(initial, humans, SNAKE_WORLD_TARGET, deviceId);
       warmGlobalWorld(initial);
       initLivingWorld(initial, resolveSnakeMatchRule(SNAKE_WORLD_TARGET));
@@ -854,6 +867,7 @@ export function SnakeIoGame({
     const attachLocalPlayer = (w: SnakeIoWorld, r: GameRoom): SnakeIoWorld => {
       spawnTrace("GAME_INIT");
       spawnTrace("PLAYER_REGISTER");
+      w.sessionAiDifficulty = aiDifficultyRef.current;
       const humans = humansForRoom(r);
       if (isGlobalWorld) {
         syncSnakePopulation(w, humans, SNAKE_WORLD_TARGET, deviceId);
@@ -1197,6 +1211,7 @@ export function SnakeIoGame({
       cullAmbientFood(next);
 
       if (isGlobalWorld && r) {
+        next.sessionAiDifficulty = next.sessionAiDifficulty ?? aiDifficultyRef.current;
         const humans = r.players.map((p) => ({ deviceId: p.deviceId, nickname: p.nickname }));
         if (!humans.some((h) => h.deviceId === deviceId)) {
           humans.push({ deviceId, nickname: getLastNickname() || "Player" });
@@ -1440,8 +1455,13 @@ export function SnakeIoGame({
         /* room may already be gone */
       }
     }
+    // NAV-001: Exit → Character lobby (never home / dead page)
+    if (onExitToLobbyRef.current) {
+      onExitToLobbyRef.current();
+      return;
+    }
     if (typeof window !== "undefined") {
-      window.location.assign("/");
+      window.history.back();
     }
   }, [postDeath, activeRoom, isLocalOnly]);
 
@@ -2582,6 +2602,14 @@ export function SnakeIoGame({
               } catch {
                 /* ignore */
               }
+            }
+            // NAV-001: Death EXIT → same as 나가기 → lobby
+            if (onExitToLobbyRef.current) {
+              onExitToLobbyRef.current();
+              return;
+            }
+            if (typeof window !== "undefined") {
+              window.history.back();
             }
           }}
         />

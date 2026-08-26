@@ -157,6 +157,8 @@ export interface SnakeIoWorld {
   deathZones: { x: number; y: number; at: number }[];
   killFeed: KillFeedEntry[];
   living?: LivingWorldState;
+  /** Entry-screen AI tier (Easy / Normal / Hard). Default Normal. */
+  sessionAiDifficulty?: "easy" | "normal" | "hard";
 }
 
 export interface KillFeedEntry {

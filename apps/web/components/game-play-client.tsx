@@ -5,6 +5,12 @@ import type { PlayableSlug } from "@/lib/playable-games";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+/**
+ * Fullscreen play shell for /games/{slug}/play.
+ * NAV: Detail → Play (push) shows Character lobby inside the game.
+ * In-game Exit → lobby (game-owned). Lobby browser Back → Detail.
+ * Do NOT route Exit to home or detail — games flip to lobby via setStarted(false).
+ */
 export function GamePlayClient({ slug, title }: { slug: string; title: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -14,22 +20,23 @@ export function GamePlayClient({ slug, title }: { slug: string; title: string })
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    function onExit(event: Event) {
-      const detail = (event as CustomEvent<{ gameSlug?: string }>).detail;
-      if (detail?.gameSlug !== slug) return;
-      router.push(`/games/${slug}`);
-    }
-    window.addEventListener("replay:game-exit", onExit);
-    return () => window.removeEventListener("replay:game-exit", onExit);
-  }, [router, slug]);
+  // Agar/Bomber exit is lobby-local; ignore replay:game-exit navigation to detail/home.
+  // (Legacy listeners previously router.push(`/games/${slug}`) and broke Exit→Lobby.)
 
   return (
     <div ref={rootRef} tabIndex={-1} className="flex h-full min-h-0 flex-col outline-none">
       <header className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-black/80 px-3 py-2">
         <button
           type="button"
-          onClick={() => router.push(`/games/${slug}`)}
+          data-testid="mp-play-back-detail"
+          onClick={() => {
+            // Prefer history so Back stack stays Detail ← Lobby
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              router.back();
+              return;
+            }
+            router.replace(`/games/${slug}`);
+          }}
           className="text-xs font-medium text-white/70 transition hover:text-white"
         >
           ← {title}

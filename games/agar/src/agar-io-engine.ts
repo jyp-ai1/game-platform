@@ -57,12 +57,16 @@ export type AgarPlayer = {
   score: number;
 };
 
+export type AgarAiDifficulty = "easy" | "normal" | "hard";
+
 export type AgarWorld = {
   tick: number;
   size: number;
   food: AgarFood[];
   players: Record<string, AgarPlayer>;
   rankings: Array<{ id: string; nickname: string; mass: number; color: string }>;
+  /** Entry AI tier — Easy food-first / Normal chase / Hard split. */
+  aiDifficulty?: AgarAiDifficulty;
 };
 
 function clamp(n: number, lo: number, hi: number): number {
@@ -122,13 +126,18 @@ function makePlayer(
   };
 }
 
-export function createAgarWorld(localId: string, nickname: string): AgarWorld {
+export function createAgarWorld(
+  localId: string,
+  nickname: string,
+  aiDifficulty: AgarAiDifficulty = "normal"
+): AgarWorld {
   const world: AgarWorld = {
     tick: 0,
     size: AGAR_WORLD,
     food: [],
     players: {},
     rankings: [],
+    aiDifficulty,
   };
   world.players[localId] = makePlayer(localId, nickname || "You", false, world.size, 0);
   for (let i = 0; i < AGAR_BOT_COUNT; i++) {
@@ -228,15 +237,21 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
   const head = bot.cells[0];
   if (!head) return;
   const myMass = totalMass(bot);
+  const tier = world.aiDifficulty ?? "normal";
+  const avoidMul = tier === "easy" ? 1.05 : tier === "hard" ? 1.2 : 1.12;
+  const avoidRange = tier === "easy" ? 110 : tier === "hard" ? 170 : 140;
+  const preyRange = tier === "easy" ? 100 : tier === "hard" ? 200 : 160;
+  const preyMassMul = tier === "easy" ? 0.7 : tier === "hard" ? 0.95 : 0.88;
+  const chasePrey = tier !== "easy";
 
   // Avoid larger cells first
   for (const other of Object.values(world.players)) {
     if (other.id === bot.id || !other.alive) continue;
     const o = other.cells[0];
     if (!o) continue;
-    if (totalMass(other) > myMass * 1.12) {
+    if (totalMass(other) > myMass * avoidMul) {
       const d = Math.hypot(o.x - head.x, o.y - head.y);
-      if (d < 140) {
+      if (d < avoidRange) {
         bot.aimX = clamp(head.x - (o.x - head.x) * 1.4, 0, world.size);
         bot.aimY = clamp(head.y - (o.y - head.y) * 1.4, 0, world.size);
         return;
@@ -244,30 +259,32 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
     }
   }
 
-  // Chase smaller cells (Normal AI — not overpowered)
-  let prey: AgarPlayer | null = null;
-  let preyD = 160;
-  for (const other of Object.values(world.players)) {
-    if (other.id === bot.id || !other.alive) continue;
-    const oMass = totalMass(other);
-    if (oMass >= myMass * 0.88) continue;
-    const o = other.cells[0];
-    if (!o) continue;
-    const d = Math.hypot(o.x - head.x, o.y - head.y);
-    if (d < preyD) {
-      preyD = d;
-      prey = other;
+  // Chase smaller cells (Normal/Hard) — Easy prefers food
+  if (chasePrey) {
+    let prey: AgarPlayer | null = null;
+    let preyD = preyRange;
+    for (const other of Object.values(world.players)) {
+      if (other.id === bot.id || !other.alive) continue;
+      const oMass = totalMass(other);
+      if (oMass >= myMass * preyMassMul) continue;
+      const o = other.cells[0];
+      if (!o) continue;
+      const d = Math.hypot(o.x - head.x, o.y - head.y);
+      if (d < preyD) {
+        preyD = d;
+        prey = other;
+      }
     }
-  }
-  if (prey?.cells[0] && preyD < 150) {
-    bot.aimX = prey.cells[0].x;
-    bot.aimY = prey.cells[0].y;
-    return;
+    if (prey?.cells[0] && preyD < preyRange - 10) {
+      bot.aimX = prey.cells[0].x;
+      bot.aimY = prey.cells[0].y;
+      return;
+    }
   }
 
   // Prefer nearby food
   let best: AgarFood | null = null;
-  let bestD = 180;
+  let bestD = tier === "easy" ? 220 : 180;
   for (const f of world.food) {
     const d = Math.hypot(f.x - head.x, f.y - head.y);
     if (d < bestD) {
@@ -285,20 +302,24 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
   }
 }
 
-/** Occasional split-attack when chasing a clearly smaller cell (Normal tier). */
+/** Split-attack: Hard only (Normal rare, Easy never). */
 function botMaybeSplit(world: AgarWorld, bot: AgarPlayer, now: number): void {
+  const tier = world.aiDifficulty ?? "normal";
+  if (tier === "easy") return;
   const head = bot.cells[0];
   if (!head || head.mass < AGAR_MIN_SPLIT_MASS) return;
   if (bot.cells.length >= 4) return;
   if (world.tick % 17 !== (bot.id.charCodeAt(0) % 17)) return;
   const myMass = totalMass(bot);
+  const splitChance = tier === "hard" ? 0.12 : 0.035;
+  const maxDist = tier === "hard" ? 120 : 95;
   for (const other of Object.values(world.players)) {
     if (!other.alive || other.id === bot.id) continue;
     if (totalMass(other) > myMass * 0.7) continue;
     const o = other.cells[0];
     if (!o) continue;
     const d = Math.hypot(o.x - head.x, o.y - head.y);
-    if (d > 35 && d < 95 && Math.random() < 0.035) {
+    if (d > 35 && d < maxDist && Math.random() < splitChance) {
       bot.aimX = o.x;
       bot.aimY = o.y;
       splitPlayer(world, bot.id, now);

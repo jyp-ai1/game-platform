@@ -94,8 +94,11 @@ export {
   isViewportFullscreen,
 } from "./multiplayer-fullscreen";
 export {
+  DEFAULT_MP_AI_DIFFICULTY,
+  MP_AI_DIFFICULTIES,
   MP_PLAYER_COLORS,
   MultiplayerEntrySelect,
+  type MpAiDifficulty,
   type MpStyleOption,
 } from "./multiplayer-entry-select";
 export {

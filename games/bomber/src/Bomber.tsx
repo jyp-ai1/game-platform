@@ -4,6 +4,7 @@
  * MP-COMMON-SHELL-001 — shared entry / YOU / TOP10 / minimap / death chrome.
  */
 import {
+  DEFAULT_MP_AI_DIFFICULTY,
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
@@ -14,6 +15,7 @@ import {
   MultiplayerSideRankHud,
   MultiplayerYouBar,
   useGameSDK,
+  type MpAiDifficulty,
   type MpMinimapDot,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
@@ -61,6 +63,7 @@ function snap(w: BomberWorld): BomberWorld {
     difficulty: w.difficulty,
     fuseMs: w.fuseMs,
     matchOver: w.matchOver,
+    aiTier: w.aiTier,
   };
 }
 
@@ -88,6 +91,7 @@ export function BomberGame() {
   const [started, setStarted] = useState(false);
   const [styleId, setStyleId] = useState(BOMBER_STYLES[0]!.id);
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
+  const [aiDifficulty, setAiDifficulty] = useState<MpAiDifficulty>(DEFAULT_MP_AI_DIFFICULTY);
   const [nowTick, setNowTick] = useState(() => Date.now());
   const reportedRef = useRef(false);
 
@@ -179,20 +183,24 @@ export function BomberGame() {
 
   const handleStart = useCallback(() => {
     reportedRef.current = false;
-    const next = createBomberWorld(deviceId, nickname);
+    const next = createBomberWorld(deviceId, nickname, 2, aiDifficulty);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
     setStarted(true);
-  }, [deviceId, nickname, color]);
+  }, [deviceId, nickname, color, aiDifficulty]);
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
-    const next = createBomberWorld(deviceId, nickname);
+    const next = createBomberWorld(deviceId, nickname, 2, aiDifficulty);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
-  }, [deviceId, nickname, color]);
+  }, [deviceId, nickname, color, aiDifficulty]);
+
+  const exitToLobby = useCallback(() => {
+    setStarted(false);
+  }, []);
 
   const width = world.cols * CELL;
   const height = world.rows * CELL;
@@ -211,10 +219,12 @@ export function BomberGame() {
         colors={MP_PLAYER_COLORS}
         color={color}
         onColorChange={setColor}
+        difficulty={aiDifficulty}
+        onDifficultyChange={setAiDifficulty}
         onPlay={handleStart}
         playLabel="ENTER WORLD"
         players={1}
-        bots={botCount}
+        bots={botCount || 3}
         roomCode={roomCode}
       />
     );
@@ -256,7 +266,7 @@ export function BomberGame() {
   return (
     <>
       <MultiplayerPlayShell
-        onExit={() => setStarted(false)}
+        onExit={exitToLobby}
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
@@ -359,7 +369,7 @@ export function BomberGame() {
           score={wins}
           metric={`L:${wins} · Kills ${kills}`}
           onRetry={handleRetry}
-          onExit={() => setStarted(false)}
+          onExit={exitToLobby}
         />
       ) : null}
     </>

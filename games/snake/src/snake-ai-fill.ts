@@ -18,6 +18,20 @@ import { PLAYTEST_AI } from "./snake-playtest-tuning";
 import { noteExecOrder } from "./snake-exec-order-trace";
 import { applyCharacterToSnake, randomSnakeHeadId } from "./snake-characters";
 
+/** Map entry Easy/Normal/Hard → bot spawn tier (no collision algorithm changes). */
+function resolveSessionBotDifficulty(world: SnakeIoWorld, humanCount: number): BotDifficulty {
+  const session = world.sessionAiDifficulty ?? "normal";
+  if (session === "easy") return "easy";
+  if (session === "hard") {
+    // Hard: stronger fill — hunter floor, legend when crowded
+    const base = pickBotDifficulty(humanCount);
+    return base === "easy" || base === "normal" ? "hunter" : base;
+  }
+  // Normal default — keep existing population pick (never Easy)
+  const base = pickBotDifficulty(humanCount);
+  return base === "easy" ? "normal" : base;
+}
+
 export { POPULATION_TARGET as SNAKE_WORLD_TARGET };
 
 export type BotRole = "explorer" | "hunter" | "farmer" | "aggressive" | "scavenger";
@@ -309,7 +323,7 @@ export function syncSnakePopulation(
     if (!humanIds.has(id)) delete world.snakes[id];
   }
 
-  const difficulty = pickBotDifficulty(capped.length);
+  const difficulty = resolveSessionBotDifficulty(world, capped.length);
 
   for (let i = 0; i < capped.length; i++) {
     const h = capped[i]!;
@@ -516,7 +530,7 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
 
 /** Fill missing bot slots after retirements (combat respawns handled by tickWorld) */
 export function respawnDeadBots(world: SnakeIoWorld, target = POPULATION_TARGET): void {
-  const difficulty = pickBotDifficulty(countHumanSnakes(world));
+  const difficulty = resolveSessionBotDifficulty(world, countHumanSnakes(world));
   let slot = 0;
   while (countWorldSnakes(world) < target && slot < 80) {
     const id = botDeviceId(slot);

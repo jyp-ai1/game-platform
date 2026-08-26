@@ -61,24 +61,25 @@ export const ROUND_DIFFICULTY: RoundDifficulty[] = [
   {
     label: "easy",
     botCount: 2,
-    aiTickEvery: 16,
-    aiBombChance: 0.01,
+    aiTickEvery: 18,
+    aiBombChance: 0.004,
     softDensity: 0.4,
     timeLimitSec: 100,
     bombRange: 2,
     bombsMax: 1,
-    fuseMs: 2100,
+    fuseMs: 2200,
   },
   {
     label: "normal",
     botCount: 3,
-    aiTickEvery: 11,
-    aiBombChance: 0.02,
-    softDensity: 0.52,
+    // Survivable ~10s+: slower ticks, rare bombs, strong blast avoid
+    aiTickEvery: 14,
+    aiBombChance: 0.008,
+    softDensity: 0.5,
     timeLimitSec: 80,
     bombRange: 2,
     bombsMax: 1,
-    fuseMs: 1900,
+    fuseMs: 2000,
   },
   {
     label: "hard",
@@ -107,6 +108,14 @@ export const ROUND_DIFFICULTY: RoundDifficulty[] = [
 /** Closed Alpha default AI tier label = Normal (see getRoundDifficulty). */
 export const DEFAULT_AI_TIER = "normal" as const;
 
+export type BomberAiTier = "easy" | "normal" | "hard";
+
+const AI_TIER_INDEX: Record<BomberAiTier, number> = {
+  easy: 0,
+  normal: 1,
+  hard: 2,
+};
+
 export type BomberWorld = {
   tick: number;
   round: number;
@@ -126,6 +135,8 @@ export type BomberWorld = {
   difficulty: RoundDifficulty;
   fuseMs: number;
   matchOver?: boolean;
+  /** Entry-selected AI base tier (Easy / Normal / Hard). */
+  aiTier: BomberAiTier;
 };
 
 const COLORS = ["#22d3ee", "#f472b6", "#fbbf24", "#34d399", "#a78bfa", "#fb7185", "#60a5fa", "#4ade80"];
@@ -201,9 +212,10 @@ const MAP_PRESETS: number[][][] = [
   ],
 ];
 
-export function getRoundDifficulty(round: number): RoundDifficulty {
-  // Closed Alpha: round 1 → Normal (index 1). Easy (0) kept for future/explicit use.
-  const idx = Math.max(1, Math.min(ROUND_DIFFICULTY.length - 1, round));
+export function getRoundDifficulty(round: number, aiTier: BomberAiTier = DEFAULT_AI_TIER): RoundDifficulty {
+  // Scale from entry tier: Easy stays soft; Normal→Hard ladder; Hard escalates faster.
+  const base = AI_TIER_INDEX[aiTier] ?? 1;
+  const idx = Math.max(0, Math.min(ROUND_DIFFICULTY.length - 1, base + Math.max(0, round - 1)));
   return ROUND_DIFFICULTY[idx]!;
 }
 
@@ -325,9 +337,14 @@ function syncBotsToDifficulty(
   }
 }
 
-export function createBomberWorld(localId: string, nickname: string, _botCount = 2): BomberWorld {
+export function createBomberWorld(
+  localId: string,
+  nickname: string,
+  _botCount = 2,
+  aiTier: BomberAiTier = DEFAULT_AI_TIER
+): BomberWorld {
   const round = 1;
-  const diff = getRoundDifficulty(round);
+  const diff = getRoundDifficulty(round, aiTier);
   const mapId = 0;
   const world: BomberWorld = {
     tick: 0,
@@ -345,6 +362,7 @@ export function createBomberWorld(localId: string, nickname: string, _botCount =
     timeLimitSec: diff.timeLimitSec,
     difficulty: diff,
     fuseMs: diff.fuseMs,
+    aiTier,
   };
   syncBotsToDifficulty(world, localId, nickname, diff);
   const ids = Object.keys(world.players);
@@ -416,7 +434,7 @@ function blastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: numbe
 }
 
 function applyRoundState(world: BomberWorld, localId: string, nickname: string): void {
-  const diff = getRoundDifficulty(world.round);
+  const diff = getRoundDifficulty(world.round, world.aiTier ?? DEFAULT_AI_TIER);
   world.difficulty = diff;
   world.timeLimitSec = diff.timeLimitSec;
   world.fuseMs = diff.fuseMs;
@@ -523,6 +541,7 @@ function cellInBlastPreview(world: BomberWorld, x: number, y: number): boolean {
 function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
   if (!bot.alive || world.matchOver || world.roundOverAt) return;
   const every = Math.max(2, world.difficulty.aiTickEvery);
+  const chaseChance = world.aiTier === "hard" ? 0.7 : world.aiTier === "easy" ? 0.25 : 0.45;
   if (world.tick % every === 0) {
     const dirs: Array<[number, number]> = [
       [1, 0],
@@ -551,7 +570,7 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
     const humans = Object.values(world.players).filter((p) => !p.isBot && p.alive);
     const target = humans[0];
     let picked: [number, number] = dirs[Math.floor(Math.random() * dirs.length)]!;
-    if (target && Math.random() < 0.55) {
+    if (target && Math.random() < chaseChance) {
       const dx = Math.sign(target.x - bot.x);
       const dy = Math.sign(target.y - bot.y);
       if (dx || dy) {
@@ -580,16 +599,30 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
     }
   }
 
-  // Plant only when not sitting in own blast and an escape tile exists
+  // Plant only when a tile exists outside this bomb's blast (prevents ~10s self-kills on Normal)
   if (bot.bombsLeft > 0 && Math.random() < world.difficulty.aiBombChance) {
+    if (cellInBlastPreview(world, bot.x, bot.y)) return;
+    const range = world.difficulty.bombRange;
     const escapeDirs: Array<[number, number]> = [
       [1, 0],
       [-1, 0],
       [0, 1],
       [0, -1],
     ];
-    const escape = escapeDirs.some(([dx, dy]) => walkable(world, bot.x + dx, bot.y + dy));
-    if (escape && !cellInBlastPreview(world, bot.x, bot.y)) {
+    const safeEscape = escapeDirs.some(([dx, dy]) => {
+      // Need at least (range+1) steps clear OR a perpendicular step then out
+      let x = bot.x;
+      let y = bot.y;
+      for (let step = 1; step <= range + 1; step++) {
+        x += dx;
+        y += dy;
+        if (!walkable(world, x, y)) return false;
+        // After clearing blast radius, tile is safe from own bomb on this axis
+        if (step > range) return true;
+      }
+      return false;
+    });
+    if (safeEscape) {
       plantBomb(world, bot.id, now);
     }
   }

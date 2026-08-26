@@ -8,6 +8,20 @@ export type MpStyleOption = {
   emoji: string;
 };
 
+/** Shared MP AI difficulty — Closed Alpha default Normal. */
+export type MpAiDifficulty = "easy" | "normal" | "hard";
+
+export const MP_AI_DIFFICULTIES: readonly {
+  id: MpAiDifficulty;
+  label: string;
+}[] = [
+  { id: "easy", label: "Easy" },
+  { id: "normal", label: "Normal" },
+  { id: "hard", label: "Hard" },
+] as const;
+
+export const DEFAULT_MP_AI_DIFFICULTY: MpAiDifficulty = "normal";
+
 /** Shared player color palette for Snake / Agar / Bomber entry. */
 export const MP_PLAYER_COLORS = [
   "#22d3ee",
@@ -31,6 +45,8 @@ export function MultiplayerEntrySelect({
   colors = MP_PLAYER_COLORS,
   color,
   onColorChange,
+  difficulty = DEFAULT_MP_AI_DIFFICULTY,
+  onDifficultyChange,
   onPlay,
   players,
   bots,
@@ -45,6 +61,8 @@ export function MultiplayerEntrySelect({
   colors?: readonly string[];
   color: string;
   onColorChange: (color: string) => void;
+  difficulty?: MpAiDifficulty;
+  onDifficultyChange?: (d: MpAiDifficulty) => void;
   onPlay: () => void;
   players?: number;
   bots?: number;
@@ -54,7 +72,10 @@ export function MultiplayerEntrySelect({
   const selected = styles.find((s) => s.id === styleId) ?? styles[0];
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 px-4 py-8">
+    <div
+      className="mx-auto flex w-full max-w-md flex-col items-center gap-5 px-4 py-8"
+      data-testid="mp-entry-lobby"
+    >
       <div className="text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Multiplayer</p>
         <h2 className="mt-1 text-xl font-bold">{title}</h2>
@@ -125,6 +146,36 @@ export function MultiplayerEntrySelect({
         </div>
       </div>
 
+      {onDifficultyChange ? (
+        <div className="w-full space-y-2" data-testid="mp-ai-difficulty">
+          <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            AI Difficulty
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            {MP_AI_DIFFICULTIES.map((d) => {
+              const active = d.id === difficulty;
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  data-testid={`mp-ai-${d.id}`}
+                  onClick={() => onDifficultyChange(d.id)}
+                  className={cn(
+                    "min-w-[4.5rem] rounded-lg border px-3 py-2 text-xs font-semibold transition",
+                    active
+                      ? "border-cyan-400 bg-cyan-500/25 text-cyan-100 ring-2 ring-cyan-400/50"
+                      : "border-white/10 bg-muted/30 text-muted-foreground hover:border-white/25"
+                  )}
+                  aria-pressed={active}
+                >
+                  {d.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-col items-center gap-2">
         <div
           className="flex size-16 items-center justify-center rounded-full border-2 border-white/30 text-3xl shadow-lg"
@@ -137,6 +188,7 @@ export function MultiplayerEntrySelect({
           size="lg"
           className="h-14 min-w-[220px] text-base font-bold bg-cyan-600 hover:bg-cyan-500"
           onClick={onPlay}
+          data-testid="mp-enter-world"
         >
           {playLabel}
         </Button>
