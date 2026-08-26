@@ -5,6 +5,7 @@
  */
 import type { GameRoom } from "@game-platform/shared";
 
+import { cacheGet, cacheSet } from "./cache";
 import { memoryTransport } from "./memory";
 import type { MultiplayerTransport } from "./interface";
 
@@ -40,7 +41,25 @@ function wrap(base: MultiplayerTransport): MultiplayerTransport {
     },
     send: (c, e, p) => {
       const room = base.send(c, e, p);
-      if (room) broadcast(room);
+      if (!room) return null;
+      const ephemeral =
+        e === "state" || e === "input" || e.startsWith("peer:") || e.startsWith("input:");
+      if (ephemeral && typeof BroadcastChannel !== "undefined") {
+        try {
+          const bc = new BroadcastChannel(CHANNEL);
+          bc.postMessage({
+            type: "game-event",
+            code: room.code,
+            event: e,
+            data: p,
+          });
+          bc.close();
+        } catch {
+          /* ignore */
+        }
+        return room;
+      }
+      broadcast(room);
       return room;
     },
     sync: (c) => base.sync(c),
@@ -70,9 +89,32 @@ function wrap(base: MultiplayerTransport): MultiplayerTransport {
       if (typeof BroadcastChannel === "undefined") return unsubLocal;
       const bc = new BroadcastChannel(CHANNEL);
       const handler = (ev: MessageEvent) => {
-        const data = ev.data as { type: string; code: string; room: GameRoom };
-        if (data?.type === "room-update" && data.code.toUpperCase() === code.toUpperCase()) {
+        const data = ev.data as {
+          type: string;
+          code: string;
+          room?: GameRoom;
+          event?: string;
+          data?: unknown;
+        };
+        if (!data || data.code?.toUpperCase() !== code.toUpperCase()) return;
+        if (data.type === "room-update" && data.room) {
           listener(data.room);
+          return;
+        }
+        if (data.type === "game-event" && data.event) {
+          const local = cacheGet(code) ?? base.getRoom(code);
+          if (!local) return;
+          const next: GameRoom = {
+            ...local,
+            gameState: {
+              ...(local.gameState ?? {}),
+              [data.event]: data.data,
+              _lastEvent: data.event,
+              _updatedAt: new Date().toISOString(),
+            },
+          };
+          cacheSet(next);
+          listener(next);
         }
       };
       bc.addEventListener("message", handler);

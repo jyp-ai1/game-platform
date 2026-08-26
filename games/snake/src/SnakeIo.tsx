@@ -234,11 +234,17 @@ function applyPeerPresence(
 ): void {
   if (!peer?.deviceId || peer.deviceId === localId) return;
   let snake = world.snakes[peer.deviceId];
+  const len = Math.max(1, Math.min(80, peer.length | 0));
+  // Trail for canvas visibility (peer sync is head+length only).
+  const segs: { x: number; y: number }[] = [{ x: peer.x, y: peer.y }];
+  for (let i = 1; i < Math.min(len, 24); i++) {
+    segs.push({ x: peer.x - i * 0.45, y: peer.y });
+  }
   if (!snake) {
     snake = {
       deviceId: peer.deviceId,
       nickname: peer.nickname || "Player",
-      segments: [{ x: peer.x, y: peer.y }],
+      segments: segs,
       direction: "right",
       pendingDirection: "right",
       score: peer.score,
@@ -252,7 +258,7 @@ function applyPeerPresence(
       totalKills: 0,
       isBot: false,
       awaitingInput: false,
-      segmentCount: Math.max(1, peer.length),
+      segmentCount: len,
       headX: peer.x,
       headY: peer.y,
     };
@@ -262,15 +268,11 @@ function applyPeerPresence(
     snake.alive = peer.alive;
     snake.spectating = !peer.alive;
     snake.isBot = false;
-    snake.segmentCount = Math.max(1, peer.length);
+    snake.segmentCount = len;
     snake.score = peer.score;
     snake.headX = peer.x;
     snake.headY = peer.y;
-    if (snake.segments[0]) {
-      snake.segments[0] = { x: peer.x, y: peer.y };
-    } else {
-      snake.segments = [{ x: peer.x, y: peer.y }];
-    }
+    snake.segments = segs;
   }
 }
 
@@ -831,7 +833,7 @@ export function SnakeIoGame({
           } catch {
             pinned = null;
           }
-          if (pinned && /^WORLD-\d+$/.test(pinned)) {
+          if (pinned && /^WORLD-[A-Z0-9]+$/.test(pinned)) {
             targetCode = pinned;
           } else {
             targetCode = await resolveAvailableCluster("snake");
@@ -1255,13 +1257,14 @@ export function SnakeIoGame({
     diagWorldSnakes(Object.keys(world.snakes).length, !!world.snakes[deviceId]);
   }, [world, deviceId]);
 
-  /** MP-PLATFORM-001 — measure/force length for L10…L400 perf probes (no gameplay change). */
+  /** MP-PLATFORM-001 + MP-INVITE-002 — measure/force length + invite peer probe. */
   useEffect(() => {
     if (typeof window === "undefined") return;
     type MpApi = {
       getStats: () => Record<string, unknown>;
       forceLocalLength: (n: number) => boolean;
       killLocalForLoot: () => boolean;
+      getInviteEvidence: () => Record<string, unknown>;
     };
     const api: MpApi = {
       getStats: () => {
@@ -1310,12 +1313,32 @@ export function SnakeIoGame({
         setWorld(next);
         return true;
       },
+      getInviteEvidence: () => {
+        const w = worldRef.current;
+        const r = getRoom(activeRoom);
+        const humans = Object.values(w?.snakes ?? {}).filter((s) => !s.isBot && !s.deviceId.startsWith("bot:"));
+        const peers = humans.filter((s) => s.deviceId !== deviceId);
+        const top = w ? getDisplayRankings(w, 10) : [];
+        return {
+          urlRoom: typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("room")?.toUpperCase() ?? null
+            : null,
+          sessionRoom: activeRoom,
+          roomPlayers: r?.players.map((p) => p.deviceId) ?? [],
+          localDeviceId: deviceId,
+          foodTotal: w?.food.length ?? 0,
+          peerIds: peers.map((p) => p.deviceId),
+          peerNicknames: peers.map((p) => p.nickname),
+          top10: top.map((t) => ({ id: t.deviceId, nickname: t.nickname, score: t.score })),
+          roomHud: document.querySelector('[data-testid="snake-room-label"]')?.textContent ?? null,
+        };
+      },
     };
     (window as unknown as { __MP_PLATFORM_001__?: MpApi }).__MP_PLATFORM_001__ = api;
     return () => {
       delete (window as unknown as { __MP_PLATFORM_001__?: MpApi }).__MP_PLATFORM_001__;
     };
-  }, [deviceId, worldHudFps]);
+  }, [deviceId, worldHudFps, activeRoom]);
 
   useEffect(() => {
     if (!activeRoom || !shouldTickWorld || !connected) {
@@ -1372,6 +1395,15 @@ export function SnakeIoGame({
         if (!humans.some((h) => h.deviceId === deviceId)) {
           humans.push({ deviceId, nickname: getLastNickname() || "Player" });
         }
+        // Keep invite peers registered even if room.players lag behind presence.
+        if (gs) {
+          for (const [key, val] of Object.entries(gs)) {
+            if (!key.startsWith("peer:") || !val || typeof val !== "object") continue;
+            const peer = val as PeerPresencePayload;
+            if (!peer.deviceId || humans.some((h) => h.deviceId === peer.deviceId)) continue;
+            humans.push({ deviceId: peer.deviceId, nickname: peer.nickname || "Player" });
+          }
+        }
         syncSnakePopulation(next, humans, SNAKE_WORLD_TARGET, deviceId);
         rehydrateWorldSnakes(next);
         if (!next.snakes[deviceId]) {
@@ -1410,7 +1442,7 @@ export function SnakeIoGame({
       next = tickWorld(next);
       diagSimulation();
 
-      // Invite same-WORLD: peer identity+length for TOP10 / minimap (after local sim)
+      // Invite same-WORLD: peer identity+length for TOP10 / canvas (after local sim)
       if (gs) {
         for (const [key, val] of Object.entries(gs)) {
           if (!key.startsWith("peer:") || !val || typeof val !== "object") continue;
@@ -1419,7 +1451,7 @@ export function SnakeIoGame({
         updateRankings(next);
       }
       const localForPeer = next.snakes[deviceId];
-      if (localForPeer && next.tick % 5 === 0) {
+      if (localForPeer && next.tick % 3 === 0) {
         const head = localForPeer.segments[0];
         send(activeRoom, `peer:${deviceId}`, {
           deviceId,
@@ -1548,7 +1580,8 @@ export function SnakeIoGame({
           ...sessionMomentsRef.current.filter((m) => !next.moments.some((n) => n.id === m.id)),
         ].slice(0, 20);
       }
-      if (isHost) send(activeRoom, "state", next);
+      // Shared food/gems + bots: host broadcasts world (ephemeral — no Postgres blob)
+      if (isHost && next.tick % 2 === 0) send(activeRoom, "state", next);
       setWorld(next);
       } catch (err) {
         diagTickError(err);
@@ -1765,7 +1798,7 @@ export function SnakeIoGame({
     worldRef.current = next;
     setWorld(next);
 
-    if (isHost || isGlobalWorld) send(activeRoom, "state", next);
+    if (isHost) send(activeRoom, "state", next);
 
     beginSpawnReady();
 
@@ -2380,8 +2413,8 @@ export function SnakeIoGame({
                 {isBoosting ? "⚡ BOOST" : "Boost"}
               </p>
               <p className="mt-0.5 text-[10px] text-white/45">
-                <span className="hidden lg:inline">Space = Boost</span>
-                <span className="lg:hidden">Boost 홀드</span>
+                <span className="hidden lg:inline">SPACEBAR : BOOSTER</span>
+                <span className="lg:hidden">BOOST : 화면 버튼</span>
               </p>
             </>
           ) : null}
@@ -2534,8 +2567,8 @@ export function SnakeIoGame({
               움직여서 시작
             </p>
             <p className="rounded-lg border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur-sm">
-              <span className="hidden lg:inline">Space = Boost</span>
-              <span className="lg:hidden">Boost 홀드</span>
+              <span className="hidden lg:inline">SPACEBAR : BOOSTER</span>
+              <span className="lg:hidden">BOOST : 화면 버튼</span>
             </p>
           </div>
         ) : null}

@@ -12,12 +12,11 @@ export const SNAKE_QUICK_PLAY_MARKER = "#snake-quick-play";
 
 export function isSnakeQuickPlayHref(href: string): boolean {
   const base = href.split("?")[0] ?? href;
-  return base === SNAKE_QUICK_PLAY_MARKER || /snake-io\/play\?room=WORLD/i.test(href);
-}
-
-function isGlobalWorldCode(code: string): boolean {
-  const upper = code.toUpperCase();
-  return upper === "WORLD" || /^WORLD-\d+$/.test(upper);
+  if (base === SNAKE_QUICK_PLAY_MARKER) return true;
+  const m = href.match(/snake-io\/play\?[^#]*room=([^&]+)/i);
+  if (!m) return false;
+  // Only bare WORLD is quick-play — WORLD-* shards must keep their code.
+  return decodeURIComponent(m[1]!).toUpperCase() === "WORLD";
 }
 
 const WORLD_PLAY_URL = "/flagship/snake-io/play?room=WORLD";
@@ -31,10 +30,20 @@ export async function enterSnakeQuickPlay(router: AppRouterInstance): Promise<vo
   entryTrace("ROUTE", "PASS", WORLD_PLAY_URL, 0);
 }
 
-/** Join a specific room (friend/party) or fall back to quick play for WORLD. */
+/** Join a specific room (friend/party) or fall back to quick play for bare WORLD. */
 export async function enterSnakeRoom(router: AppRouterInstance, roomCode: string): Promise<void> {
-  if (isGlobalWorldCode(roomCode)) {
+  const upper = roomCode.toUpperCase();
+  // Bare WORLD → cluster resolve on play page. Pinned WORLD-* must keep the shard.
+  if (upper === "WORLD") {
     await enterSnakeQuickPlay(router);
+    return;
+  }
+  if (/^WORLD-[A-Z0-9]+$/.test(upper)) {
+    entryTrace("CLICK", "START", `join-world-shard ${upper}`);
+    const href = `/flagship/snake-io/play?room=${encodeURIComponent(upper)}`;
+    entryTrace("ROUTE", "START", href);
+    router.push(href);
+    entryTrace("ROUTE", "PASS", href, 0);
     return;
   }
   entryTrace("CLICK", "START", `join-room ${roomCode}`);

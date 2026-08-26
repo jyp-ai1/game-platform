@@ -32,6 +32,9 @@ export function SnakeWorldHud({
       )}
     >
       <p className="mb-1 font-bold tracking-widest text-emerald-300">WORLD</p>
+      <p className="mb-1 text-[11px] font-bold tracking-wide text-amber-300" data-testid="snake-room-label">
+        ROOM: {roomCode}
+      </p>
       <p>
         Players <span className="text-sky-300">{players}</span>
       </p>
@@ -49,9 +52,6 @@ export function SnakeWorldHud({
       </p>
       <p>
         Tick <span className="text-white/80">{tickHz}</span>
-      </p>
-      <p>
-        Room <span className="text-white/60">{roomCode}</span>
       </p>
       {isHost ? (
         <p className="mt-1 text-[9px] font-semibold text-amber-300/90">HOST</p>

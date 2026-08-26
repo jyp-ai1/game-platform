@@ -45,7 +45,7 @@ export function globalWorldCode(gameSlug: string, clusterIndex = 1): string {
 export function isGlobalWorldRoom(code: string, gameSlug = "snake"): boolean {
   const upper = code.toUpperCase();
   if (gameSlug === "snake") {
-    return upper === GLOBAL_BASE || /^WORLD-\d+$/.test(upper);
+    return upper === GLOBAL_BASE || /^WORLD-[A-Z0-9]+$/.test(upper);
   }
   return upper.startsWith("GL-");
 }

@@ -68,8 +68,46 @@ function roomToRow(room: GameRoom): MpRoomRow {
 async function persistRoom(room: GameRoom): Promise<void> {
   const supabase = getMultiplayerSupabase();
   if (!supabase) return;
-  const row = roomToRow(room);
+  const key = room.code.toUpperCase();
+  // Merge players on upsert so invite create/join races do not wipe the other device.
+  let players = room.players;
+  let hostId = room.hostId;
+  try {
+    const { data: existing } = await supabase
+      .from("mp_rooms")
+      .select("players,host_id")
+      .eq("code", key)
+      .maybeSingle();
+    if (existing?.players && Array.isArray(existing.players)) {
+      const byId = new Map<string, RoomPlayer>();
+      for (const p of existing.players as RoomPlayer[]) {
+        if (p?.deviceId) byId.set(p.deviceId, p);
+      }
+      for (const p of room.players) {
+        if (p?.deviceId) byId.set(p.deviceId, p);
+      }
+      players = Array.from(byId.values());
+      const existingHost = existing.host_id as string | undefined;
+      if (existingHost && players.some((p) => p.deviceId === existingHost)) {
+        hostId = existingHost;
+      }
+    }
+  } catch {
+    /* best-effort merge */
+  }
+  const merged: GameRoom = { ...room, players, hostId };
+  const row = roomToRow(merged);
+  // Strip heavy ephemeral sim blobs from Postgres (broadcast carries them).
+  if (row.game_state) {
+    const gs = { ...row.game_state };
+    delete gs.state;
+    for (const k of Object.keys(gs)) {
+      if (k.startsWith("peer:") || k.startsWith("input:")) delete gs[k];
+    }
+    row.game_state = Object.keys(gs).length ? gs : null;
+  }
   await supabase.from("mp_rooms").upsert({ ...row, updated_at: new Date().toISOString() });
+  cacheSet(merged);
 }
 
 async function deleteRoom(code: string): Promise<void> {
@@ -289,17 +327,32 @@ export const supabaseTransport: MultiplayerTransport = {
   },
 
   send(code: string, event: string, payload: unknown): GameRoom | null {
-    const room = applyAndPersist(code, (r) => ({
-      ...r,
+    const room = cacheGet(code);
+    if (!room) return null;
+    // Ephemeral sim/presence: merge into cache + broadcast event only.
+    // Full-room broadcast caused last-writer-wins wipe of peer:* keys across devices.
+    const ephemeral =
+      event === "state" ||
+      event === "input" ||
+      event.startsWith("peer:") ||
+      event.startsWith("input:");
+    const next: GameRoom = {
+      ...room,
       gameState: {
-        ...(r.gameState ?? {}),
+        ...(room.gameState ?? {}),
         [event]: payload,
         _lastEvent: event,
         _updatedAt: new Date().toISOString(),
       },
-    }));
-    if (room) broadcastEvent(code, event, payload, room);
-    return room;
+    };
+    cacheSet(next);
+    if (ephemeral) {
+      broadcastEvent(code, event, payload);
+      return next;
+    }
+    void persistRoom(next);
+    broadcastEvent(code, event, payload, next);
+    return next;
   },
 
   sync(code: string): GameRoom | null {

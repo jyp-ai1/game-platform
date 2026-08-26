@@ -11,7 +11,7 @@ export { setMultiplayerTransport, getMultiplayerTransport, initMultiplayerTransp
 
 function isWorldRoom(code: string): boolean {
   const upper = code.toUpperCase();
-  return upper === "WORLD" || /^WORLD-\d+$/.test(upper);
+  return upper === "WORLD" || /^WORLD-[A-Z0-9]+$/.test(upper);
 }
 
 export function createRoom(params: CreateRoomParams): GameRoom;
@@ -35,7 +35,16 @@ export function joinRoom(code: string, options?: JoinRoomOptions): GameRoom | nu
 /** Async join — waits for Supabase fetch and bootstraps WORLD if missing. */
 export async function joinRoomAsync(code: string, options?: JoinRoomOptions): Promise<GameRoom | null> {
   const key = code.toUpperCase();
+  // Retry fetch so invitee does not bootstrap a second empty room over the sharer.
   let room = await ensureRoom(key);
+  if (!room) {
+    await new Promise((r) => setTimeout(r, 250));
+    room = await ensureRoomLoaded(key);
+  }
+  if (!room) {
+    await new Promise((r) => setTimeout(r, 400));
+    room = await ensureRoomLoaded(key);
+  }
 
   if (!room && isWorldRoom(key)) {
     room = createRoom({
