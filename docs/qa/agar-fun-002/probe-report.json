@@ -1,0 +1,72 @@
+{
+  "virusCount": 11,
+  "virusCenter": true,
+  "massDecay": true,
+  "decayStart": 260,
+  "decayEnd": 220,
+  "top10Changes": true,
+  "top1Changed": true,
+  "rankingsSample": [
+    {
+      "id": "bot:12",
+      "nickname": "Cell13",
+      "mass": 222,
+      "color": "#fbbf24"
+    },
+    {
+      "id": "bot:0",
+      "nickname": "Cell1",
+      "mass": 182,
+      "color": "#a78bfa"
+    },
+    {
+      "id": "bot:9",
+      "nickname": "Cell10",
+      "mass": 148,
+      "color": "#22d3ee"
+    },
+    {
+      "id": "bot:15",
+      "nickname": "Cell16",
+      "mass": 148,
+      "color": "#fb7185"
+    },
+    {
+      "id": "bot:14",
+      "nickname": "Cell15",
+      "mass": 147,
+      "color": "#60a5fa"
+    }
+  ],
+  "cellCount": 18,
+  "foodCount": 162,
+  "finalVirusCount": 11,
+  "spaceSplit": true,
+  "splitCellCount": 2,
+  "splitCooldownBlocks": true,
+  "splitCooldownReady": true,
+  "splitCooldown": true,
+  "wBackward": true,
+  "ejectX": 267.59803930990944,
+  "ejectMassLeft": 86,
+  "virusSplit": true,
+  "fragmentsFood": true,
+  "notInstantDeath": true,
+  "popCells": 8,
+  "popFoodDelta": 7,
+  "fragmentEat": true,
+  "smallStart": 40,
+  "smallEnd": 47,
+  "sizeSpeed": true,
+  "gates": {
+    "massDecay": true,
+    "virus": true,
+    "virusSplit": true,
+    "fragmentEat": true,
+    "spaceSplit": true,
+    "wBackward": true,
+    "top10": true,
+    "top1CanLose": true
+  },
+  "allPass": true
+}

@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Agar — shared MP shell UX (entry / YOU / TOP10 / minimap / death).
- * Space/W wired; spawn mass allows immediate Split/Eject.
+ * Agar — competitive loop (decay · virus · Space split · W backward eject).
+ * Shared MP shell UX kept: entry / YOU / TOP10 / minimap / death.
  */
 import {
   DEFAULT_MP_AI_DIFFICULTY,
@@ -29,6 +29,7 @@ import {
   AGAR_WORLD,
   agarBotCountForDifficulty,
   cameraFocus,
+  canSplitPlayer,
   createAgarWorld,
   ejectMass,
   massToRadius,
@@ -54,6 +55,7 @@ function snapshotWorld(w: AgarWorld): AgarWorld {
     tick: w.tick,
     size: w.size,
     food: w.food,
+    viruses: w.viruses,
     players: w.players,
     rankings: w.rankings,
     aiDifficulty: w.aiDifficulty,
@@ -173,7 +175,9 @@ export function AgarGame() {
       if (e.code === "Space") {
         e.preventDefault();
         const w = worldRef.current;
-        splitPlayer(w, deviceId);
+        const now = Date.now();
+        if (!canSplitPlayer(w, deviceId, now)) return;
+        splitPlayer(w, deviceId, now);
         const snap = snapshotWorld(w);
         worldRef.current = snap;
         setWorld(snap);
@@ -277,7 +281,7 @@ export function AgarGame() {
             rank={rank}
             extra={
               <span className="text-[10px] font-normal text-white/45">
-                Space = Split · W = Eject
+                Space = Split · W = Eject back · Virus pops large
               </span>
             }
           />
@@ -323,6 +327,36 @@ export function AgarGame() {
                 }}
               />
             ))}
+            {(world.viruses ?? []).map((v) => {
+              const r = massToRadius(v.mass);
+              return (
+                <div
+                  key={v.id}
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    left: v.x - r,
+                    top: v.y - r,
+                    width: r * 2,
+                    height: r * 2,
+                    zIndex: 8,
+                  }}
+                  title="Virus"
+                >
+                  {/* Spiky virus — visually distinct from round cells / food */}
+                  <div
+                    className="h-full w-full"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 40% 35%, #bbf7d0 0%, #22c55e 45%, #14532d 100%)",
+                      clipPath:
+                        "polygon(50% 0%, 63% 18%, 85% 12%, 78% 35%, 100% 50%, 78% 65%, 85% 88%, 63% 82%, 50% 100%, 37% 82%, 15% 88%, 22% 65%, 0% 50%, 22% 35%, 15% 12%, 37% 18%)",
+                      boxShadow: "0 0 10px rgba(34,197,94,0.55)",
+                      border: "1px solid rgba(187,247,176,0.5)",
+                    }}
+                  />
+                </div>
+              );
+            })}
             {Object.values(world.players).map((p) =>
               p.alive
                 ? p.cells.map((c, i) => {
