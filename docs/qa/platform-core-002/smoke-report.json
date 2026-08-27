@@ -1,0 +1,135 @@
+{
+  "task": "PLATFORM-CORE-002 Phase 1",
+  "base": "https://game29-5q1ubi314-jyp-ai1s-projects.vercel.app",
+  "commit": "local",
+  "startedAt": "2026-08-27T03:11:50.073Z",
+  "checks": [
+    {
+      "name": "solo-home-strip",
+      "ok": true,
+      "t": "2026-08-27T03:11:53.744Z"
+    },
+    {
+      "name": "solo-home-replay-cta",
+      "ok": true,
+      "soloCards": 6,
+      "t": "2026-08-27T03:11:53.749Z"
+    },
+    {
+      "name": "snake-world-cta",
+      "ok": true,
+      "ctaText": "▶ WORLD PLAY",
+      "t": "2026-08-27T03:11:55.209Z"
+    },
+    {
+      "name": "snake-character",
+      "ok": true,
+      "t": "2026-08-27T03:11:56.481Z"
+    },
+    {
+      "name": "snake-color",
+      "ok": true,
+      "t": "2026-08-27T03:11:56.481Z"
+    },
+    {
+      "name": "snake-no-difficulty",
+      "ok": true,
+      "t": "2026-08-27T03:11:56.481Z"
+    },
+    {
+      "name": "snake-enter",
+      "ok": true,
+      "t": "2026-08-27T03:11:56.481Z"
+    },
+    {
+      "name": "snake-in-game",
+      "ok": true,
+      "t": "2026-08-27T03:11:58.852Z"
+    },
+    {
+      "name": "agar-world-cta",
+      "ok": true,
+      "ctaText": "▶ WORLD PLAY",
+      "t": "2026-08-27T03:11:59.927Z"
+    },
+    {
+      "name": "agar-character",
+      "ok": true,
+      "t": "2026-08-27T03:12:01.745Z"
+    },
+    {
+      "name": "agar-color",
+      "ok": true,
+      "t": "2026-08-27T03:12:01.745Z"
+    },
+    {
+      "name": "agar-no-difficulty",
+      "ok": true,
+      "t": "2026-08-27T03:12:01.745Z"
+    },
+    {
+      "name": "agar-enter",
+      "ok": true,
+      "t": "2026-08-27T03:12:01.745Z"
+    },
+    {
+      "name": "agar-in-game",
+      "ok": true,
+      "t": "2026-08-27T03:12:04.083Z"
+    },
+    {
+      "name": "bomber-world-cta",
+      "ok": true,
+      "ctaText": "▶ WORLD PLAY",
+      "t": "2026-08-27T03:12:05.082Z"
+    },
+    {
+      "name": "bomber-character",
+      "ok": true,
+      "t": "2026-08-27T03:12:06.174Z"
+    },
+    {
+      "name": "bomber-color",
+      "ok": true,
+      "t": "2026-08-27T03:12:06.174Z"
+    },
+    {
+      "name": "bomber-no-difficulty",
+      "ok": true,
+      "t": "2026-08-27T03:12:06.174Z"
+    },
+    {
+      "name": "bomber-enter",
+      "ok": true,
+      "t": "2026-08-27T03:12:06.174Z"
+    },
+    {
+      "name": "bomber-in-game",
+      "ok": true,
+      "t": "2026-08-27T03:12:08.514Z"
+    },
+    {
+      "name": "mp-lobby-unified",
+      "ok": true,
+      "mpOk": [
+        true,
+        true,
+        true
+      ],
+      "t": "2026-08-27T03:12:08.514Z"
+    },
+    {
+      "name": "solo-detail-play",
+      "ok": true,
+      "soloText": "▶ PLAY",
+      "t": "2026-08-27T03:12:09.358Z"
+    },
+    {
+      "name": "solo-playable",
+      "ok": true,
+      "t": "2026-08-27T03:12:11.573Z"
+    }
+  ],
+  "endedAt": "2026-08-27T03:12:11.573Z",
+  "pass": true
+}

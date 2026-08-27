@@ -8,7 +8,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-const BASE = process.env.QA_BASE_URL ?? "http://127.0.0.1:3000";
+const BASE =
+  process.env.QA_BASE_URL ??
+  "https://game29-5q1ubi314-jyp-ai1s-projects.vercel.app";
 const OUT = dirname(fileURLToPath(import.meta.url));
 const COMMIT = process.env.QA_COMMIT ?? "local";
 

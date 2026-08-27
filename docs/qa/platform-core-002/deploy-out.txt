@@ -1,0 +1,14 @@
+PLATFORM-CORE-002 Phase 1
+
+Vercel Project: game29
+Branch: content-factory
+Commit: ba4198f
+Deployment: https://vercel.com/jyp-ai1s-projects/game29/6MA1FSVML3a37s8wsuthQXLUpuV1
+Preview URL: https://game29-5q1ubi314-jyp-ai1s-projects.vercel.app
+Branch alias: https://game29-git-content-factory-jyp-ai1s-projects.vercel.app (stale risk — use Visit URL)
+Production: HOLD
+
+Legacy Vercel game-platform: ignore (failed independently; do not use)
+
+Smoke: docs/qa/platform-core-002/smoke-report.json — PASS (23/23)
+Static: docs/qa/mp-final-ux-003/smoke.mjs — PASS
