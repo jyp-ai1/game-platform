@@ -1,0 +1,309 @@
+{
+  "ticket": "AGAR-FUN-005.1",
+  "tickMs": 33,
+  "collideEps": 0,
+  "pipeline": {
+    "physics": "tickAgarWorld → tryEatPlayers / tryVirusCollisions",
+    "render": "DOM fill width/height = 2*massToRadius; outline outside (no border inset)",
+    "interpolation": "NONE",
+    "network": "local MVP — auth snapshot === React state"
+  },
+  "rootCause": {
+    "eps": "AGAR_COLLIDE_EPS=1.5 fired auth before disc touch",
+    "borderBox": "YOU border 2px + other 1px with border-box shrunk visible fill below massToRadius",
+    "virus": "spike clip-path without disc underlay → visual gaps inside collision circle"
+  },
+  "fix": {
+    "eps": 0,
+    "render": "border:none; outline for YOU chrome; virus solid disc underlay",
+    "radii": "cellDiscRadius === massToRadius (auth + render)"
+  },
+  "counts": {
+    "totalSamples": 178,
+    "hundredProbe": 100,
+    "static": 64,
+    "dynamic": 92,
+    "split": 12,
+    "virus": 10
+  },
+  "hundred": {
+    "cases": 100,
+    "falsePositive": 0,
+    "falseNegative": 0,
+    "maxPhysRenderDevPx": 0,
+    "contactTrueJudgedOk": true
+  },
+  "normal": {
+    "falsePositive": 0,
+    "falseNegative": 0,
+    "maxPhysRenderDevPx": 0
+  },
+  "network": {
+    "0ms": {
+      "pass": true,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "maxDev": 0,
+      "desyncHazardFp": 0,
+      "note": "auth===render",
+      "cases": 12
+    },
+    "50ms": {
+      "pass": true,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "maxDev": 2.3999999999999773,
+      "desyncHazardFp": 3,
+      "note": "synced delayed poses for auth+render; desyncHazard = live-auth vs lagged-render (must not be used in game)",
+      "cases": 12
+    },
+    "100ms": {
+      "pass": true,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "maxDev": 3.6000000000000227,
+      "desyncHazardFp": 3,
+      "note": "synced delayed poses for auth+render; desyncHazard = live-auth vs lagged-render (must not be used in game)",
+      "cases": 12
+    },
+    "200ms": {
+      "pass": true,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "maxDev": 7.199999999999989,
+      "desyncHazardFp": 6,
+      "note": "synced delayed poses for auth+render; desyncHazard = live-auth vs lagged-render (must not be used in game)",
+      "cases": 12
+    }
+  },
+  "split": {
+    "pass": true,
+    "cases": [
+      {
+        "tag": "split-0",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-1",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-2",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-3",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-4",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-5",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-6",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-7",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-8",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-9",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-10",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      },
+      {
+        "tag": "split-11",
+        "cellsBefore": 1,
+        "cellsAfter": 2,
+        "ate": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0
+      }
+    ]
+  },
+  "virus": {
+    "pass": true,
+    "cases": [
+      {
+        "tag": "virus-0",
+        "gapFactor": 0.85,
+        "popped": true,
+        "expectPop": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 3
+      },
+      {
+        "tag": "virus-1",
+        "gapFactor": 1.25,
+        "popped": false,
+        "expectPop": false,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 1
+      },
+      {
+        "tag": "virus-2",
+        "gapFactor": 0.85,
+        "popped": true,
+        "expectPop": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 4
+      },
+      {
+        "tag": "virus-3",
+        "gapFactor": 1.25,
+        "popped": false,
+        "expectPop": false,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 1
+      },
+      {
+        "tag": "virus-4",
+        "gapFactor": 0.85,
+        "popped": true,
+        "expectPop": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 5
+      },
+      {
+        "tag": "virus-5",
+        "gapFactor": 1.25,
+        "popped": false,
+        "expectPop": false,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 1
+      },
+      {
+        "tag": "virus-6",
+        "gapFactor": 0.85,
+        "popped": true,
+        "expectPop": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 5
+      },
+      {
+        "tag": "virus-7",
+        "gapFactor": 1.25,
+        "popped": false,
+        "expectPop": false,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 1
+      },
+      {
+        "tag": "virus-8",
+        "gapFactor": 0.85,
+        "popped": true,
+        "expectPop": true,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 5
+      },
+      {
+        "tag": "virus-9",
+        "gapFactor": 1.25,
+        "popped": false,
+        "expectPop": false,
+        "falsePositive": false,
+        "falseNegative": false,
+        "physRenderDev": 0,
+        "cellsBefore": 1,
+        "cellsAfter": 1
+      }
+    ]
+  },
+  "helperOk": true,
+  "pass": true
+}

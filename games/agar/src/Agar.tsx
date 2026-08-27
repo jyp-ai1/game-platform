@@ -344,6 +344,7 @@ export function AgarGame() {
             })}
             {(world.viruses ?? []).map((v) => {
               if (!inViewport(v.x, v.y, cam.x, cam.y, VIEW, 80)) return null;
+              // Disc radius === auth collision (massToRadius); underlay fills the hit circle
               const r = massToRadius(v.mass);
               return (
                 <div
@@ -358,17 +359,25 @@ export function AgarGame() {
                   }}
                   title="Virus"
                 >
-                  {/* Spiky green virus — clearly not a round cell */}
+                  {/* Underlay: solid disc = collision circle (no false gap between spikes) */}
                   <div
-                    className="h-full w-full"
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 38% 32%, #bbf7d0 0%, #22c55e 45%, #14532d 100%)",
+                    }}
+                  />
+                  {/* Spiky overlay — tips reach disc edge; chrome via outline (outside fill) */}
+                  <div
+                    className="absolute inset-0"
                     style={{
                       background:
                         "radial-gradient(circle at 38% 32%, #dcfce7 0%, #4ade80 28%, #16a34a 58%, #14532d 100%)",
                       clipPath:
                         "polygon(50% 0%, 58% 14%, 72% 6%, 70% 22%, 90% 18%, 82% 34%, 100% 42%, 86% 52%, 98% 68%, 78% 66%, 82% 88%, 64% 78%, 58% 100%, 50% 86%, 42% 100%, 36% 78%, 18% 88%, 22% 66%, 2% 68%, 14% 52%, 0% 42%, 18% 34%, 10% 18%, 30% 22%, 28% 6%, 42% 14%)",
-                      boxShadow:
-                        "0 0 14px rgba(74,222,128,0.7), inset 0 0 8px rgba(20,83,45,0.45)",
+                      boxShadow: "0 0 14px rgba(74,222,128,0.55)",
                       outline: "1px solid rgba(187,247,176,0.65)",
+                      outlineOffset: 0,
                     }}
                   />
                 </div>
@@ -377,18 +386,19 @@ export function AgarGame() {
             {Object.values(world.players).map((p) =>
               p.alive
                 ? p.cells.map((c, i) => {
+                    // Fill disc === auth radius (FUN-005.1). No CSS border (border-box inset).
                     const r = massToRadius(c.mass);
                     if (!inViewport(c.x, c.y, cam.x, cam.y, VIEW, r + 24)) return null;
                     const isYou = p.id === deviceId;
                     const showEmoji = isYou && r > 16;
-                    // Local-only ID: bright outline + soft glow (readable when split/small)
-                    const youOutline = isYou
+                    // Identity chrome outside the fill via outline/glow — does not shrink disc
+                    const chrome = isYou
                       ? {
-                          border: "2px solid rgba(255,255,255,0.95)",
-                          boxShadow: `0 0 0 2px rgba(255,255,255,0.45), 0 0 14px ${p.color}, 0 0 5px #fff`,
+                          outline: "2px solid rgba(255,255,255,0.95)",
+                          boxShadow: `0 0 14px ${p.color}, 0 0 5px rgba(255,255,255,0.7)`,
                         }
                       : {
-                          border: "1px solid rgba(255,255,255,0.2)",
+                          outline: "1px solid rgba(255,255,255,0.25)",
                           boxShadow: undefined as string | undefined,
                         };
                     return (
@@ -401,8 +411,10 @@ export function AgarGame() {
                           width: r * 2,
                           height: r * 2,
                           backgroundColor: p.color,
-                          border: youOutline.border,
-                          boxShadow: youOutline.boxShadow,
+                          border: "none",
+                          outline: chrome.outline,
+                          outlineOffset: 0,
+                          boxShadow: chrome.boxShadow,
                           zIndex: Math.min(50, Math.round(c.mass) + (isYou ? 10 : 0)),
                         }}
                         title={isYou ? "YOU" : p.nickname}

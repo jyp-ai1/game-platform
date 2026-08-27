@@ -3,6 +3,7 @@
  * AGAR-FUN-003: mass-conserving virus split · moving W pellets · virus feed/spawn.
  * AGAR-FUN-004: ~2× map · gem tiers · early growth · density retune (not blind 2×).
  * AGAR-FUN-005: contact-based collision (auth immediate; no deep-swallow lag / no radius inflate).
+ * AGAR-FUN-005.1: auth contact ≡ visible disc (eps=0; render fill = massToRadius; no border inset).
  */
 
 /** Linear world edge — ~2× FUN-003 (900 → 1800); area ~4× so density retuned separately. */
@@ -35,11 +36,11 @@ export const AGAR_EJECT_SPEED = 8.2;
 export const AGAR_EJECT_GLIDE_TICKS = 32;
 export const AGAR_TICK_MS = 33;
 /**
- * Render-only overlap tolerance (world units). Auth collision fires at first contact
- * minus this eps — NOT an inflated hitbox (radii stay massToRadius).
- * FUN-004 deep-swallow (`d < hr - 0.28*pr`) caused 1s+ chase overlap.
+ * Contact epsilon (world units). MUST stay 0 — any positive value fires auth
+ * before visible discs touch (FUN-005.1 false-positive death).
+ * Radii stay massToRadius; do not inflate/deflate hitboxes here.
  */
-export const AGAR_COLLIDE_EPS = 1.5;
+export const AGAR_COLLIDE_EPS = 0;
 /** Split-attack boost window (ms) — forward launch for absorb. */
 export const AGAR_SPLIT_BOOST_MS = 640;
 /** Virus base mass / visual size. */
@@ -157,8 +158,67 @@ export function massToRadius(mass: number): number {
 }
 
 /**
- * Auth collision vs render: circles overlap past render tolerance.
- * Judgment is independent of interpolation (Agar has none — state === draw).
+ * Visible disc radius — identical to auth collision radius.
+ * Render MUST size the filled circle to this (no border-box inset).
+ */
+export function cellDiscRadius(mass: number): number {
+  return massToRadius(mass);
+}
+
+/**
+ * Same-frame sample: physics pos/r vs render pos/r (local MVP: identical source).
+ * Used by FUN-005.1 probes to prove contact FP/FN = 0.
+ */
+export type AgarCollisionFrame = {
+  tick: number;
+  aPhys: { x: number; y: number; r: number };
+  aRender: { x: number; y: number; r: number };
+  bPhys: { x: number; y: number; r: number };
+  bRender: { x: number; y: number; r: number };
+  distancePhys: number;
+  distanceRender: number;
+  contactAuth: boolean;
+  contactVisual: boolean;
+  maxPhysRenderDevPx: number;
+};
+
+export function sampleCollisionFrame(
+  tick: number,
+  a: { x: number; y: number; mass: number },
+  b: { x: number; y: number; mass: number },
+  /** Optional delayed render poses (network lag sim). Default = physics. */
+  renderA?: { x: number; y: number; mass: number },
+  renderB?: { x: number; y: number; mass: number }
+): AgarCollisionFrame {
+  const ra = cellDiscRadius(a.mass);
+  const rb = cellDiscRadius(b.mass);
+  const aR = renderA ?? a;
+  const bR = renderB ?? b;
+  const raR = cellDiscRadius(aR.mass);
+  const rbR = cellDiscRadius(bR.mass);
+  const dPhys = Math.hypot(a.x - b.x, a.y - b.y);
+  const dRender = Math.hypot(aR.x - bR.x, aR.y - bR.y);
+  const contactAuth = circlesContact(dPhys, ra, rb);
+  const contactVisual = dRender < raR + rbR;
+  const devA = Math.hypot(a.x - aR.x, a.y - aR.y);
+  const devB = Math.hypot(b.x - bR.x, b.y - bR.y);
+  return {
+    tick,
+    aPhys: { x: a.x, y: a.y, r: ra },
+    aRender: { x: aR.x, y: aR.y, r: raR },
+    bPhys: { x: b.x, y: b.y, r: rb },
+    bRender: { x: bR.x, y: bR.y, r: rbR },
+    distancePhys: dPhys,
+    distanceRender: dRender,
+    contactAuth,
+    contactVisual,
+    maxPhysRenderDevPx: Math.max(devA, devB),
+  };
+}
+
+/**
+ * Auth collision ≡ visible disc overlap (eps=0).
+ * Agar local MVP: auth state === draw state (no interpolation).
  */
 export function circlesContact(
   d: number,
