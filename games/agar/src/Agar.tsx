@@ -43,6 +43,24 @@ import {
 
 const VIEW = 520;
 
+/**
+ * AGAR-FUN-005.2 — Virus silhouette tips sit on the massToRadius circle (viewBox edge).
+ * Valleys inset so the outer edge reads as toothed, not a smooth Cell disc.
+ * Auth hitbox stays circular at massToRadius (unchanged); tips ≡ visible outer ≡ r.
+ */
+const VIRUS_SPIKE_POINTS = (() => {
+  const spikes = 20;
+  const tipR = 50;
+  const valleyR = 36;
+  const pts: string[] = [];
+  for (let i = 0; i < spikes * 2; i++) {
+    const ang = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+    const rad = i % 2 === 0 ? tipR : valleyR;
+    pts.push(`${50 + Math.cos(ang) * rad},${50 + Math.sin(ang) * rad}`);
+  }
+  return pts.join(" ");
+})();
+
 const AGAR_STYLES: MpStyleOption[] = [
   { id: "cell", label: "Cell", emoji: "⚪", color: MP_PLAYER_COLORS[0] },
   { id: "orb", label: "Orb", emoji: "🔵", color: MP_PLAYER_COLORS[1] },
@@ -344,42 +362,60 @@ export function AgarGame() {
             })}
             {(world.viruses ?? []).map((v) => {
               if (!inViewport(v.x, v.y, cam.x, cam.y, VIEW, 80)) return null;
-              // Disc radius === auth collision (massToRadius); underlay fills the hit circle
+              // Box = 2×massToRadius; spike tips on the rim ≡ auth collision radius (005.1 fidelity)
               const r = massToRadius(v.mass);
+              const gradId = `agar-virus-${v.id}`;
               return (
                 <div
                   key={v.id}
-                  className="absolute flex items-center justify-center"
+                  className="absolute"
                   style={{
                     left: v.x - r,
                     top: v.y - r,
                     width: r * 2,
                     height: r * 2,
                     zIndex: 8,
+                    filter: "drop-shadow(0 0 5px rgba(74,222,128,0.75))",
                   }}
                   title="Virus"
                 >
-                  {/* Underlay: solid disc = collision circle (no false gap between spikes) */}
-                  <div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 38% 32%, #bbf7d0 0%, #22c55e 45%, #14532d 100%)",
-                    }}
-                  />
-                  {/* Spiky overlay — tips reach disc edge; chrome via outline (outside fill) */}
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 38% 32%, #dcfce7 0%, #4ade80 28%, #16a34a 58%, #14532d 100%)",
-                      clipPath:
-                        "polygon(50% 0%, 58% 14%, 72% 6%, 70% 22%, 90% 18%, 82% 34%, 100% 42%, 86% 52%, 98% 68%, 78% 66%, 82% 88%, 64% 78%, 58% 100%, 50% 86%, 42% 100%, 36% 78%, 18% 88%, 22% 66%, 2% 68%, 14% 52%, 0% 42%, 18% 34%, 10% 18%, 30% 22%, 28% 6%, 42% 14%)",
-                      boxShadow: "0 0 14px rgba(74,222,128,0.55)",
-                      outline: "1px solid rgba(187,247,176,0.65)",
-                      outlineOffset: 0,
-                    }}
-                  />
+                  {/* Spiky body only — no round underlay (CEO: not ordinary green cell) */}
+                  <svg
+                    width={r * 2}
+                    height={r * 2}
+                    viewBox="0 0 100 100"
+                    className="absolute inset-0 block"
+                    aria-hidden
+                  >
+                    <defs>
+                      <radialGradient id={gradId} cx="38%" cy="32%" r="68%">
+                        <stop offset="0%" stopColor="#f7fee7" />
+                        <stop offset="22%" stopColor="#a3e635" />
+                        <stop offset="55%" stopColor="#16a34a" />
+                        <stop offset="82%" stopColor="#14532d" />
+                        <stop offset="100%" stopColor="#022c22" />
+                      </radialGradient>
+                    </defs>
+                    <polygon
+                      points={VIRUS_SPIKE_POINTS}
+                      fill={`url(#${gradId})`}
+                      stroke="#052e16"
+                      strokeWidth="2.2"
+                      strokeLinejoin="miter"
+                    />
+                    <polygon
+                      points={VIRUS_SPIKE_POINTS}
+                      fill="none"
+                      stroke="#bbf7d0"
+                      strokeWidth="0.9"
+                      strokeLinejoin="miter"
+                      opacity="0.85"
+                    />
+                    {/* Dark core — bomb/hazard cue vs smooth Cell */}
+                    <circle cx="50" cy="50" r="22" fill="rgba(2,44,34,0.55)" />
+                    <circle cx="50" cy="50" r="9" fill="rgba(190,242,100,0.4)" />
+                    <circle cx="42" cy="40" r="5" fill="rgba(236,252,203,0.35)" />
+                  </svg>
                 </div>
               );
             })}

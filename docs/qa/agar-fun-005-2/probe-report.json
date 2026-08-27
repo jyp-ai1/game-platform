@@ -1,0 +1,268 @@
+{
+  "ticket": "AGAR-FUN-005.2",
+  "collideEps": 0,
+  "virusVisual": {
+    "spikes": 20,
+    "tipNorm": 1,
+    "valleyNorm": 0.72,
+    "tipEqualsHitbox": true,
+    "roundUnderlayRemoved": true,
+    "note": "SVG spiky polygon tips on massToRadius rim; no solid round underlay"
+  },
+  "measures": {
+    "nonContactDeathFp": 0,
+    "contactMissFn": 0,
+    "physRenderDevPx": 0,
+    "tipHitDevPx": 0
+  },
+  "cases": [
+    {
+      "tag": "virus-0",
+      "gapFactor": 0.85,
+      "popped": true,
+      "expectPop": true,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 100,
+        "hitR": 22,
+        "tipR": 22,
+        "valleyR": 15.84,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-1",
+      "gapFactor": 1.25,
+      "popped": false,
+      "expectPop": false,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 140,
+        "hitR": 26.03075104563831,
+        "tipR": 26.03075104563831,
+        "valleyR": 18.742140752859584,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-2",
+      "gapFactor": 0.85,
+      "popped": true,
+      "expectPop": true,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 180,
+        "hitR": 29.516097302997228,
+        "tipR": 29.516097302997228,
+        "valleyR": 21.251590058158,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-3",
+      "gapFactor": 1.25,
+      "popped": false,
+      "expectPop": false,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 220,
+        "hitR": 32.63127334322092,
+        "tipR": 32.63127334322092,
+        "valleyR": 23.494516807119062,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-4",
+      "gapFactor": 0.85,
+      "popped": true,
+      "expectPop": true,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 100,
+        "hitR": 22,
+        "tipR": 22,
+        "valleyR": 15.84,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-5",
+      "gapFactor": 1.25,
+      "popped": false,
+      "expectPop": false,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 140,
+        "hitR": 26.03075104563831,
+        "tipR": 26.03075104563831,
+        "valleyR": 18.742140752859584,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-6",
+      "gapFactor": 0.85,
+      "popped": true,
+      "expectPop": true,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 180,
+        "hitR": 29.516097302997228,
+        "tipR": 29.516097302997228,
+        "valleyR": 21.251590058158,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-7",
+      "gapFactor": 1.25,
+      "popped": false,
+      "expectPop": false,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 220,
+        "hitR": 32.63127334322092,
+        "tipR": 32.63127334322092,
+        "valleyR": 23.494516807119062,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-8",
+      "gapFactor": 0.85,
+      "popped": true,
+      "expectPop": true,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 100,
+        "hitR": 22,
+        "tipR": 22,
+        "valleyR": 15.84,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-9",
+      "gapFactor": 1.25,
+      "popped": false,
+      "expectPop": false,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 140,
+        "hitR": 26.03075104563831,
+        "tipR": 26.03075104563831,
+        "valleyR": 18.742140752859584,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-10",
+      "gapFactor": 0.85,
+      "popped": true,
+      "expectPop": true,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 180,
+        "hitR": 29.516097302997228,
+        "tipR": 29.516097302997228,
+        "valleyR": 21.251590058158,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    },
+    {
+      "tag": "virus-11",
+      "gapFactor": 1.25,
+      "popped": false,
+      "expectPop": false,
+      "falsePositive": false,
+      "falseNegative": false,
+      "physRenderDev": 0,
+      "tipHitDevPx": 0,
+      "visual": {
+        "mass": 220,
+        "hitR": 32.63127334322092,
+        "tipR": 32.63127334322092,
+        "valleyR": 23.494516807119062,
+        "tipHitDevPx": 0,
+        "spikes": 20,
+        "silhouette": "spiky-polygon",
+        "underlayRoundDisc": false
+      }
+    }
+  ],
+  "gates": {
+    "distinctFromCell": true,
+    "spikySilhouette": true,
+    "outerEqualsHitbox": true,
+    "nonContactFpZero": true,
+    "contactInstant": true,
+    "collisionUnchanged": true
+  }
+}
