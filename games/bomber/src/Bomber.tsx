@@ -25,6 +25,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BOMBER_MAX_ROUNDS,
   BOMBER_TICK_MS,
+  MAP_NAMES,
   createBomberWorld,
   plantBomb,
   powerUpEmoji,
@@ -280,6 +281,12 @@ export function BomberGame() {
                   className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
                 >
                   ROUND {world.round} / {world.maxRounds || BOMBER_MAX_ROUNDS}
+                </span>
+                <span
+                  data-testid="bomber-map-hud"
+                  className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/80"
+                >
+                  {MAP_NAMES[world.mapId % MAP_NAMES.length]} · {world.difficulty.label}
                 </span>
                 <span className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums">
                   TIME {timeLeft}

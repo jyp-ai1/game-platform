@@ -1,0 +1,22 @@
+{
+  "task": "BOMBER-FUN-001",
+  "branch": "content-factory",
+  "deploymentTarget": "game29",
+  "production": "HOLD",
+  "tests": {
+    "command": "npm test --workspace=@game-platform/game-bomber",
+    "pass": 5,
+    "fail": 0
+  },
+  "escalation": {
+    "R1_normal": { "aiTickEvery": 8, "aiBombChance": 0.032, "fuseMs": 1850, "bombRange": 2, "timeLimitSec": 70, "map": "Corridors" },
+    "R2_hard": { "aiTickEvery": 5, "aiBombChance": 0.058, "fuseMs": 1500, "bombRange": 3, "timeLimitSec": 52, "map": "Open Center" },
+    "R3_very_hard": { "aiTickEvery": 3, "aiBombChance": 0.095, "fuseMs": 1250, "bombRange": 4, "timeLimitSec": 38, "map": "Dense Maze", "baseSpeedBonus": 1 }
+  },
+  "regression": {
+    "agar": "NOT_TOUCHED",
+    "snake": "NOT_TOUCHED",
+    "shell": "NOT_TOUCHED"
+  },
+  "mpNote": "Room ensure/join still present; gameplay sim remains local (no world-state rebuild)."
+}

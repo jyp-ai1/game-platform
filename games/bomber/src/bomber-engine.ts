@@ -1,5 +1,5 @@
 /** Bomber MVP — 2–8p grid, bomb, blast, death, round, TOP LB.
- * STEP 4 — round difficulty ladder + 4 preset maps (no procedural gen).
+ * BOMBER-FUN-001 — Round 1→3 escalation (map / fuse / AI / speed / blast / power-ups).
  */
 
 export const BOMBER_COLS = 13;
@@ -8,7 +8,7 @@ export const BOMBER_TICK_MS = 50;
 export const BOMBER_MIN_PLAYERS = 2;
 export const BOMBER_MAX_PLAYERS = 8;
 export const BOMBER_BOMB_FUSE_MS = 1800;
-export const BOMBER_BLAST_MS = 350;
+export const BOMBER_BLAST_MS = 420;
 export const BOMBER_RANGE = 2;
 export const BOMBER_MAX_ROUNDS = 3;
 
@@ -62,61 +62,86 @@ export type RoundDifficulty = {
   /** Lower = faster AI moves */
   aiTickEvery: number;
   aiBombChance: number;
+  /** Chance to plant when lined up with a living opponent */
+  aiHuntChance: number;
   softDensity: number;
   timeLimitSec: number;
   bombRange: number;
   bombsMax: number;
   fuseMs: number;
+  /** Soft-block break → power-up drop rate */
+  powerUpChance: number;
+  /** Starting speedBonus for all players this round (0–1) */
+  baseSpeedBonus: number;
 };
 
-/** Round ladder: Easy → Normal → Hard → Very Hard. Closed Alpha starts at Normal. */
+/** Round ladder: Easy → Normal → Hard → Very Hard.
+ * Closed Alpha starts at Normal; FUN-001 raises Normal+ above prior “place bomb, kill AI”.
+ */
 export const ROUND_DIFFICULTY: RoundDifficulty[] = [
   {
     label: "easy",
     botCount: 2,
-    aiTickEvery: 18,
-    aiBombChance: 0.004,
-    softDensity: 0.4,
-    timeLimitSec: 100,
+    aiTickEvery: 16,
+    aiBombChance: 0.01,
+    aiHuntChance: 0.15,
+    softDensity: 0.42,
+    timeLimitSec: 95,
     bombRange: 2,
     bombsMax: 1,
-    fuseMs: 2200,
+    fuseMs: 2100,
+    powerUpChance: 0.2,
+    baseSpeedBonus: 0,
   },
   {
+    // Round 1 @ Normal tier — active bots, learnable fuse
     label: "normal",
     botCount: 3,
-    // Survivable ~10s+: slower ticks, rare bombs, strong blast avoid
-    aiTickEvery: 14,
-    aiBombChance: 0.008,
-    softDensity: 0.5,
-    timeLimitSec: 80,
+    aiTickEvery: 8,
+    aiBombChance: 0.032,
+    aiHuntChance: 0.42,
+    softDensity: 0.56,
+    timeLimitSec: 70,
     bombRange: 2,
     bombsMax: 1,
-    fuseMs: 2000,
+    fuseMs: 1850,
+    powerUpChance: 0.26,
+    baseSpeedBonus: 0,
   },
   {
+    // Round 2 — denser map, shorter fuse, more bombs + hunt
     label: "hard",
     botCount: 4,
-    aiTickEvery: 7,
-    aiBombChance: 0.045,
-    softDensity: 0.62,
-    timeLimitSec: 60,
+    aiTickEvery: 5,
+    aiBombChance: 0.058,
+    aiHuntChance: 0.62,
+    softDensity: 0.65,
+    timeLimitSec: 52,
     bombRange: 3,
     bombsMax: 2,
-    fuseMs: 1650,
+    fuseMs: 1500,
+    powerUpChance: 0.36,
+    baseSpeedBonus: 0,
   },
   {
+    // Round 3 — survival pressure: fast AI, wide blast, power-ups + speed
     label: "very-hard",
     botCount: 5,
-    aiTickEvery: 5,
-    aiBombChance: 0.075,
-    softDensity: 0.7,
-    timeLimitSec: 45,
-    bombRange: 3,
-    bombsMax: 2,
-    fuseMs: 1450,
+    aiTickEvery: 3,
+    aiBombChance: 0.095,
+    aiHuntChance: 0.78,
+    softDensity: 0.74,
+    timeLimitSec: 38,
+    bombRange: 4,
+    bombsMax: 3,
+    fuseMs: 1250,
+    powerUpChance: 0.48,
+    baseSpeedBonus: 1,
   },
 ];
+
+/** Human-readable map names for HUD (index = mapId). */
+export const MAP_NAMES = ["Corridors", "Open Center", "Dense Maze", "Lanes"] as const;
 
 /** Closed Alpha default AI tier label = Normal (see getRoundDifficulty). */
 export const DEFAULT_AI_TIER = "normal" as const;
@@ -160,9 +185,16 @@ const POWERUP_EMOJI: Record<PowerUpKind, string> = {
 };
 
 function maybeSpawnPowerUp(world: BomberWorld, x: number, y: number): void {
-  if (Math.random() > 0.28) return;
+  const chance = world.difficulty.powerUpChance ?? 0.28;
+  if (Math.random() > chance) return;
   if (world.powerUps.some((p) => p.x === x && p.y === y)) return;
-  const kinds: PowerUpKind[] = ["bomb", "speed", "range"];
+  // Later rounds bias toward range/bomb for survival pressure
+  const kinds: PowerUpKind[] =
+    world.round >= 3
+      ? ["bomb", "range", "range", "speed", "bomb"]
+      : world.round >= 2
+        ? ["bomb", "speed", "range", "range"]
+        : ["bomb", "speed", "range"];
   const kind = kinds[Math.floor(Math.random() * kinds.length)]!;
   world.powerUps.push({ id: `pu-${world.tick}-${x}-${y}`, kind, x, y });
 }
@@ -180,7 +212,7 @@ function applyPowerUp(p: BomberPlayer, kind: PowerUpKind): void {
 
 function resetPlayerPowerUps(p: BomberPlayer, diff: RoundDifficulty): void {
   p.blastBonus = 0;
-  p.speedBonus = 0;
+  p.speedBonus = Math.min(2, Math.max(0, diff.baseSpeedBonus ?? 0));
   p.bombsMax = diff.bombsMax;
   p.bombsLeft = diff.bombsMax;
 }
@@ -600,10 +632,85 @@ function cellInBlastPreview(world: BomberWorld, x: number, y: number): boolean {
   return false;
 }
 
+function manhattan(a: BomberPlayer, b: BomberPlayer): number {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+}
+
+function pickChaseTarget(world: BomberWorld, bot: BomberPlayer): BomberPlayer | null {
+  const others = Object.values(world.players).filter((p) => p.alive && p.id !== bot.id);
+  if (others.length === 0) return null;
+  const humans = others.filter((p) => !p.isBot);
+  const pool = humans.length > 0 ? humans : others;
+  let best = pool[0]!;
+  let bestD = manhattan(bot, best);
+  for (let i = 1; i < pool.length; i++) {
+    const d = manhattan(bot, pool[i]!);
+    if (d < bestD) {
+      best = pool[i]!;
+      bestD = d;
+    }
+  }
+  return best;
+}
+
+/** True if target shares row/col within blast range and soft/hard don't fully block. */
+function linedUpForBomb(world: BomberWorld, bot: BomberPlayer, target: BomberPlayer, range: number): boolean {
+  if (bot.x === target.x) {
+    const dist = Math.abs(bot.y - target.y);
+    if (dist === 0 || dist > range) return false;
+    const step = Math.sign(target.y - bot.y);
+    for (let i = 1; i < dist; i++) {
+      const cell = world.grid[bot.y + step * i]?.[bot.x];
+      if (!cell || cell === "hard" || cell === "soft") return false;
+    }
+    return true;
+  }
+  if (bot.y === target.y) {
+    const dist = Math.abs(bot.x - target.x);
+    if (dist === 0 || dist > range) return false;
+    const step = Math.sign(target.x - bot.x);
+    for (let i = 1; i < dist; i++) {
+      const cell = world.grid[bot.y]?.[bot.x + step * i];
+      if (!cell || cell === "hard" || cell === "soft") return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+function hasSafeBombEscape(world: BomberWorld, bot: BomberPlayer, range: number): boolean {
+  const escapeDirs: Array<[number, number]> = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  return escapeDirs.some(([dx, dy]) => {
+    let x = bot.x;
+    let y = bot.y;
+    for (let step = 1; step <= range + 1; step++) {
+      x += dx;
+      y += dy;
+      if (!walkable(world, x, y)) return false;
+      if (step > range) return true;
+    }
+    return false;
+  });
+}
+
 function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
   if (!bot.alive || world.matchOver || world.roundOverAt) return;
   const every = Math.max(2, world.difficulty.aiTickEvery);
-  const chaseChance = world.aiTier === "hard" ? 0.7 : world.aiTier === "easy" ? 0.25 : 0.45;
+  const chaseChance =
+    world.difficulty.label === "very-hard"
+      ? 0.82
+      : world.difficulty.label === "hard"
+        ? 0.68
+        : world.difficulty.label === "easy"
+          ? 0.28
+          : 0.55;
+  const range = world.difficulty.bombRange + (bot.blastBonus ?? 0);
+
   if (world.tick % every === 0) {
     const dirs: Array<[number, number]> = [
       [1, 0],
@@ -628,9 +735,8 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
       if (escaped) return;
     }
 
-    // Chase nearest living human when safe; otherwise wander to empty cells
-    const humans = Object.values(world.players).filter((p) => !p.isBot && p.alive);
-    const target = humans[0];
+    // Chase nearest living human (else nearest bot) when safe
+    const target = pickChaseTarget(world, bot);
     let picked: [number, number] = dirs[Math.floor(Math.random() * dirs.length)]!;
     if (target && Math.random() < chaseChance) {
       const dx = Math.sign(target.x - bot.x);
@@ -647,7 +753,6 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
       if (walkable(world, nx, ny) && !cellInBlastPreview(world, nx, ny)) {
         tryMove(world, bot.id, dx, dy);
       } else {
-        // obstacle: try alternate axis
         for (const [ax, ay] of dirs) {
           if (!ax && !ay) continue;
           const tx = bot.x + ax;
@@ -661,32 +766,16 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
     }
   }
 
-  // Plant only when a tile exists outside this bomb's blast (prevents ~10s self-kills on Normal)
-  if (bot.bombsLeft > 0 && Math.random() < world.difficulty.aiBombChance) {
-    if (cellInBlastPreview(world, bot.x, bot.y)) return;
-    const range = world.difficulty.bombRange;
-    const escapeDirs: Array<[number, number]> = [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-    ];
-    const safeEscape = escapeDirs.some(([dx, dy]) => {
-      // Need at least (range+1) steps clear OR a perpendicular step then out
-      let x = bot.x;
-      let y = bot.y;
-      for (let step = 1; step <= range + 1; step++) {
-        x += dx;
-        y += dy;
-        if (!walkable(world, x, y)) return false;
-        // After clearing blast radius, tile is safe from own bomb on this axis
-        if (step > range) return true;
-      }
-      return false;
-    });
-    if (safeEscape) {
-      plantBomb(world, bot.id, now);
-    }
+  if (bot.bombsLeft <= 0 || cellInBlastPreview(world, bot.x, bot.y)) return;
+  if (!hasSafeBombEscape(world, bot, range)) return;
+
+  const target = pickChaseTarget(world, bot);
+  const huntChance = world.difficulty.aiHuntChance ?? 0.35;
+  const wantHunt =
+    target && linedUpForBomb(world, bot, target, range) && Math.random() < huntChance;
+  const wantWander = Math.random() < world.difficulty.aiBombChance;
+  if (wantHunt || wantWander) {
+    plantBomb(world, bot.id, now);
   }
 }
 
