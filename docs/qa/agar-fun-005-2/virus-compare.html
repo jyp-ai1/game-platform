@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AGAR-FUN-005.2 Virus visual</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0b1220;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        font-family: ui-sans-serif, system-ui;
+        color: #e2e8f0;
+      }
+      .wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      .stage {
+        position: relative;
+        width: 420px;
+        height: 280px;
+        background: radial-gradient(circle at 50% 40%, #1e293b, #020617 70%);
+        border: 1px solid #334155;
+        overflow: hidden;
+      }
+      .cell {
+        position: absolute;
+        left: 48px;
+        top: 90px;
+        width: 88px;
+        height: 88px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 30%, #67e8f9, #0284c7 70%);
+        outline: 1px solid rgba(255, 255, 255, 0.35);
+      }
+      .virus {
+        position: absolute;
+        left: 210px;
+        top: 70px;
+        width: 140px;
+        height: 140px;
+        filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.75));
+      }
+      h1 {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>AGAR-FUN-005.2 — Cell (left) vs Virus (right)</h1>
+      <div class="stage">
+        <div class="cell" title="Cell"></div>
+        <div class="virus" title="Virus">
+          <svg width="140" height="140" viewBox="0 0 100 100">
+            <defs>
+              <radialGradient id="vg" cx="38%" cy="32%" r="68%">
+                <stop offset="0%" stop-color="#f7fee7" />
+                <stop offset="22%" stop-color="#a3e635" />
+                <stop offset="55%" stop-color="#16a34a" />
+                <stop offset="82%" stop-color="#14532d" />
+                <stop offset="100%" stop-color="#022c22" />
+              </radialGradient>
+            </defs>
+            <polygon
+              id="spikes"
+              fill="url(#vg)"
+              stroke="#052e16"
+              stroke-width="2.2"
+              stroke-linejoin="miter"
+            ></polygon>
+            <polygon
+              fill="none"
+              stroke="#bbf7d0"
+              stroke-width="0.9"
+              stroke-linejoin="miter"
+              opacity="0.85"
+            ></polygon>
+            <circle cx="50" cy="50" r="22" fill="rgba(2,44,34,0.55)" />
+            <circle cx="50" cy="50" r="9" fill="rgba(190,242,100,0.4)" />
+            <circle cx="42" cy="40" r="5" fill="rgba(236,252,203,0.35)" />
+          </svg>
+        </div>
+      </div>
+    </div>
+    <script>
+      const spikes = 20;
+      const tipR = 50;
+      const valleyR = 36;
+      const pts = [];
+      for (let i = 0; i < spikes * 2; i++) {
+        const ang = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+        const rad = i % 2 === 0 ? tipR : valleyR;
+        pts.push(`${50 + Math.cos(ang) * rad},${50 + Math.sin(ang) * rad}`);
+      }
+      const points = pts.join(" ");
+      document.querySelectorAll("polygon").forEach((p) => p.setAttribute("points", points));
+    </script>
+  </body>
+</html>
