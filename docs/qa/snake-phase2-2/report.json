@@ -1,11 +1,23 @@
 {
   "phase": "PHASE-2.2",
+  "commit": "4f6cad0",
+  "preview": "https://game29-hzqz9f4e3-jyp-ai1s-projects.vercel.app",
+  "production": "HOLD",
   "botUnit": {
     "characterlessSpawnBlocked": "PASS",
     "respawnSamePolicy": "PASS",
     "movement30sNoStuck": "PASS",
     "test": "games/snake/src/__tests__/snake-phase2-2.test.ts"
   },
-  "inviteProbe": "docs/qa/snake-phase2-2/invite-probe.mjs (run against Preview)",
+  "invite": {
+    "linkGeneration": "PASS",
+    "clipboard": "PASS",
+    "toast": "PASS",
+    "roomIdConsistency": "PASS",
+    "mobileShareFallback": "PASS",
+    "clipboardSample": "https://game29-hzqz9f4e3-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-ZUJ&source=invite",
+    "hudRoom": "WORLD-ZUJ",
+    "probe": "docs/qa/snake-phase2-2/invite-probe.mjs"
+  },
   "policy": "Bot without character → exclude/despawn; never invent default face via ensureBotReady"
 }

@@ -1,0 +1,26 @@
+{
+  "phase": "PHASE-2.2",
+  "preview": "https://game29-hzqz9f4e3-jyp-ai1s-projects.vercel.app",
+  "linkGeneration": "PASS",
+  "clipboard": "PASS",
+  "toast": "PASS",
+  "roomIdConsistency": "PASS",
+  "mobileShareAvailable": false,
+  "mobileShareFallback": "PASS",
+  "evidence": {
+    "share": {
+      "status": "초대 링크가 복사되었습니다.",
+      "clipboard": "https://game29-hzqz9f4e3-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-ZUJ&source=invite",
+      "pinned": "WORLD-ZUJ"
+    },
+    "roomFromClipboard": "WORLD-ZUJ",
+    "hud": {
+      "urlRoom": "WORLD-ZUJ",
+      "roomHud": "ROOM: WORLD-ZUJ",
+      "sessionRoom": "WORLD-ZUJ",
+      "href": "https://game29-hzqz9f4e3-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-ZUJ&source=invite"
+    },
+    "mobileClipboard": "https://game29-hzqz9f4e3-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-B86&source=invite",
+    "mobileStatus": "초대 링크가 복사되었습니다."
+  }
+}
