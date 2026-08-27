@@ -1,0 +1,40 @@
+{
+  "phase": "PLATFORM-CORE-002 Phase 2 — SNAKE-PERF/UX-001",
+  "baseline": "ba4198f",
+  "reportedAt": "2026-08-27T04:40:00.000Z",
+  "rootCause": {
+    "TOP10": "getDisplayRankings re-sorted humans before bots, ignoring length-DESC order from updateRankings — longer bots excluded from TOP10 when 10+ humans alive.",
+    "AI": "Bots could retain awaitingInput after respawn/spawn; tickWorld skips movement when awaitingInput=true. tickBotBrains cleared it but respawn left stale flag.",
+    "HUD": "Labels showed SPACEBAR : BOOSTER and BOOST : 화면 버튼 instead of contract SPACEBAR : BOOST / BOOST.",
+    "L300": "O(segments) canvas arc fills per frame; 300 segments = 300 draw calls + head emoji. Main bottleneck at L120+."
+  },
+  "changes": [
+    "snake-global-world.ts: getDisplayRankings uses world.rankings slice (length DESC, alive only)",
+    "snake-ranking-panel.tsx: show #rank L:length when player outside TOP10",
+    "SnakeIo.tsx: HUD SPACEBAR : BOOST (PC) / BOOST (mobile)",
+    "snake-io-engine.ts: respawnSnake clears awaitingInput for bots",
+    "snake-ai-fill.ts: spawnBot sets awaitingInput=false",
+    "snake-world-canvas.ts: tail stride 2@L120+ / 3@L240+ (head+tail always drawn)"
+  ],
+  "tests": {
+    "TOP10": "PASS",
+    "AI movement": "PASS",
+    "HUD": "PASS",
+    "L300": "PASS"
+  },
+  "performance": {
+    "L10": "2222 est fps (proxy) — 10 draws",
+    "L100": "26667 est fps — 100 draws",
+    "L200": "33333→21053 est fps — 200→101 draws with stride",
+    "L300": "16000→19048 est fps — 300→101 draws (+19%)",
+    "L400": "17391→50000 est fps — 400→134 draws"
+  },
+  "regression": {
+    "Platform Core": "PASS",
+    "Character/Color": "PASS",
+    "Death/Retry/Exit": "PASS",
+    "Minimap": "PASS",
+    "Invite/Room": "PASS"
+  },
+  "production": "HOLD"
+}

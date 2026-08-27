@@ -11,6 +11,8 @@ export interface SnakeRankingEntry {
 interface SnakeRankingPanelProps {
   entries: SnakeRankingEntry[];
   deviceId: string;
+  /** When player is alive but outside TOP10 — e.g. #14 L:153 */
+  selfOutsideTop10?: { rank: number; length: number } | null;
   title?: string;
   compact?: boolean;
   className?: string;
@@ -20,6 +22,7 @@ interface SnakeRankingPanelProps {
 export function SnakeRankingPanel({
   entries,
   deviceId,
+  selfOutsideTop10 = null,
   title = "TOP 10",
   compact = false,
   className,
@@ -53,6 +56,16 @@ export function SnakeRankingPanel({
           );
         })}
       </ol>
+      {selfOutsideTop10 ? (
+        <p
+          className={cn(
+            "mt-1 truncate rounded-sm bg-emerald-500/20 font-bold text-emerald-200 ring-1 ring-emerald-400/50",
+            compact ? "pt-0.5 text-[9px]" : "pt-1 text-[10px]"
+          )}
+        >
+          ★ #{selfOutsideTop10.rank} L:{selfOutsideTop10.length}
+        </p>
+      ) : null}
     </div>
   );
 }

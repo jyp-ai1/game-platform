@@ -2336,6 +2336,9 @@ export function SnakeIoGame({
       ? getSegmentCount(world.snakes[r.deviceId]!)
       : r.score,
   }));
+  const myInTop10 = top10.some((r) => r.deviceId === deviceId);
+  const selfOutsideTop10 =
+    mySnake?.alive && !myInTop10 ? { rank: myRank, length: myLength } : null;
   const minimapTopRanks = top10.slice(0, 10).map((r, i) => ({
     deviceId: r.deviceId,
     rank: i + 1,
@@ -2370,7 +2373,7 @@ export function SnakeIoGame({
             className="hidden shrink-0 self-start pt-2 lg:block"
             style={{ width: "clamp(7.5rem, 11vw, 10rem)" }}
           >
-            <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} />
+            <SnakeRankingPanel entries={rankingEntries} deviceId={deviceId} selfOutsideTop10={selfOutsideTop10} />
           </aside>
         ) : null}
 
@@ -2521,8 +2524,8 @@ export function SnakeIoGame({
                 {isBoosting ? "⚡ BOOST" : "Boost"}
               </p>
               <p className="mt-0.5 text-[10px] text-white/45">
-                <span className="hidden lg:inline">SPACEBAR : BOOSTER</span>
-                <span className="lg:hidden">BOOST : 화면 버튼</span>
+                <span className="hidden lg:inline">SPACEBAR : BOOST</span>
+                <span className="lg:hidden">BOOST</span>
               </p>
             </>
           ) : null}
@@ -2675,8 +2678,8 @@ export function SnakeIoGame({
               움직여서 시작
             </p>
             <p className="rounded-lg border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur-sm">
-              <span className="hidden lg:inline">SPACEBAR : BOOSTER</span>
-              <span className="lg:hidden">BOOST : 화면 버튼</span>
+              <span className="hidden lg:inline">SPACEBAR : BOOST</span>
+              <span className="lg:hidden">BOOST</span>
             </p>
           </div>
         ) : null}
@@ -2740,6 +2743,7 @@ export function SnakeIoGame({
             compact
             entries={rankingEntries}
             deviceId={deviceId}
+            selfOutsideTop10={selfOutsideTop10}
             className="min-w-0 flex-1"
           />
           {showMinimap ? (

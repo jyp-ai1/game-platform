@@ -159,13 +159,16 @@ function drawSnakeBody(
   if (len === 0) return 0;
   const radiusScale = snake.bodyRadiusScale ?? 1;
   const margin = cellSize * 2;
+  // L300 perf: skip sub-pixel tail segments when body is long (head/tail always drawn)
+  const tailStride = len > 240 ? 3 : len > 120 ? 2 : 1;
   let drawn = 0;
   // Draw tail → head so head paints on top
   for (let i = len - 1; i >= 0; i--) {
-    const seg = segs[i]!;
-    if (!inView(seg.x, seg.y, camX, camY, cellSize, boardW, boardH, margin)) continue;
     const isHead = i === 0;
     const isTail = i === len - 1;
+    if (tailStride > 1 && !isHead && !isTail && i % tailStride !== 0) continue;
+    const seg = segs[i]!;
+    if (!inView(seg.x, seg.y, camX, camY, cellSize, boardW, boardH, margin)) continue;
     const segBase = cellSize * 0.72;
     const segSize = isHead
       ? segBase * SNAKE_MVP_RC1.headScale

@@ -1,0 +1,9 @@
+{
+  "testedAt": "2026-08-27T04:40:16.080Z",
+  "hasPcBoost": true,
+  "hasMobileBoost": true,
+  "noBooster": true,
+  "noArrowHint": true,
+  "pass": true,
+  "verdict": "PASS"
+}

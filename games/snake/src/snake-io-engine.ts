@@ -1145,6 +1145,11 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   snake.aliveSinceTick = world.tick;
   // FIX-SNAKE-UX-001 Step1: respawn length = start length (L10), not hardcoded 3
   finalizeSnake(snake, pos, SNAKE_MVP_RC1.startingSegments, 0);
+  // FIX-SNAKE-UX-002: bots must never stall on awaitingInput after respawn
+  if (isBotEntity(snake)) {
+    snake.awaitingInput = false;
+    snake.lastMoveTick = world.tick;
+  }
   deathTrace("alive_true", {
     tick: world.tick,
     victimId: snake.deviceId,

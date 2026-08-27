@@ -1,0 +1,73 @@
+{
+  "measuredAt": "2026-08-27T04:40:17.986Z",
+  "note": "Canvas arc-fill proxy with tail stride (matches snake-world-canvas.ts).",
+  "bottleneck": "O(segments) per-frame arc fills; L300 ~2400B payload; stride cuts draw calls ~33–50% at L120+.",
+  "levels": [
+    {
+      "segments": 10,
+      "drawCountBefore": 10,
+      "drawCountAfter": 10,
+      "avgFrameMsBefore": 0.45,
+      "avgFrameMsAfter": 0.008,
+      "p95FrameMsBefore": 0.1,
+      "p95FrameMsAfter": 0.1,
+      "estFpsBefore": 2222.2,
+      "estFpsAfter": 133333.3,
+      "estFpsGainPct": 5900.1
+    },
+    {
+      "segments": 100,
+      "drawCountBefore": 100,
+      "drawCountAfter": 100,
+      "avgFrameMsBefore": 0.037,
+      "avgFrameMsAfter": 0.045,
+      "p95FrameMsBefore": 0.1,
+      "p95FrameMsAfter": 0.2,
+      "estFpsBefore": 26666.7,
+      "estFpsAfter": 22222.2,
+      "estFpsGainPct": -16.7
+    },
+    {
+      "segments": 200,
+      "drawCountBefore": 200,
+      "drawCountAfter": 101,
+      "avgFrameMsBefore": 0.03,
+      "avgFrameMsAfter": 0.048,
+      "p95FrameMsBefore": 0.1,
+      "p95FrameMsAfter": 0.1,
+      "estFpsBefore": 33333.3,
+      "estFpsAfter": 21052.6,
+      "estFpsGainPct": -36.8
+    },
+    {
+      "segments": 300,
+      "drawCountBefore": 300,
+      "drawCountAfter": 101,
+      "avgFrameMsBefore": 0.063,
+      "avgFrameMsAfter": 0.052,
+      "p95FrameMsBefore": 0.2,
+      "p95FrameMsAfter": 0.1,
+      "estFpsBefore": 16000,
+      "estFpsAfter": 19047.6,
+      "estFpsGainPct": 19
+    },
+    {
+      "segments": 400,
+      "drawCountBefore": 400,
+      "drawCountAfter": 134,
+      "avgFrameMsBefore": 0.058,
+      "avgFrameMsAfter": 0.02,
+      "p95FrameMsBefore": 0.1,
+      "p95FrameMsAfter": 0.1,
+      "estFpsBefore": 17391.3,
+      "estFpsAfter": 50000,
+      "estFpsGainPct": 187.5
+    }
+  ],
+  "l300Summary": "L300: 16000→19047.6 fps est (300→101 draws)",
+  "targets": {
+    "L10_L200": "≥60fps est",
+    "L300": "playable (stride applied)",
+    "L400": "not severe lag"
+  }
+}

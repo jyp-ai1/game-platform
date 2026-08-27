@@ -305,6 +305,7 @@ function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty:
   snake.botSeed = seed;
   const headId = randomSnakeHeadId(seed);
   applyCharacterToSnake(snake, headId);
+  snake.awaitingInput = false;
   return snake;
 }
 

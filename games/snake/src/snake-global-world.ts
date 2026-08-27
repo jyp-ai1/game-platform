@@ -36,18 +36,15 @@ export function loadPersistedGlobalWorld(roomCode: string): SnakeIoWorld | null 
   }
 }
 
-/** TOP10 — humans first, bots fill remaining slots */
+/** TOP10 — alive snakes by current length DESC (same order as updateRankings). */
 export function getDisplayRankings(
   world: SnakeIoWorld,
   limit = 10
 ): { deviceId: string; nickname: string; score: number; isBot: boolean }[] {
-  const entries = world.rankings.map((r) => ({
+  return world.rankings.slice(0, limit).map((r) => ({
     ...r,
     isBot: isBotSnake(world.snakes[r.deviceId]),
   }));
-  const humans = entries.filter((e) => !e.isBot);
-  const bots = entries.filter((e) => e.isBot);
-  return [...humans, ...bots].slice(0, limit);
 }
 
 export function buildJoinBrief(world: SnakeIoWorld): GlobalWorldJoinBrief {

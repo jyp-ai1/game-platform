@@ -1,0 +1,17 @@
+{
+  "testedAt": "2026-08-27T04:40:15.997Z",
+  "test": "TOP10 length-DESC display wiring",
+  "longestSnake": "bot:3",
+  "oldDisplayFirst": "human-a",
+  "newDisplayFirst": "bot:3",
+  "newTop10Scores": [
+    280,
+    200,
+    150,
+    120,
+    50
+  ],
+  "pass": true,
+  "verdict": "PASS",
+  "rootCause": "getDisplayRankings re-sorted humans before bots, ignoring length order from updateRankings."
+}
