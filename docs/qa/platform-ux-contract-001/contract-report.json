@@ -1,0 +1,187 @@
+{
+  "base": "https://game29-86r8rvocb-jyp-ai1s-projects.vercel.app",
+  "commit": "c944078",
+  "startedAt": "2026-08-27T01:13:19.584Z",
+  "checks": [
+    {
+      "name": "home-replay-cta-count",
+      "ok": true,
+      "replayCount": 67,
+      "t": "2026-08-27T01:13:25.591Z"
+    },
+    {
+      "name": "no-card-thumb-link",
+      "ok": true,
+      "thumbInLink": false,
+      "t": "2026-08-27T01:13:25.606Z"
+    },
+    {
+      "name": "replay-snake-nav",
+      "ok": true,
+      "t": "2026-08-27T01:13:26.574Z"
+    },
+    {
+      "name": "snake-detail",
+      "ok": true,
+      "t": "2026-08-27T01:13:29.551Z"
+    },
+    {
+      "name": "snake-world-play-cta",
+      "ok": true,
+      "ctaText": "▶ WORLD PLAY",
+      "t": "2026-08-27T01:13:29.641Z"
+    },
+    {
+      "name": "snake-lobby",
+      "ok": true,
+      "t": "2026-08-27T01:13:30.176Z"
+    },
+    {
+      "name": "snake-no-color-step",
+      "ok": true,
+      "t": "2026-08-27T01:13:30.185Z"
+    },
+    {
+      "name": "snake-character",
+      "ok": true,
+      "t": "2026-08-27T01:13:30.192Z"
+    },
+    {
+      "name": "snake-difficulty",
+      "ok": true,
+      "t": "2026-08-27T01:13:30.241Z"
+    },
+    {
+      "name": "snake-shell",
+      "ok": true,
+      "t": "2026-08-27T01:13:33.227Z"
+    },
+    {
+      "name": "agar-detail",
+      "ok": true,
+      "t": "2026-08-27T01:13:35.331Z"
+    },
+    {
+      "name": "agar-world-play-cta",
+      "ok": true,
+      "ctaText": "▶ WORLD PLAY",
+      "t": "2026-08-27T01:13:35.339Z"
+    },
+    {
+      "name": "agar-lobby",
+      "ok": true,
+      "t": "2026-08-27T01:13:36.272Z"
+    },
+    {
+      "name": "agar-no-color-step",
+      "ok": true,
+      "t": "2026-08-27T01:13:36.281Z"
+    },
+    {
+      "name": "agar-character",
+      "ok": true,
+      "t": "2026-08-27T01:13:36.291Z"
+    },
+    {
+      "name": "agar-difficulty",
+      "ok": true,
+      "t": "2026-08-27T01:13:36.340Z"
+    },
+    {
+      "name": "agar-shell",
+      "ok": true,
+      "t": "2026-08-27T01:13:39.169Z"
+    },
+    {
+      "name": "bomber-detail",
+      "ok": true,
+      "t": "2026-08-27T01:13:40.643Z"
+    },
+    {
+      "name": "bomber-world-play-cta",
+      "ok": true,
+      "ctaText": "▶ WORLD PLAY",
+      "t": "2026-08-27T01:13:40.647Z"
+    },
+    {
+      "name": "bomber-lobby",
+      "ok": true,
+      "t": "2026-08-27T01:13:41.751Z"
+    },
+    {
+      "name": "bomber-no-color-step",
+      "ok": true,
+      "t": "2026-08-27T01:13:41.756Z"
+    },
+    {
+      "name": "bomber-character",
+      "ok": true,
+      "t": "2026-08-27T01:13:41.759Z"
+    },
+    {
+      "name": "bomber-difficulty",
+      "ok": true,
+      "t": "2026-08-27T01:13:41.773Z"
+    },
+    {
+      "name": "bomber-shell",
+      "ok": true,
+      "t": "2026-08-27T01:13:44.399Z"
+    },
+    {
+      "name": "solo-play-cta",
+      "ok": true,
+      "soloText": "▶ PLAY",
+      "t": "2026-08-27T01:13:46.390Z"
+    },
+    {
+      "name": "mobile-cta-size",
+      "ok": true,
+      "box": {
+        "x": 85,
+        "y": 429.0625,
+        "width": 220,
+        "height": 48
+      },
+      "t": "2026-08-27T01:13:48.303Z"
+    },
+    {
+      "name": "death-overlay-shared",
+      "ok": true,
+      "t": "2026-08-27T01:13:48.841Z"
+    },
+    {
+      "name": "retry-to-lobby",
+      "ok": true,
+      "t": "2026-08-27T01:13:48.841Z"
+    },
+    {
+      "name": "exit-to-detail",
+      "ok": true,
+      "t": "2026-08-27T01:13:48.841Z"
+    }
+  ],
+  "report": {
+    "commonDetail": true,
+    "commonPlay": true,
+    "commonLobby": true,
+    "character": true,
+    "difficulty": true,
+    "enter": true,
+    "gameShell": true,
+    "death": true,
+    "retry": true,
+    "exit": true,
+    "snakeRegression": true,
+    "agarRegression": true,
+    "bomberRegression": true,
+    "replaySnake": true,
+    "replayAgar": true,
+    "replayBomber": true,
+    "replaySolo": true,
+    "mobileCta": true,
+    "noCardDirect": true
+  },
+  "pass": true,
+  "endedAt": "2026-08-27T01:13:48.841Z"
+}

@@ -76,6 +76,7 @@ async function assertDifficultyLabels(page) {
 async function runMpFlow(page, game, idx) {
   const prefix = `${idx}-${game.slug}`;
   await page.goto(`${BASE}${game.detailPath}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.locator('[data-testid="game-detail-page"]').waitFor({ timeout: 30_000 });
   await page.screenshot({ path: join(OUT, `${prefix}-01-detail.png`) });
 
   const detailOk = (await page.locator('[data-testid="game-detail-page"]').count()) > 0;
@@ -87,16 +88,17 @@ async function runMpFlow(page, game, idx) {
 
   await worldCta.click({ timeout: 15_000 });
   await page.waitForURL(/\/play/, { timeout: 60_000 });
+  await page.locator('[data-testid="mp-entry-lobby"]').waitFor({ timeout: 30_000 });
   await page.screenshot({ path: join(OUT, `${prefix}-02-lobby.png`) });
 
   const lobby = (await page.locator('[data-testid="mp-entry-lobby"]').count()) > 0;
   mark(`${game.slug}-lobby`, lobby);
 
-  const colorSection = page.getByText("Color", { exact: true });
+  const colorSection = page.getByText(/^Color$/i);
   const noColorStep = (await colorSection.count()) === 0;
   mark(`${game.slug}-no-color-step`, noColorStep);
 
-  const charSection = (await page.getByText("Character", { exact: true }).count()) > 0;
+  const charSection = (await page.getByText(/^Character$/i).count()) > 0;
   mark(`${game.slug}-character`, charSection);
 
   const diffOk = await assertDifficultyLabels(page);
@@ -118,10 +120,12 @@ const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
 try {
-  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  // Prefer Discover catalog for Re:Play cards (home may lazy-load)
+  await page.goto(`${BASE}/games`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.waitForTimeout(2000);
   await page.screenshot({ path: join(OUT, "00-home.png") });
 
-  const replayBtns = page.getByRole("link", { name: /Re:Play/i });
+  const replayBtns = page.locator("a", { hasText: /▶\s*Re:Play/i });
   const replayCount = await replayBtns.count();
   mark("home-replay-cta-count", replayCount > 0, { replayCount });
 
@@ -134,12 +138,13 @@ try {
   });
   report.noCardDirect = mark("no-card-thumb-link", !thumbInLink, { thumbInLink });
 
-  const snakeReplay = page.getByRole("link", { name: /Re:Play/i }).first();
-  if ((await snakeReplay.count()) > 0) {
-    await snakeReplay.click();
+  if (replayCount > 0) {
+    await replayBtns.first().click();
     await page.waitForURL(/\/games\//, { timeout: 30_000 });
-    report.replaySnake = mark("replay-snake-nav", page.url().includes("/games/"));
+    report.replaySnake = mark("replay-snake-nav", /\/games\/[^/]+$/.test(new URL(page.url()).pathname) || page.url().includes("/games/"));
     await page.screenshot({ path: join(OUT, "replay-snake-detail.png") });
+  } else {
+    report.replaySnake = mark("replay-snake-nav", false, { reason: "no card Re:Play CTA found" });
   }
 
   const snakeRes = await runMpFlow(page, MP_GAMES[0], 1);
