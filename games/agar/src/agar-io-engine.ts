@@ -1,6 +1,6 @@
 /**
  * Agar competitive engine — mass decay · virus pop · split · backward eject · size/speed.
- * Host-authoritative world shape (ready for Room sync in a follow-up).
+ * AGAR-FUN-003: mass-conserving virus split · moving W pellets · virus feed/spawn.
  */
 
 export const AGAR_WORLD = 900;
@@ -22,16 +22,29 @@ export const AGAR_MIN_EJECT_MASS = 36;
 export const AGAR_EJECT_COST = 14;
 /** Food pellet mass spawned by eject (slightly less than cost). */
 export const AGAR_EJECT_FOOD = 12;
+/** Ballistic eject speed (world units / tick) — must be visibly moving. */
+export const AGAR_EJECT_SPEED = 8.2;
+/** How many ticks an eject pellet keeps gliding. */
+export const AGAR_EJECT_GLIDE_TICKS = 32;
 export const AGAR_TICK_MS = 33;
 /** Split-attack boost window (ms) — forward launch for absorb. */
 export const AGAR_SPLIT_BOOST_MS = 640;
-/** Virus pop: large cell must exceed this mass to pop (not instant death). */
+/** Virus base mass / visual size. */
 export const AGAR_VIRUS_MASS = 100;
+/** Large cell must exceed this mass to pop on virus (not instant death). */
 export const AGAR_VIRUS_POP_MIN = 130;
-/** Fragments created when a large cell hits a virus. */
+/** Fragments created when a large cell hits a virus (player pieces + food). */
 export const AGAR_VIRUS_FRAGMENTS = 8;
-/** Target virus count on the map (center + paths + random). */
-export const AGAR_VIRUS_TARGET = 11;
+/** Hard cap on edible food pieces from one virus pop (comeback fuel). */
+export const AGAR_MAX_VIRUS_FOOD_FRAGS = 12;
+/** Soft target virus count (center + paths + edges). */
+export const AGAR_VIRUS_TARGET = 10;
+/** Hard cap — feeding must not flood the map. */
+export const AGAR_VIRUS_MAX = 14;
+/** Feed mass at which a virus shoots a new virus (or grows if at cap). */
+export const AGAR_VIRUS_SHOOT_MASS = 175;
+/** Small balance loss on virus pop (conservation still ≈ before). */
+export const AGAR_VIRUS_POP_LOSS = 0.06;
 /** Board / grid tone — shared visual target for Snake WORLD map. */
 export const AGAR_BOARD_BG = "#0b1220";
 export const AGAR_GRID_LINE = "rgba(255,255,255,0.04)";
@@ -43,7 +56,20 @@ const COLORS = [
 
 export type Vec = { x: number; y: number };
 
-export type AgarFood = { id: string; x: number; y: number; mass: number; color: string };
+export type AgarFood = {
+  id: string;
+  x: number;
+  y: number;
+  mass: number;
+  color: string;
+  /** Moving eject pellet velocity (world units / tick). */
+  vx?: number;
+  vy?: number;
+  /** Remaining glide ticks; undefined/0 = static. */
+  glide?: number;
+  /** Render / feed hint — eject pellets feed viruses. */
+  kind?: "food" | "eject" | "frag";
+};
 
 /** Spiky virus / bomb — distinct from food pellets and player cells. */
 export type AgarVirus = {
@@ -51,6 +77,9 @@ export type AgarVirus = {
   x: number;
   y: number;
   mass: number;
+  /** Last feed direction (for shoot spawn). */
+  feedDirX?: number;
+  feedDirY?: number;
 };
 
 export type AgarCell = {
@@ -112,6 +141,12 @@ export function totalMass(p: AgarPlayer): number {
   return p.cells.reduce((s, c) => s + c.mass, 0);
 }
 
+/** Size → speed curve (exported for QA / HUD feel checks). */
+export function speedForMass(mass: number): number {
+  // small★★★★★ (~4.5) · mid★★★ (~2.5) · large★ (~1.4) — clear feel gap
+  return clamp(28 / Math.sqrt(mass + 8), 0.95, 5.0);
+}
+
 function randPos(size: number): Vec {
   const m = 40;
   return { x: m + Math.random() * (size - m * 2), y: m + Math.random() * (size - m * 2) };
@@ -134,27 +169,32 @@ function spawnFood(world: AgarWorld, n: number): void {
       y: pos.y,
       mass: 1,
       color: foodColor(),
+      kind: "food",
     });
   }
 }
 
 /**
- * Place limited viruses: world center + key mid-paths + a few random.
- * Replaces any prior "big center circle" concept — this IS the center hazard.
+ * Limited viruses: 2–4 near center + mid-path + edge placements.
+ * Optional regen only up to AGAR_VIRUS_TARGET — feed can grow to AGAR_VIRUS_MAX.
  */
 function spawnViruses(world: AgarWorld): void {
   const s = world.size;
   const half = s / 2;
+  // 3 near-center hazards (primary competitive risk for #1)
   const fixed: Vec[] = [
-    { x: half, y: half }, // center — primary competitive hazard
+    { x: half, y: half },
+    { x: half - 55, y: half + 40 },
+    { x: half + 48, y: half - 38 },
+    // mid-path
     { x: s * 0.25, y: s * 0.25 },
     { x: s * 0.75, y: s * 0.25 },
     { x: s * 0.25, y: s * 0.75 },
     { x: s * 0.75, y: s * 0.75 },
-    { x: half, y: s * 0.2 },
-    { x: half, y: s * 0.8 },
-    { x: s * 0.2, y: half },
-    { x: s * 0.8, y: half },
+    // edge / corridor
+    { x: half, y: s * 0.12 },
+    { x: half, y: s * 0.88 },
+    { x: s * 0.12, y: half },
   ];
   for (const pos of fixed) {
     if (world.viruses.length >= AGAR_VIRUS_TARGET) break;
@@ -167,7 +207,6 @@ function spawnViruses(world: AgarWorld): void {
   }
   while (world.viruses.length < AGAR_VIRUS_TARGET) {
     const pos = randPos(s);
-    // Keep random viruses away from spawn-crowded edges slightly
     world.viruses.push({
       id: `v${virusSeq++}`,
       x: pos.x,
@@ -311,7 +350,7 @@ export function splitPlayer(world: AgarWorld, playerId: string, now = Date.now()
 
 /**
  * W eject — mass flies BACKWARD (opposite movement / aim direction).
- * Chasees feed pursuers behind them, bait, or shed mass while fleeing.
+ * Pellets MOVE visibly, are edible by others, and can feed viruses.
  */
 export function ejectMass(world: AgarWorld, playerId: string): void {
   const p = world.players[playerId];
@@ -320,27 +359,24 @@ export function ejectMass(world: AgarWorld, playerId: string): void {
     if (cell.mass < AGAR_MIN_EJECT_MASS) continue;
     cell.mass -= AGAR_EJECT_COST;
     const ang = Math.atan2(p.aimY - cell.y, p.aimX - cell.x);
-    // Opposite of movement direction
+    // Opposite of movement direction (chase feed / flee shed)
     const back = ang + Math.PI;
+    const dirX = Math.cos(back);
+    const dirY = Math.sin(back);
     const r = massToRadius(cell.mass);
-    const dist = r + 12;
+    const dist = r + 14;
     world.food.push({
       id: `e${foodSeq++}`,
-      x: clamp(cell.x + Math.cos(back) * dist, 4, world.size - 4),
-      y: clamp(cell.y + Math.sin(back) * dist, 4, world.size - 4),
+      x: clamp(cell.x + dirX * dist, 4, world.size - 4),
+      y: clamp(cell.y + dirY * dist, 4, world.size - 4),
       mass: AGAR_EJECT_FOOD,
       color: p.color,
+      vx: dirX * AGAR_EJECT_SPEED,
+      vy: dirY * AGAR_EJECT_SPEED,
+      glide: AGAR_EJECT_GLIDE_TICKS,
+      kind: "eject",
     });
   }
-}
-
-/**
- * Size → speed: small = fast, mid = normal, large = slow.
- * Stronger curve than MVP so huge #1 feels sluggish vs tiny comeback.
- */
-function speedForMass(mass: number): number {
-  // ~4.8 at mass 20 · ~3.0 at 80 · ~1.8 at 250 · ~1.05 at 800+
-  return clamp(5.1 - Math.log2(mass + 1) * 0.72, 1.0, 4.9);
 }
 
 /**
@@ -379,6 +415,68 @@ function moveCell(cell: AgarCell, aimX: number, aimY: number, size: number, now:
   const step = Math.min(dist, spd);
   cell.x = clamp(cell.x + (dx / dist) * step, 4, size - 4);
   cell.y = clamp(cell.y + (dy / dist) * step, 4, size - 4);
+}
+
+/** Glide eject pellets so W is never a silent no-op. */
+function moveEjectPellets(world: AgarWorld): void {
+  for (const f of world.food) {
+    if (!f.glide || f.glide <= 0) continue;
+    if (f.vx == null || f.vy == null) continue;
+    f.x = clamp(f.x + f.vx, 4, world.size - 4);
+    f.y = clamp(f.y + f.vy, 4, world.size - 4);
+    f.vx *= 0.94;
+    f.vy *= 0.94;
+    f.glide -= 1;
+    if (f.glide <= 0) {
+      f.vx = 0;
+      f.vy = 0;
+    }
+  }
+}
+
+/**
+ * W pellets feed viruses → grow; at threshold spawn a new virus (or grow if at cap).
+ */
+function tryVirusFeed(world: AgarWorld): void {
+  for (const virus of world.viruses) {
+    const vr = massToRadius(virus.mass);
+    for (let i = world.food.length - 1; i >= 0; i--) {
+      const f = world.food[i]!;
+      if (f.kind !== "eject" && !f.id.startsWith("e")) continue;
+      if (Math.hypot(f.x - virus.x, f.y - virus.y) > vr + 6) continue;
+      virus.mass += f.mass * 0.95;
+      if (f.vx != null && f.vy != null && (Math.abs(f.vx) > 0.1 || Math.abs(f.vy) > 0.1)) {
+        const len = Math.hypot(f.vx, f.vy) || 1;
+        virus.feedDirX = f.vx / len;
+        virus.feedDirY = f.vy / len;
+      } else {
+        const dx = f.x - virus.x;
+        const dy = f.y - virus.y;
+        const len = Math.hypot(dx, dy) || 1;
+        virus.feedDirX = dx / len;
+        virus.feedDirY = dy / len;
+      }
+      world.food.splice(i, 1);
+
+      if (virus.mass >= AGAR_VIRUS_SHOOT_MASS) {
+        if (world.viruses.length < AGAR_VIRUS_MAX) {
+          const dirX = virus.feedDirX ?? 1;
+          const dirY = virus.feedDirY ?? 0;
+          const shootDist = massToRadius(AGAR_VIRUS_MASS) * 2.8 + 28;
+          world.viruses.push({
+            id: `v${virusSeq++}`,
+            x: clamp(virus.x + dirX * shootDist, 30, world.size - 30),
+            y: clamp(virus.y + dirY * shootDist, 30, world.size - 30),
+            mass: AGAR_VIRUS_MASS,
+          });
+          virus.mass = AGAR_VIRUS_MASS;
+        } else {
+          // At cap: grow size as strategic hazard, soft-cap mass
+          virus.mass = Math.min(virus.mass, AGAR_VIRUS_SHOOT_MASS * 1.35);
+        }
+      }
+    }
+  }
 }
 
 function botAim(world: AgarWorld, bot: AgarPlayer): void {
@@ -530,13 +628,15 @@ function dropDeathMass(
       y: clamp(y + Math.sin(ang) * dist, 4, world.size - 4),
       mass: per,
       color: i % 2 === 0 ? color : "#fbbf24",
+      kind: "frag",
     });
   }
 }
 
 /**
- * Large cell + virus → split into multiple smaller cells (NOT death).
- * Overflow beyond max cells becomes edible food fragments for comeback.
+ * Large cell + virus → forced split into many smaller cells (NOT death).
+ * Mass conservation: sum(cells + food frags) ≈ total * (1 - small loss).
+ * Overflow / reserved share becomes edible fragments for smaller players (comeback).
  */
 function popCellOnVirus(
   world: AgarWorld,
@@ -548,54 +648,53 @@ function popCellOnVirus(
   const cell = player.cells[cellIndex];
   if (!cell) return;
   const total = cell.mass;
+  const budget = total * (1 - AGAR_VIRUS_POP_LOSS);
   const fragCount = Math.min(
     AGAR_VIRUS_FRAGMENTS,
-    Math.max(4, Math.floor(total / AGAR_MIN_CELL_AFTER_SPLIT))
+    Math.max(4, Math.floor(budget / AGAR_MIN_CELL_AFTER_SPLIT))
   );
-  const per = total / fragCount;
   const room = Math.max(0, AGAR_MAX_CELLS - (player.cells.length - 1));
-  const keepAsCells = Math.min(fragCount, Math.max(1, room));
-  const foodFrags = fragCount - keepAsCells;
+  // Keep most mass as player pieces; reserve ~40% as edible comeback fuel when room allows,
+  // or more when cell-capped so fragments always exist for scenario B.
+  const preferCells = Math.min(fragCount, Math.max(1, room));
+  let keepAsCells = preferCells;
+  let foodPieceCount = fragCount - keepAsCells;
+  // Always leave some edible mass for nearby smaller players
+  if (foodPieceCount < 3 && budget > 40) {
+    const steal = Math.min(3 - foodPieceCount, Math.max(0, keepAsCells - 2));
+    keepAsCells -= steal;
+    foodPieceCount += steal;
+  }
+  foodPieceCount = Math.min(AGAR_MAX_VIRUS_FOOD_FRAGS, Math.max(2, foodPieceCount));
+  const cellShare = budget * (keepAsCells / (keepAsCells + foodPieceCount));
+  const foodShare = budget - cellShare;
+  const perCell = cellShare / keepAsCells;
+  const perFood = foodShare / foodPieceCount;
 
   const newCells: AgarCell[] = [];
   for (let i = 0; i < keepAsCells; i++) {
     const ang = (Math.PI * 2 * i) / fragCount + Math.random() * 0.15;
-    const dist = massToRadius(virus.mass) + massToRadius(per) + 8 + Math.random() * 10;
+    const dist = massToRadius(virus.mass) + massToRadius(perCell) + 8 + Math.random() * 10;
     newCells.push({
       x: clamp(virus.x + Math.cos(ang) * dist, 4, world.size - 4),
       y: clamp(virus.y + Math.sin(ang) * dist, 4, world.size - 4),
-      mass: per,
+      mass: perCell,
       boostUntil: now + 380,
       boostDirX: Math.cos(ang),
       boostDirY: Math.sin(ang),
       mergeAt: now + 10_000,
     });
   }
-  // Edible fragments for nearby smaller players — comeback fuel
-  for (let i = 0; i < foodFrags; i++) {
-    const ang = (Math.PI * 2 * (keepAsCells + i)) / fragCount;
-    const dist = 18 + Math.random() * 28;
+  for (let i = 0; i < foodPieceCount; i++) {
+    const ang = (Math.PI * 2 * (keepAsCells + i)) / Math.max(1, keepAsCells + foodPieceCount) + 0.35;
+    const dist = 22 + Math.random() * 36;
     world.food.push({
       id: `vf${foodSeq++}`,
       x: clamp(virus.x + Math.cos(ang) * dist, 4, world.size - 4),
       y: clamp(virus.y + Math.sin(ang) * dist, 4, world.size - 4),
-      mass: Math.max(3, Math.round(per * 0.85)),
-      color: player.color,
-    });
-  }
-  // Always spray edible mass for nearby smaller players (comeback fuel).
-  // Keeps ~22% of popped mass as free food even when all fragments stay as cells.
-  const spray = Math.min(14, Math.max(6, Math.round(total / 28)));
-  const sprayPer = Math.max(3, Math.round((total * 0.22) / spray));
-  for (let i = 0; i < spray; i++) {
-    const ang = (Math.PI * 2 * i) / spray + 0.4;
-    const dist = 36 + Math.random() * 44;
-    world.food.push({
-      id: `vs${foodSeq++}`,
-      x: clamp(virus.x + Math.cos(ang) * dist, 4, world.size - 4),
-      y: clamp(virus.y + Math.sin(ang) * dist, 4, world.size - 4),
-      mass: sprayPer,
-      color: "#86efac",
+      mass: Math.max(2, perFood),
+      color: i % 2 === 0 ? player.color : "#86efac",
+      kind: "frag",
     });
   }
 
@@ -607,8 +706,9 @@ function popCellOnVirus(
         id: `vo${foodSeq++}`,
         x: o.x,
         y: o.y,
-        mass: Math.max(2, Math.round(o.mass * 0.9)),
+        mass: Math.max(2, o.mass),
         color: player.color,
+        kind: "frag",
       });
     }
   }
@@ -714,6 +814,9 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
   world.tick += 1;
   const dtSec = AGAR_TICK_MS / 1000;
 
+  moveEjectPellets(world);
+  tryVirusFeed(world);
+
   for (const p of Object.values(world.players)) {
     if (!p.alive) continue;
     if (p.isBot) {
@@ -733,7 +836,7 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
   if (world.food.length < AGAR_FOOD_TARGET * 0.7) {
     spawnFood(world, Math.min(24, AGAR_FOOD_TARGET - world.food.length));
   }
-  // Keep virus count stable if somehow depleted (viruses are hazards, not consumed)
+  // Soft regen only toward target — never above max from accidental wipe
   if (world.viruses.length < AGAR_VIRUS_TARGET) {
     spawnViruses(world);
   }
@@ -775,4 +878,14 @@ export function cameraFocus(player: AgarPlayer | undefined): Vec {
 /** Debug / QA helpers */
 export function countCells(world: AgarWorld): number {
   return Object.values(world.players).reduce((n, p) => n + (p.alive ? p.cells.length : 0), 0);
+}
+
+/** Sum of player cell mass + food mass tagged as virus frags (for conservation probes). */
+export function sumPoppedMass(player: AgarPlayer, food: AgarFood[], fragIds: Set<string>): number {
+  const cellMass = totalMass(player);
+  let foodMass = 0;
+  for (const f of food) {
+    if (fragIds.has(f.id) || f.kind === "frag") foodMass += f.mass;
+  }
+  return cellMass + foodMass;
 }

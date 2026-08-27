@@ -8,6 +8,7 @@ export {
   ejectMass,
   setPlayerAim,
   canSplitPlayer,
+  speedForMass,
   type AgarWorld,
   type AgarVirus,
 } from "./agar-io-engine";

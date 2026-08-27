@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Agar — competitive loop (decay · virus · Space split · W backward eject).
+ * Agar — competitive loop (virus pop · Space split · W eject feed · comeback).
  * Shared MP shell UX kept: entry / YOU / TOP10 / minimap / death.
  */
 import {
@@ -281,7 +281,7 @@ export function AgarGame() {
             rank={rank}
             extra={
               <span className="text-[10px] font-normal text-white/45">
-                Space = Split · W = Eject back · Virus pops large
+                Space = Split · W = Eject (feeds Virus) · Virus pops #1
               </span>
             }
           />
@@ -313,20 +313,31 @@ export function AgarGame() {
               transform: `translate(${offsetX}px, ${offsetY}px)`,
             }}
           >
-            {world.food.map((f) => (
-              <div
-                key={f.id}
-                className="absolute rounded-full"
-                style={{
-                  left: f.x - (f.mass > 2 ? 3 : 2),
-                  top: f.y - (f.mass > 2 ? 3 : 2),
-                  width: f.mass > 2 ? 6 : 4,
-                  height: f.mass > 2 ? 6 : 4,
-                  backgroundColor: f.color,
-                  boxShadow: f.mass > 2 ? `0 0 6px ${f.color}` : undefined,
-                }}
-              />
-            ))}
+            {world.food.map((f) => {
+              const isEject = f.kind === "eject" || f.id.startsWith("e");
+              const isFrag = f.kind === "frag" || f.id.startsWith("vf") || f.id.startsWith("vo");
+              const size = isEject ? 9 : isFrag || f.mass > 2 ? 6 : 4;
+              return (
+                <div
+                  key={f.id}
+                  className="absolute rounded-full"
+                  style={{
+                    left: f.x - size / 2,
+                    top: f.y - size / 2,
+                    width: size,
+                    height: size,
+                    backgroundColor: f.color,
+                    boxShadow: isEject
+                      ? `0 0 10px ${f.color}, 0 0 4px #fff`
+                      : f.mass > 2
+                        ? `0 0 6px ${f.color}`
+                        : undefined,
+                    border: isEject ? "1px solid rgba(255,255,255,0.55)" : undefined,
+                    zIndex: isEject ? 9 : 1,
+                  }}
+                />
+              );
+            })}
             {(world.viruses ?? []).map((v) => {
               const r = massToRadius(v.mass);
               return (
@@ -342,16 +353,17 @@ export function AgarGame() {
                   }}
                   title="Virus"
                 >
-                  {/* Spiky virus — visually distinct from round cells / food */}
+                  {/* Spiky green virus — clearly not a round cell */}
                   <div
                     className="h-full w-full"
                     style={{
                       background:
-                        "radial-gradient(circle at 40% 35%, #bbf7d0 0%, #22c55e 45%, #14532d 100%)",
+                        "radial-gradient(circle at 38% 32%, #dcfce7 0%, #4ade80 28%, #16a34a 58%, #14532d 100%)",
                       clipPath:
-                        "polygon(50% 0%, 63% 18%, 85% 12%, 78% 35%, 100% 50%, 78% 65%, 85% 88%, 63% 82%, 50% 100%, 37% 82%, 15% 88%, 22% 65%, 0% 50%, 22% 35%, 15% 12%, 37% 18%)",
-                      boxShadow: "0 0 10px rgba(34,197,94,0.55)",
-                      border: "1px solid rgba(187,247,176,0.5)",
+                        "polygon(50% 0%, 58% 14%, 72% 6%, 70% 22%, 90% 18%, 82% 34%, 100% 42%, 86% 52%, 98% 68%, 78% 66%, 82% 88%, 64% 78%, 58% 100%, 50% 86%, 42% 100%, 36% 78%, 18% 88%, 22% 66%, 2% 68%, 14% 52%, 0% 42%, 18% 34%, 10% 18%, 30% 22%, 28% 6%, 42% 14%)",
+                      boxShadow:
+                        "0 0 14px rgba(74,222,128,0.7), inset 0 0 8px rgba(20,83,45,0.45)",
+                      outline: "1px solid rgba(187,247,176,0.65)",
                     }}
                   />
                 </div>

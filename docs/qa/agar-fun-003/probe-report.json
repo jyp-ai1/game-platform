@@ -1,0 +1,99 @@
+{
+  "virusCount": 10,
+  "virusAtTarget": true,
+  "virusCenter": true,
+  "virusNearCenter": 3,
+  "spaceSplit": true,
+  "splitForward": true,
+  "splitCooldownBlocks": true,
+  "splitCooldownReady": true,
+  "splitCooldown": true,
+  "splitCellCount": 2,
+  "wSpawned": true,
+  "wBackward": true,
+  "wMassLost": true,
+  "wMoved": true,
+  "wVisible": true,
+  "ejectTravel": 53.4,
+  "ejectMassLeft": 86.86248518886993,
+  "virusSplit": true,
+  "notInstantDeath": true,
+  "popCells": 5,
+  "popFoodCount": 3,
+  "massBefore": 230,
+  "massAfter": 216.1,
+  "massRatio": 0.939,
+  "massConservation": true,
+  "maxFragmentsOk": true,
+  "fragmentEat": true,
+  "smallStart": 40,
+  "smallEnd": 259,
+  "comeback": true,
+  "virusFeedGrew": true,
+  "virusFeedSpawned": true,
+  "virusFeed": true,
+  "virusCountAfterFeed": 11,
+  "virusMassSample": 100,
+  "virusCapOk": true,
+  "sizeSpeed": true,
+  "speedSmall": 4.54,
+  "speedMid": 2.47,
+  "speedLarge": 1.39,
+  "top10Changes": true,
+  "top1Changed": true,
+  "rankingsSample": [
+    {
+      "id": "bot:5",
+      "nickname": "Cell6",
+      "mass": 363,
+      "color": "#fb7185"
+    },
+    {
+      "id": "bot:16",
+      "nickname": "Cell17",
+      "mass": 341,
+      "color": "#c084fc"
+    },
+    {
+      "id": "bot:0",
+      "nickname": "Cell1",
+      "mass": 249,
+      "color": "#a78bfa"
+    },
+    {
+      "id": "bot:14",
+      "nickname": "Cell15",
+      "mass": 222,
+      "color": "#60a5fa"
+    },
+    {
+      "id": "bot:10",
+      "nickname": "Cell11",
+      "mass": 215,
+      "color": "#a78bfa"
+    }
+  ],
+  "cellCount": 18,
+  "foodCount": 180,
+  "finalVirusCount": 10,
+  "maxCells": 8,
+  "maxFragments": 12,
+  "gates": {
+    "virus": true,
+    "spaceSplit": true,
+    "wVisible": true,
+    "massConservation": true,
+    "virusSplit": true,
+    "comeback": true,
+    "virusFeed": true,
+    "sizeSpeed": true,
+    "top1CanLose": true
+  },
+  "allPass": true,
+  "performance": {
+    "cellCount": 18,
+    "virusCount": 10,
+    "maxFragments": 12,
+    "fpsHint": 30
+  }
+}
