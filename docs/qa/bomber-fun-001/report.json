@@ -1,7 +1,10 @@
 {
   "task": "BOMBER-FUN-001",
   "branch": "content-factory",
+  "commit": "c12a9e0",
   "deploymentTarget": "game29",
+  "preview": "https://game29-eft9fy32y-jyp-ai1s-projects.vercel.app",
+  "playUrl": "https://game29-eft9fy32y-jyp-ai1s-projects.vercel.app/games/bomber/play",
   "production": "HOLD",
   "tests": {
     "command": "npm test --workspace=@game-platform/game-bomber",
