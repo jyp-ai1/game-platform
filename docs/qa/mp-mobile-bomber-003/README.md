@@ -1,9 +1,10 @@
 # MP-MOBILE-CONTROL-001 + BOMBER-ONLINE-003
 
 ## Commit / Preview
-- Commit: (filled after push)
-- Preview: (filled after deploy)
-- Play Bomber Classic room: `/games/bomber/play?room=BOMBER-A`
+- Commit: `63715f4`
+- Preview: https://game29-rl1b9aju9-jyp-ai1s-projects.vercel.app
+- Inspect: https://vercel.com/jyp-ai1s-projects/game29/GribkS9peJ8u9CwzqNNFWdUtJuGp
+- Play Bomber Classic room: https://game29-rl1b9aju9-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A
 - Production: HOLD
 
 ## Mobile Control
