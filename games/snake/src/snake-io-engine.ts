@@ -158,7 +158,7 @@ export interface SnakeIoWorld {
   killFeed: KillFeedEntry[];
   living?: LivingWorldState;
   /** Entry-screen AI tier (Easy / Normal / Hard). Default Normal. */
-  sessionAiDifficulty?: "easy" | "normal" | "hard";
+  sessionAiDifficulty?: "normal" | "hard" | "superhard";
 }
 
 export interface KillFeedEntry {

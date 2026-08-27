@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { PlatformGameCard } from "@/components/platform-game-card";
-import { detailHrefForCatalogSlug } from "@/lib/game-catalog";
+import { detailHrefForCatalogSlug, REPLAY_CARD_CTA } from "@/lib/game-catalog";
 
 /**
  * Sprint 17 Step 5 — search UI + simple title/tag filter (no search infra).
@@ -54,7 +54,7 @@ export function HomeSearchStub({ games }: { games: Game[] }) {
                   game={game}
                   className="min-w-[220px] max-w-[260px] shrink-0"
                   actions={{
-                    primary: { label: "상세 보기", href: detailHrefForCatalogSlug(game.slug) },
+                    primary: { label: REPLAY_CARD_CTA, href: detailHrefForCatalogSlug(game.slug) },
                   }}
                 />
               ))}

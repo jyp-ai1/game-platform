@@ -18,16 +18,17 @@ import { PLAYTEST_AI } from "./snake-playtest-tuning";
 import { noteExecOrder } from "./snake-exec-order-trace";
 import { applyCharacterToSnake, randomSnakeHeadId } from "./snake-characters";
 
-/** Map entry Easy/Normal/Hard → bot spawn tier (no collision algorithm changes). */
+/** Map entry NORMAL / HARD / SUPER HARD → bot spawn tier (no collision algorithm changes). */
 function resolveSessionBotDifficulty(world: SnakeIoWorld, humanCount: number): BotDifficulty {
   const session = world.sessionAiDifficulty ?? "normal";
-  if (session === "easy") return "easy";
+  if (session === "superhard") {
+    const base = pickBotDifficulty(humanCount);
+    return base === "legend" ? "legend" : "hunter";
+  }
   if (session === "hard") {
-    // Hard: stronger fill — hunter floor, legend when crowded
     const base = pickBotDifficulty(humanCount);
     return base === "easy" || base === "normal" ? "hunter" : base;
   }
-  // Normal default — keep existing population pick (never Easy)
   const base = pickBotDifficulty(humanCount);
   return base === "easy" ? "normal" : base;
 }

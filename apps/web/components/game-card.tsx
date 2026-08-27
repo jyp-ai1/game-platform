@@ -1,7 +1,7 @@
 import type { Game } from "@game-platform/shared";
 
 import { PlatformGameCard } from "@/components/platform-game-card";
-import { detailHrefForCatalogSlug } from "@/lib/game-catalog";
+import { detailHrefForCatalogSlug, REPLAY_CARD_CTA } from "@/lib/game-catalog";
 import { getGameBalanceMeta } from "@/lib/game-balance";
 import { isRecentlyCreated } from "@/lib/game-sections";
 
@@ -27,7 +27,7 @@ export function GameCard({
         isNew={isNew}
         actions={{
           primary: {
-            label: isMaintenance ? "점검 중" : isComingSoon ? "Coming Soon" : "상세 보기",
+            label: isMaintenance ? "점검 중" : isComingSoon ? "Coming Soon" : REPLAY_CARD_CTA,
             href: detailHrefForCatalogSlug(game.slug),
           },
         }}

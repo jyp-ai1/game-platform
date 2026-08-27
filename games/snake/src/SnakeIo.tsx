@@ -290,6 +290,7 @@ function applyPeerPresence(
 export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
+  onExitToDetail,
   onExitToLobby,
   headCharacter = "frog",
   bodyColor,
@@ -297,12 +298,14 @@ export function SnakeIoGame({
 }: {
   practiceMode?: boolean;
   onJoinTimeout?: () => void;
-  /** Exit / Death EXIT → Character lobby (not home). */
+  /** Exit / Death EXIT → Game Detail. */
+  onExitToDetail?: () => void;
+  /** Death RETRY → Character lobby. */
   onExitToLobby?: () => void;
   headCharacter?: SnakeHeadId;
   bodyColor?: string;
-  /** Entry AI tier — Easy weaker / Normal default / Hard stronger. */
-  aiDifficulty?: "easy" | "normal" | "hard";
+  /** Entry AI tier — NORMAL / HARD / SUPER HARD. */
+  aiDifficulty?: "normal" | "hard" | "superhard";
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -365,6 +368,7 @@ export function SnakeIoGame({
   const bodyColorRef = useRef<string | undefined>(bodyColor);
   const aiDifficultyRef = useRef(aiDifficulty);
   const onExitToLobbyRef = useRef(onExitToLobby);
+  const onExitToDetailRef = useRef(onExitToDetail);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   // MP-PLATFORM-001: render alpha lives on ref only — canvas draws each RAF without setState
@@ -411,6 +415,7 @@ export function SnakeIoGame({
   onJoinTimeoutRef.current = onJoinTimeout;
   aiDifficultyRef.current = aiDifficulty;
   onExitToLobbyRef.current = onExitToLobby;
+  onExitToDetailRef.current = onExitToDetail;
 
   const effectiveRoomCode = sessionRoom || roomCode;
   const activeRoom = effectiveRoomCode;
@@ -1738,13 +1743,13 @@ export function SnakeIoGame({
         /* room may already be gone */
       }
     }
-    // NAV-001: Exit → Character lobby (never home / dead page)
-    if (onExitToLobbyRef.current) {
-      onExitToLobbyRef.current();
+    // PLATFORM-UX-CONTRACT-001 — Exit → Game Detail
+    if (onExitToDetailRef.current) {
+      onExitToDetailRef.current();
       return;
     }
     if (typeof window !== "undefined") {
-      window.history.back();
+      window.location.href = "/games/snake";
     }
   }, [postDeath, activeRoom, isLocalOnly]);
 
@@ -1850,6 +1855,11 @@ export function SnakeIoGame({
     if (!activeRoom || !worldRef.current) return;
     postDeath("replay");
     emitGameRetry("snake");
+    // PLATFORM-UX-CONTRACT-001 — Death RETRY → Common Lobby
+    if (onExitToLobbyRef.current) {
+      onExitToLobbyRef.current();
+      return;
+    }
     recordSnakeRematch(activeRoom);
     recordSpectatorRejoin(activeRoom);
 
@@ -2814,13 +2824,13 @@ export function SnakeIoGame({
                 /* ignore */
               }
             }
-            // NAV-001: Death EXIT → same as 나가기 → lobby
-            if (onExitToLobbyRef.current) {
-              onExitToLobbyRef.current();
+            // PLATFORM-UX-CONTRACT-001 — Death EXIT → Game Detail
+            if (onExitToDetailRef.current) {
+              onExitToDetailRef.current();
               return;
             }
             if (typeof window !== "undefined") {
-              window.history.back();
+              window.location.href = "/games/snake";
             }
           }}
         />

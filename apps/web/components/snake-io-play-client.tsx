@@ -312,6 +312,7 @@ function SnakeIoPlayInner({
         <SnakeIoGame
           practiceMode={practiceMode}
           onJoinTimeout={handleInviteJoinTimeout}
+          onExitToDetail={() => router.push("/games/snake")}
           onExitToLobby={() => setCharacterReady(false)}
           headCharacter={headCharacter}
           bodyColor={bodyColor}

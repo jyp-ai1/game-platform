@@ -96,6 +96,8 @@ export {
 export {
   DEFAULT_MP_AI_DIFFICULTY,
   MP_AI_DIFFICULTIES,
+  toEngineAiTier,
+  type EngineAiTier,
   type MpAiDifficulty,
 } from "./mp-difficulty";
 export {

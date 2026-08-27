@@ -14,6 +14,7 @@ import {
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
   MultiplayerYouBar,
+  toEngineAiTier,
   useGameSDK,
   type MpAiDifficulty,
   type MpMinimapDot,
@@ -36,11 +37,11 @@ import {
 const CELL = 28;
 
 const BOMBER_STYLES: MpStyleOption[] = [
-  { id: "bomber", label: "Bomber", emoji: "💣" },
-  { id: "hero", label: "Hero", emoji: "🧑" },
-  { id: "ninja", label: "Ninja", emoji: "🥷" },
-  { id: "robot", label: "Robot", emoji: "🤖" },
-  { id: "ghost", label: "Ghost", emoji: "👻" },
+  { id: "bomber", label: "Bomber", emoji: "💣", color: MP_PLAYER_COLORS[0] },
+  { id: "hero", label: "Hero", emoji: "🧑", color: MP_PLAYER_COLORS[1] },
+  { id: "ninja", label: "Ninja", emoji: "🥷", color: MP_PLAYER_COLORS[2] },
+  { id: "robot", label: "Robot", emoji: "🤖", color: MP_PLAYER_COLORS[3] },
+  { id: "ghost", label: "Ghost", emoji: "👻", color: MP_PLAYER_COLORS[4] },
 ];
 
 function snap(w: BomberWorld): BomberWorld {
@@ -183,7 +184,8 @@ export function BomberGame() {
 
   const handleStart = useCallback(() => {
     reportedRef.current = false;
-    const next = createBomberWorld(deviceId, nickname, 2, aiDifficulty);
+    const engineTier = toEngineAiTier(aiDifficulty);
+    const next = createBomberWorld(deviceId, nickname, 2, engineTier);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
@@ -192,14 +194,13 @@ export function BomberGame() {
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
-    const next = createBomberWorld(deviceId, nickname, 2, aiDifficulty);
-    applyLocalLook(next, deviceId, color);
-    worldRef.current = next;
-    setWorld(next);
-  }, [deviceId, nickname, color, aiDifficulty]);
-
-  const exitToLobby = useCallback(() => {
     setStarted(false);
+  }, []);
+
+  const exitToDetail = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.location.href = "/games/bomber";
+    }
   }, []);
 
   const width = world.cols * CELL;
@@ -212,7 +213,7 @@ export function BomberGame() {
     return (
       <MultiplayerEntrySelect
         title="Bomber"
-        subtitle="캐릭터 · 색상 선택 후 ENTER WORLD"
+        subtitle="캐릭터 · 난이도 선택 후 ENTER"
         styles={BOMBER_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
@@ -222,7 +223,7 @@ export function BomberGame() {
         difficulty={aiDifficulty}
         onDifficultyChange={setAiDifficulty}
         onPlay={handleStart}
-        playLabel="ENTER WORLD"
+        playLabel="ENTER"
         players={1}
         bots={botCount || 3}
         roomCode={roomCode}
@@ -266,7 +267,7 @@ export function BomberGame() {
   return (
     <>
       <MultiplayerPlayShell
-        onExit={exitToLobby}
+        onExit={exitToDetail}
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
@@ -369,7 +370,7 @@ export function BomberGame() {
           score={wins}
           metric={`L:${wins} · Kills ${kills}`}
           onRetry={handleRetry}
-          onExit={exitToLobby}
+          onExit={exitToDetail}
         />
       ) : null}
     </>

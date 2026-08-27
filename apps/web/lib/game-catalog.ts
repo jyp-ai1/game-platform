@@ -41,6 +41,11 @@ export function detailHrefForCatalogSlug(slug: string): string {
   return `/games/${slug}`;
 }
 
+/** PLATFORM-UX-CONTRACT-002 — unified card / detail CTA copy. */
+export const REPLAY_CARD_CTA = "▶ Re:Play";
+export const REPLAY_DETAIL_WORLD_CTA = "▶ WORLD PLAY";
+export const REPLAY_DETAIL_SOLO_CTA = "▶ PLAY";
+
 export function playHrefForCatalogSlug(slug: string): string {
   // Detail CTA → Character/Color entry (flagship Snake or /games/{slug}/play).
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";

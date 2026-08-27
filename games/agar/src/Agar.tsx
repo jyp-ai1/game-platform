@@ -14,6 +14,7 @@ import {
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
   MultiplayerYouBar,
+  toEngineAiTier,
   useGameSDK,
   type MpAiDifficulty,
   type MpStyleOption,
@@ -32,7 +33,6 @@ import {
   createAgarWorld,
   ejectMass,
   massToRadius,
-  respawnPlayer,
   setPlayerAim,
   splitPlayer,
   tickAgarWorld,
@@ -43,11 +43,11 @@ import {
 const VIEW = 520;
 
 const AGAR_STYLES: MpStyleOption[] = [
-  { id: "cell", label: "Cell", emoji: "⚪" },
-  { id: "orb", label: "Orb", emoji: "🔵" },
-  { id: "blob", label: "Blob", emoji: "🟢" },
-  { id: "dot", label: "Dot", emoji: "🟡" },
-  { id: "pulse", label: "Pulse", emoji: "🟣" },
+  { id: "cell", label: "Cell", emoji: "⚪", color: MP_PLAYER_COLORS[0] },
+  { id: "orb", label: "Orb", emoji: "🔵", color: MP_PLAYER_COLORS[1] },
+  { id: "blob", label: "Blob", emoji: "🟢", color: MP_PLAYER_COLORS[2] },
+  { id: "dot", label: "Dot", emoji: "🟡", color: MP_PLAYER_COLORS[3] },
+  { id: "pulse", label: "Pulse", emoji: "🟣", color: MP_PLAYER_COLORS[4] },
 ];
 
 function snapshotWorld(w: AgarWorld): AgarWorld {
@@ -198,7 +198,8 @@ export function AgarGame() {
 
   function handleStart() {
     reportedRef.current = false;
-    const next = createAgarWorld(deviceId, nickname, aiDifficulty);
+    const engineTier = toEngineAiTier(aiDifficulty);
+    const next = createAgarWorld(deviceId, nickname, engineTier);
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
@@ -207,16 +208,13 @@ export function AgarGame() {
 
   function handleRetry() {
     reportedRef.current = false;
-    const w = worldRef.current;
-    respawnPlayer(w, deviceId, nickname);
-    applyLocalLook(w, deviceId, color);
-    const snap = snapshotWorld(w);
-    worldRef.current = snap;
-    setWorld(snap);
+    setStarted(false);
   }
 
-  function exitToLobby() {
-    setStarted(false);
+  function exitToDetail() {
+    if (typeof window !== "undefined") {
+      window.location.href = "/games/agar";
+    }
   }
 
   const offsetX = VIEW / 2 - cam.x;
@@ -226,7 +224,7 @@ export function AgarGame() {
     return (
       <MultiplayerEntrySelect
         title="Agar"
-        subtitle="세포 · 색상 선택 후 ENTER WORLD"
+        subtitle="캐릭터 · 난이도 선택 후 ENTER"
         styles={AGAR_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
@@ -236,9 +234,9 @@ export function AgarGame() {
         difficulty={aiDifficulty}
         onDifficultyChange={setAiDifficulty}
         onPlay={handleStart}
-        playLabel="ENTER WORLD"
+        playLabel="ENTER"
         players={1}
-        bots={agarBotCountForDifficulty(aiDifficulty)}
+        bots={agarBotCountForDifficulty(toEngineAiTier(aiDifficulty))}
         roomCode={roomCode}
       />
     );
@@ -273,7 +271,7 @@ export function AgarGame() {
   return (
     <>
       <MultiplayerPlayShell
-        onExit={exitToLobby}
+        onExit={exitToDetail}
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
@@ -362,7 +360,7 @@ export function AgarGame() {
           score={finalScore}
           metric={`L:${finalScore}`}
           onRetry={handleRetry}
-          onExit={exitToLobby}
+          onExit={exitToDetail}
         />
       ) : null}
     </>

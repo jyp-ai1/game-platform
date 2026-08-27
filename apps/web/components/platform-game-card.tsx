@@ -242,16 +242,17 @@ export function PlatformGameCard({
           <div
             className={cn(
               "mt-auto flex flex-wrap gap-2 pt-1",
-              live && !actions.secondary && "flex-col"
+              !actions.secondary && "flex-col"
             )}
           >
             {actions.primary.href ? (
               <Button
                 className={cn(
-                  "gap-1.5 motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
-                  live &&
-                    "w-full bg-gradient-to-r from-emerald-500 to-cyan-400 text-emerald-950 hover:from-emerald-400 hover:to-cyan-300",
-                  live && actions.secondary && "w-auto"
+                  "min-h-12 w-full gap-1.5 text-base font-bold motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
+                  live
+                    ? "bg-gradient-to-r from-emerald-500 to-cyan-400 text-emerald-950 hover:from-emerald-400 hover:to-cyan-300"
+                    : "bg-gradient-to-r from-violet-600 to-cyan-500 text-white hover:from-violet-500 hover:to-cyan-400",
+                  actions.secondary && "w-auto flex-1"
                 )}
                 nativeButton={false}
                 render={
@@ -264,10 +265,11 @@ export function PlatformGameCard({
             ) : (
               <Button
                 className={cn(
-                  "gap-1.5 motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
-                  live &&
-                    "w-full bg-gradient-to-r from-emerald-500 to-cyan-400 text-emerald-950 hover:from-emerald-400 hover:to-cyan-300",
-                  live && actions.secondary && "w-auto flex-1"
+                  "min-h-12 w-full gap-1.5 text-base font-bold motion-base transition-transform hover:scale-[1.02] active:scale-[0.98]",
+                  live
+                    ? "bg-gradient-to-r from-emerald-500 to-cyan-400 text-emerald-950 hover:from-emerald-400 hover:to-cyan-300"
+                    : "bg-gradient-to-r from-violet-600 to-cyan-500 text-white hover:from-violet-500 hover:to-cyan-400",
+                  actions.secondary && "w-auto flex-1"
                 )}
                 onClick={actions.primary.onClick}
                 disabled={actions.primary.loading}
@@ -290,10 +292,9 @@ export function PlatformGameCard({
         ) : !isComingSoon && !isMaintenance ? (
           <div className="mt-auto pt-1">
             <Button
-              size="sm"
-              className="w-full transition-transform duration-200 hover:scale-[1.01]"
+              className="min-h-12 w-full bg-gradient-to-r from-violet-600 to-cyan-500 text-base font-bold text-white hover:from-violet-500 hover:to-cyan-400"
               nativeButton={false}
-              render={<Link href={`/games/${game.slug}`}>플레이</Link>}
+              render={<Link href={`/games/${game.slug}`}>▶ Re:Play</Link>}
             />
           </div>
         ) : (

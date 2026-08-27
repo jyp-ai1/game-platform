@@ -12,7 +12,7 @@ import {
   PlatformGameCard,
   type PlatformGameCardFriend,
 } from "@/components/platform-game-card";
-import { detailHrefForCatalogSlug } from "@/lib/game-catalog";
+import { detailHrefForCatalogSlug, REPLAY_CARD_CTA } from "@/lib/game-catalog";
 import { useMounted } from "@/lib/use-mounted";
 
 export interface LiveMultiplayerFriendPresence {
@@ -99,7 +99,7 @@ export function LiveMultiplayerGameCard({
       className={className}
       actions={{
         primary: {
-          label: "게임 상세",
+          label: REPLAY_CARD_CTA,
           href: detailHref,
         },
         secondary: friend

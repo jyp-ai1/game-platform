@@ -9,7 +9,7 @@ import {
 
 export type GameType = "multiplayer" | "singleplayer";
 
-/** Alias — same as MpAiDifficulty; user-facing Easy / Normal / Hard. */
+/** Alias — same as MpAiDifficulty; user-facing NORMAL / HARD / SUPER HARD. */
 export type SessionDifficulty = MpAiDifficulty;
 
 export type CreatorGameMeta = {
@@ -29,22 +29,36 @@ export type CreatorGameMeta = {
   popularity?: string;
 };
 
+  /** Creator placeholder — metadata-only slug for shared detail template. */
+const CREATOR_STUB_SLUGS = new Set(["creator-demo"]);
+
 const MP_SLUGS = new Set(["snake", "agar", "bomber"]);
 
-/** Map legacy catalog Difficulty (EASY/MEDIUM/HARD) → session difficulty. */
+/** Map legacy catalog Difficulty (EASY/MEDIUM/HARD) → session difficulty. Easy → normal. */
 export function toSessionDifficulty(
   value: string | null | undefined
 ): SessionDifficulty {
   const v = (value ?? "").toLowerCase();
-  if (v === "easy" || v === "e") return "easy";
+  if (v === "superhard" || v === "super-hard" || v === "super_hard" || v === "insane") {
+    return "superhard";
+  }
   if (v === "hard" || v === "h") return "hard";
-  if (v === "medium" || v === "med" || v === "m" || v === "normal" || v === "n") {
+  if (
+    v === "easy" ||
+    v === "e" ||
+    v === "medium" ||
+    v === "med" ||
+    v === "m" ||
+    v === "normal" ||
+    v === "n"
+  ) {
     return "normal";
   }
   return DEFAULT_MP_AI_DIFFICULTY;
 }
 
 export function resolveGameType(slug: string): GameType {
+  if (CREATOR_STUB_SLUGS.has(slug)) return "singleplayer";
   return MP_SLUGS.has(slug) ? "multiplayer" : "singleplayer";
 }
 

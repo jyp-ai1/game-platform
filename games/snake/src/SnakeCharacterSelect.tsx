@@ -17,6 +17,7 @@ const SNAKE_STYLES = SNAKE_HEAD_IDS.map((id) => ({
   id,
   label: SNAKE_HEAD_CHARACTERS[id].label,
   emoji: SNAKE_HEAD_CHARACTERS[id].emoji,
+  color: SNAKE_HEAD_CHARACTERS[id].bodyColor,
 }));
 
 export function SnakeCharacterSelect({
@@ -45,7 +46,7 @@ export function SnakeCharacterSelect({
   return (
     <MultiplayerEntrySelect
       title="Snake"
-      subtitle="스타일 · 색상 선택 후 ENTER WORLD"
+      subtitle="캐릭터 · 난이도 선택 후 ENTER"
       styles={SNAKE_STYLES}
       styleId={value}
       onStyleChange={(id) => onChange(id as SnakeHeadId)}
@@ -55,7 +56,7 @@ export function SnakeCharacterSelect({
       difficulty={difficulty}
       onDifficultyChange={onDifficultyChange}
       onPlay={onConfirm}
-      playLabel="ENTER WORLD"
+      playLabel="ENTER"
       players={players}
       bots={bots}
       roomCode={roomCode}
