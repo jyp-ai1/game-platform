@@ -8,6 +8,7 @@ import {
   DEFAULT_MP_AI_DIFFICULTY,
   getDeviceId,
   getLastNickname,
+  MobileControlPad,
   MP_PLAYER_COLORS,
   MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
@@ -17,6 +18,7 @@ import {
   toEngineAiTier,
   useGameSDK,
   type MpStyleOption,
+  type PadDirection,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -177,46 +179,66 @@ export function AgarGame() {
     [deviceId]
   );
 
-  // Fullscreen: keep aim tracking even if pointer leaves the scaled board briefly
+  // Fullscreen: keep aim tracking even if pointer leaves the scaled board briefly (mouse/pen only — touch uses D-pad)
   useEffect(() => {
     if (!started || !alive) return;
     const onMove = (e: PointerEvent) => {
-      if (e.pointerType === "touch" && e.buttons === 0) return;
+      if (e.pointerType === "touch") return;
       onPointer(e.clientX, e.clientY);
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
   }, [started, alive, onPointer]);
 
+  const aimFromPad = useCallback(
+    (dir: PadDirection) => {
+      const w = worldRef.current;
+      const focus = cameraFocus(w.players[deviceId]);
+      const dist = 140;
+      const ox = dir === "left" ? -dist : dir === "right" ? dist : 0;
+      const oy = dir === "up" ? -dist : dir === "down" ? dist : 0;
+      setPlayerAim(w, deviceId, focus.x + ox, focus.y + oy);
+    },
+    [deviceId]
+  );
+
+  const doSplit = useCallback(() => {
+    const w = worldRef.current;
+    const now = Date.now();
+    if (!canSplitPlayer(w, deviceId, now)) return;
+    splitPlayer(w, deviceId, now);
+    const snap = snapshotWorld(w);
+    worldRef.current = snap;
+    setWorld(snap);
+  }, [deviceId]);
+
+  const doEject = useCallback(() => {
+    const now = performance.now();
+    if (now - lastEjectAtRef.current < 90) return;
+    lastEjectAtRef.current = now;
+    const w = worldRef.current;
+    ejectMass(w, deviceId);
+    const snap = snapshotWorld(w);
+    worldRef.current = snap;
+    setWorld(snap);
+  }, [deviceId]);
+
   useEffect(() => {
     if (!started) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         e.preventDefault();
-        const w = worldRef.current;
-        const now = Date.now();
-        if (!canSplitPlayer(w, deviceId, now)) return;
-        splitPlayer(w, deviceId, now);
-        const snap = snapshotWorld(w);
-        worldRef.current = snap;
-        setWorld(snap);
+        doSplit();
         return;
       }
       if (e.code === "KeyW") {
         e.preventDefault();
-        const now = performance.now();
-        if (now - lastEjectAtRef.current < 90) return;
-        lastEjectAtRef.current = now;
-        const w = worldRef.current;
-        ejectMass(w, deviceId);
-        const snap = snapshotWorld(w);
-        worldRef.current = snap;
-        setWorld(snap);
+        doEject();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [started, deviceId]);
+  }, [started, doSplit, doEject]);
 
   function handleStart() {
     reportedRef.current = false;
@@ -312,8 +334,12 @@ export function AgarGame() {
           ref={boardRef}
           className="absolute inset-0 touch-none overflow-hidden"
           style={{ backgroundColor: AGAR_BOARD_BG }}
-          onPointerMove={(e) => onPointer(e.clientX, e.clientY)}
+          onPointerMove={(e) => {
+            if (e.pointerType === "touch") return;
+            onPointer(e.clientX, e.clientY);
+          }}
           onPointerDown={(e) => {
+            if (e.pointerType === "touch") return;
             (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
             onPointer(e.clientX, e.clientY);
           }}
@@ -464,6 +490,16 @@ export function AgarGame() {
           </div>
         </div>
       </MultiplayerPlayShell>
+
+      {alive ? (
+        <MobileControlPad
+          onDirection={aimFromPad}
+          actions={[
+            { id: "split", label: "SPLIT", mode: "tap", onPress: doSplit },
+            { id: "eject", label: "EJECT", mode: "tap", onPress: doEject },
+          ]}
+        />
+      ) : null}
 
       {!alive ? (
         <MultiplayerDeathOverlay

@@ -1,6 +1,14 @@
 "use client";
 
-import { getDeviceId, getLastNickname, useGameSDK, emitGameExit, emitGameRetry, MultiplayerDeathOverlay } from "@game-platform/game-sdk";
+import {
+  getDeviceId,
+  getLastNickname,
+  useGameSDK,
+  emitGameExit,
+  emitGameRetry,
+  MobileControlPad,
+  MultiplayerDeathOverlay,
+} from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
@@ -168,7 +176,6 @@ import { drawWorldCanvas, getWorldCanvasStats } from "./snake-world-canvas";
 import { initSnakePath } from "./snake-path-movement";
 import { SnakeMinimap } from "./snake-minimap";
 import { SnakeWorldHud } from "./snake-world-hud";
-import { SnakeMobileControls } from "./snake-mobile-controls";
 import { SnakeRankingPanel } from "./snake-ranking-panel";
 import {
   playBoostSound,
@@ -347,7 +354,6 @@ export function SnakeIoGame({
   const prevSnakeSnapRef = useRef<Record<string, ReturnType<typeof captureSnakeSnapshot>>>({});
   const prevWorldRef = useRef<SnakeIoWorld | null>(null);
   const boostingRef = useRef(false);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const inputLoggedRef = useRef(false);
   const awaitingInputRef = useRef(true);
   const [awaitingInput, setAwaitingInput] = useState(true);
@@ -2414,21 +2420,6 @@ export function SnakeIoGame({
             backgroundImage: `linear-gradient(${visualGridLine} 1px, transparent 1px), linear-gradient(90deg, ${visualGridLine} 1px, transparent 1px)`,
             backgroundSize: `${visualGridPx}px ${visualGridPx}px`,
           }}
-          onTouchStart={(e) => {
-            const t = e.touches[0];
-            if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
-          }}
-          onTouchEnd={(e) => {
-            const start = touchStartRef.current;
-            touchStartRef.current = null;
-            const t = e.changedTouches[0];
-            if (!start || !t) return;
-            const dx = t.clientX - start.x;
-            const dy = t.clientY - start.y;
-            if (Math.hypot(dx, dy) < SNAKE_FEEL.mobileSwipeThreshold) return;
-            const dir: Direction = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
-            handleDirection(dir);
-          }}
         >
         {mySnake?.alive && !isSpectating ? (
           <div className="pointer-events-auto absolute left-2 top-2 z-40 flex gap-1.5">
@@ -2839,48 +2830,55 @@ export function SnakeIoGame({
       ) : null}
 
       {!isSpectating && mySnake?.alive && !awaitingInput && !isPaused ? (
-        <SnakeMobileControls
+        <MobileControlPad
           onDirection={handleDirection}
-          onBoostStart={() => {
-            if (getSegmentCount(mySnake) <= SNAKE_FEEL.boostMinSegments) return;
-            if (!boostingRef.current) {
-              playBoostSound();
-              if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 4);
-            }
-            boostingRef.current = true;
-            if (worldRef.current && shouldTickWorld) {
-              setBoost(worldRef.current, deviceId, true);
-            } else if (worldRef.current && !isGlobalWorld) {
-              setBoost(worldRef.current, deviceId, true);
-              bumpLocalInput();
-            }
-            if (!shouldTickWorld && activeRoom) {
-              sendPlayerInput(activeRoom, isGlobalWorld, {
-                deviceId,
-                direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
-                boosting: true,
-              });
-            }
-          }}
-          onBoostEnd={() => {
-            if (boostingRef.current) playBoostEndSound();
-            boostingRef.current = false;
-            if (worldRef.current && shouldTickWorld) {
-              setBoost(worldRef.current, deviceId, false);
-            } else if (worldRef.current && !isGlobalWorld) {
-              setBoost(worldRef.current, deviceId, false);
-              bumpLocalInput();
-            }
-            if (!shouldTickWorld && activeRoom) {
-              sendPlayerInput(activeRoom, isGlobalWorld, {
-                deviceId,
-                direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
-                boosting: false,
-              });
-            }
-          }}
-          boosting={!!isBoosting}
-          boostReady={getSegmentCount(mySnake) > SNAKE_FEEL.boostMinSegments}
+          actions={[
+            {
+              id: "boost",
+              label: "BOOST",
+              mode: "hold",
+              active: !!isBoosting,
+              disabled: getSegmentCount(mySnake) <= SNAKE_FEEL.boostMinSegments,
+              onPress: () => {
+                if (getSegmentCount(mySnake) <= SNAKE_FEEL.boostMinSegments) return;
+                if (!boostingRef.current) {
+                  playBoostSound();
+                  if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 4);
+                }
+                boostingRef.current = true;
+                if (worldRef.current && shouldTickWorld) {
+                  setBoost(worldRef.current, deviceId, true);
+                } else if (worldRef.current && !isGlobalWorld) {
+                  setBoost(worldRef.current, deviceId, true);
+                  bumpLocalInput();
+                }
+                if (!shouldTickWorld && activeRoom) {
+                  sendPlayerInput(activeRoom, isGlobalWorld, {
+                    deviceId,
+                    direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
+                    boosting: true,
+                  });
+                }
+              },
+              onRelease: () => {
+                if (boostingRef.current) playBoostEndSound();
+                boostingRef.current = false;
+                if (worldRef.current && shouldTickWorld) {
+                  setBoost(worldRef.current, deviceId, false);
+                } else if (worldRef.current && !isGlobalWorld) {
+                  setBoost(worldRef.current, deviceId, false);
+                  bumpLocalInput();
+                }
+                if (!shouldTickWorld && activeRoom) {
+                  sendPlayerInput(activeRoom, isGlobalWorld, {
+                    deviceId,
+                    direction: worldRef.current?.snakes[deviceId]?.pendingDirection ?? "right",
+                    boosting: false,
+                  });
+                }
+              },
+            },
+          ]}
         />
       ) : null}
     </div>

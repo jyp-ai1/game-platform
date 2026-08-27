@@ -78,10 +78,10 @@ export type MatchDifficulty = {
 };
 
 export const MATCH_AI: MatchDifficulty = {
-  // Old Normal: aiTickEvery 8 / bombChance 0.032 — this is stricter
-  aiTickEvery: 5,
-  aiBombChance: 0.05,
-  aiHuntChance: 0.58,
+  // Harder than old Normal (tick 8 / bomb 0.032); not godlike
+  aiTickEvery: 3,
+  aiBombChance: 0.08,
+  aiHuntChance: 0.62,
   softDensity: 0.58,
   fuseMs: BOMBER_BOMB_FUSE_MS,
   powerUpChance: 0.28,
@@ -93,6 +93,19 @@ export const MATCH_AI: MatchDifficulty = {
 /** Map A/B/C/D — Classic · Cross · Maze · Open */
 export const MAP_NAMES = ["Classic", "Cross", "Maze", "Open"] as const;
 export const MAP_LETTERS = ["A", "B", "C", "D"] as const;
+
+/** Roster size is determined by map (no 4/6 picker). Classic/Cross=4, Maze/Open=6 */
+export const MAP_ROSTER: readonly PlayerSlots[] = [4, 4, 6, 6];
+
+/** Same Map = same Room/World shard */
+export function bomberRoomCodeForMap(mapId: number): string {
+  const letter = MAP_LETTERS[((mapId % 4) + 4) % 4] ?? "A";
+  return `BOMBER-${letter}`;
+}
+
+export function rosterForMap(mapId: number): PlayerSlots {
+  return MAP_ROSTER[((mapId % 4) + 4) % 4] ?? 4;
+}
 
 /** Per-map max fire power (cap after Fire+1 pickups). */
 export const MAP_MAX_FIRE: readonly number[] = [4, 5, 3, 6];
@@ -372,8 +385,11 @@ export function createBomberWorld(
     matchStartedAt?: number;
   }
 ): BomberWorld {
-  const playerSlots: PlayerSlots = opts?.playerSlots === 6 ? 6 : 4;
   const mapId = Math.max(0, Math.min(3, opts?.mapId ?? 0));
+  const playerSlots: PlayerSlots =
+    opts?.playerSlots === 4 || opts?.playerSlots === 6
+      ? opts.playerSlots
+      : rosterForMap(mapId);
   const maxFire = MAP_MAX_FIRE[mapId] ?? 4;
   const diff: MatchDifficulty = { ...MATCH_AI, bombRange: BOMBER_FIRE_START, maxFire };
   const humans =
@@ -428,6 +444,83 @@ export function createBomberWorld(
   }
   updateRankings(world);
   return world;
+}
+
+/**
+ * Host: new humans take over AI seats; leavers become AI refill (keep seat/stats).
+ */
+export function reconcileHumans(world: BomberWorld, humans: HumanSeat[]): void {
+  if (world.matchOver) return;
+  const want = world.playerSlots;
+  const humanIds = new Set(humans.map((h) => h.id));
+
+  for (const h of humans) {
+    const existing = world.players[h.id];
+    if (existing) {
+      existing.isBot = false;
+      existing.nickname = h.nickname || existing.nickname;
+      if (h.color) existing.color = h.color;
+      continue;
+    }
+    const bot = Object.values(world.players).find((p) => p.isBot);
+    if (!bot) break;
+    const seat = { ...bot };
+    delete world.players[bot.id];
+    world.players[h.id] = {
+      ...seat,
+      id: h.id,
+      nickname: h.nickname || "Player",
+      color: h.color || seat.color,
+      isBot: false,
+    };
+  }
+
+  for (const p of Object.values(world.players)) {
+    if (p.isBot) continue;
+    if (humanIds.has(p.id)) continue;
+    const botId = `bot:refill-${p.x}-${p.y}-${world.tick}`;
+    const seat = { ...p };
+    delete world.players[p.id];
+    world.players[botId] = {
+      ...seat,
+      id: botId,
+      nickname: `Bomber${Object.keys(world.players).length + 1}`,
+      isBot: true,
+    };
+  }
+
+  while (Object.keys(world.players).length < want) {
+    const seats = spawnPoints(want);
+    const taken = new Set(
+      Object.values(world.players).map((p) => `${p.x},${p.y}`)
+    );
+    const spawn = seats.find((s) => !taken.has(`${s.x},${s.y}`)) ?? seats[0]!;
+    const idx = Object.keys(world.players).length;
+    const id = `bot:${idx}-${world.tick}`;
+    world.players[id] = {
+      id,
+      nickname: `Bomber${idx + 1}`,
+      color: COLORS[idx % COLORS.length]!,
+      x: spawn.x,
+      y: spawn.y,
+      alive: true,
+      isBot: true,
+      bombsMax: world.difficulty.bombsMax,
+      bombsLeft: world.difficulty.bombsMax,
+      kills: 0,
+      wins: 0,
+      blastBonus: 0,
+      speedBonus: 0,
+    };
+  }
+
+  while (Object.keys(world.players).length > want) {
+    const bot = Object.values(world.players).find((p) => p.isBot);
+    if (!bot) break;
+    delete world.players[bot.id];
+  }
+
+  updateRankings(world);
 }
 
 function walkable(world: BomberWorld, x: number, y: number): boolean {

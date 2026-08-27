@@ -122,6 +122,12 @@ export {
   MultiplayerYouBar,
   type MpMinimapDot,
 } from "./multiplayer-play-shell";
+export {
+  MobileControlPad,
+  type MobileControlAction,
+  type MobileControlPadProps,
+  type PadDirection,
+} from "./mobile-control-pad";
 export { GameFeelLayer } from "./game-feel-layer";
 export { playGameFeel, type GameFeelEvent } from "./game-feel-events";
 export { PuzzlePlayField } from "./puzzle-play-field";
