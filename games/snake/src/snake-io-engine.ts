@@ -510,9 +510,21 @@ export function rehydrateWorldSnakes(world: SnakeIoWorld): void {
 
 export function setInput(world: SnakeIoWorld, deviceId: string, direction: Direction): void {
   const snake = world.snakes[deviceId];
-  if (!snake || !snake.alive || snake.spectating || isOpposite(direction, snake.direction)) return;
+  if (!snake || !snake.alive || snake.spectating) return;
+  // Slither-like path follow: maxTurn limits reversal speed — no discrete opposite block.
+  // Discretized isOpposite(direction, snake.direction) falsely blocks left after a full circle
+  // when angleToDirection returns the starting cardinal (e.g. right @ 0rad) while turning left.
   snake.pendingDirection = direction;
   snake.desiredAngle = directionToAngle(direction);
+}
+
+/** Default direction + path for bots/humans when pending/drift is missing. */
+export function ensureSnakeMovementReady(snake: SnakeEntity): void {
+  const dir = snake.pendingDirection ?? snake.direction ?? "right";
+  snake.pendingDirection = dir;
+  snake.direction = snake.direction ?? dir;
+  snake.desiredAngle = directionToAngle(dir);
+  ensureSnakePath(snake);
 }
 
 export function setBoost(world: SnakeIoWorld, deviceId: string, boosting: boolean): void {
@@ -1149,6 +1161,7 @@ function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, no
   if (isBotEntity(snake)) {
     snake.awaitingInput = false;
     snake.lastMoveTick = world.tick;
+    ensureSnakeMovementReady(snake);
   }
   deathTrace("alive_true", {
     tick: world.tick,

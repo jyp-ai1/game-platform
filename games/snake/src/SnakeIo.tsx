@@ -2520,12 +2520,9 @@ export function SnakeIoGame({
           {!immersivePlay ? (
             <>
               <p className="mt-0.5 text-muted-foreground">Kills <span className="text-amber-300">{myKills}</span></p>
-              <p className={cn("mt-0.5", isBoosting ? "font-semibold text-amber-300" : "text-white/40")}>
-                {isBoosting ? "⚡ BOOST" : "Boost"}
-              </p>
-              <p className="mt-0.5 text-[10px] text-white/45">
-                <span className="hidden lg:inline">SPACEBAR : BOOST</span>
-                <span className="lg:hidden">BOOST</span>
+              <p className={cn("mt-0.5 text-[10px]", isBoosting ? "font-semibold text-amber-300" : "text-white/45")}>
+                <span className="hidden lg:inline">{isBoosting ? "⚡ BOOST" : "SPACEBAR : BOOST"}</span>
+                <span className="lg:hidden">{isBoosting ? "⚡ BOOST" : "BOOST"}</span>
               </p>
             </>
           ) : null}

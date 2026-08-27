@@ -5,7 +5,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/__tests__/snake-phase2-1.test.ts"
   },
   "dependencies": {
     "@game-platform/game-sdk": "*",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@types/react": "^19",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }

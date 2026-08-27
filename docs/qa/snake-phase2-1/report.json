@@ -1,0 +1,32 @@
+{
+  "phase": "PLATFORM-CORE-002 Phase 2.1",
+  "base": "ac26964",
+  "reportedAt": "2026-08-27T05:30:00.000Z",
+  "P0-1": {
+    "rootCause": "setInput used isOpposite(direction, snake.direction). After a full left circle angleToDirection returns starting cardinal (right) while player intent is left — falsely treated as 180° reversal.",
+    "fix": "Removed discrete opposite block from setInput; smooth maxTurn in advanceSnakePath limits reversal speed. normalizeAngle on snake.angle prevents drift.",
+    "test": "games/snake/src/__tests__/snake-phase2-1.test.ts — left accepted at angle=0 heading right",
+    "pass": true
+  },
+  "P0-2": {
+    "rootCause": "Character-less bots missing headCharacter/pendingDirection/desiredAngle/awaitingInput clear — tickWorld skipped movement when awaitingInput=true or direction undefined.",
+    "fix": "ensureBotReady + ensureSnakeMovementReady on spawn/tick/respawn/sync; repairWorldBots in syncSnakePopulation; desiredAngle synced in runBotBrain.",
+    "test": "games/snake/src/__tests__/snake-phase2-1.test.ts — character-less bot gets defaults",
+    "pass": true
+  },
+  "P1": {
+    "before": "Separate Boost label + SPACEBAR : BOOST hint lines in HUD",
+    "after": "PC: SPACEBAR : BOOST (or ⚡ BOOST when active) only; Mobile: BOOST only",
+    "pass": true
+  },
+  "regression": {
+    "characterColor": "PASS",
+    "top10": "PASS",
+    "minimap": "PASS",
+    "death": "PASS",
+    "retryExit": "PASS",
+    "fullscreen": "PASS",
+    "invite": "PASS"
+  },
+  "production": "HOLD"
+}

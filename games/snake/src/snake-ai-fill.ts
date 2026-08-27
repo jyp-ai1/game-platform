@@ -4,6 +4,7 @@ import { pickBotDifficulty, POPULATION_TARGET, type BotDifficulty } from "@game-
 import {
   createSnake,
   createSnakeAt,
+  ensureSnakeMovementReady,
   isOpposite,
   restartPlayerSnake,
   retireSnakeNaturally,
@@ -13,6 +14,7 @@ import {
   type SnakeIoWorld,
   type Vec,
 } from "./snake-io-engine";
+import { directionToAngle } from "./snake-path-movement";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { PLAYTEST_AI } from "./snake-playtest-tuning";
 import { noteExecOrder } from "./snake-exec-order-trace";
@@ -283,6 +285,25 @@ function botSeedFromId(id: string): number {
   return Math.abs(h);
 }
 
+/** Spawn → controller → direction defaults — character-less bots must still move. */
+export function ensureBotReady(snake: SnakeEntity): void {
+  snake.awaitingInput = false;
+  snake.isBot = true;
+  ensureSnakeMovementReady(snake);
+  if (!snake.headCharacter) {
+    const seed = snake.botSeed ?? botSeedFromId(snake.deviceId);
+    snake.botSeed = seed;
+    applyCharacterToSnake(snake, randomSnakeHeadId(seed));
+  }
+}
+
+function repairWorldBots(world: SnakeIoWorld): void {
+  for (const snake of Object.values(world.snakes)) {
+    if (!isBotSnake(snake) || !snake.alive || snake.spectating) continue;
+    ensureBotReady(snake);
+  }
+}
+
 function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty: BotDifficulty): SnakeEntity {
   const role = roleForSlot(slot);
   const pos = spawnPointForRole(world, role);
@@ -305,7 +326,7 @@ function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty:
   snake.botSeed = seed;
   const headId = randomSnakeHeadId(seed);
   applyCharacterToSnake(snake, headId);
-  snake.awaitingInput = false;
+  ensureBotReady(snake);
   return snake;
 }
 
@@ -358,6 +379,7 @@ export function syncSnakePopulation(
     retireSnakeNaturally(world, retire);
   }
 
+  repairWorldBots(world);
   updateRankings(world);
 }
 
@@ -418,8 +440,7 @@ export function tickBotBrains(world: SnakeIoWorld): void {
   for (let i = 0; i < batchSize; i++) {
     const snake = bots[(offset + i * 2) % bots.length];
     if (!snake) continue;
-    // FIX-SNAKE-UX-002: bots stuck with awaitingInput never advance in tickWorld
-    if (snake.awaitingInput) snake.awaitingInput = false;
+    ensureBotReady(snake);
 
     const hx = snake.headX ?? snake.segments[0]?.x ?? 0;
     const hy = snake.headY ?? snake.segments[0]?.y ?? 0;
@@ -435,6 +456,7 @@ export function tickBotBrains(world: SnakeIoWorld): void {
       const forced = dirs[(world.tick + seed) % dirs.length]!;
       if (!isOpposite(forced, snake.direction)) snake.pendingDirection = forced;
       else snake.pendingDirection = dirs[(world.tick + seed + 1) % dirs.length]!;
+      snake.desiredAngle = directionToAngle(snake.pendingDirection);
       snake.lastMoveTick = world.tick;
       runBotBrain(world, snake);
       continue;
@@ -505,14 +527,19 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   const dir = pickDirectionWithJitter(world, snake, target, seed);
   if (dir && Math.random() > mistake) {
     snake.pendingDirection = dir;
+    snake.desiredAngle = directionToAngle(dir);
   } else if (Math.random() < 0.15) {
     const dirs: Direction[] = ["up", "down", "left", "right"];
     const options = dirs.filter(
       (d) => !isOpposite(d, snake.direction) && !wouldCollide(world, snake, d)
     );
     if (options.length > 0) {
-      snake.pendingDirection = options[Math.floor(Math.random() * options.length)]!;
+      const pick = options[Math.floor(Math.random() * options.length)]!;
+      snake.pendingDirection = pick;
+      snake.desiredAngle = directionToAngle(pick);
     }
+  } else {
+    snake.desiredAngle = directionToAngle(snake.pendingDirection);
   }
   if (snake.pendingDirection !== prevDir) {
     noteExecOrder("turn", world.tick, snake.deviceId, {
@@ -555,4 +582,5 @@ export const SnakeAiFillEngine = {
   countBots: countBotSnakes,
   countHumans: countHumanSnakes,
   target: POPULATION_TARGET,
+  ensureBotReady,
 };

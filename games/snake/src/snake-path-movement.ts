@@ -19,10 +19,17 @@ export function angleToDirection(angle: number): Direction {
   return "right";
 }
 
-function normalizeAngle(a: number): number {
+export function normalizeAngle(a: number): number {
   while (a > Math.PI) a -= 2 * Math.PI;
   while (a < -Math.PI) a += 2 * Math.PI;
   return a;
+}
+
+/** Block ~180° reversals from actual heading — not discretized direction (full-circle left bug). */
+export function isReverseTurn(snake: SnakeEntity, direction: Direction): boolean {
+  const currentAngle = snake.angle ?? directionToAngle(snake.direction);
+  const newAngle = directionToAngle(direction);
+  return Math.abs(normalizeAngle(newAngle - currentAngle)) > Math.PI * 0.85;
 }
 
 /** Sample a point `dist` world-units behind the head along the path trail. */
@@ -116,7 +123,7 @@ export function advanceSnakePath(
   if (Math.abs(diff) > maxTurn) {
     diff = Math.sign(diff) * maxTurn;
   }
-  angle += diff;
+  angle = normalizeAngle(angle + diff);
   snake.angle = angle;
   snake.direction = angleToDirection(angle);
   snake.desiredAngle = desired;
