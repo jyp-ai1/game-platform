@@ -1,0 +1,56 @@
+{
+  "before": {
+    "world": 900,
+    "foodTarget": 220,
+    "botCount": 18,
+    "startMass": 36,
+    "virusTarget": 10,
+    "virusMax": 14,
+    "fps": 30,
+    "gemCull": "none (all gems rendered)"
+  },
+  "after": {
+    "world": 1800,
+    "foodTarget": 360,
+    "foodActual": 376,
+    "gemTiers": {
+      "small": 278,
+      "medium": 68,
+      "large": 30,
+      "total": 376
+    },
+    "botCount": 26,
+    "botConst": 26,
+    "startMass": 28,
+    "startMassConst": 28,
+    "virusCount": 14,
+    "virusTarget": 14,
+    "virusMax": 18,
+    "cellCount": 27,
+    "earlyGemSeed": 16,
+    "gemsInViewport": 52,
+    "gemsTotal": 376,
+    "cullRatio": 0.138,
+    "fpsLogic": 30,
+    "gemSizes": {
+      "small": 4,
+      "medium": 7,
+      "large": 10
+    },
+    "earlyMass0": 28,
+    "earlyMass45s": 114.4
+  },
+  "tests": {
+    "map2x": true,
+    "gemTiers": true,
+    "notBlindFood2x": true,
+    "botsRetuned": true,
+    "virusRetuned": true,
+    "startNotHuge": true,
+    "viewportCull": true,
+    "earlyGrowth": true,
+    "youSplitPieces": true,
+    "youCellIdApproach": "bright outline + soft glow (local only)",
+    "allPass": true
+  }
+}

@@ -26,12 +26,13 @@ import {
   AGAR_BOARD_BG,
   AGAR_GRID_LINE,
   AGAR_TICK_MS,
-  AGAR_WORLD,
   agarBotCountForDifficulty,
   cameraFocus,
   canSplitPlayer,
   createAgarWorld,
   ejectMass,
+  gemRenderSize,
+  inViewport,
   massToRadius,
   setPlayerAim,
   splitPlayer,
@@ -222,6 +223,8 @@ export function AgarGame() {
 
   const offsetX = VIEW / 2 - cam.x;
   const offsetY = VIEW / 2 - cam.y;
+  const worldSize = world.size;
+  const gridPx = (40 / worldSize) * VIEW;
 
   if (!started) {
     return (
@@ -301,22 +304,23 @@ export function AgarGame() {
             className="absolute inset-0"
             style={{
               backgroundImage: `linear-gradient(${AGAR_GRID_LINE} 1px, transparent 1px), linear-gradient(90deg, ${AGAR_GRID_LINE} 1px, transparent 1px)`,
-              backgroundSize: `${(40 / AGAR_WORLD) * VIEW}px ${(40 / AGAR_WORLD) * VIEW}px`,
+              backgroundSize: `${gridPx}px ${gridPx}px`,
               backgroundPosition: `${offsetX}px ${offsetY}px`,
             }}
           />
           <div
             className="absolute left-0 top-0"
             style={{
-              width: AGAR_WORLD,
-              height: AGAR_WORLD,
+              width: worldSize,
+              height: worldSize,
               transform: `translate(${offsetX}px, ${offsetY}px)`,
             }}
           >
             {world.food.map((f) => {
+              if (!inViewport(f.x, f.y, cam.x, cam.y, VIEW)) return null;
               const isEject = f.kind === "eject" || f.id.startsWith("e");
               const isFrag = f.kind === "frag" || f.id.startsWith("vf") || f.id.startsWith("vo");
-              const size = isEject ? 9 : isFrag || f.mass > 2 ? 6 : 4;
+              const size = isEject ? 9 : isFrag ? Math.max(6, gemRenderSize(f.mass)) : gemRenderSize(f.mass);
               return (
                 <div
                   key={f.id}
@@ -329,7 +333,7 @@ export function AgarGame() {
                     backgroundColor: f.color,
                     boxShadow: isEject
                       ? `0 0 10px ${f.color}, 0 0 4px #fff`
-                      : f.mass > 2
+                      : f.mass >= 2
                         ? `0 0 6px ${f.color}`
                         : undefined,
                     border: isEject ? "1px solid rgba(255,255,255,0.55)" : undefined,
@@ -339,6 +343,7 @@ export function AgarGame() {
               );
             })}
             {(world.viruses ?? []).map((v) => {
+              if (!inViewport(v.x, v.y, cam.x, cam.y, VIEW, 80)) return null;
               const r = massToRadius(v.mass);
               return (
                 <div
@@ -373,21 +378,34 @@ export function AgarGame() {
               p.alive
                 ? p.cells.map((c, i) => {
                     const r = massToRadius(c.mass);
-                    const showEmoji = p.id === deviceId && r > 16;
+                    if (!inViewport(c.x, c.y, cam.x, cam.y, VIEW, r + 24)) return null;
+                    const isYou = p.id === deviceId;
+                    const showEmoji = isYou && r > 16;
+                    // Local-only ID: bright outline + soft glow (readable when split/small)
+                    const youOutline = isYou
+                      ? {
+                          border: "2px solid rgba(255,255,255,0.95)",
+                          boxShadow: `0 0 0 2px rgba(255,255,255,0.45), 0 0 14px ${p.color}, 0 0 5px #fff`,
+                        }
+                      : {
+                          border: "1px solid rgba(255,255,255,0.2)",
+                          boxShadow: undefined as string | undefined,
+                        };
                     return (
                       <div
                         key={`${p.id}-${i}`}
-                        className="absolute flex items-center justify-center rounded-full border border-white/20 text-[9px] font-semibold text-white/90"
+                        className="absolute flex items-center justify-center rounded-full text-[9px] font-semibold text-white/90"
                         style={{
                           left: c.x - r,
                           top: c.y - r,
                           width: r * 2,
                           height: r * 2,
                           backgroundColor: p.color,
-                          boxShadow: p.id === deviceId ? `0 0 12px ${p.color}` : undefined,
-                          zIndex: Math.min(50, Math.round(c.mass)),
+                          border: youOutline.border,
+                          boxShadow: youOutline.boxShadow,
+                          zIndex: Math.min(50, Math.round(c.mass) + (isYou ? 10 : 0)),
                         }}
-                        title={p.nickname}
+                        title={isYou ? "YOU" : p.nickname}
                       >
                         {showEmoji ? styleEmoji : r > 14 ? p.nickname.slice(0, 6) : null}
                       </div>

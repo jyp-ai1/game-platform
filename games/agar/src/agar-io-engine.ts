@@ -1,13 +1,19 @@
 /**
  * Agar competitive engine — mass decay · virus pop · split · backward eject · size/speed.
  * AGAR-FUN-003: mass-conserving virus split · moving W pellets · virus feed/spawn.
+ * AGAR-FUN-004: ~2× map · gem tiers · early growth · density retune (not blind 2×).
  */
 
-export const AGAR_WORLD = 900;
-export const AGAR_FOOD_TARGET = 220;
-export const AGAR_BOT_COUNT = 18;
-/** Tuned minimum so first eats / presence feel quick (not Snake L10). */
-export const AGAR_START_MASS = 36;
+/** Linear world edge — ~2× FUN-003 (900 → 1800); area ~4× so density retuned separately. */
+export const AGAR_WORLD = 1800;
+/**
+ * Gem target — area grew ~4×; keep absolute count ~1.65× (not 4×) so early room exists
+ * while local small-gem clusters still feed the first 30–60s.
+ */
+export const AGAR_FOOD_TARGET = 360;
+export const AGAR_BOT_COUNT = 26;
+/** Modest start — first gems matter; not already mid-game sized. */
+export const AGAR_START_MASS = 28;
 /** Split needs enough mass so halves aren't spam crumbs. */
 export const AGAR_MIN_SPLIT_MASS = 48;
 /** Floor for each half after split — blocks tiny fragment spam. */
@@ -37,14 +43,20 @@ export const AGAR_VIRUS_POP_MIN = 130;
 export const AGAR_VIRUS_FRAGMENTS = 8;
 /** Hard cap on edible food pieces from one virus pop (comeback fuel). */
 export const AGAR_MAX_VIRUS_FOOD_FRAGS = 12;
-/** Soft target virus count (center + paths + edges). */
-export const AGAR_VIRUS_TARGET = 10;
+/** Soft target virus count on ~2× map (paths retuned; not 2× of 10). */
+export const AGAR_VIRUS_TARGET = 14;
 /** Hard cap — feeding must not flood the map. */
-export const AGAR_VIRUS_MAX = 14;
+export const AGAR_VIRUS_MAX = 18;
 /** Feed mass at which a virus shoots a new virus (or grows if at cap). */
 export const AGAR_VIRUS_SHOOT_MASS = 175;
 /** Small balance loss on virus pop (conservation still ≈ before). */
 export const AGAR_VIRUS_POP_LOSS = 0.06;
+/** Gem tier masses: small +1 · medium +2 · large +3. */
+export const AGAR_GEM_SMALL = 1;
+export const AGAR_GEM_MEDIUM = 2;
+export const AGAR_GEM_LARGE = 3;
+/** Early-game ring of small gems around the local spawn. */
+export const AGAR_EARLY_GEM_COUNT = 16;
 /** Board / grid tone — shared visual target for Snake WORLD map. */
 export const AGAR_BOARD_BG = "#0b1220";
 export const AGAR_GRID_LINE = "rgba(255,255,255,0.04)";
@@ -111,10 +123,10 @@ export type AgarPlayer = {
 
 export type AgarAiDifficulty = "easy" | "normal" | "hard";
 
-/** Fewer / normal / more bots by session difficulty. */
+/** Fewer / normal / more bots by session difficulty (~1.4× FUN-003 for 2× map). */
 export function agarBotCountForDifficulty(tier: AgarAiDifficulty = "normal"): number {
-  if (tier === "easy") return 12;
-  if (tier === "hard") return 24;
+  if (tier === "easy") return 18;
+  if (tier === "hard") return 34;
   return AGAR_BOT_COUNT;
 }
 
@@ -152,9 +164,32 @@ function randPos(size: number): Vec {
   return { x: m + Math.random() * (size - m * 2), y: m + Math.random() * (size - m * 2) };
 }
 
-function foodColor(): string {
+function foodColor(tier: 1 | 2 | 3 = 1): string {
+  if (tier === 3) {
+    const palette = ["#fbbf24", "#f59e0b", "#fcd34d"];
+    return palette[Math.floor(Math.random() * palette.length)]!;
+  }
+  if (tier === 2) {
+    const palette = ["#a5b4fc", "#67e8f9", "#c4b5fd"];
+    return palette[Math.floor(Math.random() * palette.length)]!;
+  }
   const palette = ["#fde68a", "#86efac", "#fda4af", "#a5b4fc", "#67e8f9"];
   return palette[Math.floor(Math.random() * palette.length)]!;
+}
+
+/** Pick gem mass: mostly small, some medium, sparse large (mid/late growth). */
+function rollGemMass(): { mass: number; tier: 1 | 2 | 3 } {
+  const r = Math.random();
+  if (r < 0.72) return { mass: AGAR_GEM_SMALL, tier: 1 };
+  if (r < 0.92) return { mass: AGAR_GEM_MEDIUM, tier: 2 };
+  return { mass: AGAR_GEM_LARGE, tier: 3 };
+}
+
+/** Pixel diameter for static gem render (tiers differ visually). */
+export function gemRenderSize(mass: number): number {
+  if (mass >= AGAR_GEM_LARGE) return 10;
+  if (mass >= AGAR_GEM_MEDIUM) return 7;
+  return 4;
 }
 
 let foodSeq = 0;
@@ -163,38 +198,60 @@ let virusSeq = 0;
 function spawnFood(world: AgarWorld, n: number): void {
   for (let i = 0; i < n; i++) {
     const pos = randPos(world.size);
+    const { mass, tier } = rollGemMass();
     world.food.push({
       id: `f${foodSeq++}`,
       x: pos.x,
       y: pos.y,
-      mass: 1,
-      color: foodColor(),
+      mass,
+      color: foodColor(tier),
+      kind: "food",
+    });
+  }
+}
+
+/** Dense small gems near spawn — "ate a few → grew → entered the game". */
+function seedEarlyGems(world: AgarWorld, x: number, y: number): void {
+  for (let i = 0; i < AGAR_EARLY_GEM_COUNT; i++) {
+    const ang = (Math.PI * 2 * i) / AGAR_EARLY_GEM_COUNT + Math.random() * 0.2;
+    const dist = 28 + Math.random() * 95;
+    world.food.push({
+      id: `f${foodSeq++}`,
+      x: clamp(x + Math.cos(ang) * dist, 8, world.size - 8),
+      y: clamp(y + Math.sin(ang) * dist, 8, world.size - 8),
+      mass: AGAR_GEM_SMALL,
+      color: foodColor(1),
       kind: "food",
     });
   }
 }
 
 /**
- * Limited viruses: 2–4 near center + mid-path + edge placements.
+ * Limited viruses: center cluster + mid-path + edge (scaled to world size).
  * Optional regen only up to AGAR_VIRUS_TARGET — feed can grow to AGAR_VIRUS_MAX.
  */
 function spawnViruses(world: AgarWorld): void {
   const s = world.size;
   const half = s / 2;
-  // 3 near-center hazards (primary competitive risk for #1)
+  // Near-center hazards (primary competitive risk for #1) — offsets scale with map
+  const near = s * 0.06;
   const fixed: Vec[] = [
     { x: half, y: half },
-    { x: half - 55, y: half + 40 },
-    { x: half + 48, y: half - 38 },
+    { x: half - near, y: half + near * 0.7 },
+    { x: half + near * 0.85, y: half - near * 0.65 },
+    { x: half + near * 0.4, y: half + near },
     // mid-path
     { x: s * 0.25, y: s * 0.25 },
     { x: s * 0.75, y: s * 0.25 },
     { x: s * 0.25, y: s * 0.75 },
     { x: s * 0.75, y: s * 0.75 },
+    { x: s * 0.5, y: s * 0.35 },
+    { x: s * 0.5, y: s * 0.65 },
     // edge / corridor
-    { x: half, y: s * 0.12 },
-    { x: half, y: s * 0.88 },
-    { x: s * 0.12, y: half },
+    { x: half, y: s * 0.1 },
+    { x: half, y: s * 0.9 },
+    { x: s * 0.1, y: half },
+    { x: s * 0.9, y: half },
   ];
   for (const pos of fixed) {
     if (world.viruses.length >= AGAR_VIRUS_TARGET) break;
@@ -256,6 +313,9 @@ export function createAgarWorld(
   world.players[localId] = makePlayer(localId, nickname || "You", false, world.size, 0);
   spawnFood(world, AGAR_FOOD_TARGET);
   spawnViruses(world);
+  const local = world.players[localId]!;
+  const localCell = local.cells[0]!;
+  seedEarlyGems(world, localCell.x, localCell.y);
   const botCount = agarBotCountForDifficulty(aiDifficulty);
   for (let i = 0; i < botCount; i++) {
     const id = `bot:${i}`;
@@ -277,8 +337,9 @@ export function createAgarWorld(
     if (i < 3 && world.viruses[i]) {
       const v = world.viruses[i]!;
       const ang = Math.random() * Math.PI * 2;
-      bot.cells[0]!.x = clamp(v.x + Math.cos(ang) * 70, 40, world.size - 40);
-      bot.cells[0]!.y = clamp(v.y + Math.sin(ang) * 70, 40, world.size - 40);
+      const orbit = world.size * 0.045;
+      bot.cells[0]!.x = clamp(v.x + Math.cos(ang) * orbit, 40, world.size - 40);
+      bot.cells[0]!.y = clamp(v.y + Math.sin(ang) * orbit, 40, world.size - 40);
       bot.aimX = v.x;
       bot.aimY = v.y;
     }
@@ -485,8 +546,8 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
   const myMass = totalMass(bot);
   const tier = world.aiDifficulty ?? "normal";
   const avoidMul = tier === "easy" ? 1.05 : tier === "hard" ? 1.2 : 1.12;
-  const avoidRange = tier === "easy" ? 110 : tier === "hard" ? 170 : 140;
-  const preyRange = tier === "easy" ? 100 : tier === "hard" ? 200 : 160;
+  const avoidRange = tier === "easy" ? 140 : tier === "hard" ? 220 : 180;
+  const preyRange = tier === "easy" ? 130 : tier === "hard" ? 260 : 200;
   const preyMassMul = tier === "easy" ? 0.7 : tier === "hard" ? 0.95 : 0.88;
   const chasePrey = tier !== "easy";
 
@@ -549,7 +610,7 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
 
   // Prefer nearby food (and ejected / virus fragments)
   let best: AgarFood | null = null;
-  let bestD = tier === "easy" ? 220 : 180;
+  let bestD = tier === "easy" ? 280 : 230;
   for (const f of world.food) {
     const d = Math.hypot(f.x - head.x, f.y - head.y);
     // Prefer richer fragments (comeback food)
@@ -834,7 +895,7 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
   tryEatPlayers(world, now);
 
   if (world.food.length < AGAR_FOOD_TARGET * 0.7) {
-    spawnFood(world, Math.min(24, AGAR_FOOD_TARGET - world.food.length));
+    spawnFood(world, Math.min(36, AGAR_FOOD_TARGET - world.food.length));
   }
   // Soft regen only toward target — never above max from accidental wipe
   if (world.viruses.length < AGAR_VIRUS_TARGET) {
@@ -878,6 +939,33 @@ export function cameraFocus(player: AgarPlayer | undefined): Vec {
 /** Debug / QA helpers */
 export function countCells(world: AgarWorld): number {
   return Object.values(world.players).reduce((n, p) => n + (p.alive ? p.cells.length : 0), 0);
+}
+
+/** Count gems by mass tier (static food only; excludes eject/frag). */
+export function countGemTiers(world: AgarWorld): { small: number; medium: number; large: number; total: number } {
+  let small = 0;
+  let medium = 0;
+  let large = 0;
+  for (const f of world.food) {
+    if (f.kind === "eject" || f.kind === "frag") continue;
+    if (f.mass >= AGAR_GEM_LARGE) large += 1;
+    else if (f.mass >= AGAR_GEM_MEDIUM) medium += 1;
+    else small += 1;
+  }
+  return { small, medium, large, total: small + medium + large };
+}
+
+/** Viewport cull helper — true if point is inside padded camera view. */
+export function inViewport(
+  x: number,
+  y: number,
+  camX: number,
+  camY: number,
+  viewSize: number,
+  pad = 48
+): boolean {
+  const half = viewSize / 2 + pad;
+  return x >= camX - half && x <= camX + half && y >= camY - half && y <= camY + half;
 }
 
 /** Sum of player cell mass + food mass tagged as virus frags (for conservation probes). */
