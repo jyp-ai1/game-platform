@@ -3,7 +3,7 @@
 import type { Game } from "@game-platform/shared";
 import { Button, cn } from "@game-platform/ui";
 import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { GameGrid } from "@/components/game-grid";
@@ -52,6 +52,18 @@ const PLAYER_FILTERS: Array<{ value: PlayerFilter; label: string }> = [
   { value: "multiplayer", label: "Multiplayer" },
 ];
 
+function playersFromSearch(raw: string | null): PlayerFilter {
+  if (raw === "solo" || raw === "multiplayer") return raw;
+  return "all";
+}
+
+function sortFromSearch(raw: string | null): GameSortOption {
+  if (raw && GAME_SORT_OPTIONS.some((o) => o.value === raw)) {
+    return raw as GameSortOption;
+  }
+  return "popular";
+}
+
 export function GamesDiscoveryBrowser({
   games,
   hotSlugs,
@@ -65,6 +77,14 @@ export function GamesDiscoveryBrowser({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [difficulty, setDifficulty] = useState<"all" | "EASY" | "MEDIUM" | "HARD">("all");
   const [players, setPlayers] = useState<PlayerFilter>("all");
+
+  // PLATFORM-CORE-002 — honor /games?players=solo|multiplayer from home Solo strip.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    setPlayers(playersFromSearch(sp.get("players")));
+    setSort(sortFromSearch(sp.get("sort")));
+  }, []);
 
   const favorites = useSyncExternalStore(
     subscribeFavorites,

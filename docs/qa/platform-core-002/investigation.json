@@ -1,0 +1,60 @@
+{
+  "task": "PLATFORM-CORE-002 Phase 1",
+  "investigation": {
+    "A_HEAD": "b5a9accabd0618441059a6f377de239ebcc3f6ef",
+    "A_message": "MP-FINAL-UX-003 + GAME-P0-003: remove MP difficulty UI, P0 game fixes.",
+    "B_recent_mp_commits": [
+      "b5a9acc MP-FINAL-UX-003 + GAME-P0-003: remove MP difficulty UI, P0 game fixes.",
+      "c944078 feat(platform): enforce PLATFORM-UX-CONTRACT-001/002 shell and Re:Play CTAs",
+      "122bcca fix(mp): restore detail page SSR after MP-GAME-STANDARD-001",
+      "f1806d2 feat(mp): shared Easy/Normal/Hard shell + creator metadata",
+      "2e4fb5e fix(mp): Exit→lobby + Easy/Normal/Hard AI for Snake/Agar/Bomber",
+      "58115f0 MP-VERIFY-001: fix Agar HUD CSS purge + Space gate + entry/gems",
+      "8db3755 MP-PLATFORM-UX-002: common shell + Snake/Agar P0 stabilize",
+      "212e4bb MP-COMMON-SHELL-001",
+      "b9e8c0b feat(mp-ux): common multiplayer shell for Snake/Agar/Bomber",
+      "0012f4e feat(agar/snake): classic W eject, Agar rename, map tone, lag HUD wins"
+    ],
+    "C_routes": {
+      "snake_detail": "/games/snake",
+      "snake_play": "/flagship/snake-io/play (also /games/snake/play → redirect)",
+      "agar_detail": "/games/agar",
+      "agar_play": "/games/agar/play?room=WORLD",
+      "bomber_detail": "/games/bomber",
+      "bomber_play": "/games/bomber/play?room=WORLD"
+    },
+    "D_solo": {
+      "playable_slugs_count": 50,
+      "deleted": false,
+      "home_before": "popular + new + multiplayer strips; solos still in getGames()/PLAYABLE_SLUGS",
+      "why_ceo_thought_missing": "MP LIVE strip + Re:Play/WORLD PLAY UX dominated first viewport; no dedicated Solo strip; Discover ?players= links were not applied client-side",
+      "not_replaced_with_mp": true
+    },
+    "E_character_color": {
+      "component": "packages/game-sdk/src/multiplayer-entry-select.tsx → MultiplayerEntrySelect",
+      "used_by": ["SnakeCharacterSelect", "Agar.tsx", "Bomber.tsx"],
+      "color_removed_in": "c944078 (showColorStep default false; Character embeds color)"
+    },
+    "F_top10_minimap": {
+      "common": "packages/game-sdk/src/multiplayer-play-shell.tsx → MultiplayerSideRankHud + MultiplayerMinimap",
+      "adapters": ["agar-minimap.tsx", "Bomber.tsx inline dots", "Snake HUD"]
+    },
+    "G_auth": {
+      "google_oauth": true,
+      "path": "apps/web/lib/auth/player-auth.ts → signInWithOAuth({ provider: 'google' })",
+      "phase1_change": "none"
+    },
+    "H_creator": {
+      "route": "/creator",
+      "state": "AI Creator · SOON stub (AiCreatorSoonPanel)",
+      "phase1_change": "none"
+    },
+    "agar_space_w_root_cause": {
+      "not_missing_handlers": "Agar.tsx window keydown Space/W present on HEAD",
+      "primary": "CEO Preview often hit STALE deploy / branch alias / Production HOLD — baseline docs explicitly note 'Preview not yet redeployed' and 19d stale alias while Space/W lived only on HEAD",
+      "secondary": "W-before-Space drops mass below AGAR_MIN_SPLIT_MASS(36) so Space appears broken; postfix probes also showed wWorks false when eat deltas masked eject",
+      "tertiary": "Earlier HUD CSS purge made controls look dead (58115f0)",
+      "phase1_action": "investigate only — no Space/W re-implement (Phase 2+)"
+    }
+  }
+}

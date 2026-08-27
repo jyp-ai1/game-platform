@@ -214,7 +214,7 @@ export function BomberGame() {
     return (
       <MultiplayerEntrySelect
         title="Bomber"
-        subtitle="캐릭터 선택 후 ENTER"
+        subtitle="캐릭터 · 색상 선택 후 ENTER"
         styles={BOMBER_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
@@ -223,6 +223,7 @@ export function BomberGame() {
         onColorChange={setColor}
         onPlay={handleStart}
         playLabel="ENTER"
+        showColorStep
         players={1}
         bots={botCount || 3}
         roomCode={roomCode}

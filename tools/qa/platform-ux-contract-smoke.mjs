@@ -95,14 +95,14 @@ async function runMpFlow(page, game, idx) {
   mark(`${game.slug}-lobby`, lobby);
 
   const colorSection = page.getByText(/^Color$/i);
-  const noColorStep = (await colorSection.count()) === 0;
-  mark(`${game.slug}-no-color-step`, noColorStep);
+  const hasColorStep = (await colorSection.count()) > 0;
+  mark(`${game.slug}-color-step`, hasColorStep);
 
   const charSection = (await page.getByText(/^Character$/i).count()) > 0;
   mark(`${game.slug}-character`, charSection);
 
-  const diffOk = await assertDifficultyLabels(page);
-  mark(`${game.slug}-difficulty`, diffOk);
+  const hasDiffUi = (await page.locator('[data-testid="mp-ai-difficulty"]').count()) > 0;
+  mark(`${game.slug}-no-difficulty`, !hasDiffUi);
 
   await page.locator('[data-testid="mp-enter-world"]').click({ timeout: 15_000 });
   await page.waitForTimeout(2500);
@@ -113,7 +113,7 @@ async function runMpFlow(page, game, idx) {
     0;
   mark(`${game.slug}-shell`, shell);
 
-  return { detailOk, lobby, noColorStep, charSection, diffOk, shell };
+  return { detailOk, lobby, hasColorStep, charSection, noDiff: !hasDiffUi, shell };
 }
 
 const browser = await chromium.launch({ headless: true });
@@ -149,21 +149,33 @@ try {
 
   const snakeRes = await runMpFlow(page, MP_GAMES[0], 1);
   report.snakeRegression =
-    snakeRes.detailOk && snakeRes.lobby && snakeRes.noColorStep && snakeRes.diffOk && snakeRes.shell;
+    snakeRes.detailOk &&
+    snakeRes.lobby &&
+    snakeRes.hasColorStep &&
+    snakeRes.noDiff &&
+    snakeRes.shell;
   report.commonDetail = snakeRes.detailOk;
   report.commonLobby = snakeRes.lobby;
-  report.character = snakeRes.charSection && snakeRes.noColorStep;
-  report.difficulty = snakeRes.diffOk;
+  report.character = snakeRes.charSection && snakeRes.hasColorStep;
+  report.difficulty = snakeRes.noDiff;
   report.replaySnake = report.replaySnake || snakeRes.detailOk;
 
   const agarRes = await runMpFlow(page, MP_GAMES[1], 2);
   report.agarRegression =
-    agarRes.detailOk && agarRes.lobby && agarRes.noColorStep && agarRes.diffOk && agarRes.shell;
+    agarRes.detailOk &&
+    agarRes.lobby &&
+    agarRes.hasColorStep &&
+    agarRes.noDiff &&
+    agarRes.shell;
   report.replayAgar = agarRes.detailOk;
 
   const bomberRes = await runMpFlow(page, MP_GAMES[2], 3);
   report.bomberRegression =
-    bomberRes.detailOk && bomberRes.lobby && bomberRes.noColorStep && bomberRes.diffOk && bomberRes.shell;
+    bomberRes.detailOk &&
+    bomberRes.lobby &&
+    bomberRes.hasColorStep &&
+    bomberRes.noDiff &&
+    bomberRes.shell;
   report.replayBomber = bomberRes.detailOk;
 
   report.commonPlay = report.snakeRegression && report.agarRegression && report.bomberRegression;

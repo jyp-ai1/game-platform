@@ -61,7 +61,7 @@ export function MultiplayerEntrySelect({
   bots,
   roomCode,
   playLabel = "ENTER",
-  showColorStep = false,
+  showColorStep = true,
 }: {
   title: string;
   subtitle?: string;
@@ -78,7 +78,11 @@ export function MultiplayerEntrySelect({
   bots?: number;
   roomCode?: string;
   playLabel?: string;
-  /** PLATFORM-UX-CONTRACT-001 — Character includes color; no separate Color step. */
+  /**
+   * PLATFORM-CORE-002 — Character and Color are separate steps.
+   * Default ON for Snake/Agar/Bomber and any Solo lobby using this shell.
+   * Difficulty remains opt-in via onDifficultyChange (MP: omit, Solo: pass).
+   */
   showColorStep?: boolean;
 }) {
   const selected = styles.find((s) => s.id === styleId) ?? styles[0];

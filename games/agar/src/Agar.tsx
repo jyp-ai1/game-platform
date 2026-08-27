@@ -223,7 +223,7 @@ export function AgarGame() {
     return (
       <MultiplayerEntrySelect
         title="Agar"
-        subtitle="캐릭터 선택 후 ENTER"
+        subtitle="캐릭터 · 색상 선택 후 ENTER"
         styles={AGAR_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
@@ -232,6 +232,7 @@ export function AgarGame() {
         onColorChange={setColor}
         onPlay={handleStart}
         playLabel="ENTER"
+        showColorStep
         players={1}
         bots={agarBotCountForDifficulty(toEngineAiTier(aiDifficulty))}
         roomCode={roomCode}

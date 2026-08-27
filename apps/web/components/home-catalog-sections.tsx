@@ -11,7 +11,8 @@ import { selectNew, selectPopular } from "@/lib/game-sections";
 import { detailHrefForCatalogSlug, REPLAY_CARD_CTA } from "@/lib/game-catalog";
 
 /**
- * Sprint 17 Step 5 — home catalog strips (인기 / 최신 / Multiplayer).
+ * Sprint 17 Step 5 — home catalog strips (인기 / 최신 / Solo / Multiplayer).
+ * PLATFORM-CORE-002: Solo catalog must stay visible (not replaced by MP-only UI).
  * Reuses PlatformGameCard + LiveMultiplayerGameCard; no fake AI ranking.
  */
 export function HomeCatalogSections({
@@ -25,6 +26,9 @@ export function HomeCatalogSections({
 }) {
   const popular = selectPopular(games, 6);
   const newest = selectNew(games, 6);
+  // Solo / single catalog — exclude realtime WORLD titles only (never delete Solo).
+  const soloPool = games.filter((g) => !REALTIME_GAMES.has(g.slug));
+  const soloPopular = selectPopular(soloPool, 6);
   const mpExtras = multiplayerGames.filter(
     (g) => g.slug !== "snake" && REALTIME_GAMES.has(g.slug)
   );
@@ -59,6 +63,24 @@ export function HomeCatalogSections({
         href="/games?sort=newest"
       >
         {(newest.length > 0 ? newest : popular.slice(0, 4)).map((game) => (
+          <PlatformGameCard
+            key={game.id}
+            game={game}
+            className="min-w-[240px] max-w-[280px] shrink-0"
+            actions={{
+              primary: { label: REPLAY_CARD_CTA, href: detailHrefForCatalogSlug(game.slug) },
+            }}
+          />
+        ))}
+      </CatalogRow>
+
+      <CatalogRow
+        id="home-solo-catalog"
+        title="🎯 Solo"
+        subtitle="1인 플레이 · Re:Play → Detail → PLAY"
+        href="/games?players=solo"
+      >
+        {soloPopular.map((game) => (
           <PlatformGameCard
             key={game.id}
             game={game}

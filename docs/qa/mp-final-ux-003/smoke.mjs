@@ -45,15 +45,18 @@ check("mp-default-hard", () => {
 
 check("mp-no-difficulty-snake", () => {
   assert.doesNotMatch(snakeSelect, /onDifficultyChange/);
-  assert.match(snakeSelect, /캐릭터 선택 후 ENTER/);
+  assert.match(snakeSelect, /캐릭터 · 색상 선택 후 ENTER/);
+  assert.match(snakeSelect, /showColorStep/);
 });
 
 check("mp-no-difficulty-agar", () => {
   assert.doesNotMatch(agar, /onDifficultyChange/);
+  assert.match(agar, /showColorStep/);
 });
 
 check("mp-no-difficulty-bomber", () => {
   assert.doesNotMatch(bomber, /onDifficultyChange/);
+  assert.match(bomber, /showColorStep/);
 });
 
 check("solo-difficulty-labels", () => {
@@ -62,9 +65,13 @@ check("solo-difficulty-labels", () => {
   assert.match(mpDiff, /label: "SUPER HARD"/);
 });
 
-check("detail-character-enter", () => {
-  assert.match(detail, /Character → ENTER/);
+check("detail-character-color-enter", () => {
+  assert.match(detail, /Character → Color → ENTER/);
   assert.doesNotMatch(detail, /game-detail-difficulty/);
+});
+
+check("entry-color-step-default-on", () => {
+  assert.match(entry, /showColorStep = true/);
 });
 
 check("ai-creator-soon-badge", () => {

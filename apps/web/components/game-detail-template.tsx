@@ -124,7 +124,7 @@ export function GameDetailTemplate({
                 )}
                 {mp ? (
                   <p className="text-xs text-muted-foreground">
-                    Character → ENTER
+                    Character → Color → ENTER
                   </p>
                 ) : null}
               </div>
