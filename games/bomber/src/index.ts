@@ -1,11 +1,15 @@
 export { BomberGame } from "./Bomber";
 export {
-  createBomberWorld,
-  getRoundDifficulty,
+  BOMBER_FIRE_START,
   MAP_NAMES,
-  ROUND_DIFFICULTY,
-  tickBomberWorld,
+  MAP_LETTERS,
+  MATCH_AI,
+  createBomberWorld,
   plantBomb,
   tryMove,
+  tickBomberWorld,
+  serializeBomberState,
+  applyBomberSyncState,
   type BomberWorld,
+  type PlayerSlots,
 } from "./bomber-engine";

@@ -1,18 +1,19 @@
-/** Bomber MVP — 2–8p grid, bomb, blast, death, round, TOP LB.
- * BOMBER-FUN-001 — Round 1→3 escalation (map / fuse / AI / speed / blast / power-ups).
- */
+/** BOMBER-ONLINE-002 — Classic multiplayer match (4/6 · maps · fire=1 · 3 items · sudden death). */
 
-export const BOMBER_COLS = 13;
-export const BOMBER_ROWS = 11;
+export const BOMBER_COLS = 15;
+export const BOMBER_ROWS = 13;
 export const BOMBER_TICK_MS = 50;
-export const BOMBER_MIN_PLAYERS = 2;
-export const BOMBER_MAX_PLAYERS = 8;
 export const BOMBER_BOMB_FUSE_MS = 1800;
 export const BOMBER_BLAST_MS = 420;
-export const BOMBER_RANGE = 2;
-export const BOMBER_MAX_ROUNDS = 3;
+
+/** Fire power starts at 1; map caps max fire. */
+export const BOMBER_FIRE_START = 1;
+export const BOMBER_SUDDEN_DEATH_AT_SEC = 105;
+export const BOMBER_SUDDEN_DEATH_INTERVAL_SEC = 8;
 
 export type Cell = "empty" | "soft" | "hard";
+export type PlayerSlots = 4 | 6;
+export type PowerUpKind = "bomb" | "speed" | "range";
 
 export type BomberPlayer = {
   id: string;
@@ -26,13 +27,11 @@ export type BomberPlayer = {
   bombsLeft: number;
   kills: number;
   wins: number;
-  /** Power-up: extra blast tiles (0–2). Reset each round. */
   blastBonus?: number;
-  /** Power-up: bonus move per keypress (0–2). Reset each round. */
   speedBonus?: number;
+  /** Placement when eliminated (1 = winner). */
+  place?: number;
 };
-
-export type PowerUpKind = "bomb" | "speed" | "range";
 
 export type PowerUp = {
   id: string;
@@ -56,109 +55,52 @@ export type Blast = {
   until: number;
 };
 
-export type RoundDifficulty = {
-  label: string;
-  botCount: number;
-  /** Lower = faster AI moves */
+export type Placement = {
+  id: string;
+  nickname: string;
+  place: number;
+  kills: number;
+  color: string;
+  alive: boolean;
+};
+
+/** Classic match AI — harder than FUN-001 Normal, not unbeatable. */
+export type MatchDifficulty = {
   aiTickEvery: number;
   aiBombChance: number;
-  /** Chance to plant when lined up with a living opponent */
   aiHuntChance: number;
   softDensity: number;
-  timeLimitSec: number;
+  fuseMs: number;
+  powerUpChance: number;
   bombRange: number;
   bombsMax: number;
-  fuseMs: number;
-  /** Soft-block break → power-up drop rate */
-  powerUpChance: number;
-  /** Starting speedBonus for all players this round (0–1) */
-  baseSpeedBonus: number;
+  maxFire: number;
 };
 
-/** Round ladder: Easy → Normal → Hard → Very Hard.
- * Closed Alpha starts at Normal; FUN-001 raises Normal+ above prior “place bomb, kill AI”.
- */
-export const ROUND_DIFFICULTY: RoundDifficulty[] = [
-  {
-    label: "easy",
-    botCount: 2,
-    aiTickEvery: 16,
-    aiBombChance: 0.01,
-    aiHuntChance: 0.15,
-    softDensity: 0.42,
-    timeLimitSec: 95,
-    bombRange: 2,
-    bombsMax: 1,
-    fuseMs: 2100,
-    powerUpChance: 0.2,
-    baseSpeedBonus: 0,
-  },
-  {
-    // Round 1 @ Normal tier — active bots, learnable fuse
-    label: "normal",
-    botCount: 3,
-    aiTickEvery: 8,
-    aiBombChance: 0.032,
-    aiHuntChance: 0.42,
-    softDensity: 0.56,
-    timeLimitSec: 70,
-    bombRange: 2,
-    bombsMax: 1,
-    fuseMs: 1850,
-    powerUpChance: 0.26,
-    baseSpeedBonus: 0,
-  },
-  {
-    // Round 2 — denser map, shorter fuse, more bombs + hunt
-    label: "hard",
-    botCount: 4,
-    aiTickEvery: 5,
-    aiBombChance: 0.058,
-    aiHuntChance: 0.62,
-    softDensity: 0.65,
-    timeLimitSec: 52,
-    bombRange: 3,
-    bombsMax: 2,
-    fuseMs: 1500,
-    powerUpChance: 0.36,
-    baseSpeedBonus: 0,
-  },
-  {
-    // Round 3 — survival pressure: fast AI, wide blast, power-ups + speed
-    label: "very-hard",
-    botCount: 5,
-    aiTickEvery: 3,
-    aiBombChance: 0.095,
-    aiHuntChance: 0.78,
-    softDensity: 0.74,
-    timeLimitSec: 38,
-    bombRange: 4,
-    bombsMax: 3,
-    fuseMs: 1250,
-    powerUpChance: 0.48,
-    baseSpeedBonus: 1,
-  },
-];
-
-/** Human-readable map names for HUD (index = mapId). */
-export const MAP_NAMES = ["Corridors", "Open Center", "Dense Maze", "Lanes"] as const;
-
-/** Closed Alpha default AI tier label = Normal (see getRoundDifficulty). */
-export const DEFAULT_AI_TIER = "normal" as const;
-
-export type BomberAiTier = "easy" | "normal" | "hard";
-
-const AI_TIER_INDEX: Record<BomberAiTier, number> = {
-  easy: 0,
-  normal: 1,
-  hard: 2,
+export const MATCH_AI: MatchDifficulty = {
+  // Old Normal: aiTickEvery 8 / bombChance 0.032 — this is stricter
+  aiTickEvery: 5,
+  aiBombChance: 0.05,
+  aiHuntChance: 0.58,
+  softDensity: 0.58,
+  fuseMs: BOMBER_BOMB_FUSE_MS,
+  powerUpChance: 0.28,
+  bombRange: BOMBER_FIRE_START,
+  bombsMax: 1,
+  maxFire: 4,
 };
+
+/** Map A/B/C/D — Classic · Cross · Maze · Open */
+export const MAP_NAMES = ["Classic", "Cross", "Maze", "Open"] as const;
+export const MAP_LETTERS = ["A", "B", "C", "D"] as const;
+
+/** Per-map max fire power (cap after Fire+1 pickups). */
+export const MAP_MAX_FIRE: readonly number[] = [4, 5, 3, 6];
 
 export type BomberWorld = {
   tick: number;
-  round: number;
-  maxRounds: number;
   mapId: number;
+  playerSlots: PlayerSlots;
   cols: number;
   rows: number;
   grid: Cell[][];
@@ -166,16 +108,19 @@ export type BomberWorld = {
   bombs: Bomb[];
   blasts: Blast[];
   rankings: Array<{ id: string; nickname: string; wins: number; kills: number; color: string }>;
-  roundOverAt?: number;
-  winnerId?: string | null;
-  roundStartedAt: number;
-  timeLimitSec: number;
-  difficulty: RoundDifficulty;
-  fuseMs: number;
+  placements: Placement[];
+  /** Elimination order (first death first); used for placement. */
+  deathOrder: string[];
   matchOver?: boolean;
-  /** Entry-selected AI base tier (Easy / Normal / Hard). */
-  aiTier: BomberAiTier;
+  winnerId?: string | null;
+  isDraw?: boolean;
+  matchStartedAt: number;
+  fuseMs: number;
+  difficulty: MatchDifficulty;
   powerUps: PowerUp[];
+  suddenDeathActive: boolean;
+  suddenDeathRing: number;
+  maxFire: number;
 };
 
 const POWERUP_EMOJI: Record<PowerUpKind, string> = {
@@ -184,124 +129,132 @@ const POWERUP_EMOJI: Record<PowerUpKind, string> = {
   range: "🔥",
 };
 
+const COLORS = ["#22d3ee", "#f472b6", "#fbbf24", "#34d399", "#a78bfa", "#fb7185", "#60a5fa", "#4ade80"];
+
+/** Deterministic soft→item spawn (no Math.random — keeps clients aligned). */
 function maybeSpawnPowerUp(world: BomberWorld, x: number, y: number): void {
   const chance = world.difficulty.powerUpChance ?? 0.28;
-  if (Math.random() > chance) return;
+  const roll = ((x * 31 + y * 17 + world.tick * 13) % 100) / 100;
+  if (roll > chance) return;
   if (world.powerUps.some((p) => p.x === x && p.y === y)) return;
-  // Later rounds bias toward range/bomb for survival pressure
-  const kinds: PowerUpKind[] =
-    world.round >= 3
-      ? ["bomb", "range", "range", "speed", "bomb"]
-      : world.round >= 2
-        ? ["bomb", "speed", "range", "range"]
-        : ["bomb", "speed", "range"];
-  const kind = kinds[Math.floor(Math.random() * kinds.length)]!;
+  const kinds: PowerUpKind[] = ["bomb", "speed", "range"];
+  const kind = kinds[(x + y + world.tick) % kinds.length]!;
   world.powerUps.push({ id: `pu-${world.tick}-${x}-${y}`, kind, x, y });
 }
 
-function applyPowerUp(p: BomberPlayer, kind: PowerUpKind): void {
+function applyPowerUp(p: BomberPlayer, kind: PowerUpKind, maxFire: number): void {
   if (kind === "bomb") {
     p.bombsMax = Math.min(5, p.bombsMax + 1);
     p.bombsLeft = Math.min(p.bombsMax, p.bombsLeft + 1);
   } else if (kind === "speed") {
     p.speedBonus = Math.min(2, (p.speedBonus ?? 0) + 1);
   } else if (kind === "range") {
-    p.blastBonus = Math.min(2, (p.blastBonus ?? 0) + 1);
+    const next = Math.min(maxFire - BOMBER_FIRE_START, (p.blastBonus ?? 0) + 1);
+    p.blastBonus = Math.max(0, next);
   }
 }
 
-function resetPlayerPowerUps(p: BomberPlayer, diff: RoundDifficulty): void {
+function resetPlayerLoadout(p: BomberPlayer, diff: MatchDifficulty): void {
   p.blastBonus = 0;
-  p.speedBonus = Math.min(2, Math.max(0, diff.baseSpeedBonus ?? 0));
+  p.speedBonus = 0;
   p.bombsMax = diff.bombsMax;
   p.bombsLeft = diff.bombsMax;
 }
-
-const COLORS = ["#22d3ee", "#f472b6", "#fbbf24", "#34d399", "#a78bfa", "#fb7185", "#60a5fa", "#4ade80"];
 
 export function powerUpEmoji(kind: PowerUpKind): string {
   return POWERUP_EMOJI[kind];
 }
 
-const SPAWNS: Array<{ x: number; y: number }> = [
-  { x: 1, y: 1 },
-  { x: BOMBER_COLS - 2, y: 1 },
-  { x: 1, y: BOMBER_ROWS - 2 },
-  { x: BOMBER_COLS - 2, y: BOMBER_ROWS - 2 },
-  { x: 3, y: 1 },
-  { x: BOMBER_COLS - 4, y: BOMBER_ROWS - 2 },
-  { x: 1, y: 3 },
-  { x: BOMBER_COLS - 2, y: BOMBER_ROWS - 4 },
-];
-
-/** 4 fixed soft-wall masks (1=soft). Hard pillars stay on even×even. No RNG. */
-const MAP_PRESETS: number[][][] = [
-  // classic corridors
-  [
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-    [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
-    [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
-    [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-  ],
-  // open center
-  [
-    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-    [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
-    [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
-  ],
-  // dense maze
-  [
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0],
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-    [1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-    [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-    [1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-    [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-    [1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-  ],
-  // lanes
-  [
-    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0],
-  ],
-];
-
-export function getRoundDifficulty(round: number, aiTier: BomberAiTier = DEFAULT_AI_TIER): RoundDifficulty {
-  // Scale from entry tier: Easy stays soft; Normal→Hard ladder; Hard escalates faster.
-  const base = AI_TIER_INDEX[aiTier] ?? 1;
-  const idx = Math.max(0, Math.min(ROUND_DIFFICULTY.length - 1, base + Math.max(0, round - 1)));
-  return ROUND_DIFFICULTY[idx]!;
+/** Spawns with safe 2-tile clearance for 4 and 6. */
+function spawnPoints(slots: PlayerSlots): Array<{ x: number; y: number }> {
+  const c = BOMBER_COLS;
+  const r = BOMBER_ROWS;
+  const corners = [
+    { x: 1, y: 1 },
+    { x: c - 2, y: 1 },
+    { x: 1, y: r - 2 },
+    { x: c - 2, y: r - 2 },
+  ];
+  if (slots === 4) return corners;
+  return [
+    ...corners,
+    { x: 1, y: Math.floor(r / 2) },
+    { x: c - 2, y: Math.floor(r / 2) },
+  ];
 }
 
-function clearSpawnCorners(g: Cell[][]): void {
+/**
+ * Soft-wall masks (1=soft) for interior coords; borders + even×even pillars are hard.
+ * Sized for 15×13 (indices 0..14 × 0..12).
+ */
+const MAP_PRESETS: number[][][] = [
+  // A Classic — symmetric corridors
+  [
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+    [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+    [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+  ],
+  // B Cross
+  [
+    [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
+    [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+    [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+    [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+    [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+  ],
+  // C Maze
+  [
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
+    [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
+    [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
+    [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
+    [1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+  ],
+  // D Open / Arena
+  [
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+  ],
+];
+
+function clearSpawnSafeZones(g: Cell[][], slots: PlayerSlots): void {
   const clear = (cx: number, cy: number) => {
     for (let dy = 0; dy <= 2; dy++) {
       for (let dx = 0; dx <= 2; dx++) {
@@ -311,13 +264,10 @@ function clearSpawnCorners(g: Cell[][]): void {
       }
     }
   };
-  clear(1, 1);
-  clear(BOMBER_COLS - 2, 1);
-  clear(1, BOMBER_ROWS - 2);
-  clear(BOMBER_COLS - 2, BOMBER_ROWS - 2);
+  for (const s of spawnPoints(slots)) clear(s.x, s.y);
 }
 
-function makeGridFromPreset(mapId: number, softDensity: number): Cell[][] {
+function makeGridFromPreset(mapId: number, softDensity: number, slots: PlayerSlots): Cell[][] {
   const preset = MAP_PRESETS[mapId % MAP_PRESETS.length]!;
   const g: Cell[][] = [];
   for (let y = 0; y < BOMBER_ROWS; y++) {
@@ -336,125 +286,146 @@ function makeGridFromPreset(mapId: number, softDensity: number): Cell[][] {
         row.push("empty");
         continue;
       }
-      // Density gate: lower density thins preset soft cells (still deterministic)
       const keep =
-        softDensity >= 0.7
-          ? true
-          : softDensity >= 0.55
-            ? (x + y) % 3 !== 0
-            : (x + y) % 2 === 0;
+        softDensity >= 0.7 ? true : softDensity >= 0.55 ? (x + y) % 3 !== 0 : (x + y) % 2 === 0;
       row.push(keep ? "soft" : "empty");
     }
     g.push(row);
   }
-  clearSpawnCorners(g);
+  clearSpawnSafeZones(g, slots);
   return g;
 }
 
 function updateRankings(world: BomberWorld): void {
   world.rankings = Object.values(world.players)
-    .map((p) => ({ id: p.id, nickname: p.nickname, wins: p.wins, kills: p.kills, color: p.color }))
-    .sort((a, b) => b.wins - a.wins || b.kills - a.kills)
+    .map((p) => ({
+      id: p.id,
+      nickname: p.nickname,
+      wins: p.wins,
+      kills: p.kills,
+      color: p.color,
+    }))
+    .sort((a, b) => {
+      const pa = world.players[a.id]?.place ?? 99;
+      const pb = world.players[b.id]?.place ?? 99;
+      if (pa !== pb) return pa - pb;
+      return b.kills - a.kills;
+    })
     .slice(0, 8);
+
+  world.placements = Object.values(world.players)
+    .map((p) => ({
+      id: p.id,
+      nickname: p.nickname,
+      place: p.place ?? (p.alive ? 1 : 99),
+      kills: p.kills,
+      color: p.color,
+      alive: p.alive,
+    }))
+    .sort((a, b) => a.place - b.place || b.kills - a.kills);
 }
 
-function syncBotsToDifficulty(
-  world: BomberWorld,
-  localId: string,
-  nickname: string,
-  diff: RoundDifficulty
-): void {
-  const want = Math.max(BOMBER_MIN_PLAYERS - 1, Math.min(BOMBER_MAX_PLAYERS - 1, diff.botCount));
-  let bots = Object.values(world.players).filter((p) => p.isBot);
+export type HumanSeat = { id: string; nickname: string; color?: string };
 
-  while (bots.length > want) {
-    const drop = bots[bots.length - 1]!;
-    delete world.players[drop.id];
-    bots = bots.slice(0, -1);
+function fillPlayers(
+  world: BomberWorld,
+  humans: HumanSeat[],
+  diff: MatchDifficulty
+): void {
+  const seats = spawnPoints(world.playerSlots);
+  const want = world.playerSlots;
+  const list: HumanSeat[] = humans.slice(0, want);
+  while (list.length < want) {
+    const idx = list.length;
+    list.push({ id: `bot:${idx}`, nickname: `Bomber${idx + 1}` });
   }
 
-  let nextIdx = 0;
-  while (bots.length < want) {
-    while (world.players[`bot:${nextIdx}`]) nextIdx += 1;
-    const id = `bot:${nextIdx}`;
-    const spawn = SPAWNS[(bots.length + 1) % SPAWNS.length]!;
-    const bot: BomberPlayer = {
-      id,
-      nickname: `Bomber${nextIdx + 1}`,
-      color: COLORS[(bots.length + 1) % COLORS.length]!,
+  world.players = {};
+  list.forEach((h, i) => {
+    const spawn = seats[i % seats.length]!;
+    const isBot = h.id.startsWith("bot:");
+    world.players[h.id] = {
+      id: h.id,
+      nickname: h.nickname || (isBot ? `Bomber${i + 1}` : "You"),
+      color: h.color || COLORS[i % COLORS.length]!,
       x: spawn.x,
       y: spawn.y,
       alive: true,
-      isBot: true,
+      isBot,
       bombsMax: diff.bombsMax,
       bombsLeft: diff.bombsMax,
       kills: 0,
-      wins: world.players[id]?.wins ?? 0,
+      wins: 0,
+      blastBonus: 0,
+      speedBonus: 0,
     };
-    world.players[id] = bot;
-    bots.push(bot);
-    nextIdx += 1;
-  }
+  });
+}
 
+export function createBomberWorld(
+  localId: string,
+  nickname: string,
+  opts?: {
+    playerSlots?: PlayerSlots;
+    mapId?: number;
+    humans?: HumanSeat[];
+    matchStartedAt?: number;
+  }
+): BomberWorld {
+  const playerSlots: PlayerSlots = opts?.playerSlots === 6 ? 6 : 4;
+  const mapId = Math.max(0, Math.min(3, opts?.mapId ?? 0));
+  const maxFire = MAP_MAX_FIRE[mapId] ?? 4;
+  const diff: MatchDifficulty = { ...MATCH_AI, bombRange: BOMBER_FIRE_START, maxFire };
+  const humans =
+    opts?.humans && opts.humans.length > 0
+      ? opts.humans
+      : [{ id: localId, nickname: nickname || "You" }];
+
+  const world: BomberWorld = {
+    tick: 0,
+    mapId,
+    playerSlots,
+    cols: BOMBER_COLS,
+    rows: BOMBER_ROWS,
+    grid: makeGridFromPreset(mapId, diff.softDensity, playerSlots),
+    players: {},
+    bombs: [],
+    blasts: [],
+    rankings: [],
+    placements: [],
+    deathOrder: [],
+    matchStartedAt: opts?.matchStartedAt ?? Date.now(),
+    fuseMs: diff.fuseMs,
+    difficulty: diff,
+    powerUps: [],
+    suddenDeathActive: false,
+    suddenDeathRing: 0,
+    maxFire,
+  };
+  fillPlayers(world, humans, diff);
   if (!world.players[localId]) {
-    const spawn = SPAWNS[0]!;
+    // Ensure local always present (replace last bot if needed)
+    const bots = Object.values(world.players).filter((p) => p.isBot);
+    const drop = bots[bots.length - 1];
+    if (drop) delete world.players[drop.id];
+    const seats = spawnPoints(playerSlots);
+    const idx = Object.keys(world.players).length;
     world.players[localId] = {
       id: localId,
       nickname: nickname || "You",
-      color: COLORS[0]!,
-      x: spawn.x,
-      y: spawn.y,
+      color: COLORS[idx % COLORS.length]!,
+      x: seats[idx % seats.length]!.x,
+      y: seats[idx % seats.length]!.y,
       alive: true,
       isBot: false,
       bombsMax: diff.bombsMax,
       bombsLeft: diff.bombsMax,
       kills: 0,
       wins: 0,
+      blastBonus: 0,
+      speedBonus: 0,
     };
   }
-
-  for (const p of Object.values(world.players)) {
-    resetPlayerPowerUps(p, diff);
-  }
-}
-
-export function createBomberWorld(
-  localId: string,
-  nickname: string,
-  _botCount = 2,
-  aiTier: BomberAiTier = DEFAULT_AI_TIER
-): BomberWorld {
-  const round = 1;
-  const diff = getRoundDifficulty(round, aiTier);
-  const mapId = 0;
-  const world: BomberWorld = {
-    tick: 0,
-    round,
-    maxRounds: BOMBER_MAX_ROUNDS,
-    mapId,
-    cols: BOMBER_COLS,
-    rows: BOMBER_ROWS,
-    grid: makeGridFromPreset(mapId, diff.softDensity),
-    players: {},
-    bombs: [],
-    blasts: [],
-    rankings: [],
-    roundStartedAt: Date.now(),
-    timeLimitSec: diff.timeLimitSec,
-    difficulty: diff,
-    fuseMs: diff.fuseMs,
-    aiTier,
-    powerUps: [],
-  };
-  syncBotsToDifficulty(world, localId, nickname, diff);
-  const ids = Object.keys(world.players);
-  ids.forEach((id, i) => {
-    const spawn = SPAWNS[i % SPAWNS.length]!;
-    const p = world.players[id]!;
-    p.x = spawn.x;
-    p.y = spawn.y;
-    p.alive = true;
-  });
   updateRankings(world);
   return world;
 }
@@ -469,7 +440,7 @@ function walkable(world: BomberWorld, x: number, y: number): boolean {
 function pickupPowerUps(world: BomberWorld, p: BomberPlayer): void {
   const idx = world.powerUps.findIndex((pu) => pu.x === p.x && pu.y === p.y);
   if (idx < 0) return;
-  applyPowerUp(p, world.powerUps[idx]!.kind);
+  applyPowerUp(p, world.powerUps[idx]!.kind, world.maxFire);
   world.powerUps.splice(idx, 1);
 }
 
@@ -487,19 +458,25 @@ export function tryMove(world: BomberWorld, playerId: string, dx: number, dy: nu
   }
 }
 
-export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()): void {
+export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()): Bomb | null {
   const p = world.players[playerId];
-  if (!p || !p.alive || p.bombsLeft <= 0 || world.matchOver) return;
-  if (world.bombs.some((b) => b.x === p.x && b.y === p.y)) return;
+  if (!p || !p.alive || p.bombsLeft <= 0 || world.matchOver) return null;
+  if (world.bombs.some((b) => b.x === p.x && b.y === p.y)) return null;
   p.bombsLeft -= 1;
-  world.bombs.push({
-    id: `b${world.tick}-${playerId}`,
+  const range = Math.min(
+    world.maxFire,
+    BOMBER_FIRE_START + (p.blastBonus ?? 0)
+  );
+  const bomb: Bomb = {
+    id: `b${world.tick}-${playerId}-${now}`,
     ownerId: playerId,
     x: p.x,
     y: p.y,
     plantedAt: now,
-    range: world.difficulty.bombRange + (p.blastBonus ?? 0),
-  });
+    range,
+  };
+  world.bombs.push(bomb);
+  return bomb;
 }
 
 function blastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: number }> {
@@ -527,66 +504,79 @@ function blastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: numbe
   return cells;
 }
 
-function applyRoundState(world: BomberWorld, localId: string, nickname: string): void {
-  const diff = getRoundDifficulty(world.round, world.aiTier ?? DEFAULT_AI_TIER);
-  world.difficulty = diff;
-  world.timeLimitSec = diff.timeLimitSec;
-  world.fuseMs = diff.fuseMs;
-  world.mapId = (world.round - 1) % MAP_PRESETS.length;
-  world.grid = makeGridFromPreset(world.mapId, diff.softDensity);
-  world.bombs = [];
-  world.blasts = [];
-  world.powerUps = [];
-  world.roundOverAt = undefined;
-  world.winnerId = undefined;
-  world.roundStartedAt = Date.now();
-  syncBotsToDifficulty(world, localId, nickname, diff);
-  Object.values(world.players).forEach((p, i) => {
-    const spawn = SPAWNS[i % SPAWNS.length]!;
-    p.x = spawn.x;
-    p.y = spawn.y;
-    p.alive = true;
-    resetPlayerPowerUps(p, diff);
-  });
+function markDeath(world: BomberWorld, p: BomberPlayer): void {
+  if (!p.alive) return;
+  p.alive = false;
+  if (!world.deathOrder.includes(p.id)) world.deathOrder.push(p.id);
 }
 
-function startRound(world: BomberWorld): void {
-  if (world.round >= world.maxRounds) {
-    world.matchOver = true;
-    return;
-  }
-  world.round += 1;
-  const human = Object.values(world.players).find((p) => !p.isBot);
-  applyRoundState(world, human?.id ?? "local", human?.nickname ?? "You");
-}
-
-function resolveRound(world: BomberWorld, now: number): void {
-  if (world.matchOver) return;
-
-  const elapsed = (now - world.roundStartedAt) / 1000;
-  if (!world.roundOverAt && elapsed >= world.timeLimitSec) {
-    // time up — living players stay; first by kills wins round, else draw
-    const living = Object.values(world.players).filter((p) => p.alive);
-    living.sort((a, b) => b.kills - a.kills);
-    const winner = living[0] ?? null;
-    world.winnerId = winner?.id ?? null;
-    if (winner) winner.wins += 1;
-    world.roundOverAt = now + 1800;
-    updateRankings(world);
-    return;
-  }
-
+function finalizeMatch(world: BomberWorld): void {
   const living = Object.values(world.players).filter((p) => p.alive);
-  if (living.length > 1) return;
-  if (world.roundOverAt) {
-    if (now >= world.roundOverAt) startRound(world);
+  const total = Object.keys(world.players).length;
+
+  if (living.length === 1) {
+    const winner = living[0]!;
+    winner.wins += 1;
+    winner.place = 1;
+    world.winnerId = winner.id;
+    world.isDraw = false;
+  } else if (living.length === 0) {
+    world.winnerId = null;
+    world.isDraw = true;
+  } else {
     return;
   }
-  const winner = living[0] ?? null;
-  world.winnerId = winner?.id ?? null;
-  if (winner) winner.wins += 1;
-  world.roundOverAt = now + 2200;
+
+  // Assign places: winner=1, then reverse death order
+  let place = living.length === 1 ? 2 : 1;
+  for (let i = world.deathOrder.length - 1; i >= 0; i--) {
+    const id = world.deathOrder[i]!;
+    const p = world.players[id];
+    if (!p || p.place) continue;
+    p.place = place;
+    place += 1;
+  }
+  for (const p of Object.values(world.players)) {
+    if (!p.place) p.place = total;
+  }
+
+  world.matchOver = true;
   updateRankings(world);
+}
+
+/** Shrink playable area from edges — converts soft/empty to hard; players on ring die. */
+function applySuddenDeath(world: BomberWorld, now: number): void {
+  const elapsed = (now - world.matchStartedAt) / 1000;
+  if (elapsed < BOMBER_SUDDEN_DEATH_AT_SEC) return;
+
+  world.suddenDeathActive = true;
+  const ringsWanted =
+    1 + Math.floor((elapsed - BOMBER_SUDDEN_DEATH_AT_SEC) / BOMBER_SUDDEN_DEATH_INTERVAL_SEC);
+  const maxRing = Math.min(
+    ringsWanted,
+    Math.floor(Math.min(BOMBER_COLS, BOMBER_ROWS) / 2) - 2
+  );
+
+  while (world.suddenDeathRing < maxRing) {
+    world.suddenDeathRing += 1;
+    const ring = world.suddenDeathRing;
+    for (let y = 0; y < BOMBER_ROWS; y++) {
+      for (let x = 0; x < BOMBER_COLS; x++) {
+        const onRing =
+          x === ring ||
+          y === ring ||
+          x === BOMBER_COLS - 1 - ring ||
+          y === BOMBER_ROWS - 1 - ring;
+        if (!onRing) continue;
+        if (world.grid[y]![x] !== "hard") {
+          world.grid[y]![x] = "hard";
+        }
+        for (const p of Object.values(world.players)) {
+          if (p.alive && p.x === x && p.y === y) markDeath(world, p);
+        }
+      }
+    }
+  }
 }
 
 function cellInBlastPreview(world: BomberWorld, x: number, y: number): boolean {
@@ -594,7 +584,6 @@ function cellInBlastPreview(world: BomberWorld, x: number, y: number): boolean {
     if (bomb.x === x && bomb.y === y) return true;
     const range = bomb.range;
     if (bomb.y === y && Math.abs(bomb.x - x) <= range) {
-      // same row — blocked by hard?
       const step = Math.sign(x - bomb.x) || 1;
       let blocked = false;
       for (let i = 1; i <= Math.abs(x - bomb.x); i++) {
@@ -653,8 +642,12 @@ function pickChaseTarget(world: BomberWorld, bot: BomberPlayer): BomberPlayer | 
   return best;
 }
 
-/** True if target shares row/col within blast range and soft/hard don't fully block. */
-function linedUpForBomb(world: BomberWorld, bot: BomberPlayer, target: BomberPlayer, range: number): boolean {
+function linedUpForBomb(
+  world: BomberWorld,
+  bot: BomberPlayer,
+  target: BomberPlayer,
+  range: number
+): boolean {
   if (bot.x === target.x) {
     const dist = Math.abs(bot.y - target.y);
     if (dist === 0 || dist > range) return false;
@@ -699,17 +692,10 @@ function hasSafeBombEscape(world: BomberWorld, bot: BomberPlayer, range: number)
 }
 
 function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
-  if (!bot.alive || world.matchOver || world.roundOverAt) return;
+  if (!bot.alive || world.matchOver) return;
   const every = Math.max(2, world.difficulty.aiTickEvery);
-  const chaseChance =
-    world.difficulty.label === "very-hard"
-      ? 0.82
-      : world.difficulty.label === "hard"
-        ? 0.68
-        : world.difficulty.label === "easy"
-          ? 0.28
-          : 0.55;
-  const range = world.difficulty.bombRange + (bot.blastBonus ?? 0);
+  const chaseChance = 0.62;
+  const range = Math.min(world.maxFire, BOMBER_FIRE_START + (bot.blastBonus ?? 0));
 
   if (world.tick % every === 0) {
     const dirs: Array<[number, number]> = [
@@ -719,23 +705,18 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
       [0, -1],
       [0, 0],
     ];
-    // Prefer escaping bomb blast lanes
     if (cellInBlastPreview(world, bot.x, bot.y)) {
-      let escaped = false;
       for (const [dx, dy] of dirs) {
         if (!dx && !dy) continue;
         const nx = bot.x + dx;
         const ny = bot.y + dy;
         if (walkable(world, nx, ny) && !cellInBlastPreview(world, nx, ny)) {
           tryMove(world, bot.id, dx, dy);
-          escaped = true;
-          break;
+          return;
         }
       }
-      if (escaped) return;
     }
 
-    // Chase nearest living human (else nearest bot) when safe
     const target = pickChaseTarget(world, bot);
     let picked: [number, number] = dirs[Math.floor(Math.random() * dirs.length)]!;
     if (target && Math.random() < chaseChance) {
@@ -770,23 +751,102 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
   if (!hasSafeBombEscape(world, bot, range)) return;
 
   const target = pickChaseTarget(world, bot);
-  const huntChance = world.difficulty.aiHuntChance ?? 0.35;
   const wantHunt =
-    target && linedUpForBomb(world, bot, target, range) && Math.random() < huntChance;
+    target && linedUpForBomb(world, bot, target, range) && Math.random() < world.difficulty.aiHuntChance;
   const wantWander = Math.random() < world.difficulty.aiBombChance;
-  if (wantHunt || wantWander) {
-    plantBomb(world, bot.id, now);
-  }
+  if (wantHunt || wantWander) plantBomb(world, bot.id, now);
 }
 
 export function remainingTimeSec(world: BomberWorld, now = Date.now()): number {
-  const left = world.timeLimitSec - (now - world.roundStartedAt) / 1000;
-  return Math.max(0, Math.ceil(left));
+  const untilSd = BOMBER_SUDDEN_DEATH_AT_SEC - (now - world.matchStartedAt) / 1000;
+  if (untilSd > 0) return Math.ceil(untilSd);
+  return 0;
+}
+
+export function firePowerOf(p: BomberPlayer): number {
+  return BOMBER_FIRE_START + (p.blastBonus ?? 0);
+}
+
+/** Compact snapshot for host→client sync. */
+export type BomberSyncState = {
+  tick: number;
+  mapId: number;
+  playerSlots: PlayerSlots;
+  matchStartedAt: number;
+  matchOver?: boolean;
+  winnerId?: string | null;
+  isDraw?: boolean;
+  suddenDeathActive: boolean;
+  suddenDeathRing: number;
+  grid: Cell[][];
+  players: BomberPlayer[];
+  bombs: Bomb[];
+  blasts: Blast[];
+  powerUps: PowerUp[];
+  deathOrder: string[];
+  fuseMs: number;
+  maxFire: number;
+};
+
+export function serializeBomberState(world: BomberWorld): BomberSyncState {
+  return {
+    tick: world.tick,
+    mapId: world.mapId,
+    playerSlots: world.playerSlots,
+    matchStartedAt: world.matchStartedAt,
+    matchOver: world.matchOver,
+    winnerId: world.winnerId,
+    isDraw: world.isDraw,
+    suddenDeathActive: world.suddenDeathActive,
+    suddenDeathRing: world.suddenDeathRing,
+    grid: world.grid.map((r) => r.slice()),
+    players: Object.values(world.players).map((p) => ({ ...p })),
+    bombs: world.bombs.map((b) => ({ ...b })),
+    blasts: world.blasts.map((b) => ({ ...b, cells: b.cells.map((c) => ({ ...c })) })),
+    powerUps: world.powerUps.map((p) => ({ ...p })),
+    deathOrder: world.deathOrder.slice(),
+    fuseMs: world.fuseMs,
+    maxFire: world.maxFire,
+  };
+}
+
+export function applyBomberSyncState(world: BomberWorld, state: BomberSyncState): void {
+  world.tick = state.tick;
+  world.mapId = state.mapId;
+  world.playerSlots = state.playerSlots;
+  world.matchStartedAt = state.matchStartedAt;
+  world.matchOver = state.matchOver;
+  world.winnerId = state.winnerId;
+  world.isDraw = state.isDraw;
+  world.suddenDeathActive = state.suddenDeathActive;
+  world.suddenDeathRing = state.suddenDeathRing;
+  world.grid = state.grid.map((r) => r.slice());
+  world.bombs = state.bombs.map((b) => ({ ...b }));
+  world.blasts = state.blasts.map((b) => ({ ...b, cells: b.cells.map((c) => ({ ...c })) }));
+  world.powerUps = state.powerUps.map((p) => ({ ...p }));
+  world.deathOrder = state.deathOrder.slice();
+  world.fuseMs = state.fuseMs;
+  world.maxFire = state.maxFire;
+  world.players = {};
+  for (const p of state.players) {
+    world.players[p.id] = { ...p };
+  }
+  updateRankings(world);
+}
+
+/** Merge a remote bomb if missing (low-latency bomb visibility before full state). */
+export function upsertRemoteBomb(world: BomberWorld, bomb: Bomb): void {
+  if (world.bombs.some((b) => b.id === bomb.id)) return;
+  if (world.bombs.some((b) => b.x === bomb.x && b.y === bomb.y)) return;
+  world.bombs.push({ ...bomb });
 }
 
 export function tickBomberWorld(world: BomberWorld, now = Date.now()): void {
   if (world.matchOver) return;
   world.tick += 1;
+
+  applySuddenDeath(world, now);
+
   for (const p of Object.values(world.players)) {
     if (p.isBot) botThink(world, p, now);
   }
@@ -805,13 +865,15 @@ export function tickBomberWorld(world: BomberWorld, now = Date.now()): void {
     for (const p of Object.values(world.players)) {
       if (!p.alive) continue;
       if (cells.some((c) => c.x === p.x && c.y === p.y)) {
-        p.alive = false;
+        markDeath(world, p);
         if (owner && owner.id !== p.id) owner.kills += 1;
       }
     }
   }
   world.bombs = remain;
   world.blasts = world.blasts.filter((b) => b.until > now);
-  resolveRound(world, now);
+
+  const living = Object.values(world.players).filter((p) => p.alive);
+  if (living.length <= 1) finalizeMatch(world);
   updateRankings(world);
 }
