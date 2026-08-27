@@ -1,0 +1,114 @@
+{
+  "ticket": "AGAR-FUN-005",
+  "tickMs": 33,
+  "fpsLogic": 30,
+  "collideEps": 1.5,
+  "pipeline": {
+    "physics": "tickAgarWorld → tryEatPlayers / tryVirusCollisions (after move)",
+    "authState": "cells spliced / alive=false / pop same tick",
+    "network": "N/A local MVP",
+    "interpolation": "NONE — React draws auth cell.x/y",
+    "render": "setState each tick (~1 frame after auth)"
+  },
+  "rootCauseBefore": {
+    "eat": "d < hr - 0.28*pr (deep swallow)",
+    "virus": "d < cr - vr*0.15 (deep swallow)",
+    "legacyChaseEstimateMs": 1848,
+    "note": "Detection late — not interpolation. Auth waited for deep penetration."
+  },
+  "theory": {
+    "contactCloseWu": 1.5,
+    "legacyCloseWu": 25.2,
+    "legacyChase": {
+      "closeWu": 25.2,
+      "ticks": 56,
+      "ms": 1848
+    }
+  },
+  "latency": {
+    "headOnMs": 0,
+    "chaseMs": 33,
+    "smallEatenMs": 33,
+    "largeEatsMs": 0,
+    "splitMs": 33,
+    "virusMs": 0
+  },
+  "overlap": {
+    "headOnMs": 0,
+    "chaseMs": 33,
+    "splitMs": 33,
+    "virusMs": 0,
+    "maxMs": 33
+  },
+  "detail": {
+    "headOn": {
+      "mode": "head-on",
+      "hunterMass": 160,
+      "preyMass": 70,
+      "ticks": 10,
+      "overlapTicks": 0,
+      "latencyMs": 0,
+      "overlapMs": 0,
+      "resolved": true
+    },
+    "chase": {
+      "mode": "chase",
+      "hunterMass": 180,
+      "preyMass": 80,
+      "ticks": 25,
+      "overlapTicks": 1,
+      "latencyMs": 33,
+      "overlapMs": 33,
+      "resolved": true
+    },
+    "smallEaten": {
+      "mode": "chase",
+      "hunterMass": 200,
+      "preyMass": 40,
+      "ticks": 26,
+      "overlapTicks": 1,
+      "latencyMs": 33,
+      "overlapMs": 33,
+      "resolved": true
+    },
+    "largeEats": {
+      "mode": "head-on",
+      "hunterMass": 220,
+      "preyMass": 90,
+      "ticks": 11,
+      "overlapTicks": 0,
+      "latencyMs": 0,
+      "overlapMs": 0,
+      "resolved": true
+    },
+    "split": {
+      "latencyMs": 33,
+      "overlapMs": 33,
+      "ticks": 30,
+      "resolved": true
+    },
+    "virus": {
+      "latencyMs": 0,
+      "overlapMs": 0,
+      "cellsBefore": 1,
+      "cellsAfter": 4,
+      "popped": true,
+      "ticks": 27
+    }
+  },
+  "regression": {
+    "growth": true,
+    "space": true,
+    "w": true,
+    "virus": true,
+    "top10": true,
+    "minimap": true,
+    "contactHelper": true
+  },
+  "pass": {
+    "maxOverlapUnder200ms": true,
+    "allLatenciesUnder200ms": true,
+    "allResolved": true,
+    "regressions": true
+  }
+}

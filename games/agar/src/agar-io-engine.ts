@@ -2,6 +2,7 @@
  * Agar competitive engine — mass decay · virus pop · split · backward eject · size/speed.
  * AGAR-FUN-003: mass-conserving virus split · moving W pellets · virus feed/spawn.
  * AGAR-FUN-004: ~2× map · gem tiers · early growth · density retune (not blind 2×).
+ * AGAR-FUN-005: contact-based collision (auth immediate; no deep-swallow lag / no radius inflate).
  */
 
 /** Linear world edge — ~2× FUN-003 (900 → 1800); area ~4× so density retuned separately. */
@@ -33,6 +34,12 @@ export const AGAR_EJECT_SPEED = 8.2;
 /** How many ticks an eject pellet keeps gliding. */
 export const AGAR_EJECT_GLIDE_TICKS = 32;
 export const AGAR_TICK_MS = 33;
+/**
+ * Render-only overlap tolerance (world units). Auth collision fires at first contact
+ * minus this eps — NOT an inflated hitbox (radii stay massToRadius).
+ * FUN-004 deep-swallow (`d < hr - 0.28*pr`) caused 1s+ chase overlap.
+ */
+export const AGAR_COLLIDE_EPS = 1.5;
 /** Split-attack boost window (ms) — forward launch for absorb. */
 export const AGAR_SPLIT_BOOST_MS = 640;
 /** Virus base mass / visual size. */
@@ -147,6 +154,19 @@ function clamp(n: number, lo: number, hi: number): number {
 
 export function massToRadius(mass: number): number {
   return Math.sqrt(Math.max(1, mass)) * 2.2;
+}
+
+/**
+ * Auth collision vs render: circles overlap past render tolerance.
+ * Judgment is independent of interpolation (Agar has none — state === draw).
+ */
+export function circlesContact(
+  d: number,
+  rA: number,
+  rB: number,
+  eps: number = AGAR_COLLIDE_EPS
+): boolean {
+  return d < rA + rB - eps;
 }
 
 export function totalMass(p: AgarPlayer): number {
@@ -785,8 +805,8 @@ function tryVirusCollisions(world: AgarWorld, now: number): void {
       for (const virus of world.viruses) {
         const vr = massToRadius(virus.mass);
         const d = Math.hypot(cell.x - virus.x, cell.y - virus.y);
-        // Must overlap meaningfully — large swallows/hits virus → pop
-        if (d < cr - vr * 0.15) {
+        // Contact → pop same tick (no deep-swallow wait)
+        if (circlesContact(d, cr, vr)) {
           popCellOnVirus(world, player, ci, virus, now);
           break;
         }
@@ -811,7 +831,8 @@ function tryEatPlayers(world: AgarWorld, now: number): void {
           if (hc.mass < pc.mass * 1.12) continue;
           const pr = massToRadius(pc.mass);
           const d = Math.hypot(hc.x - pc.x, hc.y - pc.y);
-          if (d < hr - pr * 0.28) {
+          // Contact → eat/death same physics tick (auth); render reads auth state
+          if (circlesContact(d, hr, pr)) {
             hc.mass += pc.mass * 0.9;
             hunter.score += Math.round(pc.mass);
             deathX = pc.x;
