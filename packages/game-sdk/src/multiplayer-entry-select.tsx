@@ -2,26 +2,20 @@
 
 import { Button, cn } from "@game-platform/ui";
 
+import {
+  DEFAULT_MP_AI_DIFFICULTY,
+  MP_AI_DIFFICULTIES,
+  type MpAiDifficulty,
+} from "./mp-difficulty";
+
 export type MpStyleOption = {
   id: string;
   label: string;
   emoji: string;
 };
 
-/** Shared MP AI difficulty — Closed Alpha default Normal. */
-export type MpAiDifficulty = "easy" | "normal" | "hard";
-
-export const MP_AI_DIFFICULTIES: readonly {
-  id: MpAiDifficulty;
-  label: string;
-  emoji: string;
-}[] = [
-  { id: "easy", label: "Easy", emoji: "🟢" },
-  { id: "normal", label: "Normal", emoji: "🟡" },
-  { id: "hard", label: "Hard", emoji: "🔴" },
-] as const;
-
-export const DEFAULT_MP_AI_DIFFICULTY: MpAiDifficulty = "normal";
+export type { MpAiDifficulty };
+export { DEFAULT_MP_AI_DIFFICULTY, MP_AI_DIFFICULTIES };
 
 /** Shared player color palette for Snake / Agar / Bomber entry. */
 export const MP_PLAYER_COLORS = [

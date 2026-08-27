@@ -5,7 +5,7 @@
 import {
   DEFAULT_MP_AI_DIFFICULTY,
   type MpAiDifficulty,
-} from "./multiplayer-entry-select";
+} from "./mp-difficulty";
 
 export type GameType = "multiplayer" | "singleplayer";
 

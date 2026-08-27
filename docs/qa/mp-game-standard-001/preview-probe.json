@@ -1,0 +1,66 @@
+{
+  "base": "http://localhost:3098",
+  "at": "2026-08-27T00:05:29.816Z",
+  "results": [
+    {
+      "slug": "snake",
+      "url": "http://localhost:3098/flagship/snake-io/play?room=WORLD",
+      "ok": true,
+      "title": "Replay Snake.io — Play | Re:Play",
+      "bodySnippet": "Re:Play2.0 Home Discover Journey Community AI Creator · SOON Profile Lv.1 · 0 / 100 XP 로그인 ← Snake MULTIPLAYER Snake 스타일 · 색상 선택 후 ENTER WORLD Room WORLDPlayers 1Bots 49 CHARACTER 🐸 Frog 🐼 Panda 🐱 Cat 🐶 Dog 🦊 Fox 🤖 Robot 👽 Alien 👻 Ghost 🐧 Penguin 🐵 Monkey COLOR DIFFICULTY 🟢 Easy 🟡 Normal 🔴 Hard 🐸 ENTER WORLD © 2026 Re:Play. All rights reserved. Privacy Terms Contact",
+      "errors": [],
+      "status": 200,
+      "hasConnectionError": false,
+      "hasMpLobby": true,
+      "hasPractice": false
+    },
+    {
+      "slug": "agar",
+      "url": "http://localhost:3098/games/agar/play?room=WORLD",
+      "ok": true,
+      "title": "Agar — Play | Re:Play",
+      "bodySnippet": "Re:Play2.0 Home Discover Journey Community AI Creator · SOON Profile Lv.1 · 0 / 100 XP 로그인 ← Agar MULTIPLAYER Agar 세포 · 색상 선택 후 ENTER WORLD Room WORLDPlayers 1Bots 18 CHARACTER ⚪ Cell 🔵 Orb 🟢 Blob 🟡 Dot 🟣 Pulse COLOR DIFFICULTY 🟢 Easy 🟡 Normal 🔴 Hard ⚪ ENTER WORLD © 2026 Re:Play. All rights reserved. Privacy Terms Contact",
+      "errors": [],
+      "status": 200,
+      "hasConnectionError": false,
+      "hasMpLobby": true,
+      "hasPractice": false
+    },
+    {
+      "slug": "bomber",
+      "url": "http://localhost:3098/games/bomber/play?room=WORLD",
+      "ok": true,
+      "title": "Bomber — Play | Re:Play",
+      "bodySnippet": "Re:Play2.0 Home Discover Journey Community AI Creator · SOON Profile Lv.1 · 0 / 100 XP 로그인 ← Bomber MULTIPLAYER Bomber 캐릭터 · 색상 선택 후 ENTER WORLD Room WORLDPlayers 1Bots 3 CHARACTER 💣 Bomber 🧑 Hero 🥷 Ninja 🤖 Robot 👻 Ghost COLOR DIFFICULTY 🟢 Easy 🟡 Normal 🔴 Hard 💣 ENTER WORLD © 2026 Re:Play. All rights reserved. Privacy Terms Contact",
+      "errors": [],
+      "status": 200,
+      "hasConnectionError": false,
+      "hasMpLobby": true,
+      "hasPractice": false
+    },
+    {
+      "slug": "snake-detail",
+      "url": "http://localhost:3098/games/snake",
+      "ok": true,
+      "title": "Re:Play | Snake 무료 온라인 게임",
+      "bodySnippet": "Re:Play2.0 Home Discover Journey Community AI Creator · SOON Profile Lv.1 · 0 / 100 XP 로그인 Snake Classic 👥 Multiplayer Creator · Replay Studio 다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요. 🔥 LIVE · 39 plays 🟢 Easy 🟡 Normal default 🔴 Hard WORLD PLAY Character · Color · Difficulty → ENTER WORLD 친구 초대 / 공유 모바일: 공유 시트 · PC: 초대 링크 복사 Global Ranking — Today — This Week Best — · updat",
+      "errors": [],
+      "status": 200,
+      "hasConnectionError": false,
+      "hasMpLobby": true,
+      "hasPractice": false
+    },
+    {
+      "slug": "agar-detail",
+      "url": "http://localhost:3098/games/agar",
+      "ok": true,
+      "title": "Re:Play | Agar 무료 온라인 게임",
+      "bodySnippet": "Re:Play2.0 Home Discover Journey Community AI Creator · SOON Profile Lv.1 · 0 / 100 XP 로그인 Agar Retro Arcade 👥 Multiplayer Creator · Replay Studio 세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요. 🔥 LIVE · 12,400 plays 🟢 Easy 🟡 Normal default 🔴 Hard WORLD PLAY Character · Color · Difficulty → ENTER WORLD 친구 초대 / 공유 모바일: 공유 시트 · PC: 초대 링크 복사 Global Ranking — Today — This Week Best — · up",
+      "errors": [],
+      "status": 200,
+      "hasConnectionError": false,
+      "hasMpLobby": true,
+      "hasPractice": false
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 import { Container } from "@game-platform/ui";
-import { MP_AI_DIFFICULTIES, DEFAULT_MP_AI_DIFFICULTY } from "@game-platform/game-sdk";
+import {
+  MP_AI_DIFFICULTIES,
+  DEFAULT_MP_AI_DIFFICULTY,
+} from "@game-platform/game-sdk/src/mp-difficulty";
 import type { Game, GameStatus } from "@game-platform/shared";
 import Link from "next/link";
 

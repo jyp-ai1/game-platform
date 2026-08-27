@@ -10,7 +10,7 @@ import {
   type CreatorGameMeta,
   type GameType,
   type SessionDifficulty,
-} from "@game-platform/game-sdk";
+} from "@game-platform/game-sdk/src/game-metadata";
 import { getGameTier, REALTIME_GAMES } from "@game-platform/multiplayer-sdk";
 
 export type CatalogPlayMode = "single" | "party" | "realtime";

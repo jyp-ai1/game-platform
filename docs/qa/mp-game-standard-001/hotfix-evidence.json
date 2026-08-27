@@ -1,0 +1,14 @@
+{
+  "hotfix": "MP-GAME-STANDARD-001",
+  "cause": "Server Component detail page imported MP_AI_DIFFICULTIES from @game-platform/game-sdk barrel (client module) → SSR crash → global error.tsx",
+  "fix": "Extract mp-difficulty.ts (server-safe); server imports use src/mp-difficulty and src/game-metadata subpaths",
+  "localProd3098": {
+    "at": "2026-08-27",
+    "snake-detail": "ok",
+    "agar-detail": "ok",
+    "snake-play": "ok",
+    "agar-play": "ok",
+    "bomber-play": "ok"
+  },
+  "brokenPreviewBeforeFix": "https://game29-3lct6dc29-jyp-ai1s-projects.vercel.app/games/snake — connection error UI"
+}

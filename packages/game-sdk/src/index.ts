@@ -96,9 +96,11 @@ export {
 export {
   DEFAULT_MP_AI_DIFFICULTY,
   MP_AI_DIFFICULTIES,
+  type MpAiDifficulty,
+} from "./mp-difficulty";
+export {
   MP_PLAYER_COLORS,
   MultiplayerEntrySelect,
-  type MpAiDifficulty,
   type MpStyleOption,
 } from "./multiplayer-entry-select";
 export {

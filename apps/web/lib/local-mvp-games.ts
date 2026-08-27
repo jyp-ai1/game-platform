@@ -8,7 +8,7 @@ import {
   buildCreatorGameMeta,
   type CreatorGameMeta,
   type SessionDifficulty,
-} from "@game-platform/game-sdk";
+} from "@game-platform/game-sdk/src/game-metadata";
 
 /** Cache-bust so browsers / Kakao OG cache that stored a prior miss refetch. */
 export const LOCAL_GAME_THUMBS: Record<string, string> = {
