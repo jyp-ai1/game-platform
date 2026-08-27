@@ -24,6 +24,6 @@ Root cause:
 Fix:
 eps=0 (auth ≡ disc overlap); render fill = 2*massToRadius with outline chrome (no border inset); virus solid disc underlay = massToRadius.
 
-Commit: (filled after push)
-Preview: (filled after deploy)
+Commit: 53c2b5e
+Preview: https://game29-nhakmg70p-jyp-ai1s-projects.vercel.app
 Production: HOLD
