@@ -1,0 +1,45 @@
+{
+  "task": "BOMBER-ONLINE-002",
+  "branch": "content-factory",
+  "commit": "17be976",
+  "deploymentTarget": "game29",
+  "preview": "https://game29-lriybye9u-jyp-ai1s-projects.vercel.app",
+  "playUrl": "https://game29-lriybye9u-jyp-ai1s-projects.vercel.app/games/bomber/play",
+  "inspect": "https://vercel.com/jyp-ai1s-projects/game29/G6jynHoER2oAeccQLcizTfUj8eyS",
+  "production": "HOLD",
+  "tests": {
+    "command": "npm test --workspace=@game-platform/game-bomber",
+    "pass": 9,
+    "fail": 0
+  },
+  "syncSim": {
+    "command": "node --import tsx docs/qa/bomber-online-002/sync-sim.mjs",
+    "bombVisibleOnGuest": true,
+    "explosionSynced": true,
+    "deathResultSame": true
+  },
+  "match": {
+    "slots4or6": "PASS",
+    "mapABCD": "PASS",
+    "roundLadderRemoved": "PASS",
+    "fireStart1": "PASS",
+    "itemsBombFireSpeedOnly": "PASS",
+    "suddenDeath": "PASS",
+    "lastSurvivorDraw": "PASS",
+    "aiFill": "PASS"
+  },
+  "onlineSync": {
+    "model": "host-authoritative state + bomber:bomb + input:{deviceId}",
+    "sameRoom": "PASS (sdk ensureRoom/joinRoom + send/subscribeRoom)",
+    "positionSync": "PASS (host state)",
+    "bombSync": "PASS (bomber:bomb + state; engine 2-client sim)",
+    "explosionSync": "PASS (host tick → state)",
+    "deathResultSync": "PASS (sync-sim same winner both sides)",
+    "liveTwoBrowser": "NOT_RUN_IN_CI — use same ?room= code on Preview PC↔PC"
+  },
+  "regression": {
+    "agar": "NOT_TOUCHED",
+    "snake": "NOT_TOUCHED",
+    "shell": "NOT_TOUCHED"
+  }
+}
