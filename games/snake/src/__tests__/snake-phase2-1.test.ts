@@ -49,19 +49,14 @@ test("P0-1: isReverseTurn detects 180deg for AI (humans use smooth turn)", () =>
   assert.equal(isReverseTurn(snake, "left"), true);
 });
 
-test("P0-2: character-less bot gets direction + character defaults", () => {
+test("P0-2 superseded by P2.2: character-less bot is NOT patched with defaults", () => {
   const world = stubWorld();
   const bot = createSnakeAt("bot:7", "BOT", 1, world, { x: 40, y: 40 }, 3, { isBot: true });
   bot.headCharacter = undefined;
   bot.awaitingInput = true;
-  bot.desiredAngle = undefined;
-  bot.pendingDirection = undefined as unknown as typeof bot.pendingDirection;
   world.snakes[bot.deviceId] = bot;
 
-  ensureBotReady(bot);
-
-  assert.equal(bot.awaitingInput, false);
-  assert.ok(bot.headCharacter, "bot should receive head character");
-  assert.ok(bot.desiredAngle != null, "bot should have desiredAngle");
-  assert.ok(bot.pendingDirection, "bot should have pendingDirection");
+  const ok = ensureBotReady(bot);
+  assert.equal(ok, false);
+  assert.equal(bot.headCharacter, undefined);
 });

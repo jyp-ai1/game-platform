@@ -24,6 +24,7 @@ import {
   initSnakePath,
   syncSegmentsFromPath,
 } from "./snake-path-movement";
+import { isSnakeHeadId } from "./snake-characters";
 
 export type { FoodKind };
 
@@ -1138,6 +1139,11 @@ export function retireSnakeNaturally(world: SnakeIoWorld, snake: SnakeEntity): v
 }
 
 function respawnSnake(world: SnakeIoWorld, snake: SnakeEntity, index: number, now: number): void {
+  // Character-less bots must not re-enter WORLD — despawn instead of inventing a face.
+  if (isBotEntity(snake) && !isSnakeHeadId(snake.headCharacter ?? "")) {
+    delete world.snakes[snake.deviceId];
+    return;
+  }
   deathTrace("respawn_execute", {
     tick: world.tick,
     victimId: snake.deviceId,

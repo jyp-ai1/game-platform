@@ -212,7 +212,10 @@ export function GameDetailShare({
     const invite = resolveInviteRoomCode(gameSlug);
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://game29.vercel.app";
-    // Embed concrete room id — both devices join the same WORLD-* (never bare WORLD).
+    // Concrete room id in query — HUD ROOM must match clipboard ROOM (never bare WORLD).
+    if (gameSlug === "snake") {
+      return `${origin}/flagship/snake-io/play?room=${encodeURIComponent(invite)}&source=invite`;
+    }
     return `${origin}/games/${gameSlug}?invite=${encodeURIComponent(invite)}&source=invite`;
   }
 
@@ -279,7 +282,7 @@ export function GameDetailShare({
 
   const statusLabel =
     shareStatus === "copied"
-      ? "링크 복사됨"
+      ? "초대 링크가 복사되었습니다."
       : shareStatus === "shared"
         ? "공유됨"
         : shareStatus === "error"

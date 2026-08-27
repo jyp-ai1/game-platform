@@ -18,7 +18,11 @@ import { directionToAngle } from "./snake-path-movement";
 import { SNAKE_FEEL } from "./snake-feel-tuning";
 import { PLAYTEST_AI } from "./snake-playtest-tuning";
 import { noteExecOrder } from "./snake-exec-order-trace";
-import { applyCharacterToSnake, randomSnakeHeadId } from "./snake-characters";
+import {
+  applyCharacterToSnake,
+  isSnakeHeadId,
+  randomSnakeHeadId,
+} from "./snake-characters";
 
 /** Map entry NORMAL / HARD / SUPER HARD → bot spawn tier (no collision algorithm changes). */
 function resolveSessionBotDifficulty(world: SnakeIoWorld, humanCount: number): BotDifficulty {
@@ -285,26 +289,54 @@ function botSeedFromId(id: string): number {
   return Math.abs(h);
 }
 
-/** Spawn → controller → direction defaults — character-less bots must still move. */
-export function ensureBotReady(snake: SnakeEntity): void {
+/** True when bot has a real head character (never invent defaults). */
+export function botHasCharacter(snake: SnakeEntity): boolean {
+  return typeof snake.headCharacter === "string" && isSnakeHeadId(snake.headCharacter);
+}
+
+/**
+ * Movement defaults for bots that already have a character.
+ * Returns false when character is missing — caller must exclude/despawn (do not invent).
+ */
+export function ensureBotReady(snake: SnakeEntity): boolean {
+  if (!botHasCharacter(snake)) return false;
   snake.awaitingInput = false;
   snake.isBot = true;
   ensureSnakeMovementReady(snake);
-  if (!snake.headCharacter) {
-    const seed = snake.botSeed ?? botSeedFromId(snake.deviceId);
-    snake.botSeed = seed;
-    applyCharacterToSnake(snake, randomSnakeHeadId(seed));
+  return true;
+}
+
+/** Remove character-less bots from the world (frozen face-less snakes). */
+export function purgeCharacterlessBots(world: SnakeIoWorld): number {
+  let removed = 0;
+  for (const id of Object.keys(world.snakes)) {
+    const snake = world.snakes[id];
+    if (!snake || !isBotSnake(snake)) continue;
+    if (botHasCharacter(snake)) continue;
+    delete world.snakes[id];
+    removed += 1;
   }
+  return removed;
 }
 
 function repairWorldBots(world: SnakeIoWorld): void {
+  purgeCharacterlessBots(world);
   for (const snake of Object.values(world.snakes)) {
     if (!isBotSnake(snake) || !snake.alive || snake.spectating) continue;
     ensureBotReady(snake);
   }
 }
 
-function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty: BotDifficulty): SnakeEntity {
+/**
+ * Spawn only when character applies successfully.
+ * Character-less → exclude (do not invent a temporary default).
+ */
+function spawnBot(
+  world: SnakeIoWorld,
+  slot: number,
+  humans: number,
+  difficulty: BotDifficulty
+): SnakeEntity | null {
   const role = roleForSlot(slot);
   const pos = spawnPointForRole(world, role);
   const segs = world.living?.matchRule.startingSegments ?? 3;
@@ -326,6 +358,7 @@ function spawnBot(world: SnakeIoWorld, slot: number, humans: number, difficulty:
   snake.botSeed = seed;
   const headId = randomSnakeHeadId(seed);
   applyCharacterToSnake(snake, headId);
+  if (!botHasCharacter(snake)) return null;
   ensureBotReady(snake);
   return snake;
 }
@@ -368,7 +401,8 @@ export function syncSnakePopulation(
   while (countWorldSnakes(world) < target && botSlot < 80) {
     const id = botDeviceId(botSlot);
     if (!world.snakes[id]) {
-      world.snakes[id] = spawnBot(world, botSlot, capped.length, difficulty);
+      const bot = spawnBot(world, botSlot, capped.length, difficulty);
+      if (bot) world.snakes[id] = bot;
     }
     botSlot += 1;
   }
@@ -440,7 +474,10 @@ export function tickBotBrains(world: SnakeIoWorld): void {
   for (let i = 0; i < batchSize; i++) {
     const snake = bots[(offset + i * 2) % bots.length];
     if (!snake) continue;
-    ensureBotReady(snake);
+    if (!ensureBotReady(snake)) {
+      delete world.snakes[snake.deviceId];
+      continue;
+    }
 
     const hx = snake.headX ?? snake.segments[0]?.x ?? 0;
     const hy = snake.headY ?? snake.segments[0]?.y ?? 0;
@@ -562,12 +599,14 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
 
 /** Fill missing bot slots after retirements (combat respawns handled by tickWorld) */
 export function respawnDeadBots(world: SnakeIoWorld, target = POPULATION_TARGET): void {
+  purgeCharacterlessBots(world);
   const difficulty = resolveSessionBotDifficulty(world, countHumanSnakes(world));
   let slot = 0;
   while (countWorldSnakes(world) < target && slot < 80) {
     const id = botDeviceId(slot);
     if (!world.snakes[id]) {
-      world.snakes[id] = spawnBot(world, slot, countHumanSnakes(world), difficulty);
+      const bot = spawnBot(world, slot, countHumanSnakes(world), difficulty);
+      if (bot) world.snakes[id] = bot;
     }
     slot += 1;
   }
@@ -583,4 +622,6 @@ export const SnakeAiFillEngine = {
   countHumans: countHumanSnakes,
   target: POPULATION_TARGET,
   ensureBotReady,
+  botHasCharacter,
+  purgeCharacterlessBots,
 };

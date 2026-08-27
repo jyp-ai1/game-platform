@@ -1,0 +1,11 @@
+{
+  "phase": "PHASE-2.2",
+  "botUnit": {
+    "characterlessSpawnBlocked": "PASS",
+    "respawnSamePolicy": "PASS",
+    "movement30sNoStuck": "PASS",
+    "test": "games/snake/src/__tests__/snake-phase2-2.test.ts"
+  },
+  "inviteProbe": "docs/qa/snake-phase2-2/invite-probe.mjs (run against Preview)",
+  "policy": "Bot without character → exclude/despawn; never invent default face via ensureBotReady"
+}
