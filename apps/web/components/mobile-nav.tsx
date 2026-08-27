@@ -31,14 +31,28 @@ export function MobileNav({ navItems }: { navItems: NavItem[] }) {
           <nav className="flex flex-col gap-1">
             {navItems.map((item) =>
               item.href ? (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="rounded-md px-2 py-2 text-sm font-medium hover:bg-muted"
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                item.href === "/creator" ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-violet-100 hover:bg-violet-500/15"
+                    onClick={() => setOpen(false)}
+                  >
+                    AI Creator
+                    <Badge className="border-violet-300/50 bg-violet-400/20 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wide text-violet-100">
+                      SOON
+                    </Badge>
+                  </Link>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="rounded-md px-2 py-2 text-sm font-medium hover:bg-muted"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )
               ) : (
                 <span
                   key={item.label}

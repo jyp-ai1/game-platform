@@ -70,6 +70,12 @@ export function playDeathSound(): void {
   setTimeout(() => tone(70, 0.28, "sawtooth", 0.09), 90);
 }
 
+/** Corpse / death-loot gems — distinct from regular pickup. */
+export function playLootGemSound(): void {
+  tone(520, 0.1, "triangle", 0.09);
+  setTimeout(() => tone(780, 0.08, "sine", 0.07), 55);
+}
+
 export function playKillSound(isFirst = false): void {
   if (isFirst) {
     tone(SNAKE_FEEL.killSoundHz, 0.08, "square", 0.12);

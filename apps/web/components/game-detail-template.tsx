@@ -1,8 +1,4 @@
 import { Container } from "@game-platform/ui";
-import {
-  MP_AI_DIFFICULTIES,
-  DEFAULT_MP_AI_DIFFICULTY,
-} from "@game-platform/game-sdk/src/mp-difficulty";
 import type { Game, GameStatus } from "@game-platform/shared";
 import Link from "next/link";
 
@@ -108,36 +104,6 @@ export function GameDetailTemplate({
                 {popularityLabel(game, slug)}
               </p>
 
-              {mp ? (
-                <div
-                  className="flex flex-wrap items-center justify-center gap-2"
-                  data-testid="game-detail-difficulty"
-                  aria-label="Difficulty"
-                >
-                  {MP_AI_DIFFICULTIES.map((d) => {
-                    const isDefault = d.id === DEFAULT_MP_AI_DIFFICULTY;
-                    return (
-                      <span
-                        key={d.id}
-                        data-testid={`game-detail-diff-${d.id}`}
-                        className={
-                          isDefault
-                            ? "inline-flex items-center rounded-full border border-cyan-400/50 bg-cyan-500/15 px-3 py-1 text-xs font-semibold text-cyan-100"
-                            : "inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground"
-                        }
-                      >
-                        <span aria-hidden>{d.emoji}</span> {d.label}
-                        {isDefault ? (
-                          <span className="ml-1 text-[10px] font-normal text-cyan-200/80">
-                            default
-                          </span>
-                        ) : null}
-                      </span>
-                    );
-                  })}
-                </div>
-              ) : null}
-
               <div className="flex flex-col items-center gap-2">
                 {mp && (slug === "snake" || slug === "agar" || slug === "bomber") ? (
                   <MpWorldPlayLink
@@ -158,7 +124,7 @@ export function GameDetailTemplate({
                 )}
                 {mp ? (
                   <p className="text-xs text-muted-foreground">
-                    Character → Difficulty → ENTER
+                    Character → ENTER
                   </p>
                 ) : null}
               </div>

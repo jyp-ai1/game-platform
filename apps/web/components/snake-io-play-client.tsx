@@ -6,7 +6,7 @@ import { ViralLoopResultPanel } from "@/components/viral-loop-result";
 import { GameResultModal } from "@/components/game-result-modal";
 import { getGameFramework } from "@/lib/game-framework";
 import type { UniversalRewardBundle } from "@/lib/reward-engine";
-import { GameSDKProvider, DEFAULT_MP_AI_DIFFICULTY, emitEngagementEvent, getDeviceId, subscribePlatformAnalyticsEvents, type MpAiDifficulty } from "@game-platform/game-sdk";
+import { GameSDKProvider, DEFAULT_MP_AI_DIFFICULTY, emitEngagementEvent, getDeviceId, subscribePlatformAnalyticsEvents } from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
 import { entryLog, entryLogFail, entryTrace, resetEntryStatus, resetEngineSession } from "@game-platform/game-snake";
 import { EntryCrashLog } from "@game-platform/multiplayer-sdk";
@@ -112,7 +112,7 @@ function SnakeIoPlayInner({
     loadSnakeBodyColor(SNAKE_HEAD_CHARACTERS[loadSnakeHeadCharacter()].bodyColor)
   );
   const [characterReady, setCharacterReady] = useState(false);
-  const [aiDifficulty, setAiDifficulty] = useState<MpAiDifficulty>(DEFAULT_MP_AI_DIFFICULTY);
+  const aiDifficulty = DEFAULT_MP_AI_DIFFICULTY;
   const [showPostGameMeta, setShowPostGameMeta] = useState(false);
   const [sessionSummary, setSessionSummary] = useState<{
     score: number;
@@ -289,8 +289,6 @@ function SnakeIoPlayInner({
             }}
             color={bodyColor}
             onColorChange={setBodyColor}
-            difficulty={aiDifficulty}
-            onDifficultyChange={setAiDifficulty}
             players={1}
             bots={practiceMode ? 0 : 49}
             roomCode={practiceMode ? "PRACTICE" : room?.toUpperCase() ?? undefined}

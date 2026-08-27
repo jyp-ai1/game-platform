@@ -15,7 +15,8 @@ export const MP_AI_DIFFICULTIES: readonly {
   { id: "superhard", label: "SUPER HARD", emoji: "🔴" },
 ] as const;
 
-export const DEFAULT_MP_AI_DIFFICULTY: MpAiDifficulty = "normal";
+/** MP lobby has no difficulty picker — internal default one tier above Normal. */
+export const DEFAULT_MP_AI_DIFFICULTY: MpAiDifficulty = "hard";
 
 /** Per-game engine tiers — internal tuning only; UI never exposes Easy. */
 export type EngineAiTier = "easy" | "normal" | "hard";

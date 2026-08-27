@@ -16,7 +16,6 @@ import {
   MultiplayerYouBar,
   toEngineAiTier,
   useGameSDK,
-  type MpAiDifficulty,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
@@ -89,7 +88,7 @@ export function AgarGame() {
   const [started, setStarted] = useState(false);
   const [styleId, setStyleId] = useState(AGAR_STYLES[0]!.id);
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
-  const [aiDifficulty, setAiDifficulty] = useState<MpAiDifficulty>(DEFAULT_MP_AI_DIFFICULTY);
+  const aiDifficulty = DEFAULT_MP_AI_DIFFICULTY;
   const reportedRef = useRef(false);
   const lastEjectAtRef = useRef(0);
 
@@ -224,15 +223,13 @@ export function AgarGame() {
     return (
       <MultiplayerEntrySelect
         title="Agar"
-        subtitle="캐릭터 · 난이도 선택 후 ENTER"
+        subtitle="캐릭터 선택 후 ENTER"
         styles={AGAR_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
         colors={MP_PLAYER_COLORS}
         color={color}
         onColorChange={setColor}
-        difficulty={aiDifficulty}
-        onDifficultyChange={setAiDifficulty}
         onPlay={handleStart}
         playLabel="ENTER"
         players={1}

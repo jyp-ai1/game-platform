@@ -16,7 +16,6 @@ import {
   MultiplayerYouBar,
   toEngineAiTier,
   useGameSDK,
-  type MpAiDifficulty,
   type MpMinimapDot,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
@@ -28,6 +27,7 @@ import {
   BOMBER_TICK_MS,
   createBomberWorld,
   plantBomb,
+  powerUpEmoji,
   remainingTimeSec,
   tickBomberWorld,
   tryMove,
@@ -65,6 +65,7 @@ function snap(w: BomberWorld): BomberWorld {
     fuseMs: w.fuseMs,
     matchOver: w.matchOver,
     aiTier: w.aiTier,
+    powerUps: w.powerUps.slice(),
   };
 }
 
@@ -92,7 +93,7 @@ export function BomberGame() {
   const [started, setStarted] = useState(false);
   const [styleId, setStyleId] = useState(BOMBER_STYLES[0]!.id);
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
-  const [aiDifficulty, setAiDifficulty] = useState<MpAiDifficulty>(DEFAULT_MP_AI_DIFFICULTY);
+  const aiDifficulty = DEFAULT_MP_AI_DIFFICULTY;
   const [nowTick, setNowTick] = useState(() => Date.now());
   const reportedRef = useRef(false);
 
@@ -213,15 +214,13 @@ export function BomberGame() {
     return (
       <MultiplayerEntrySelect
         title="Bomber"
-        subtitle="캐릭터 · 난이도 선택 후 ENTER"
+        subtitle="캐릭터 선택 후 ENTER"
         styles={BOMBER_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
         colors={MP_PLAYER_COLORS}
         color={color}
         onColorChange={setColor}
-        difficulty={aiDifficulty}
-        onDifficultyChange={setAiDifficulty}
         onPlay={handleStart}
         playLabel="ENTER"
         players={1}
@@ -312,18 +311,6 @@ export function BomberGame() {
               />
             ))
           )}
-          {world.bombs.map((b) => (
-            <div
-              key={b.id}
-              className="absolute rounded-full bg-zinc-200"
-              style={{
-                left: b.x * CELL + 6,
-                top: b.y * CELL + 6,
-                width: CELL - 12,
-                height: CELL - 12,
-              }}
-            />
-          ))}
           {world.blasts.flatMap((bl) =>
             bl.cells.map((c, i) => (
               <div
@@ -333,11 +320,27 @@ export function BomberGame() {
               />
             ))
           )}
+          {world.powerUps.map((pu) => (
+            <div
+              key={pu.id}
+              data-testid={`bomber-powerup-${pu.kind}`}
+              className="absolute z-10 flex items-center justify-center rounded-md bg-black/40 text-base"
+              style={{
+                left: pu.x * CELL + 2,
+                top: pu.y * CELL + 2,
+                width: CELL - 4,
+                height: CELL - 4,
+              }}
+              title={pu.kind}
+            >
+              {powerUpEmoji(pu.kind)}
+            </div>
+          ))}
           {Object.values(world.players).map((p) =>
             p.alive ? (
               <div
                 key={p.id}
-                className="absolute flex items-center justify-center rounded-sm text-sm"
+                className="absolute z-20 flex items-center justify-center rounded-sm text-sm"
                 style={{
                   left: p.x * CELL + 4,
                   top: p.y * CELL + 4,
@@ -352,6 +355,34 @@ export function BomberGame() {
               </div>
             ) : null
           )}
+          {world.bombs.map((b) => {
+            const fuseMs = world.fuseMs || 1800;
+            const fuseLeft = Math.max(0, fuseMs - (nowTick - b.plantedAt));
+            const urgent = fuseLeft / fuseMs < 0.45;
+            return (
+              <div
+                key={b.id}
+                data-testid="bomber-bomb"
+                className={`absolute z-30 flex items-center justify-center rounded-full border-2 ${
+                  urgent ? "animate-pulse border-red-400 bg-amber-100" : "border-zinc-400 bg-zinc-200"
+                }`}
+                style={{
+                  left: b.x * CELL + 4,
+                  top: b.y * CELL + 4,
+                  width: CELL - 8,
+                  height: CELL - 8,
+                  boxShadow: urgent ? "0 0 10px rgba(248,113,113,0.9)" : "0 0 6px rgba(255,255,255,0.5)",
+                }}
+              >
+                <span className="text-xs">💣</span>
+                {urgent ? (
+                  <span className="absolute -top-2 rounded bg-red-600 px-1 text-[9px] font-bold text-white">
+                    {Math.ceil(fuseLeft / 1000)}
+                  </span>
+                ) : null}
+              </div>
+            );
+          })}
           {world.roundOverAt && !world.matchOver ? (
             <div className="absolute inset-x-0 bottom-3 text-center text-sm font-semibold text-amber-200">
               Round clear · next map…

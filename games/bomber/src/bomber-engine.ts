@@ -10,7 +10,7 @@ export const BOMBER_MAX_PLAYERS = 8;
 export const BOMBER_BOMB_FUSE_MS = 1800;
 export const BOMBER_BLAST_MS = 350;
 export const BOMBER_RANGE = 2;
-export const BOMBER_MAX_ROUNDS = 4;
+export const BOMBER_MAX_ROUNDS = 3;
 
 export type Cell = "empty" | "soft" | "hard";
 
@@ -26,6 +26,19 @@ export type BomberPlayer = {
   bombsLeft: number;
   kills: number;
   wins: number;
+  /** Power-up: extra blast tiles (0–2). Reset each round. */
+  blastBonus?: number;
+  /** Power-up: bonus move per keypress (0–2). Reset each round. */
+  speedBonus?: number;
+};
+
+export type PowerUpKind = "bomb" | "speed" | "range";
+
+export type PowerUp = {
+  id: string;
+  kind: PowerUpKind;
+  x: number;
+  y: number;
 };
 
 export type Bomb = {
@@ -137,9 +150,46 @@ export type BomberWorld = {
   matchOver?: boolean;
   /** Entry-selected AI base tier (Easy / Normal / Hard). */
   aiTier: BomberAiTier;
+  powerUps: PowerUp[];
 };
 
+const POWERUP_EMOJI: Record<PowerUpKind, string> = {
+  bomb: "💣",
+  speed: "⚡",
+  range: "🔥",
+};
+
+function maybeSpawnPowerUp(world: BomberWorld, x: number, y: number): void {
+  if (Math.random() > 0.28) return;
+  if (world.powerUps.some((p) => p.x === x && p.y === y)) return;
+  const kinds: PowerUpKind[] = ["bomb", "speed", "range"];
+  const kind = kinds[Math.floor(Math.random() * kinds.length)]!;
+  world.powerUps.push({ id: `pu-${world.tick}-${x}-${y}`, kind, x, y });
+}
+
+function applyPowerUp(p: BomberPlayer, kind: PowerUpKind): void {
+  if (kind === "bomb") {
+    p.bombsMax = Math.min(5, p.bombsMax + 1);
+    p.bombsLeft = Math.min(p.bombsMax, p.bombsLeft + 1);
+  } else if (kind === "speed") {
+    p.speedBonus = Math.min(2, (p.speedBonus ?? 0) + 1);
+  } else if (kind === "range") {
+    p.blastBonus = Math.min(2, (p.blastBonus ?? 0) + 1);
+  }
+}
+
+function resetPlayerPowerUps(p: BomberPlayer, diff: RoundDifficulty): void {
+  p.blastBonus = 0;
+  p.speedBonus = 0;
+  p.bombsMax = diff.bombsMax;
+  p.bombsLeft = diff.bombsMax;
+}
+
 const COLORS = ["#22d3ee", "#f472b6", "#fbbf24", "#34d399", "#a78bfa", "#fb7185", "#60a5fa", "#4ade80"];
+
+export function powerUpEmoji(kind: PowerUpKind): string {
+  return POWERUP_EMOJI[kind];
+}
 
 const SPAWNS: Array<{ x: number; y: number }> = [
   { x: 1, y: 1 },
@@ -332,8 +382,7 @@ function syncBotsToDifficulty(
   }
 
   for (const p of Object.values(world.players)) {
-    p.bombsMax = diff.bombsMax;
-    p.bombsLeft = diff.bombsMax;
+    resetPlayerPowerUps(p, diff);
   }
 }
 
@@ -363,6 +412,7 @@ export function createBomberWorld(
     difficulty: diff,
     fuseMs: diff.fuseMs,
     aiTier,
+    powerUps: [],
   };
   syncBotsToDifficulty(world, localId, nickname, diff);
   const ids = Object.keys(world.players);
@@ -384,14 +434,25 @@ function walkable(world: BomberWorld, x: number, y: number): boolean {
   return true;
 }
 
+function pickupPowerUps(world: BomberWorld, p: BomberPlayer): void {
+  const idx = world.powerUps.findIndex((pu) => pu.x === p.x && pu.y === p.y);
+  if (idx < 0) return;
+  applyPowerUp(p, world.powerUps[idx]!.kind);
+  world.powerUps.splice(idx, 1);
+}
+
 export function tryMove(world: BomberWorld, playerId: string, dx: number, dy: number): void {
   const p = world.players[playerId];
   if (!p || !p.alive || world.matchOver) return;
-  const nx = p.x + dx;
-  const ny = p.y + dy;
-  if (!walkable(world, nx, ny)) return;
-  p.x = nx;
-  p.y = ny;
+  const steps = 1 + (p.speedBonus ?? 0);
+  for (let s = 0; s < steps; s++) {
+    const nx = p.x + dx;
+    const ny = p.y + dy;
+    if (!walkable(world, nx, ny)) break;
+    p.x = nx;
+    p.y = ny;
+    pickupPowerUps(world, p);
+  }
 }
 
 export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()): void {
@@ -405,7 +466,7 @@ export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()
     x: p.x,
     y: p.y,
     plantedAt: now,
-    range: world.difficulty.bombRange,
+    range: world.difficulty.bombRange + (p.blastBonus ?? 0),
   });
 }
 
@@ -426,6 +487,7 @@ function blastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: numbe
       cells.push({ x, y });
       if (cell === "soft") {
         world.grid[y]![x] = "empty";
+        maybeSpawnPowerUp(world, x, y);
         break;
       }
     }
@@ -442,6 +504,7 @@ function applyRoundState(world: BomberWorld, localId: string, nickname: string):
   world.grid = makeGridFromPreset(world.mapId, diff.softDensity);
   world.bombs = [];
   world.blasts = [];
+  world.powerUps = [];
   world.roundOverAt = undefined;
   world.winnerId = undefined;
   world.roundStartedAt = Date.now();
@@ -451,8 +514,7 @@ function applyRoundState(world: BomberWorld, localId: string, nickname: string):
     p.x = spawn.x;
     p.y = spawn.y;
     p.alive = true;
-    p.bombsMax = diff.bombsMax;
-    p.bombsLeft = diff.bombsMax;
+    resetPlayerPowerUps(p, diff);
   });
 }
 

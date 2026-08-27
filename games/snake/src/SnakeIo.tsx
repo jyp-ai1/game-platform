@@ -176,7 +176,7 @@ import {
   playDeathSound,
   playEatSound,
   playKillSound,
-  playRareFoodSound,
+  playLootGemSound,
   playRankUpSound,
   spawnBoostTrail,
   spawnDeathBurst,
@@ -1918,9 +1918,10 @@ export function SnakeIoGame({
       if (prevMe && me && me.score > prevMe.score && me.segments[0]) {
         const delta = me.score - prevMe.score;
         const head = me.segments[0]!;
-        const tier = tierFromKind("normal", delta);
+        const tier =
+          delta === 1 ? "small" : delta === 2 ? "medium" : delta === 3 ? "large" : tierFromKind("normal", delta);
         const vis = getFoodVisual(tier);
-        if (delta >= 12) playRareFoodSound();
+        if (delta >= 12 || tier === "death" || tier === "epic") playLootGemSound();
         else playEatSound("normal", vis.soundHz);
         markFirstFun(activeRoom);
         setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, isGlobalWorld ? Math.max(vis.particleCount, 6) : vis.particleCount));

@@ -1,10 +1,8 @@
 "use client";
 
 import {
-  DEFAULT_MP_AI_DIFFICULTY,
   MP_PLAYER_COLORS,
   MultiplayerEntrySelect,
-  type MpAiDifficulty,
 } from "@game-platform/game-sdk";
 
 import {
@@ -25,8 +23,6 @@ export function SnakeCharacterSelect({
   onChange,
   color,
   onColorChange,
-  difficulty = DEFAULT_MP_AI_DIFFICULTY,
-  onDifficultyChange,
   onConfirm,
   players,
   bots,
@@ -36,8 +32,6 @@ export function SnakeCharacterSelect({
   onChange: (id: SnakeHeadId) => void;
   color: string;
   onColorChange: (color: string) => void;
-  difficulty?: MpAiDifficulty;
-  onDifficultyChange?: (d: MpAiDifficulty) => void;
   onConfirm: () => void;
   players?: number;
   bots?: number;
@@ -46,15 +40,13 @@ export function SnakeCharacterSelect({
   return (
     <MultiplayerEntrySelect
       title="Snake"
-      subtitle="캐릭터 · 난이도 선택 후 ENTER"
+      subtitle="캐릭터 선택 후 ENTER"
       styles={SNAKE_STYLES}
       styleId={value}
       onStyleChange={(id) => onChange(id as SnakeHeadId)}
       colors={MP_PLAYER_COLORS}
       color={color}
       onColorChange={onColorChange}
-      difficulty={difficulty}
-      onDifficultyChange={onDifficultyChange}
       onPlay={onConfirm}
       playLabel="ENTER"
       players={players}

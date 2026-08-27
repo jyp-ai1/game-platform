@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "mp-default-hard",
+      "ok": true
+    },
+    {
+      "name": "mp-no-difficulty-snake",
+      "ok": true
+    },
+    {
+      "name": "mp-no-difficulty-agar",
+      "ok": true
+    },
+    {
+      "name": "mp-no-difficulty-bomber",
+      "ok": true
+    },
+    {
+      "name": "solo-difficulty-labels",
+      "ok": true
+    },
+    {
+      "name": "detail-character-enter",
+      "ok": true
+    },
+    {
+      "name": "ai-creator-soon-badge",
+      "ok": true
+    },
+    {
+      "name": "snake-loot-sfx",
+      "ok": true
+    },
+    {
+      "name": "snake-ai-food-priority",
+      "ok": true
+    },
+    {
+      "name": "bomber-3-rounds",
+      "ok": true
+    },
+    {
+      "name": "bomber-powerups",
+      "ok": true
+    },
+    {
+      "name": "bomber-bomb-z30",
+      "ok": true
+    }
+  ],
+  "at": "2026-08-27T02:13:10.629Z"
+}

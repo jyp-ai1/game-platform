@@ -22,15 +22,29 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-5 md:flex">
-          {mainNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {mainNavItems.map((item) =>
+            item.href === "/creator" ? (
+              <Link
+                key={item.href}
+                href={item.href}
+                data-testid="nav-ai-creator-soon"
+                className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/40 bg-violet-500/15 px-3 py-1 text-sm font-semibold text-violet-100 transition-colors hover:bg-violet-500/25"
+              >
+                AI Creator
+                <Badge className="border-violet-300/50 bg-violet-400/20 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wide text-violet-100">
+                  SOON
+                </Badge>
+              </Link>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="flex items-center gap-1">

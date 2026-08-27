@@ -462,9 +462,10 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
   const anyPrey = pickPrey(world, snake, { botsOk: true, humansOnly: false });
 
   let state: NonNullable<SnakeEntity["botState"]> = "search";
+  // Priority: movement stability (tickBotBrains idle escape) → food → avoid → chase → attack
   if (threatNear) state = "escape";
+  else if (food) state = "chase";
   else if (humanPrey && (chasing || (seed + world.tick) % 53 < 8)) state = "chase";
-  else if (food && (role === "farmer" || role === "scavenger" || role === "explorer")) state = "chase";
   else if (chasing && anyPrey) state = "chase";
   else if ((seed + world.tick) % 47 < 6) state = "wander";
   else state = "search";
@@ -486,9 +487,11 @@ function runBotBrain(world: SnakeIoWorld, snake: SnakeEntity): void {
       break;
     case "chase":
       target =
-        humanPrey && (chasing || (seed + world.tick) % 53 < 8)
-          ? humanPrey
-          : resolveTarget(world, snake, role);
+        food && (!humanPrey || role !== "aggressive" || (seed + world.tick) % 71 > 10)
+          ? food
+          : humanPrey && (chasing || (seed + world.tick) % 53 < 8)
+            ? humanPrey
+            : resolveTarget(world, snake, role);
       break;
     default:
       target = food ?? { x: head.x + ((seed % 5) - 2) * 8, y: head.y + ((seed % 7) - 3) * 8 };
