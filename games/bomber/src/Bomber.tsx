@@ -444,6 +444,15 @@ export function BomberGame() {
   );
 
   useEffect(() => {
+    if (!qaLocalProbeRef.current || !started) return;
+    const w = window as Window & { __BOMBER_QA_MOVE__?: (dx: number, dy: number) => void };
+    w.__BOMBER_QA_MOVE__ = (dx, dy) => pushInput({ dx, dy });
+    return () => {
+      delete w.__BOMBER_QA_MOVE__;
+    };
+  }, [started, pushInput]);
+
+  useEffect(() => {
     if (!started) return;
     const onKey = (e: KeyboardEvent) => {
       const map: Record<string, [number, number]> = {

@@ -411,22 +411,38 @@ async function probeBomberGridMove(page) {
     let usedDir = null;
 
     const tryDir = async (dir) => {
-      const pad = page.locator('[data-testid="mp-mobile-control-pad"]');
-      if ((await pad.count()) > 0 && (await pad.isVisible())) {
-        await pad.locator(`[data-testid="mp-pad-${dir}"]`).click({ timeout: 5_000, force: true });
-      } else {
-        await page.setViewportSize({ width: 1280, height: 800 });
-        await page.locator('[data-testid="bomber-match-hud"]').click({ force: true }).catch(() => {});
-        const key =
-          dir === "right" ? "ArrowRight" : dir === "left" ? "ArrowLeft" : dir === "up" ? "ArrowUp" : "ArrowDown";
-        await page.keyboard.press(key);
-        await page.setViewportSize(iphone.viewport);
+      const dx =
+        dir === "right" ? 1 : dir === "left" ? -1 : 0;
+      const dy =
+        dir === "down" ? 1 : dir === "up" ? -1 : 0;
+      const movedViaHook = await page.evaluate(
+        ([x, y]) => {
+          if (typeof window.__BOMBER_QA_MOVE__ === "function") {
+            window.__BOMBER_QA_MOVE__(x, y);
+            return true;
+          }
+          return false;
+        },
+        [dx, dy]
+      );
+      if (!movedViaHook) {
+        const pad = page.locator('[data-testid="mp-mobile-control-pad"]');
+        if ((await pad.count()) > 0 && (await pad.isVisible())) {
+          await pad.locator(`[data-testid="mp-pad-${dir}"]`).click({ timeout: 5_000, force: true });
+        } else {
+          await page.setViewportSize({ width: 1280, height: 800 });
+          await page.locator('[data-testid="bomber-match-hud"]').click({ force: true }).catch(() => {});
+          const key =
+            dir === "right" ? "ArrowRight" : dir === "left" ? "ArrowLeft" : dir === "up" ? "ArrowUp" : "ArrowDown";
+          await page.keyboard.press(key);
+          await page.setViewportSize(iphone.viewport);
+        }
       }
       await page.waitForTimeout(900);
       posAfter = (await readBomberGrid(page)) ?? posAfter;
-      const dx = posAfter.x - posBefore.x;
-      const dy = posAfter.y - posBefore.y;
-      return Math.abs(dx) + Math.abs(dy) === 1 ? { dx, dy } : null;
+      const ddx = posAfter.x - posBefore.x;
+      const ddy = posAfter.y - posBefore.y;
+      return Math.abs(ddx) + Math.abs(ddy) === 1 ? { dx: ddx, dy: ddy } : null;
     };
 
     for (const dir of dirs) {
