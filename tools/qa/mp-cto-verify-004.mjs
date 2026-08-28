@@ -43,9 +43,14 @@ function invitePath(slug, room) {
 
 async function enterGame(page, slug) {
   const enter = page.locator('[data-testid="mp-enter-world"]');
+  await enter.or(page.getByRole("button", { name: /^ENTER$/i })).first().waitFor({
+    state: "visible",
+    timeout: 45_000,
+  });
   if ((await enter.count()) > 0) {
-    await enter.waitFor({ state: "visible", timeout: 45_000 });
     await enter.click({ timeout: 15_000 });
+  } else {
+    await page.getByRole("button", { name: /^ENTER$/i }).first().click({ timeout: 15_000 });
   }
 
   if (slug === "bomber") {
