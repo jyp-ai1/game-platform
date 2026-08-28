@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@game-platform/ui";
+import { useRef, type PointerEvent } from "react";
 
 export type PadDirection = "up" | "down" | "left" | "right";
 
@@ -36,20 +37,22 @@ function DirButton({
   dir: PadDirection;
   onDirection: (dir: PadDirection) => void;
 }) {
+  const lastFire = useRef(0);
+  const fire = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const now = Date.now();
+    if (now - lastFire.current < 150) return;
+    lastFire.current = now;
+    onDirection(dir);
+  };
+
   return (
     <button
       type="button"
       aria-label={dir}
       data-testid={`mp-pad-${dir}`}
       className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/65 text-lg font-bold text-white shadow-lg active:scale-95 active:bg-primary/30 touch-manipulation landscape:h-10 landscape:w-10"
-      onTouchStart={(e) => {
-        e.preventDefault();
-        onDirection(dir);
-      }}
-      onMouseDown={(e) => {
-        e.preventDefault();
-        onDirection(dir);
-      }}
+      onPointerDown={fire}
     >
       {DIR_ARROW[dir]}
     </button>
@@ -58,8 +61,13 @@ function DirButton({
 
 function ActionButton({ action }: { action: MobileControlAction }) {
   const mode = action.mode ?? "tap";
-  const fire = () => {
+  const lastFire = useRef(0);
+  const fire = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     if (action.disabled) return;
+    const now = Date.now();
+    if (now - lastFire.current < 150) return;
+    lastFire.current = now;
     action.onPress();
   };
   const release = () => {
@@ -79,21 +87,10 @@ function ActionButton({ action }: { action: MobileControlAction }) {
             ? "border-white/10 bg-black/40 text-white/40"
             : "border-white/30 bg-black/60 text-white active:scale-95"
       )}
-      onTouchStart={(e) => {
-        e.preventDefault();
-        fire();
-      }}
-      onTouchEnd={(e) => {
-        e.preventDefault();
-        release();
-      }}
-      onTouchCancel={release}
-      onMouseDown={(e) => {
-        e.preventDefault();
-        fire();
-      }}
-      onMouseUp={release}
-      onMouseLeave={release}
+      onPointerDown={fire}
+      onPointerUp={release}
+      onPointerCancel={release}
+      onPointerLeave={release}
     >
       {action.label}
     </button>

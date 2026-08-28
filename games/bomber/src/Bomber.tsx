@@ -380,20 +380,22 @@ export function BomberGame() {
       const code = roomRef.current;
       const payload: BomberInput = { deviceId, ...partial, at: Date.now() };
       const hostNow = isRoomHost(code, deviceId);
-
       const w = worldRef.current;
-      if (partial.dx || partial.dy) tryMove(w, deviceId, partial.dx ?? 0, partial.dy ?? 0);
-      if (partial.plant) {
-        const bomb = plantBomb(w, deviceId, payload.at);
-        if (bomb) send(code, "bomber:bomb", bomb);
-      }
-      const next = snap(w);
-      worldRef.current = next;
-      setWorld(next);
 
-      if (!hostNow) {
-        send(code, `input:${deviceId}`, payload);
+      if (hostNow) {
+        if (partial.dx || partial.dy) tryMove(w, deviceId, partial.dx ?? 0, partial.dy ?? 0);
+        if (partial.plant) {
+          const bomb = plantBomb(w, deviceId, payload.at);
+          if (bomb) send(code, "bomber:bomb", bomb);
+        }
+        const next = snap(w);
+        worldRef.current = next;
+        setWorld(next);
+        return;
       }
+
+      // Guest: host authoritative — no optimistic move (prevents 2-cell / desync).
+      send(code, `input:${deviceId}`, payload);
     },
     [deviceId]
   );
@@ -424,10 +426,6 @@ export function BomberGame() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [started, pushInput]);
-
-  const handleEntryDone = useCallback(() => {
-    setLobbyPhase("map");
-  }, []);
 
   /** Map select → join map room → enter match immediately (AI fills + moves). */
   const enterMapMatch = useCallback(
@@ -503,6 +501,18 @@ export function BomberGame() {
     },
     [deviceId, nickname, color]
   );
+
+  const handleEntryDone = useCallback(() => {
+    setLobbyPhase("map");
+    if (typeof window === "undefined") return;
+    const q = new URLSearchParams(window.location.search).get("room")?.toUpperCase();
+    if (!q?.startsWith("BOMBER-")) return;
+    const letter = q.slice("BOMBER-".length);
+    const idx = MAP_LETTERS.indexOf(letter as (typeof MAP_LETTERS)[number]);
+    if (idx >= 0) {
+      window.setTimeout(() => enterMapMatch(idx), 0);
+    }
+  }, [enterMapMatch]);
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
