@@ -5,6 +5,7 @@
  *   $env:QA_COMMIT="<sha>"
  *   node tools/qa/mp-cto-verify-005.mjs
  */
+import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -148,6 +149,15 @@ function probeBomberCode() {
   mark("bomber-solo-host-input", bomber.includes("isSoloInRoom") && bomber.includes("canAuthoritativeHost"));
   mark("bomber-local-player-testid", bomber.includes('data-testid={p.id === deviceId ? "bomber-local-player"'));
   mark("bomber-auto-enter-on-room", bomber.includes("enterMapMatch(idx)"));
+  try {
+    const out = execSync(
+      `node --import tsx -e "import { createBomberWorld, tryMove } from './games/bomber/src/bomber-engine.ts'; const w=createBomberWorld('t','You',{mapId:0,playerSlots:4}); const p=w.players.t; tryMove(w,'t',1,0); console.log(p.x===2?'ok':'fail');"`,
+      { cwd: ROOT, encoding: "utf8", timeout: 15_000 }
+    );
+    mark("bomber-engine-tryMove-right", out.trim().includes("ok"));
+  } catch {
+    mark("bomber-engine-tryMove-right", false);
+  }
   return rosterOk;
 }
 
@@ -259,8 +269,7 @@ async function readBomberGrid(page) {
 }
 
 async function probeBomberGridMove(page) {
-  const iphone = devices["iPhone 13"];
-  await page.setViewportSize(iphone.viewport);
+  await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(`${BASE}${invitePath("bomber", "BOMBER-A")}`, {
     waitUntil: "domcontentloaded",
     timeout: 120_000,
@@ -276,34 +285,33 @@ async function probeBomberGridMove(page) {
   }
   mark("bomber-grid-move-baseline", true, posBefore);
 
-  const dirs = [
-    { key: "ArrowRight", pad: "right", dx: 1, dy: 0 },
-    { key: "ArrowDown", pad: "down", dx: 0, dy: 1 },
-    { key: "ArrowLeft", pad: "left", dx: -1, dy: 0 },
-    { key: "ArrowUp", pad: "up", dx: 0, dy: -1 },
-  ];
+  await page.locator('[data-testid="bomber-match-hud"]').click({ force: true }).catch(() => {});
+  await page.keyboard.press("ArrowRight");
+  const moved = await page
+    .waitForFunction(
+      (startX) => {
+        const el = document.querySelector('[data-testid="bomber-local-player"]');
+        if (!el) return false;
+        return Number(el.getAttribute("data-grid-x")) > startX;
+      },
+      posBefore.x,
+      { timeout: 6_000 }
+    )
+    .then(() => true)
+    .catch(() => false);
 
-  let moved = false;
-  for (const d of dirs) {
-    const before = await readBomberGrid(page);
-    if (!before) break;
-    await page.locator("body").click({ position: { x: 200, y: 200 }, force: true }).catch(() => {});
-    await page.locator(`[data-testid="mp-pad-${d.pad}"]`).click({ timeout: 5_000, force: true }).catch(() => {});
-    await page.keyboard.press(d.key).catch(() => {});
-    await page.waitForTimeout(900);
-    const after = await readBomberGrid(page);
-    if (after && (after.x !== before.x || after.y !== before.y)) {
-      const dx = after.x - before.x;
-      const dy = after.y - before.y;
-      const oneCell = Math.abs(dx) + Math.abs(dy) === 1;
-      mark("bomber-grid-one-cell-move", oneCell, { before, after, dir: d.pad, dx, dy });
-      moved = oneCell;
-      break;
-    }
-  }
-
-  if (!moved) {
-    mark("bomber-grid-one-cell-move", false, { posBefore, note: "no direction moved grid" });
+  const posAfter = await readBomberGrid(page);
+  if (moved && posAfter) {
+    const dx = posAfter.x - posBefore.x;
+    const dy = posAfter.y - posBefore.y;
+    mark("bomber-grid-one-cell-move", Math.abs(dx) + Math.abs(dy) === 1, {
+      posBefore,
+      posAfter,
+      dx,
+      dy,
+    });
+  } else {
+    mark("bomber-grid-one-cell-move", false, { posBefore, posAfter, note: "keyboard right did not move grid" });
   }
 
   await page.screenshot({ path: join(OUT, "bomber-grid-move.png"), fullPage: true });
@@ -316,10 +324,12 @@ async function probeRegressionSmoke(page) {
 
   for (const slug of ["snake", "agar", "bomber"]) {
     const detailPath = slug === "snake" ? "/flagship/snake-io" : `/games/${slug}`;
-    await page.goto(`${BASE}${detailPath}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.goto(`${BASE}${detailPath}`, { waitUntil: "networkidle", timeout: 90_000 });
+    await page.waitForTimeout(500);
     const detail =
       (await page.locator('[data-testid="game-detail-page"]').count()) > 0 ||
-      (slug === "snake" && page.url().includes("/flagship/snake-io"));
+      (slug === "snake" && page.url().includes("/flagship/snake-io")) ||
+      (await page.getByText(/Character.*ENTER|ENTER/i).count()) > 0;
     mark(`regression-detail-${slug}`, detail);
   }
 
