@@ -264,13 +264,12 @@ export function BomberGame() {
       const everSynced = lastHostStateAt.current > 0;
       const hostFresh = Date.now() - lastHostStateAt.current < HOST_STATE_STALE_MS;
       const waitedForHost = Date.now() - matchLocalStartAt.current > 900;
+      const w = worldRef.current;
       const solo = isSoloInRoom(code, deviceId, w);
       // Host ticks; guest waits briefly for host state; solo or stale → take over so input/AI/bombs run
       const hostNow =
         listedHost || solo || (everSynced && !hostFresh) || (!everSynced && waitedForHost);
       setIsHost(hostNow);
-
-      const w = worldRef.current;
 
       if (hostNow) {
         const humans = collectHumans(code, deviceId, nickname, color);
