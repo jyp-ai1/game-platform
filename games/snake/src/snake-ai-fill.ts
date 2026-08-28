@@ -320,11 +320,15 @@ export function purgeCharacterlessBots(world: SnakeIoWorld): number {
 }
 
 function repairWorldBots(world: SnakeIoWorld): void {
-  purgeCharacterlessBots(world);
   for (const snake of Object.values(world.snakes)) {
     if (!isBotSnake(snake) || !snake.alive || snake.spectating) continue;
+    if (!botHasCharacter(snake)) {
+      const headId = randomSnakeHeadId(botSeedFromId(snake.deviceId));
+      applyCharacterToSnake(snake, headId);
+    }
     ensureBotReady(snake);
   }
+  purgeCharacterlessBots(world);
 }
 
 /**

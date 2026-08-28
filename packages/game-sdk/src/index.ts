@@ -140,7 +140,9 @@ export {
   type MpMinimapDot,
 } from "./multiplayer-play-shell";
 export {
+  FloatingMobilePad,
   MobileControlPad,
+  type FloatingMobilePadProps,
   type MobileControlAction,
   type MobileControlPadProps,
   type PadDirection,

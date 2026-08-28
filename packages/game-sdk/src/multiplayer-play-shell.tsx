@@ -121,10 +121,11 @@ export function MultiplayerPlayShell({
       >
         <div
           className={cn(
-            "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black",
+            "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black touch-none select-none",
             isGameFullscreen && "max-h-[min(100dvh,100dvw)] max-w-[min(100dvh,100dvw)]",
             boardClassName
           )}
+          style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
         >
           {children}
         </div>
@@ -149,7 +150,8 @@ export function MultiplayerSideRankHud({
   return (
     <div
       data-testid="mp-top10"
-      className="rounded-lg border border-white/10 bg-black/55 p-2 text-[11px] backdrop-blur"
+      className="touch-none select-none rounded-lg border border-white/10 bg-black/55 p-2 text-[11px] backdrop-blur"
+      style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
     >
       <p className="mb-1 font-semibold text-amber-200">{title}</p>
       <ol className="space-y-0.5">
@@ -187,9 +189,10 @@ export function MultiplayerYouBar({
     <div
       data-testid="mp-you-bar"
       className={cn(
-        "flex w-full max-w-xl flex-wrap items-center justify-between gap-2 text-xs font-semibold tracking-wide text-white/90",
+        "flex w-full max-w-xl touch-none select-none flex-wrap items-center justify-between gap-2 text-xs font-semibold tracking-wide text-white/90",
         className
       )}
+      style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
     >
       <span className="rounded-md bg-black/55 px-2.5 py-1">
         ★ YOU

@@ -208,6 +208,17 @@ export function AgarGame() {
     [deviceId]
   );
 
+  const steerFromPad = useCallback(
+    (vx: number, vy: number) => {
+      if (Math.hypot(vx, vy) < 0.12) return;
+      const w = worldRef.current;
+      const focus = cameraFocus(w.players[deviceId]);
+      const dist = 140;
+      setPlayerAim(w, deviceId, focus.x + vx * dist, focus.y + vy * dist);
+    },
+    [deviceId]
+  );
+
   const doSplit = useCallback(() => {
     const w = worldRef.current;
     const now = Date.now();
@@ -500,6 +511,7 @@ export function AgarGame() {
       {started && (alive || qaPadProbeRef.current) ? (
         <MobileControlPad
           onDirection={aimFromPad}
+          onSteer={steerFromPad}
           actions={[
             { id: "split", label: "SPLIT", mode: "tap", onPress: doSplit },
             { id: "eject", label: "EJECT", mode: "tap", onPress: doEject },

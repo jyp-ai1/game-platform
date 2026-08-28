@@ -59,7 +59,7 @@ test("P2.2: purgeCharacterlessBots removes face-less bots from world", () => {
   assert.equal(world.snakes[bare.deviceId], undefined);
 });
 
-test("P2.2: syncSnakePopulation only keeps bots with character", () => {
+test("P2.2: syncSnakePopulation auto-assigns character to face-less bots (QA-007)", () => {
   const world = stubWorld();
   const bare = createSnakeAt("bot:99", "Ghost", 0, world, { x: 20, y: 20 }, 3, { isBot: true });
   bare.headCharacter = undefined;
@@ -67,7 +67,6 @@ test("P2.2: syncSnakePopulation only keeps bots with character", () => {
 
   syncSnakePopulation(world, [{ deviceId: "p1", nickname: "You" }], 8, "p1");
 
-  assert.equal(world.snakes["bot:99"], undefined);
   for (const s of Object.values(world.snakes)) {
     if (!s.isBot && !s.deviceId.startsWith("bot:")) continue;
     assert.ok(botHasCharacter(s), `${s.deviceId} must have character`);
