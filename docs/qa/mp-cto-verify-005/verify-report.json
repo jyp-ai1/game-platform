@@ -1,0 +1,350 @@
+{
+  "base": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app",
+  "commit": "ff359c1",
+  "startedAt": "2026-08-28T08:49:05.019Z",
+  "checks": [
+    {
+      "name": "auth-preview-redirect-code",
+      "ok": true,
+      "sessionStorage": true,
+      "originRedirect": true,
+      "consumeReturn": true,
+      "t": "2026-08-28T08:49:05.021Z"
+    },
+    {
+      "name": "mobile-pad-dedupe-150ms",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.023Z"
+    },
+    {
+      "name": "mobile-pad-lg-hidden",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.024Z"
+    },
+    {
+      "name": "snake-pad-visible-before-first-move",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.024Z"
+    },
+    {
+      "name": "agar-no-touch-drag-steer",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.024Z"
+    },
+    {
+      "name": "snake-hud-spacebar-boost",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "snake-hud-mobile-boost",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "snake-top10-length-desc",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "snake-outside-top10-rank",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "snake-gem-gains-123",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "snake-purge-characterless",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "snake-canvas-touch-none",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.027Z"
+    },
+    {
+      "name": "agar-you-outline",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.028Z"
+    },
+    {
+      "name": "agar-virus-collision-doc",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.028Z"
+    },
+    {
+      "name": "agar-eject-backward",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.028Z"
+    },
+    {
+      "name": "agar-frozen-no-major-diff",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.029Z"
+    },
+    {
+      "name": "bomber-map-roster-ab-cd",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.029Z"
+    },
+    {
+      "name": "bomber-solo-host-input",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.030Z"
+    },
+    {
+      "name": "bomber-local-player-testid",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.030Z"
+    },
+    {
+      "name": "bomber-auto-enter-on-room",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.030Z"
+    },
+    {
+      "name": "bomber-engine-tryMove-right",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.258Z"
+    },
+    {
+      "name": "invite-unified-path",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.259Z"
+    },
+    {
+      "name": "invite-slug-specific",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.259Z"
+    },
+    {
+      "name": "invite-detail-copy-share",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.259Z"
+    },
+    {
+      "name": "death-overlay-retry-exit",
+      "ok": true,
+      "t": "2026-08-28T08:49:05.260Z"
+    },
+    {
+      "name": "regression-home",
+      "ok": true,
+      "t": "2026-08-28T08:49:08.126Z"
+    },
+    {
+      "name": "regression-detail-snake",
+      "ok": true,
+      "t": "2026-08-28T08:49:14.022Z"
+    },
+    {
+      "name": "regression-detail-agar",
+      "ok": true,
+      "t": "2026-08-28T08:49:16.918Z"
+    },
+    {
+      "name": "regression-detail-bomber",
+      "ok": true,
+      "t": "2026-08-28T08:49:19.529Z"
+    },
+    {
+      "name": "regression-creator",
+      "ok": true,
+      "t": "2026-08-28T08:49:20.008Z"
+    },
+    {
+      "name": "regression-admin",
+      "ok": true,
+      "t": "2026-08-28T08:49:20.708Z"
+    },
+    {
+      "name": "snake-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T08:49:21.642Z"
+    },
+    {
+      "name": "snake-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-F2U",
+      "t": "2026-08-28T08:49:22.137Z"
+    },
+    {
+      "name": "agar-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T08:49:24.029Z"
+    },
+    {
+      "name": "agar-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-F2U",
+      "t": "2026-08-28T08:49:24.485Z"
+    },
+    {
+      "name": "bomber-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T08:49:25.737Z"
+    },
+    {
+      "name": "bomber-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-28T08:49:26.187Z"
+    },
+    {
+      "name": "snake-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-SAME005",
+      "t": "2026-08-28T08:49:27.419Z"
+    },
+    {
+      "name": "agar-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-SAME005",
+      "t": "2026-08-28T08:49:27.904Z"
+    },
+    {
+      "name": "bomber-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-3f7b30ob0-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-B",
+      "t": "2026-08-28T08:49:28.362Z"
+    },
+    {
+      "name": "snake-hud-boost-visible",
+      "ok": true,
+      "t": "2026-08-28T08:50:00.544Z"
+    },
+    {
+      "name": "snake-no-arrow-hints",
+      "ok": true,
+      "t": "2026-08-28T08:50:00.544Z"
+    },
+    {
+      "name": "snake-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T08:50:04.043Z"
+    },
+    {
+      "name": "snake-mobile-action-boost",
+      "ok": true,
+      "t": "2026-08-28T08:50:04.044Z"
+    },
+    {
+      "name": "snake-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T08:50:04.048Z"
+    },
+    {
+      "name": "snake-mobile-dpad-down",
+      "ok": true,
+      "t": "2026-08-28T08:50:04.050Z"
+    },
+    {
+      "name": "snake-mobile-dpad-left",
+      "ok": true,
+      "t": "2026-08-28T08:50:04.072Z"
+    },
+    {
+      "name": "snake-mobile-dpad-right",
+      "ok": true,
+      "t": "2026-08-28T08:50:04.077Z"
+    },
+    {
+      "name": "agar-mobile-pad-visible",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "agar-mobile-action-split",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "agar-mobile-action-eject",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "agar-mobile-dpad-up",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "agar-mobile-dpad-down",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "agar-mobile-dpad-left",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "agar-mobile-dpad-right",
+      "ok": false,
+      "t": "2026-08-28T08:50:08.763Z"
+    },
+    {
+      "name": "bomber-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T08:50:12.021Z"
+    },
+    {
+      "name": "bomber-mobile-action-bomb",
+      "ok": true,
+      "t": "2026-08-28T08:50:12.022Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T08:50:12.023Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-down",
+      "ok": true,
+      "t": "2026-08-28T08:50:12.024Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-left",
+      "ok": true,
+      "t": "2026-08-28T08:50:12.025Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-right",
+      "ok": true,
+      "t": "2026-08-28T08:50:12.027Z"
+    },
+    {
+      "name": "bomber-grid-move-baseline",
+      "ok": true,
+      "x": 1,
+      "y": 1,
+      "t": "2026-08-28T08:50:16.649Z"
+    },
+    {
+      "name": "bomber-grid-one-cell-move",
+      "ok": false,
+      "posBefore": {
+        "x": 1,
+        "y": 1
+      },
+      "posAfter": {
+        "x": 1,
+        "y": 1
+      },
+      "note": "keyboard right did not move grid",
+      "t": "2026-08-28T08:50:22.685Z"
+    }
+  ],
+  "finishedAt": "2026-08-28T08:50:22.728Z",
+  "pass": false
+}
