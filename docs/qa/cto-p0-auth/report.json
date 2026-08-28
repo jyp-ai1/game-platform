@@ -1,0 +1,17 @@
+{
+  "p0": "P0-1",
+  "title": "Auth Preview redirect",
+  "status": "PASS",
+  "gate": "HOLD — Auth LIVE Gate remains HOLD for CEO",
+  "fixes": [
+    "signInWithGoogle stores return path via sessionStorage (play29:auth-return-to)",
+    "authRedirectTo uses window.location.origin (Preview stays on Preview)",
+    "Auth callback router.replace(consumeAuthReturnPath()) instead of hardcoded /profile"
+  ],
+  "envNote": "Supabase OAuth redirect URIs must include https://{preview-host}/auth/callback — verify in Supabase dashboard per Preview deployment",
+  "verification": [
+    "Preview login → callback stays on Preview domain",
+    "Return path preserved (Detail/Play page, not Production)"
+  ],
+  "commit": "pending"
+}

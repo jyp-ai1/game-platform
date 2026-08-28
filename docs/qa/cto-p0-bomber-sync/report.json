@@ -1,0 +1,12 @@
+{
+  "p0": "P0-5/P0-6",
+  "title": "Bomber sync + mobile input",
+  "status": "PASS",
+  "fixes": [
+    "Guest pushInput: host-authoritative only (no optimistic move/plant) — fixes 2-cell desync",
+    "MobileControlPad pointer dedupe — one tap = one grid cell",
+    "Host bomb chain unchanged: plant → fuse → blast → wall break → death via tickBomberWorld"
+  ],
+  "chain": "move → plantBomb → bomber:bomb event → tick fuse → blastCells → markDeath",
+  "commit": "pending"
+}

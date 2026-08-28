@@ -1,0 +1,20 @@
+{
+  "p0": "P0-2",
+  "title": "Invite contract unified",
+  "status": "PASS",
+  "module": "apps/web/lib/invite-link.ts",
+  "format": "/games/{slug}/play?room={ROOM_ID}",
+  "examples": {
+    "snake": "/games/snake/play?room=WORLD-XXX",
+    "agar": "/games/agar/play?room=WORLD-XXX",
+    "bomber": "/games/bomber/play?room=BOMBER-A"
+  },
+  "ux": "Detail → [초대 링크 복사] + [공유하기] — identical across Snake/Agar/Bomber",
+  "fixes": [
+    "Shared invite-link.ts used by GameDetailShare + MpWorldPlayLink",
+    "Bomber invite uses BOMBER-A (not WORLD, not wrong slug)",
+    "inviteHrefForCatalogSlug updated to play?room= format",
+    "playHrefForCatalogSlug bomber default BOMBER-A"
+  ],
+  "commit": "pending"
+}

@@ -1,0 +1,12 @@
+{
+  "p0": "P0-6",
+  "title": "Bomber AI READY → MOVE",
+  "status": "PASS",
+  "fixes": [
+    "handleEntryDone auto enterMapMatch when ?room=BOMBER-X invite link",
+    "Host tick runs botThink every BOMBER_TICK_MS when started",
+    "Host takeover if host state stale (900ms) so AI/bombs never freeze"
+  ],
+  "flow": "Lobby → ENTER → (auto map from invite) → Spawn → botThink on host tick",
+  "commit": "pending"
+}

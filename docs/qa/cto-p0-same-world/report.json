@@ -1,0 +1,14 @@
+{
+  "p0": "P0-3",
+  "title": "Same world",
+  "status": "PASS",
+  "mechanism": "?room= param pins shard — Snake/Agar WORLD-*, Bomber BOMBER-A/B/C/D",
+  "automated": "cto-p0-smoke.mjs probes play URLs with room param",
+  "manualSteps": [
+    "Device A: copy invite link from Snake detail → WORLD-XXX",
+    "Device B: open same link → both join WORLD-XXX",
+    "Repeat for Agar (same WORLD-XXX) and Bomber (BOMBER-A same map)"
+  ],
+  "notes": "Snake /games/snake/play?room=X redirects to flagship with same room param preserved",
+  "commit": "pending"
+}

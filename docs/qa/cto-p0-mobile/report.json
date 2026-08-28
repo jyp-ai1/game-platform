@@ -1,0 +1,16 @@
+{
+  "p0": "P0-4",
+  "title": "Mobile control contract",
+  "status": "PASS",
+  "layout": "Brawl Stars — left D-pad, right actions, fixed bottom (lg:hidden)",
+  "games": {
+    "snake": "left D-pad, right BOOST (MobileControlPad)",
+    "agar": "left D-pad, right SPLIT/EJECT",
+    "bomber": "left D-pad, right BOMB"
+  },
+  "fixes": [
+    "MobileControlPad pointer dedupe (150ms) — prevents touch+mouse double fire",
+    "No per-game canvas overlay direction keys"
+  ],
+  "commit": "pending"
+}
