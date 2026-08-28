@@ -1,6 +1,7 @@
 "use client";
 
-/** BOMBER-ONLINE-003 — Map→roster · same Map=same Room · instant enter · AI moves · bomb sync. */
+/** BOMBER-ONLINE-004 — strict MP join: room → playerId → seat → spawn → stateAck → start. */
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getDeviceId,
   getLastNickname,
@@ -54,7 +55,6 @@ import {
 } from "./bomber-engine";
 
 const CELL = 26;
-const HOST_STATE_STALE_MS = 1200;
 
 const BOMBER_STYLES: MpStyleOption[] = [
   { id: "bomber", label: "Bomber", emoji: "💣", color: MP_PLAYER_COLORS[0] },
@@ -150,12 +150,6 @@ function localPlayerInState(state: BomberSyncState, deviceId: string): boolean {
   return state.players.some((p) => p.id === deviceId && !p.isBot);
 }
 
-/** Solo client must tick locally — only when room has one human connection. */
-function isSoloInRoom(roomCode: string): boolean {
-  const room = getRoom(roomCode);
-  return !!room && room.players.length <= 1;
-}
-
 function MiniMapPreview({ mapId }: { mapId: number }) {
   const slots = rosterForMap(mapId);
   const preview = useMemo(
@@ -225,6 +219,8 @@ export function BomberGame() {
   worldRef.current = world;
   const [lobbyPhase, setLobbyPhase] = useState<LobbyPhase>("entry");
   const [started, setStarted] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState(false);
   const [stateAck, setStateAck] = useState(false);
   const stateAckRef = useRef(false);
   const setStateAckReady = useCallback((ready: boolean) => {
@@ -291,15 +287,8 @@ export function BomberGame() {
       const code = roomRef.current;
       const room = getRoom(code);
       const listedHost = room?.hostId === deviceId;
-      const everSynced = lastHostStateAt.current > 0;
-      const hostFresh = Date.now() - lastHostStateAt.current < HOST_STATE_STALE_MS;
-      const waitedForHost = Date.now() - matchLocalStartAt.current > 900;
       const w = worldRef.current;
-      const solo = isSoloInRoom(code);
-      const hostNow =
-        qaLocalProbeRef.current ||
-        solo ||
-        (listedHost && (!everSynced || !hostFresh || waitedForHost));
+      const hostNow = qaLocalProbeRef.current || listedHost;
       isHostRef.current = hostNow;
       setIsHost(hostNow);
 
@@ -352,8 +341,7 @@ export function BomberGame() {
         if (qaLocalProbeRef.current) return;
         const w = worldRef.current;
         const listedHost = amHost || isRoomHost(code, deviceId);
-        const solo = isSoloInRoom(code);
-        const ignoreRemote = isHostRef.current || listedHost || solo;
+        const ignoreRemote = isHostRef.current || listedHost || qaLocalProbeRef.current;
         if (ignoreRemote) return;
         lastHostStateAt.current = Date.now();
         const state = gs.state as BomberSyncState;
@@ -370,7 +358,7 @@ export function BomberGame() {
 
       if (
         last.startsWith("input:") &&
-        (amHost || isHostRef.current || isRoomHost(code, deviceId) || isSoloInRoom(code))
+        (amHost || isHostRef.current || isRoomHost(code, deviceId) || qaLocalProbeRef.current)
       ) {
         const payload = gs[last] as BomberInput | undefined;
         if (payload?.deviceId && payload.deviceId !== deviceId) {
@@ -472,26 +460,6 @@ export function BomberGame() {
     [deviceId, applyMatchFromState, setHostAuthority]
   );
 
-  // Guest: pull existing match state for this map room (no lobby wait)
-  useEffect(() => {
-    if (started || lobbyPhase === "entry" || qaLocalProbeRef.current) return;
-    const code = activeRoom;
-    return subscribeRoom(code, (room) => {
-      const gs = room.gameState ?? {};
-      if (gs.state && !started) {
-        const state = gs.state as BomberSyncState;
-        if (state.mapId !== mapId) return;
-        if (isRoomHost(code, deviceId)) return;
-        if (!localPlayerInState(state, deviceId)) return;
-        if (applyMatchFromState(state, code, true)) {
-          setStarted(true);
-          setHostAuthority(false);
-          matchLocalStartAt.current = Date.now();
-        }
-      }
-    });
-  }, [started, lobbyPhase, activeRoom, deviceId, mapId, applyMatchFromState, setHostAuthority]);
-
   useEffect(() => {
     if (!started || reportedRef.current) return;
     if (!world.matchOver) return;
@@ -506,7 +474,7 @@ export function BomberGame() {
       const payload: BomberInput = { deviceId, ...partial, at: Date.now() };
       const w = worldRef.current;
       const hostNow =
-        qaLocalProbeRef.current || isHostRef.current || isRoomHost(code, deviceId) || isSoloInRoom(code);
+        qaLocalProbeRef.current || isHostRef.current || isRoomHost(code, deviceId);
 
       if (hostNow) {
         if (partial.dx || partial.dy) tryMove(w, deviceId, partial.dx ?? 0, partial.dy ?? 0);
@@ -530,34 +498,50 @@ export function BomberGame() {
     if (typeof window === "undefined") return;
     const w = window as Window & {
       __BOMBER_QA__?: () => {
+        roomId: string;
         deviceId: string;
         stateAck: boolean;
         isHost: boolean;
-        local: { x: number; y: number } | null;
-        players: Array<{ id: string; x: number; y: number; isBot: boolean }>;
+        local: { x: number; y: number; alive: boolean } | null;
+        players: Array<{ id: string; x: number; y: number; isBot: boolean; alive: boolean }>;
+        bombs: Array<{ id: string; x: number; y: number; ownerId: string }>;
+        blasts: number;
+        matchOver: boolean;
       };
       __BOMBER_QA_MOVE__?: (dx: number, dy: number) => void;
+      __BOMBER_QA_PLANT__?: () => boolean;
     };
     w.__BOMBER_QA__ = () => {
       const wr = worldRef.current;
       const me = wr.players[deviceId];
       return {
+        roomId: roomRef.current,
         deviceId,
         stateAck: stateAckRef.current,
         isHost: isHostRef.current,
-        local: me ? { x: me.x, y: me.y } : null,
+        local: me ? { x: me.x, y: me.y, alive: me.alive } : null,
         players: Object.values(wr.players).map((p) => ({
           id: p.id,
           x: p.x,
           y: p.y,
           isBot: p.isBot,
+          alive: p.alive,
         })),
+        bombs: wr.bombs.map((b) => ({ id: b.id, x: b.x, y: b.y, ownerId: b.ownerId })),
+        blasts: wr.blasts.length,
+        matchOver: !!wr.matchOver,
       };
+    };
+    w.__BOMBER_QA_PLANT__ = () => {
+      if (!stateAckRef.current) return false;
+      pushInput({ plant: true });
+      return worldRef.current.bombs.some((b) => b.ownerId === deviceId);
     };
     return () => {
       delete w.__BOMBER_QA__;
+      delete w.__BOMBER_QA_PLANT__;
     };
-  }, [deviceId]);
+  }, [deviceId, pushInput]);
 
   useEffect(() => {
     if (!qaLocalProbeRef.current || !started) return;
@@ -569,7 +553,7 @@ export function BomberGame() {
   }, [started, pushInput]);
 
   useEffect(() => {
-    if (!started) return;
+    if (!started || (!stateAck && !qaLocalProbeRef.current)) return;
     const onKey = (e: KeyboardEvent) => {
       const map: Record<string, [number, number]> = {
         ArrowUp: [0, -1],
@@ -593,14 +577,17 @@ export function BomberGame() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [started, pushInput]);
+  }, [started, stateAck, pushInput]);
 
-  /** Map select → join map room → host creates / guest waits for STATE ACK. */
+  /** Map select → join room → host creates world / guest waits for stateAck (no local fallback). */
   const enterMapMatch = useCallback(
     (nextMapId: number) => {
       if (started && stateAckRef.current) return;
       reportedRef.current = false;
-      if (!started) setStateAckReady(false);
+      setStateAckReady(false);
+      setConnectError(false);
+      setConnecting(true);
+      setStarted(false);
       setMapId(nextMapId);
       const code = bomberRoomCodeForMap(nextMapId);
       setActiveRoom(code);
@@ -610,89 +597,111 @@ export function BomberGame() {
         window.history.replaceState({}, "", url.toString());
       }
 
-      const slots = rosterForMap(nextMapId);
-      const matchStartedAt = Date.now();
-
       void (async () => {
-        let room: GameRoom | null = null;
         try {
-          room = await ensureJoinedRoom(code, nickname);
-        } catch {
-          /* local */
-        }
-
-        if (!room && !qaLocalProbeRef.current) {
-          for (let i = 0; i < 12; i++) {
-            room = getRoom(code);
-            if (room) break;
-            const st = getRoom(code)?.gameState?.state as BomberSyncState | undefined;
-            if (st && !localPlayerInState(st, deviceId)) {
-              const acked = await waitForHostStateAck(code, nextMapId, 6000);
-              if (!acked) {
-                setStarted(false);
-                return;
-              }
-              return;
-            }
-            await new Promise((r) => window.setTimeout(r, 300));
+          let room: GameRoom | null = null;
+          try {
+            room = await ensureJoinedRoom(code, nickname);
+          } catch {
+            /* retry below */
           }
-        }
 
-        if (room && room.hostId !== deviceId && !qaLocalProbeRef.current) {
-          const acked = await waitForHostStateAck(code, nextMapId);
-          if (!acked) {
-            setStarted(false);
+          if (!room && !qaLocalProbeRef.current) {
+            for (let i = 0; i < 24; i++) {
+              await ensureRoom(code);
+              room = getRoom(code);
+              if (room?.players.some((p) => p.deviceId === deviceId)) break;
+              room = (await joinRoomAsync(code, { nickname })) ?? room;
+              if (room?.players.some((p) => p.deviceId === deviceId)) break;
+              await new Promise((r) => window.setTimeout(r, 250));
+            }
+          }
+
+          if (!room && qaLocalProbeRef.current) {
+            room = createRoom({
+              code,
+              gameSlug: "bomber",
+              maxPlayers: 8,
+              matchMode: "public",
+              hostNickname: nickname,
+            });
+          }
+
+          if (!room && !qaLocalProbeRef.current) {
+            const fetched = await ensureRoom(code);
+            if (!fetched) {
+              room = createRoom({
+                code,
+                gameSlug: "bomber",
+                maxPlayers: 8,
+                matchMode: "public",
+                hostNickname: nickname,
+              });
+            } else {
+              room = (await joinRoomAsync(code, { nickname })) ?? fetched;
+            }
+          }
+
+          if (!room) {
+            setConnecting(false);
+            setConnectError(true);
             return;
           }
-          return;
-        }
 
-        if (!room && !qaLocalProbeRef.current) {
-          room = createRoom({
-            code,
-            gameSlug: "bomber",
-            maxPlayers: 8,
-            matchMode: "public",
-            hostNickname: nickname,
-          });
-        }
+          const amHost = qaLocalProbeRef.current || room.hostId === deviceId;
+          setHostAuthority(amHost);
 
-        let gs = room?.gameState ?? {};
-        let existing = gs.state as BomberSyncState | undefined;
-
-        const hostNow = qaLocalProbeRef.current || room?.hostId === deviceId || isSoloInRoom(code);
-
-        if (
-          existing &&
-          existing.mapId === nextMapId &&
-          !existing.matchOver &&
-          !qaLocalProbeRef.current &&
-          !isRoomHost(code, deviceId)
-        ) {
-          if (applyMatchFromState(existing, code, true)) {
-            setStarted(true);
-            setHostAuthority(false);
-            matchLocalStartAt.current = Date.now();
+          if (!amHost) {
+            const acked = await waitForHostStateAck(code, nextMapId, 15000);
+            setConnecting(false);
+            if (!acked) {
+              setConnectError(true);
+              setStarted(false);
+              setStateAckReady(false);
+            }
+            return;
           }
-          return;
-        }
 
-        const humans = collectHumans(code, deviceId, nickname, color);
-        const next = createBomberWorld(deviceId, nickname, {
-          playerSlots: slots,
-          mapId: nextMapId,
-          humans,
-          matchStartedAt,
-        });
-        applyLocalLook(next, deviceId, color);
-        worldRef.current = next;
-        setWorld(next);
-        matchLocalStartAt.current = Date.now();
-        setStarted(true);
-        setStateAckReady(true);
+          const gs = room.gameState ?? {};
+          const existing = gs.state as BomberSyncState | undefined;
+          const slots = rosterForMap(nextMapId);
+          const matchStartedAt = Date.now();
 
-        setHostAuthority(hostNow);
-        if (hostNow) {
+          if (existing && existing.mapId === nextMapId && !existing.matchOver && !qaLocalProbeRef.current) {
+            const humans = collectHumans(code, deviceId, nickname, color);
+            const next = createBomberWorld(deviceId, nickname, {
+              playerSlots: existing.playerSlots,
+              mapId: existing.mapId,
+              humans,
+              matchStartedAt: existing.matchStartedAt,
+            });
+            applyBomberSyncState(next, existing);
+            applyLocalLook(next, deviceId, color);
+            worldRef.current = next;
+            setWorld(next);
+            matchLocalStartAt.current = Date.now();
+            setStarted(true);
+            setStateAckReady(true);
+            setConnecting(false);
+            send(code, "state", serializeBomberState(next));
+            return;
+          }
+
+          const humans = collectHumans(code, deviceId, nickname, color);
+          const next = createBomberWorld(deviceId, nickname, {
+            playerSlots: slots,
+            mapId: nextMapId,
+            humans,
+            matchStartedAt,
+          });
+          applyLocalLook(next, deviceId, color);
+          worldRef.current = next;
+          setWorld(next);
+          matchLocalStartAt.current = Date.now();
+          setStarted(true);
+          setStateAckReady(true);
+          setConnecting(false);
+          setHostAuthority(true);
           send(code, "bomber:cfg", {
             playerSlots: slots,
             mapId: nextMapId,
@@ -700,6 +709,11 @@ export function BomberGame() {
             hostId: deviceId,
           });
           send(code, "state", serializeBomberState(next));
+        } catch {
+          setConnecting(false);
+          setConnectError(true);
+          setStarted(false);
+          setStateAckReady(false);
         }
       })();
     },
@@ -709,7 +723,6 @@ export function BomberGame() {
       color,
       started,
       waitForHostStateAck,
-      applyMatchFromState,
       setHostAuthority,
       setStateAckReady,
     ]
@@ -731,6 +744,8 @@ export function BomberGame() {
     reportedRef.current = false;
     setStateAckReady(false);
     setStarted(false);
+    setConnecting(false);
+    setConnectError(false);
     setLobbyPhase("map");
   }, [setStateAckReady]);
 
@@ -788,25 +803,52 @@ export function BomberGame() {
       >
         <h1 className="text-2xl font-bold">Map Select</h1>
         <p className="text-sm text-white/60">Same map = same room · AI fills empty seats</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          {MAP_NAMES.map((name, i) => (
+        {connecting ? (
+          <div
+            data-testid="bomber-connecting"
+            className="flex flex-col items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-8 py-6"
+          >
+            <p className="text-lg font-semibold">Connecting…</p>
+            <p className="text-sm text-white/60">Waiting for room · seat · spawn</p>
+          </div>
+        ) : connectError ? (
+          <div
+            data-testid="bomber-connect-error"
+            className="flex flex-col items-center gap-3 rounded-xl border border-red-500/40 bg-red-950/40 px-8 py-6"
+          >
+            <p className="text-lg font-semibold text-red-200">Connection failed</p>
             <button
-              key={name}
               type="button"
-              data-testid={`bomber-map-${MAP_LETTERS[i]}`}
-              onClick={() => enterMapMatch(i)}
-              className={`rounded-xl px-4 py-3 text-sm font-semibold ${
-                mapId === i ? "bg-amber-400 text-black" : "bg-white/10"
-              }`}
+              data-testid="bomber-connect-retry"
+              onClick={() => enterMapMatch(mapId)}
+              className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black"
             >
-              {MAP_LETTERS[i]} · {name} · {rosterForMap(i)}P
+              Retry
             </button>
-          ))}
-        </div>
-        <MiniMapPreview mapId={mapId} />
-        <p className="text-xs text-white/50">
-          Tap a map to enter · Fire start {BOMBER_FIRE_START} · Items Bomb/Fire/Speed
-        </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap justify-center gap-3">
+              {MAP_NAMES.map((name, i) => (
+                <button
+                  key={name}
+                  type="button"
+                  data-testid={`bomber-map-${MAP_LETTERS[i]}`}
+                  onClick={() => enterMapMatch(i)}
+                  className={`rounded-xl px-4 py-3 text-sm font-semibold ${
+                    mapId === i ? "bg-amber-400 text-black" : "bg-white/10"
+                  }`}
+                >
+                  {MAP_LETTERS[i]} · {name} · {rosterForMap(i)}P
+                </button>
+              ))}
+            </div>
+            <MiniMapPreview mapId={mapId} />
+            <p className="text-xs text-white/50">
+              Tap a map to enter · Fire start {BOMBER_FIRE_START} · Items Bomb/Fire/Speed
+            </p>
+          </>
+        )}
       </div>
     );
   }
