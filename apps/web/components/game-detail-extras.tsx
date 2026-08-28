@@ -1,7 +1,6 @@
 "use client";
 
 import type { Game } from "@game-platform/shared";
-import { createRoom } from "@game-platform/multiplayer-sdk";
 import Link from "next/link";
 import { Share2, ThumbsDown, Heart, Flag } from "lucide-react";
 import { useCallback, useState, useSyncExternalStore, type FormEvent } from "react";
@@ -19,7 +18,11 @@ import {
   toggleCommentDislike,
   toggleCommentLike,
 } from "@/lib/community-store";
-import { inviteHrefForCatalogSlug } from "@/lib/game-catalog";
+import {
+  buildInvitePlayUrl,
+  readInviteOrigin,
+  resolveInviteRoomCode,
+} from "@/lib/invite-link";
 import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getLastNickname } from "@game-platform/game-sdk";
 
@@ -212,63 +215,6 @@ export function GameDetailRating({ gameSlug }: { gameSlug: string }) {
   );
 }
 
-const ACTIVE_ROOM_KEY = "play29:active-room";
-
-function makeWorldInviteCode(): string {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let suffix = "";
-  for (let i = 0; i < 3; i++) {
-    suffix += alphabet[Math.floor(Math.random() * alphabet.length)]!;
-  }
-  return `WORLD-${suffix}`;
-}
-
-/** Pin invite to a real multiplayer room id (not a disposable UUID). */
-function resolveInviteRoomCode(gameSlug: string): string {
-  if (typeof window !== "undefined") {
-    try {
-      const active = window.localStorage.getItem(ACTIVE_ROOM_KEY)?.toUpperCase();
-      // Prefer a pinned WORLD-* shard (bare WORLD re-resolves per client → split worlds)
-      if (active && /^WORLD-[A-Z0-9]+$/.test(active)) {
-        return active;
-      }
-      if (gameSlug !== "snake" && gameSlug !== "agar" && gameSlug !== "bomber" && active) {
-        return active;
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-
-  // Snake / Agar / Bomber — same WORLD-* invite UX (do not deepen Snake-only invite).
-  if (gameSlug === "snake" || gameSlug === "agar" || gameSlug === "bomber") {
-    const code = makeWorldInviteCode();
-    createRoom({
-      gameSlug,
-      maxPlayers: gameSlug === "snake" ? 50 : 8,
-      matchMode: "public",
-      code,
-    });
-    try {
-      window.localStorage.setItem(ACTIVE_ROOM_KEY, code);
-    } catch {
-      /* ignore */
-    }
-    return code;
-  }
-
-  const room = createRoom({
-    gameSlug,
-    maxPlayers: 8,
-    matchMode: "friends",
-  });
-  try {
-    window.localStorage.setItem(ACTIVE_ROOM_KEY, room.code);
-  } catch {
-    /* ignore */
-  }
-  return room.code;
-}
 
 export function GameDetailShare({
   gameSlug,
@@ -283,11 +229,7 @@ export function GameDetailShare({
 
   function buildInviteUrl(): string {
     const invite = resolveInviteRoomCode(gameSlug);
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://game29.vercel.app";
-    // Sprint 21 — all MP invites land on Detail → WORLD PLAY (same World).
-    // Web Share API + copy; no Kakao SDK.
-    return `${origin}${inviteHrefForCatalogSlug(gameSlug, invite)}`;
+    return buildInvitePlayUrl(readInviteOrigin(), gameSlug, invite);
   }
 
   async function copyText(text: string): Promise<boolean> {
@@ -310,6 +252,13 @@ export function GameDetailShare({
         return false;
       }
     }
+  }
+
+  async function handleCopyLink() {
+    const url = buildInviteUrl();
+    const ok = await copyText(url);
+    setShareStatus(ok ? "copied" : "error");
+    window.setTimeout(() => setShareStatus("idle"), 2200);
   }
 
   async function handleShare(mode: "default" | "challenge" | "sms" = "default") {
@@ -339,16 +288,13 @@ export function GameDetailShare({
         window.setTimeout(() => setShareStatus("idle"), 2000);
         return;
       } catch (err) {
-        // User cancel → still offer copy; AbortError = cancelled
         if (err && typeof err === "object" && "name" in err && (err as { name: string }).name === "AbortError") {
           return;
         }
       }
     }
 
-    const ok = await copyText(url);
-    setShareStatus(ok ? "copied" : "error");
-    window.setTimeout(() => setShareStatus("idle"), 2200);
+    await handleCopyLink();
   }
 
   const statusLabel =
@@ -362,14 +308,24 @@ export function GameDetailShare({
 
   return (
     <div className="space-y-2">
-      <button
-        type="button"
-        data-testid="game-detail-share-btn"
-        onClick={() => void handleShare("default")}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
-      >
-        <Share2 className="size-4" /> 친구 초대 / 공유
-      </button>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          data-testid="game-detail-invite-copy"
+          onClick={() => void handleCopyLink()}
+          className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
+        >
+          초대 링크 복사
+        </button>
+        <button
+          type="button"
+          data-testid="game-detail-share-btn"
+          onClick={() => void handleShare("default")}
+          className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-card/50 py-3 text-sm font-medium backdrop-blur transition-colors hover:border-primary/30"
+        >
+          <Share2 className="size-4" /> 공유하기
+        </button>
+      </div>
       {statusLabel ? (
         <p
           data-testid="game-detail-share-status"

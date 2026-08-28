@@ -1,14 +1,12 @@
 "use client";
 
 /**
- * Sprint 21 — pin invite room on Detail (no auto-skip to play).
- * Invite URL → Detail → WORLD PLAY → same World.
+ * Sprint 21 / CTO P0-2 — pin invite room on Detail from ?invite= or ?room= on play links.
  */
 import { useEffect } from "react";
 
 import { usePlayerAuth } from "@/components/auth-provider";
-
-const ACTIVE_ROOM_KEY = "play29:active-room";
+import { pinActiveRoom } from "@/lib/invite-link";
 
 export function InviteDetailPin({
   invite,
@@ -23,11 +21,7 @@ export function InviteDetailPin({
     if (!invite) return;
     const code = invite.trim().toUpperCase();
     if (!code) return;
-    try {
-      window.localStorage.setItem(ACTIVE_ROOM_KEY, code);
-    } catch {
-      /* ignore */
-    }
+    pinActiveRoom(code);
   }, [invite, gameSlug]);
 
   if (!invite) return null;

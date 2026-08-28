@@ -4,36 +4,8 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { playHrefForCatalogSlug } from "@/lib/game-catalog";
+import { invitePlayPath, readPinnedRoom } from "@/lib/invite-link";
 
-const ACTIVE_ROOM_KEY = "play29:active-room";
-
-/** Concrete WORLD-* only — bare WORLD re-resolves per client and splits invite rooms. */
-function readPinnedWorldRoom(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const fromUrl = new URLSearchParams(window.location.search).get("invite")?.toUpperCase();
-    if (fromUrl && /^WORLD-[A-Z0-9]+$/.test(fromUrl)) {
-      try {
-        window.localStorage.setItem(ACTIVE_ROOM_KEY, fromUrl);
-      } catch {
-        /* ignore */
-      }
-      return fromUrl;
-    }
-    const active = window.localStorage.getItem(ACTIVE_ROOM_KEY)?.toUpperCase() ?? null;
-    if (active && /^WORLD-[A-Z0-9]+$/.test(active)) return active;
-  } catch {
-    /* ignore */
-  }
-  return null;
-}
-
-/**
- * WORLD PLAY CTA — if an invite/share already pinned a WORLD-* shard, join that room
- * instead of bare WORLD (cluster resolve → WORLD-2/3/4 split).
- * Snake path unchanged; Agar/Bomber reuse the same pin key.
- * Sprint 21 — also honor ?invite= on Detail.
- */
 export function SnakeWorldPlayLink({
   className,
   children,
@@ -64,13 +36,9 @@ export function MpWorldPlayLink({
   const [href, setHref] = useState(() => playHrefForCatalogSlug(slug));
 
   useEffect(() => {
-    const pinned = readPinnedWorldRoom();
+    const pinned = readPinnedRoom(slug);
     if (!pinned) return;
-    if (slug === "snake") {
-      setHref(`/flagship/snake-io/play?room=${encodeURIComponent(pinned)}&source=invite`);
-      return;
-    }
-    setHref(`/games/${slug}/play?room=${encodeURIComponent(pinned)}&source=invite`);
+    setHref(invitePlayPath(slug, pinned));
   }, [slug]);
 
   return (

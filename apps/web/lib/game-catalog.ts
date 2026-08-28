@@ -42,12 +42,12 @@ export function detailHrefForCatalogSlug(slug: string): string {
 }
 
 /**
- * Sprint 18 / 21 — invite lands on Detail first (pin room), then WORLD PLAY.
- * Never deep-link guests past Detail into a bare WORLD cluster resolve.
+ * Sprint 18 / 21 / CTO P0-2 — invite deep-links to play with pinned room.
+ * Format: /games/{slug}/play?room={ROOM_ID}
  */
 export function inviteHrefForCatalogSlug(slug: string, roomCode: string): string {
   const code = roomCode.trim().toUpperCase();
-  return `/games/${slug}?invite=${encodeURIComponent(code)}&source=invite`;
+  return `/games/${slug}/play?room=${encodeURIComponent(code)}`;
 }
 
 /** PLATFORM-UX-CONTRACT-002 — unified card / detail CTA copy. */
@@ -59,7 +59,7 @@ export function playHrefForCatalogSlug(slug: string): string {
   // Detail CTA → Character/Color entry (flagship Snake or /games/{slug}/play).
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
   if (slug === "agar") return "/games/agar/play?room=WORLD";
-  if (slug === "bomber") return "/games/bomber/play?room=WORLD";
+  if (slug === "bomber") return "/games/bomber/play?room=BOMBER-A";
   return `/games/${slug}/play`;
 }
 

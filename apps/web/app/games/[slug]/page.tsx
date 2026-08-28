@@ -53,7 +53,10 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
   const q = await searchParams;
   // Sprint 21 — Invite lands on Detail (pin room via InviteDetailPin), then WORLD PLAY.
   // Do not auto-redirect past Detail (same-world join still uses pinned room).
-  const invite = firstParam(q.invite)?.trim().toUpperCase() || null;
+  const invite =
+    firstParam(q.invite)?.trim().toUpperCase() ||
+    firstParam(q.room)?.trim().toUpperCase() ||
+    null;
 
   const [dbGame, rawGames, rankingEnabled] = await Promise.all([
     getGameBySlug(slug),
