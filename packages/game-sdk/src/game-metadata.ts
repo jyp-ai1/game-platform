@@ -33,6 +33,17 @@ export type CreatorGameMeta = {
 const CREATOR_STUB_SLUGS = new Set(["creator-demo"]);
 
 const MP_SLUGS = new Set(["snake", "agar", "bomber"]);
+const CREATOR_MP_SLUGS = new Set<string>();
+
+/** Sprint 23 — web registry registers published creator MP slugs at catalog merge. */
+export function setCreatorMultiplayerSlugs(slugs: readonly string[]): void {
+  CREATOR_MP_SLUGS.clear();
+  for (const s of slugs) CREATOR_MP_SLUGS.add(s);
+}
+
+export function getCreatorMultiplayerSlugs(): readonly string[] {
+  return [...CREATOR_MP_SLUGS];
+}
 
 /** Map legacy catalog Difficulty (EASY/MEDIUM/HARD) → session difficulty. Easy → normal. */
 export function toSessionDifficulty(
@@ -59,11 +70,12 @@ export function toSessionDifficulty(
 
 export function resolveGameType(slug: string): GameType {
   if (CREATOR_STUB_SLUGS.has(slug)) return "singleplayer";
-  return MP_SLUGS.has(slug) ? "multiplayer" : "singleplayer";
+  if (MP_SLUGS.has(slug) || CREATOR_MP_SLUGS.has(slug)) return "multiplayer";
+  return "singleplayer";
 }
 
 export function isMultiplayerGameSlug(slug: string): boolean {
-  return MP_SLUGS.has(slug);
+  return MP_SLUGS.has(slug) || CREATOR_MP_SLUGS.has(slug);
 }
 
 export function buildCreatorGameMeta(input: {

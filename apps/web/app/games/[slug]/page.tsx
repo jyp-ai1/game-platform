@@ -8,8 +8,12 @@ import { selectRelated } from "@/lib/game-sections";
 import {
   buildLocalMvpGame,
   getGameOrLocalMvp,
-  mergeLocalMvpGames,
 } from "@/lib/local-mvp-games";
+import {
+  getCreatorGameOrNull,
+  mergeCatalogGames,
+} from "@/lib/creator/creator-game-catalog";
+import { isCreatorPlayableSlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
 import {
   breadcrumbJsonLd,
@@ -56,17 +60,18 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
     getGames(),
     isFeatureEnabled("ranking"),
   ]);
-  const allGames = mergeLocalMvpGames(rawGames);
+  const allGames = mergeCatalogGames(rawGames);
   const game = dbGame
     ? getGameOrLocalMvp([dbGame], slug)
-    : getGameOrLocalMvp(allGames, slug);
+    : getGameOrLocalMvp(allGames, slug) ?? getCreatorGameOrNull(slug);
 
   if (!game || game.status === "HIDDEN") {
     notFound();
   }
 
   const related = selectRelated(allGames, game);
-  const isPlayable = game.status === "ACTIVE" && isPlayableSlug(slug);
+  const isPlayable =
+    (game.status === "ACTIVE" && isPlayableSlug(slug)) || isCreatorPlayableSlug(slug);
 
   return (
     <>

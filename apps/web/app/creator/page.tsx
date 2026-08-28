@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
-import { AiCreatorSoonPanel } from "@/components/ai-creator-soon-panel";
+import { CreatorPipelinePanel } from "@/components/creator-pipeline-panel";
 
 export const metadata: Metadata = {
   title: "AI Creator · SOON",
   robots: { index: false, follow: false },
 };
 
-/** Sprint 17 Step 5 — UI expose only, no real AI generator. */
+/** Sprint 23 — Creator pipeline (stub generate; AI engine SOON). */
 export default function AiCreatorPage() {
-  return <AiCreatorSoonPanel />;
+  return <CreatorPipelinePanel />;
 }

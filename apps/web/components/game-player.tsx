@@ -321,16 +321,20 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
 
 export function GamePlayer({
   slug,
+  catalogSlug,
   rankingEnabled = true,
   instantPlay = false,
   fullscreen = false,
 }: {
   slug: PlayableSlug;
+  /** Catalog slug for analytics when playing creator stub (engine may differ). */
+  catalogSlug?: string;
   rankingEnabled?: boolean;
   instantPlay?: boolean;
   fullscreen?: boolean;
 }) {
   const Component = gameComponents[slug];
+  const trackSlug = catalogSlug ?? slug;
 
   async function submitScoreWithFlags(
     gameSlug: string,
@@ -347,8 +351,8 @@ export function GamePlayer({
   return (
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
       <InstantPlayProvider enabled={instantPlay}>
-        <GameSlugProvider slug={slug}>
-          <GameErrorMonitor gameSlug={slug} />
+        <GameSlugProvider slug={trackSlug}>
+          <GameErrorMonitor gameSlug={trackSlug} />
           <div
             className={
               fullscreen

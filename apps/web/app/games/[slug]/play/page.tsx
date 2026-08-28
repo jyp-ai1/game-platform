@@ -1,5 +1,7 @@
 import { GamePlayClient } from "@/components/game-play-client";
 import { buildLocalMvpGame } from "@/lib/local-mvp-games";
+import { getCreatorGameOrNull } from "@/lib/creator/creator-game-catalog";
+import { isCreatorPlayableSlug, resolvePlaySlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
 import { getGameBySlug } from "@/lib/supabase/games";
 import type { Metadata } from "next";
@@ -16,7 +18,8 @@ function firstParam(value: string | string[] | undefined): string | undefined {
 
 export async function generateMetadata({ params }: GamePlayPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const game = (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug);
+  const game =
+    (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug) ?? getCreatorGameOrNull(slug);
   return { title: game?.title ? `${game.title} — Play` : "Play" };
 }
 
@@ -28,7 +31,13 @@ export async function generateMetadata({ params }: GamePlayPageProps): Promise<M
  */
 export default async function GamePlayPage({ params, searchParams }: GamePlayPageProps) {
   const { slug } = await params;
-  if (!isPlayableSlug(slug)) {
+  const playable = isPlayableSlug(slug) || isCreatorPlayableSlug(slug);
+  if (!playable) {
+    notFound();
+  }
+
+  const engineSlug = resolvePlaySlug(slug);
+  if (!engineSlug) {
     notFound();
   }
 
@@ -48,14 +57,15 @@ export default async function GamePlayPage({ params, searchParams }: GamePlayPag
     );
   }
 
-  const game = (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug);
-  if (!game || game.status !== "ACTIVE") {
+  const game =
+    (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug) ?? getCreatorGameOrNull(slug);
+  if (!game || (game.status !== "ACTIVE" && !isCreatorPlayableSlug(slug))) {
     notFound();
   }
 
   return (
     <main className="fixed inset-0 z-[100] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black">
-      <GamePlayClient slug={slug} title={game.title} />
+      <GamePlayClient slug={slug} engineSlug={engineSlug} title={game.title} />
     </main>
   );
 }

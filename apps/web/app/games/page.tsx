@@ -4,7 +4,7 @@ import { GamesDiscoveryBrowser } from "@/components/games-discovery-browser";
 import { Container, SectionTitle } from "@game-platform/ui";
 
 import { selectHotSlugs } from "@/lib/game-sections";
-import { mergeLocalMvpGames } from "@/lib/local-mvp-games";
+import { mergeCatalogGames } from "@/lib/creator/creator-game-catalog";
 import { buildGamesListMetadata } from "@/lib/seo";
 import { getGames } from "@/lib/supabase/games";
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = buildGamesListMetadata();
 export const revalidate = 60;
 
 export default async function AllGamesPage() {
-  const games = mergeLocalMvpGames(await getGames());
+  const games = mergeCatalogGames(await getGames());
   const hotSlugs = selectHotSlugs(games);
 
   return (

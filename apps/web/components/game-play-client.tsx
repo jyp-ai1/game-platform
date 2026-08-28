@@ -11,7 +11,15 @@ import { useEffect, useRef } from "react";
  * In-game Exit → lobby (game-owned). Lobby browser Back → Detail.
  * Do NOT route Exit to home or detail — games flip to lobby via setStarted(false).
  */
-export function GamePlayClient({ slug, title }: { slug: string; title: string }) {
+export function GamePlayClient({
+  slug,
+  engineSlug,
+  title,
+}: {
+  slug: string;
+  engineSlug: string;
+  title: string;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -43,7 +51,7 @@ export function GamePlayClient({ slug, title }: { slug: string; title: string })
         </button>
       </header>
       <div className="min-h-0 flex-1 overflow-hidden">
-        <GamePlayer slug={slug as PlayableSlug} instantPlay fullscreen />
+        <GamePlayer slug={engineSlug as PlayableSlug} catalogSlug={slug} instantPlay fullscreen />
       </div>
     </div>
   );

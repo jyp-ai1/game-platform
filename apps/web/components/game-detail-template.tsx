@@ -12,6 +12,8 @@ import { GameStatusBlock } from "@/components/game-status-block";
 import { InviteDetailPin } from "@/components/invite-detail-pin";
 import { MpWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug, REPLAY_DETAIL_SOLO_CTA, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
+import { creatorDisplayName, isCreatorMultiplayerSlug } from "@/lib/creator/creator-game-catalog";
+import { isCreatorGameSlug } from "@/lib/creator/creator-game-registry";
 
 function shortDescription(game: Game, slug: string): string {
   if (slug === "snake") {
@@ -30,13 +32,14 @@ function shortDescription(game: Game, slug: string): string {
 }
 
 function isMultiplayerSlug(slug: string): boolean {
-  return slug === "snake" || slug === "agar" || slug === "bomber";
+  return slug === "snake" || slug === "agar" || slug === "bomber" || isCreatorMultiplayerSlug(slug);
 }
 
 function creatorStub(slug: string): string {
   if (slug === "snake") return "Replay Studio";
   if (slug === "agar") return "Replay Studio";
   if (slug === "bomber") return "Replay Studio";
+  if (isCreatorGameSlug(slug)) return creatorDisplayName(slug) ?? "Creator";
   return "Community";
 }
 

@@ -5,9 +5,9 @@ import { HomePageClient } from "@/components/home-page-client";
 import { selectPopular } from "@/lib/game-sections";
 import {
   buildLocalMvpGame,
-  mergeLocalMvpGames,
   resolveLocalThumb,
 } from "@/lib/local-mvp-games";
+import { mergeCatalogGames } from "@/lib/creator/creator-game-catalog";
 import { getGames } from "@/lib/supabase/games";
 import { buildHomeMetadata } from "@/lib/seo";
 
@@ -16,7 +16,7 @@ export const revalidate = 60;
 
 export default async function Home() {
   const rawGames = await getGames();
-  const games = mergeLocalMvpGames(rawGames);
+  const games = mergeCatalogGames(rawGames);
   const popular = selectPopular(games, 8);
   const snakeGame = games.find((g) => g.slug === "snake") ?? null;
 

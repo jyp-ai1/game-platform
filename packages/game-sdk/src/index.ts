@@ -107,8 +107,10 @@ export {
 } from "./multiplayer-entry-select";
 export {
   buildCreatorGameMeta,
+  getCreatorMultiplayerSlugs,
   isMultiplayerGameSlug,
   resolveGameType,
+  setCreatorMultiplayerSlugs,
   toSessionDifficulty,
   type CreatorGameMeta,
   type GameType,
