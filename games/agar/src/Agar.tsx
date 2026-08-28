@@ -103,6 +103,11 @@ export function AgarGame() {
     if (typeof window === "undefined") return "WORLD";
     return new URLSearchParams(window.location.search).get("room")?.toUpperCase() || "WORLD";
   }, []);
+  /** QA-only: keep mobile pad visible for automation pad probes (no gameplay change). */
+  const qaPadProbe = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("mp_qa_pad") === "1";
+  }, []);
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<AgarWorld>(() => createAgarWorld(deviceId, nickname));
   const worldRef = useRef(world);
@@ -491,7 +496,7 @@ export function AgarGame() {
         </div>
       </MultiplayerPlayShell>
 
-      {alive ? (
+      {started && (alive || qaPadProbe) ? (
         <MobileControlPad
           onDirection={aimFromPad}
           actions={[
@@ -501,7 +506,7 @@ export function AgarGame() {
         />
       ) : null}
 
-      {!alive ? (
+      {!alive && !qaPadProbe ? (
         <MultiplayerDeathOverlay
           score={finalScore}
           metric={`L:${finalScore}`}

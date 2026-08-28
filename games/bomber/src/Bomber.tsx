@@ -210,6 +210,7 @@ export function BomberGame() {
   const [mapId, setMapId] = useState(0);
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [isHost, setIsHost] = useState(true);
+  const isHostRef = useRef(true);
   const reportedRef = useRef(false);
   const pendingInputs = useRef<BomberInput[]>([]);
   const lastStateSent = useRef(0);
@@ -269,6 +270,7 @@ export function BomberGame() {
       // Host ticks; guest waits briefly for host state; solo or stale → take over so input/AI/bombs run
       const hostNow =
         listedHost || solo || (everSynced && !hostFresh) || (!everSynced && waitedForHost);
+      isHostRef.current = hostNow;
       setIsHost(hostNow);
 
       if (hostNow) {
@@ -395,7 +397,7 @@ export function BomberGame() {
       const code = roomRef.current;
       const payload: BomberInput = { deviceId, ...partial, at: Date.now() };
       const w = worldRef.current;
-      const hostNow = canAuthoritativeHost(code, deviceId, w);
+      const hostNow = isHostRef.current || canAuthoritativeHost(code, deviceId, w);
 
       if (hostNow) {
         if (partial.dx || partial.dy) tryMove(w, deviceId, partial.dx ?? 0, partial.dy ?? 0);
