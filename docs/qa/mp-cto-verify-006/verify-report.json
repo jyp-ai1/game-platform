@@ -1,0 +1,419 @@
+{
+  "base": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app",
+  "commit": "ad8adab",
+  "startedAt": "2026-08-28T10:17:32.574Z",
+  "checks": [
+    {
+      "name": "auth-preview-redirect-code",
+      "ok": true,
+      "sessionStorage": true,
+      "originRedirect": true,
+      "consumeReturn": true,
+      "noProdHardcode": true,
+      "t": "2026-08-28T10:17:32.580Z"
+    },
+    {
+      "name": "mobile-pad-dedupe-150ms",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.585Z"
+    },
+    {
+      "name": "mobile-pad-lg-hidden",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.585Z"
+    },
+    {
+      "name": "snake-pad-visible-before-first-move",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.585Z"
+    },
+    {
+      "name": "agar-no-touch-drag-steer",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.586Z"
+    },
+    {
+      "name": "agar-qa-pad-probe-hook",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.586Z"
+    },
+    {
+      "name": "snake-hud-spacebar-boost",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-hud-mobile-boost",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-top10-length-desc",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-outside-top10-rank",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-gem-gains-123",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-purge-characterless",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-canvas-touch-none",
+      "ok": true,
+      "t": "2026-08-28T10:17:32.593Z"
+    },
+    {
+      "name": "snake-ai-movement-sim-60s",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.555Z"
+    },
+    {
+      "name": "snake-l300-perf-flag-only",
+      "ok": true,
+      "note": "flag probe — no balance change",
+      "t": "2026-08-28T10:17:33.558Z"
+    },
+    {
+      "name": "agar-you-outline",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.560Z"
+    },
+    {
+      "name": "agar-virus-collision-doc",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.560Z"
+    },
+    {
+      "name": "agar-eject-backward",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.560Z"
+    },
+    {
+      "name": "agar-frozen-no-major-diff",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.560Z"
+    },
+    {
+      "name": "bomber-map-roster-ab-cd",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.562Z"
+    },
+    {
+      "name": "bomber-solo-host-input",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.562Z"
+    },
+    {
+      "name": "bomber-qa-local-probe-hook",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.562Z"
+    },
+    {
+      "name": "bomber-local-player-testid",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.562Z"
+    },
+    {
+      "name": "bomber-auto-enter-on-room",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.562Z"
+    },
+    {
+      "name": "bomber-engine-tryMove-right",
+      "ok": true,
+      "t": "2026-08-28T10:17:33.868Z"
+    },
+    {
+      "name": "bomber-bomb-fuse-death-unit",
+      "ok": true,
+      "t": "2026-08-28T10:17:34.568Z"
+    },
+    {
+      "name": "invite-unified-path",
+      "ok": true,
+      "t": "2026-08-28T10:17:34.574Z"
+    },
+    {
+      "name": "invite-slug-specific",
+      "ok": true,
+      "t": "2026-08-28T10:17:34.574Z"
+    },
+    {
+      "name": "invite-detail-copy-share",
+      "ok": true,
+      "t": "2026-08-28T10:17:34.574Z"
+    },
+    {
+      "name": "death-overlay-retry-exit",
+      "ok": true,
+      "t": "2026-08-28T10:17:34.575Z"
+    },
+    {
+      "name": "regression-home",
+      "ok": true,
+      "t": "2026-08-28T10:17:35.717Z"
+    },
+    {
+      "name": "regression-detail-snake",
+      "ok": true,
+      "t": "2026-08-28T10:17:37.491Z"
+    },
+    {
+      "name": "regression-detail-agar",
+      "ok": true,
+      "t": "2026-08-28T10:17:40.810Z"
+    },
+    {
+      "name": "regression-detail-bomber",
+      "ok": true,
+      "t": "2026-08-28T10:17:43.926Z"
+    },
+    {
+      "name": "regression-creator",
+      "ok": true,
+      "t": "2026-08-28T10:17:44.092Z"
+    },
+    {
+      "name": "regression-admin",
+      "ok": true,
+      "t": "2026-08-28T10:17:44.800Z"
+    },
+    {
+      "name": "snake-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T10:17:46.500Z"
+    },
+    {
+      "name": "snake-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-7LZ",
+      "t": "2026-08-28T10:17:47.085Z"
+    },
+    {
+      "name": "agar-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T10:17:48.127Z"
+    },
+    {
+      "name": "agar-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-7LZ",
+      "t": "2026-08-28T10:17:48.597Z"
+    },
+    {
+      "name": "bomber-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T10:17:49.418Z"
+    },
+    {
+      "name": "bomber-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-28T10:17:49.864Z"
+    },
+    {
+      "name": "snake-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-SAME006&source=invite",
+      "t": "2026-08-28T10:17:50.495Z"
+    },
+    {
+      "name": "snake-same-world-source-invite",
+      "ok": true,
+      "finalUrl": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-SAME006&source=invite",
+      "t": "2026-08-28T10:17:50.509Z"
+    },
+    {
+      "name": "agar-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-SAME006&source=invite",
+      "t": "2026-08-28T10:17:50.972Z"
+    },
+    {
+      "name": "agar-same-world-source-invite",
+      "ok": true,
+      "finalUrl": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-SAME006&source=invite",
+      "t": "2026-08-28T10:17:50.999Z"
+    },
+    {
+      "name": "bomber-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-B&source=invite",
+      "t": "2026-08-28T10:17:51.459Z"
+    },
+    {
+      "name": "snake-hud-boost-visible",
+      "ok": true,
+      "t": "2026-08-28T10:18:23.631Z"
+    },
+    {
+      "name": "snake-no-arrow-hints",
+      "ok": true,
+      "t": "2026-08-28T10:18:23.631Z"
+    },
+    {
+      "name": "snake-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T10:18:27.174Z"
+    },
+    {
+      "name": "snake-mobile-action-boost",
+      "ok": true,
+      "t": "2026-08-28T10:18:27.176Z"
+    },
+    {
+      "name": "snake-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T10:18:27.178Z"
+    },
+    {
+      "name": "snake-mobile-dpad-down",
+      "ok": true,
+      "t": "2026-08-28T10:18:27.184Z"
+    },
+    {
+      "name": "snake-mobile-dpad-left",
+      "ok": true,
+      "t": "2026-08-28T10:18:27.186Z"
+    },
+    {
+      "name": "snake-mobile-dpad-right",
+      "ok": true,
+      "t": "2026-08-28T10:18:27.189Z"
+    },
+    {
+      "name": "agar-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.000Z"
+    },
+    {
+      "name": "agar-mobile-action-split",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.001Z"
+    },
+    {
+      "name": "agar-mobile-action-eject",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.002Z"
+    },
+    {
+      "name": "agar-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.005Z"
+    },
+    {
+      "name": "agar-mobile-dpad-down",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.007Z"
+    },
+    {
+      "name": "agar-mobile-dpad-left",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.008Z"
+    },
+    {
+      "name": "agar-mobile-dpad-right",
+      "ok": true,
+      "t": "2026-08-28T10:18:32.010Z"
+    },
+    {
+      "name": "bomber-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T10:18:36.075Z"
+    },
+    {
+      "name": "bomber-mobile-action-bomb",
+      "ok": true,
+      "t": "2026-08-28T10:18:36.076Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T10:18:36.077Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-down",
+      "ok": true,
+      "t": "2026-08-28T10:18:36.078Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-left",
+      "ok": true,
+      "t": "2026-08-28T10:18:36.080Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-right",
+      "ok": true,
+      "t": "2026-08-28T10:18:36.082Z"
+    },
+    {
+      "name": "bomber-grid-move-baseline",
+      "ok": true,
+      "x": 1,
+      "y": 1,
+      "t": "2026-08-28T10:18:37.902Z"
+    },
+    {
+      "name": "bomber-grid-one-cell-move",
+      "ok": true,
+      "posBefore": {
+        "x": 1,
+        "y": 1
+      },
+      "posAfter": {
+        "x": 2,
+        "y": 1
+      },
+      "dx": 1,
+      "dy": 0,
+      "dir": "right",
+      "t": "2026-08-28T10:18:38.227Z"
+    },
+    {
+      "name": "bomber-dual-context-room-pinned",
+      "ok": true,
+      "urlA": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-B",
+      "urlB": "https://game29-ppa0vd3uf-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-B",
+      "t": "2026-08-28T10:18:50.356Z"
+    },
+    {
+      "name": "bomber-dual-context-both-spawned",
+      "ok": true,
+      "posA": 1,
+      "posB": 1,
+      "t": "2026-08-28T10:18:50.365Z"
+    }
+  ],
+  "pendingExternal": [
+    {
+      "name": "auth-oauth-live-roundtrip",
+      "reason": "PENDING_EXTERNAL_CONFIG — Supabase redirect URIs per Preview host"
+    },
+    {
+      "name": "real-device-mobile-feel",
+      "reason": "PENDING_EXTERNAL — requires physical phone QA"
+    },
+    {
+      "name": "same-world-two-device",
+      "reason": "PENDING_EXTERNAL — requires 2 physical devices"
+    }
+  ],
+  "finishedAt": "2026-08-28T10:18:50.373Z",
+  "pass": true
+}
