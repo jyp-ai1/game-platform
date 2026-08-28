@@ -199,12 +199,11 @@ export function BomberGame() {
     return "BOMBER-A";
   });
   /** QA-only: isolate grid/input probes from shared room stale sync (no gameplay change). */
-  const qaLocalProbe = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return new URLSearchParams(window.location.search).get("mp_qa_local") === "1";
-  }, []);
-  const qaLocalProbeRef = useRef(qaLocalProbe);
-  qaLocalProbeRef.current = qaLocalProbe;
+  const qaLocalProbeRef = useRef(false);
+  if (typeof window !== "undefined") {
+    qaLocalProbeRef.current =
+      new URLSearchParams(window.location.search).get("mp_qa_local") === "1";
+  }
   const [world, setWorld] = useState<BomberWorld>(() =>
     createBomberWorld(deviceId, nickname, { mapId: 0 })
   );
@@ -381,7 +380,7 @@ export function BomberGame() {
         }
       }
     });
-  }, [started, activeRoom, deviceId, color, qaLocalProbe]);
+  }, [started, activeRoom, deviceId, color]);
 
   // Guest: pull existing match state for this map room (no lobby wait)
   useEffect(() => {
@@ -409,7 +408,7 @@ export function BomberGame() {
         matchLocalStartAt.current = Date.now();
       }
     });
-  }, [started, lobbyPhase, activeRoom, deviceId, nickname, color, mapId, qaLocalProbe]);
+  }, [started, lobbyPhase, activeRoom, deviceId, nickname, color, mapId]);
 
   useEffect(() => {
     if (!started || reportedRef.current) return;
@@ -551,7 +550,7 @@ export function BomberGame() {
         }
       })();
     },
-    [deviceId, nickname, color, qaLocalProbe]
+    [deviceId, nickname, color]
   );
 
   const handleEntryDone = useCallback(() => {
