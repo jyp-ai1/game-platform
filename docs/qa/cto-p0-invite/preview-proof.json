@@ -1,0 +1,21 @@
+{
+  "previewUrl": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app",
+  "sha": "0e10903",
+  "branch": "content-factory",
+  "vercelProject": "game29",
+  "smoke": {
+    "script": "tools/qa/cto-p0-smoke.mjs",
+    "inviteButtons": "PASS",
+    "inviteUrlFormat": {
+      "snake": "PASS",
+      "agar": "PASS",
+      "bomber": "PASS — BOMBER-A not WORLD"
+    },
+    "mobilePadAutomated": "INCONCLUSIVE — requires ENTER through lobby; manual CTO verify on device"
+  },
+  "samples": {
+    "snake": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-XXX",
+    "agar": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-XXX",
+    "bomber": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A"
+  }
+}

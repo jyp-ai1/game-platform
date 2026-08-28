@@ -1,0 +1,63 @@
+{
+  "base": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app",
+  "commit": "0e10903",
+  "startedAt": "2026-08-28T06:44:25.254Z",
+  "checks": [
+    {
+      "name": "snake-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T06:44:29.746Z"
+    },
+    {
+      "name": "snake-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-26C",
+      "t": "2026-08-28T06:44:30.244Z"
+    },
+    {
+      "name": "agar-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T06:44:31.418Z"
+    },
+    {
+      "name": "agar-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-26C",
+      "t": "2026-08-28T06:44:31.870Z"
+    },
+    {
+      "name": "bomber-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T06:44:33.394Z"
+    },
+    {
+      "name": "bomber-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-28T06:44:33.852Z"
+    },
+    {
+      "name": "snake-mobile-pad",
+      "ok": false,
+      "t": "2026-08-28T06:44:38.052Z"
+    },
+    {
+      "name": "agar-mobile-pad",
+      "ok": false,
+      "t": "2026-08-28T06:44:41.160Z"
+    },
+    {
+      "name": "bomber-mobile-pad",
+      "ok": false,
+      "t": "2026-08-28T06:44:44.307Z"
+    }
+  ],
+  "finishedAt": "2026-08-28T06:44:44.328Z",
+  "pass": false
+}
