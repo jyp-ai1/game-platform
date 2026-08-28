@@ -9,6 +9,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
   applyGuestAuthMerge,
+  avatarUrlFromUser,
   displayNameFromUser,
   signInWithGoogle,
   signOutPlayer,
@@ -19,6 +20,7 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   displayName: string;
+  avatarUrl: string | null;
   isAuthenticated: boolean;
   signIn: () => Promise<string | null>;
   signOut: () => Promise<void>;
@@ -71,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       loading,
       displayName: displayNameFromUser(user),
+      avatarUrl: avatarUrlFromUser(user),
       isAuthenticated: !!user,
       signIn,
       signOut,

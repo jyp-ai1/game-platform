@@ -17,6 +17,8 @@ import { GuestIdentityPanel } from "@/components/guest-identity-panel";
 import { AchievementGrid } from "@/components/achievement-grid";
 import { PlayerStats } from "@/components/player-stats";
 import { getPlayerId } from "@/lib/auth/player-id";
+import { usePlayerAuth } from "@/components/auth-provider";
+import { MyPageHistoryPanel } from "@/components/my-page-history";
 import {
   ProfileHeatmapSection,
   ProfileHero2,
@@ -34,6 +36,7 @@ import { useMounted } from "@/lib/use-mounted";
 
 export function ProfileClient({ games }: { games: Game[] }) {
   const mounted = useMounted();
+  const { isAuthenticated, displayName, avatarUrl, user } = usePlayerAuth();
   useEffect(() => {
     trackAnalyticsEvent("profile_open", { deviceId: getPlayerId() }).catch(() => {});
     recordAttendance();
@@ -54,14 +57,24 @@ export function ProfileClient({ games }: { games: Game[] }) {
   const [editing, setEditing] = useState(false);
   const animatedXp = useCountUp(levelProgress.xpIntoLevel);
 
+  // Sprint 19 — prefer auth display name when nickname still default Guest
+  useEffect(() => {
+    if (!isAuthenticated || !displayName) return;
+    if (!nickname || nickname === "Guest" || nickname === "Player") {
+      setLastNickname(displayName.slice(0, 20));
+    }
+  }, [isAuthenticated, displayName, nickname]);
+
   function handleSave() {
     const trimmed = draft.trim();
     if (trimmed) setLastNickname(trimmed);
     setEditing(false);
   }
 
+  const shownName = nickname || displayName;
+
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10" data-testid="my-page">
       {editing ? (
         <form
           className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card p-4"
@@ -86,14 +99,39 @@ export function ProfileClient({ games }: { games: Game[] }) {
           </button>
         </form>
       ) : (
-        <ProfileHero2
-          nickname={nickname}
-          level={levelProgress.level}
-          onEdit={() => {
-            setDraft(nickname);
-            setEditing(true);
-          }}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarUrl}
+              alt=""
+              width={64}
+              height={64}
+              className="size-16 rounded-full object-cover ring-2 ring-white/20"
+              data-testid="profile-avatar"
+              referrerPolicy="no-referrer"
+            />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <ProfileHero2
+              nickname={shownName}
+              level={levelProgress.level}
+              onEdit={() => {
+                setDraft(shownName);
+                setEditing(true);
+              }}
+            />
+            {isAuthenticated && user?.email ? (
+              <p className="mt-1 text-xs text-muted-foreground" data-testid="profile-email">
+                {user.email} · Google session
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-amber-200/80">
+                로그인하면 닉네임·프로필 이미지가 계정에 연결됩니다 (LIVE OAuth: CEO HOLD)
+              </p>
+            )}
+          </div>
+        </div>
       )}
 
       {mounted ? (
@@ -107,6 +145,8 @@ export function ProfileClient({ games }: { games: Game[] }) {
           <Progress value={levelProgress.percent} label="Level progress" className="mt-2" />
         </div>
       ) : null}
+
+      <MyPageHistoryPanel games={games} />
 
       <ProfileStatsGrid games={games} />
       <ProfileSocialStrip />

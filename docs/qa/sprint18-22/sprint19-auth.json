@@ -1,0 +1,14 @@
+{
+  "sprint": 19,
+  "at": "2026-08-28T00:00:00.000Z",
+  "auth": {
+    "googleOAuthPath": "apps/web/lib/auth/player-auth.ts + AuthProvider",
+    "headerLogin": "AuthHeaderControls — Login → profile+avatar when session",
+    "nickname": "ProfileClient + setLastNickname / displayNameFromUser",
+    "profileImage": "avatarUrlFromUser (Google picture/avatar_url)",
+    "sessionPersist": "supabase.auth.getSession + onAuthStateChange"
+  },
+  "liveOAuth": "HOLD — code/UI paths implemented; do NOT claim LIVE device PASS",
+  "pass": true,
+  "ceoGate": "Google OAuth real-device verification = HOLD"
+}

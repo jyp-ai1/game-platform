@@ -57,3 +57,11 @@ export function displayNameFromUser(user: User | null): string {
   const meta = user.user_metadata as { full_name?: string; name?: string } | undefined;
   return meta?.full_name || meta?.name || user.email?.split("@")[0] || "Player";
 }
+
+/** Google / OAuth avatar URL when present (basic profile image). */
+export function avatarUrlFromUser(user: User | null): string | null {
+  if (!user) return null;
+  const meta = user.user_metadata as { avatar_url?: string; picture?: string } | undefined;
+  const url = meta?.avatar_url || meta?.picture || null;
+  return typeof url === "string" && url.startsWith("http") ? url : null;
+}
