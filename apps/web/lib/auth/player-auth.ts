@@ -16,9 +16,34 @@ export type PlayerAuthState = {
   loading: boolean;
 };
 
+const AUTH_RETURN_KEY = "play29:auth-return-to";
+
 export function authRedirectTo(path = "/auth/callback"): string {
   if (typeof window === "undefined") return path;
   return `${window.location.origin}${path}`;
+}
+
+/** Preserve Preview origin path before OAuth redirect. */
+export function storeAuthReturnPath(path?: string): void {
+  if (typeof window === "undefined") return;
+  const target = path ?? `${window.location.pathname}${window.location.search}`;
+  try {
+    sessionStorage.setItem(AUTH_RETURN_KEY, target);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function consumeAuthReturnPath(): string {
+  if (typeof window === "undefined") return "/profile";
+  try {
+    const stored = sessionStorage.getItem(AUTH_RETURN_KEY);
+    sessionStorage.removeItem(AUTH_RETURN_KEY);
+    if (stored && stored.startsWith("/")) return stored;
+  } catch {
+    /* ignore */
+  }
+  return "/profile";
 }
 
 export async function getPlayerSession(): Promise<Session | null> {
@@ -27,6 +52,7 @@ export async function getPlayerSession(): Promise<Session | null> {
 }
 
 export async function signInWithGoogle(): Promise<{ error: string | null }> {
+  storeAuthReturnPath();
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {

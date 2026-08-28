@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase/client";
-import { applyGuestAuthMerge } from "@/lib/auth/player-auth";
+import { applyGuestAuthMerge, consumeAuthReturnPath } from "@/lib/auth/player-auth";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function AuthCallbackPage() {
           if (data.session?.user) applyGuestAuthMerge(data.session.user);
         }
 
-        if (!cancelled) router.replace("/profile");
+        if (!cancelled) router.replace(consumeAuthReturnPath());
       } catch (e) {
         if (!cancelled) setMessage(e instanceof Error ? e.message : "로그인 처리 실패");
       }
