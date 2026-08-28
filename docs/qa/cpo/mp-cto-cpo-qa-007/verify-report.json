@@ -1,0 +1,342 @@
+{
+  "base": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app",
+  "commit": "c5d81fe",
+  "startedAt": "2026-08-28T11:20:46.746Z",
+  "commonShell": {},
+  "invite": {
+    "invite-unified-path": true,
+    "snake-invite-buttons": true,
+    "snake-invite-url-format": true,
+    "agar-invite-buttons": true,
+    "agar-invite-url-format": true,
+    "bomber-invite-buttons": true,
+    "bomber-invite-url-format": true
+  },
+  "sameWorld": {
+    "dual-context-room-pinned": true,
+    "dual-context-both-spawned": true,
+    "dual-context-a-moves": false,
+    "dual-context-b-moves": false
+  },
+  "mobileControls": {
+    "floating-pad-left-half-joystick": true,
+    "floating-pad-right-half-actions": true,
+    "floating-pad-on-steer": true,
+    "floating-pad-touch-none-select-none": true,
+    "commonShell-touch-none-board": true,
+    "snake-mobile-overlay": true,
+    "snake-floating-joystick-hidden-initial": true,
+    "snake-floating-joystick-on-touch": true,
+    "snake-mobile-action-zone-boost": true,
+    "agar-mobile-overlay": true,
+    "agar-floating-joystick-hidden-initial": true,
+    "agar-floating-joystick-on-touch": true,
+    "agar-mobile-action-zone-split": true,
+    "agar-mobile-action-zone-eject": true,
+    "bomber-mobile-overlay": true,
+    "bomber-floating-joystick-hidden-initial": true,
+    "bomber-floating-joystick-on-touch": true,
+    "bomber-mobile-action-zone-bomb": true
+  },
+  "snake": {
+    "snake-top10-length-desc": true,
+    "snake-bot-auto-character": true,
+    "snake-ai-movement-unit": true,
+    "snake-detail-loaded": true
+  },
+  "agar": {
+    "agar-on-steer-wired": true,
+    "agar-detail-loaded": true,
+    "agar-mass-baseline": true,
+    "agar-split-cells-change": false,
+    "agar-eject-tap-fired": true
+  },
+  "bomber": {
+    "bomber-host-only-authority": true,
+    "bomber-bomb-authority-unit": true,
+    "bomber-detail-loaded": true,
+    "bomber-grid-baseline": true,
+    "bomber-grid-continuous-move": true
+  },
+  "performance": {
+    "metricsFile": true
+  },
+  "checks": [
+    {
+      "name": "floating-pad-left-half-joystick",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.749Z"
+    },
+    {
+      "name": "floating-pad-right-half-actions",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "floating-pad-on-steer",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "floating-pad-touch-none-select-none",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "commonShell-touch-none-board",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "agar-on-steer-wired",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "bomber-host-only-authority",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "invite-unified-path",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "snake-top10-length-desc",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "snake-bot-auto-character",
+      "ok": true,
+      "t": "2026-08-28T11:20:46.750Z"
+    },
+    {
+      "name": "bomber-bomb-authority-unit",
+      "ok": true,
+      "t": "2026-08-28T11:20:47.076Z"
+    },
+    {
+      "name": "snake-ai-movement-unit",
+      "ok": true,
+      "t": "2026-08-28T11:20:47.708Z"
+    },
+    {
+      "name": "snake-detail-loaded",
+      "ok": true,
+      "t": "2026-08-28T11:20:50.199Z"
+    },
+    {
+      "name": "snake-invite-buttons",
+      "ok": true,
+      "t": "2026-08-28T11:20:50.204Z"
+    },
+    {
+      "name": "snake-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-UXZ",
+      "t": "2026-08-28T11:20:50.673Z"
+    },
+    {
+      "name": "agar-detail-loaded",
+      "ok": true,
+      "t": "2026-08-28T11:20:52.759Z"
+    },
+    {
+      "name": "agar-invite-buttons",
+      "ok": true,
+      "t": "2026-08-28T11:20:52.762Z"
+    },
+    {
+      "name": "agar-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-UXZ",
+      "t": "2026-08-28T11:20:53.215Z"
+    },
+    {
+      "name": "bomber-detail-loaded",
+      "ok": true,
+      "t": "2026-08-28T11:20:55.136Z"
+    },
+    {
+      "name": "bomber-invite-buttons",
+      "ok": true,
+      "t": "2026-08-28T11:20:55.139Z"
+    },
+    {
+      "name": "bomber-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-28T11:20:55.594Z"
+    },
+    {
+      "name": "snake-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-28T11:21:22.777Z"
+    },
+    {
+      "name": "snake-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-28T11:21:22.789Z"
+    },
+    {
+      "name": "snake-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-28T11:21:23.512Z"
+    },
+    {
+      "name": "snake-mobile-action-zone-boost",
+      "ok": true,
+      "t": "2026-08-28T11:21:23.700Z"
+    },
+    {
+      "name": "agar-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-28T11:21:28.936Z"
+    },
+    {
+      "name": "agar-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-28T11:21:28.946Z"
+    },
+    {
+      "name": "agar-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-28T11:21:29.341Z"
+    },
+    {
+      "name": "agar-mobile-action-zone-split",
+      "ok": true,
+      "t": "2026-08-28T11:21:29.348Z"
+    },
+    {
+      "name": "agar-mobile-action-zone-eject",
+      "ok": true,
+      "t": "2026-08-28T11:21:29.358Z"
+    },
+    {
+      "name": "bomber-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-28T11:21:34.575Z"
+    },
+    {
+      "name": "bomber-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-28T11:21:34.643Z"
+    },
+    {
+      "name": "bomber-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-28T11:21:35.239Z"
+    },
+    {
+      "name": "bomber-mobile-action-zone-bomb",
+      "ok": true,
+      "t": "2026-08-28T11:21:35.243Z"
+    },
+    {
+      "name": "agar-mass-baseline",
+      "ok": true,
+      "massBefore": "0",
+      "t": "2026-08-28T11:21:39.576Z"
+    },
+    {
+      "name": "agar-split-cells-change",
+      "ok": false,
+      "cellsBefore": 0,
+      "cellsAfter": 0,
+      "t": "2026-08-28T11:21:40.342Z"
+    },
+    {
+      "name": "agar-eject-tap-fired",
+      "ok": true,
+      "t": "2026-08-28T11:21:40.753Z"
+    },
+    {
+      "name": "bomber-grid-baseline",
+      "ok": true,
+      "x": 1,
+      "y": 1,
+      "t": "2026-08-28T11:21:42.387Z"
+    },
+    {
+      "name": "bomber-grid-continuous-move",
+      "ok": true,
+      "posBefore": {
+        "x": 1,
+        "y": 1
+      },
+      "posAfter": {
+        "x": 5,
+        "y": 1
+      },
+      "t": "2026-08-28T11:21:42.813Z"
+    },
+    {
+      "name": "dual-context-room-pinned",
+      "ok": true,
+      "t": "2026-08-28T11:21:56.684Z"
+    },
+    {
+      "name": "dual-context-both-spawned",
+      "ok": true,
+      "posA0": {
+        "x": 1,
+        "y": 1
+      },
+      "posB0": {
+        "x": 1,
+        "y": 1
+      },
+      "t": "2026-08-28T11:21:56.709Z"
+    },
+    {
+      "name": "dual-context-a-moves",
+      "ok": false,
+      "posA0": {
+        "x": 1,
+        "y": 1
+      },
+      "posA1": {
+        "x": 1,
+        "y": 1
+      },
+      "t": "2026-08-28T11:21:58.973Z"
+    },
+    {
+      "name": "dual-context-b-moves",
+      "ok": false,
+      "posB0": {
+        "x": 1,
+        "y": 1
+      },
+      "posB2": {
+        "x": 1,
+        "y": 1
+      },
+      "t": "2026-08-28T11:22:01.973Z"
+    }
+  ],
+  "pendingExternal": [
+    {
+      "name": "real-device-mobile-feel",
+      "reason": "PENDING_EXTERNAL — physical phone QA for CPO"
+    },
+    {
+      "name": "same-world-two-device-snake",
+      "reason": "PENDING_EXTERNAL — 2 physical devices"
+    }
+  ],
+  "finishedAt": "2026-08-28T11:22:01.986Z",
+  "pass": false,
+  "summary": {
+    "passed": 40,
+    "total": 43,
+    "failed": [
+      "agar-split-cells-change",
+      "dual-context-a-moves",
+      "dual-context-b-moves"
+    ]
+  }
+}

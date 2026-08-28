@@ -1,0 +1,30 @@
+{
+  "commit": "c5d81fe",
+  "base": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app",
+  "capturedAt": "2026-08-28T11:20:47.708Z",
+  "L100": {
+    "inputLatencyMs": null,
+    "frameTimeMs": null,
+    "renderMs": null,
+    "collisionMs": null
+  },
+  "L200": {
+    "inputLatencyMs": null,
+    "frameTimeMs": null,
+    "renderMs": null,
+    "collisionMs": null
+  },
+  "L300": {
+    "inputLatencyMs": null,
+    "frameTimeMs": null,
+    "renderMs": null,
+    "collisionMs": null
+  },
+  "L400": {
+    "inputLatencyMs": null,
+    "frameTimeMs": null,
+    "renderMs": null,
+    "collisionMs": null
+  },
+  "note": "Runtime perf probes require in-game instrumentation — code gate only for CTO PASS"
+}

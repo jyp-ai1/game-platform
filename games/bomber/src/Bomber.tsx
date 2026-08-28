@@ -497,8 +497,16 @@ export function BomberGame() {
         }
 
         const room = getRoom(code);
-        const gs = room?.gameState ?? {};
-        const existing = gs.state as BomberSyncState | undefined;
+        let gs = room?.gameState ?? {};
+        let existing = gs.state as BomberSyncState | undefined;
+
+        // Guest: brief wait for host state to avoid dual-create race (MP-CTO-CPO-QA-007)
+        if (!existing && !isRoomHost(code, deviceId) && !qaLocalProbeRef.current) {
+          await new Promise((r) => window.setTimeout(r, 1500));
+          gs = getRoom(code)?.gameState ?? {};
+          existing = gs.state as BomberSyncState | undefined;
+        }
+
         if (existing && existing.mapId === nextMapId && !existing.matchOver && !qaLocalProbeRef.current) {
           const humans = collectHumans(code, deviceId, nickname, color);
           const next = createBomberWorld(deviceId, nickname, {

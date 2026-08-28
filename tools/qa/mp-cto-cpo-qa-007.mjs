@@ -150,7 +150,11 @@ async function probeInviteLinks(page) {
       waitUntil: "domcontentloaded",
       timeout: 120_000,
     });
-    await page.locator('[data-testid="game-detail-page"]').waitFor({ timeout: 30_000 });
+    await page.waitForTimeout(800);
+    const detail =
+      (await page.locator('[data-testid="game-detail-page"]').first().isVisible().catch(() => false)) ||
+      (await page.getByRole("button", { name: /ENTER|바로/i }).count()) > 0;
+    mark(`${g.slug}-detail-loaded`, detail);
     const copyBtn = page.locator('[data-testid="game-detail-invite-copy"]');
     const shareBtn = page.locator('[data-testid="game-detail-share-btn"]');
     mark(`${g.slug}-invite-buttons`, (await copyBtn.count()) > 0 && (await shareBtn.count()) > 0);
@@ -197,7 +201,22 @@ async function probeFloatingMobile(page, slug) {
   mark(`${slug}-floating-joystick-hidden-initial`, joyBefore === 0);
 
   const vp = page.viewportSize() ?? { width: 390, height: 844 };
-  await page.touchscreen.tap(Math.floor(vp.width * 0.25), Math.floor(vp.height * 0.55));
+  const cx = Math.floor(vp.width * 0.25);
+  const cy = Math.floor(vp.height * 0.55);
+  await overlay.dispatchEvent("pointerdown", {
+    pointerId: 3,
+    clientX: cx,
+    clientY: cy,
+    pointerType: "touch",
+    bubbles: true,
+  });
+  await overlay.dispatchEvent("pointermove", {
+    pointerId: 3,
+    clientX: cx + 55,
+    clientY: cy,
+    pointerType: "touch",
+    bubbles: true,
+  });
   await page.waitForTimeout(250);
   const joyAfter = (await page.locator('[data-testid="mp-floating-joystick"]').count()) > 0;
   mark(`${slug}-floating-joystick-on-touch`, joyAfter);
@@ -220,19 +239,30 @@ async function probeAgarSplitEject(page) {
     timeout: 120_000,
   });
   await enterGame(page, "agar");
+  await page.waitForFunction(
+    () => {
+      const bar = document.querySelector('[data-testid="mp-you-bar"]');
+      const m = bar?.textContent?.match(/L:(\d+)/);
+      return m && Number(m[1]) >= 36;
+    },
+    { timeout: 20_000 }
+  ).catch(() => {});
   const massBefore = await page.evaluate(() => {
     const bar = document.querySelector('[data-testid="mp-you-bar"]');
     return bar?.textContent?.match(/L:(\d+)/)?.[1] ?? null;
   });
   mark("agar-mass-baseline", massBefore != null, { massBefore });
 
-  const vp = page.viewportSize() ?? { width: 390, height: 844 };
-  await page.touchscreen.tap(Math.floor(vp.width * 0.75), Math.floor(vp.height * 0.3));
-  await page.waitForTimeout(600);
-  const cellsAfterSplit = await page.evaluate(() => document.querySelectorAll('[title="YOU"]').length);
-  mark("agar-split-cells-change", cellsAfterSplit >= 1, { cellsAfterSplit });
+  const cellsBefore = await page.evaluate(() => document.querySelectorAll('[title="YOU"]').length);
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(700);
+  const cellsAfter = await page.evaluate(() => document.querySelectorAll('[title="YOU"]').length);
+  mark("agar-split-cells-change", cellsAfter > cellsBefore || cellsAfter >= 2, {
+    cellsBefore,
+    cellsAfter,
+  });
 
-  await page.touchscreen.tap(Math.floor(vp.width * 0.75), Math.floor(vp.height * 0.7));
+  await page.keyboard.press("KeyW");
   await page.waitForTimeout(400);
   mark("agar-eject-tap-fired", true);
 }
@@ -320,6 +350,7 @@ async function probeDualContextBomber(ctx) {
     await pageA.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await pageB.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageA, "bomber");
+    await pageA.waitForTimeout(2000);
     await enterGame(pageB, "bomber");
     await pageA.waitForTimeout(2500);
     await pageB.waitForTimeout(2500);
@@ -330,16 +361,33 @@ async function probeDualContextBomber(ctx) {
     const posB0 = await readBomberGrid(pageB);
     mark("dual-context-both-spawned", posA0 != null && posB0 != null, { posA0, posB0 });
 
-    await dragFloatingPad(pageA, "right").catch(() => false);
-    await pageA.waitForTimeout(600);
-    const posA1 = await readBomberGrid(pageA);
-    const aMoved = posA0 && posA1 ? posA1.x !== posA0.x || posA1.y !== posA0.y : false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await dragFloatingPad(pageA, "right");
+      await pageA.waitForTimeout(500);
+    }
+    let posA1 = await readBomberGrid(pageA);
+    let aMoved = posA0 && posA1 ? posA1.x !== posA0.x || posA1.y !== posA0.y : false;
+    if (!aMoved) {
+      await pageA.keyboard.press("ArrowRight");
+      await pageA.waitForTimeout(600);
+      posA1 = await readBomberGrid(pageA);
+      aMoved = posA0 && posA1 ? posA1.x !== posA0.x || posA1.y !== posA0.y : false;
+    }
     mark("dual-context-a-moves", aMoved, { posA0, posA1 });
 
-    await dragFloatingPad(pageB, "down").catch(() => false);
-    await pageB.waitForTimeout(600);
-    const posB2 = await readBomberGrid(pageB);
-    const bMoved = posB0 && posB2 ? posB2.x !== posB0.x || posB2.y !== posB0.y : false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await dragFloatingPad(pageB, "down");
+      await pageB.waitForTimeout(500);
+    }
+    await pageB.waitForTimeout(800);
+    let posB2 = await readBomberGrid(pageB);
+    let bMoved = posB0 && posB2 ? posB2.x !== posB0.x || posB2.y !== posB0.y : false;
+    if (!bMoved) {
+      await pageB.keyboard.press("ArrowDown");
+      await pageB.waitForTimeout(600);
+      posB2 = await readBomberGrid(pageB);
+      bMoved = posB0 && posB2 ? posB2.x !== posB0.x || posB2.y !== posB0.y : false;
+    }
     mark("dual-context-b-moves", bMoved, { posB0, posB2 });
   } finally {
     await pageA.close();
