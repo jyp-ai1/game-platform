@@ -129,15 +129,17 @@ function isRoomHost(roomCode: string, deviceId: string): boolean {
   return room.hostId === deviceId || room.players[0]?.deviceId === deviceId;
 }
 
-/** Solo client must tick locally — stale remote state must not block input. */
-function isSoloInRoom(roomCode: string, deviceId: string): boolean {
+/** Solo client must tick locally — stale remote roster must not block input. */
+function isSoloInRoom(roomCode: string, deviceId: string, world: BomberWorld): boolean {
+  const aliveHumans = Object.values(world.players).filter((p) => p.alive && !p.isBot);
+  if (aliveHumans.length <= 1) return true;
   const room = getRoom(roomCode);
-  if (!room) return true;
-  return room.players.length <= 1 || room.players.every((p) => p.deviceId === deviceId);
+  if (!room || room.players.length <= 1) return true;
+  return room.players.every((p) => p.deviceId === deviceId);
 }
 
-function canAuthoritativeHost(roomCode: string, deviceId: string): boolean {
-  return isRoomHost(roomCode, deviceId) || isSoloInRoom(roomCode, deviceId);
+function canAuthoritativeHost(roomCode: string, deviceId: string, world: BomberWorld): boolean {
+  return isRoomHost(roomCode, deviceId) || isSoloInRoom(roomCode, deviceId, world);
 }
 
 function MiniMapPreview({ mapId }: { mapId: number }) {
@@ -262,7 +264,7 @@ export function BomberGame() {
       const everSynced = lastHostStateAt.current > 0;
       const hostFresh = Date.now() - lastHostStateAt.current < HOST_STATE_STALE_MS;
       const waitedForHost = Date.now() - matchLocalStartAt.current > 900;
-      const solo = isSoloInRoom(code, deviceId);
+      const solo = isSoloInRoom(code, deviceId, w);
       // Host ticks; guest waits briefly for host state; solo or stale → take over so input/AI/bombs run
       const hostNow =
         listedHost || solo || (everSynced && !hostFresh) || (!everSynced && waitedForHost);
@@ -375,7 +377,7 @@ export function BomberGame() {
         setWorld(next);
         lastHostStateAt.current = Date.now();
         setStarted(true);
-        setIsHost(canAuthoritativeHost(code, deviceId));
+        setIsHost(canAuthoritativeHost(code, deviceId, next));
         matchLocalStartAt.current = Date.now();
       }
     });
@@ -392,8 +394,8 @@ export function BomberGame() {
     (partial: Omit<BomberInput, "deviceId">) => {
       const code = roomRef.current;
       const payload: BomberInput = { deviceId, ...partial, at: Date.now() };
-      const hostNow = canAuthoritativeHost(code, deviceId);
       const w = worldRef.current;
+      const hostNow = canAuthoritativeHost(code, deviceId, w);
 
       if (hostNow) {
         if (partial.dx || partial.dy) tryMove(w, deviceId, partial.dx ?? 0, partial.dy ?? 0);
@@ -481,7 +483,7 @@ export function BomberGame() {
           setWorld(next);
           lastHostStateAt.current = Date.now();
           setStarted(true);
-          setIsHost(canAuthoritativeHost(code, deviceId));
+          setIsHost(canAuthoritativeHost(code, deviceId, next));
           matchLocalStartAt.current = Date.now();
           return;
         }
@@ -499,7 +501,7 @@ export function BomberGame() {
         matchLocalStartAt.current = Date.now();
         setStarted(true);
 
-        const hostNow = canAuthoritativeHost(code, deviceId);
+        const hostNow = canAuthoritativeHost(code, deviceId, next);
         setIsHost(hostNow);
         if (hostNow) {
           send(code, "bomber:cfg", {

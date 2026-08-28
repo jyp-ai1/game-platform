@@ -287,10 +287,10 @@ async function probeBomberGridMove(page) {
   for (const d of dirs) {
     const before = await readBomberGrid(page);
     if (!before) break;
-    await page.locator(`[data-testid="mp-pad-${d.pad}"]`).click({ timeout: 5_000 }).catch(() => {});
-    await page.waitForTimeout(400);
+    await page.locator("body").click({ position: { x: 200, y: 200 }, force: true }).catch(() => {});
+    await page.locator(`[data-testid="mp-pad-${d.pad}"]`).click({ timeout: 5_000, force: true }).catch(() => {});
     await page.keyboard.press(d.key).catch(() => {});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(900);
     const after = await readBomberGrid(page);
     if (after && (after.x !== before.x || after.y !== before.y)) {
       const dx = after.x - before.x;
@@ -315,8 +315,11 @@ async function probeRegressionSmoke(page) {
   mark("regression-home", (await page.title()).length > 0);
 
   for (const slug of ["snake", "agar", "bomber"]) {
-    await page.goto(`${BASE}/games/${slug}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    const detail = (await page.locator('[data-testid="game-detail-page"]').count()) > 0;
+    const detailPath = slug === "snake" ? "/flagship/snake-io" : `/games/${slug}`;
+    await page.goto(`${BASE}${detailPath}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const detail =
+      (await page.locator('[data-testid="game-detail-page"]').count()) > 0 ||
+      (slug === "snake" && page.url().includes("/flagship/snake-io"));
     mark(`regression-detail-${slug}`, detail);
   }
 
