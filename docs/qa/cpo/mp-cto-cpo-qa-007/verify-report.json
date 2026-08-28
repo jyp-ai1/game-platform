@@ -1,7 +1,7 @@
 {
-  "base": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app",
-  "commit": "c5d81fe",
-  "startedAt": "2026-08-28T11:20:46.746Z",
+  "base": "https://game29-65hl712x5-jyp-ai1s-projects.vercel.app",
+  "commit": "7d2172e",
+  "startedAt": "2026-08-28T11:28:41.138Z",
   "commonShell": {},
   "invite": {
     "invite-unified-path": true,
@@ -65,200 +65,200 @@
     {
       "name": "floating-pad-left-half-joystick",
       "ok": true,
-      "t": "2026-08-28T11:20:46.749Z"
+      "t": "2026-08-28T11:28:41.143Z"
     },
     {
       "name": "floating-pad-right-half-actions",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.144Z"
     },
     {
       "name": "floating-pad-on-steer",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "floating-pad-touch-none-select-none",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "commonShell-touch-none-board",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "agar-on-steer-wired",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "bomber-host-only-authority",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "invite-unified-path",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "snake-top10-length-desc",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "snake-bot-auto-character",
       "ok": true,
-      "t": "2026-08-28T11:20:46.750Z"
+      "t": "2026-08-28T11:28:41.145Z"
     },
     {
       "name": "bomber-bomb-authority-unit",
       "ok": true,
-      "t": "2026-08-28T11:20:47.076Z"
+      "t": "2026-08-28T11:28:41.519Z"
     },
     {
       "name": "snake-ai-movement-unit",
       "ok": true,
-      "t": "2026-08-28T11:20:47.708Z"
+      "t": "2026-08-28T11:28:42.307Z"
     },
     {
       "name": "snake-detail-loaded",
       "ok": true,
-      "t": "2026-08-28T11:20:50.199Z"
+      "t": "2026-08-28T11:28:46.973Z"
     },
     {
       "name": "snake-invite-buttons",
       "ok": true,
-      "t": "2026-08-28T11:20:50.204Z"
+      "t": "2026-08-28T11:28:46.980Z"
     },
     {
       "name": "snake-invite-url-format",
       "ok": true,
-      "clip": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-UXZ",
-      "t": "2026-08-28T11:20:50.673Z"
+      "clip": "https://game29-65hl712x5-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-NQR",
+      "t": "2026-08-28T11:28:47.475Z"
     },
     {
       "name": "agar-detail-loaded",
       "ok": true,
-      "t": "2026-08-28T11:20:52.759Z"
+      "t": "2026-08-28T11:28:49.048Z"
     },
     {
       "name": "agar-invite-buttons",
       "ok": true,
-      "t": "2026-08-28T11:20:52.762Z"
+      "t": "2026-08-28T11:28:49.051Z"
     },
     {
       "name": "agar-invite-url-format",
       "ok": true,
-      "clip": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-UXZ",
-      "t": "2026-08-28T11:20:53.215Z"
+      "clip": "https://game29-65hl712x5-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-NQR",
+      "t": "2026-08-28T11:28:49.506Z"
     },
     {
       "name": "bomber-detail-loaded",
       "ok": true,
-      "t": "2026-08-28T11:20:55.136Z"
+      "t": "2026-08-28T11:28:51.007Z"
     },
     {
       "name": "bomber-invite-buttons",
       "ok": true,
-      "t": "2026-08-28T11:20:55.139Z"
+      "t": "2026-08-28T11:28:51.012Z"
     },
     {
       "name": "bomber-invite-url-format",
       "ok": true,
-      "clip": "https://game29-hb3ubguy7-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
-      "t": "2026-08-28T11:20:55.594Z"
+      "clip": "https://game29-65hl712x5-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-28T11:28:51.467Z"
     },
     {
       "name": "snake-mobile-overlay",
       "ok": true,
-      "t": "2026-08-28T11:21:22.777Z"
+      "t": "2026-08-28T11:29:19.763Z"
     },
     {
       "name": "snake-floating-joystick-hidden-initial",
       "ok": true,
-      "t": "2026-08-28T11:21:22.789Z"
+      "t": "2026-08-28T11:29:19.771Z"
     },
     {
       "name": "snake-floating-joystick-on-touch",
       "ok": true,
-      "t": "2026-08-28T11:21:23.512Z"
+      "t": "2026-08-28T11:29:20.660Z"
     },
     {
       "name": "snake-mobile-action-zone-boost",
       "ok": true,
-      "t": "2026-08-28T11:21:23.700Z"
+      "t": "2026-08-28T11:29:20.772Z"
     },
     {
       "name": "agar-mobile-overlay",
       "ok": true,
-      "t": "2026-08-28T11:21:28.936Z"
+      "t": "2026-08-28T11:29:26.538Z"
     },
     {
       "name": "agar-floating-joystick-hidden-initial",
       "ok": true,
-      "t": "2026-08-28T11:21:28.946Z"
+      "t": "2026-08-28T11:29:26.557Z"
     },
     {
       "name": "agar-floating-joystick-on-touch",
       "ok": true,
-      "t": "2026-08-28T11:21:29.341Z"
+      "t": "2026-08-28T11:29:27.015Z"
     },
     {
       "name": "agar-mobile-action-zone-split",
       "ok": true,
-      "t": "2026-08-28T11:21:29.348Z"
+      "t": "2026-08-28T11:29:27.021Z"
     },
     {
       "name": "agar-mobile-action-zone-eject",
       "ok": true,
-      "t": "2026-08-28T11:21:29.358Z"
+      "t": "2026-08-28T11:29:27.024Z"
     },
     {
       "name": "bomber-mobile-overlay",
       "ok": true,
-      "t": "2026-08-28T11:21:34.575Z"
+      "t": "2026-08-28T11:29:31.410Z"
     },
     {
       "name": "bomber-floating-joystick-hidden-initial",
       "ok": true,
-      "t": "2026-08-28T11:21:34.643Z"
+      "t": "2026-08-28T11:29:31.414Z"
     },
     {
       "name": "bomber-floating-joystick-on-touch",
       "ok": true,
-      "t": "2026-08-28T11:21:35.239Z"
+      "t": "2026-08-28T11:29:31.765Z"
     },
     {
       "name": "bomber-mobile-action-zone-bomb",
       "ok": true,
-      "t": "2026-08-28T11:21:35.243Z"
+      "t": "2026-08-28T11:29:31.783Z"
     },
     {
       "name": "agar-mass-baseline",
       "ok": true,
       "massBefore": "0",
-      "t": "2026-08-28T11:21:39.576Z"
+      "t": "2026-08-28T11:30:05.808Z"
     },
     {
       "name": "agar-split-cells-change",
       "ok": false,
       "cellsBefore": 0,
       "cellsAfter": 0,
-      "t": "2026-08-28T11:21:40.342Z"
+      "t": "2026-08-28T11:30:06.560Z"
     },
     {
       "name": "agar-eject-tap-fired",
       "ok": true,
-      "t": "2026-08-28T11:21:40.753Z"
+      "t": "2026-08-28T11:30:06.968Z"
     },
     {
       "name": "bomber-grid-baseline",
       "ok": true,
       "x": 1,
       "y": 1,
-      "t": "2026-08-28T11:21:42.387Z"
+      "t": "2026-08-28T11:30:08.712Z"
     },
     {
       "name": "bomber-grid-continuous-move",
@@ -271,12 +271,12 @@
         "x": 5,
         "y": 1
       },
-      "t": "2026-08-28T11:21:42.813Z"
+      "t": "2026-08-28T11:30:09.132Z"
     },
     {
       "name": "dual-context-room-pinned",
       "ok": true,
-      "t": "2026-08-28T11:21:56.684Z"
+      "t": "2026-08-28T11:30:22.991Z"
     },
     {
       "name": "dual-context-both-spawned",
@@ -289,7 +289,7 @@
         "x": 1,
         "y": 1
       },
-      "t": "2026-08-28T11:21:56.709Z"
+      "t": "2026-08-28T11:30:23.006Z"
     },
     {
       "name": "dual-context-a-moves",
@@ -302,7 +302,7 @@
         "x": 1,
         "y": 1
       },
-      "t": "2026-08-28T11:21:58.973Z"
+      "t": "2026-08-28T11:30:25.188Z"
     },
     {
       "name": "dual-context-b-moves",
@@ -315,7 +315,7 @@
         "x": 1,
         "y": 1
       },
-      "t": "2026-08-28T11:22:01.973Z"
+      "t": "2026-08-28T11:30:28.148Z"
     }
   ],
   "pendingExternal": [
@@ -328,7 +328,7 @@
       "reason": "PENDING_EXTERNAL — 2 physical devices"
     }
   ],
-  "finishedAt": "2026-08-28T11:22:01.986Z",
+  "finishedAt": "2026-08-28T11:30:28.162Z",
   "pass": false,
   "summary": {
     "passed": 40,
