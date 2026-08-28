@@ -1,0 +1,17 @@
+{
+  "sprint": 20,
+  "at": "2026-08-28T00:00:00.000Z",
+  "myPage": {
+    "route": "/profile",
+    "nickname": true,
+    "profileImage": true,
+    "recentPlays": true,
+    "bestScoreLength": true,
+    "playCount": true,
+    "lastPlayed": true,
+    "favorites": true
+  },
+  "storage": "localStorage play29:* + game-sdk bestScore/playCounts (Supabase-ready shape)",
+  "futureRanking": "rankingHintsFromLocal → TOP10/Popular/Recent seeds",
+  "pass": true
+}
