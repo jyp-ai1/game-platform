@@ -203,6 +203,8 @@ export function BomberGame() {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("mp_qa_local") === "1";
   }, []);
+  const qaLocalProbeRef = useRef(qaLocalProbe);
+  qaLocalProbeRef.current = qaLocalProbe;
   const [world, setWorld] = useState<BomberWorld>(() =>
     createBomberWorld(deviceId, nickname, { mapId: 0 })
   );
@@ -278,7 +280,7 @@ export function BomberGame() {
       const solo = isSoloInRoom(code, deviceId, w);
       // Host ticks; guest waits briefly for host state; solo or stale → take over so input/AI/bombs run
       const hostNow =
-        qaLocalProbe ||
+        qaLocalProbeRef.current ||
         listedHost ||
         solo ||
         (everSynced && !hostFresh) ||
@@ -332,7 +334,7 @@ export function BomberGame() {
       const amHost = hostId === deviceId;
 
       if (last === "state" && !amHost && gs.state) {
-        if (qaLocalProbe) return;
+        if (qaLocalProbeRef.current) return;
         const w = worldRef.current;
         const everSynced = lastHostStateAt.current > 0;
         const hostFresh = Date.now() - lastHostStateAt.current < HOST_STATE_STALE_MS;
@@ -387,7 +389,7 @@ export function BomberGame() {
     const code = activeRoom;
     return subscribeRoom(code, (room) => {
       const gs = room.gameState ?? {};
-      if (gs.state && !started && !qaLocalProbe) {
+      if (gs.state && !started && !qaLocalProbeRef.current) {
         const state = gs.state as BomberSyncState;
         if (state.mapId !== mapId) return;
         const humans = collectHumans(code, deviceId, nickname, color);
@@ -421,7 +423,7 @@ export function BomberGame() {
       const code = roomRef.current;
       const payload: BomberInput = { deviceId, ...partial, at: Date.now() };
       const w = worldRef.current;
-      const hostNow = qaLocalProbe || isHostRef.current || canAuthoritativeHost(code, deviceId, w);
+      const hostNow = qaLocalProbeRef.current || isHostRef.current || canAuthoritativeHost(code, deviceId, w);
 
       if (hostNow) {
         if (partial.dx || partial.dy) tryMove(w, deviceId, partial.dx ?? 0, partial.dy ?? 0);
@@ -495,7 +497,7 @@ export function BomberGame() {
         const room = getRoom(code);
         const gs = room?.gameState ?? {};
         const existing = gs.state as BomberSyncState | undefined;
-        if (existing && existing.mapId === nextMapId && !existing.matchOver && !qaLocalProbe) {
+        if (existing && existing.mapId === nextMapId && !existing.matchOver && !qaLocalProbeRef.current) {
           const humans = collectHumans(code, deviceId, nickname, color);
           const next = createBomberWorld(deviceId, nickname, {
             playerSlots: existing.playerSlots,
@@ -527,7 +529,7 @@ export function BomberGame() {
         matchLocalStartAt.current = Date.now();
         setStarted(true);
 
-        const hostNow = qaLocalProbe || canAuthoritativeHost(code, deviceId, next);
+        const hostNow = qaLocalProbeRef.current || canAuthoritativeHost(code, deviceId, next);
         setHostAuthority(hostNow);
         if (hostNow) {
           send(code, "bomber:cfg", {
