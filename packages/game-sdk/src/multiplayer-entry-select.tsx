@@ -8,6 +8,10 @@ import {
   MP_AI_DIFFICULTIES,
   type MpAiDifficulty,
 } from "./mp-difficulty";
+import {
+  assertEntryLobbyContract,
+  type PlatformEntryMode,
+} from "./platform-game-contract";
 
 export type MpStyleOption = {
   id: string;
@@ -62,6 +66,7 @@ export function MultiplayerEntrySelect({
   roomCode,
   playLabel = "ENTER",
   showColorStep = true,
+  entryMode = "multiplayer",
 }: {
   title: string;
   subtitle?: string;
@@ -79,14 +84,33 @@ export function MultiplayerEntrySelect({
   roomCode?: string;
   playLabel?: string;
   /**
-   * PLATFORM-CORE-002 — Character and Color are separate steps.
+   * Sprint 18 — Character and Color are separate steps.
    * Default ON for Snake/Agar/Bomber and any Solo lobby using this shell.
-   * Difficulty remains opt-in via onDifficultyChange (MP: omit, Solo: pass).
+   * Difficulty: MP omit `onDifficultyChange`; Solo pass it (`entryMode="solo"`).
    */
   showColorStep?: boolean;
+  /** Sprint 18 contract — multiplayer hides Difficulty; solo shows when handler set. */
+  entryMode?: PlatformEntryMode;
 }) {
   const selected = styles.find((s) => s.id === styleId) ?? styles[0];
   const embeddedColor = colorForStyle(styles, styleId, colors);
+
+  // MP: never surface Difficulty even if a handler is accidentally passed.
+  const difficultyHandler =
+    entryMode === "solo" ? onDifficultyChange : undefined;
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      const check = assertEntryLobbyContract({
+        mode: entryMode,
+        showColorStep,
+        hasDifficultyHandler: !!difficultyHandler,
+      });
+      if (!check.ok) {
+        console.warn("[platform-game-contract]", check.errors.join("; "));
+      }
+    }
+  }, [entryMode, showColorStep, difficultyHandler]);
 
   useEffect(() => {
     if (!showColorStep && embeddedColor.toLowerCase() !== color.toLowerCase()) {
@@ -179,7 +203,7 @@ export function MultiplayerEntrySelect({
         </div>
       ) : null}
 
-      {onDifficultyChange ? (
+      {difficultyHandler ? (
         <div className="w-full space-y-2" data-testid="mp-ai-difficulty">
           <p className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Difficulty
@@ -192,7 +216,7 @@ export function MultiplayerEntrySelect({
                   key={d.id}
                   type="button"
                   data-testid={`mp-ai-${d.id}`}
-                  onClick={() => onDifficultyChange(d.id)}
+                  onClick={() => difficultyHandler(d.id)}
                   className={cn(
                     "min-h-11 min-w-[5.5rem] rounded-lg border px-3 py-2 text-xs font-semibold transition",
                     active

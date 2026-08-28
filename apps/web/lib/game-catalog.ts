@@ -41,6 +41,15 @@ export function detailHrefForCatalogSlug(slug: string): string {
   return `/games/${slug}`;
 }
 
+/**
+ * Sprint 18 / 21 — invite lands on Detail first (pin room), then WORLD PLAY.
+ * Never deep-link guests past Detail into a bare WORLD cluster resolve.
+ */
+export function inviteHrefForCatalogSlug(slug: string, roomCode: string): string {
+  const code = roomCode.trim().toUpperCase();
+  return `/games/${slug}?invite=${encodeURIComponent(code)}&source=invite`;
+}
+
 /** PLATFORM-UX-CONTRACT-002 — unified card / detail CTA copy. */
 export const REPLAY_CARD_CTA = "▶ Re:Play";
 export const REPLAY_DETAIL_WORLD_CTA = "▶ WORLD PLAY";

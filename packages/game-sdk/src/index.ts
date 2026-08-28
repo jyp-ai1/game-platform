@@ -115,6 +115,21 @@ export {
   type SessionDifficulty,
 } from "./game-metadata";
 export {
+  PLATFORM_CONTRACT_CHECKLIST_KEYS,
+  PLATFORM_FLAGSHIP_MP_SLUGS,
+  PLATFORM_JOURNEY,
+  assertEntryLobbyContract,
+  buildPlatformGameContract,
+  entryStepsForMode,
+  flagshipMpContractSmoke,
+  resolveEntryMode,
+  type PlatformContractChecklist,
+  type PlatformEntryMode,
+  type PlatformEntrySteps,
+  type PlatformGameContractMeta,
+  type PlatformJourneyStep,
+} from "./platform-game-contract";
+export {
   MultiplayerDeathOverlay,
   MultiplayerMinimap,
   MultiplayerPlayShell,

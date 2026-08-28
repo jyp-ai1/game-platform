@@ -1,0 +1,74 @@
+{
+  "sprint": 18,
+  "at": "2026-08-28T00:27:27.908Z",
+  "journey": "HOME→Re:Play→DETAIL→PLAY→CHARACTER→COLOR→ENTER→GAME→DEATH→RETRY/EXIT",
+  "mpFlow": "Character→Color→Enter→World (no Difficulty)",
+  "soloFlow": "Character→Color→Difficulty→Enter",
+  "mobile": "MobileControlPad left D-pad / right actions (63715f4)",
+  "checklist": {
+    "usesSharedDetailTemplate": true,
+    "usesSharedEntrySelect": true,
+    "mpOmitsDifficulty": true,
+    "soloOffersDifficulty": true,
+    "mobilePadContract": true,
+    "deathRetryExit": true,
+    "soloPreservedOnHome": true
+  },
+  "bySlug": {
+    "2048": {
+      "slug": "2048",
+      "entryMode": "solo",
+      "entrySteps": {
+        "character": true,
+        "color": true,
+        "difficulty": true,
+        "enter": true
+      },
+      "detailCta": "PLAY",
+      "knownDeviations": []
+    },
+    "snake": {
+      "slug": "snake",
+      "entryMode": "multiplayer",
+      "entrySteps": {
+        "character": true,
+        "color": true,
+        "difficulty": false,
+        "enter": true
+      },
+      "detailCta": "WORLD_PLAY",
+      "knownDeviations": []
+    },
+    "agar": {
+      "slug": "agar",
+      "entryMode": "multiplayer",
+      "entrySteps": {
+        "character": true,
+        "color": true,
+        "difficulty": false,
+        "enter": true
+      },
+      "detailCta": "WORLD_PLAY",
+      "knownDeviations": []
+    },
+    "bomber": {
+      "slug": "bomber",
+      "entryMode": "multiplayer",
+      "entrySteps": {
+        "character": true,
+        "color": true,
+        "difficulty": false,
+        "enter": true
+      },
+      "detailCta": "WORLD_PLAY",
+      "knownDeviations": [
+        "bomber:map-select-after-enter (HOLD)"
+      ]
+    }
+  },
+  "flagshipOk": true,
+  "soloOk": true,
+  "bomberHold": true,
+  "agarFrozen": true,
+  "pass": true
+}
