@@ -324,7 +324,7 @@ export function BomberGame() {
 
       if (last === "state" && !amHost && gs.state) {
         const w = worldRef.current;
-        if (canAuthoritativeHost(code, deviceId, w)) return;
+        if (isHostRef.current || canAuthoritativeHost(code, deviceId, w)) return;
         lastHostStateAt.current = Date.now();
         const state = gs.state as BomberSyncState;
         applyBomberSyncState(w, state);
@@ -335,7 +335,7 @@ export function BomberGame() {
         return;
       }
 
-      if (last.startsWith("input:") && (amHost || canAuthoritativeHost(code, deviceId, worldRef.current))) {
+      if (last.startsWith("input:") && (amHost || isHostRef.current || canAuthoritativeHost(code, deviceId, worldRef.current))) {
         const payload = gs[last] as BomberInput | undefined;
         if (payload?.deviceId && payload.deviceId !== deviceId) {
           pendingInputs.current.push(payload);
