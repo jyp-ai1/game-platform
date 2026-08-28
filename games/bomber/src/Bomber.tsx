@@ -211,6 +211,10 @@ export function BomberGame() {
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [isHost, setIsHost] = useState(true);
   const isHostRef = useRef(true);
+  const setHostAuthority = useCallback((host: boolean) => {
+    isHostRef.current = host;
+    setIsHost(host);
+  }, []);
   const reportedRef = useRef(false);
   const pendingInputs = useRef<BomberInput[]>([]);
   const lastStateSent = useRef(0);
@@ -232,7 +236,7 @@ export function BomberGame() {
         if (!mounted) return;
         const room = joinRoom(code, { nickname });
         if (room) {
-          setIsHost(room.hostId === deviceId || room.players[0]?.deviceId === deviceId);
+          setHostAuthority(room.hostId === deviceId || room.players[0]?.deviceId === deviceId);
         }
       } catch {
         /* local OK */
@@ -379,7 +383,7 @@ export function BomberGame() {
         setWorld(next);
         lastHostStateAt.current = Date.now();
         setStarted(true);
-        setIsHost(canAuthoritativeHost(code, deviceId, next));
+        setHostAuthority(canAuthoritativeHost(code, deviceId, next));
         matchLocalStartAt.current = Date.now();
       }
     });
@@ -485,7 +489,7 @@ export function BomberGame() {
           setWorld(next);
           lastHostStateAt.current = Date.now();
           setStarted(true);
-          setIsHost(canAuthoritativeHost(code, deviceId, next));
+          setHostAuthority(canAuthoritativeHost(code, deviceId, next));
           matchLocalStartAt.current = Date.now();
           return;
         }
@@ -504,7 +508,7 @@ export function BomberGame() {
         setStarted(true);
 
         const hostNow = canAuthoritativeHost(code, deviceId, next);
-        setIsHost(hostNow);
+        setHostAuthority(hostNow);
         if (hostNow) {
           send(code, "bomber:cfg", {
             playerSlots: slots,

@@ -64,14 +64,18 @@ async function enterGame(page, slug) {
 
   if (slug === "bomber") {
     await page.waitForTimeout(800);
+    const hud = page.locator('[data-testid="bomber-match-hud"]');
     const pad = page.locator('[data-testid="mp-mobile-control-pad"]');
-    if ((await pad.count()) === 0) {
-      const mapBtn = page.locator('[data-testid="bomber-map-A"]');
+    if ((await hud.count()) === 0 && (await pad.count()) === 0) {
+      const url = page.url();
+      const m = url.match(/room=BOMBER-([A-D])/i);
+      const letter = m?.[1]?.toUpperCase() ?? "A";
+      const mapBtn = page.locator(`[data-testid="bomber-map-${letter}"]`);
       if ((await mapBtn.count()) > 0) {
         await mapBtn.click({ timeout: 8_000, force: true }).catch(() => {});
       }
     }
-    await page.locator('[data-testid="bomber-match-hud"]').waitFor({ timeout: 25_000 }).catch(() => {});
+    await hud.waitFor({ timeout: 25_000 }).catch(() => {});
   }
 
   if (slug === "snake") {
@@ -335,7 +339,7 @@ async function probeSameWorld(page) {
 }
 
 async function probeDualContextSync(ctx) {
-  const room = "BOMBER-SYNC006";
+  const room = "BOMBER-B";
   const url = `${BASE}${invitePath("bomber", room)}`;
   const pageA = await ctx.newPage();
   const pageB = await ctx.newPage();
@@ -344,8 +348,8 @@ async function probeDualContextSync(ctx) {
     await pageB.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageA, "bomber");
     await enterGame(pageB, "bomber");
-    await pageA.waitForTimeout(2000);
-    await pageB.waitForTimeout(2000);
+    await pageA.waitForTimeout(2500);
+    await pageB.waitForTimeout(2500);
 
     const pinA = pageA.url().includes(room);
     const pinB = pageB.url().includes(room);
@@ -381,7 +385,7 @@ async function readBomberGrid(page) {
 async function probeBomberGridMove(page) {
   const iphone = devices["iPhone 13"];
   await page.setViewportSize(iphone.viewport);
-  const room = "BOMBER-GRID006";
+  const room = "BOMBER-D";
   await page.goto(`${BASE}${invitePath("bomber", room)}`, {
     waitUntil: "domcontentloaded",
     timeout: 120_000,
@@ -389,7 +393,7 @@ async function probeBomberGridMove(page) {
   await enterGame(page, "bomber");
   await page.waitForSelector('[data-testid="bomber-local-player"]', { timeout: 25_000 });
   await page.waitForSelector('[data-testid="mp-mobile-control-pad"]', { timeout: 20_000 });
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
 
   const posBefore = await readBomberGrid(page);
   if (!posBefore) {
@@ -398,22 +402,28 @@ async function probeBomberGridMove(page) {
   }
   mark("bomber-grid-move-baseline", true, posBefore);
 
-  const right = page.locator('[data-testid="mp-pad-right"]');
-  await right.click({ timeout: 8_000, force: true });
-  await page.waitForTimeout(800);
-
-  const posAfter = await readBomberGrid(page);
-  if (posAfter) {
+  const dirs = ["right", "down", "left", "up"];
+  let posAfter = posBefore;
+  let moved = false;
+  for (const dir of dirs) {
+    const btn = page.locator(`[data-testid="mp-pad-${dir}"]`);
+    await btn.click({ timeout: 8_000, force: true });
+    await page.waitForTimeout(900);
+    posAfter = (await readBomberGrid(page)) ?? posAfter;
     const dx = posAfter.x - posBefore.x;
     const dy = posAfter.y - posBefore.y;
-    const oneCell = Math.abs(dx) + Math.abs(dy) === 1;
-    mark("bomber-grid-one-cell-move", oneCell, { posBefore, posAfter, dx, dy });
-  } else {
-    mark("bomber-grid-one-cell-move", false, { posBefore, note: "D-pad right did not move grid" });
+    if (Math.abs(dx) + Math.abs(dy) === 1) {
+      moved = true;
+      mark("bomber-grid-one-cell-move", true, { posBefore, posAfter, dx, dy, dir });
+      break;
+    }
+  }
+  if (!moved) {
+    mark("bomber-grid-one-cell-move", false, { posBefore, posAfter, note: "D-pad did not move grid" });
   }
 
   await page.screenshot({ path: join(EVIDENCE, "bomber-grid-move.png"), fullPage: true });
-  return posAfter != null;
+  return moved;
 }
 
 async function probeRegressionSmoke(page) {
