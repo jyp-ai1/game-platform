@@ -393,9 +393,12 @@ async function probeBomberGridMove(page) {
       waitUntil: "domcontentloaded",
       timeout: 120_000,
     });
-    await enterGame(page, "bomber");
-    await page.waitForSelector('[data-testid="bomber-local-player"]', { timeout: 25_000 });
-    await page.waitForTimeout(2500);
+    await page.getByRole("button", { name: /^ENTER$/i }).click({ timeout: 15_000 });
+    await page.waitForSelector('[data-testid="bomber-local-player"]', { timeout: 30_000 });
+    await page.waitForFunction(() => typeof window.__BOMBER_QA_MOVE__ === "function", {
+      timeout: 12_000,
+    });
+    await page.waitForTimeout(800);
 
     const posBefore = await readBomberGrid(page);
     if (!posBefore) {
@@ -438,11 +441,28 @@ async function probeBomberGridMove(page) {
           await page.setViewportSize(iphone.viewport);
         }
       }
-      await page.waitForTimeout(900);
+      await page.waitForTimeout(300);
+      const changed = await page
+        .waitForFunction(
+          (start) => {
+            const el = document.querySelector('[data-testid="bomber-local-player"]');
+            if (!el) return false;
+            const x = Number(el.getAttribute("data-grid-x"));
+            const y = Number(el.getAttribute("data-grid-y"));
+            return Math.abs(x - start.x) + Math.abs(y - start.y) === 1;
+          },
+          posBefore,
+          { timeout: 4_000 }
+        )
+        .then(() => true)
+        .catch(() => false);
       posAfter = (await readBomberGrid(page)) ?? posAfter;
       const ddx = posAfter.x - posBefore.x;
       const ddy = posAfter.y - posBefore.y;
-      return Math.abs(ddx) + Math.abs(ddy) === 1 ? { dx: ddx, dy: ddy } : null;
+      if (changed || Math.abs(ddx) + Math.abs(ddy) === 1) {
+        return { dx: ddx, dy: ddy };
+      }
+      return null;
     };
 
     for (const dir of dirs) {
