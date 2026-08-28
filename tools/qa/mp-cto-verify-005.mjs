@@ -74,6 +74,15 @@ async function enterGame(page, slug) {
     }
   }
 
+  if (slug === "agar") {
+    await page.waitForTimeout(1500);
+    const death = page.locator('[data-testid="mp-death-overlay"]');
+    if ((await death.count()) > 0 && (await death.isVisible())) {
+      await page.locator('[data-testid="mp-death-retry"]').click({ timeout: 8_000 }).catch(() => {});
+      await page.waitForTimeout(1200);
+    }
+  }
+
   await page.waitForTimeout(1500);
 }
 
