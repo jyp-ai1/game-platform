@@ -40,6 +40,7 @@ import {
   splitPlayer,
   tickAgarWorld,
   totalMass,
+  AGAR_MIN_SPLIT_MASS,
   type AgarWorld,
 } from "./agar-io-engine";
 
@@ -105,9 +106,13 @@ export function AgarGame() {
   }, []);
   /** QA-only: keep mobile pad visible for automation pad probes (no gameplay change). */
   const qaPadProbeRef = useRef(false);
+  /** QA-only: seed split-ready mass before split harness (no gameplay change in normal play). */
+  const qaSplitProbeRef = useRef(false);
   if (typeof window !== "undefined") {
     qaPadProbeRef.current =
       new URLSearchParams(window.location.search).get("mp_qa_pad") === "1";
+    qaSplitProbeRef.current =
+      new URLSearchParams(window.location.search).get("mp_qa_split") === "1";
   }
   const { reportScore } = useGameSDK();
   const [world, setWorld] = useState<AgarWorld>(() => createAgarWorld(deviceId, nickname));
@@ -261,6 +266,12 @@ export function AgarGame() {
     reportedRef.current = false;
     const engineTier = toEngineAiTier(aiDifficulty);
     const next = createAgarWorld(deviceId, nickname, engineTier);
+    if (qaSplitProbeRef.current) {
+      const me = next.players[deviceId];
+      if (me?.cells[0]) {
+        me.cells[0].mass = AGAR_MIN_SPLIT_MASS + 4;
+      }
+    }
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
@@ -277,6 +288,35 @@ export function AgarGame() {
       window.location.href = "/games/agar";
     }
   }
+
+  useEffect(() => {
+    if (!started) return;
+    const w = window as Window & {
+      __AGAR_QA__?: () => {
+        mass: number;
+        cells: number;
+        canSplit: boolean;
+        alive: boolean;
+        ready: boolean;
+      };
+    };
+    w.__AGAR_QA__ = () => {
+      const wr = worldRef.current;
+      const p = wr.players[deviceId];
+      const mass = p ? Math.round(totalMass(p)) : 0;
+      const cells = p?.cells.length ?? 0;
+      return {
+        mass,
+        cells,
+        canSplit: canSplitPlayer(wr, deviceId),
+        alive: !!p?.alive,
+        ready: !!p?.alive && mass >= AGAR_MIN_SPLIT_MASS,
+      };
+    };
+    return () => {
+      delete w.__AGAR_QA__;
+    };
+  }, [started, deviceId]);
 
   const offsetX = VIEW / 2 - cam.x;
   const offsetY = VIEW / 2 - cam.y;

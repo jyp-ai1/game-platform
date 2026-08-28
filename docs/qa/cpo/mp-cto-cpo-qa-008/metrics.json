@@ -1,0 +1,6 @@
+{
+  "commit": "local-008c",
+  "base": "http://localhost:3000",
+  "capturedAt": "2026-08-28T11:53:14.607Z",
+  "note": "MP-CTO-CPO-QA-008 runtime perf — code gate only unless instrumented"
+}
