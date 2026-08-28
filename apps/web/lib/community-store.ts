@@ -17,9 +17,12 @@ export interface CommunityComment {
   gameSlug: string;
   message: string;
   author: string;
+  /** Auth subject marker for delete-own (local MVP). */
+  authorId?: string | null;
   createdAt: string;
   likes: number;
   parentId?: string;
+  moderated?: boolean;
 }
 
 export interface BugReport {
@@ -71,7 +74,7 @@ export function listReplies(parentId: string): CommunityComment[] {
 export function postComment(
   gameSlug: string,
   message: string,
-  opts?: { author?: string; parentId?: string }
+  opts?: { author?: string; parentId?: string; authorId?: string | null }
 ): void {
   if (!message.trim()) return;
   const list = listComments();
@@ -80,11 +83,34 @@ export function postComment(
     gameSlug,
     message: message.trim(),
     author: opts?.author ?? "Player",
+    authorId: opts?.authorId ?? null,
     createdAt: new Date().toISOString(),
     likes: 0,
     parentId: opts?.parentId,
+    moderated: false,
   });
   writeJson(COMMENTS_KEY, list.slice(0, 200));
+}
+
+/** Sprint 22 — delete own comment only. */
+export function deleteOwnComment(commentId: string, authorId: string): boolean {
+  const list = listComments();
+  const next = list.filter((c) => !(c.id === commentId && c.authorId === authorId));
+  if (next.length === list.length) return false;
+  writeJson(COMMENTS_KEY, next);
+  return true;
+}
+
+/** Basic moderation stub — block empty / oversized / banned stubs. */
+export function moderateCommentStub(message: string): { ok: boolean; reason?: string } {
+  const t = message.trim();
+  if (!t) return { ok: false, reason: "빈 댓글은 등록할 수 없습니다." };
+  if (t.length > 500) return { ok: false, reason: "댓글은 500자 이내로 작성해 주세요." };
+  const banned = ["http://malware", "<script"];
+  if (banned.some((b) => t.toLowerCase().includes(b))) {
+    return { ok: false, reason: "허용되지 않는 내용입니다." };
+  }
+  return { ok: true };
 }
 
 export function toggleCommentLike(commentId: string): void {

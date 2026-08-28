@@ -4,16 +4,26 @@ import type { Game } from "@game-platform/shared";
 import { REALTIME_GAMES } from "@game-platform/multiplayer-sdk";
 import { Container } from "@game-platform/ui";
 import Link from "next/link";
+import { useMemo, useSyncExternalStore } from "react";
 
 import { LiveMultiplayerGameCard } from "@/components/live-multiplayer-game-card";
 import { PlatformGameCard } from "@/components/platform-game-card";
-import { selectNew, selectPopular } from "@/lib/game-sections";
+import { selectNew, selectPopular, selectRecommended } from "@/lib/game-sections";
 import { detailHrefForCatalogSlug, REPLAY_CARD_CTA } from "@/lib/game-catalog";
+import {
+  getFavoritesSnapshot,
+  getRecentlyPlayedSnapshot,
+  getServerFavoritesSnapshot,
+  getServerRecentlyPlayedSnapshot,
+  subscribeFavorites,
+  subscribeRecentlyPlayed,
+} from "@/lib/local-storage";
 
 /**
- * Sprint 17 Step 5 — home catalog strips (인기 / 최신 / Solo / Multiplayer).
- * PLATFORM-CORE-002: Solo catalog must stay visible (not replaced by MP-only UI).
- * Reuses PlatformGameCard + LiveMultiplayerGameCard; no fake AI ranking.
+ * Sprint 17 Step 5 + Sprint 22 — home catalog strips.
+ * Latest · Popular · Multiplayer · Solo · My played · Recommend
+ * PLATFORM-CORE-002: Solo catalog must stay visible.
+ * Honest ranking from playCount / recentlyPlayed — no fake AI.
  */
 export function HomeCatalogSections({
   games,
@@ -24,6 +34,17 @@ export function HomeCatalogSections({
   snakeGame: Game | null;
   multiplayerGames?: Game[];
 }) {
+  const favorites = useSyncExternalStore(
+    subscribeFavorites,
+    getFavoritesSnapshot,
+    getServerFavoritesSnapshot
+  );
+  const recentlyPlayed = useSyncExternalStore(
+    subscribeRecentlyPlayed,
+    getRecentlyPlayedSnapshot,
+    getServerRecentlyPlayedSnapshot
+  );
+
   const popular = selectPopular(games, 6);
   const newest = selectNew(games, 6);
   // Solo / single catalog — exclude realtime WORLD titles only (never delete Solo).
@@ -36,11 +57,24 @@ export function HomeCatalogSections({
   if (snakeGame) mpCards.push(snakeGame);
   mpCards.push(...mpExtras);
 
+  const myPlayed = useMemo(() => {
+    const bySlug = new Map(games.map((g) => [g.slug, g]));
+    return recentlyPlayed
+      .map((slug) => bySlug.get(slug))
+      .filter((g): g is Game => !!g)
+      .slice(0, 6);
+  }, [games, recentlyPlayed]);
+
+  const recommended = useMemo(
+    () => selectRecommended(games, recentlyPlayed, favorites, 6),
+    [games, recentlyPlayed, favorites]
+  );
+
   return (
     <>
       <CatalogRow
         id="home-popular-catalog"
-        title="🔥 인기"
+        title="🔥 Popular"
         subtitle="playCount 기준 정렬 · 데이터 없으면 카탈로그 순"
         href="/games?sort=popular"
       >
@@ -58,7 +92,7 @@ export function HomeCatalogSections({
 
       <CatalogRow
         id="home-new-catalog"
-        title="🆕 최신"
+        title="🆕 Latest"
         subtitle="최근 등록 게임"
         href="/games?sort=newest"
       >
@@ -125,6 +159,42 @@ export function HomeCatalogSections({
           )}
         </Container>
       </section>
+
+      <CatalogRow
+        id="home-my-played-catalog"
+        title="🕹️ My played"
+        subtitle="최근 플레이한 게임"
+        href="/games?sort=played"
+      >
+        {(myPlayed.length > 0 ? myPlayed : popular.slice(0, 3)).map((game) => (
+          <PlatformGameCard
+            key={game.id}
+            game={game}
+            className="min-w-[240px] max-w-[280px] shrink-0"
+            actions={{
+              primary: { label: REPLAY_CARD_CTA, href: detailHrefForCatalogSlug(game.slug) },
+            }}
+          />
+        ))}
+      </CatalogRow>
+
+      <CatalogRow
+        id="home-recommend-catalog"
+        title="✨ Recommend"
+        subtitle="최근 플레이 · 즐겨찾기 · playCount 기반 (가짜 AI 없음)"
+        href="/games?sort=recommended"
+      >
+        {recommended.map((game) => (
+          <PlatformGameCard
+            key={game.id}
+            game={game}
+            className="min-w-[240px] max-w-[280px] shrink-0"
+            actions={{
+              primary: { label: REPLAY_CARD_CTA, href: detailHrefForCatalogSlug(game.slug) },
+            }}
+          />
+        ))}
+      </CatalogRow>
     </>
   );
 }

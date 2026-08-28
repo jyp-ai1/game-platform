@@ -1,0 +1,16 @@
+{
+  "sprint": 22,
+  "at": "2026-08-28T00:00:00.000Z",
+  "comments": {
+    "loginRequiredWrite": true,
+    "nickname": true,
+    "date": true,
+    "deleteOwn": true,
+    "moderationStub": "moderateCommentStub"
+  },
+  "catalog": ["Latest", "Popular", "Multiplayer", "Solo", "My played", "Recommend"],
+  "ranking": "honest playCount / recentlyPlayed / favorites — no fake AI",
+  "search": "title + description (+ tags/howTo) via lib/search.ts",
+  "pass": true,
+  "sprint23_24": "skipped — Creator/Admin stubs deferred; 18–22 solid first"
+}
