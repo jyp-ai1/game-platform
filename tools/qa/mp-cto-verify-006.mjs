@@ -199,6 +199,7 @@ function probeBomberCode() {
   const rosterOk = engine.includes("MAP_ROSTER") && engine.includes("[4, 4, 6, 6]");
   mark("bomber-map-roster-ab-cd", rosterOk);
   mark("bomber-solo-host-input", bomber.includes("isSoloInRoom") && bomber.includes("isHostRef"));
+  mark("bomber-qa-local-probe-hook", bomber.includes("mp_qa_local") && bomber.includes("qaLocalProbe"));
   mark("bomber-local-player-testid", bomber.includes('data-testid={p.id === deviceId ? "bomber-local-player"'));
   mark("bomber-auto-enter-on-room", bomber.includes("enterMapMatch(idx)"));
   try {
@@ -388,7 +389,7 @@ async function probeBomberGridMove(page) {
     const iphone = devices["iPhone 13"];
     await page.setViewportSize(iphone.viewport);
     const room = "BOMBER-D";
-    await page.goto(`${BASE}${invitePath("bomber", room)}`, {
+    await page.goto(`${BASE}${invitePath("bomber", room, "mp_qa_local=1")}`, {
       waitUntil: "domcontentloaded",
       timeout: 120_000,
     });
