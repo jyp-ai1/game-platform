@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { GameDetailTemplate } from "@/components/game-detail-template";
 import { JsonLdScript } from "@/components/json-ld-script";
@@ -47,16 +47,9 @@ export async function generateMetadata({
 export default async function GamePage({ params, searchParams }: GamePageProps) {
   const { slug } = await params;
   const q = await searchParams;
-  // Invite token = room code — land both clients in the same multiplayer room.
-  const invite = firstParam(q.invite)?.trim().toUpperCase();
-  if (invite) {
-    if (slug === "snake") {
-      redirect(
-        `/flagship/snake-io/play?room=${encodeURIComponent(invite)}&source=invite`
-      );
-    }
-    redirect(`/games/${slug}/play?room=${encodeURIComponent(invite)}&source=invite`);
-  }
+  // Sprint 21 — Invite lands on Detail (pin room via InviteDetailPin), then WORLD PLAY.
+  // Do not auto-redirect past Detail (same-world join still uses pinned room).
+  const invite = firstParam(q.invite)?.trim().toUpperCase() || null;
 
   const [dbGame, rawGames, rankingEnabled] = await Promise.all([
     getGameBySlug(slug),
@@ -96,6 +89,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
         rankingEnabled={rankingEnabled}
         related={related}
         allGames={allGames}
+        inviteCode={invite}
       />
     </>
   );

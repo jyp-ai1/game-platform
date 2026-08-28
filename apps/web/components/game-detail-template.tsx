@@ -9,6 +9,7 @@ import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameStatusBlock } from "@/components/game-status-block";
+import { InviteDetailPin } from "@/components/invite-detail-pin";
 import { MpWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug, REPLAY_DETAIL_SOLO_CTA, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
 
@@ -54,6 +55,7 @@ export function GameDetailTemplate({
   rankingEnabled = true,
   related: _related = [],
   allGames = [],
+  inviteCode = null,
 }: {
   game: Game;
   slug: string;
@@ -61,6 +63,8 @@ export function GameDetailTemplate({
   rankingEnabled?: boolean;
   related?: Game[];
   allGames?: Game[];
+  /** Sprint 21 — pin invite on Detail; WORLD PLAY joins same room. */
+  inviteCode?: string | null;
 }) {
   const desc = shortDescription(game, slug);
   const playHref = playHrefForCatalogSlug(slug);
@@ -73,6 +77,8 @@ export function GameDetailTemplate({
 
         {isPlayable ? (
           <>
+            <InviteDetailPin invite={inviteCode} gameSlug={slug} />
+
             <section className="space-y-4 text-center" data-testid="game-detail-meta">
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {mp ? (

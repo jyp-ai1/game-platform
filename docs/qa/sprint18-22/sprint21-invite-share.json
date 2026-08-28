@@ -1,0 +1,12 @@
+{
+  "sprint": 21,
+  "at": "2026-08-28T00:00:00.000Z",
+  "inviteFlow": "Invite URL → Detail (?invite=) → optional login → WORLD PLAY → same World",
+  "share": "Web Share API + clipboard copy; no Kakao SDK",
+  "detailShare": "GameDetailShare → inviteHrefForCatalogSlug for snake/agar/bomber",
+  "pin": "InviteDetailPin + MpWorldPlayLink read ?invite= / play29:active-room",
+  "agarFreeze": "share UI only — no Agar game logic changes",
+  "bomberHold": "no Bomber gameplay/online changes",
+  "friendMultiLive": "HOLD — CEO gate",
+  "pass": true
+}

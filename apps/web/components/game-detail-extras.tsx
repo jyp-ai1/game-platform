@@ -7,24 +7,31 @@ import { Share2, ThumbsDown, Heart, Flag } from "lucide-react";
 import { useCallback, useState, useSyncExternalStore, type FormEvent } from "react";
 
 import { StarRatingPanel } from "@/components/community-ratings-panel";
+import { usePlayerAuth } from "@/components/auth-provider";
 import {
+  deleteOwnComment,
   isCommentDisliked,
   isCommentLiked,
   listCommentsForGame,
+  moderateCommentStub,
   postComment,
   reportComment,
   toggleCommentDislike,
   toggleCommentLike,
 } from "@/lib/community-store";
+import { inviteHrefForCatalogSlug } from "@/lib/game-catalog";
 import { subscribeLiveData } from "@/lib/live-data-bus";
+import { getLastNickname } from "@game-platform/game-sdk";
 
 export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
+  const { isAuthenticated, displayName, signIn, loading } = usePlayerAuth();
   const [message, setMessage] = useState("");
+  const [gateMsg, setGateMsg] = useState<string | null>(null);
   const [, bump] = useState(0);
   useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
 
   const refresh = useCallback(() => bump((n) => n + 1), []);
-  const stored = listCommentsForGame(gameSlug, "recent").slice(0, 5);
+  const stored = listCommentsForGame(gameSlug, "recent").slice(0, 8);
   /** Visible stub list when store is empty — Detail must show Comments. */
   const stubComments =
     stored.length === 0
@@ -33,17 +40,21 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
             id: `stub-${gameSlug}-1`,
             gameSlug,
             author: "Nova",
+            authorId: null as string | null,
             message: "친구랑 한 판 더 했어요. 월드가 살아있어요!",
             likes: 4,
             createdAt: new Date().toISOString(),
+            moderated: false,
           },
           {
             id: `stub-${gameSlug}-2`,
             gameSlug,
             author: "Kai",
+            authorId: null as string | null,
             message: "캐릭터·색상 고르고 바로 입장 — 흐름 좋음.",
             likes: 2,
             createdAt: new Date().toISOString(),
+            moderated: false,
           },
         ]
       : [];
@@ -52,9 +63,31 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    postComment(gameSlug, message);
+    if (!isAuthenticated) {
+      setGateMsg("댓글 작성은 로그인이 필요합니다.");
+      return;
+    }
+    const nick = getLastNickname() || displayName || "Player";
+    const mod = moderateCommentStub(message);
+    if (!mod.ok) {
+      setGateMsg(mod.reason ?? "댓글을 수정해 주세요.");
+      return;
+    }
+    postComment(gameSlug, message, { author: nick, authorId: "self" });
     setMessage("");
+    setGateMsg(null);
     refresh();
+  }
+
+  function formatDate(iso: string): string {
+    try {
+      return new Date(iso).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "";
+    }
   }
 
   return (
@@ -63,19 +96,42 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
       data-testid="game-detail-comments"
     >
       <h3 className="font-semibold">Comments</h3>
+      {!loading && !isAuthenticated ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          작성은 로그인 후 가능합니다.{" "}
+          <button
+            type="button"
+            className="text-primary underline"
+            onClick={() => void signIn()}
+            data-testid="comments-login-cta"
+          >
+            로그인
+          </button>
+          <span className="text-muted-foreground"> (LIVE OAuth: CEO HOLD)</span>
+        </p>
+      ) : null}
       <form className="mt-3 space-y-2" onSubmit={handleSubmit}>
         <textarea
           className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm backdrop-blur"
           rows={2}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Leave a comment…"
+          placeholder={isAuthenticated ? "Leave a comment…" : "로그인 후 댓글을 남겨 주세요"}
           aria-label="댓글"
           required
+          disabled={!isAuthenticated}
+          data-testid="comments-textarea"
         />
+        {gateMsg ? (
+          <p className="text-xs text-amber-300" role="status">
+            {gateMsg}
+          </p>
+        ) : null}
         <button
           type="submit"
-          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+          disabled={!isAuthenticated}
+          data-testid="comments-submit"
         >
           Post
         </button>
@@ -84,11 +140,15 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
         {comments.map((c) => {
           const liked = !isStub && isCommentLiked(c.id);
           const disliked = !isStub && isCommentDisliked(c.id);
+          const own = !isStub && c.authorId === "self";
           return (
             <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm">
-              <p className="text-xs text-muted-foreground">{c.author}</p>
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="text-xs text-muted-foreground">{c.author}</p>
+                <p className="text-[10px] text-muted-foreground">{formatDate(c.createdAt)}</p>
+              </div>
               <p>{c.message}</p>
-              <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+              <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
                 <button
                   type="button"
                   className={liked ? "text-red-400" : ""}
@@ -117,6 +177,19 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
                     <button type="button" onClick={() => reportComment(c.id)}>
                       <Flag className="inline size-3" /> Report
                     </button>
+                    {own ? (
+                      <button
+                        type="button"
+                        className="text-red-300"
+                        data-testid="comments-delete-own"
+                        onClick={() => {
+                          deleteOwnComment(c.id, "self");
+                          refresh();
+                        }}
+                      >
+                        Delete
+                      </button>
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -212,11 +285,9 @@ export function GameDetailShare({
     const invite = resolveInviteRoomCode(gameSlug);
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://game29.vercel.app";
-    // Concrete room id in query — HUD ROOM must match clipboard ROOM (never bare WORLD).
-    if (gameSlug === "snake") {
-      return `${origin}/flagship/snake-io/play?room=${encodeURIComponent(invite)}&source=invite`;
-    }
-    return `${origin}/games/${gameSlug}?invite=${encodeURIComponent(invite)}&source=invite`;
+    // Sprint 21 — all MP invites land on Detail → WORLD PLAY (same World).
+    // Web Share API + copy; no Kakao SDK.
+    return `${origin}${inviteHrefForCatalogSlug(gameSlug, invite)}`;
   }
 
   async function copyText(text: string): Promise<boolean> {
