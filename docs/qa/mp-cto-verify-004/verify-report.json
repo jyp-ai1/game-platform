@@ -1,0 +1,196 @@
+{
+  "base": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app",
+  "commit": "local",
+  "startedAt": "2026-08-28T06:58:15.742Z",
+  "checks": [
+    {
+      "name": "auth-preview-redirect-code",
+      "ok": true,
+      "sessionStorage": true,
+      "originRedirect": true,
+      "consumeReturn": true,
+      "t": "2026-08-28T06:58:15.746Z"
+    },
+    {
+      "name": "mobile-pad-dedupe-150ms",
+      "ok": true,
+      "t": "2026-08-28T06:58:15.748Z"
+    },
+    {
+      "name": "mobile-pad-lg-hidden",
+      "ok": true,
+      "t": "2026-08-28T06:58:15.748Z"
+    },
+    {
+      "name": "snake-pad-visible-before-first-move",
+      "ok": true,
+      "t": "2026-08-28T06:58:15.748Z"
+    },
+    {
+      "name": "build-info-reachable",
+      "ok": false,
+      "error": "SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "t": "2026-08-28T06:58:18.401Z"
+    },
+    {
+      "name": "snake-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T06:58:20.817Z"
+    },
+    {
+      "name": "snake-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-ZQF",
+      "t": "2026-08-28T06:58:21.323Z"
+    },
+    {
+      "name": "agar-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T06:58:22.229Z"
+    },
+    {
+      "name": "agar-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-ZQF",
+      "t": "2026-08-28T06:58:22.691Z"
+    },
+    {
+      "name": "bomber-invite-buttons",
+      "ok": true,
+      "hasCopy": true,
+      "hasShare": true,
+      "t": "2026-08-28T06:58:23.930Z"
+    },
+    {
+      "name": "bomber-invite-url-format",
+      "ok": true,
+      "clip": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-28T06:58:24.394Z"
+    },
+    {
+      "name": "snake-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD-SAME004",
+      "t": "2026-08-28T06:58:25.090Z"
+    },
+    {
+      "name": "agar-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-SAME004",
+      "t": "2026-08-28T06:58:25.551Z"
+    },
+    {
+      "name": "bomber-same-world-room-pinned",
+      "ok": true,
+      "finalUrl": "https://game29-czb26czv3-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-B",
+      "t": "2026-08-28T06:58:26.441Z"
+    },
+    {
+      "name": "snake-mobile-pad-visible",
+      "ok": false,
+      "t": "2026-08-28T06:58:49.306Z"
+    },
+    {
+      "name": "snake-mobile-action-boost",
+      "ok": false,
+      "t": "2026-08-28T06:58:49.782Z"
+    },
+    {
+      "name": "snake-mobile-dpad-up",
+      "ok": false,
+      "t": "2026-08-28T06:58:49.823Z"
+    },
+    {
+      "name": "snake-mobile-dpad-down",
+      "ok": false,
+      "t": "2026-08-28T06:58:50.123Z"
+    },
+    {
+      "name": "snake-mobile-dpad-left",
+      "ok": false,
+      "t": "2026-08-28T06:58:50.144Z"
+    },
+    {
+      "name": "snake-mobile-dpad-right",
+      "ok": false,
+      "t": "2026-08-28T06:58:50.151Z"
+    },
+    {
+      "name": "agar-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T06:58:55.226Z"
+    },
+    {
+      "name": "agar-mobile-action-split",
+      "ok": true,
+      "t": "2026-08-28T06:58:55.237Z"
+    },
+    {
+      "name": "agar-mobile-action-eject",
+      "ok": true,
+      "t": "2026-08-28T06:58:55.245Z"
+    },
+    {
+      "name": "agar-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T06:58:55.260Z"
+    },
+    {
+      "name": "agar-mobile-dpad-down",
+      "ok": false,
+      "t": "2026-08-28T06:58:55.294Z"
+    },
+    {
+      "name": "agar-mobile-dpad-left",
+      "ok": false,
+      "t": "2026-08-28T06:58:55.311Z"
+    },
+    {
+      "name": "agar-mobile-dpad-right",
+      "ok": false,
+      "t": "2026-08-28T06:58:55.325Z"
+    },
+    {
+      "name": "bomber-mobile-pad-visible",
+      "ok": true,
+      "t": "2026-08-28T06:58:59.076Z"
+    },
+    {
+      "name": "bomber-mobile-action-bomb",
+      "ok": true,
+      "t": "2026-08-28T06:58:59.080Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-up",
+      "ok": true,
+      "t": "2026-08-28T06:58:59.083Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-down",
+      "ok": true,
+      "t": "2026-08-28T06:58:59.085Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-left",
+      "ok": true,
+      "t": "2026-08-28T06:58:59.089Z"
+    },
+    {
+      "name": "bomber-mobile-dpad-right",
+      "ok": true,
+      "t": "2026-08-28T06:58:59.092Z"
+    },
+    {
+      "name": "bomber-grid-move-baseline",
+      "ok": false,
+      "detail": "player not found",
+      "t": "2026-08-28T06:59:04.166Z"
+    }
+  ],
+  "finishedAt": "2026-08-28T06:59:04.166Z",
+  "pass": false
+}

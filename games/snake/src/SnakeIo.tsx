@@ -2829,7 +2829,7 @@ export function SnakeIoGame({
         />
       ) : null}
 
-      {!isSpectating && mySnake?.alive && !awaitingInput && !isPaused ? (
+      {!isSpectating && mySnake?.alive && !isPaused ? (
         <MobileControlPad
           onDirection={handleDirection}
           actions={[
