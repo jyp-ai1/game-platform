@@ -743,10 +743,10 @@ export function BomberGame() {
               code,
               othersInRoom ? 12_000 : 3500
             );
-            const hostPresent = joinedRoom.players.some((p) => p.deviceId === joinedRoom.hostId);
+            const hostPresent =
+              freshState &&
+              joinedRoom.players.some((p) => p.deviceId === joinedRoom.hostId);
             if (!hostPresent) {
-              joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
-            } else if (!freshState && !othersInRoom) {
               joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
             }
           }
