@@ -1,0 +1,31 @@
+{
+  "roomId": "BOMBER-B",
+  "playerA": "qa009-host-1787972407922",
+  "playerB": "qa009-guest-1787972407923",
+  "spawnA": null,
+  "spawnB": {
+    "x": 1,
+    "y": 1,
+    "alive": true
+  },
+  "positionA_before": null,
+  "positionA_after": null,
+  "positionB_before": {
+    "x": 1,
+    "y": 1,
+    "alive": true
+  },
+  "positionB_after": {
+    "x": 1,
+    "y": 1
+  },
+  "bombId": "b2-bot:1-1787972458183",
+  "bombPosition": {
+    "x": 13,
+    "y": 1
+  },
+  "explosion": false,
+  "death": false,
+  "aiPosition_before": null,
+  "aiPosition_after": null
+}

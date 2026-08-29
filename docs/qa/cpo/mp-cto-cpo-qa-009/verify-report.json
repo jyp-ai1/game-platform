@@ -1,0 +1,290 @@
+{
+  "base": "https://game29-jnwrz6rye-jyp-ai1s-projects.vercel.app",
+  "commit": "fb9f61f",
+  "startedAt": "2026-08-29T02:58:39.802Z",
+  "gates": {
+    "autoPass": 27,
+    "autoTotal": 37,
+    "dualContext": false,
+    "bomberAi": false,
+    "agarSplit": false,
+    "mobilePad": true,
+    "regression": true
+  },
+  "checks": [
+    {
+      "name": "bomber-state-ack-gate",
+      "ok": true,
+      "t": "2026-08-29T02:58:39.804Z"
+    },
+    {
+      "name": "bomber-no-solo-fallback",
+      "ok": true,
+      "t": "2026-08-29T02:58:39.805Z"
+    },
+    {
+      "name": "bomber-connecting-ui",
+      "ok": true,
+      "t": "2026-08-29T02:58:39.805Z"
+    },
+    {
+      "name": "bomber-qa-hook",
+      "ok": true,
+      "t": "2026-08-29T02:58:39.805Z"
+    },
+    {
+      "name": "floating-pad-left-half-joystick",
+      "ok": true,
+      "t": "2026-08-29T02:58:39.805Z"
+    },
+    {
+      "name": "agar-qa-split-hook",
+      "ok": true,
+      "t": "2026-08-29T02:58:39.805Z"
+    },
+    {
+      "name": "bomber-bomb-authority-unit",
+      "ok": true,
+      "t": "2026-08-29T02:58:40.020Z"
+    },
+    {
+      "name": "snake-ai-movement-unit",
+      "ok": true,
+      "t": "2026-08-29T02:58:40.420Z"
+    },
+    {
+      "name": "snake-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-29T02:59:10.271Z"
+    },
+    {
+      "name": "snake-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-29T02:59:10.273Z"
+    },
+    {
+      "name": "snake-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-29T02:59:10.562Z"
+    },
+    {
+      "name": "snake-mobile-action-zone-boost",
+      "ok": true,
+      "t": "2026-08-29T02:59:10.567Z"
+    },
+    {
+      "name": "agar-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-29T02:59:14.946Z"
+    },
+    {
+      "name": "agar-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-29T02:59:14.947Z"
+    },
+    {
+      "name": "agar-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-29T02:59:15.232Z"
+    },
+    {
+      "name": "agar-mobile-action-zone-split",
+      "ok": true,
+      "t": "2026-08-29T02:59:15.235Z"
+    },
+    {
+      "name": "agar-mobile-action-zone-eject",
+      "ok": true,
+      "t": "2026-08-29T02:59:15.237Z"
+    },
+    {
+      "name": "bomber-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-29T02:59:18.923Z"
+    },
+    {
+      "name": "bomber-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-29T02:59:18.924Z"
+    },
+    {
+      "name": "bomber-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-29T02:59:19.207Z"
+    },
+    {
+      "name": "bomber-mobile-action-zone-bomb",
+      "ok": true,
+      "t": "2026-08-29T02:59:19.209Z"
+    },
+    {
+      "name": "agar-split-setup-ready",
+      "ok": false,
+      "t": "2026-08-29T02:59:52.966Z"
+    },
+    {
+      "name": "agar-split-cells-change",
+      "ok": false,
+      "note": "setup fail",
+      "t": "2026-08-29T02:59:52.967Z"
+    },
+    {
+      "name": "bomber-ai-movement-10s",
+      "ok": false,
+      "before": {
+        "bots": [],
+        "tick": 39
+      },
+      "after": {
+        "bots": [],
+        "tick": 279
+      },
+      "t": "2026-08-29T03:00:07.920Z"
+    },
+    {
+      "name": "p0-bomber-same-room",
+      "ok": true,
+      "roomA": "BOMBER-B",
+      "roomB": "BOMBER-B",
+      "t": "2026-08-29T03:01:07.263Z"
+    },
+    {
+      "name": "p0-distinct-player-id",
+      "ok": true,
+      "idA": "qa009-host-1787972407922",
+      "idB": "qa009-guest-1787972407923",
+      "t": "2026-08-29T03:01:07.263Z"
+    },
+    {
+      "name": "p0-distinct-spawn",
+      "ok": false,
+      "spawnA": null,
+      "spawnB": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "t": "2026-08-29T03:01:07.263Z"
+    },
+    {
+      "name": "p0-state-ack-both",
+      "ok": true,
+      "t": "2026-08-29T03:01:07.263Z"
+    },
+    {
+      "name": "p0-a-move-local",
+      "ok": false,
+      "posA0": null,
+      "posA1": null,
+      "t": "2026-08-29T03:01:13.882Z"
+    },
+    {
+      "name": "p0-a-visible-on-b",
+      "ok": false,
+      "posA1": null,
+      "posAOnB": null,
+      "t": "2026-08-29T03:01:13.882Z"
+    },
+    {
+      "name": "p0-b-unchanged-during-a-move",
+      "ok": true,
+      "posBBeforeMove": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "posBStill": {
+        "x": 1,
+        "y": 1
+      },
+      "t": "2026-08-29T03:01:13.882Z"
+    },
+    {
+      "name": "p0-b-move-local",
+      "ok": false,
+      "posB0": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "posB2": {
+        "x": 1,
+        "y": 1
+      },
+      "t": "2026-08-29T03:01:20.499Z"
+    },
+    {
+      "name": "p0-b-visible-on-a",
+      "ok": true,
+      "posB2": {
+        "x": 1,
+        "y": 1
+      },
+      "posBOnA": {
+        "x": 1,
+        "y": 1
+      },
+      "t": "2026-08-29T03:01:20.499Z"
+    },
+    {
+      "name": "p0-a-stable-during-b-move",
+      "ok": false,
+      "posABeforeBMove": null,
+      "posAStill": null,
+      "t": "2026-08-29T03:01:20.499Z"
+    },
+    {
+      "name": "p0-bomb-sync",
+      "ok": true,
+      "bombsA": [
+        {
+          "id": "b2-bot:1-1787972458183",
+          "x": 13,
+          "y": 1,
+          "ownerId": "bot:1"
+        }
+      ],
+      "bombsB": [
+        {
+          "id": "b2-bot:1-1787972458183",
+          "x": 13,
+          "y": 1,
+          "ownerId": "bot:1"
+        }
+      ],
+      "t": "2026-08-29T03:01:21.715Z"
+    },
+    {
+      "name": "p0-explosion-sync",
+      "ok": false,
+      "dualContextExplosion": false,
+      "t": "2026-08-29T03:01:25.679Z"
+    },
+    {
+      "name": "p0-death-sync",
+      "ok": false,
+      "deathOnA": false,
+      "deathOnB": false,
+      "playerA": "qa009-host-1787972407922",
+      "t": "2026-08-29T03:01:25.680Z"
+    }
+  ],
+  "finishedAt": "2026-08-29T03:01:25.724Z",
+  "pass": false,
+  "summary": {
+    "passed": 27,
+    "total": 37,
+    "failed": [
+      "agar-split-setup-ready",
+      "agar-split-cells-change",
+      "bomber-ai-movement-10s",
+      "p0-distinct-spawn",
+      "p0-a-move-local",
+      "p0-a-visible-on-b",
+      "p0-b-move-local",
+      "p0-a-stable-during-b-move",
+      "p0-explosion-sync",
+      "p0-death-sync"
+    ]
+  }
+}
