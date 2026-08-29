@@ -1,9 +1,9 @@
 {
-  "base": "https://game29-kx4av377w-jyp-ai1s-projects.vercel.app",
-  "commit": "9d62522",
-  "startedAt": "2026-08-29T13:33:33.828Z",
+  "base": "https://game29-rk2787cuy-jyp-ai1s-projects.vercel.app",
+  "commit": "300901d",
+  "startedAt": "2026-08-29T13:46:51.238Z",
   "gates": {
-    "hostSeat": true,
+    "hostSeat": false,
     "guestSeat": false,
     "distinctSpawn": false,
     "aMoveSync": false,
@@ -17,154 +17,155 @@
     "regression": true,
     "ctoPass": false,
     "ctoTotal": 12,
-    "ctoPassed": 4
+    "ctoPassed": 3
   },
   "checks": [
     {
       "name": "bomber-host-seat-pin",
       "ok": true,
-      "t": "2026-08-29T13:33:33.832Z"
+      "t": "2026-08-29T13:46:51.244Z"
     },
     {
       "name": "bomber-reconcile-hostId",
       "ok": true,
-      "t": "2026-08-29T13:33:33.832Z"
+      "t": "2026-08-29T13:46:51.247Z"
     },
     {
       "name": "bomber-state-ack-gate",
       "ok": true,
-      "t": "2026-08-29T13:33:33.832Z"
+      "t": "2026-08-29T13:46:51.248Z"
     },
     {
       "name": "bomber-qa-hook",
       "ok": true,
-      "t": "2026-08-29T13:33:33.832Z"
+      "t": "2026-08-29T13:46:51.248Z"
     },
     {
       "name": "floating-pad-left-half-joystick",
       "ok": true,
-      "t": "2026-08-29T13:33:33.833Z"
+      "t": "2026-08-29T13:46:51.248Z"
     },
     {
       "name": "agar-qa-split-hook",
       "ok": true,
-      "t": "2026-08-29T13:33:33.833Z"
+      "t": "2026-08-29T13:46:51.248Z"
     },
     {
       "name": "bomber-host-seat-unit",
       "ok": true,
-      "t": "2026-08-29T13:33:34.123Z"
+      "t": "2026-08-29T13:46:51.974Z"
     },
     {
       "name": "bomber-bomb-authority-unit",
       "ok": true,
-      "t": "2026-08-29T13:33:34.404Z"
+      "t": "2026-08-29T13:46:52.300Z"
     },
     {
       "name": "snake-ai-movement-unit",
       "ok": true,
-      "t": "2026-08-29T13:33:34.906Z"
+      "t": "2026-08-29T13:46:53.413Z"
     },
     {
       "name": "snake-mobile-overlay",
       "ok": true,
-      "t": "2026-08-29T13:34:07.274Z"
+      "t": "2026-08-29T13:47:21.462Z"
     },
     {
       "name": "snake-floating-joystick-hidden-initial",
       "ok": true,
-      "t": "2026-08-29T13:34:07.276Z"
+      "t": "2026-08-29T13:47:21.469Z"
     },
     {
       "name": "snake-floating-joystick-on-touch",
       "ok": true,
-      "t": "2026-08-29T13:34:07.576Z"
+      "t": "2026-08-29T13:47:21.777Z"
     },
     {
       "name": "snake-mobile-action-zone-boost",
       "ok": true,
-      "t": "2026-08-29T13:34:07.582Z"
+      "t": "2026-08-29T13:47:21.783Z"
     },
     {
       "name": "agar-mobile-overlay",
       "ok": true,
-      "t": "2026-08-29T13:34:12.636Z"
+      "t": "2026-08-29T13:47:25.670Z"
     },
     {
       "name": "agar-floating-joystick-hidden-initial",
       "ok": true,
-      "t": "2026-08-29T13:34:12.638Z"
+      "t": "2026-08-29T13:47:25.673Z"
     },
     {
       "name": "agar-floating-joystick-on-touch",
       "ok": true,
-      "t": "2026-08-29T13:34:12.948Z"
+      "t": "2026-08-29T13:47:25.971Z"
     },
     {
       "name": "agar-mobile-action-zone-split",
       "ok": true,
-      "t": "2026-08-29T13:34:12.951Z"
+      "t": "2026-08-29T13:47:25.976Z"
     },
     {
       "name": "agar-mobile-action-zone-eject",
       "ok": true,
-      "t": "2026-08-29T13:34:12.957Z"
+      "t": "2026-08-29T13:47:25.981Z"
     },
     {
       "name": "bomber-mobile-overlay",
       "ok": true,
-      "t": "2026-08-29T13:34:17.008Z"
+      "t": "2026-08-29T13:47:29.730Z"
     },
     {
       "name": "bomber-floating-joystick-hidden-initial",
       "ok": true,
-      "t": "2026-08-29T13:34:17.010Z"
+      "t": "2026-08-29T13:47:29.733Z"
     },
     {
       "name": "bomber-floating-joystick-on-touch",
       "ok": true,
-      "t": "2026-08-29T13:34:17.295Z"
+      "t": "2026-08-29T13:47:30.031Z"
     },
     {
       "name": "bomber-mobile-action-zone-bomb",
       "ok": true,
-      "t": "2026-08-29T13:34:17.299Z"
+      "t": "2026-08-29T13:47:30.035Z"
     },
     {
       "name": "agar-split-setup-ready",
       "ok": true,
-      "t": "2026-08-29T13:34:21.049Z"
+      "t": "2026-08-29T13:47:33.731Z"
     },
     {
       "name": "agar-split-cells-change",
       "ok": true,
       "cellsBefore": 1,
       "cellsAfter": 2,
-      "t": "2026-08-29T13:34:21.773Z"
+      "t": "2026-08-29T13:47:34.449Z"
     },
     {
       "name": "bomber-ai-movement-10s",
       "ok": false,
       "before": {
         "bots": [],
-        "tick": 39
+        "tick": 40
       },
       "after": {
         "bots": [],
         "tick": 280
       },
-      "t": "2026-08-29T13:34:37.222Z"
+      "t": "2026-08-29T13:47:49.880Z"
     },
     {
       "name": "gate-host-seat",
-      "ok": true,
+      "ok": false,
       "spawnA": {
         "x": 1,
         "y": 1,
         "alive": false
       },
       "isHost": true,
-      "t": "2026-08-29T13:37:18.904Z"
+      "stateAck": true,
+      "t": "2026-08-29T13:50:31.587Z"
     },
     {
       "name": "gate-guest-seat",
@@ -174,7 +175,7 @@
         "y": 1,
         "alive": true
       },
-      "t": "2026-08-29T13:37:18.904Z"
+      "t": "2026-08-29T13:50:31.588Z"
     },
     {
       "name": "gate-distinct-spawn",
@@ -189,7 +190,7 @@
         "y": 1,
         "alive": true
       },
-      "t": "2026-08-29T13:37:18.904Z"
+      "t": "2026-08-29T13:50:31.588Z"
     },
     {
       "name": "gate-a-move-sync",
@@ -201,7 +202,7 @@
       },
       "posA1": null,
       "posAOnB": null,
-      "t": "2026-08-29T13:37:26.226Z"
+      "t": "2026-08-29T13:50:38.886Z"
     },
     {
       "name": "gate-b-move-sync",
@@ -213,7 +214,7 @@
       },
       "posB2": null,
       "posBOnA": null,
-      "t": "2026-08-29T13:37:31.391Z"
+      "t": "2026-08-29T13:50:44.057Z"
     },
     {
       "name": "gate-player-bomb-sync",
@@ -221,30 +222,31 @@
       "playerBomb": null,
       "bombsA": [],
       "bombsB": [],
-      "t": "2026-08-29T13:37:33.014Z"
+      "t": "2026-08-29T13:50:45.680Z"
     },
     {
       "name": "gate-explosion-sync",
       "ok": false,
       "dualContextExplosion": false,
-      "t": "2026-08-29T13:37:37.839Z"
+      "t": "2026-08-29T13:50:50.505Z"
     },
     {
       "name": "gate-death-sync",
       "ok": false,
       "deathOnA": true,
       "deathOnB": false,
-      "victim": "qa010-host-1788010477226",
-      "t": "2026-08-29T13:37:37.843Z"
+      "victim": "qa010-host-1788011269884",
+      "t": "2026-08-29T13:50:50.508Z"
     }
   ],
-  "finishedAt": "2026-08-29T13:37:37.905Z",
+  "finishedAt": "2026-08-29T13:50:50.576Z",
   "pass": false,
   "summary": {
-    "passed": 25,
+    "passed": 24,
     "total": 33,
     "failed": [
       "bomber-ai-movement-10s",
+      "gate-host-seat",
       "gate-guest-seat",
       "gate-distinct-spawn",
       "gate-a-move-sync",
@@ -253,6 +255,6 @@
       "gate-explosion-sync",
       "gate-death-sync"
     ],
-    "cto": "4/12"
+    "cto": "3/12"
   }
 }

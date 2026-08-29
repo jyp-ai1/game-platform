@@ -783,9 +783,13 @@ export function BomberGame() {
           const slots = rosterForMap(nextMapId);
           const matchStartedAt = Date.now();
 
+          const selfAlive = existing.players.some(
+            (p) => p.id === deviceId && !p.isBot && p.alive
+          );
           if (
             existing &&
             !reclaimedShard &&
+            selfAlive &&
             existing.mapId === nextMapId &&
             !existing.matchOver &&
             !qaLocalProbeRef.current

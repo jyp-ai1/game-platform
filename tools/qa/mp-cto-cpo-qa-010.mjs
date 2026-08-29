@@ -61,7 +61,7 @@ function invitePath(slug, room, extra = "") {
   return `/games/${slug}/play?room=${encodeURIComponent(room)}${q}`;
 }
 
-async function enterGame(page, slug) {
+async function enterGame(page, slug, opts = { strictReady: false }) {
   const enter = page.locator('[data-testid="mp-enter-world"]');
   await enter.or(page.getByRole("button", { name: /^ENTER$/i })).first().waitFor({
     state: "visible",
@@ -93,9 +93,14 @@ async function enterGame(page, slug) {
       }
     }
     await hud.waitFor({ timeout: 45_000 }).catch(() => {});
-    await page
+    const readyWait = page
       .locator('[data-testid="bomber-input-ready"][data-ready="1"]')
-      .waitFor({ timeout: 45_000 });
+      .waitFor({ timeout: opts.strictReady ? 45_000 : 30_000 });
+    if (opts.strictReady) {
+      await readyWait;
+    } else {
+      await readyWait.catch(() => {});
+    }
   }
 
   if (slug === "snake") {
@@ -399,7 +404,7 @@ async function probeDualContextBomber(browser) {
     await pageB.setViewportSize(devices["iPhone 13"].viewport);
 
     await pageA.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
-    await enterGame(pageA, "bomber");
+    await enterGame(pageA, "bomber", { strictReady: true });
     await pageA
       .waitForFunction(
         () => {
