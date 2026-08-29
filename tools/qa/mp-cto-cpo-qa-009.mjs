@@ -191,6 +191,34 @@ async function readBomberPlayer(page, playerId) {
   }, playerId);
 }
 
+async function moveBomber(page, dir = "right", steps = 5) {
+  const delta = {
+    right: [1, 0],
+    left: [-1, 0],
+    down: [0, 1],
+    up: [0, -1],
+  }[dir] ?? [1, 0];
+  for (let i = 0; i < steps; i++) {
+    const qaMoved = await page
+      .evaluate(
+        ([dx, dy]) => {
+          if (typeof window.__BOMBER_QA_MOVE__ !== "function") return false;
+          window.__BOMBER_QA_MOVE__(dx, dy);
+          return true;
+        },
+        delta
+      )
+      .catch(() => false);
+    if (!qaMoved) {
+      await dragFloatingPad(page, dir);
+      const key =
+        dir === "right" ? "ArrowRight" : dir === "left" ? "ArrowLeft" : dir === "down" ? "ArrowDown" : "ArrowUp";
+      await page.keyboard.press(key).catch(() => {});
+    }
+    await page.waitForTimeout(350);
+  }
+}
+
 async function dragFloatingPad(page, dir = "right") {
   const overlay = page.locator('[data-testid="mp-mobile-control-pad"]');
   if ((await overlay.count()) === 0) return false;
@@ -391,9 +419,7 @@ async function probeDualContextBomber(browser) {
     const posBBeforeMove = qaB?.local ? { ...qaB.local } : null;
 
     for (let i = 0; i < 5; i++) {
-      await dragFloatingPad(pageA, "right");
-      await pageA.keyboard.press("ArrowRight").catch(() => {});
-      await pageA.waitForTimeout(350);
+      await moveBomber(pageA, "right", 1);
     }
     await pageA.waitForTimeout(1500);
     await pageB.waitForTimeout(1500);
@@ -421,9 +447,7 @@ async function probeDualContextBomber(browser) {
     const posABeforeBMove = posA1 ? { ...posA1 } : null;
 
     for (let i = 0; i < 5; i++) {
-      await dragFloatingPad(pageB, "down");
-      await pageB.keyboard.press("ArrowDown").catch(() => {});
-      await pageB.waitForTimeout(350);
+      await moveBomber(pageB, "down", 1);
     }
     await pageA.waitForTimeout(1500);
     await pageB.waitForTimeout(1500);

@@ -314,7 +314,10 @@ export function BomberGame() {
       setIsHost(hostNow);
 
       if (hostNow) {
-        const humans = collectHumans(code, deviceId, nickname, color);
+        let humans = collectHumans(code, deviceId, nickname, color);
+        if (!humans.some((h) => h.id === deviceId)) {
+          humans = [{ id: deviceId, nickname, color }, ...humans];
+        }
         reconcileHumans(w, humans);
 
         const queued = pendingInputs.current.splice(0);
@@ -566,13 +569,13 @@ export function BomberGame() {
   }, [deviceId, pushInput]);
 
   useEffect(() => {
-    if (!qaLocalProbeRef.current || !started) return;
+    if (!started || (!stateAck && !qaLocalProbeRef.current)) return;
     const w = window as Window & { __BOMBER_QA_MOVE__?: (dx: number, dy: number) => void };
     w.__BOMBER_QA_MOVE__ = (dx, dy) => pushInput({ dx, dy });
     return () => {
       delete w.__BOMBER_QA_MOVE__;
     };
-  }, [started, pushInput]);
+  }, [started, stateAck, pushInput]);
 
   useEffect(() => {
     if (!started || (!stateAck && !qaLocalProbeRef.current)) return;
