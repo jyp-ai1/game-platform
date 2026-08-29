@@ -534,6 +534,20 @@ export function reconcileHumans(
     }
   }
 
+  for (let i = 0; i < ordered.length; i++) {
+    const h = ordered[i]!;
+    const p = world.players[h.id];
+    if (!p || p.isBot) continue;
+    const target = seats[i % seats.length]!;
+    const overlap = Object.values(world.players).some(
+      (o) => o.id !== h.id && o.alive && o.x === p.x && o.y === p.y
+    );
+    if (overlap) {
+      p.x = target.x;
+      p.y = target.y;
+    }
+  }
+
   while (Object.keys(world.players).length < want) {
     const seats = spawnPoints(want);
     const taken = new Set(

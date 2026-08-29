@@ -380,7 +380,7 @@ async function probeBomberAiMovement(page) {
 }
 
 async function probeDualContextBomber(browser) {
-  const room = "BOMBER-B";
+  const room = "BOMBER-D";
   const url = `${BASE}${invitePath("bomber", room)}`;
   const deviceA = `qa010-host-${Date.now()}`;
   const deviceB = `qa010-guest-${Date.now() + 1}`;

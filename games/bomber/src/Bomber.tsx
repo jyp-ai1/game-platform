@@ -322,7 +322,7 @@ export function BomberGame() {
         await ensureJoinedRoom(code, nickname);
         if (!mounted) return;
         const room = getRoom(code);
-        if (room) {
+        if (room && !started && !stateAckRef.current) {
           setHostAuthority(room.hostId === deviceId);
         }
       } catch {
@@ -752,7 +752,8 @@ export function BomberGame() {
 
           const amHost =
             qaLocalProbeRef.current ||
-            (room.hostId === deviceId && (!othersInRoom || freshState));
+            matchHostIdRef.current === deviceId ||
+            room.hostId === deviceId;
           setHostAuthority(amHost);
 
           if (!amHost) {
