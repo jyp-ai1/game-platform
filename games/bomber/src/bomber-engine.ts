@@ -811,7 +811,8 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
     }
 
     const target = pickChaseTarget(world, bot);
-    let picked: [number, number] = dirs[Math.floor(Math.random() * dirs.length)]!;
+    const wanderDirs = dirs.filter(([dx, dy]) => dx !== 0 || dy !== 0);
+    let picked: [number, number] = wanderDirs[Math.floor(Math.random() * wanderDirs.length)]!;
     if (target && Math.random() < chaseChance) {
       const dx = Math.sign(target.x - bot.x);
       const dy = Math.sign(target.y - bot.y);

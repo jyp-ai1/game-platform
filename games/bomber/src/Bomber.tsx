@@ -27,6 +27,7 @@ import {
   leaveRoom,
   send,
   subscribeRoom,
+  sync,
 } from "@game-platform/multiplayer-sdk";
 import type { GameRoom } from "@game-platform/shared";
 
@@ -55,6 +56,8 @@ import {
 } from "./bomber-engine";
 
 const CELL = 26;
+/** Map shard rooms (BOMBER-A..D) reuse Supabase rows — reclaim when sim is stale. */
+const SHARD_STATE_STALE_MS = 4000;
 
 const BOMBER_STYLES: MpStyleOption[] = [
   { id: "bomber", label: "Bomber", emoji: "💣", color: MP_PLAYER_COLORS[0] },
@@ -148,6 +151,24 @@ async function ensureJoinedRoom(code: string, nickname: string): Promise<GameRoo
 
 function localPlayerInState(state: BomberSyncState, deviceId: string): boolean {
   return state.players.some((p) => p.id === deviceId && !p.isBot);
+}
+
+function shardStateAgeMs(room: GameRoom | null | undefined): number {
+  const updatedAt = room?.gameState?._updatedAt;
+  if (!updatedAt) return Number.POSITIVE_INFINITY;
+  const ts = new Date(String(updatedAt)).getTime();
+  return Number.isFinite(ts) ? Date.now() - ts : Number.POSITIVE_INFINITY;
+}
+
+/** Reset stale map shard so the entering device becomes authoritative host (no ghost host). */
+function claimStaleShardRoom(room: GameRoom, nickname: string): GameRoom {
+  return createRoom({
+    code: room.code,
+    gameSlug: "bomber",
+    maxPlayers: 8,
+    matchMode: "public",
+    hostNickname: nickname,
+  });
 }
 
 function MiniMapPreview({ mapId }: { mapId: number }) {
@@ -448,6 +469,7 @@ export function BomberGame() {
             resolve(false);
             return;
           }
+          sync(code);
           const r = getRoom(code);
           const st = r?.gameState?.state as BomberSyncState | undefined;
           if (tryAck(st)) {
@@ -646,6 +668,17 @@ export function BomberGame() {
             setConnecting(false);
             setConnectError(true);
             return;
+          }
+
+          if (!qaLocalProbeRef.current) {
+            const hostMember = room.players.some((p) => p.deviceId === room.hostId);
+            const liveHost =
+              hostMember &&
+              room.gameState?.state &&
+              shardStateAgeMs(room) < SHARD_STATE_STALE_MS;
+            if (!liveHost) {
+              room = claimStaleShardRoom(room, nickname);
+            }
           }
 
           const amHost = qaLocalProbeRef.current || room.hostId === deviceId;
