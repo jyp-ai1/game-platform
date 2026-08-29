@@ -348,6 +348,20 @@ export function BomberGame() {
           humans = [{ id: deviceId, nickname, color }, ...humans];
         }
         reconcileHumans(w, humans);
+        if (!w.players[deviceId]) {
+          const openBot = Object.values(w.players).find((p) => p.isBot);
+          if (openBot) {
+            const seat = { ...openBot };
+            delete w.players[openBot.id];
+            w.players[deviceId] = {
+              ...seat,
+              id: deviceId,
+              nickname,
+              color,
+              isBot: false,
+            };
+          }
+        }
 
         const queued = pendingInputs.current.splice(0);
         for (const inp of queued) {

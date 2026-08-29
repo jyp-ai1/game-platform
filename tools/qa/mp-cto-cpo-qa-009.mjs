@@ -397,6 +397,7 @@ async function probeDualContextBomber(browser) {
     await pageB.waitForFunction(() => window.__BOMBER_QA__?.().stateAck === true, {
       timeout: 35_000,
     }).catch(() => {});
+    await pageB.waitForFunction(() => window.__BOMBER_QA__?.().local, { timeout: 15_000 }).catch(() => {});
     await pageA.waitForTimeout(4000);
     await pageB.waitForTimeout(4000);
 
@@ -431,6 +432,11 @@ async function probeDualContextBomber(browser) {
     for (let i = 0; i < 5; i++) {
       await moveBomber(pageA, "right", 1);
     }
+    if (!(await readBomberGrid(pageA))) {
+      for (let i = 0; i < 5; i++) {
+        await moveBomber(pageA, "down", 1);
+      }
+    }
     await pageA.waitForTimeout(1500);
     await pageB.waitForTimeout(1500);
 
@@ -458,6 +464,11 @@ async function probeDualContextBomber(browser) {
 
     for (let i = 0; i < 5; i++) {
       await moveBomber(pageB, "down", 1);
+    }
+    if ((await readBomberGrid(pageB))?.y === dualContext.positionB_before?.y) {
+      for (let i = 0; i < 5; i++) {
+        await moveBomber(pageB, "right", 1);
+      }
     }
     await pageA.waitForTimeout(1500);
     await pageB.waitForTimeout(1500);
