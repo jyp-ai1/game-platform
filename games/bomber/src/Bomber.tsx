@@ -171,6 +171,35 @@ function claimStaleShardRoom(room: GameRoom, nickname: string): GameRoom {
   });
 }
 
+function shardHasFreshState(code: string): boolean {
+  const room = getRoom(code);
+  return !!room?.gameState?.state && shardStateAgeMs(room) < SHARD_STATE_STALE_MS;
+}
+
+/** Wait for Realtime state broadcast — Postgres omits ephemeral sim blobs. */
+async function waitForFreshShardState(code: string, timeoutMs = 3500): Promise<boolean> {
+  if (shardHasFreshState(code)) return true;
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      unsub();
+      window.clearInterval(poll);
+      resolve(ok);
+    };
+    const deadline = Date.now() + timeoutMs;
+    const unsub = subscribeRoom(code, () => {
+      if (shardHasFreshState(code)) finish(true);
+    });
+    const poll = window.setInterval(() => {
+      sync(code);
+      if (shardHasFreshState(code)) finish(true);
+      if (Date.now() > deadline) finish(false);
+    }, 100);
+  });
+}
+
 function MiniMapPreview({ mapId }: { mapId: number }) {
   const slots = rosterForMap(mapId);
   const preview = useMemo(
@@ -555,6 +584,7 @@ export function BomberGame() {
         bombs: wr.bombs.map((b) => ({ id: b.id, x: b.x, y: b.y, ownerId: b.ownerId })),
         blasts: wr.blasts.length,
         matchOver: !!wr.matchOver,
+        tick: wr.tick,
       };
     };
     w.__BOMBER_QA_PLANT__ = () => {
@@ -675,16 +705,8 @@ export function BomberGame() {
 
           let joinedRoom: GameRoom = room;
           if (!qaLocalProbeRef.current) {
-            const hostId = joinedRoom.hostId;
-            const hostInRoom = joinedRoom.players.some((p) => p.deviceId === hostId);
-            const freshState =
-              !!joinedRoom.gameState?.state &&
-              shardStateAgeMs(joinedRoom) < SHARD_STATE_STALE_MS;
-            const otherHumans = joinedRoom.players.filter((p) => p.deviceId !== deviceId);
-            const joiningLiveMatch =
-              otherHumans.length > 0 && hostInRoom && hostId !== deviceId;
-            const shouldClaim = !freshState && !joiningLiveMatch && (otherHumans.length === 0 || !hostInRoom);
-            if (shouldClaim) {
+            const freshState = await waitForFreshShardState(code, 3500);
+            if (!freshState) {
               joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
             }
           }

@@ -343,20 +343,26 @@ async function probeBomberAiMovement(page) {
   const before = await page.evaluate(() => {
     const qa = window.__BOMBER_QA__?.();
     if (!qa) return null;
-    const bot = qa.players.find((p) => p.isBot);
-    return bot ? { id: bot.id, x: bot.x, y: bot.y } : null;
+    const bots = qa.players.filter((p) => p.isBot);
+    return { bots, tick: qa.tick ?? 0 };
   });
-  dualContext.aiPosition_before = before;
-  await page.waitForTimeout(10_500);
+  dualContext.aiPosition_before = before?.bots[0] ?? null;
+  await page.waitForTimeout(12_000);
   const after = await page.evaluate(() => {
     const qa = window.__BOMBER_QA__?.();
     if (!qa) return null;
-    const bot = qa.players.find((p) => p.isBot);
-    return bot ? { id: bot.id, x: bot.x, y: bot.y } : null;
+    const bots = qa.players.filter((p) => p.isBot);
+    return { bots, tick: qa.tick ?? 0 };
   });
-  dualContext.aiPosition_after = after;
+  dualContext.aiPosition_after = after?.bots[0] ?? null;
   const moved =
-    before && after ? before.x !== after.x || before.y !== after.y : false;
+    before &&
+    after &&
+    ((after.tick ?? 0) > (before.tick ?? 0) &&
+      after.bots.some((b, i) => {
+        const s = before.bots[i];
+        return s && (b.x !== s.x || b.y !== s.y);
+      }));
   mark("bomber-ai-movement-10s", moved, { before, after });
 }
 
