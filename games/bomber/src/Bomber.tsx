@@ -118,20 +118,33 @@ function localRank(world: BomberWorld, id: string): number {
 
 function collectHumans(roomCode: string, localId: string, nickname: string, color: string): HumanSeat[] {
   const room = getRoom(roomCode);
+  const hostId = room?.hostId;
   const fromRoom =
     room?.players.map((p) => ({
       id: p.deviceId,
       nickname: p.nickname || "Player",
       color: p.deviceId === localId ? color : undefined,
     })) ?? [];
-  if (fromRoom.some((h) => h.id === localId)) return fromRoom;
-  return [{ id: localId, nickname, color }, ...fromRoom];
+  let list = fromRoom.some((h) => h.id === localId)
+    ? fromRoom
+    : [{ id: localId, nickname, color }, ...fromRoom];
+  if (hostId) {
+    list = [
+      ...list.filter((h) => h.id === hostId),
+      ...list.filter((h) => h.id !== hostId),
+    ];
+  }
+  return list;
 }
 
 function isRoomHost(roomCode: string, deviceId: string): boolean {
   const room = getRoom(roomCode);
   if (!room) return false;
   return room.hostId === deviceId;
+}
+
+function roomHasOtherHumans(room: GameRoom, deviceId: string): boolean {
+  return room.players.some((p) => p.deviceId !== deviceId);
 }
 
 /** Bootstrap map shard room when missing (host-only). */
@@ -292,6 +305,8 @@ export function BomberGame() {
   const lastStateSent = useRef(0);
   const lastHostStateAt = useRef(0);
   const matchLocalStartAt = useRef(0);
+  /** Host that started this match — survives erroneous hostId churn from stale shard reclaim. */
+  const matchHostIdRef = useRef<string | null>(null);
   const roomRef = useRef(activeRoom);
   roomRef.current = activeRoom;
 
@@ -338,7 +353,10 @@ export function BomberGame() {
       const room = getRoom(code);
       const listedHost = room?.hostId === deviceId;
       const w = worldRef.current;
-      const hostNow = qaLocalProbeRef.current || listedHost;
+      const hostNow =
+        qaLocalProbeRef.current ||
+        listedHost ||
+        matchHostIdRef.current === deviceId;
       isHostRef.current = hostNow;
       setIsHost(hostNow);
 
@@ -347,21 +365,7 @@ export function BomberGame() {
         if (!humans.some((h) => h.id === deviceId)) {
           humans = [{ id: deviceId, nickname, color }, ...humans];
         }
-        reconcileHumans(w, humans);
-        if (!w.players[deviceId]) {
-          const openBot = Object.values(w.players).find((p) => p.isBot);
-          if (openBot) {
-            const seat = { ...openBot };
-            delete w.players[openBot.id];
-            w.players[deviceId] = {
-              ...seat,
-              id: deviceId,
-              nickname,
-              color,
-              isBot: false,
-            };
-          }
-        }
+        reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
 
         const queued = pendingInputs.current.splice(0);
         for (const inp of queued) {
@@ -404,15 +408,29 @@ export function BomberGame() {
       const hostId = room.hostId || room.players[0]?.deviceId;
       const amHost = hostId === deviceId;
 
-      if (last === "state" && !amHost && gs.state) {
+      if (last === "state" && gs.state) {
         if (qaLocalProbeRef.current) return;
         const w = worldRef.current;
         const listedHost = amHost || isRoomHost(code, deviceId);
-        const ignoreRemote = isHostRef.current || listedHost || qaLocalProbeRef.current;
+        const ignoreRemote =
+          isHostRef.current ||
+          listedHost ||
+          matchHostIdRef.current === deviceId ||
+          qaLocalProbeRef.current;
         if (ignoreRemote) return;
-        lastHostStateAt.current = Date.now();
         const state = gs.state as BomberSyncState;
-        applyBomberSyncState(w, state);
+        if (
+          stateAckRef.current &&
+          w.players[deviceId] &&
+          !localPlayerInState(state, deviceId)
+        ) {
+          return;
+        }
+        lastHostStateAt.current = Date.now();
+        const applied = applyBomberSyncState(w, state, {
+          rejectMissingHumanIds: [deviceId],
+        });
+        if (!applied) return;
         applyLocalLook(w, deviceId, color);
         if (localPlayerInState(state, deviceId)) {
           setStateAckReady(true);
@@ -462,7 +480,7 @@ export function BomberGame() {
         humans,
         matchStartedAt: state.matchStartedAt,
       });
-      applyBomberSyncState(next, state);
+      if (!applyBomberSyncState(next, state, { rejectMissingHumanIds: [deviceId] })) return false;
       applyLocalLook(next, deviceId, color);
       if (requireLocal && !localPlayerInState(state, deviceId)) return false;
       worldRef.current = next;
@@ -718,19 +736,27 @@ export function BomberGame() {
           }
 
           let joinedRoom: GameRoom = room;
+          const othersInRoom = !qaLocalProbeRef.current && roomHasOtherHumans(joinedRoom, deviceId);
+          let freshState = true;
           if (!qaLocalProbeRef.current) {
-            const freshState = await waitForFreshShardState(code, 3500);
-            if (!freshState) {
+            freshState = await waitForFreshShardState(
+              code,
+              othersInRoom ? 12_000 : 3500
+            );
+            // Never reclaim a live shard when other humans are present — guest hydrates from host state.
+            if (!freshState && !othersInRoom) {
               joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
             }
           }
           room = joinedRoom;
 
-          const amHost = qaLocalProbeRef.current || room.hostId === deviceId;
+          const amHost =
+            qaLocalProbeRef.current ||
+            (room.hostId === deviceId && (!othersInRoom || freshState));
           setHostAuthority(amHost);
 
           if (!amHost) {
-            const acked = await waitForHostStateAck(code, nextMapId, 15000);
+            const acked = await waitForHostStateAck(code, nextMapId, 20_000);
             setConnecting(false);
             if (!acked) {
               setConnectError(true);
@@ -753,8 +779,20 @@ export function BomberGame() {
               humans,
               matchStartedAt: existing.matchStartedAt,
             });
-            applyBomberSyncState(next, existing);
+            if (!applyBomberSyncState(next, existing, { rejectMissingHumanIds: [deviceId] })) {
+              setConnecting(false);
+              setConnectError(true);
+              return;
+            }
             applyLocalLook(next, deviceId, color);
+            reconcileHumans(next, humans, { hostId: deviceId });
+            applyLocalLook(next, deviceId, color);
+            if (!next.players[deviceId]) {
+              setConnecting(false);
+              setConnectError(true);
+              return;
+            }
+            matchHostIdRef.current = deviceId;
             worldRef.current = next;
             setWorld(next);
             matchLocalStartAt.current = Date.now();
@@ -772,7 +810,14 @@ export function BomberGame() {
             humans,
             matchStartedAt,
           });
+          reconcileHumans(next, humans, { hostId: deviceId });
           applyLocalLook(next, deviceId, color);
+          if (!next.players[deviceId]) {
+            setConnecting(false);
+            setConnectError(true);
+            return;
+          }
+          matchHostIdRef.current = deviceId;
           worldRef.current = next;
           setWorld(next);
           matchLocalStartAt.current = Date.now();

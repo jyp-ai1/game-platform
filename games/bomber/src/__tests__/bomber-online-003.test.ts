@@ -151,6 +151,46 @@ test("ONLINE-003: host→guest state sync same explosion/death", () => {
   assert.equal(guest.winnerId, "host");
 });
 
+test("ONLINE-003: host seat pinned when guest joins reconcile", () => {
+  const w = createBomberWorld("host-a", "Host", {
+    mapId: 1,
+    humans: [{ id: "host-a", nickname: "Host" }],
+  });
+  assert.ok(w.players["host-a"]);
+  assert.equal(w.players["host-a"]!.isBot, false);
+
+  reconcileHumans(
+    w,
+    [
+      { id: "host-a", nickname: "Host" },
+      { id: "guest-b", nickname: "Guest" },
+    ],
+    { hostId: "host-a" }
+  );
+
+  assert.ok(w.players["host-a"], "host seat must persist");
+  assert.equal(w.players["host-a"]!.isBot, false);
+  assert.ok(w.players["guest-b"]);
+  assert.equal(w.players["guest-b"]!.isBot, false);
+  assert.notEqual(
+    `${w.players["host-a"]!.x},${w.players["host-a"]!.y}`,
+    `${w.players["guest-b"]!.x},${w.players["guest-b"]!.y}`
+  );
+});
+
+test("ONLINE-003: apply sync rejects when pinned human missing", () => {
+  const local = createBomberWorld("host-a", "Host", { mapId: 1 });
+  const remote = serializeBomberState(
+    createBomberWorld("guest-b", "Guest", {
+      mapId: 1,
+      humans: [{ id: "guest-b", nickname: "Guest" }],
+    })
+  );
+  const applied = applyBomberSyncState(local, remote, { rejectMissingHumanIds: ["host-a"] });
+  assert.equal(applied, false);
+  assert.ok(local.players["host-a"]);
+});
+
 test("ONLINE-003: new human replaces AI; leaver → AI refill", () => {
   const w = createBomberWorld("a", "A", { mapId: 0, humans: [{ id: "a", nickname: "A" }] });
   assert.equal(Object.values(w.players).filter((p) => p.isBot).length, 3);

@@ -446,15 +446,35 @@ export function createBomberWorld(
   return world;
 }
 
+export type ReconcileHumansOpts = {
+  /** Sim host — never demoted; pinned to seat 0; restored if missing. */
+  hostId?: string;
+};
+
 /**
- * Host: new humans take over AI seats; leavers become AI refill (keep seat/stats).
+ * Host seat 0, guests seat 1+; leavers → AI refill.
  */
-export function reconcileHumans(world: BomberWorld, humans: HumanSeat[]): void {
+export function reconcileHumans(
+  world: BomberWorld,
+  humans: HumanSeat[],
+  opts?: ReconcileHumansOpts
+): void {
   if (world.matchOver) return;
   const want = world.playerSlots;
-  const humanIds = new Set(humans.map((h) => h.id));
+  const hostId = opts?.hostId;
+  let ordered = [...humans];
+  if (hostId) {
+    ordered = [
+      ...ordered.filter((h) => h.id === hostId),
+      ...ordered.filter((h) => h.id !== hostId),
+    ];
+  }
+  const humanIds = new Set(ordered.map((h) => h.id));
+  if (hostId) humanIds.add(hostId);
+  const seats = spawnPoints(want);
 
-  for (const h of humans) {
+  for (let seatIdx = 0; seatIdx < ordered.length; seatIdx++) {
+    const h = ordered[seatIdx]!;
     const existing = world.players[h.id];
     if (existing) {
       existing.isBot = false;
@@ -462,7 +482,11 @@ export function reconcileHumans(world: BomberWorld, humans: HumanSeat[]): void {
       if (h.color) existing.color = h.color;
       continue;
     }
-    const bot = Object.values(world.players).find((p) => p.isBot);
+    const target = seats[seatIdx % seats.length]!;
+    const botAtSeat = Object.values(world.players).find(
+      (p) => p.isBot && p.x === target.x && p.y === target.y
+    );
+    const bot = botAtSeat ?? Object.values(world.players).find((p) => p.isBot);
     if (!bot) break;
     const seat = { ...bot };
     delete world.players[bot.id];
@@ -478,6 +502,7 @@ export function reconcileHumans(world: BomberWorld, humans: HumanSeat[]): void {
   for (const p of Object.values(world.players)) {
     if (p.isBot) continue;
     if (humanIds.has(p.id)) continue;
+    if (hostId && p.id === hostId) continue;
     const botId = `bot:refill-${p.x}-${p.y}-${world.tick}`;
     const seat = { ...p };
     delete world.players[p.id];
@@ -487,6 +512,26 @@ export function reconcileHumans(world: BomberWorld, humans: HumanSeat[]): void {
       nickname: `Bomber${Object.keys(world.players).length + 1}`,
       isBot: true,
     };
+  }
+
+  if (hostId && !world.players[hostId]) {
+    const target = seats[0]!;
+    const botAtSeat = Object.values(world.players).find(
+      (p) => p.isBot && p.x === target.x && p.y === target.y
+    );
+    const bot = botAtSeat ?? Object.values(world.players).find((p) => p.isBot);
+    if (bot) {
+      const seat = { ...bot };
+      delete world.players[bot.id];
+      const meta = ordered.find((h) => h.id === hostId);
+      world.players[hostId] = {
+        ...seat,
+        id: hostId,
+        nickname: meta?.nickname || "Host",
+        color: meta?.color || seat.color,
+        isBot: false,
+      };
+    }
   }
 
   while (Object.keys(world.players).length < want) {
@@ -904,7 +949,25 @@ export function serializeBomberState(world: BomberWorld): BomberSyncState {
   };
 }
 
-export function applyBomberSyncState(world: BomberWorld, state: BomberSyncState): void {
+export type ApplyBomberSyncOpts = {
+  /** Reject apply when any pinned human would disappear from synced players. */
+  rejectMissingHumanIds?: string[];
+};
+
+export function applyBomberSyncState(
+  world: BomberWorld,
+  state: BomberSyncState,
+  opts?: ApplyBomberSyncOpts
+): boolean {
+  if (opts?.rejectMissingHumanIds?.length) {
+    for (const id of opts.rejectMissingHumanIds) {
+      const local = world.players[id];
+      if (local && !local.isBot && !state.players.some((p) => p.id === id && !p.isBot)) {
+        return false;
+      }
+    }
+  }
+
   world.tick = state.tick;
   world.mapId = state.mapId;
   world.playerSlots = state.playerSlots;
@@ -926,6 +989,7 @@ export function applyBomberSyncState(world: BomberWorld, state: BomberSyncState)
     world.players[p.id] = { ...p };
   }
   updateRankings(world);
+  return true;
 }
 
 /** Merge a remote bomb if missing (low-latency bomb visibility before full state). */
