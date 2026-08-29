@@ -676,12 +676,15 @@ export function BomberGame() {
           let joinedRoom: GameRoom = room;
           if (!qaLocalProbeRef.current) {
             const hostId = joinedRoom.hostId;
-            const hostMember = joinedRoom.players.some((p) => p.deviceId === hostId);
-            const liveHost =
-              hostMember &&
-              joinedRoom.gameState?.state &&
+            const hostInRoom = joinedRoom.players.some((p) => p.deviceId === hostId);
+            const freshState =
+              !!joinedRoom.gameState?.state &&
               shardStateAgeMs(joinedRoom) < SHARD_STATE_STALE_MS;
-            if (!liveHost) {
+            const otherHumans = joinedRoom.players.filter((p) => p.deviceId !== deviceId);
+            const joiningLiveMatch =
+              otherHumans.length > 0 && hostInRoom && hostId !== deviceId;
+            const shouldClaim = !freshState && !joiningLiveMatch && (otherHumans.length === 0 || !hostInRoom);
+            if (shouldClaim) {
               joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
             }
           }

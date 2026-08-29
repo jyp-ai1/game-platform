@@ -335,7 +335,7 @@ async function probeAgarSplit(page) {
 }
 
 async function probeBomberAiMovement(page) {
-  await page.goto(`${BASE}${invitePath("bomber", "BOMBER-D")}`, {
+  await page.goto(`${BASE}${invitePath("bomber", "BOMBER-D", "mp_qa_local=1")}`, {
     waitUntil: "domcontentloaded",
     timeout: 120_000,
   });
@@ -380,7 +380,11 @@ async function probeDualContextBomber(browser) {
     await pageA.waitForFunction(() => window.__BOMBER_QA__?.().stateAck === true, {
       timeout: 30_000,
     }).catch(() => {});
-    await pageA.waitForTimeout(5000);
+    await pageA.waitForFunction(
+      () => window.__BOMBER_QA__?.().local && window.__BOMBER_QA__?.().isHost === true,
+      { timeout: 15_000 }
+    ).catch(() => {});
+    await pageA.waitForTimeout(8000);
 
     await pageB.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageB, "bomber");
