@@ -432,7 +432,7 @@ export function BomberGame() {
         });
         if (!applied) return;
         applyLocalLook(w, deviceId, color);
-        if (localPlayerInState(state, deviceId)) {
+        if (localPlayerInState(state, deviceId) || w.players[deviceId]) {
           setStateAckReady(true);
         }
         const next = snap(w);
@@ -736,6 +736,7 @@ export function BomberGame() {
           }
 
           let joinedRoom: GameRoom = room;
+          let reclaimedShard = false;
           const othersInRoom = !qaLocalProbeRef.current && roomHasOtherHumans(joinedRoom, deviceId);
           let freshState = true;
           if (!qaLocalProbeRef.current) {
@@ -743,11 +744,19 @@ export function BomberGame() {
               code,
               othersInRoom ? 12_000 : 3500
             );
+            const gs0 = joinedRoom.gameState?.state as BomberSyncState | undefined;
+            const simHostAlive =
+              gs0?.players?.some(
+                (p) => p.id === joinedRoom.hostId && !p.isBot && p.alive
+              ) ?? false;
             const hostPresent =
               freshState &&
-              joinedRoom.players.some((p) => p.deviceId === joinedRoom.hostId);
+              joinedRoom.players.some((p) => p.deviceId === joinedRoom.hostId) &&
+              simHostAlive;
             if (!hostPresent) {
               joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
+              reclaimedShard = true;
+              freshState = false;
             }
           }
           room = joinedRoom;
@@ -774,7 +783,13 @@ export function BomberGame() {
           const slots = rosterForMap(nextMapId);
           const matchStartedAt = Date.now();
 
-          if (existing && existing.mapId === nextMapId && !existing.matchOver && !qaLocalProbeRef.current) {
+          if (
+            existing &&
+            !reclaimedShard &&
+            existing.mapId === nextMapId &&
+            !existing.matchOver &&
+            !qaLocalProbeRef.current
+          ) {
             const humans = collectHumans(code, deviceId, nickname, color);
             const next = createBomberWorld(deviceId, nickname, {
               playerSlots: existing.playerSlots,

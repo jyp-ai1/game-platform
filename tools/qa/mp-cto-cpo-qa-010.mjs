@@ -95,8 +95,7 @@ async function enterGame(page, slug) {
     await hud.waitFor({ timeout: 45_000 }).catch(() => {});
     await page
       .locator('[data-testid="bomber-input-ready"][data-ready="1"]')
-      .waitFor({ timeout: 30_000 })
-      .catch(() => {});
+      .waitFor({ timeout: 45_000 });
   }
 
   if (slug === "snake") {
@@ -434,10 +433,11 @@ async function probeDualContextBomber(browser) {
     dualContext.positionA_before = dualContext.spawnA ? { ...dualContext.spawnA } : null;
     dualContext.positionB_before = dualContext.spawnB ? { ...dualContext.spawnB } : null;
 
-    mark("gate-host-seat", !!(qaA?.local && qaA?.isHost === true && qaA?.stateAck), {
-      spawnA: qaA?.local,
-      isHost: qaA?.isHost,
-    });
+    mark(
+      "gate-host-seat",
+      !!(qaA?.local && qaA?.isHost === true && qaA?.stateAck && qaA.local.alive !== false),
+      { spawnA: qaA?.local, isHost: qaA?.isHost, stateAck: qaA?.stateAck }
+    );
     mark("gate-guest-seat", !!(qaB?.local && qaB?.stateAck), { spawnB: qaB?.local });
     mark("gate-distinct-spawn", !!(qaA?.local && qaB?.local && (qaA.local.x !== qaB.local.x || qaA.local.y !== qaB.local.y)), {
       spawnA: qaA?.local,
