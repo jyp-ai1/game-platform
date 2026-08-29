@@ -743,8 +743,10 @@ export function BomberGame() {
               code,
               othersInRoom ? 12_000 : 3500
             );
-            // Never reclaim a live shard when other humans are present — guest hydrates from host state.
-            if (!freshState && !othersInRoom) {
+            const hostPresent = joinedRoom.players.some((p) => p.deviceId === joinedRoom.hostId);
+            if (!hostPresent) {
+              joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
+            } else if (!freshState && !othersInRoom) {
               joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
             }
           }
@@ -799,6 +801,7 @@ export function BomberGame() {
             matchLocalStartAt.current = Date.now();
             setStarted(true);
             setStateAckReady(true);
+            setHostAuthority(true);
             setConnecting(false);
             send(code, "state", serializeBomberState(next));
             return;

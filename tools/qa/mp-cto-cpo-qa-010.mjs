@@ -353,6 +353,11 @@ async function probeBomberAiMovement(page) {
     timeout: 120_000,
   });
   await enterGame(page, "bomber");
+  await page
+    .waitForFunction(() => typeof window.__BOMBER_QA__ === "function" && window.__BOMBER_QA__()?.local, {
+      timeout: 30_000,
+    })
+    .catch(() => {});
   const before = await page.evaluate(() => {
     const qa = window.__BOMBER_QA__?.();
     if (!qa) return null;
@@ -397,18 +402,15 @@ async function probeDualContextBomber(browser) {
     await pageA.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageA, "bomber");
     await pageA
-      .waitForFunction(() => window.__BOMBER_QA__?.().stateAck === true, { timeout: 30_000 })
-      .catch(() => {});
-    await pageA
       .waitForFunction(
-        () =>
-          window.__BOMBER_QA__?.().local &&
-          window.__BOMBER_QA__?.().isHost === true &&
-          window.__BOMBER_QA__?.().local?.alive === true,
-        { timeout: 20_000 }
+        () => {
+          const qa = window.__BOMBER_QA__?.();
+          return qa?.local && qa?.isHost === true && qa?.stateAck === true;
+        },
+        { timeout: 45_000 }
       )
       .catch(() => {});
-    await pageA.waitForTimeout(6000);
+    await pageA.waitForTimeout(8000);
 
     await pageB.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageB, "bomber");
