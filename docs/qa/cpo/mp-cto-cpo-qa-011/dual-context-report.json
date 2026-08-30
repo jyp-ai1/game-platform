@@ -1,17 +1,33 @@
 {
-  "roomId": null,
+  "roomId": "BOMBER-B",
   "playerA": {
-    "id": null,
-    "seat": null,
-    "spawn": null,
-    "initialPosition": null,
+    "id": "qa011-host-1788074270080",
+    "seat": 0,
+    "spawn": {
+      "x": 1,
+      "y": 1,
+      "alive": false
+    },
+    "initialPosition": {
+      "x": 1,
+      "y": 1,
+      "alive": false
+    },
     "finalPosition": null
   },
   "playerB": {
-    "id": null,
-    "seat": null,
-    "spawn": null,
-    "initialPosition": null,
+    "id": "qa011-guest-1788074270081",
+    "seat": 0,
+    "spawn": {
+      "x": 1,
+      "y": 1,
+      "alive": true
+    },
+    "initialPosition": {
+      "x": 1,
+      "y": 1,
+      "alive": true
+    },
     "finalPosition": null
   },
   "movementSync": {
@@ -26,13 +42,37 @@
   "explosion": false,
   "deathSync": false,
   "aiMoved": true,
-  "seatA": null,
-  "seatB": null,
-  "spawnA": null,
-  "spawnB": null,
-  "positionA_before": null,
+  "seatA": {
+    "x": 1,
+    "y": 1,
+    "alive": false
+  },
+  "seatB": {
+    "x": 1,
+    "y": 1,
+    "alive": true
+  },
+  "spawnA": {
+    "x": 1,
+    "y": 1,
+    "alive": false
+  },
+  "spawnB": {
+    "x": 1,
+    "y": 1,
+    "alive": true
+  },
+  "positionA_before": {
+    "x": 1,
+    "y": 1,
+    "alive": false
+  },
   "positionA_after": null,
-  "positionB_before": null,
+  "positionB_before": {
+    "x": 1,
+    "y": 1,
+    "alive": true
+  },
   "positionB_after": null,
   "bombId": null,
   "bombPosition": null,

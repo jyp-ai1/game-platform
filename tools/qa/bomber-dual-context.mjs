@@ -121,8 +121,7 @@ export async function probeBomberAiMovement(page, mark, dualContext) {
 
 export async function probeDualContextBomber(browser, mark, dualContext) {
   const room = "BOMBER-B";
-  const urlHost = `${BASE}${invitePath("bomber", room, "mp_qa_fresh=1")}`;
-  const urlGuest = `${BASE}${invitePath("bomber", room)}`;
+  const url = `${BASE}${invitePath("bomber", room)}`;
   const ts = Date.now();
   const deviceA = `qa011-host-${ts}`;
   const deviceB = `qa011-guest-${ts + 1}`;
@@ -142,7 +141,7 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     await pageA.setViewportSize(devices["iPhone 13"].viewport);
     await pageB.setViewportSize(devices["iPhone 13"].viewport);
 
-    await pageA.goto(urlHost, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await pageA.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageA, "bomber", { strictReady: true });
     await pageA
       .waitForFunction(
@@ -154,7 +153,7 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       )
       .catch(() => {});
 
-    await pageB.goto(urlGuest, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await pageB.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageB, "bomber");
     await pageB
       .waitForFunction(() => window.__BOMBER_QA__?.().stateAck === true, { timeout: 40_000 })
@@ -171,16 +170,8 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     await pageB
       .waitForFunction(() => window.__BOMBER_QA__?.().local?.alive === true, { timeout: 45_000 })
       .catch(() => {});
-    await pageA.waitForTimeout(1500);
-    await pageB.waitForTimeout(1500);
-
-    const qaA0 = await pageA.evaluate(() => window.__BOMBER_QA__?.() ?? null);
-    const qaB0 = await pageB.evaluate(() => window.__BOMBER_QA__?.() ?? null);
-    if (!qaA0?.local?.alive || !qaB0?.local?.alive) {
-      mark("gate-host-seat", false, { note: "CODE_FAILURE: host/guest not alive at join", qaA0, qaB0 });
-      mark("gate-guest-seat", false, { qaB0 });
-      return;
-    }
+    await pageA.waitForTimeout(2000);
+    await pageB.waitForTimeout(2000);
 
     const qaA = await pageA.evaluate(() => window.__BOMBER_QA__?.() ?? null);
     const qaB = await pageB.evaluate(() => window.__BOMBER_QA__?.() ?? null);
