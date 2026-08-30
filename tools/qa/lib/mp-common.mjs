@@ -35,9 +35,10 @@ export function createReportState() {
   return { checks, verifyReport, mark };
 }
 
-export function invitePath(slug, room, extra = "") {
+export function invitePath(slug, room, extra = "", playPath) {
   const q = extra ? `&${extra.replace(/^&/, "")}` : "";
-  return `/games/${slug}/play?room=${encodeURIComponent(room)}${q}`;
+  const base = playPath ?? `/games/${slug}/play`;
+  return `${base}?room=${encodeURIComponent(room)}${q}`;
 }
 
 export async function enterGame(page, slug, opts = { strictReady: false }) {

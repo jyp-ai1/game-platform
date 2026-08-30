@@ -9,7 +9,8 @@ export async function probeFloatingMobile(page, slug, mark) {
   await page.setViewportSize(iphone.viewport);
   const room = slug === "bomber" ? "BOMBER-A" : "WORLD-QA010";
   const extra = slug === "agar" ? "mp_qa_pad=1" : slug === "bomber" ? "mp_qa_local=1" : "";
-  await page.goto(`${BASE}${invitePath(slug, room, extra)}`, {
+  const playPath = slug === "snake" ? "/flagship/snake-io/play" : undefined;
+  await page.goto(`${BASE}${invitePath(slug, room, extra, playPath)}`, {
     waitUntil: "domcontentloaded",
     timeout: 120_000,
   });
