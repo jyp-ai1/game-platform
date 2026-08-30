@@ -230,8 +230,13 @@ export const supabaseTransport: MultiplayerTransport = {
   createRoom(params: CreateRoomParams): GameRoom {
     const deviceId = getDeviceId();
     const nickname = params.hostNickname ?? getLastNickname() ?? "Player";
+    const code = (params.code ?? randomCode()).toUpperCase();
+    if (params.code) {
+      cacheRemove(code);
+      void deleteRoom(code);
+    }
     const room: GameRoom = {
-      code: (params.code ?? randomCode()).toUpperCase(),
+      code,
       gameSlug: params.gameSlug,
       hostId: deviceId,
       maxPlayers: params.maxPlayers ?? 8,

@@ -1,0 +1,429 @@
+{
+  "gate": "MP-CTO-CPO-QA-012",
+  "commit": "mp012-local8",
+  "previewSha": "mp012-local8",
+  "previewShaMatch": true,
+  "base": "http://localhost:3043",
+  "branch": "content-factory",
+  "finishedAt": "2026-08-30T11:37:45.694Z",
+  "automated": {
+    "passed": 5,
+    "total": 12
+  },
+  "p0": {
+    "distinctPlayerId": true,
+    "distinctSpawn": false,
+    "aMovement": false,
+    "bMovement": false,
+    "playerBomb": false,
+    "bombOwnerSync": false,
+    "explosionSync": false,
+    "deathSync": false,
+    "aiMovement": true,
+    "mobileRegression": true,
+    "agarRegression": true,
+    "fullRegression": true
+  },
+  "ctoFinal": "FAIL",
+  "checks": [
+    {
+      "name": "bomber-host-seat-pin",
+      "ok": true,
+      "t": "2026-08-30T11:30:56.116Z"
+    },
+    {
+      "name": "bomber-reconcile-hostId",
+      "ok": true,
+      "t": "2026-08-30T11:30:56.117Z"
+    },
+    {
+      "name": "bomber-state-ack-gate",
+      "ok": true,
+      "t": "2026-08-30T11:30:56.117Z"
+    },
+    {
+      "name": "bomber-qa-hook",
+      "ok": true,
+      "t": "2026-08-30T11:30:56.117Z"
+    },
+    {
+      "name": "floating-pad-left-half-joystick",
+      "ok": true,
+      "t": "2026-08-30T11:30:56.117Z"
+    },
+    {
+      "name": "agar-qa-split-hook",
+      "ok": true,
+      "t": "2026-08-30T11:30:56.117Z"
+    },
+    {
+      "name": "bomber-host-seat-unit",
+      "ok": true,
+      "t": "2026-08-30T11:30:57.460Z"
+    },
+    {
+      "name": "bomber-bomb-authority-unit",
+      "ok": true,
+      "t": "2026-08-30T11:30:59.046Z"
+    },
+    {
+      "name": "snake-ai-movement-unit",
+      "ok": true,
+      "t": "2026-08-30T11:30:59.880Z"
+    },
+    {
+      "name": "gate-same-room",
+      "ok": true,
+      "roomA": "BOMBER-B",
+      "roomB": "BOMBER-B",
+      "t": "2026-08-30T11:34:37.632Z"
+    },
+    {
+      "name": "gate-different-player-id",
+      "ok": true,
+      "idA": "qa012-host-1788089460033",
+      "idB": "qa012-guest-1788089460034",
+      "t": "2026-08-30T11:34:37.632Z"
+    },
+    {
+      "name": "gate-different-seat",
+      "ok": false,
+      "seatA": 0,
+      "seatB": 0,
+      "t": "2026-08-30T11:34:37.633Z"
+    },
+    {
+      "name": "gate-different-spawn",
+      "ok": false,
+      "spawnA": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "spawnB": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "t": "2026-08-30T11:34:37.633Z"
+    },
+    {
+      "name": "gate-host-seat",
+      "ok": true,
+      "spawnA": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "isHost": true,
+      "stateAck": true,
+      "t": "2026-08-30T11:34:37.633Z"
+    },
+    {
+      "name": "gate-guest-seat",
+      "ok": false,
+      "spawnB": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "seat": 0,
+      "t": "2026-08-30T11:34:37.633Z"
+    },
+    {
+      "name": "gate-distinct-spawn",
+      "ok": false,
+      "spawnA": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "spawnB": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "t": "2026-08-30T11:34:37.633Z"
+    },
+    {
+      "name": "gate-a-move-sync",
+      "ok": false,
+      "posA0": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "posAFinal": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "movementA": [
+        {
+          "key": "movementA",
+          "actor": "qa012-host-1788089460033",
+          "observer": "B",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "remote": null,
+          "localMoved": false,
+          "synced": false
+        },
+        {
+          "key": "movementA",
+          "actor": "qa012-host-1788089460033",
+          "observer": "B",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "remote": null,
+          "localMoved": false,
+          "synced": false
+        },
+        {
+          "key": "movementA",
+          "actor": "qa012-host-1788089460033",
+          "observer": "B",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "remote": null,
+          "localMoved": false,
+          "synced": false
+        }
+      ],
+      "t": "2026-08-30T11:35:18.482Z"
+    },
+    {
+      "name": "gate-b-move-sync",
+      "ok": false,
+      "posB0": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "posBFinal": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "movementB": [
+        {
+          "key": "movementB",
+          "actor": "qa012-guest-1788089460034",
+          "observer": "A",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "remote": null,
+          "localMoved": false,
+          "synced": false
+        },
+        {
+          "key": "movementB",
+          "actor": "qa012-guest-1788089460034",
+          "observer": "A",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "remote": null,
+          "localMoved": false,
+          "synced": false
+        },
+        {
+          "key": "movementB",
+          "actor": "qa012-guest-1788089460034",
+          "observer": "A",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "remote": null,
+          "localMoved": false,
+          "synced": false
+        }
+      ],
+      "t": "2026-08-30T11:35:59.656Z"
+    },
+    {
+      "name": "gate-human-player-bomb",
+      "ok": false,
+      "t": "2026-08-30T11:36:35.328Z"
+    },
+    {
+      "name": "gate-player-bomb-sync",
+      "ok": false,
+      "playerBomb": null,
+      "bombsA": [],
+      "bombsB": [],
+      "t": "2026-08-30T11:36:35.329Z"
+    },
+    {
+      "name": "gate-bomb-sync",
+      "ok": false,
+      "playerBomb": null,
+      "bombsB": [],
+      "t": "2026-08-30T11:36:35.330Z"
+    },
+    {
+      "name": "gate-explosion-sync",
+      "ok": false,
+      "dualContextExplosion": false,
+      "t": "2026-08-30T11:36:41.830Z"
+    },
+    {
+      "name": "gate-death-sync",
+      "ok": false,
+      "victim": "qa012-guest-1788089460034",
+      "bombOwner": "qa012-host-1788089460033",
+      "explosionSync": false,
+      "deathSetup": {
+        "hostPos": {
+          "x": 1,
+          "y": 1,
+          "alive": true
+        },
+        "guestPosBeforeBomb": {
+          "x": 1,
+          "y": 1,
+          "alive": true
+        },
+        "inRange": true
+      },
+      "note": "guest B must die from host A player-owned bomb",
+      "t": "2026-08-30T11:36:51.162Z"
+    },
+    {
+      "name": "snake-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-30T11:37:18.095Z"
+    },
+    {
+      "name": "snake-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-30T11:37:18.097Z"
+    },
+    {
+      "name": "snake-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-30T11:37:18.445Z"
+    },
+    {
+      "name": "snake-mobile-action-zone-boost",
+      "ok": true,
+      "t": "2026-08-30T11:37:18.448Z"
+    },
+    {
+      "name": "agar-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-30T11:37:21.856Z"
+    },
+    {
+      "name": "agar-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-30T11:37:21.857Z"
+    },
+    {
+      "name": "agar-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-30T11:37:22.145Z"
+    },
+    {
+      "name": "agar-mobile-action-zone-split",
+      "ok": true,
+      "t": "2026-08-30T11:37:22.151Z"
+    },
+    {
+      "name": "agar-mobile-action-zone-eject",
+      "ok": true,
+      "t": "2026-08-30T11:37:22.155Z"
+    },
+    {
+      "name": "bomber-mobile-overlay",
+      "ok": true,
+      "t": "2026-08-30T11:37:25.496Z"
+    },
+    {
+      "name": "bomber-floating-joystick-hidden-initial",
+      "ok": true,
+      "t": "2026-08-30T11:37:25.501Z"
+    },
+    {
+      "name": "bomber-floating-joystick-on-touch",
+      "ok": true,
+      "t": "2026-08-30T11:37:25.817Z"
+    },
+    {
+      "name": "bomber-mobile-action-zone-bomb",
+      "ok": true,
+      "t": "2026-08-30T11:37:25.823Z"
+    },
+    {
+      "name": "agar-split-setup-ready",
+      "ok": true,
+      "t": "2026-08-30T11:37:29.364Z"
+    },
+    {
+      "name": "agar-split-cells-change",
+      "ok": true,
+      "cellsBefore": 1,
+      "cellsAfter": 2,
+      "t": "2026-08-30T11:37:30.085Z"
+    },
+    {
+      "name": "bomber-ai-movement-10s",
+      "ok": true,
+      "before": {
+        "bots": [],
+        "tick": 41
+      },
+      "after": {
+        "bots": [],
+        "tick": 281
+      },
+      "t": "2026-08-30T11:37:45.682Z"
+    }
+  ]
+}

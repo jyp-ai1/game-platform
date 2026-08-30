@@ -110,9 +110,55 @@ export async function newContextWithDevice(browser, deviceId) {
     hasTouch: true,
   });
   await ctx.addInitScript((id) => {
+    window.sessionStorage.setItem("play29:device-id", id);
     window.localStorage.setItem("play29:device-id", id);
   }, deviceId);
   return ctx;
+}
+
+export function isLocalQaBase(base = BASE) {
+  return /localhost|127\.0\.0\.1/.test(base);
+}
+
+/** Local: shared context + per-tab sessionStorage device ids. Preview: isolated contexts. */
+export async function createDualPages(browser, deviceA, deviceB) {
+  if (isLocalQaBase()) {
+    const ctx = await browser.newContext({
+      permissions: ["clipboard-read", "clipboard-write"],
+      hasTouch: true,
+    });
+    const pageA = await ctx.newPage();
+    const pageB = await ctx.newPage();
+    await pageA.addInitScript((id) => {
+      window.sessionStorage.setItem("play29:device-id", id);
+    }, deviceA);
+    await pageB.addInitScript((id) => {
+      window.sessionStorage.setItem("play29:device-id", id);
+    }, deviceB);
+    return {
+      pageA,
+      pageB,
+      async close() {
+        await pageA.close();
+        await pageB.close();
+        await ctx.close();
+      },
+    };
+  }
+  const ctxA = await newContextWithDevice(browser, deviceA);
+  const ctxB = await newContextWithDevice(browser, deviceB);
+  const pageA = await ctxA.newPage();
+  const pageB = await ctxB.newPage();
+  return {
+    pageA,
+    pageB,
+    async close() {
+      await pageA.close();
+      await pageB.close();
+      await ctxA.close();
+      await ctxB.close();
+    },
+  };
 }
 
 export async function dragFloatingPad(page, dir = "right") {
@@ -146,6 +192,17 @@ export async function dragFloatingPad(page, dir = "right") {
     bubbles: true,
   });
   return true;
+}
+
+export async function readBomberPlayerQa(page, playerId) {
+  return page.evaluate((id) => {
+    if (typeof window.__BOMBER_QA_PLAYER__ === "function") {
+      return window.__BOMBER_QA_PLAYER__(id);
+    }
+    const qa = window.__BOMBER_QA__?.();
+    const p = qa?.players.find((row) => row.id === id);
+    return p ? { x: p.x, y: p.y, alive: p.alive } : null;
+  }, playerId);
 }
 
 export async function readBomberGrid(page) {
@@ -200,24 +257,34 @@ export async function moveBomber(page, dir = "right", steps = 5) {
 
 /** Try each direction until local grid position changes (handles spawn wall blocks). */
 export async function moveBomberUntilChanged(page, before, maxTries = 4) {
+  const localPos = async () =>
+    page.evaluate(() => {
+      const qa = window.__BOMBER_QA__?.();
+      if (qa?.local) return { x: qa.local.x, y: qa.local.y };
+      const el = document.querySelector('[data-testid="bomber-local-player"]');
+      if (!el) return null;
+      return {
+        x: Number(el.getAttribute("data-grid-x")),
+        y: Number(el.getAttribute("data-grid-y")),
+      };
+    });
   const dirs = ["right", "down", "left", "up"];
   for (const dir of dirs.slice(0, maxTries)) {
     for (let i = 0; i < 4; i++) {
       await moveBomber(page, dir, 1);
     }
     await page.waitForTimeout(400);
-    const now = await readBomberGrid(page);
+    const now = await localPos();
     if (now && before && (now.x !== before.x || now.y !== before.y)) {
       return now;
     }
-    // Guest inputs round-trip through host state — allow extra sync time
     await page.waitForTimeout(1200);
-    const synced = await readBomberGrid(page);
+    const synced = await localPos();
     if (synced && before && (synced.x !== before.x || synced.y !== before.y)) {
       return synced;
     }
   }
-  return readBomberGrid(page);
+  return localPos();
 }
 
 export { devices };

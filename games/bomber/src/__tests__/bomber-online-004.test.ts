@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createBomberWorld, reconcileHumans, rosterForMap, tryMove } from "../bomber-engine";
+import { createBomberWorld, reconcileHumans, rosterForMap, tryMove, serializeBomberState, applyBomberSyncState } from "../bomber-engine";
 
 test("ONLINE-004: host seat 0, guest seat 1 on join", () => {
   const hostId = "host-a";
@@ -92,4 +92,41 @@ test("ONLINE-004: overlap pin assigns guest to seat 1", () => {
     hostId,
   });
   assert.notEqual(w.players[hostId]!.x, w.players[guestId]!.x);
+});
+
+test("ONLINE-004: guest replacing dead bot spawns alive", () => {
+  const hostId = "host-a";
+  const guestId = "guest-b";
+  const w = createBomberWorld(hostId, "Host", {
+    mapId: 1,
+    humans: [{ id: hostId, nickname: "Host" }],
+  });
+  const bot = Object.values(w.players).find((p) => p.isBot && p.x === 13 && p.y === 1);
+  assert.ok(bot);
+  bot!.alive = false;
+  reconcileHumans(w, [{ id: hostId, nickname: "Host" }, { id: guestId, nickname: "Guest" }], {
+    hostId,
+  });
+  assert.equal(w.players[guestId]!.alive, true, "guest must not inherit dead bot state");
+  assert.equal(w.players[guestId]!.x, 13);
+});
+
+test("ONLINE-004: host can move from spawn on map B", () => {
+  const hostId = "host-a";
+  const w = createBomberWorld(hostId, "Host", { mapId: 1 });
+  assert.equal(w.players[hostId]!.x, 1);
+  assert.equal(w.players[hostId]!.y, 1);
+  tryMove(w, hostId, 1, 0);
+  assert.equal(w.players[hostId]!.x, 2);
+});
+
+test("ONLINE-004: reject stale tick on guest sync", () => {
+  const hostId = "host-a";
+  const w = createBomberWorld(hostId, "Host", { mapId: 1 });
+  w.tick = 100;
+  const stale = serializeBomberState(w);
+  stale.tick = 50;
+  const applied = applyBomberSyncState(w, stale, { rejectStaleTick: true });
+  assert.equal(applied, false);
+  assert.equal(w.tick, 100);
 });

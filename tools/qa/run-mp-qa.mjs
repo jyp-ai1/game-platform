@@ -22,8 +22,8 @@ console.log(`BASE=${BASE}`);
 console.log(`COMMIT=${COMMIT}`);
 console.log("");
 
-const env = { ...process.env, QA_BASE_URL: BASE, QA_COMMIT: COMMIT, QA_GATE: "mp-cto-cpo-qa-011" };
-const r = spawnSync("node", ["tools/qa/mp-cto-cpo-qa-011.mjs"], {
+const env = { ...process.env, QA_BASE_URL: BASE, QA_COMMIT: COMMIT, QA_GATE: "mp-cto-cpo-qa-012" };
+const r = spawnSync("node", ["tools/qa/mp-cto-cpo-qa-012.mjs"], {
   cwd: ROOT,
   env,
   stdio: "inherit",
@@ -31,6 +31,6 @@ const r = spawnSync("node", ["tools/qa/mp-cto-cpo-qa-011.mjs"], {
 });
 
 console.log("");
-console.log("Evidence: docs/qa/cpo/mp-cto-cpo-qa-011/");
+console.log("Evidence: docs/qa/cpo/mp-cto-cpo-qa-012/");
 console.log("CPO guide: docs/qa/cpo/CPO-TEST-PLAN.md");
 process.exit(r.status ?? 1);

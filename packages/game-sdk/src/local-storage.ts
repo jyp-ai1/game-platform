@@ -131,6 +131,8 @@ export function getDeviceId(): string {
   if (typeof window === "undefined") {
     return "";
   }
+  const fromSession = window.sessionStorage.getItem(DEVICE_ID_KEY);
+  if (fromSession) return fromSession;
   let deviceId = window.localStorage.getItem(DEVICE_ID_KEY);
   if (!deviceId) {
     deviceId = crypto.randomUUID();

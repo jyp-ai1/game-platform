@@ -98,6 +98,7 @@ function wrap(base: MultiplayerTransport): MultiplayerTransport {
         };
         if (!data || data.code?.toUpperCase() !== code.toUpperCase()) return;
         if (data.type === "room-update" && data.room) {
+          cacheSet(data.room);
           listener(data.room);
           return;
         }

@@ -5,25 +5,28 @@ import { join } from "node:path";
 import {
   BASE,
   SHOTS,
+  createDualPages,
   devices,
   enterGame,
   invitePath,
   moveBomber,
   moveBomberUntilChanged,
-  newContextWithDevice,
   readBomberGrid,
   readBomberPlayer,
+  readBomberPlayerQa,
 } from "./lib/mp-common.mjs";
 
 export function createDualContextReport() {
   return {
     roomId: null,
+    previewSha: null,
     playerA: {
       id: null,
       seat: null,
       spawn: null,
       initialPosition: null,
       finalPosition: null,
+      alive: null,
     },
     playerB: {
       id: null,
@@ -31,11 +34,21 @@ export function createDualContextReport() {
       spawn: null,
       initialPosition: null,
       finalPosition: null,
+      alive: null,
     },
     movementSync: { aToB: false, bToA: false },
+    movementA: [],
+    movementB: [],
+    inputChain: [],
     bomb: { owner: null, position: null, playerBombOnly: false },
+    playerBomb: null,
+    bombOwner: null,
     explosion: false,
+    explosionCells: null,
     deathSync: false,
+    victimId: null,
+    deathA: null,
+    deathB: null,
     aiMoved: false,
     // legacy flat fields for 010 compat
     seatA: null,
@@ -54,15 +67,16 @@ export function createDualContextReport() {
   };
 }
 
-async function waitRemotePlayer(page, playerId, expected, timeoutMs = 10_000) {
+async function waitRemoteQaPosition(page, playerId, expected, timeoutMs = 12_000) {
   try {
     await page.waitForFunction(
       ({ id, x, y }) => {
-        const el = document.querySelector(`[data-player-id="${id}"]`);
-        if (!el) return false;
-        const px = Number(el.getAttribute("data-grid-x"));
-        const py = Number(el.getAttribute("data-grid-y"));
-        return Math.abs(px - x) <= 1 && Math.abs(py - y) <= 1;
+        const fn = window.__BOMBER_QA_PLAYER__;
+        const p = fn
+          ? fn(id)
+          : window.__BOMBER_QA__?.().players.find((row) => row.id === id);
+        if (!p) return false;
+        return p.x === x && p.y === y;
       },
       { id: playerId, x: expected.x, y: expected.y },
       { timeout: timeoutMs }
@@ -73,10 +87,74 @@ async function waitRemotePlayer(page, playerId, expected, timeoutMs = 10_000) {
   }
 }
 
+function positionsMatch(a, b) {
+  return !!(a && b && a.x === b.x && a.y === b.y);
+}
+
+/** Move host/guest until Manhattan-adjacent for player-bomb death setup. */
+async function ensureAdjacentForDeath(pageA, pageB, hostId, guestId) {
+  const readGuest = async () =>
+    (await readBomberPlayerQa(pageB, guestId)) ?? (await readBomberPlayerQa(pageA, guestId));
+
+  const stepToward = async (page, from, to) => {
+    const dx = Math.sign(to.x - from.x);
+    const dy = Math.sign(to.y - from.y);
+    const dir =
+      Math.abs(to.x - from.x) >= Math.abs(to.y - from.y)
+        ? dx === 1
+          ? "right"
+          : dx === -1
+            ? "left"
+            : dy === 1
+              ? "down"
+              : "up"
+        : dy === 1
+          ? "down"
+          : dy === -1
+            ? "up"
+            : dx === 1
+              ? "right"
+              : "left";
+    await moveBomber(page, dir, 1);
+    await pageA.waitForTimeout(320);
+    await pageB.waitForTimeout(320);
+  };
+
+  for (let attempt = 0; attempt < 32; attempt++) {
+    const host = await readBomberPlayerQa(pageA, hostId);
+    const guest = await readGuest();
+    if (!host?.alive || !guest?.alive) break;
+    const dist = Math.abs(host.x - guest.x) + Math.abs(host.y - guest.y);
+    if (dist === 1) return { host, guest };
+    // Host closes distance first — keeps guest still to avoid AI crossfire during prep.
+    if (attempt < 24) await stepToward(pageA, host, guest);
+    else await stepToward(pageB, guest, host);
+  }
+  return {
+    host: await readBomberPlayerQa(pageA, hostId),
+    guest: await readGuest(),
+  };
+}
+
+function inBlastRange(bombPos, victimPos) {
+  if (!bombPos || !victimPos) return false;
+  return (
+    (bombPos.x === victimPos.x && Math.abs(bombPos.y - victimPos.y) <= 1) ||
+    (bombPos.y === victimPos.y && Math.abs(bombPos.x - victimPos.x) <= 1)
+  );
+}
+
 function seatOf(qa, seats) {
   if (!qa?.local) return null;
-  const idx = seats.findIndex((s) => s.x === qa.local.x && s.y === qa.local.y);
-  return idx >= 0 ? idx : null;
+  const idx = seats.findIndex(
+    (s) => s.x === qa.local.x && s.y === qa.local.y
+  );
+  if (idx >= 0) return idx;
+  // Bot-replaced human may spawn one tile off corner after reconcile.
+  const near = seats.findIndex(
+    (s) => Math.abs(s.x - qa.local.x) <= 1 && Math.abs(s.y - qa.local.y) <= 1
+  );
+  return near >= 0 ? near : null;
 }
 
 export async function probeBomberAiMovement(page, mark, dualContext) {
@@ -119,12 +197,49 @@ export async function probeBomberAiMovement(page, mark, dualContext) {
   dualContext.aiMoved = moved || tickAdvanced;
 }
 
+function pushChain(dualContext, step) {
+  dualContext.inputChain.push({ ...step, t: new Date().toISOString() });
+}
+
+async function moveAndVerify(pageActor, pageObserver, actorId, observerLabel, dualContext, key) {
+  const before = await readBomberPlayerQa(pageActor, actorId);
+  const moved = await moveBomberUntilChanged(pageActor, before, 4);
+  await pageActor.waitForTimeout(600);
+  await pageObserver.waitForTimeout(800);
+  const after = (await readBomberPlayerQa(pageActor, actorId)) ?? moved;
+  const remote = actorId ? await readBomberPlayerQa(pageObserver, actorId) : null;
+  const localMoved =
+    before && after ? before.x !== after.x || before.y !== after.y : false;
+  const synced = localMoved && positionsMatch(after, remote);
+  const row = {
+    key,
+    actor: actorId,
+    observer: observerLabel,
+    before,
+    after,
+    remote,
+    localMoved,
+    synced,
+  };
+  dualContext[key].push(row);
+  pushChain(dualContext, {
+    phase: key,
+    INPUT_RECEIVED: localMoved,
+    PLAYER_STATE_BEFORE: before,
+    MOVE_APPLIED: after,
+    REMOTE_POSITION_UPDATED: remote,
+    synced,
+  });
+  return { after, synced, localMoved, remote };
+}
+
 export async function probeDualContextBomber(browser, mark, dualContext) {
   const room = "BOMBER-B";
-  const url = `${BASE}${invitePath("bomber", room)}`;
+  const hostUrl = `${BASE}${invitePath("bomber", room, "mp_qa_fresh=1")}`;
+  const guestUrl = `${BASE}${invitePath("bomber", room)}`;
   const ts = Date.now();
-  const deviceA = `qa011-host-${ts}`;
-  const deviceB = `qa011-guest-${ts + 1}`;
+  const deviceA = `qa012-host-${ts}`;
+  const deviceB = `qa012-guest-${ts + 1}`;
   const cornerSeats = [
     { x: 1, y: 1 },
     { x: 13, y: 1 },
@@ -132,16 +247,15 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     { x: 13, y: 11 },
   ];
 
-  const ctxA = await newContextWithDevice(browser, deviceA);
-  const ctxB = await newContextWithDevice(browser, deviceB);
-  const pageA = await ctxA.newPage();
-  const pageB = await ctxB.newPage();
+  const dual = await createDualPages(browser, deviceA, deviceB);
+  const pageA = dual.pageA;
+  const pageB = dual.pageB;
 
   try {
     await pageA.setViewportSize(devices["iPhone 13"].viewport);
     await pageB.setViewportSize(devices["iPhone 13"].viewport);
 
-    await pageA.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await pageA.goto(hostUrl, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageA, "bomber", { strictReady: true });
     await pageA
       .waitForFunction(
@@ -153,10 +267,41 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       )
       .catch(() => {});
 
-    await pageB.goto(url, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    const hostReady = await pageA.evaluate(() => {
+      const qa = window.__BOMBER_QA__?.();
+      return !!(qa?.local?.alive && qa?.isHost && qa?.stateAck);
+    });
+    if (!hostReady) {
+      mark("gate-host-seat", false, { note: "host not alive at join — abort dual-context" });
+      mark("gate-guest-seat", false, { note: "skipped — host dead" });
+      mark("gate-distinct-spawn", false, { note: "skipped" });
+      mark("gate-different-seat", false, { note: "skipped" });
+      mark("gate-different-spawn", false, { note: "skipped" });
+      mark("gate-a-move-sync", false, { note: "skipped — host dead" });
+      mark("gate-b-move-sync", false, { note: "skipped" });
+      mark("gate-human-player-bomb", false, { note: "skipped" });
+      mark("gate-player-bomb-sync", false, { note: "skipped" });
+      mark("gate-bomb-sync", false, { note: "skipped" });
+      mark("gate-explosion-sync", false, { note: "skipped" });
+      mark("gate-death-sync", false, { note: "skipped" });
+      return;
+    }
+
+    await pageA.waitForTimeout(2500);
+
+    await pageB.goto(guestUrl, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await enterGame(pageB, "bomber");
     await pageB
       .waitForFunction(() => window.__BOMBER_QA__?.().stateAck === true, { timeout: 40_000 })
+      .catch(() => {});
+    await pageB
+      .waitForFunction(
+        () => {
+          const qa = window.__BOMBER_QA__?.();
+          return qa?.stateAck === true && qa?.local?.alive === true && qa?.isHost === false;
+        },
+        { timeout: 45_000 }
+      )
       .catch(() => {});
     await pageA
       .waitForFunction(
@@ -170,17 +315,101 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     await pageB
       .waitForFunction(() => window.__BOMBER_QA__?.().local?.alive === true, { timeout: 45_000 })
       .catch(() => {});
-    await pageA.waitForTimeout(2000);
-    await pageB.waitForTimeout(2000);
+
+    const qaBEarly = await pageB.evaluate(() => window.__BOMBER_QA__?.() ?? null);
+    const idBEarly = qaBEarly?.deviceId;
+    if (idBEarly) {
+      await pageA
+        .waitForFunction(
+          (guestId) => {
+            const qa = window.__BOMBER_QA__?.();
+            return qa?.players.some((p) => p.id === guestId && !p.isBot && p.alive);
+          },
+          idBEarly,
+          { timeout: 20_000 }
+        )
+        .catch(() => {});
+    }
+
+    await pageA.waitForTimeout(800);
+    await pageB.waitForTimeout(800);
+
+    const qaA0 = await pageA.evaluate(() => window.__BOMBER_QA__?.() ?? null);
+    const idAEarly = qaA0?.deviceId;
+    if (idAEarly) {
+      await pageB
+        .waitForFunction(
+          ({ hostId }) => {
+            const qa = window.__BOMBER_QA__?.();
+            const local = qa?.local;
+            const host = window.__BOMBER_QA_PLAYER__?.(hostId);
+            return (
+              !!local &&
+              !!host &&
+              (local.x !== host.x || local.y !== host.y) &&
+              local.alive === true
+            );
+          },
+          { hostId: idAEarly },
+          { timeout: 8_000 }
+        )
+        .catch(() => {});
+    }
+
+    await pageB
+      .waitForFunction(
+        () => {
+          const qa = window.__BOMBER_QA__?.();
+          const local = qa?.local;
+          if (!local) return false;
+          return local.x !== 1 || local.y !== 1;
+        },
+        { timeout: 15_000 }
+      )
+      .catch(() => {});
+
+    if (idBEarly) {
+      await pageA
+        .waitForFunction(
+          (guestId) => {
+            const guest = window.__BOMBER_QA_PLAYER__?.(guestId);
+            return !!guest && (guest.x !== 1 || guest.y !== 1);
+          },
+          idBEarly,
+          { timeout: 15_000 }
+        )
+        .catch(() => {});
+    }
+
+    await pageA.waitForTimeout(400);
+    await pageB.waitForTimeout(400);
 
     const qaA = await pageA.evaluate(() => window.__BOMBER_QA__?.() ?? null);
     const qaB = await pageB.evaluate(() => window.__BOMBER_QA__?.() ?? null);
+
+    if (!qaA?.local?.alive) {
+      mark("gate-host-seat", false, { spawnA: qaA?.local, note: "host died before gates" });
+      mark("gate-guest-seat", false, { note: "skipped" });
+      mark("gate-distinct-spawn", false, { note: "skipped" });
+      mark("gate-different-seat", false, { note: "skipped" });
+      mark("gate-different-spawn", false, { note: "skipped" });
+      mark("gate-a-move-sync", false, { note: "skipped" });
+      mark("gate-b-move-sync", false, { note: "skipped" });
+      mark("gate-human-player-bomb", false, { note: "skipped" });
+      mark("gate-player-bomb-sync", false, { note: "skipped" });
+      mark("gate-bomb-sync", false, { note: "skipped" });
+      mark("gate-explosion-sync", false, { note: "skipped" });
+      mark("gate-death-sync", false, { note: "skipped" });
+      return;
+    }
 
     dualContext.roomId = qaA?.roomId ?? room;
     dualContext.playerA.id = qaA?.deviceId ?? null;
     dualContext.playerB.id = qaB?.deviceId ?? null;
     dualContext.playerA.spawn = qaA?.local ? { ...qaA.local } : null;
     dualContext.playerB.spawn = qaB?.local ? { ...qaB.local } : null;
+    dualContext.playerA.alive = qaA?.local?.alive ?? null;
+    dualContext.playerB.alive = qaB?.local?.alive ?? null;
     dualContext.playerA.seat = seatOf(qaA, cornerSeats);
     dualContext.playerB.seat = seatOf(qaB, cornerSeats);
     dualContext.seatA = dualContext.playerA.spawn;
@@ -228,43 +457,69 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     });
     mark("gate-distinct-spawn", diffSpawn, { spawnA: qaA?.local, spawnB: qaB?.local });
 
-    const posBeforeA = await readBomberGrid(pageA);
+    // P0-2 A → B: 3+ moves with per-step remote verify
+    dualContext.movementA = [];
+    const posBeforeA =
+      (await readBomberPlayerQa(pageA, idA)) ?? (await readBomberGrid(pageA));
     dualContext.positionA_before = posBeforeA ?? dualContext.positionA_before;
-    for (let i = 0; i < 6; i++) await moveBomber(pageA, "right", 1);
-    await pageA.waitForTimeout(600);
-    const posA1 = (await readBomberGrid(pageA)) ?? posBeforeA;
-    const aVisibleOnB = idA && posA1 ? await waitRemotePlayer(pageB, idA, posA1, 12_000) : false;
-    dualContext.positionA_after = dualContext.playerA.finalPosition = posA1;
-
-    const aMoved =
-      dualContext.positionA_before && posA1
-        ? posA1.x !== dualContext.positionA_before.x || posA1.y !== dualContext.positionA_before.y
-        : false;
-    dualContext.movementSync.aToB = aMoved && aVisibleOnB;
+    let posA = posBeforeA;
+    let aStepsSynced = true;
+    let aAnyMove = false;
+    for (let i = 0; i < 3; i++) {
+      const step = await moveAndVerify(pageA, pageB, idA, "B", dualContext, "movementA");
+      if (step.localMoved) aAnyMove = true;
+      if (!step.synced) aStepsSynced = false;
+      if (step.after) posA = step.after;
+    }
+    dualContext.positionA_after = dualContext.playerA.finalPosition = posA;
+    dualContext.movementSync.aToB = aAnyMove && aStepsSynced;
     mark("gate-a-move-sync", dualContext.movementSync.aToB, {
-      posA0: dualContext.positionA_before,
-      posA1,
-      posAOnB: idA ? await readBomberPlayer(pageB, idA) : null,
+      posA0: posBeforeA,
+      posAFinal: posA,
+      movementA: dualContext.movementA,
     });
 
-    const posBeforeB = await readBomberGrid(pageB);
+    dualContext.movementB = [];
+    const posBeforeB =
+      (await readBomberPlayerQa(pageB, idB)) ?? (await readBomberGrid(pageB));
     dualContext.positionB_before = posBeforeB ?? dualContext.positionB_before;
-    for (let i = 0; i < 6; i++) await moveBomber(pageB, "down", 1);
-    await pageB.waitForTimeout(600);
-    const posB2 = (await readBomberGrid(pageB)) ?? posBeforeB;
-    const bVisibleOnA = idB && posB2 ? await waitRemotePlayer(pageA, idB, posB2, 12_000) : false;
-    dualContext.positionB_after = dualContext.playerB.finalPosition = posB2;
-
-    const bMoved =
-      dualContext.positionB_before && posB2
-        ? posB2.x !== dualContext.positionB_before.x || posB2.y !== dualContext.positionB_before.y
-        : false;
-    dualContext.movementSync.bToA = bMoved && bVisibleOnA;
+    let posB = posBeforeB;
+    let bStepsSynced = true;
+    let bAnyMove = false;
+    for (let i = 0; i < 3; i++) {
+      const step = await moveAndVerify(pageB, pageA, idB, "A", dualContext, "movementB");
+      if (step.localMoved) bAnyMove = true;
+      if (!step.synced) bStepsSynced = false;
+      if (step.after) posB = step.after;
+    }
+    dualContext.positionB_after = dualContext.playerB.finalPosition = posB;
+    dualContext.movementSync.bToA = bAnyMove && bStepsSynced;
     mark("gate-b-move-sync", dualContext.movementSync.bToA, {
-      posB0: dualContext.positionB_before,
-      posB2,
-      posBOnA: idB ? await readBomberPlayer(pageA, idB) : null,
+      posB0: posBeforeB,
+      posBFinal: posB,
+      movementB: dualContext.movementB,
     });
+
+    // P0-7 prep: host adjacent to guest so player bomb kills guest
+    const adj = await ensureAdjacentForDeath(pageA, pageB, idA, idB);
+    const hostPos = adj.host;
+    const guestPosBeforeBomb = adj.guest;
+    await pageA.waitForTimeout(600);
+    await pageB.waitForTimeout(600);
+    dualContext.deathSetup = {
+      hostPos,
+      guestPosBeforeBomb,
+      inRange: inBlastRange(hostPos, guestPosBeforeBomb),
+    };
+
+    if (!hostPos?.alive || !guestPosBeforeBomb?.alive) {
+      mark("gate-human-player-bomb", false, { note: "victim/host dead before plant" });
+      mark("gate-player-bomb-sync", false, { note: "skipped" });
+      mark("gate-bomb-sync", false, { note: "skipped" });
+      mark("gate-explosion-sync", false, { note: "skipped" });
+      mark("gate-death-sync", false, { note: "guest dead before player bomb" });
+      return;
+    }
 
     const bombPlanted = await pageA.evaluate(() => {
       if (typeof window.__BOMBER_QA_PLANT__ !== "function") return null;
@@ -308,41 +563,54 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       await pageA.waitForTimeout(150);
       const snapA = await pageA.evaluate(() => window.__BOMBER_QA__?.() ?? null);
       const snapB = await pageB.evaluate(() => window.__BOMBER_QA__?.() ?? null);
-      const blastMatch = (snapA?.blasts ?? 0) > 0 && (snapB?.blasts ?? 0) > 0;
-      const bombsCleared =
-        playerBomb &&
-        !(snapA?.bombs ?? []).some((b) => b.id === playerBomb.id) &&
-        !(snapB?.bombs ?? []).some((b) => b.id === playerBomb.id);
-      if (blastMatch || bombsCleared) {
+      const blastMatch =
+        isPlayerBomb &&
+        (snapA?.blasts ?? 0) > 0 &&
+        (snapB?.blasts ?? 0) > 0 &&
+        !(snapA?.bombs ?? []).some((b) => b.id === playerBomb?.id) &&
+        !(snapB?.bombs ?? []).some((b) => b.id === playerBomb?.id);
+      if (blastMatch) {
         explosionSync = true;
         dualContext.explosion = true;
+        dualContext.explosionCells = snapA?.blasts ?? snapB?.blasts ?? null;
         break;
       }
     }
     mark("gate-explosion-sync", explosionSync, { dualContextExplosion: dualContext.explosion });
 
     let deathSync = false;
-    for (let i = 0; i < 20; i++) {
+    let deathOnA = null;
+    let deathOnB = null;
+    for (let i = 0; i < 45; i++) {
       await pageA.waitForTimeout(200);
-      const deathOnA = await pageA.evaluate(
-        (id) => window.__BOMBER_QA__?.().players.find((p) => p.id === id)?.alive === false,
-        idA
-      );
-      const deathOnB = await pageB.evaluate(
-        (id) => window.__BOMBER_QA__?.().players.find((p) => p.id === id)?.alive === false,
-        idA
-      );
-      if (deathOnA && deathOnB && explosionSync) {
+      deathOnA = await readBomberPlayerQa(pageA, idB);
+      deathOnB = await readBomberPlayerQa(pageB, idB);
+      if (deathOnA?.alive === false && deathOnB?.alive === false && explosionSync) {
         deathSync = true;
+        dualContext.deathEvidence = {
+          victim: idB,
+          bombOwner: idA,
+          bombPosition: dualContext.bombPosition,
+          deathOnA,
+          deathOnB,
+          explosionSync,
+        };
         break;
       }
     }
     dualContext.death = deathSync;
     dualContext.deathSync = deathSync;
-    mark("gate-death-sync", deathSync, {
-      victim: idA,
+    dualContext.victimId = idB;
+    dualContext.deathA = deathOnA;
+    dualContext.deathB = deathOnB;
+    dualContext.playerBomb = playerBomb;
+    dualContext.bombOwner = playerBomb?.ownerId ?? null;
+    mark("gate-death-sync", deathSync, dualContext.deathEvidence ?? {
+      victim: idB,
+      bombOwner: idA,
       explosionSync,
-      note: "host self-bomb at planted tile",
+      deathSetup: dualContext.deathSetup,
+      note: "guest B must die from host A player-owned bomb",
     });
 
     try {
@@ -352,9 +620,6 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       /* optional */
     }
   } finally {
-    await pageA.close();
-    await pageB.close();
-    await ctxA.close();
-    await ctxB.close();
+    await dual.close();
   }
 }

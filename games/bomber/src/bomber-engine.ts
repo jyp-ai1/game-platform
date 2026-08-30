@@ -496,6 +496,8 @@ export function reconcileHumans(
       nickname: h.nickname || "Player",
       color: h.color || seat.color,
       isBot: false,
+      alive: true,
+      bombsLeft: seat.bombsMax ?? world.difficulty.bombsMax,
     };
   }
 
@@ -530,6 +532,8 @@ export function reconcileHumans(
         nickname: meta?.nickname || "Host",
         color: meta?.color || seat.color,
         isBot: false,
+        alive: true,
+        bombsLeft: seat.bombsMax ?? world.difficulty.bombsMax,
       };
     }
   }
@@ -969,6 +973,8 @@ export function serializeBomberState(world: BomberWorld): BomberSyncState {
 export type ApplyBomberSyncOpts = {
   /** Reject apply when any pinned human would disappear from synced players. */
   rejectMissingHumanIds?: string[];
+  /** Reject stale authoritative snapshots (tick regression). */
+  rejectStaleTick?: boolean;
 };
 
 export function applyBomberSyncState(
@@ -976,6 +982,9 @@ export function applyBomberSyncState(
   state: BomberSyncState,
   opts?: ApplyBomberSyncOpts
 ): boolean {
+  if (opts?.rejectStaleTick && state.tick < world.tick) {
+    return false;
+  }
   if (opts?.rejectMissingHumanIds?.length) {
     for (const id of opts.rejectMissingHumanIds) {
       const local = world.players[id];
