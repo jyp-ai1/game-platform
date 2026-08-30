@@ -197,4 +197,20 @@ export async function moveBomber(page, dir = "right", steps = 5) {
   }
 }
 
+/** Try each direction until local grid position changes (handles spawn wall blocks). */
+export async function moveBomberUntilChanged(page, before, maxTries = 4) {
+  const dirs = ["right", "down", "left", "up"];
+  for (const dir of dirs.slice(0, maxTries)) {
+    for (let i = 0; i < 4; i++) {
+      await moveBomber(page, dir, 1);
+    }
+    await page.waitForTimeout(400);
+    const now = await readBomberGrid(page);
+    if (now && before && (now.x !== before.x || now.y !== before.y)) {
+      return now;
+    }
+  }
+  return readBomberGrid(page);
+}
+
 export { devices };

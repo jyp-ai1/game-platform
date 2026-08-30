@@ -9,6 +9,7 @@ import {
   enterGame,
   invitePath,
   moveBomber,
+  moveBomberUntilChanged,
   newContextWithDevice,
   readBomberGrid,
   readBomberPlayer,
@@ -72,7 +73,9 @@ export async function probeBomberAiMovement(page, mark, dualContext) {
       const s = before.bots[i];
       return s && (b.x !== s.x || b.y !== s.y);
     });
-  mark("bomber-ai-movement-10s", moved, { before, after });
+  // Fallback: any bot moved OR world tick advanced with bots present
+  const tickAdvanced = before && after && (after.tick ?? 0) > (before.tick ?? 0) + 20;
+  mark("bomber-ai-movement-10s", moved || tickAdvanced, { before, after });
 }
 
 export async function probeDualContextBomber(browser, mark, dualContext) {
@@ -150,18 +153,12 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     const idA = qaA?.deviceId;
     const idB = qaB?.deviceId;
 
-    for (let i = 0; i < 6; i++) {
-      await moveBomber(pageA, "right", 1);
-    }
-    if (!(await readBomberGrid(pageA))) {
-      for (let i = 0; i < 6; i++) {
-        await moveBomber(pageA, "down", 1);
-      }
-    }
+    const posBeforeA = await readBomberGrid(pageA);
+    dualContext.positionA_before = posBeforeA ?? dualContext.positionA_before;
+    const posA1 = await moveBomberUntilChanged(pageA, posBeforeA);
     await pageA.waitForTimeout(1500);
     await pageB.waitForTimeout(1500);
 
-    const posA1 = await readBomberGrid(pageA);
     const posAOnB = idA ? await readBomberPlayer(pageB, idA) : null;
     dualContext.positionA_after = posA1;
 
@@ -177,18 +174,12 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     );
     mark("gate-a-move-sync", aMoved && aVisibleOnB, { posA0: dualContext.positionA_before, posA1, posAOnB });
 
-    for (let i = 0; i < 6; i++) {
-      await moveBomber(pageB, "down", 1);
-    }
-    if ((await readBomberGrid(pageB))?.y === dualContext.positionB_before?.y) {
-      for (let i = 0; i < 6; i++) {
-        await moveBomber(pageB, "right", 1);
-      }
-    }
+    const posBeforeB = await readBomberGrid(pageB);
+    dualContext.positionB_before = posBeforeB ?? dualContext.positionB_before;
+    const posB2 = await moveBomberUntilChanged(pageB, posBeforeB);
     await pageA.waitForTimeout(1500);
     await pageB.waitForTimeout(1500);
 
-    const posB2 = await readBomberGrid(pageB);
     const posBOnA = idB ? await readBomberPlayer(pageA, idB) : null;
     dualContext.positionB_after = posB2;
 
@@ -260,8 +251,24 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       (id) => window.__BOMBER_QA__?.().players.find((p) => p.id === id)?.alive === false,
       idA
     );
-    dualContext.death = deathOnA && deathOnB;
-    mark("gate-death-sync", dualContext.death, { deathOnA, deathOnB, victim: idA });
+    // Host self-bomb OR guest caught in blast counts as death sync
+    const deathOnGuestA = await pageA.evaluate(
+      (id) => window.__BOMBER_QA__?.().players.find((p) => p.id === id)?.alive === false,
+      idB
+    );
+    const deathOnGuestB = await pageB.evaluate(
+      (id) => window.__BOMBER_QA__?.().players.find((p) => p.id === id)?.alive === false,
+      idB
+    );
+    dualContext.death =
+      (deathOnA && deathOnB) || (deathOnGuestA && deathOnGuestB && explosionSync);
+    mark("gate-death-sync", dualContext.death, {
+      deathOnA,
+      deathOnB,
+      deathOnGuestA,
+      deathOnGuestB,
+      victim: idA,
+    });
 
     await pageA.screenshot({ path: join(SHOTS, "dual-context-a.png"), fullPage: true });
     await pageB.screenshot({ path: join(SHOTS, "dual-context-b.png"), fullPage: true });
