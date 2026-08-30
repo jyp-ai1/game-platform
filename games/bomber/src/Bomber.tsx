@@ -745,10 +745,10 @@ export function BomberGame() {
               othersInRoom ? 12_000 : 3500
             );
             const gs0 = joinedRoom.gameState?.state as BomberSyncState | undefined;
-            const simHostAlive =
-              gs0?.players?.some(
-                (p) => p.id === joinedRoom.hostId && !p.isBot && p.alive
-              ) ?? false;
+            const simHost = gs0?.players?.find(
+              (p) => p.id === joinedRoom.hostId && !p.isBot
+            );
+            const simHostAlive = !!simHost?.alive;
             const hostPresent =
               freshState &&
               joinedRoom.players.some((p) => p.deviceId === joinedRoom.hostId) &&
@@ -783,9 +783,10 @@ export function BomberGame() {
           const slots = rosterForMap(nextMapId);
           const matchStartedAt = Date.now();
 
-          const selfAlive = existing.players.some(
-            (p) => p.id === deviceId && !p.isBot && p.alive
-          );
+          const selfAlive =
+            existing?.players?.some(
+              (p) => p.id === deviceId && !p.isBot && p.alive
+            ) ?? false;
           if (
             existing &&
             !reclaimedShard &&
@@ -808,6 +809,13 @@ export function BomberGame() {
             }
             applyLocalLook(next, deviceId, color);
             reconcileHumans(next, humans, { hostId: deviceId });
+            for (const h of humans) {
+              const p = next.players[h.id];
+              if (p && !p.isBot) {
+                p.alive = true;
+                p.bombsLeft = p.bombsMax;
+              }
+            }
             applyLocalLook(next, deviceId, color);
             if (!next.players[deviceId]) {
               setConnecting(false);
@@ -834,6 +842,13 @@ export function BomberGame() {
             matchStartedAt,
           });
           reconcileHumans(next, humans, { hostId: deviceId });
+          for (const h of humans) {
+            const p = next.players[h.id];
+            if (p && !p.isBot) {
+              p.alive = true;
+              p.bombsLeft = p.bombsMax;
+            }
+          }
           applyLocalLook(next, deviceId, color);
           if (!next.players[deviceId]) {
             setConnecting(false);

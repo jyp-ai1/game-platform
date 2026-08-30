@@ -20,6 +20,7 @@
     "analytics:validate": "node tools/analytics/generate-validation-report.mjs",
     "analytics:verify": "node tools/qa/analytics-verify.mjs",
     "qa:localhost": "node tools/qa/run-localhost-qa.mjs",
+    "qa:mp": "node tools/qa/run-mp-qa.mjs",
     "qa:verify-games": "node tools/qa/verify-50-games.mjs",
     "qa:internal-playable": "node tools/qa/run-internal-playable-qa.mjs",
     "qa:puzzle-code": "node tools/qa/run-puzzle-code-qa.mjs",
