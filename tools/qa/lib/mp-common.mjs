@@ -9,7 +9,8 @@ import { devices } from "playwright";
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 export const BASE = process.env.QA_BASE_URL ?? "https://game29.vercel.app";
 export const COMMIT = process.env.QA_COMMIT ?? "local";
-export const OUT = join(ROOT, "docs/qa/cpo/mp-cto-cpo-qa-010");
+export const QA_GATE = process.env.QA_GATE ?? "mp-cto-cpo-qa-010";
+export const OUT = join(ROOT, "docs/qa/cpo", QA_GATE);
 export const SHOTS = join(OUT, "screenshots");
 
 mkdirSync(SHOTS, { recursive: true });

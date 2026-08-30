@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createBomberWorld, reconcileHumans, rosterForMap } from "../bomber-engine";
+import { createBomberWorld, reconcileHumans, rosterForMap, tryMove } from "../bomber-engine";
 
 test("ONLINE-004: host seat 0, guest seat 1 on join", () => {
   const hostId = "host-a";
@@ -48,4 +48,48 @@ test("ONLINE-004: pinned host survives brief room desync", () => {
   assert.equal(w.players[hostId]!.x, hx);
   assert.equal(w.players[hostId]!.y, hy);
   assert.ok(w.players["guest-b"]);
+});
+
+test("ONLINE-004: reconcile does not reset moved humans", () => {
+  const hostId = "host-a";
+  const guestId = "guest-b";
+  const w = createBomberWorld(hostId, "Host", {
+    mapId: 1,
+    humans: [
+      { id: hostId, nickname: "Host" },
+      { id: guestId, nickname: "Guest" },
+    ],
+  });
+  tryMove(w, hostId, 1, 0);
+  tryMove(w, hostId, 1, 0);
+  const hx = w.players[hostId]!.x;
+  const gy = w.players[guestId]!.y;
+  reconcileHumans(
+    w,
+    [
+      { id: hostId, nickname: "Host" },
+      { id: guestId, nickname: "Guest" },
+    ],
+    { hostId }
+  );
+  assert.equal(w.players[hostId]!.x, hx, "host position must persist after reconcile");
+  assert.equal(w.players[guestId]!.y, gy, "guest position must persist after reconcile");
+});
+
+test("ONLINE-004: overlap pin assigns guest to seat 1", () => {
+  const hostId = "host-a";
+  const guestId = "guest-b";
+  const w = createBomberWorld(hostId, "Host", {
+    mapId: 1,
+    humans: [{ id: hostId, nickname: "Host" }],
+  });
+  reconcileHumans(w, [{ id: hostId, nickname: "Host" }, { id: guestId, nickname: "Guest" }], {
+    hostId,
+  });
+  w.players[guestId]!.x = w.players[hostId]!.x;
+  w.players[guestId]!.y = w.players[hostId]!.y;
+  reconcileHumans(w, [{ id: hostId, nickname: "Host" }, { id: guestId, nickname: "Guest" }], {
+    hostId,
+  });
+  assert.notEqual(w.players[hostId]!.x, w.players[guestId]!.x);
 });

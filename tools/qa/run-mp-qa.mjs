@@ -7,7 +7,7 @@
  *   QA_BASE_URL=https://game29-xxx.vercel.app QA_COMMIT=abc123 npm run qa:mp
  *
  * Modules (individual):
- *   node tools/qa/mp-cto-cpo-qa-010.mjs   — full P0 gate (Bomber dual-context + mobile + regression)
+ *   node tools/qa/mp-cto-cpo-qa-011.mjs   — full P0 gate (MP-011)
  */
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
@@ -22,8 +22,8 @@ console.log(`BASE=${BASE}`);
 console.log(`COMMIT=${COMMIT}`);
 console.log("");
 
-const env = { ...process.env, QA_BASE_URL: BASE, QA_COMMIT: COMMIT };
-const r = spawnSync("node", ["tools/qa/mp-cto-cpo-qa-010.mjs"], {
+const env = { ...process.env, QA_BASE_URL: BASE, QA_COMMIT: COMMIT, QA_GATE: "mp-cto-cpo-qa-011" };
+const r = spawnSync("node", ["tools/qa/mp-cto-cpo-qa-011.mjs"], {
   cwd: ROOT,
   env,
   stdio: "inherit",
@@ -31,6 +31,6 @@ const r = spawnSync("node", ["tools/qa/mp-cto-cpo-qa-010.mjs"], {
 });
 
 console.log("");
-console.log("Evidence: docs/qa/cpo/mp-cto-cpo-qa-010/");
+console.log("Evidence: docs/qa/cpo/mp-cto-cpo-qa-011/");
 console.log("CPO guide: docs/qa/cpo/CPO-TEST-PLAN.md");
 process.exit(r.status ?? 1);

@@ -78,12 +78,15 @@ No regression on Agar/Snake contract
 
 ---
 
-## 5. 현재 Gate (2026-08-29)
+## 5. 현재 Gate (2026-08-30)
 
 | Gate | Status |
 | --- | --- |
-| MP-010 CTO | **FAIL (3/12)** @ `67b7e02` |
-| CPO | **HOLD** |
+| MP-010 CTO | **FAIL (8/12)** @ `e3b70d4` (was 3/12 @ `67b7e02`) |
+| CPO | **HOLD** — see `mp-cto-cpo-qa-010/CPO-REPORT.md` |
 | CEO | **HOLD** |
+| Production | **HOLD** |
 
-Preview ref: https://game29-rk2787cuy-jyp-ai1s-projects.vercel.app
+Preview ref (best run): https://game29-rk2787cuy-jyp-ai1s-projects.vercel.app
+
+**MP-011 next:** A/B move sync · death sync · guest seat `(13,1)` on fresh preview

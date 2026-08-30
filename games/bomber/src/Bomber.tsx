@@ -271,9 +271,11 @@ export function BomberGame() {
   });
   /** QA-only: isolate grid/input probes from shared room stale sync (no gameplay change). */
   const qaLocalProbeRef = useRef(false);
+  const qaFreshShardRef = useRef(false);
   if (typeof window !== "undefined") {
-    qaLocalProbeRef.current =
-      new URLSearchParams(window.location.search).get("mp_qa_local") === "1";
+    const params = new URLSearchParams(window.location.search);
+    qaLocalProbeRef.current = params.get("mp_qa_local") === "1";
+    qaFreshShardRef.current = params.get("mp_qa_fresh") === "1";
   }
   const [world, setWorld] = useState<BomberWorld>(() =>
     createBomberWorld(deviceId, nickname, { mapId: 0 })
@@ -302,6 +304,7 @@ export function BomberGame() {
   }, []);
   const reportedRef = useRef(false);
   const pendingInputs = useRef<BomberInput[]>([]);
+  const lastGuestInputAt = useRef<Record<string, number>>({});
   const lastStateSent = useRef(0);
   const lastHostStateAt = useRef(0);
   const matchLocalStartAt = useRef(0);
@@ -367,14 +370,27 @@ export function BomberGame() {
         }
         reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
 
-        const queued = pendingInputs.current.splice(0);
-        for (const inp of queued) {
+        const applyInput = (inp: BomberInput) => {
+          if (!inp.deviceId || inp.deviceId === deviceId) return;
+          const at = inp.at ?? 0;
+          if (at <= (lastGuestInputAt.current[inp.deviceId] ?? 0)) return;
+          lastGuestInputAt.current[inp.deviceId] = at;
           if (inp.dx || inp.dy) tryMove(w, inp.deviceId, inp.dx ?? 0, inp.dy ?? 0);
           if (inp.plant) {
             const bomb = plantBomb(w, inp.deviceId, inp.at ?? Date.now());
             if (bomb) send(code, "bomber:bomb", bomb);
           }
+        };
+
+        const gsInputs = room?.gameState ?? {};
+        for (const key of Object.keys(gsInputs)) {
+          if (!key.startsWith("input:")) continue;
+          const payload = gsInputs[key] as BomberInput | undefined;
+          if (payload) applyInput(payload);
         }
+
+        const queued = pendingInputs.current.splice(0);
+        for (const inp of queued) applyInput(inp);
         tickBomberWorld(w);
         const next = snap(w);
         worldRef.current = next;
@@ -576,6 +592,7 @@ export function BomberGame() {
 
       // Guest: host authoritative — no optimistic move (prevents 2-cell / desync).
       send(code, `input:${deviceId}`, payload);
+      sync(code);
     },
     [deviceId]
   );
@@ -738,6 +755,10 @@ export function BomberGame() {
           let joinedRoom: GameRoom = room;
           let reclaimedShard = false;
           const othersInRoom = !qaLocalProbeRef.current && roomHasOtherHumans(joinedRoom, deviceId);
+          if (qaFreshShardRef.current && !othersInRoom) {
+            joinedRoom = claimStaleShardRoom(joinedRoom, nickname);
+            reclaimedShard = true;
+          }
           let freshState = true;
           if (!qaLocalProbeRef.current) {
             freshState = await waitForFreshShardState(

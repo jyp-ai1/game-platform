@@ -1,0 +1,44 @@
+{
+  "roomId": null,
+  "playerA": {
+    "id": null,
+    "seat": null,
+    "spawn": null,
+    "initialPosition": null,
+    "finalPosition": null
+  },
+  "playerB": {
+    "id": null,
+    "seat": null,
+    "spawn": null,
+    "initialPosition": null,
+    "finalPosition": null
+  },
+  "movementSync": {
+    "aToB": false,
+    "bToA": false
+  },
+  "bomb": {
+    "owner": null,
+    "position": null,
+    "playerBombOnly": false
+  },
+  "explosion": false,
+  "deathSync": false,
+  "aiMoved": true,
+  "seatA": null,
+  "seatB": null,
+  "spawnA": null,
+  "spawnB": null,
+  "positionA_before": null,
+  "positionA_after": null,
+  "positionB_before": null,
+  "positionB_after": null,
+  "bombId": null,
+  "bombPosition": null,
+  "bombOwnerId": null,
+  "playerBombOnly": false,
+  "death": false,
+  "aiPosition_before": null,
+  "aiPosition_after": null
+}

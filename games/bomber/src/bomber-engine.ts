@@ -534,14 +534,21 @@ export function reconcileHumans(
     }
   }
 
-  // Always pin humans to roster seat index (host=0, guest=1, ...) — never share (1,1).
+  // Distinct seats: reposition only when two humans share a tile (never every tick).
   for (let i = 0; i < ordered.length; i++) {
     const h = ordered[i]!;
     const p = world.players[h.id];
     if (!p || p.isBot) continue;
     const target = seats[i % seats.length]!;
-    p.x = target.x;
-    p.y = target.y;
+    const overlap = ordered.some((other, j) => {
+      if (j === i || other.id === h.id) return false;
+      const op = world.players[other.id];
+      return op && !op.isBot && op.x === p.x && op.y === p.y;
+    });
+    if (overlap) {
+      p.x = target.x;
+      p.y = target.y;
+    }
   }
 
   while (Object.keys(world.players).length < want) {
