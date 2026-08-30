@@ -52,7 +52,11 @@ export async function probeFloatingMobile(page, slug, mark) {
     mark(`${slug}-mobile-action-zone-${id}`, (await overlay.count()) > 0 && (await btn.count()) > 0);
   }
 
-  await page.screenshot({ path: join(SHOTS, `${slug}-mobile-pad.png`), fullPage: true });
+  try {
+    await page.screenshot({ path: join(SHOTS, `${slug}-mobile-pad.png`), fullPage: true });
+  } catch {
+    /* screenshot optional on Windows path edge cases */
+  }
 }
 
 export async function runMobileRegression(browser, mark) {

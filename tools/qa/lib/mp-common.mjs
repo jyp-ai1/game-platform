@@ -209,6 +209,12 @@ export async function moveBomberUntilChanged(page, before, maxTries = 4) {
     if (now && before && (now.x !== before.x || now.y !== before.y)) {
       return now;
     }
+    // Guest inputs round-trip through host state — allow extra sync time
+    await page.waitForTimeout(1200);
+    const synced = await readBomberGrid(page);
+    if (synced && before && (synced.x !== before.x || synced.y !== before.y)) {
+      return synced;
+    }
   }
   return readBomberGrid(page);
 }

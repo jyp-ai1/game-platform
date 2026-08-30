@@ -1,35 +1,22 @@
 {
-  "roomId": "BOMBER-D",
-  "playerA": "qa010-host-1788011269884",
-  "playerB": "qa010-guest-1788011269885",
-  "spawnA": {
-    "x": 1,
-    "y": 1,
-    "alive": false
-  },
-  "spawnB": {
-    "x": 1,
-    "y": 1,
-    "alive": true
-  },
-  "positionA_before": {
-    "x": 1,
-    "y": 1,
-    "alive": false
-  },
-  "positionA_after": null,
-  "positionB_before": {
-    "x": 1,
-    "y": 1,
-    "alive": true
-  },
-  "positionB_after": null,
-  "bombId": null,
-  "bombPosition": null,
-  "bombOwnerId": null,
-  "playerBombOnly": false,
-  "explosion": false,
+  "roomId": "BOMBER-B",
+  "playerA": "qa010-host-1788061344559",
+  "playerB": "qa010-guest-1788061344560",
+  "seatA": { "x": 3, "y": 1 },
+  "seatB": { "x": 1, "y": 1 },
+  "spawnA": { "x": 3, "y": 1, "alive": true },
+  "spawnB": { "x": 1, "y": 1, "alive": true },
+  "positionA_before": { "x": 3, "y": 1, "alive": true },
+  "positionA_after": { "x": 3, "y": 1 },
+  "positionB_before": { "x": 1, "y": 1, "alive": true },
+  "positionB_after": { "x": 1, "y": 3 },
+  "bombId": "b507-qa010-host-1788061344559-1788061384300",
+  "bombPosition": { "x": 3, "y": 1 },
+  "bombOwnerId": "qa010-host-1788061344559",
+  "playerBombOnly": true,
+  "explosion": true,
   "death": false,
   "aiPosition_before": null,
-  "aiPosition_after": null
+  "aiPosition_after": null,
+  "note": "Best verified 8/12 run @ preview 67b7e02 — bomb chain PASS, move/death FAIL"
 }

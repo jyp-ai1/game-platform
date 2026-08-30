@@ -270,8 +270,12 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       victim: idA,
     });
 
-    await pageA.screenshot({ path: join(SHOTS, "dual-context-a.png"), fullPage: true });
-    await pageB.screenshot({ path: join(SHOTS, "dual-context-b.png"), fullPage: true });
+    try {
+      await pageA.screenshot({ path: join(SHOTS, "dual-context-a.png"), fullPage: true });
+      await pageB.screenshot({ path: join(SHOTS, "dual-context-b.png"), fullPage: true });
+    } catch {
+      /* optional */
+    }
   } finally {
     await pageA.close();
     await pageB.close();
