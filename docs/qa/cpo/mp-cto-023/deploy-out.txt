@@ -1,0 +1,12 @@
+MP-CTO-023 Preview deploy @ 9fffe35
+
+Visit URL: https://game29-lfz4o7vj8-jyp-ai1s-projects.vercel.app
+Deployment: dpl_48XTbo3jxJ2zGWJzjkuLBcAMCXEM
+Branch: content-factory
+Commit: 9fffe35
+
+Migration 0035 status: TABLE_MISSING (not applied on Supabase)
+Apply: supabase/migrations/0035_game_comments.sql in Supabase SQL editor
+Tool: node tools/qa/apply-migration-0035.mjs
+
+Preview QA: 4/8 FAIL (comment write blocked by missing game_comments table)

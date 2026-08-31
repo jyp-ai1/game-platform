@@ -2,92 +2,111 @@
 
 ## STATUS
 
-IMPLEMENTED (Preview QA pending migration `0035`)
+FAIL (Preview 4/8 — migration blocker)
 
 ## COMMIT
 
-(uncommitted at report time)
+9fffe35
 
 ## PREVIEW
 
-(pending deploy — apply migration then verify on game29 Preview Visit URL)
+https://game29-lfz4o7vj8-jyp-ai1s-projects.vercel.app
+
+Deployment: dpl_48XTbo3jxJ2zGWJzjkuLBcAMCXEM
 
 ## SCOPE
 
-Game detail → comment write → Supabase `game_comments` → list → refresh/incognito cross-session visibility
+Game detail comments → Supabase `game_comments` → cross-session visibility
 
-**Out of scope:** OAuth, likes, replies, admin delete, notifications, Bomber MP, Game Registration rework
+**Excluded:** OAuth, likes, replies, admin, Bomber MP, Game Registration rework
 
 ## P0 RESULT
 
-| # | Test | Status |
+| # | Test | Result |
 |---|------|--------|
-| 1 | Game detail entry | PENDING Preview |
-| 2 | Comment write | PENDING Preview |
-| 3 | Comment list | PENDING Preview |
-| 4 | Refresh persistence | PENDING Preview |
-| 5 | Incognito same comments | PENDING Preview |
-| 6 | Per-game isolation | PENDING Preview |
-| 7 | Empty comment rejected | CODE (400) |
-| 8 | Game play regression | PENDING Preview |
+| 1 | Game detail entry | PASS |
+| 2 | Comment write | FAIL |
+| 3 | Comment list | FAIL |
+| 4 | Refresh persistence | FAIL |
+| 5 | Incognito | FAIL |
+| 6 | Per-game isolation | PASS |
+| 7 | Empty comment reject | PASS |
+| 8 | Game play regression | PASS |
 
-**Preview score:** 0/8 verified (implementation complete)
+**4/8 Preview FAIL**
 
 ## AUTOMATED
 
+```
+node tools/qa/mp-cto-023-comments.mjs
+QA_BASE_URL=https://game29-lfz4o7vj8-jyp-ai1s-projects.vercel.app
+QA_COMMIT=9fffe35
+→ 4/8 FAIL
+```
+
 | Check | Result |
 |-------|--------|
-| `npm run typecheck` (apps/web) | PASS |
-| Validation unit (empty / 500 char) | In `game-comments.ts` |
+| typecheck | PASS (pre-commit) |
+| Harness | `tools/qa/mp-cto-023-comments.mjs` |
 
 ## BROWSER
 
-Manual Preview checklist (PM):
-
-1. `/games/snake` → Comments section loads
-2. Post comment with author + text → appears in list
-3. Refresh → comment remains
-4. Incognito → same comment visible
-5. `/games/bomber` → different slug, no snake comment
-6. Empty submit → error message, no row created
-7. `/games/snake/play` → still enters game
+Preview Playwright run @ 2026-09-01 — see `verify-report.json`, `screenshots/`
 
 ## REGRESSION
 
-- Game play routing unchanged (`game-detail-template.tsx` comments only)
-- Bomber MP: **not touched** (STOP)
-- Game Registration (MP-022): **not touched**
+Snake `/games/snake/play` → flagship — PASS (harness #8)
 
 ## CHANGED FILES
 
 | File | Change |
 |------|--------|
-| `supabase/migrations/0035_game_comments.sql` | `game_comments` table + RLS read |
+| `supabase/migrations/0035_game_comments.sql` | New table + RLS read |
 | `apps/web/lib/supabase/game-comments.ts` | list/create + validation |
-| `apps/web/app/api/games/[slug]/comments/route.ts` | GET + POST API |
-| `apps/web/components/game-detail-extras.tsx` | Supabase-backed UI (no localStorage, no OAuth gate) |
+| `apps/web/app/api/games/[slug]/comments/route.ts` | GET + POST |
+| `apps/web/components/game-detail-extras.tsx` | Supabase UI |
+| `tools/qa/mp-cto-023-comments.mjs` | 8 P0 harness |
+| `tools/qa/apply-migration-0035.mjs` | Migration probe helper |
 
 ## EVIDENCE
 
-- `docs/qa/cpo/mp-cto-023/CTO-FINAL-REPORT.md` (this file)
-- API: `GET/POST /api/games/{slug}/comments`
-- UI testids: `game-detail-comments`, `comments-author`, `comments-textarea`, `comments-submit`, `comments-list`
+```
+docs/qa/cpo/mp-cto-023/
+├── CTO-FINAL-REPORT.md
+├── verify-report.json
+├── TEST-RESULT.md
+├── deploy-out.txt
+└── screenshots/
+    ├── 01-detail-entry.png
+    ├── 02-comment-write.png
+    ├── 03-after-refresh.png
+    ├── 04-incognito.png
+    ├── 05-bomber-no-snake-comment.png
+    └── 06-snake-play.png
+```
 
 ## KNOWN LIMITATIONS
 
-- No login — author name is free text (spoofable)
-- No likes/replies/delete (by design)
-- `community-store.ts` still used elsewhere (Community page, admin moderation) — game detail only migrated
-- Requires Supabase migration `0035` + `SUPABASE_SECRET_KEY` for writes
+- **Blocker:** migration 0035 not applied on Supabase — `game_comments` table missing
+- Author name free text (no auth) — by design for MVP
+- Community page still uses localStorage — out of scope
 
 ## CTO FINAL
 
-**HOLD** — implementation complete; Preview 8/8 not yet run
+**FAIL**
 
 ## CPO REVIEW
 
-NOT READY — apply migration + Preview QA first
+**NO**
 
 ## CEO TEST
 
-HOLD
+**HOLD**
+
+---
+
+### Min fix (no new Gate)
+
+Apply `0035_game_comments.sql` → re-run harness → expect 8/8 PASS → CPO REVIEW READY
+
+**Do not open MP-024.**

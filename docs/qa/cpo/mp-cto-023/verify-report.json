@@ -1,0 +1,64 @@
+{
+  "gate": "mp-cto-023",
+  "scope": "Comments MVP",
+  "commit": "9fffe35",
+  "base": "https://game29-lfz4o7vj8-jyp-ai1s-projects.vercel.app",
+  "marker": "mp023-1788217894407",
+  "finishedAt": "2026-08-31T23:11:55.055Z",
+  "p0": {
+    "detailEntry": true,
+    "commentWrite": false,
+    "commentList": false,
+    "refresh": false,
+    "incognito": false,
+    "isolation": true,
+    "emptyReject": true,
+    "playRegression": true
+  },
+  "passed": 4,
+  "total": 8,
+  "ctoFinal": "FAIL",
+  "checks": [
+    {
+      "name": "p0-detail-entry",
+      "ok": true,
+      "t": "2026-08-31T23:11:38.926Z"
+    },
+    {
+      "name": "p0-comment-write",
+      "ok": false,
+      "t": "2026-08-31T23:11:40.810Z"
+    },
+    {
+      "name": "p0-comment-list",
+      "ok": false,
+      "t": "2026-08-31T23:11:41.442Z"
+    },
+    {
+      "name": "p0-refresh-persistence",
+      "ok": false,
+      "t": "2026-08-31T23:11:44.345Z"
+    },
+    {
+      "name": "p0-incognito",
+      "ok": false,
+      "t": "2026-08-31T23:11:47.241Z"
+    },
+    {
+      "name": "p0-per-game-isolation",
+      "ok": true,
+      "t": "2026-08-31T23:11:49.080Z"
+    },
+    {
+      "name": "p0-empty-comment-reject",
+      "ok": true,
+      "t": "2026-08-31T23:11:50.760Z"
+    },
+    {
+      "name": "p0-play-regression",
+      "ok": true,
+      "note": "https://game29-lfz4o7vj8-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD",
+      "t": "2026-08-31T23:11:54.911Z"
+    }
+  ]
+}
