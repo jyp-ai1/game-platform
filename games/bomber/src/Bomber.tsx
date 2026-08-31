@@ -325,8 +325,8 @@ export function BomberGame() {
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
   const [mapId, setMapId] = useState(0);
   const [nowTick, setNowTick] = useState(() => Date.now());
-  const [isHost, setIsHost] = useState(true);
-  const isHostRef = useRef(true);
+  const [isHost, setIsHost] = useState(false);
+  const isHostRef = useRef(false);
   const setHostAuthority = useCallback((host: boolean) => {
     isHostRef.current = host;
     setIsHost(host);
@@ -469,7 +469,7 @@ export function BomberGame() {
       const hostId = room.hostId || room.players[0]?.deviceId;
       const amHost = hostId === deviceId;
       const listedHost =
-        amHost || isHostRef.current || isRoomHost(code, deviceId) || matchHostIdRef.current === deviceId;
+        amHost || isRoomHost(code, deviceId) || matchHostIdRef.current === deviceId;
 
       const rosterKey = room.players
         .map((p) => p.deviceId)
@@ -514,7 +514,6 @@ export function BomberGame() {
         const w = worldRef.current;
         const listedHost = amHost || isRoomHost(code, deviceId);
         const ignoreRemote =
-          isHostRef.current ||
           listedHost ||
           matchHostIdRef.current === deviceId ||
           qaLocalProbeRef.current;
@@ -674,7 +673,6 @@ export function BomberGame() {
       const room = getRoom(code);
       const hostNow =
         qaLocalProbeRef.current ||
-        isHostRef.current ||
         matchHostIdRef.current === deviceId ||
         room?.hostId === deviceId;
 

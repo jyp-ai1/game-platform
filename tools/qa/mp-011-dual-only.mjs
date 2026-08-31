@@ -1,5 +1,5 @@
-/** Fast Bomber dual-context P0 only (MP-CTO-019 / MP-CTO-020). */
-process.env.QA_GATE = process.env.QA_GATE ?? "mp-cto-020";
+/** Fast Bomber dual-context P0 only (MP-CTO-019 / 020 / 021). */
+process.env.QA_GATE = process.env.QA_GATE ?? "mp-cto-021";
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
