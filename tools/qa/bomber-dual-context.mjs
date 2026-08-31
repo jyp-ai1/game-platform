@@ -538,6 +538,14 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       hostView: await readBomberPlayerQa(pageA, idB),
       guestView: await readBomberPlayerQa(pageB, idB),
     };
+    dualContext.stateTrace = dualContext.stateTrace ?? [];
+    dualContext.stateTrace.push({
+      phase: "pre-plant",
+      bomb: null,
+      hostViewGuest: dualContext.deathSetup.hostGuestPositionSync.hostView,
+      guestLocal: dualContext.deathSetup.hostGuestPositionSync.guestView,
+      hostLocal: await readBomberPlayerQa(pageA, idA),
+    });
 
     // Nudge guest input so host authoritative world has fresh guest coordinates.
     await pageB.evaluate(() => window.__BOMBER_QA_MOVE__?.(0, 0));
@@ -628,6 +636,15 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
         explosionSync = true;
         dualContext.explosion = true;
         dualContext.explosionCells = snapA?.blasts ?? snapB?.blasts ?? null;
+        dualContext.stateTrace.push({
+          phase: "explosion",
+          bomb: playerBomb,
+          hostViewGuest: await readBomberPlayerQa(pageA, idB),
+          guestLocal: await readBomberPlayerQa(pageB, idB),
+          hostLocal: await readBomberPlayerQa(pageA, idA),
+          blastsA: snapA?.blasts ?? 0,
+          blastsB: snapB?.blasts ?? 0,
+        });
         break;
       }
     }
@@ -640,7 +657,9 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       await pageA.waitForTimeout(100);
       deathOnA = await readBomberPlayerQa(pageA, idB);
       deathOnB = await readBomberPlayerQa(pageB, idB);
-      if (deathOnA?.alive === false && deathOnB?.alive === false) {
+      const positionsMatch =
+        deathOnA?.x === deathOnB?.x && deathOnA?.y === deathOnB?.y;
+      if (deathOnA?.alive === false && deathOnB?.alive === false && positionsMatch) {
         deathSync = true;
         if (!explosionSync) {
           explosionSync = true;

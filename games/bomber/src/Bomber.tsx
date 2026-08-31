@@ -414,9 +414,7 @@ export function BomberGame() {
           send(code, "state", serializeBomberState(next));
           return;
         }
-        if (!(qaFreshShardRef.current && humanSeats >= 2)) {
-          reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
-        }
+        reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
 
         const applyInput = (inp: BomberInput) => {
           if (!inp.deviceId) return;
@@ -439,13 +437,6 @@ export function BomberGame() {
 
         const queued = pendingInputs.current.splice(0);
         for (const inp of queued) applyInput(inp);
-        if (qaFreshShardRef.current) {
-          const hostPlayer = w.players[matchHostIdRef.current ?? deviceId];
-          if (hostPlayer && !hostPlayer.isBot && !hostPlayer.alive) {
-            hostPlayer.alive = true;
-            hostPlayer.bombsLeft = hostPlayer.bombsMax;
-          }
-        }
         tickBomberWorld(w, Date.now(), { deferMatchEnd, skipBots });
         const next = snap(w);
         worldRef.current = next;
@@ -502,9 +493,9 @@ export function BomberGame() {
           send(code, "state", serializeBomberState(next));
           return;
         }
-        const skipRosterReconcile = qaFreshShardRef.current && humans.length >= 2;
-        if (!skipRosterReconcile) {
-          reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? hostId ?? deviceId });
+        reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? hostId ?? deviceId });
+        // Mid-match roster churn must not revive dead humans (MP-CTO-020 death sync).
+        if (!w.matchStartedAt || w.matchOver) {
           for (const h of humans) {
             const p = w.players[h.id];
             if (p && !p.isBot) {
