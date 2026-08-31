@@ -414,7 +414,9 @@ export function BomberGame() {
           send(code, "state", serializeBomberState(next));
           return;
         }
-        reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
+        if (!(qaFreshShardRef.current && humanSeats >= 2)) {
+          reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
+        }
 
         const applyInput = (inp: BomberInput) => {
           if (!inp.deviceId) return;
