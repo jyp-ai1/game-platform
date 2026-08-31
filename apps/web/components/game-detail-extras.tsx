@@ -2,84 +2,83 @@
 
 import type { Game } from "@game-platform/shared";
 import Link from "next/link";
-import { Share2, ThumbsDown, Heart, Flag } from "lucide-react";
-import { useCallback, useState, useSyncExternalStore, type FormEvent } from "react";
+import { Share2 } from "lucide-react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { StarRatingPanel } from "@/components/community-ratings-panel";
-import { usePlayerAuth } from "@/components/auth-provider";
-import {
-  deleteOwnComment,
-  isCommentDisliked,
-  isCommentLiked,
-  listCommentsForGame,
-  moderateCommentStub,
-  postComment,
-  reportComment,
-  toggleCommentDislike,
-  toggleCommentLike,
-} from "@/lib/community-store";
+import type { GameComment } from "@/lib/supabase/game-comments";
+import { MAX_COMMENT_LENGTH } from "@/lib/supabase/game-comments";
 import {
   buildInvitePlayUrl,
   readInviteOrigin,
   resolveInviteRoomCode,
 } from "@/lib/invite-link";
-import { subscribeLiveData } from "@/lib/live-data-bus";
 import { getLastNickname } from "@game-platform/game-sdk";
 
 export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
-  const { isAuthenticated, displayName, signIn, loading } = usePlayerAuth();
+  const [author, setAuthor] = useState("");
   const [message, setMessage] = useState("");
   const [gateMsg, setGateMsg] = useState<string | null>(null);
-  const [, bump] = useState(0);
-  useSyncExternalStore(subscribeLiveData, () => 0, () => 0);
+  const [comments, setComments] = useState<GameComment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const refresh = useCallback(() => bump((n) => n + 1), []);
-  const stored = listCommentsForGame(gameSlug, "recent").slice(0, 8);
-  /** Visible stub list when store is empty — Detail must show Comments. */
-  const stubComments =
-    stored.length === 0
-      ? [
-          {
-            id: `stub-${gameSlug}-1`,
-            gameSlug,
-            author: "Nova",
-            authorId: null as string | null,
-            message: "친구랑 한 판 더 했어요. 월드가 살아있어요!",
-            likes: 4,
-            createdAt: new Date().toISOString(),
-            moderated: false,
-          },
-          {
-            id: `stub-${gameSlug}-2`,
-            gameSlug,
-            author: "Kai",
-            authorId: null as string | null,
-            message: "캐릭터·색상 고르고 바로 입장 — 흐름 좋음.",
-            likes: 2,
-            createdAt: new Date().toISOString(),
-            moderated: false,
-          },
-        ]
-      : [];
-  const comments = stored.length > 0 ? stored : stubComments;
-  const isStub = stored.length === 0;
+  const loadComments = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const res = await fetch(`/api/games/${encodeURIComponent(gameSlug)}/comments`);
+      const data = (await res.json()) as { ok: boolean; comments?: GameComment[]; error?: string };
+      if (!data.ok) {
+        setLoadError(data.error ?? "댓글을 불러오지 못했습니다.");
+        setComments([]);
+        return;
+      }
+      setComments(data.comments ?? []);
+    } catch {
+      setLoadError("댓글을 불러오지 못했습니다.");
+      setComments([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [gameSlug]);
 
-  function handleSubmit(e: FormEvent) {
+  useEffect(() => {
+    setAuthor(getLastNickname() || "");
+    void loadComments();
+  }, [loadComments]);
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!isAuthenticated) {
-      setGateMsg("댓글 작성은 로그인이 필요합니다.");
-      return;
-    }
-    const nick = getLastNickname() || displayName || "Player";
-    const mod = moderateCommentStub(message);
-    if (!mod.ok) {
-      setGateMsg(mod.reason ?? "댓글을 수정해 주세요.");
-      return;
-    }
-    postComment(gameSlug, message, { author: nick, authorId: "self" });
-    setMessage("");
     setGateMsg(null);
-    refresh();
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/games/${encodeURIComponent(gameSlug)}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ author: author || "Player", content: message }),
+      });
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        field?: "author" | "content";
+        comment?: GameComment;
+      };
+      if (!data.ok) {
+        setGateMsg(data.error ?? "댓글 등록 실패");
+        return;
+      }
+      if (data.comment) {
+        setComments((prev) => [data.comment!, ...prev]);
+      } else {
+        await loadComments();
+      }
+      setMessage("");
+    } catch {
+      setGateMsg("네트워크 오류 — 다시 시도하세요.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function formatDate(iso: string): string {
@@ -99,107 +98,66 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
       data-testid="game-detail-comments"
     >
       <h3 className="font-semibold">Comments</h3>
-      {!loading && !isAuthenticated ? (
-        <p className="mt-2 text-xs text-muted-foreground">
-          작성은 로그인 후 가능합니다.{" "}
-          <button
-            type="button"
-            className="text-primary underline"
-            onClick={() => void signIn()}
-            data-testid="comments-login-cta"
-          >
-            로그인
-          </button>
-          <span className="text-muted-foreground"> (LIVE OAuth: CEO HOLD)</span>
-        </p>
-      ) : null}
+      <p className="mt-1 text-xs text-muted-foreground">
+        서버에 저장되는 공유 댓글 · 로그인 없이 작성 가능
+      </p>
       <form className="mt-3 space-y-2" onSubmit={handleSubmit}>
+        <input
+          className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm backdrop-blur"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          placeholder="이름"
+          aria-label="작성자"
+          maxLength={32}
+          data-testid="comments-author"
+        />
         <textarea
           className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm backdrop-blur"
           rows={2}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder={isAuthenticated ? "Leave a comment…" : "로그인 후 댓글을 남겨 주세요"}
+          placeholder="Leave a comment…"
           aria-label="댓글"
-          required
-          disabled={!isAuthenticated}
+          maxLength={MAX_COMMENT_LENGTH}
           data-testid="comments-textarea"
         />
         {gateMsg ? (
-          <p className="text-xs text-amber-300" role="status">
+          <p className="text-xs text-amber-300" role="status" data-testid="comments-gate-msg">
             {gateMsg}
           </p>
         ) : null}
         <button
           type="submit"
           className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
-          disabled={!isAuthenticated}
+          disabled={submitting}
           data-testid="comments-submit"
         >
-          Post
+          {submitting ? "Posting…" : "Post"}
         </button>
       </form>
-      <ul className="mt-4 space-y-2">
-        {comments.map((c) => {
-          const liked = !isStub && isCommentLiked(c.id);
-          const disliked = !isStub && isCommentDisliked(c.id);
-          const own = !isStub && c.authorId === "self";
-          return (
-            <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm">
+      {loadError ? (
+        <p className="mt-3 text-xs text-amber-300" data-testid="comments-load-error">
+          {loadError}
+        </p>
+      ) : null}
+      {loading ? (
+        <p className="mt-4 text-xs text-muted-foreground">Loading comments…</p>
+      ) : (
+        <ul className="mt-4 space-y-2" data-testid="comments-list">
+          {comments.length === 0 ? (
+            <li className="text-xs text-muted-foreground">아직 댓글이 없습니다. 첫 댓글을 남겨 보세요.</li>
+          ) : null}
+          {comments.map((c) => (
+            <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm" data-testid="comment-item">
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-xs text-muted-foreground">{c.author}</p>
                 <p className="text-[10px] text-muted-foreground">{formatDate(c.createdAt)}</p>
               </div>
-              <p>{c.message}</p>
-              <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                <button
-                  type="button"
-                  className={liked ? "text-red-400" : ""}
-                  disabled={isStub}
-                  onClick={() => {
-                    if (isStub) return;
-                    toggleCommentLike(c.id);
-                    refresh();
-                  }}
-                >
-                  <Heart className="mr-0.5 inline size-3" fill={liked ? "currentColor" : "none"} />
-                  {c.likes}
-                </button>
-                {!isStub ? (
-                  <>
-                    <button
-                      type="button"
-                      className={disliked ? "text-amber-400" : ""}
-                      onClick={() => {
-                        toggleCommentDislike(c.id);
-                        refresh();
-                      }}
-                    >
-                      <ThumbsDown className="inline size-3" />
-                    </button>
-                    <button type="button" onClick={() => reportComment(c.id)}>
-                      <Flag className="inline size-3" /> Report
-                    </button>
-                    {own ? (
-                      <button
-                        type="button"
-                        className="text-red-300"
-                        data-testid="comments-delete-own"
-                        onClick={() => {
-                          deleteOwnComment(c.id, "self");
-                          refresh();
-                        }}
-                      >
-                        Delete
-                      </button>
-                    ) : null}
-                  </>
-                ) : null}
-              </div>
+              <p data-testid="comment-content">{c.content}</p>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
       <Link href="/community" className="mt-3 inline-block text-xs text-primary hover:underline">
         View all in Community →
       </Link>
