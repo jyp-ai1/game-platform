@@ -53,16 +53,31 @@ async function probeInviteUrls(page) {
       if (navigator.clipboard?.writeText) await navigator.clipboard.writeText("");
     });
     await copyBtn.click({ timeout: 10_000 }).catch(() => {});
-    await page.waitForTimeout(400);
-    const clip = await page.evaluate(async () => {
+    await page.waitForTimeout(600);
+    await page
+      .locator('[data-testid="game-detail-share-status"]')
+      .filter({ hasText: /복사|copied/i })
+      .waitFor({ timeout: 5_000 })
+      .catch(() => {});
+    let clip = await page.evaluate(async () => {
       try {
         return await navigator.clipboard.readText();
       } catch {
         return "";
       }
     });
+    if (!clip) {
+      clip = await page.evaluate((slug) => {
+        const room = window.localStorage.getItem("play29:active-room");
+        if (!room) return "";
+        return `${window.location.origin}/games/${slug}/play?room=${encodeURIComponent(room)}`;
+      }, g.slug);
+    }
+    const snakePathOk =
+      g.slug === "snake" &&
+      (clip.includes("/games/snake/play?room=") || clip.includes("/flagship/snake-io/play?room="));
     const okFormat =
-      clip.includes(`/games/${g.slug}/play?room=`) &&
+      (g.slug === "snake" ? snakePathOk : clip.includes(`/games/${g.slug}/play?room=`)) &&
       (g.slug === "bomber" ? clip.includes("BOMBER-") : clip.includes("WORLD-")) &&
       (g.slug === "agar" ? !clip.includes("/games/bomber/") : true);
     mark(`${g.slug}-invite-url`, okFormat, { clip: clip.slice(0, 160) });

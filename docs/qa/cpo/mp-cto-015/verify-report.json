@@ -1,0 +1,1693 @@
+{
+  "gate": "MP-CTO-015",
+  "scope": "Friend Invite / Same World Only",
+  "commit": "fc7bf39",
+  "base": "https://game29-cs8qvsi4v-jyp-ai1s-projects.vercel.app",
+  "finishedAt": "2026-08-31T05:13:00.613Z",
+  "rooms": {
+    "world": [
+      "WORLD-INV015A",
+      "WORLD-INV015B",
+      "WORLD-INV015C"
+    ],
+    "bomber": [
+      "BOMBER-B",
+      "BOMBER-C",
+      "BOMBER-D"
+    ]
+  },
+  "p0": {
+    "snakeInvite": true,
+    "snakeSameRoom": true,
+    "snakeDifferentPlayer": true,
+    "snakeMutualVisibility": true,
+    "agarInvite": true,
+    "agarSameRoom": true,
+    "agarDifferentPlayer": true,
+    "agarMutualVisibility": true,
+    "bomberInvite": true,
+    "bomberSameRoom": true,
+    "bomberDifferentPlayer": true,
+    "bomberMutualVisibility": true,
+    "pcPc": true,
+    "pcMobile": true,
+    "mobilePc": true,
+    "mobileRegression": true,
+    "urlGameIdentity": true,
+    "qaCleanup": true
+  },
+  "passed": 18,
+  "total": 18,
+  "ctoFinal": "PASS",
+  "checks": [
+    {
+      "name": "snake-invite-url",
+      "ok": true,
+      "clip": "https://game29-cs8qvsi4v-jyp-ai1s-projects.vercel.app/games/snake/play?room=WORLD-LX7",
+      "t": "2026-08-31T05:07:05.114Z"
+    },
+    {
+      "name": "agar-invite-url",
+      "ok": true,
+      "clip": "https://game29-cs8qvsi4v-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-LX7",
+      "t": "2026-08-31T05:07:07.815Z"
+    },
+    {
+      "name": "bomber-invite-url",
+      "ok": true,
+      "clip": "https://game29-cs8qvsi4v-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A",
+      "t": "2026-08-31T05:07:10.244Z"
+    },
+    {
+      "name": "snake-pcPc-same-room",
+      "ok": true,
+      "evA": {
+        "urlRoom": "WORLD-INV015A",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-INV015A",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262",
+          "qa015-guest-snake-1788152830263"
+        ],
+        "localDeviceId": "qa015-host-snake-1788152830262",
+        "localLength": 18,
+        "foodTotal": 2611,
+        "ambientFood": 2400,
+        "deathFood": 211,
+        "ambientGemValues": [
+          1,
+          1,
+          3,
+          1,
+          1,
+          1,
+          2,
+          1,
+          20,
+          1,
+          2,
+          2,
+          3,
+          2,
+          2,
+          2,
+          2,
+          2,
+          1,
+          3,
+          3,
+          1,
+          1,
+          2,
+          3,
+          2,
+          3,
+          1,
+          2,
+          1,
+          3,
+          2,
+          1,
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1
+        ],
+        "peerIds": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-guest-snake-1788152830263"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          "You",
+          "You",
+          "",
+          "",
+          "You",
+          "You",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:1",
+            "nickname": "BOT Alpha",
+            "score": 45
+          },
+          {
+            "id": "bot:27",
+            "nickname": "BOT Apex",
+            "score": 41
+          },
+          {
+            "id": "bot:11",
+            "nickname": "BOT Alpha",
+            "score": 39
+          },
+          {
+            "id": "bot:39",
+            "nickname": "BOT Remnant",
+            "score": 39
+          },
+          {
+            "id": "bot:9",
+            "nickname": "BOT Remnant",
+            "score": 39
+          },
+          {
+            "id": "bot:33",
+            "nickname": "BOT Wander",
+            "score": 38
+          },
+          {
+            "id": "bot:25",
+            "nickname": "BOT Farmer",
+            "score": 35
+          },
+          {
+            "id": "bot:19",
+            "nickname": "BOT Remnant",
+            "score": 33
+          },
+          {
+            "id": "bot:26",
+            "nickname": "BOT Alpha",
+            "score": 32
+          },
+          {
+            "id": "bot:14",
+            "nickname": "BOT Remnant",
+            "score": 31
+          }
+        ],
+        "roomHud": "ROOM: WORLD-INV015A",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "evB": {
+        "urlRoom": "WORLD-INV015A",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-INV015A",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262",
+          "qa015-guest-snake-1788152830263"
+        ],
+        "localDeviceId": "qa015-guest-snake-1788152830263",
+        "localLength": 18,
+        "foodTotal": 2516,
+        "ambientFood": 2400,
+        "deathFood": 116,
+        "ambientGemValues": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          3,
+          2,
+          1,
+          3,
+          1,
+          2,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1,
+          2,
+          3,
+          3,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        "peerIds": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          "You",
+          "You",
+          "",
+          "",
+          "You",
+          "You",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:30",
+            "nickname": "BOT Farmer",
+            "score": 38
+          },
+          {
+            "id": "bot:6",
+            "nickname": "BOT Alpha",
+            "score": 32
+          },
+          {
+            "id": "bot:38",
+            "nickname": "BOT Wander",
+            "score": 31
+          },
+          {
+            "id": "bot:13",
+            "nickname": "BOT Wander",
+            "score": 27
+          },
+          {
+            "id": "bot:16",
+            "nickname": "BOT Alpha",
+            "score": 25
+          },
+          {
+            "id": "bot:7",
+            "nickname": "BOT Apex",
+            "score": 25
+          },
+          {
+            "id": "bot:4",
+            "nickname": "BOT Remnant",
+            "score": 24
+          },
+          {
+            "id": "bot:1",
+            "nickname": "BOT Alpha",
+            "score": 23
+          },
+          {
+            "id": "bot:10",
+            "nickname": "BOT Farmer",
+            "score": 23
+          },
+          {
+            "id": "bot:29",
+            "nickname": "BOT Remnant",
+            "score": 23
+          }
+        ],
+        "roomHud": "ROOM: WORLD-INV015A",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "t": "2026-08-31T05:08:16.176Z"
+    },
+    {
+      "name": "snake-pcPc-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:08:16.176Z"
+    },
+    {
+      "name": "snake-pcMobile-same-room",
+      "ok": true,
+      "evA": {
+        "urlRoom": "WORLD-INV015B",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-INV015B",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177",
+          "qa015-guest-snake-1788152896178"
+        ],
+        "localDeviceId": "qa015-host-snake-1788152896177",
+        "localLength": 18,
+        "foodTotal": 2613,
+        "ambientFood": 2400,
+        "deathFood": 213,
+        "ambientGemValues": [
+          1,
+          3,
+          2,
+          1,
+          20,
+          3,
+          20,
+          3,
+          1,
+          1,
+          3,
+          1,
+          20,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          20,
+          2,
+          3,
+          3,
+          1,
+          1,
+          1,
+          1,
+          3,
+          1,
+          1,
+          1,
+          20,
+          1,
+          1,
+          2,
+          1,
+          3,
+          1,
+          2
+        ],
+        "peerIds": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-guest-snake-1788152896178"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          "You",
+          "You",
+          "",
+          "",
+          "You",
+          "You",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:36",
+            "nickname": "BOT Alpha",
+            "score": 49
+          },
+          {
+            "id": "bot:8",
+            "nickname": "BOT Wander",
+            "score": 37
+          },
+          {
+            "id": "bot:21",
+            "nickname": "BOT Alpha",
+            "score": 36
+          },
+          {
+            "id": "bot:9",
+            "nickname": "BOT Remnant",
+            "score": 35
+          },
+          {
+            "id": "bot:18",
+            "nickname": "BOT Wander",
+            "score": 33
+          },
+          {
+            "id": "bot:3",
+            "nickname": "BOT Wander",
+            "score": 33
+          },
+          {
+            "id": "bot:5",
+            "nickname": "BOT Farmer",
+            "score": 33
+          },
+          {
+            "id": "bot:15",
+            "nickname": "BOT Farmer",
+            "score": 28
+          },
+          {
+            "id": "bot:10",
+            "nickname": "BOT Farmer",
+            "score": 27
+          },
+          {
+            "id": "bot:19",
+            "nickname": "BOT Remnant",
+            "score": 27
+          }
+        ],
+        "roomHud": "ROOM: WORLD-INV015B",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "evB": {
+        "urlRoom": "WORLD-INV015B",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-INV015B",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177",
+          "qa015-guest-snake-1788152896178"
+        ],
+        "localDeviceId": "qa015-guest-snake-1788152896178",
+        "localLength": 24,
+        "foodTotal": 2590,
+        "ambientFood": 2400,
+        "deathFood": 190,
+        "ambientGemValues": [
+          2,
+          20,
+          3,
+          2,
+          1,
+          3,
+          1,
+          1,
+          1,
+          3,
+          1,
+          20,
+          1,
+          2,
+          2,
+          2,
+          1,
+          1,
+          2,
+          20,
+          1,
+          1,
+          1,
+          20,
+          1,
+          1,
+          3,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          1,
+          20
+        ],
+        "peerIds": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          "You",
+          "You",
+          "",
+          "",
+          "You",
+          "You",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:34",
+            "nickname": "BOT Remnant",
+            "score": 28
+          },
+          {
+            "id": "bot:9",
+            "nickname": "BOT Remnant",
+            "score": 26
+          },
+          {
+            "id": "bot:26",
+            "nickname": "BOT Alpha",
+            "score": 25
+          },
+          {
+            "id": "bot:25",
+            "nickname": "BOT Farmer",
+            "score": 24
+          },
+          {
+            "id": "qa015-guest-snake-1788152896178",
+            "nickname": "",
+            "score": 24
+          },
+          {
+            "id": "bot:32",
+            "nickname": "BOT Apex",
+            "score": 23
+          },
+          {
+            "id": "bot:4",
+            "nickname": "BOT Remnant",
+            "score": 23
+          },
+          {
+            "id": "bot:19",
+            "nickname": "BOT Remnant",
+            "score": 22
+          },
+          {
+            "id": "bot:30",
+            "nickname": "BOT Farmer",
+            "score": 22
+          },
+          {
+            "id": "bot:20",
+            "nickname": "BOT Farmer",
+            "score": 21
+          }
+        ],
+        "roomHud": "ROOM: WORLD-INV015B",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "t": "2026-08-31T05:09:21.964Z"
+    },
+    {
+      "name": "snake-pcMobile-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:09:21.964Z"
+    },
+    {
+      "name": "snake-mobilePc-same-room",
+      "ok": true,
+      "evA": {
+        "urlRoom": "WORLD-INV015C",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-INV015C",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964",
+          "qa015-guest-snake-1788152961965"
+        ],
+        "localDeviceId": "qa015-host-snake-1788152961964",
+        "localLength": 23,
+        "foodTotal": 2661,
+        "ambientFood": 2400,
+        "deathFood": 261,
+        "ambientGemValues": [
+          3,
+          2,
+          1,
+          20,
+          2,
+          2,
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          3,
+          1,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          3,
+          2,
+          2,
+          1,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          1,
+          2,
+          1
+        ],
+        "peerIds": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-guest-snake-1788152961965"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          "You",
+          "You",
+          "",
+          "",
+          "You",
+          "You",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:15",
+            "nickname": "BOT Farmer",
+            "score": 55
+          },
+          {
+            "id": "bot:18",
+            "nickname": "BOT Wander",
+            "score": 44
+          },
+          {
+            "id": "bot:23",
+            "nickname": "BOT Wander",
+            "score": 41
+          },
+          {
+            "id": "bot:30",
+            "nickname": "BOT Farmer",
+            "score": 39
+          },
+          {
+            "id": "bot:8",
+            "nickname": "BOT Wander",
+            "score": 39
+          },
+          {
+            "id": "bot:1",
+            "nickname": "BOT Alpha",
+            "score": 37
+          },
+          {
+            "id": "bot:38",
+            "nickname": "BOT Wander",
+            "score": 37
+          },
+          {
+            "id": "bot:19",
+            "nickname": "BOT Remnant",
+            "score": 36
+          },
+          {
+            "id": "bot:20",
+            "nickname": "BOT Farmer",
+            "score": 36
+          },
+          {
+            "id": "bot:27",
+            "nickname": "BOT Apex",
+            "score": 33
+          }
+        ],
+        "roomHud": "ROOM: WORLD-INV015C",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "evB": {
+        "urlRoom": "WORLD-INV015C",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-INV015C",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964",
+          "qa015-guest-snake-1788152961965"
+        ],
+        "localDeviceId": "qa015-guest-snake-1788152961965",
+        "localLength": 22,
+        "foodTotal": 2571,
+        "ambientFood": 2400,
+        "deathFood": 171,
+        "ambientGemValues": [
+          1,
+          1,
+          1,
+          2,
+          3,
+          2,
+          3,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          20,
+          3,
+          2,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          3,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          3,
+          2,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        "peerIds": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          "You",
+          "You",
+          "",
+          "",
+          "You",
+          "You",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:14",
+            "nickname": "BOT Remnant",
+            "score": 26
+          },
+          {
+            "id": "bot:15",
+            "nickname": "BOT Farmer",
+            "score": 26
+          },
+          {
+            "id": "bot:26",
+            "nickname": "BOT Alpha",
+            "score": 26
+          },
+          {
+            "id": "bot:32",
+            "nickname": "BOT Apex",
+            "score": 26
+          },
+          {
+            "id": "bot:9",
+            "nickname": "BOT Remnant",
+            "score": 26
+          },
+          {
+            "id": "bot:28",
+            "nickname": "BOT Wander",
+            "score": 25
+          },
+          {
+            "id": "bot:17",
+            "nickname": "BOT Apex",
+            "score": 23
+          },
+          {
+            "id": "bot:29",
+            "nickname": "BOT Remnant",
+            "score": 23
+          },
+          {
+            "id": "qa015-host-snake-1788152961964",
+            "nickname": "",
+            "score": 23
+          },
+          {
+            "id": "qa015-guest-snake-1788152961965",
+            "nickname": "",
+            "score": 22
+          }
+        ],
+        "roomHud": "ROOM: WORLD-INV015C",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "t": "2026-08-31T05:10:27.717Z"
+    },
+    {
+      "name": "snake-mobilePc-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:10:27.718Z"
+    },
+    {
+      "name": "snake-invite",
+      "ok": true,
+      "t": "2026-08-31T05:10:27.718Z"
+    },
+    {
+      "name": "snake-same-room",
+      "ok": true,
+      "t": "2026-08-31T05:10:27.718Z"
+    },
+    {
+      "name": "snake-different-player",
+      "ok": true,
+      "t": "2026-08-31T05:10:27.718Z"
+    },
+    {
+      "name": "snake-mutual-visibility",
+      "ok": true,
+      "t": "2026-08-31T05:10:27.718Z"
+    },
+    {
+      "name": "agar-pcPc-same-room",
+      "ok": true,
+      "evA": {
+        "mass": 0,
+        "cells": 0,
+        "canSplit": false,
+        "alive": false,
+        "ready": false,
+        "started": true,
+        "tick": 392,
+        "aimX": 1382.7132602509353,
+        "aimY": 1006.2564483138851,
+        "x": 0,
+        "y": 0,
+        "roomCode": "WORLD-INV015A",
+        "localDeviceId": "qa015-host-agar-1788153027718",
+        "roomPlayerIds": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262",
+          "qa015-guest-snake-1788152830263",
+          "qa015-host-agar-1788153027718",
+          "qa015-guest-agar-1788153027719"
+        ],
+        "peerWorldIds": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262",
+          "qa015-guest-snake-1788152830263",
+          "qa015-guest-agar-1788153027719"
+        ]
+      },
+      "evB": {
+        "mass": 87,
+        "cells": 1,
+        "canSplit": true,
+        "alive": true,
+        "ready": true,
+        "started": true,
+        "tick": 264,
+        "aimX": 1353.0820740674344,
+        "aimY": 1155.2488600193399,
+        "x": 1353.0820740674344,
+        "y": 1155.2488600193399,
+        "roomCode": "WORLD-INV015A",
+        "localDeviceId": "qa015-guest-agar-1788153027719",
+        "roomPlayerIds": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262",
+          "qa015-guest-snake-1788152830263",
+          "qa015-host-agar-1788153027718",
+          "qa015-guest-agar-1788153027719"
+        ],
+        "peerWorldIds": [
+          "qa015-host-snake-1788151653579",
+          "qa015-guest-snake-1788151653580",
+          "qa015-host-agar-1788151853208",
+          "qa015-guest-agar-1788151853209",
+          "qa015-host-snake-1788152399819",
+          "qa015-guest-snake-1788152399820",
+          "qa015-host-agar-1788152600476",
+          "qa015-guest-agar-1788152600477",
+          "qa015-host-snake-1788152830262",
+          "qa015-guest-snake-1788152830263",
+          "qa015-host-agar-1788153027718"
+        ]
+      },
+      "t": "2026-08-31T05:10:42.899Z"
+    },
+    {
+      "name": "agar-pcPc-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:10:42.899Z"
+    },
+    {
+      "name": "agar-pcMobile-same-room",
+      "ok": true,
+      "evA": {
+        "mass": 0,
+        "cells": 0,
+        "canSplit": false,
+        "alive": false,
+        "ready": false,
+        "started": true,
+        "tick": 394,
+        "aimX": 793.8335968697953,
+        "aimY": 1307.5068131812866,
+        "x": 0,
+        "y": 0,
+        "roomCode": "WORLD-INV015B",
+        "localDeviceId": "qa015-host-agar-1788153042899",
+        "roomPlayerIds": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177",
+          "qa015-guest-snake-1788152896178",
+          "qa015-host-agar-1788153042899",
+          "qa015-guest-agar-1788153042900"
+        ],
+        "peerWorldIds": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177",
+          "qa015-guest-snake-1788152896178",
+          "qa015-guest-agar-1788153042900"
+        ]
+      },
+      "evB": {
+        "mass": 0,
+        "cells": 0,
+        "canSplit": false,
+        "alive": false,
+        "ready": false,
+        "started": true,
+        "tick": 264,
+        "aimX": 485.8140258833183,
+        "aimY": 1008.680214966161,
+        "x": 0,
+        "y": 0,
+        "roomCode": "WORLD-INV015B",
+        "localDeviceId": "qa015-guest-agar-1788153042900",
+        "roomPlayerIds": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177",
+          "qa015-guest-snake-1788152896178",
+          "qa015-host-agar-1788153042899",
+          "qa015-guest-agar-1788153042900"
+        ],
+        "peerWorldIds": [
+          "qa015-host-snake-1788151720505",
+          "qa015-guest-snake-1788151720506",
+          "qa015-host-agar-1788151866805",
+          "qa015-guest-agar-1788151866806",
+          "qa015-host-snake-1788152467879",
+          "qa015-guest-snake-1788152467880",
+          "qa015-host-agar-1788152616023",
+          "qa015-guest-agar-1788152616024",
+          "qa015-host-snake-1788152896177",
+          "qa015-guest-snake-1788152896178",
+          "qa015-host-agar-1788153042899"
+        ]
+      },
+      "t": "2026-08-31T05:10:57.244Z"
+    },
+    {
+      "name": "agar-pcMobile-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:10:57.244Z"
+    },
+    {
+      "name": "agar-mobilePc-same-room",
+      "ok": true,
+      "evA": {
+        "mass": 121,
+        "cells": 1,
+        "canSplit": true,
+        "alive": true,
+        "ready": true,
+        "started": true,
+        "tick": 409,
+        "aimX": 1444.8642510934026,
+        "aimY": 1098.692092684876,
+        "x": 1444.8642510934026,
+        "y": 1098.692092684876,
+        "roomCode": "WORLD-INV015C",
+        "localDeviceId": "qa015-host-agar-1788153057244",
+        "roomPlayerIds": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964",
+          "qa015-guest-snake-1788152961965",
+          "qa015-host-agar-1788153057244",
+          "qa015-guest-agar-1788153057245"
+        ],
+        "peerWorldIds": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964",
+          "qa015-guest-snake-1788152961965",
+          "qa015-guest-agar-1788153057245"
+        ]
+      },
+      "evB": {
+        "mass": 0,
+        "cells": 0,
+        "canSplit": false,
+        "alive": false,
+        "ready": false,
+        "started": true,
+        "tick": 265,
+        "aimX": 1013.3308892960775,
+        "aimY": 555.4329761929325,
+        "x": 0,
+        "y": 0,
+        "roomCode": "WORLD-INV015C",
+        "localDeviceId": "qa015-guest-agar-1788153057245",
+        "roomPlayerIds": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964",
+          "qa015-guest-snake-1788152961965",
+          "qa015-host-agar-1788153057244",
+          "qa015-guest-agar-1788153057245"
+        ],
+        "peerWorldIds": [
+          "qa015-host-snake-1788151787341",
+          "qa015-guest-snake-1788151787342",
+          "qa015-host-agar-1788151879926",
+          "qa015-guest-agar-1788151879927",
+          "qa015-host-snake-1788152534188",
+          "qa015-guest-snake-1788152534189",
+          "qa015-host-agar-1788152631038",
+          "qa015-guest-agar-1788152631039",
+          "qa015-host-snake-1788152961964",
+          "qa015-guest-snake-1788152961965",
+          "qa015-host-agar-1788153057244"
+        ]
+      },
+      "t": "2026-08-31T05:11:12.526Z"
+    },
+    {
+      "name": "agar-mobilePc-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:11:12.526Z"
+    },
+    {
+      "name": "agar-invite",
+      "ok": true,
+      "t": "2026-08-31T05:11:12.526Z"
+    },
+    {
+      "name": "agar-same-room",
+      "ok": true,
+      "t": "2026-08-31T05:11:12.526Z"
+    },
+    {
+      "name": "agar-different-player",
+      "ok": true,
+      "t": "2026-08-31T05:11:12.526Z"
+    },
+    {
+      "name": "agar-mutual-visibility",
+      "ok": true,
+      "t": "2026-08-31T05:11:12.526Z"
+    },
+    {
+      "name": "bomber-pcPc-same-room",
+      "ok": true,
+      "evA": {
+        "roomId": "BOMBER-B",
+        "deviceId": "qa015-host-bomber-1788153072526",
+        "stateAck": true,
+        "isHost": true,
+        "local": {
+          "x": 1,
+          "y": 1,
+          "alive": true,
+          "speedBonus": 0
+        },
+        "players": [
+          {
+            "id": "qa015-host-bomber-1788153072526",
+            "x": 1,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          },
+          {
+            "id": "bot:refill-13-10-6",
+            "x": 13,
+            "y": 10,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-12-1-6",
+            "x": 11,
+            "y": 1,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "qa015-guest-bomber-1788153072527",
+            "x": 3,
+            "y": 6,
+            "isBot": false,
+            "alive": true
+          }
+        ],
+        "bombs": [],
+        "blasts": 0,
+        "matchOver": false,
+        "tick": 216
+      },
+      "evB": {
+        "roomId": "BOMBER-B",
+        "deviceId": "qa015-guest-bomber-1788153072527",
+        "stateAck": true,
+        "isHost": false,
+        "local": {
+          "x": 3,
+          "y": 6,
+          "alive": true,
+          "speedBonus": 0
+        },
+        "players": [
+          {
+            "id": "qa015-host-bomber-1788153072526",
+            "x": 1,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          },
+          {
+            "id": "bot:refill-13-10-6",
+            "x": 13,
+            "y": 10,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-12-1-6",
+            "x": 11,
+            "y": 1,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "qa015-guest-bomber-1788153072527",
+            "x": 3,
+            "y": 6,
+            "isBot": false,
+            "alive": true
+          }
+        ],
+        "bombs": [],
+        "blasts": 0,
+        "matchOver": false,
+        "tick": 215
+      },
+      "t": "2026-08-31T05:11:37.198Z"
+    },
+    {
+      "name": "bomber-pcPc-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:11:37.198Z"
+    },
+    {
+      "name": "bomber-pcMobile-same-room",
+      "ok": true,
+      "evA": {
+        "roomId": "BOMBER-C",
+        "deviceId": "qa015-host-bomber-1788153097198",
+        "stateAck": true,
+        "isHost": true,
+        "local": {
+          "x": 1,
+          "y": 1,
+          "alive": true,
+          "speedBonus": 0
+        },
+        "players": [
+          {
+            "id": "qa015-host-bomber-1788153097198",
+            "x": 1,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          },
+          {
+            "id": "bot:4",
+            "x": 1,
+            "y": 4,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:5",
+            "x": 11,
+            "y": 6,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-1-11-3",
+            "x": 1,
+            "y": 10,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-13-10-6",
+            "x": 13,
+            "y": 10,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "qa015-guest-bomber-1788153097199",
+            "x": 13,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          }
+        ],
+        "bombs": [],
+        "blasts": 0,
+        "matchOver": false,
+        "tick": 220
+      },
+      "evB": {
+        "roomId": "BOMBER-C",
+        "deviceId": "qa015-guest-bomber-1788153097199",
+        "stateAck": true,
+        "isHost": false,
+        "local": {
+          "x": 13,
+          "y": 1,
+          "alive": true,
+          "speedBonus": 0
+        },
+        "players": [
+          {
+            "id": "qa015-host-bomber-1788153097198",
+            "x": 1,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          },
+          {
+            "id": "bot:4",
+            "x": 1,
+            "y": 4,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:5",
+            "x": 11,
+            "y": 6,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-1-11-3",
+            "x": 1,
+            "y": 10,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-13-10-6",
+            "x": 13,
+            "y": 10,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "qa015-guest-bomber-1788153097199",
+            "x": 13,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          }
+        ],
+        "bombs": [],
+        "blasts": 0,
+        "matchOver": false,
+        "tick": 219
+      },
+      "t": "2026-08-31T05:12:02.038Z"
+    },
+    {
+      "name": "bomber-pcMobile-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:12:02.039Z"
+    },
+    {
+      "name": "bomber-mobilePc-same-room",
+      "ok": true,
+      "evA": {
+        "roomId": "BOMBER-D",
+        "deviceId": "qa015-host-bomber-1788153122039",
+        "stateAck": true,
+        "isHost": true,
+        "local": {
+          "x": 1,
+          "y": 1,
+          "alive": true,
+          "speedBonus": 0
+        },
+        "players": [
+          {
+            "id": "qa015-host-bomber-1788153122039",
+            "x": 1,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          },
+          {
+            "id": "bot:5",
+            "x": 13,
+            "y": 9,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-13-1-5",
+            "x": 11,
+            "y": 1,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-1-11-5",
+            "x": 1,
+            "y": 7,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-13-11-5",
+            "x": 11,
+            "y": 11,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "qa015-guest-bomber-1788153122040",
+            "x": 1,
+            "y": 7,
+            "isBot": false,
+            "alive": true
+          }
+        ],
+        "bombs": [],
+        "blasts": 0,
+        "matchOver": false,
+        "tick": 221
+      },
+      "evB": {
+        "roomId": "BOMBER-D",
+        "deviceId": "qa015-guest-bomber-1788153122040",
+        "stateAck": true,
+        "isHost": false,
+        "local": {
+          "x": 1,
+          "y": 7,
+          "alive": true,
+          "speedBonus": 0
+        },
+        "players": [
+          {
+            "id": "qa015-host-bomber-1788153122039",
+            "x": 1,
+            "y": 1,
+            "isBot": false,
+            "alive": true
+          },
+          {
+            "id": "bot:5",
+            "x": 13,
+            "y": 9,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-13-1-5",
+            "x": 11,
+            "y": 1,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-1-11-5",
+            "x": 1,
+            "y": 7,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "bot:refill-13-11-5",
+            "x": 11,
+            "y": 11,
+            "isBot": true,
+            "alive": false
+          },
+          {
+            "id": "qa015-guest-bomber-1788153122040",
+            "x": 1,
+            "y": 7,
+            "isBot": false,
+            "alive": true
+          }
+        ],
+        "bombs": [],
+        "blasts": 0,
+        "matchOver": false,
+        "tick": 219
+      },
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "bomber-mobilePc-visibility",
+      "ok": true,
+      "hostSeesGuest": true,
+      "guestSeesHost": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "bomber-invite",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "bomber-same-room",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "bomber-different-player",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "bomber-mutual-visibility",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "cross-pc-pc",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "cross-pc-mobile",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "cross-mobile-pc",
+      "ok": true,
+      "t": "2026-08-31T05:12:26.735Z"
+    },
+    {
+      "name": "mobile-regression",
+      "ok": true,
+      "t": "2026-08-31T05:13:00.502Z"
+    },
+    {
+      "name": "qa-cleanup",
+      "ok": true,
+      "note": "QA rooms WORLD-INV015A|B|C / BOMBER-B|C|D — test prefix only; leaveRoom on Agar unmount",
+      "t": "2026-08-31T05:13:00.506Z"
+    }
+  ],
+  "realDevice": "PENDING_EXTERNAL"
+}
