@@ -144,6 +144,34 @@ function isRoomHost(roomCode: string, deviceId: string): boolean {
   return room.hostId === deviceId;
 }
 
+/** Fresh match when invite guest arrives after a solo host win/end. */
+function restartInviteMatch(
+  w: BomberWorld,
+  deviceId: string,
+  nickname: string,
+  color: string,
+  hostId: string,
+  humans: HumanSeat[]
+): BomberWorld {
+  const slots = rosterForMap(w.mapId);
+  const next = createBomberWorld(deviceId, nickname, {
+    playerSlots: slots,
+    mapId: w.mapId,
+    humans,
+    matchStartedAt: Date.now(),
+  });
+  reconcileHumans(next, humans, { hostId });
+  for (const h of humans) {
+    const p = next.players[h.id];
+    if (p && !p.isBot) {
+      p.alive = true;
+      p.bombsLeft = p.bombsMax;
+    }
+  }
+  applyLocalLook(next, deviceId, color);
+  return next;
+}
+
 function roomHasOtherHumans(room: GameRoom, deviceId: string): boolean {
   return room.players.some((p) => p.deviceId !== deviceId);
 }
@@ -371,6 +399,16 @@ export function BomberGame() {
         if (!humans.some((h) => h.id === deviceId)) {
           humans = [{ id: deviceId, nickname, color }, ...humans];
         }
+        const roomNow = getRoom(code);
+        const deferMatchEnd = (roomNow?.players.length ?? 1) < 2;
+        if (w.matchOver && humans.length >= 2) {
+          const hostId = matchHostIdRef.current ?? deviceId;
+          const next = restartInviteMatch(w, deviceId, nickname, color, hostId, humans);
+          worldRef.current = next;
+          setWorld(next);
+          send(code, "state", serializeBomberState(next));
+          return;
+        }
         reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
 
         const applyInput = (inp: BomberInput) => {
@@ -401,7 +439,7 @@ export function BomberGame() {
             hostPlayer.bombsLeft = hostPlayer.bombsMax;
           }
         }
-        tickBomberWorld(w);
+        tickBomberWorld(w, Date.now(), { deferMatchEnd });
         const next = snap(w);
         worldRef.current = next;
         setWorld(next);
@@ -443,6 +481,20 @@ export function BomberGame() {
         rosterKeyRef.current = rosterKey;
         const w = worldRef.current;
         const humans = collectHumans(code, deviceId, nickname, color);
+        if (w.matchOver && humans.length >= 2) {
+          const next = restartInviteMatch(
+            w,
+            deviceId,
+            nickname,
+            color,
+            matchHostIdRef.current ?? hostId ?? deviceId,
+            humans
+          );
+          worldRef.current = next;
+          setWorld(next);
+          send(code, "state", serializeBomberState(next));
+          return;
+        }
         reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? hostId ?? deviceId });
         for (const h of humans) {
           const p = w.players[h.id];

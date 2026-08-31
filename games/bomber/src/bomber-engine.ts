@@ -1027,7 +1027,11 @@ export function upsertRemoteBomb(world: BomberWorld, bomb: Bomb): void {
   world.bombs.push({ ...bomb });
 }
 
-export function tickBomberWorld(world: BomberWorld, now = Date.now()): void {
+export function tickBomberWorld(
+  world: BomberWorld,
+  now = Date.now(),
+  opts?: { deferMatchEnd?: boolean }
+): void {
   if (world.matchOver) return;
   world.tick += 1;
 
@@ -1060,6 +1064,6 @@ export function tickBomberWorld(world: BomberWorld, now = Date.now()): void {
   world.blasts = world.blasts.filter((b) => b.until > now);
 
   const living = Object.values(world.players).filter((p) => p.alive);
-  if (living.length <= 1) finalizeMatch(world);
+  if (living.length <= 1 && !opts?.deferMatchEnd) finalizeMatch(world);
   updateRankings(world);
 }

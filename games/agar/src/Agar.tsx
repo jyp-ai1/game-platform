@@ -20,7 +20,7 @@ import {
   type MpStyleOption,
   type PadDirection,
 } from "@game-platform/game-sdk";
-import { ensureRoom, joinRoom, leaveRoom } from "@game-platform/multiplayer-sdk";
+import { ensureRoom, getRoom, joinRoomAsync, leaveRoom } from "@game-platform/multiplayer-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AgarMinimap } from "./agar-minimap";
@@ -37,6 +37,7 @@ import {
   inViewport,
   massToRadius,
   setPlayerAim,
+  respawnPlayer,
   splitPlayer,
   tickAgarWorld,
   totalMass,
@@ -98,6 +99,20 @@ function localRank(world: AgarWorld, id: string): number {
   return idx >= 0 ? idx + 1 : 0;
 }
 
+function syncRoomPeers(w: AgarWorld, code: string, localId: string): void {
+  const room = getRoom(code);
+  if (!room) return;
+  for (const rp of room.players) {
+    if (rp.deviceId === localId) continue;
+    const existing = w.players[rp.deviceId];
+    if (!existing?.alive) {
+      respawnPlayer(w, rp.deviceId, rp.nickname || "Guest");
+      const peer = w.players[rp.deviceId];
+      if (peer) peer.isBot = false;
+    }
+  }
+}
+
 export function AgarGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
@@ -136,8 +151,7 @@ export function AgarGame() {
     void (async () => {
       try {
         await ensureRoom(roomCode);
-        if (!mounted) return;
-        joinRoom(roomCode, { nickname });
+        await joinRoomAsync(roomCode, { nickname });
       } catch {
         /* local MVP still playable without transport */
       }
@@ -162,13 +176,14 @@ export function AgarGame() {
     if (!started) return;
     const id = window.setInterval(() => {
       const w = worldRef.current;
+      syncRoomPeers(w, roomCode, deviceId);
       tickAgarWorld(w);
       const snap = snapshotWorld(w);
       worldRef.current = snap;
       setWorld(snap);
     }, AGAR_TICK_MS);
     return () => window.clearInterval(id);
-  }, [started]);
+  }, [started, deviceId, roomCode]);
 
   useEffect(() => {
     if (!started || alive || reportedRef.current) return;
@@ -326,6 +341,11 @@ export function AgarGame() {
       const head = p?.cells[0];
       const mass = p ? Math.round(totalMass(p)) : 0;
       const cells = p?.cells.length ?? 0;
+      const room = getRoom(roomCode);
+      const roomPlayerIds = room?.players.map((rp) => rp.deviceId) ?? [];
+      const peerWorldIds = Object.values(wr.players)
+        .filter((row) => row.alive && !row.isBot && row.id !== deviceId)
+        .map((row) => row.id);
       return {
         mass,
         cells,
@@ -338,12 +358,16 @@ export function AgarGame() {
         aimY: p?.aimY ?? 0,
         x: head?.x ?? 0,
         y: head?.y ?? 0,
+        roomCode,
+        localDeviceId: deviceId,
+        roomPlayerIds,
+        peerWorldIds,
       };
     };
     return () => {
       delete w.__AGAR_QA__;
     };
-  }, [started, deviceId]);
+  }, [started, deviceId, roomCode]);
 
   const offsetX = VIEW / 2 - cam.x;
   const offsetY = VIEW / 2 - cam.y;
