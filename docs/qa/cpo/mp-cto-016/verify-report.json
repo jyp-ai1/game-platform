@@ -1,0 +1,233 @@
+{
+  "gate": "MP-CTO-016",
+  "scope": "Snake 실사용 안정성 점검",
+  "commit": "ded615b",
+  "base": "https://game29-ghjb36fz7-jyp-ai1s-projects.vercel.app",
+  "finishedAt": "2026-08-31T06:09:54.742Z",
+  "p0": {
+    "previewEntry": true,
+    "gameStart": true,
+    "floatingPad": true,
+    "directionInput": true,
+    "holdMovement": true,
+    "padRelease": true,
+    "pcArrows": true,
+    "tickAlive": true,
+    "inviteStart": true,
+    "snakeRegression": true
+  },
+  "passed": 10,
+  "total": 10,
+  "ctoFinal": "PASS",
+  "checks": [
+    {
+      "name": "p0-preview-entry",
+      "ok": true,
+      "status": 200,
+      "hasEnter": true,
+      "hasCanvas": false,
+      "hasHud": false,
+      "t": "2026-08-31T06:07:09.198Z"
+    },
+    {
+      "name": "p0-game-start",
+      "ok": true,
+      "canvas": true,
+      "alive": true,
+      "exists": true,
+      "tick": 595,
+      "t": "2026-08-31T06:08:08.809Z"
+    },
+    {
+      "name": "p0-tick-alive",
+      "ok": true,
+      "canvas": true,
+      "alive": true,
+      "exists": true,
+      "tick": 595,
+      "t": "2026-08-31T06:08:08.810Z"
+    },
+    {
+      "name": "p0-floating-pad",
+      "ok": true,
+      "t": "2026-08-31T06:08:08.850Z"
+    },
+    {
+      "name": "p0-direction-input",
+      "ok": true,
+      "dirPass": 4,
+      "dirs": [
+        "down",
+        "left",
+        "up",
+        "right"
+      ],
+      "t": "2026-08-31T06:08:16.000Z"
+    },
+    {
+      "name": "p0-hold-movement",
+      "ok": true,
+      "tickBeforeHold": 652,
+      "tickAfterHold": 664,
+      "t": "2026-08-31T06:08:17.502Z"
+    },
+    {
+      "name": "p0-pad-release",
+      "ok": true,
+      "t": "2026-08-31T06:08:17.767Z"
+    },
+    {
+      "name": "p0-invite-start",
+      "ok": true,
+      "inviteReg": {
+        "canvas": true,
+        "alive": true,
+        "exists": true,
+        "tick": 360
+      },
+      "inviteEvidence": {
+        "urlRoom": "WORLD-QA016",
+        "source": "INVITE",
+        "sessionRoom": "WORLD-QA016",
+        "roomJoinSource": "INVITE",
+        "roomPlayers": [
+          "15a38f9a-7349-42b7-9012-70ba0506f36c",
+          "750aeaa0-a2ed-447e-bb82-990ea04d1bfc",
+          "1a43b6a8-214f-48e5-91d4-2f8c68657b43",
+          "6a93f17a-9cdb-4d53-9976-2bc89dcf08ed"
+        ],
+        "localDeviceId": "6a93f17a-9cdb-4d53-9976-2bc89dcf08ed",
+        "localLength": 22,
+        "foodTotal": 2624,
+        "ambientFood": 2400,
+        "deathFood": 224,
+        "ambientGemValues": [
+          1,
+          2,
+          2,
+          3,
+          1,
+          2,
+          2,
+          1,
+          1,
+          3,
+          1,
+          1,
+          1,
+          3,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          2,
+          3,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          1,
+          3,
+          20
+        ],
+        "peerIds": [
+          "15a38f9a-7349-42b7-9012-70ba0506f36c",
+          "750aeaa0-a2ed-447e-bb82-990ea04d1bfc",
+          "1a43b6a8-214f-48e5-91d4-2f8c68657b43"
+        ],
+        "peerNicknames": [
+          "",
+          "",
+          ""
+        ],
+        "top10": [
+          {
+            "id": "bot:39",
+            "nickname": "BOT Remnant",
+            "score": 38
+          },
+          {
+            "id": "bot:33",
+            "nickname": "BOT Wander",
+            "score": 27
+          },
+          {
+            "id": "bot:45",
+            "nickname": "BOT Farmer",
+            "score": 26
+          },
+          {
+            "id": "bot:11",
+            "nickname": "BOT Alpha",
+            "score": 24
+          },
+          {
+            "id": "bot:44",
+            "nickname": "BOT Remnant",
+            "score": 23
+          },
+          {
+            "id": "6a93f17a-9cdb-4d53-9976-2bc89dcf08ed",
+            "nickname": "",
+            "score": 22
+          },
+          {
+            "id": "bot:10",
+            "nickname": "BOT Farmer",
+            "score": 21
+          },
+          {
+            "id": "bot:16",
+            "nickname": "BOT Alpha",
+            "score": 20
+          },
+          {
+            "id": "bot:21",
+            "nickname": "BOT Alpha",
+            "score": 20
+          },
+          {
+            "id": "bot:29",
+            "nickname": "BOT Remnant",
+            "score": 20
+          }
+        ],
+        "roomHud": "ROOM: WORLD-QA016",
+        "modeHud": "MODE: WORLD",
+        "sourceHud": "SOURCE: INVITE"
+      },
+      "t": "2026-08-31T06:08:45.359Z"
+    },
+    {
+      "name": "p0-pc-arrows",
+      "ok": true,
+      "inputBefore": 0,
+      "inputAfter": 2,
+      "lastDirection": "right",
+      "t": "2026-08-31T06:09:24.730Z"
+    },
+    {
+      "name": "p0-snake-regression",
+      "ok": true,
+      "canvas": true,
+      "alive": true,
+      "exists": true,
+      "tick": 352,
+      "t": "2026-08-31T06:09:54.354Z"
+    }
+  ],
+  "realDevice": "PENDING_EXTERNAL"
+}

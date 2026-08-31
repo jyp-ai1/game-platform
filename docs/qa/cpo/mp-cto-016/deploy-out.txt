@@ -1,0 +1,16 @@
+Preview Deployment — MP-CTO-016
+
+Commit: ded615b
+Branch: content-factory
+Vercel Project: game29
+
+Preview Visit URL:
+https://game29-ghjb36fz7-jyp-ai1s-projects.vercel.app
+
+Deployment ID: dpl_4E3xPQbgDQgCffULjZybLpZ6UCqD
+Created: 2026-08-31 (auto from git push content-factory)
+
+Preview QA: 10/10 PASS @ ded615b
+Local QA: 10/10 PASS @ http://localhost:3028
+
+Snake game code: unchanged (verification-only gate)
