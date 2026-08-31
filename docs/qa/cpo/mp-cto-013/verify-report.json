@@ -1,9 +1,9 @@
 {
   "gate": "MP-CTO-013",
   "scope": "Snake Mobile Control Only",
-  "commit": "9cb910b",
-  "base": "http://localhost:3022",
-  "finishedAt": "2026-08-31T02:02:57.711Z",
+  "commit": "5a2b920",
+  "base": "https://game29-fw5aoqje4-jyp-ai1s-projects.vercel.app",
+  "finishedAt": "2026-08-31T02:10:24.610Z",
   "p0": {
     "floatingPadShow": true,
     "padPosition": true,
@@ -26,8 +26,8 @@
       "canvas": true,
       "alive": true,
       "exists": true,
-      "tick": 354,
-      "t": "2026-08-31T02:02:08.926Z"
+      "tick": 550,
+      "t": "2026-08-31T02:09:34.965Z"
     },
     {
       "name": "p0-direction-input",
@@ -39,24 +39,24 @@
         "left",
         "up"
       ],
-      "t": "2026-08-31T02:02:15.594Z"
+      "t": "2026-08-31T02:09:42.525Z"
     },
     {
       "name": "p0-floating-pad-visible",
       "ok": true,
-      "t": "2026-08-31T02:02:15.599Z"
+      "t": "2026-08-31T02:09:42.544Z"
     },
     {
       "name": "p0-pad-at-touch",
       "ok": true,
       "touchX": 85,
       "touchY": 298,
-      "t": "2026-08-31T02:02:15.754Z"
+      "t": "2026-08-31T02:09:42.694Z"
     },
     {
       "name": "p0-floating-pad-on-touch",
       "ok": true,
-      "t": "2026-08-31T02:02:15.758Z"
+      "t": "2026-08-31T02:09:42.697Z"
     },
     {
       "name": "p0-screen-interference",
@@ -65,31 +65,31 @@
       "y": 246,
       "width": 104,
       "height": 104,
-      "t": "2026-08-31T02:02:15.812Z"
+      "t": "2026-08-31T02:09:42.714Z"
     },
     {
       "name": "p0-ui-selection-block",
       "ok": true,
       "found": true,
       "userSelect": "none",
-      "t": "2026-08-31T02:02:15.815Z"
+      "t": "2026-08-31T02:09:42.720Z"
     },
     {
       "name": "p0-pad-hidden-on-release",
       "ok": true,
-      "t": "2026-08-31T02:02:15.957Z"
+      "t": "2026-08-31T02:09:42.897Z"
     },
     {
       "name": "p0-hold-movement",
       "ok": true,
-      "tickBeforeHold": 410,
-      "tickAfterHold": 421,
-      "t": "2026-08-31T02:02:17.397Z"
+      "tickBeforeHold": 613,
+      "tickAfterHold": 625,
+      "t": "2026-08-31T02:09:44.398Z"
     },
     {
       "name": "p0-mobile-regression",
       "ok": true,
-      "t": "2026-08-31T02:02:17.405Z"
+      "t": "2026-08-31T02:09:44.417Z"
     },
     {
       "name": "p0-pc-regression",
@@ -97,7 +97,7 @@
       "inputBefore": 0,
       "inputAfter": 1,
       "lastDirection": "right",
-      "t": "2026-08-31T02:02:57.632Z"
+      "t": "2026-08-31T02:10:24.503Z"
     }
   ],
   "realDevice": "PENDING_EXTERNAL"
