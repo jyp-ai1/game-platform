@@ -1,9 +1,9 @@
 {
   "gate": "MP-CTO-012",
   "scope": "Bomber Mobile Control Only",
-  "commit": "d9998d2",
-  "base": "http://localhost:3021",
-  "finishedAt": "2026-08-31T01:19:00.381Z",
+  "commit": "9cb910b",
+  "base": "https://game29-bsczp3vz5-jyp-ai1s-projects.vercel.app",
+  "finishedAt": "2026-08-31T01:25:37.610Z",
   "p0": {
     "floatingPadShow": true,
     "padPosition": true,
@@ -23,31 +23,31 @@
     {
       "name": "p0-floating-pad-visible",
       "ok": true,
-      "t": "2026-08-31T01:18:39.391Z"
+      "t": "2026-08-31T01:25:15.725Z"
     },
     {
       "name": "p0-pad-at-touch",
       "ok": true,
       "touchX": 85,
       "touchY": 385,
-      "t": "2026-08-31T01:18:39.547Z"
+      "t": "2026-08-31T01:25:15.874Z"
     },
     {
       "name": "p0-floating-pad-on-touch",
       "ok": true,
-      "t": "2026-08-31T01:18:39.550Z"
+      "t": "2026-08-31T01:25:15.875Z"
     },
     {
       "name": "p0-pad-hidden-on-release",
       "ok": true,
-      "t": "2026-08-31T01:18:39.690Z"
+      "t": "2026-08-31T01:25:16.007Z"
     },
     {
       "name": "p0-ui-selection-block",
       "ok": true,
       "found": true,
       "userSelect": "none",
-      "t": "2026-08-31T01:18:39.693Z"
+      "t": "2026-08-31T01:25:16.009Z"
     },
     {
       "name": "p0-lightning-one-cell-per-input",
@@ -56,13 +56,13 @@
       "x1": 12,
       "x2": 11,
       "stepX": -1,
-      "t": "2026-08-31T01:18:45.307Z"
+      "t": "2026-08-31T01:25:21.895Z"
     },
     {
       "name": "p0-direction-input",
       "ok": true,
       "dirPass": 4,
-      "t": "2026-08-31T01:18:49.883Z"
+      "t": "2026-08-31T01:25:26.500Z"
     },
     {
       "name": "p0-hold-movement",
@@ -76,7 +76,7 @@
         "y": 1
       },
       "holdDist": 10,
-      "t": "2026-08-31T01:18:51.059Z"
+      "t": "2026-08-31T01:25:27.688Z"
     },
     {
       "name": "p0-grid-collision",
@@ -87,14 +87,14 @@
         "y": 1
       },
       "towardWallDx": 1,
-      "t": "2026-08-31T01:18:51.240Z"
+      "t": "2026-08-31T01:25:27.880Z"
     },
     {
       "name": "p0-bomb-action",
       "ok": true,
       "bombsBefore": 0,
       "bombsAfter": 1,
-      "t": "2026-08-31T01:18:51.554Z"
+      "t": "2026-08-31T01:25:28.218Z"
     },
     {
       "name": "p0-pc-regression",
@@ -108,7 +108,7 @@
         "y": 1
       },
       "key": "ArrowLeft",
-      "t": "2026-08-31T01:18:59.899Z"
+      "t": "2026-08-31T01:25:37.476Z"
     }
   ],
   "realDevice": "PENDING"
