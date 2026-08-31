@@ -1,0 +1,277 @@
+{
+  "gate": "mp-cto-021",
+  "scope": "Bomber Multiplayer Sync Only",
+  "commit": "501512f",
+  "base": "https://game29-n6ckbun9i-jyp-ai1s-projects.vercel.app",
+  "finishedAt": "2026-08-31T16:39:19.364Z",
+  "p0": {
+    "distinctSpawn": true,
+    "aToBMovement": true,
+    "bToAMovement": true,
+    "playerBomb": true,
+    "explosionSync": true,
+    "deathSync": false
+  },
+  "passed": 5,
+  "total": 6,
+  "ctoFinal": "FAIL",
+  "checks": [
+    {
+      "name": "gate-same-room",
+      "ok": true,
+      "roomA": "BOMBER-D",
+      "roomB": "BOMBER-D",
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-different-player-id",
+      "ok": true,
+      "idA": "qa012-host-1788194314452",
+      "idB": "qa012-guest-1788194314453",
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-different-seat",
+      "ok": false,
+      "seatA": 0,
+      "seatB": null,
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-different-spawn",
+      "ok": true,
+      "spawnA": {
+        "x": 1,
+        "y": 1,
+        "alive": true,
+        "speedBonus": 0
+      },
+      "spawnB": {
+        "x": 1,
+        "y": 7,
+        "alive": true,
+        "speedBonus": 0
+      },
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-host-seat",
+      "ok": true,
+      "spawnA": {
+        "x": 1,
+        "y": 1,
+        "alive": true,
+        "speedBonus": 0
+      },
+      "isHost": true,
+      "stateAck": true,
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-guest-seat",
+      "ok": true,
+      "spawnB": {
+        "x": 1,
+        "y": 7,
+        "alive": true,
+        "speedBonus": 0
+      },
+      "seat": null,
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-distinct-spawn",
+      "ok": true,
+      "spawnA": {
+        "x": 1,
+        "y": 1,
+        "alive": true,
+        "speedBonus": 0
+      },
+      "spawnB": {
+        "x": 1,
+        "y": 7,
+        "alive": true,
+        "speedBonus": 0
+      },
+      "t": "2026-08-31T16:39:00.008Z"
+    },
+    {
+      "name": "gate-a-move-sync",
+      "ok": true,
+      "posA0": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "posAFinal": {
+        "x": 5,
+        "y": 1,
+        "alive": true
+      },
+      "movementA": [
+        {
+          "key": "movementA",
+          "actor": "qa012-host-1788194314452",
+          "observer": "B",
+          "before": {
+            "x": 1,
+            "y": 1,
+            "alive": true
+          },
+          "after": {
+            "x": 5,
+            "y": 1,
+            "alive": true
+          },
+          "remote": {
+            "x": 5,
+            "y": 1,
+            "alive": true
+          },
+          "localMoved": true,
+          "synced": true
+        }
+      ],
+      "t": "2026-08-31T16:39:03.280Z"
+    },
+    {
+      "name": "gate-b-move-sync",
+      "ok": true,
+      "posB0": {
+        "x": 1,
+        "y": 7,
+        "alive": true
+      },
+      "posBFinal": {
+        "x": 3,
+        "y": 7,
+        "alive": true
+      },
+      "movementB": [
+        {
+          "key": "movementB",
+          "actor": "qa012-guest-1788194314453",
+          "observer": "A",
+          "before": {
+            "x": 1,
+            "y": 7,
+            "alive": true
+          },
+          "after": {
+            "x": 3,
+            "y": 7,
+            "alive": true
+          },
+          "remote": {
+            "x": 3,
+            "y": 7,
+            "alive": true
+          },
+          "localMoved": true,
+          "synced": true
+        }
+      ],
+      "t": "2026-08-31T16:39:06.556Z"
+    },
+    {
+      "name": "gate-human-player-bomb",
+      "ok": true,
+      "ownerId": "qa012-host-1788194314452",
+      "t": "2026-08-31T16:39:13.527Z"
+    },
+    {
+      "name": "gate-player-bomb-sync",
+      "ok": true,
+      "playerBomb": {
+        "id": "b453-qa012-host-1788194314452-1788194351899",
+        "x": 3,
+        "y": 6,
+        "ownerId": "qa012-host-1788194314452"
+      },
+      "bombsA": [
+        {
+          "id": "b453-qa012-host-1788194314452-1788194351899",
+          "x": 3,
+          "y": 6,
+          "ownerId": "qa012-host-1788194314452"
+        }
+      ],
+      "bombsB": [
+        {
+          "id": "b453-qa012-host-1788194314452-1788194351899",
+          "x": 3,
+          "y": 6,
+          "ownerId": "qa012-host-1788194314452"
+        }
+      ],
+      "ownerId": "qa012-host-1788194314452",
+      "t": "2026-08-31T16:39:13.527Z"
+    },
+    {
+      "name": "gate-bomb-sync",
+      "ok": true,
+      "playerBomb": {
+        "id": "b453-qa012-host-1788194314452-1788194351899",
+        "x": 3,
+        "y": 6,
+        "ownerId": "qa012-host-1788194314452"
+      },
+      "bombsB": [
+        {
+          "id": "b453-qa012-host-1788194314452-1788194351899",
+          "x": 3,
+          "y": 6,
+          "ownerId": "qa012-host-1788194314452"
+        }
+      ],
+      "t": "2026-08-31T16:39:13.528Z"
+    },
+    {
+      "name": "gate-explosion-sync",
+      "ok": true,
+      "dualContextExplosion": true,
+      "t": "2026-08-31T16:39:13.878Z"
+    },
+    {
+      "name": "gate-death-sync",
+      "ok": false,
+      "victim": "qa012-guest-1788194314453",
+      "bombOwner": "qa012-host-1788194314452",
+      "explosionSync": true,
+      "deathSetup": {
+        "hostPos": {
+          "x": 3,
+          "y": 6,
+          "alive": true
+        },
+        "guestPosBeforeBomb": {
+          "x": 3,
+          "y": 7,
+          "alive": true
+        },
+        "inRange": true,
+        "hostGuestPositionSync": {
+          "hostView": {
+            "x": 3,
+            "y": 7,
+            "alive": true
+          },
+          "guestView": {
+            "x": 3,
+            "y": 7,
+            "alive": true
+          }
+        },
+        "guestPosAfterRush": {
+          "x": 3,
+          "y": 7,
+          "alive": true
+        },
+        "inRangeAfterRush": true
+      },
+      "note": "guest B must die from host A player-owned bomb",
+      "t": "2026-08-31T16:39:19.207Z"
+    }
+  ]
+}

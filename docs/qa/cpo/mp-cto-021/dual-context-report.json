@@ -1,0 +1,304 @@
+{
+  "roomId": "BOMBER-D",
+  "previewSha": "501512f",
+  "playerA": {
+    "id": "qa012-host-1788194480392",
+    "seat": 0,
+    "spawn": {
+      "x": 1,
+      "y": 1,
+      "alive": true,
+      "speedBonus": 0
+    },
+    "initialPosition": {
+      "x": 1,
+      "y": 1,
+      "alive": true,
+      "speedBonus": 0
+    },
+    "finalPosition": {
+      "x": 5,
+      "y": 1,
+      "alive": true
+    },
+    "alive": true
+  },
+  "playerB": {
+    "id": "qa012-guest-1788194480393",
+    "seat": 1,
+    "spawn": {
+      "x": 13,
+      "y": 1,
+      "alive": true,
+      "speedBonus": 0
+    },
+    "initialPosition": {
+      "x": 13,
+      "y": 1,
+      "alive": true,
+      "speedBonus": 0
+    },
+    "finalPosition": {
+      "x": 13,
+      "y": 5,
+      "alive": true
+    },
+    "alive": true
+  },
+  "movementSync": {
+    "aToB": true,
+    "bToA": true
+  },
+  "movementA": [
+    {
+      "key": "movementA",
+      "actor": "qa012-host-1788194480392",
+      "observer": "B",
+      "before": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "after": {
+        "x": 5,
+        "y": 1,
+        "alive": true
+      },
+      "remote": {
+        "x": 5,
+        "y": 1,
+        "alive": true
+      },
+      "localMoved": true,
+      "synced": true
+    }
+  ],
+  "movementB": [
+    {
+      "key": "movementB",
+      "actor": "qa012-guest-1788194480393",
+      "observer": "A",
+      "before": {
+        "x": 13,
+        "y": 1,
+        "alive": true
+      },
+      "after": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "remote": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "localMoved": true,
+      "synced": true
+    }
+  ],
+  "inputChain": [
+    {
+      "phase": "movementA",
+      "INPUT_RECEIVED": true,
+      "PLAYER_STATE_BEFORE": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "MOVE_APPLIED": {
+        "x": 5,
+        "y": 1,
+        "alive": true
+      },
+      "REMOTE_POSITION_UPDATED": {
+        "x": 5,
+        "y": 1,
+        "alive": true
+      },
+      "synced": true,
+      "t": "2026-08-31T16:41:47.775Z"
+    },
+    {
+      "phase": "movementB",
+      "INPUT_RECEIVED": true,
+      "PLAYER_STATE_BEFORE": {
+        "x": 13,
+        "y": 1,
+        "alive": true
+      },
+      "MOVE_APPLIED": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "REMOTE_POSITION_UPDATED": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "synced": true,
+      "t": "2026-08-31T16:41:54.116Z"
+    }
+  ],
+  "bomb": {
+    "owner": "qa012-host-1788194480392",
+    "position": {
+      "x": 13,
+      "y": 4
+    },
+    "playerBombOnly": true
+  },
+  "playerBomb": {
+    "id": "b533-qa012-host-1788194480392-1788194521369",
+    "x": 13,
+    "y": 4,
+    "ownerId": "qa012-host-1788194480392"
+  },
+  "bombOwner": "qa012-host-1788194480392",
+  "explosion": true,
+  "explosionCells": 0,
+  "deathSync": false,
+  "victimId": "qa012-guest-1788194480393",
+  "deathA": {
+    "x": 13,
+    "y": 1,
+    "alive": true
+  },
+  "deathB": {
+    "x": 13,
+    "y": 5,
+    "alive": false
+  },
+  "aiMoved": false,
+  "seatA": {
+    "x": 1,
+    "y": 1,
+    "alive": true,
+    "speedBonus": 0
+  },
+  "seatB": {
+    "x": 13,
+    "y": 1,
+    "alive": true,
+    "speedBonus": 0
+  },
+  "spawnA": {
+    "x": 1,
+    "y": 1,
+    "alive": true,
+    "speedBonus": 0
+  },
+  "spawnB": {
+    "x": 13,
+    "y": 1,
+    "alive": true,
+    "speedBonus": 0
+  },
+  "positionA_before": {
+    "x": 1,
+    "y": 1,
+    "alive": true
+  },
+  "positionA_after": {
+    "x": 5,
+    "y": 1,
+    "alive": true
+  },
+  "positionB_before": {
+    "x": 13,
+    "y": 1,
+    "alive": true
+  },
+  "positionB_after": {
+    "x": 13,
+    "y": 5,
+    "alive": true
+  },
+  "bombId": "b533-qa012-host-1788194480392-1788194521369",
+  "bombPosition": {
+    "x": 13,
+    "y": 4
+  },
+  "bombOwnerId": "qa012-host-1788194480392",
+  "playerBombOnly": true,
+  "death": false,
+  "deathSetup": {
+    "hostPos": {
+      "x": 13,
+      "y": 4,
+      "alive": true
+    },
+    "guestPosBeforeBomb": {
+      "x": 13,
+      "y": 5,
+      "alive": true
+    },
+    "inRange": true,
+    "hostGuestPositionSync": {
+      "hostView": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "guestView": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      }
+    },
+    "guestPosAfterRush": {
+      "x": 13,
+      "y": 5,
+      "alive": true
+    },
+    "inRangeAfterRush": true
+  },
+  "stateTrace": [
+    {
+      "phase": "pre-plant",
+      "bomb": null,
+      "hostViewGuest": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "guestLocal": {
+        "x": 13,
+        "y": 5,
+        "alive": true
+      },
+      "hostLocal": {
+        "x": 13,
+        "y": 4,
+        "alive": true
+      }
+    },
+    {
+      "phase": "explosion",
+      "bomb": {
+        "id": "b533-qa012-host-1788194480392-1788194521369",
+        "x": 13,
+        "y": 4,
+        "ownerId": "qa012-host-1788194480392"
+      },
+      "hostViewGuest": {
+        "x": 13,
+        "y": 1,
+        "alive": true
+      },
+      "guestLocal": {
+        "x": 13,
+        "y": 5,
+        "alive": false
+      },
+      "hostLocal": {
+        "x": 1,
+        "y": 1,
+        "alive": true
+      },
+      "blastsA": 0,
+      "blastsB": 1
+    }
+  ]
+}
