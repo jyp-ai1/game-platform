@@ -41,6 +41,7 @@ import {
   tickAgarWorld,
   totalMass,
   AGAR_MIN_SPLIT_MASS,
+  AGAR_MIN_EJECT_MASS,
   type AgarWorld,
 } from "./agar-io-engine";
 
@@ -125,6 +126,8 @@ export function AgarGame() {
   const aiDifficulty = DEFAULT_MP_AI_DIFFICULTY;
   const reportedRef = useRef(false);
   const lastEjectAtRef = useRef(0);
+  /** Keep last non-dead steer vector while pad is held (mobile hold persistence). */
+  const lastSteerRef = useRef({ vx: 0, vy: 0 });
 
   const styleEmoji = AGAR_STYLES.find((s) => s.id === styleId)?.emoji ?? "⚪";
 
@@ -215,14 +218,25 @@ export function AgarGame() {
 
   const steerFromPad = useCallback(
     (vx: number, vy: number) => {
-      if (Math.hypot(vx, vy) < 0.12) return;
+      if (Math.hypot(vx, vy) >= 0.12) {
+        lastSteerRef.current = { vx, vy };
+      } else if (Math.hypot(lastSteerRef.current.vx, lastSteerRef.current.vy) < 0.12) {
+        return;
+      }
       const w = worldRef.current;
-      const focus = cameraFocus(w.players[deviceId]);
+      const p = w.players[deviceId];
+      if (!p?.alive) return;
+      const focus = cameraFocus(p);
       const dist = 140;
-      setPlayerAim(w, deviceId, focus.x + vx * dist, focus.y + vy * dist);
+      const { vx: sx, vy: sy } = lastSteerRef.current;
+      setPlayerAim(w, deviceId, focus.x + sx * dist, focus.y + sy * dist);
     },
     [deviceId]
   );
+
+  const clearSteerFromPad = useCallback(() => {
+    lastSteerRef.current = { vx: 0, vy: 0 };
+  }, []);
 
   const doSplit = useCallback(() => {
     const w = worldRef.current;
@@ -269,7 +283,7 @@ export function AgarGame() {
     if (qaSplitProbeRef.current) {
       const me = next.players[deviceId];
       if (me?.cells[0]) {
-        me.cells[0].mass = AGAR_MIN_SPLIT_MASS + 4;
+        me.cells[0].mass = AGAR_MIN_SPLIT_MASS + AGAR_MIN_EJECT_MASS + 8;
       }
     }
     applyLocalLook(next, deviceId, color);
@@ -292,17 +306,24 @@ export function AgarGame() {
   useEffect(() => {
     if (!started) return;
     const w = window as Window & {
-      __AGAR_QA__?: () => {
+        __AGAR_QA__?: () => {
         mass: number;
         cells: number;
         canSplit: boolean;
         alive: boolean;
         ready: boolean;
+        started: boolean;
+        tick: number;
+        aimX: number;
+        aimY: number;
+        x: number;
+        y: number;
       };
     };
     w.__AGAR_QA__ = () => {
       const wr = worldRef.current;
       const p = wr.players[deviceId];
+      const head = p?.cells[0];
       const mass = p ? Math.round(totalMass(p)) : 0;
       const cells = p?.cells.length ?? 0;
       return {
@@ -311,6 +332,12 @@ export function AgarGame() {
         canSplit: canSplitPlayer(wr, deviceId),
         alive: !!p?.alive,
         ready: !!p?.alive && mass >= AGAR_MIN_SPLIT_MASS,
+        started: true,
+        tick: wr.tick,
+        aimX: p?.aimX ?? 0,
+        aimY: p?.aimY ?? 0,
+        x: head?.x ?? 0,
+        y: head?.y ?? 0,
       };
     };
     return () => {
@@ -552,6 +579,7 @@ export function AgarGame() {
         <MobileControlPad
           onDirection={aimFromPad}
           onSteer={steerFromPad}
+          onDirectionEnd={clearSteerFromPad}
           actions={[
             { id: "split", label: "SPLIT", mode: "tap", onPress: doSplit },
             { id: "eject", label: "EJECT", mode: "tap", onPress: doEject },

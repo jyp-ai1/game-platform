@@ -1,0 +1,159 @@
+{
+  "gate": "MP-CTO-014",
+  "scope": "Agar Mobile Control Only",
+  "commit": "5a2b920",
+  "base": "http://localhost:3025",
+  "finishedAt": "2026-08-31T02:59:04.139Z",
+  "p0": {
+    "gameStart": true,
+    "floatingPadShow": true,
+    "padPosition": true,
+    "directionInput": true,
+    "holdMovement": true,
+    "inputPersistence": true,
+    "padRelease": true,
+    "split": true,
+    "eject": true,
+    "uiSelectionBlock": true,
+    "screenInterference": true,
+    "pcRegression": true,
+    "agarRegression": true
+  },
+  "passed": 13,
+  "total": 13,
+  "ctoFinal": "PASS",
+  "checks": [
+    {
+      "name": "p0-game-start",
+      "ok": true,
+      "mass": 92,
+      "cells": 1,
+      "canSplit": true,
+      "alive": true,
+      "ready": true,
+      "started": true,
+      "tick": 32,
+      "aimX": 1128.5807155555874,
+      "aimY": 540.6341024148838,
+      "x": 1025.0529937726656,
+      "y": 540.6341024148838,
+      "t": "2026-08-31T02:58:53.149Z"
+    },
+    {
+      "name": "p0-agar-regression",
+      "ok": true,
+      "mass": 92,
+      "cells": 1,
+      "canSplit": true,
+      "alive": true,
+      "ready": true,
+      "started": true,
+      "tick": 32,
+      "aimX": 1128.5807155555874,
+      "aimY": 540.6341024148838,
+      "x": 1025.0529937726656,
+      "y": 540.6341024148838,
+      "t": "2026-08-31T02:58:53.158Z"
+    },
+    {
+      "name": "p0-floating-pad-visible",
+      "ok": true,
+      "t": "2026-08-31T02:58:53.175Z"
+    },
+    {
+      "name": "p0-pad-at-touch",
+      "ok": true,
+      "touchX": 85,
+      "touchY": 298,
+      "t": "2026-08-31T02:58:53.372Z"
+    },
+    {
+      "name": "p0-screen-interference",
+      "ok": true,
+      "x": 33,
+      "y": 246,
+      "width": 104,
+      "height": 104,
+      "t": "2026-08-31T02:58:53.473Z"
+    },
+    {
+      "name": "p0-ui-selection-block",
+      "ok": true,
+      "found": true,
+      "userSelect": "none",
+      "t": "2026-08-31T02:58:53.480Z"
+    },
+    {
+      "name": "p0-hold-movement",
+      "ok": true,
+      "d0": 44.79825047733266,
+      "d1": 153.53709303360552,
+      "holdStart": {
+        "mass": 92,
+        "cells": 1,
+        "canSplit": true,
+        "alive": true,
+        "ready": true,
+        "started": true,
+        "tick": 46,
+        "aimX": 1128.5807155555874,
+        "aimY": 540.6341024148838,
+        "x": 1064.1979338806773,
+        "y": 540.6341024148838
+      },
+      "holdEnd": {
+        "mass": 94,
+        "cells": 1,
+        "canSplit": true,
+        "alive": true,
+        "ready": true,
+        "started": true,
+        "tick": 117,
+        "aimX": 1402.5332773916155,
+        "aimY": 540.6341024148838,
+        "x": 1262.5332773916155,
+        "y": 540.6341024148838
+      },
+      "t": "2026-08-31T02:58:55.964Z"
+    },
+    {
+      "name": "p0-input-persistence",
+      "ok": true,
+      "totalDist": 198.33534351093817,
+      "t": "2026-08-31T02:58:55.965Z"
+    },
+    {
+      "name": "p0-pad-hidden-on-release",
+      "ok": true,
+      "t": "2026-08-31T02:58:56.095Z"
+    },
+    {
+      "name": "p0-direction-input",
+      "ok": true,
+      "dirPass": 4,
+      "t": "2026-08-31T02:58:59.748Z"
+    },
+    {
+      "name": "p0-split",
+      "ok": true,
+      "cellsBefore": 1,
+      "cellsAfter": 2,
+      "t": "2026-08-31T02:59:00.606Z"
+    },
+    {
+      "name": "p0-eject",
+      "ok": true,
+      "massBefore": 93,
+      "massAfter": 65,
+      "t": "2026-08-31T02:59:01.128Z"
+    },
+    {
+      "name": "p0-pc-regression",
+      "ok": true,
+      "aimOk": true,
+      "cells": 2,
+      "t": "2026-08-31T02:59:04.005Z"
+    }
+  ],
+  "realDevice": "PENDING_EXTERNAL"
+}
