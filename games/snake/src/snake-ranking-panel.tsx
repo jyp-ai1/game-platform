@@ -29,11 +29,13 @@ export function SnakeRankingPanel({
 }: SnakeRankingPanelProps) {
   return (
     <div
+      data-testid="mp-top10"
       className={cn(
-        "rounded-xl border border-white/15 bg-black/55 backdrop-blur-sm",
+        "touch-none select-none rounded-xl border border-white/15 bg-black/55 backdrop-blur-sm",
         compact ? "px-2 py-1.5 text-[9px]" : "px-3 py-2 text-[10px]",
         className
       )}
+      style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
     >
       <p className={cn("font-semibold text-amber-300", compact ? "mb-0.5" : "mb-1")}>{title}</p>
       <ol className={cn("space-y-0.5", compact && "grid grid-cols-2 gap-x-2 gap-y-0.5")}>

@@ -33,9 +33,10 @@ export function SnakeWorldHud({
   return (
     <div
       className={cn(
-        "pointer-events-none rounded-lg border border-emerald-400/25 bg-black/70 px-2.5 py-2 font-mono text-[10px] leading-relaxed text-white/90 backdrop-blur-sm",
+        "pointer-events-none touch-none select-none rounded-lg border border-emerald-400/25 bg-black/70 px-2.5 py-2 font-mono text-[10px] leading-relaxed text-white/90 backdrop-blur-sm",
         className
       )}
+      style={{ WebkitUserSelect: "none", userSelect: "none" }}
       data-testid="snake-room-evidence"
     >
       <p className="mb-1 font-bold tracking-widest text-emerald-300">WORLD</p>

@@ -1,0 +1,104 @@
+{
+  "gate": "MP-CTO-013",
+  "scope": "Snake Mobile Control Only",
+  "commit": "9cb910b",
+  "base": "http://localhost:3022",
+  "finishedAt": "2026-08-31T02:02:57.711Z",
+  "p0": {
+    "floatingPadShow": true,
+    "padPosition": true,
+    "uiSelectionBlock": true,
+    "directionInput": true,
+    "holdMovement": true,
+    "padRelease": true,
+    "screenInterference": true,
+    "snakeRegression": true,
+    "pcRegression": true,
+    "mobileRegression": true
+  },
+  "passed": 10,
+  "total": 10,
+  "ctoFinal": "PASS",
+  "checks": [
+    {
+      "name": "p0-snake-regression",
+      "ok": true,
+      "canvas": true,
+      "alive": true,
+      "exists": true,
+      "tick": 354,
+      "t": "2026-08-31T02:02:08.926Z"
+    },
+    {
+      "name": "p0-direction-input",
+      "ok": true,
+      "dirPass": 4,
+      "dirs": [
+        "right",
+        "down",
+        "left",
+        "up"
+      ],
+      "t": "2026-08-31T02:02:15.594Z"
+    },
+    {
+      "name": "p0-floating-pad-visible",
+      "ok": true,
+      "t": "2026-08-31T02:02:15.599Z"
+    },
+    {
+      "name": "p0-pad-at-touch",
+      "ok": true,
+      "touchX": 85,
+      "touchY": 298,
+      "t": "2026-08-31T02:02:15.754Z"
+    },
+    {
+      "name": "p0-floating-pad-on-touch",
+      "ok": true,
+      "t": "2026-08-31T02:02:15.758Z"
+    },
+    {
+      "name": "p0-screen-interference",
+      "ok": true,
+      "x": 33,
+      "y": 246,
+      "width": 104,
+      "height": 104,
+      "t": "2026-08-31T02:02:15.812Z"
+    },
+    {
+      "name": "p0-ui-selection-block",
+      "ok": true,
+      "found": true,
+      "userSelect": "none",
+      "t": "2026-08-31T02:02:15.815Z"
+    },
+    {
+      "name": "p0-pad-hidden-on-release",
+      "ok": true,
+      "t": "2026-08-31T02:02:15.957Z"
+    },
+    {
+      "name": "p0-hold-movement",
+      "ok": true,
+      "tickBeforeHold": 410,
+      "tickAfterHold": 421,
+      "t": "2026-08-31T02:02:17.397Z"
+    },
+    {
+      "name": "p0-mobile-regression",
+      "ok": true,
+      "t": "2026-08-31T02:02:17.405Z"
+    },
+    {
+      "name": "p0-pc-regression",
+      "ok": true,
+      "inputBefore": 0,
+      "inputAfter": 1,
+      "lastDirection": "right",
+      "t": "2026-08-31T02:02:57.632Z"
+    }
+  ],
+  "realDevice": "PENDING_EXTERNAL"
+}

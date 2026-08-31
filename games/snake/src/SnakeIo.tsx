@@ -2832,6 +2832,7 @@ export function SnakeIoGame({
       {!isSpectating && mySnake?.alive && !isPaused ? (
         <MobileControlPad
           onDirection={handleDirection}
+          repeatMs={85}
           actions={[
             {
               id: "boost",
