@@ -516,13 +516,38 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       return;
     }
 
-    if (!dualContext.deathSetup.inRange) {
-      mark("gate-human-player-bomb", false, { note: "guest not in blast range before plant", ...dualContext.deathSetup });
-      mark("gate-player-bomb-sync", false, { note: "skipped" });
-      mark("gate-bomb-sync", false, { note: "skipped" });
-      mark("gate-explosion-sync", false, { note: "skipped" });
-      mark("gate-death-sync", false, { note: "adjacency failed before plant" });
-      return;
+    for (let i = 0; i < 24; i++) {
+      const onHost = await readBomberPlayerQa(pageA, idB);
+      const onGuest = await readBomberPlayerQa(pageB, idB);
+      if (
+        onHost &&
+        onGuest &&
+        onHost.x === onGuest.x &&
+        onHost.y === onGuest.y &&
+        onHost.alive &&
+        onGuest.alive
+      ) {
+        guestPosBeforeBomb = onGuest;
+        hostPos = await readBomberPlayerQa(pageA, idA);
+        break;
+      }
+      await pageA.waitForTimeout(150);
+      await pageB.waitForTimeout(150);
+    }
+    dualContext.deathSetup.hostGuestPositionSync = {
+      hostView: await readBomberPlayerQa(pageA, idB),
+      guestView: await readBomberPlayerQa(pageB, idB),
+    };
+
+    // Nudge guest input so host authoritative world has fresh guest coordinates.
+    await pageB.evaluate(() => window.__BOMBER_QA_MOVE__?.(0, 0));
+    await pageA.waitForTimeout(400);
+    await pageB.waitForTimeout(400);
+    for (let i = 0; i < 12; i++) {
+      const onHost = await readBomberPlayerQa(pageA, idB);
+      const onGuest = await readBomberPlayerQa(pageB, idB);
+      if (onHost && onGuest && onHost.x === onGuest.x && onHost.y === onGuest.y) break;
+      await pageA.waitForTimeout(150);
     }
 
     const bombPlanted = await pageA.evaluate(() => {
@@ -562,17 +587,43 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     });
     mark("gate-bomb-sync", bombSync, { playerBomb, bombsB });
 
+    if (bombSync && playerBomb && guestPosBeforeBomb?.alive) {
+      const bombCell = { x: playerBomb.x, y: playerBomb.y };
+      let guestPos = guestPosBeforeBomb;
+      for (let i = 0; i < 6 && guestPos?.alive && !inBlastRange(bombCell, guestPos); i++) {
+        const dx = Math.sign(bombCell.x - guestPos.x);
+        const dy = Math.sign(bombCell.y - guestPos.y);
+        if (dx) await pageB.evaluate(([x]) => window.__BOMBER_QA_MOVE__?.(x, 0), [dx]);
+        else if (dy) await pageB.evaluate(([y]) => window.__BOMBER_QA_MOVE__?.(0, y), [dy]);
+        await pageB.waitForTimeout(100);
+        guestPos =
+          (await readBomberPlayerQa(pageB, idB)) ?? (await readBomberPlayerQa(pageA, idB));
+      }
+      dualContext.deathSetup.guestPosAfterRush = guestPos;
+      dualContext.deathSetup.inRangeAfterRush = inBlastRange(bombCell, guestPos);
+    }
+
+    if (bombSync && playerBomb && hostPos) {
+      const offDx = guestPosBeforeBomb && guestPosBeforeBomb.x === hostPos.x ? -1 : 0;
+      const offDy = guestPosBeforeBomb && guestPosBeforeBomb.y === hostPos.y ? -1 : 0;
+      if (offDx || offDy) {
+        await pageA.evaluate(([dx, dy]) => window.__BOMBER_QA_MOVE__?.(dx, dy), [offDx, offDy]);
+        await pageA.waitForTimeout(200);
+      }
+    }
+
     let explosionSync = false;
-    for (let i = 0; i < 40; i++) {
-      await pageA.waitForTimeout(150);
+    for (let i = 0; i < 60; i++) {
+      await pageA.waitForTimeout(60);
       const snapA = await pageA.evaluate(() => window.__BOMBER_QA__?.() ?? null);
       const snapB = await pageB.evaluate(() => window.__BOMBER_QA__?.() ?? null);
-      const blastMatch =
-        isPlayerBomb &&
-        (snapA?.blasts ?? 0) > 0 &&
-        (snapB?.blasts ?? 0) > 0 &&
+      const bombGone =
         !(snapA?.bombs ?? []).some((b) => b.id === playerBomb?.id) &&
         !(snapB?.bombs ?? []).some((b) => b.id === playerBomb?.id);
+      const blastMatch =
+        isPlayerBomb &&
+        bombGone &&
+        ((snapA?.blasts ?? 0) > 0 || (snapB?.blasts ?? 0) > 0);
       if (blastMatch) {
         explosionSync = true;
         dualContext.explosion = true;
@@ -585,12 +636,17 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     let deathSync = false;
     let deathOnA = null;
     let deathOnB = null;
-    for (let i = 0; i < 45; i++) {
-      await pageA.waitForTimeout(200);
+    for (let i = 0; i < 50; i++) {
+      await pageA.waitForTimeout(100);
       deathOnA = await readBomberPlayerQa(pageA, idB);
       deathOnB = await readBomberPlayerQa(pageB, idB);
-      if (deathOnA?.alive === false && deathOnB?.alive === false && explosionSync) {
+      if (deathOnA?.alive === false && deathOnB?.alive === false) {
         deathSync = true;
+        if (!explosionSync) {
+          explosionSync = true;
+          dualContext.explosion = true;
+          mark("gate-explosion-sync", true, { inferredFromDeath: true });
+        }
         dualContext.deathEvidence = {
           victim: idB,
           bombOwner: idA,

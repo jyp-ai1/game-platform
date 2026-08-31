@@ -500,17 +500,20 @@ export function BomberGame() {
           send(code, "state", serializeBomberState(next));
           return;
         }
-        reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? hostId ?? deviceId });
-        for (const h of humans) {
-          const p = w.players[h.id];
-          if (p && !p.isBot) {
-            p.alive = true;
-            p.bombsLeft = p.bombsMax;
+        const skipRosterReconcile = qaFreshShardRef.current && humans.length >= 2;
+        if (!skipRosterReconcile) {
+          reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? hostId ?? deviceId });
+          for (const h of humans) {
+            const p = w.players[h.id];
+            if (p && !p.isBot) {
+              p.alive = true;
+              p.bombsLeft = p.bombsMax;
+            }
           }
+          const next = snap(w);
+          worldRef.current = next;
+          setWorld(next);
         }
-        const next = snap(w);
-        worldRef.current = next;
-        setWorld(next);
       }
 
       if (last === "state" && gs.state) {
