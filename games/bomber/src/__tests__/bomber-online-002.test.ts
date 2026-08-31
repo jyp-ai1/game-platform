@@ -15,6 +15,8 @@ import {
   plantBomb,
   serializeBomberState,
   tickBomberWorld,
+  applyPowerUp,
+  bomberPadRepeatMs,
   tryMove,
   upsertRemoteBomb,
   type BomberWorld,
@@ -89,6 +91,25 @@ test("ONLINE-002: fire start = 1 only; items Bomb/Fire/Speed", () => {
   w.powerUps = [{ id: "pu-s3", kind: "speed", x: 2, y: 1 }];
   tryMove(w, "local", 1, 0);
   assert.ok((me.speedBonus ?? 0) >= 1);
+});
+
+test("ONLINE-002: speed ⚡ moves one cell per input (cadence via pad repeat)", () => {
+  const w = createBomberWorld("local", "You", { playerSlots: 4, mapId: 0 });
+  stripBots(w);
+  const me = w.players.local!;
+  me.x = 3;
+  me.y = 3;
+  me.speedBonus = 2;
+  w.grid[3]![4] = "empty";
+  w.grid[3]![5] = "empty";
+  w.grid[3]![6] = "empty";
+  tryMove(w, "local", 1, 0);
+  assert.equal(me.x, 4);
+  assert.equal(me.y, 3);
+  tryMove(w, "local", 1, 0);
+  assert.equal(me.x, 5);
+  assert.equal(bomberPadRepeatMs(2), 50);
+  assert.equal(bomberPadRepeatMs(0), 100);
 });
 
 test("ONLINE-002: AI harder than old Normal (tick 8 / bomb 0.032)", () => {

@@ -10,6 +10,7 @@ export {
   plantBomb,
   reconcileHumans,
   rosterForMap,
+  bomberPadRepeatMs,
   tryMove,
   tickBomberWorld,
   serializeBomberState,

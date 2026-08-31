@@ -193,6 +193,8 @@ export function FloatingMobilePad({
       {joy ? (
         <div
           data-testid="mp-floating-joystick"
+          data-touch-x={Math.round(joy.cx)}
+          data-touch-y={Math.round(joy.cy)}
           className="pointer-events-none absolute"
           style={{ left: joy.cx - BASE_R, top: joy.cy - BASE_R, width: BASE_R * 2, height: BASE_R * 2 }}
         >

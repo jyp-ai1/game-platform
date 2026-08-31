@@ -47,6 +47,7 @@ import {
   rosterForMap,
   serializeBomberState,
   tickBomberWorld,
+  bomberPadRepeatMs,
   tryMove,
   upsertRemoteBomb,
   type Bomb,
@@ -658,7 +659,7 @@ export function BomberGame() {
         deviceId: string;
         stateAck: boolean;
         isHost: boolean;
-        local: { x: number; y: number; alive: boolean } | null;
+        local: { x: number; y: number; alive: boolean; speedBonus: number } | null;
         players: Array<{ id: string; x: number; y: number; isBot: boolean; alive: boolean }>;
         bombs: Array<{ id: string; x: number; y: number; ownerId: string }>;
         blasts: number;
@@ -676,7 +677,9 @@ export function BomberGame() {
         deviceId,
         stateAck: stateAckRef.current,
         isHost: isHostRef.current,
-        local: me ? { x: me.x, y: me.y, alive: me.alive } : null,
+        local: me
+          ? { x: me.x, y: me.y, alive: me.alive, speedBonus: me.speedBonus ?? 0 }
+          : null,
         players: Object.values(wr.players).map((p) => ({
           id: p.id,
           x: p.x,
@@ -1061,7 +1064,8 @@ export function BomberGame() {
     return (
       <div
         data-testid="bomber-map-select"
-        className="flex min-h-[70vh] flex-col items-center justify-center gap-5 bg-slate-950 px-4 text-white"
+        className="flex min-h-[70vh] touch-none select-none flex-col items-center justify-center gap-5 bg-slate-950 px-4 text-white"
+        style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
       >
         <h1 className="text-2xl font-bold">Map Select</h1>
         <p className="text-sm text-white/60">Same map = same room · AI fills empty seats</p>
@@ -1170,25 +1174,29 @@ export function BomberGame() {
               <>
                 <span
                   data-testid="bomber-match-hud"
-                  className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
+                  className="touch-none select-none rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
+                  style={{ WebkitUserSelect: "none", userSelect: "none" }}
                 >
                   {world.playerSlots}P · {MAP_LETTERS[world.mapId % 4]} {MAP_NAMES[world.mapId % 4]}
                 </span>
                 <span
                   data-testid="bomber-room-hud"
-                  className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/80"
+                  className="touch-none select-none rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/80"
+                  style={{ WebkitUserSelect: "none", userSelect: "none" }}
                 >
                   {activeRoom}
                 </span>
                 <span
                   data-testid="bomber-fire-hud"
-                  className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/80"
+                  className="touch-none select-none rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/80"
+                  style={{ WebkitUserSelect: "none", userSelect: "none" }}
                 >
                   FIRE {me ? firePowerOf(me) : BOMBER_FIRE_START}/{world.maxFire}
                 </span>
                 <span
                   data-testid="bomber-sd-hud"
-                  className="rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
+                  className="touch-none select-none rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
+                  style={{ WebkitUserSelect: "none", userSelect: "none" }}
                 >
                   {world.suddenDeathActive
                     ? `SD R${world.suddenDeathRing}`
@@ -1197,7 +1205,8 @@ export function BomberGame() {
                 <span
                   data-testid="bomber-input-ready"
                   data-ready={stateAck ? "1" : "0"}
-                  className="rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/70"
+                  className="touch-none select-none rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/70"
+                  style={{ WebkitUserSelect: "none", userSelect: "none" }}
                 >
                   {stateAck ? (alive ? "❤️" : "🖤") : "⏳"} · {isHost ? "HOST" : "SYNC"}
                 </span>
@@ -1313,7 +1322,7 @@ export function BomberGame() {
       {alive && !world.matchOver && stateAck ? (
         <MobileControlPad
           onDirection={padMove}
-          repeatMs={Math.max(60, 120 - (me?.speedBonus ?? 0) * 25)}
+          repeatMs={bomberPadRepeatMs(me?.speedBonus ?? 0)}
           actions={[{ id: "bomb", label: "BOMB", mode: "tap", onPress: () => pushInput({ plant: true }) }]}
         />
       ) : null}

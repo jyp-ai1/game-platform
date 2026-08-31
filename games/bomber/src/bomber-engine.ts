@@ -606,15 +606,17 @@ function pickupPowerUps(world: BomberWorld, p: BomberPlayer): void {
 export function tryMove(world: BomberWorld, playerId: string, dx: number, dy: number): void {
   const p = world.players[playerId];
   if (!p || !p.alive || world.matchOver) return;
-  const steps = 1 + (p.speedBonus ?? 0);
-  for (let s = 0; s < steps; s++) {
-    const nx = p.x + dx;
-    const ny = p.y + dy;
-    if (!walkable(world, nx, ny)) break;
-    p.x = nx;
-    p.y = ny;
-    pickupPowerUps(world, p);
-  }
+  const nx = p.x + dx;
+  const ny = p.y + dy;
+  if (!walkable(world, nx, ny)) return;
+  p.x = nx;
+  p.y = ny;
+  pickupPowerUps(world, p);
+}
+
+/** Mobile pad repeat interval — speed ⚡ reduces cadence, not cells per tick. */
+export function bomberPadRepeatMs(speedBonus = 0): number {
+  return Math.max(50, 100 - speedBonus * 25);
 }
 
 export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()): Bomb | null {

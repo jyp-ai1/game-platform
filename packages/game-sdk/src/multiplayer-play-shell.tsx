@@ -238,9 +238,10 @@ export function MultiplayerMinimap({
       data-testid="mp-minimap"
       className={
         compact
-          ? "w-full max-w-[6rem] shrink-0 rounded-lg border border-white/15 bg-black/50 p-1.5"
-          : "mt-2 w-full shrink-0 rounded-lg border border-white/15 bg-black/50 p-2"
+          ? "w-full max-w-[6rem] shrink-0 touch-none select-none rounded-lg border border-white/15 bg-black/50 p-1.5"
+          : "mt-2 w-full shrink-0 touch-none select-none rounded-lg border border-white/15 bg-black/50 p-2"
       }
+      style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
     >
       <p
         className={
