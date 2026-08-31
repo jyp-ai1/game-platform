@@ -1,0 +1,13 @@
+Preview Deployment — MP-CTO-017
+
+Commit: 177b599
+Branch: content-factory
+Vercel Project: game29
+
+Preview Visit URL:
+https://game29-fw8l2slaw-jyp-ai1s-projects.vercel.app
+
+Preview QA: 12/12 PASS @ 177b599
+Local QA: 12/12 PASS @ http://localhost:3029
+
+Agar game code: unchanged (verification-only gate)

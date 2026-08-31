@@ -1,0 +1,172 @@
+{
+  "gate": "MP-CTO-017",
+  "scope": "Agar 실사용 안정성 점검",
+  "commit": "177b599",
+  "base": "https://game29-fw8l2slaw-jyp-ai1s-projects.vercel.app",
+  "room": "WORLD-QA017",
+  "finishedAt": "2026-08-31T06:59:06.147Z",
+  "p0": {
+    "previewEntry": true,
+    "gameStart": true,
+    "floatingPad": true,
+    "directionInput": true,
+    "holdMovement": true,
+    "padRelease": true,
+    "split": true,
+    "eject": true,
+    "pcRegression": true,
+    "agarRegression": true,
+    "inviteRegression": true,
+    "mobileRegression": true
+  },
+  "passed": 12,
+  "total": 12,
+  "ctoFinal": "PASS",
+  "consoleErrors": [],
+  "checks": [
+    {
+      "name": "p0-preview-entry",
+      "ok": true,
+      "status": 200,
+      "hasEnter": true,
+      "hasBoard": false,
+      "t": "2026-08-31T06:58:53.017Z"
+    },
+    {
+      "name": "p0-game-start",
+      "ok": true,
+      "mass": 92,
+      "cells": 1,
+      "canSplit": true,
+      "alive": true,
+      "ready": true,
+      "started": true,
+      "tick": 2,
+      "aimX": 437.8895545118563,
+      "aimY": 1334.8070236997494,
+      "x": 437.8895545118563,
+      "y": 1334.8070236997494,
+      "roomCode": "WORLD-QA017",
+      "localDeviceId": "7f5691b2-7b52-4876-9ae6-38121317e09c",
+      "roomPlayerIds": [
+        "1bdc7b2e-54b2-40fd-a1cf-7615618813c5",
+        "21d8c09d-8767-4960-a09d-19e847d1b62a",
+        "4616d386-84bc-46b4-8ab9-9a1bcb3814ea",
+        "7f5691b2-7b52-4876-9ae6-38121317e09c"
+      ],
+      "peerWorldIds": [
+        "1bdc7b2e-54b2-40fd-a1cf-7615618813c5",
+        "21d8c09d-8767-4960-a09d-19e847d1b62a",
+        "4616d386-84bc-46b4-8ab9-9a1bcb3814ea"
+      ],
+      "t": "2026-08-31T06:58:53.188Z"
+    },
+    {
+      "name": "p0-agar-regression",
+      "ok": true,
+      "mass": 92,
+      "cells": 1,
+      "canSplit": true,
+      "alive": true,
+      "ready": true,
+      "started": true,
+      "tick": 2,
+      "aimX": 437.8895545118563,
+      "aimY": 1334.8070236997494,
+      "x": 437.8895545118563,
+      "y": 1334.8070236997494,
+      "roomCode": "WORLD-QA017",
+      "localDeviceId": "7f5691b2-7b52-4876-9ae6-38121317e09c",
+      "roomPlayerIds": [
+        "1bdc7b2e-54b2-40fd-a1cf-7615618813c5",
+        "21d8c09d-8767-4960-a09d-19e847d1b62a",
+        "4616d386-84bc-46b4-8ab9-9a1bcb3814ea",
+        "7f5691b2-7b52-4876-9ae6-38121317e09c"
+      ],
+      "peerWorldIds": [
+        "1bdc7b2e-54b2-40fd-a1cf-7615618813c5",
+        "21d8c09d-8767-4960-a09d-19e847d1b62a",
+        "4616d386-84bc-46b4-8ab9-9a1bcb3814ea"
+      ],
+      "t": "2026-08-31T06:58:53.188Z"
+    },
+    {
+      "name": "p0-floating-pad",
+      "ok": true,
+      "t": "2026-08-31T06:58:54.009Z"
+    },
+    {
+      "name": "p0-direction-input",
+      "ok": true,
+      "dirPass": 4,
+      "t": "2026-08-31T06:58:57.559Z"
+    },
+    {
+      "name": "p0-hold-movement",
+      "ok": true,
+      "d0": 41.315911644431935,
+      "d1": 150.6035719879855,
+      "t": "2026-08-31T06:58:59.879Z"
+    },
+    {
+      "name": "p0-pad-release",
+      "ok": true,
+      "t": "2026-08-31T06:59:00.148Z"
+    },
+    {
+      "name": "p0-split",
+      "ok": true,
+      "cellsBefore": 1,
+      "cellsAfter": 2,
+      "t": "2026-08-31T06:59:00.962Z"
+    },
+    {
+      "name": "p0-eject",
+      "ok": true,
+      "massBefore": 97,
+      "massAfter": 69,
+      "t": "2026-08-31T06:59:01.458Z"
+    },
+    {
+      "name": "p0-mobile-regression",
+      "ok": true,
+      "x": 33,
+      "y": 246,
+      "width": 104,
+      "height": 104,
+      "t": "2026-08-31T06:59:01.632Z"
+    },
+    {
+      "name": "p0-invite-regression",
+      "ok": true,
+      "inviteQa": {
+        "mass": 92,
+        "cells": 1,
+        "canSplit": true,
+        "alive": true,
+        "ready": true,
+        "started": true,
+        "tick": 1,
+        "aimX": 416.9015446534097,
+        "aimY": 1073.6312937134066,
+        "x": 416.9015446534097,
+        "y": 1073.6312937134066,
+        "roomCode": "WORLD-QA017B",
+        "localDeviceId": "7f5691b2-7b52-4876-9ae6-38121317e09c",
+        "roomPlayerIds": [],
+        "peerWorldIds": []
+      },
+      "url": "https://game29-fw8l2slaw-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD-QA017B&source=invite&mp_qa_pad=1&mp_qa_split=1",
+      "t": "2026-08-31T06:59:03.160Z"
+    },
+    {
+      "name": "p0-pc-regression",
+      "ok": true,
+      "aimOk": true,
+      "cells": 2,
+      "t": "2026-08-31T06:59:06.011Z"
+    }
+  ],
+  "realDevice": "PENDING_EXTERNAL",
+  "qaCleanup": true
+}
