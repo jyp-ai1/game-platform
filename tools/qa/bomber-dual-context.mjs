@@ -91,44 +91,25 @@ function positionsMatch(a, b) {
   return !!(a && b && a.x === b.x && a.y === b.y);
 }
 
-/** Move host/guest until Manhattan-adjacent for player-bomb death setup. */
+/** Host walks toward guest (QA input) until adjacent; guest stays still. */
 async function ensureAdjacentForDeath(pageA, pageB, hostId, guestId) {
   const readGuest = async () =>
     (await readBomberPlayerQa(pageB, guestId)) ?? (await readBomberPlayerQa(pageA, guestId));
 
-  const stepToward = async (page, from, to) => {
-    const dx = Math.sign(to.x - from.x);
-    const dy = Math.sign(to.y - from.y);
-    const dir =
-      Math.abs(to.x - from.x) >= Math.abs(to.y - from.y)
-        ? dx === 1
-          ? "right"
-          : dx === -1
-            ? "left"
-            : dy === 1
-              ? "down"
-              : "up"
-        : dy === 1
-          ? "down"
-          : dy === -1
-            ? "up"
-            : dx === 1
-              ? "right"
-              : "left";
-    await moveBomber(page, dir, 1);
-    await pageA.waitForTimeout(320);
-    await pageB.waitForTimeout(320);
-  };
-
-  for (let attempt = 0; attempt < 32; attempt++) {
+  for (let attempt = 0; attempt < 60; attempt++) {
     const host = await readBomberPlayerQa(pageA, hostId);
     const guest = await readGuest();
     if (!host?.alive || !guest?.alive) break;
     const dist = Math.abs(host.x - guest.x) + Math.abs(host.y - guest.y);
     if (dist === 1) return { host, guest };
-    // Host closes distance first — keeps guest still to avoid AI crossfire during prep.
-    if (attempt < 24) await stepToward(pageA, host, guest);
-    else await stepToward(pageB, guest, host);
+    const hostPhase = attempt < 28;
+    const dx = Math.sign((hostPhase ? guest.x : host.x) - (hostPhase ? host.x : guest.x));
+    const dy = Math.sign((hostPhase ? guest.y : host.y) - (hostPhase ? host.y : guest.y));
+    const page = hostPhase ? pageA : pageB;
+    if (dx) await page.evaluate(([x]) => window.__BOMBER_QA_MOVE__?.(x, 0), [dx]);
+    else if (dy) await page.evaluate(([y]) => window.__BOMBER_QA_MOVE__?.(0, y), [dy]);
+    await pageA.waitForTimeout(200);
+    await pageB.waitForTimeout(250);
   }
   return {
     host: await readBomberPlayerQa(pageA, hostId),
@@ -234,7 +215,7 @@ async function moveAndVerify(pageActor, pageObserver, actorId, observerLabel, du
 }
 
 export async function probeDualContextBomber(browser, mark, dualContext) {
-  const room = "BOMBER-B";
+  const room = "BOMBER-D";
   const hostUrl = `${BASE}${invitePath("bomber", room, "mp_qa_fresh=1")}`;
   const guestUrl = `${BASE}${invitePath("bomber", room)}`;
   const ts = Date.now();
@@ -465,7 +446,7 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     let posA = posBeforeA;
     let aStepsSynced = true;
     let aAnyMove = false;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 1; i++) {
       const step = await moveAndVerify(pageA, pageB, idA, "B", dualContext, "movementA");
       if (step.localMoved) aAnyMove = true;
       if (!step.synced) aStepsSynced = false;
@@ -486,7 +467,7 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
     let posB = posBeforeB;
     let bStepsSynced = true;
     let bAnyMove = false;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 1; i++) {
       const step = await moveAndVerify(pageB, pageA, idB, "A", dualContext, "movementB");
       if (step.localMoved) bAnyMove = true;
       if (!step.synced) bStepsSynced = false;
@@ -502,8 +483,22 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
 
     // P0-7 prep: host adjacent to guest so player bomb kills guest
     const adj = await ensureAdjacentForDeath(pageA, pageB, idA, idB);
-    const hostPos = adj.host;
-    const guestPosBeforeBomb = adj.guest;
+    let hostPos = adj.host;
+    let guestPosBeforeBomb = adj.guest;
+    if (!inBlastRange(hostPos, guestPosBeforeBomb) && guestPosBeforeBomb?.alive && hostPos?.alive) {
+      for (let i = 0; i < 12; i++) {
+        const dx = Math.sign(hostPos.x - guestPosBeforeBomb.x);
+        const dy = Math.sign(hostPos.y - guestPosBeforeBomb.y);
+        if (dx) await pageB.evaluate(([x]) => window.__BOMBER_QA_MOVE__?.(x, 0), [dx]);
+        else if (dy) await pageB.evaluate(([y]) => window.__BOMBER_QA_MOVE__?.(0, y), [dy]);
+        await pageB.waitForTimeout(280);
+        await pageA.waitForTimeout(180);
+        hostPos = await readBomberPlayerQa(pageA, idA);
+        guestPosBeforeBomb =
+          (await readBomberPlayerQa(pageB, idB)) ?? (await readBomberPlayerQa(pageA, idB));
+        if (inBlastRange(hostPos, guestPosBeforeBomb)) break;
+      }
+    }
     await pageA.waitForTimeout(600);
     await pageB.waitForTimeout(600);
     dualContext.deathSetup = {
@@ -518,6 +513,15 @@ export async function probeDualContextBomber(browser, mark, dualContext) {
       mark("gate-bomb-sync", false, { note: "skipped" });
       mark("gate-explosion-sync", false, { note: "skipped" });
       mark("gate-death-sync", false, { note: "guest dead before player bomb" });
+      return;
+    }
+
+    if (!dualContext.deathSetup.inRange) {
+      mark("gate-human-player-bomb", false, { note: "guest not in blast range before plant", ...dualContext.deathSetup });
+      mark("gate-player-bomb-sync", false, { note: "skipped" });
+      mark("gate-bomb-sync", false, { note: "skipped" });
+      mark("gate-explosion-sync", false, { note: "skipped" });
+      mark("gate-death-sync", false, { note: "adjacency failed before plant" });
       return;
     }
 

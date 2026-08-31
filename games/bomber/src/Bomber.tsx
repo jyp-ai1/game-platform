@@ -401,6 +401,11 @@ export function BomberGame() {
         }
         const roomNow = getRoom(code);
         const deferMatchEnd = (roomNow?.players.length ?? 1) < 2;
+        const humanSeats = humans.filter((h) => {
+          const p = w.players[h.id];
+          return p && !p.isBot;
+        }).length;
+        const skipBots = qaFreshShardRef.current && humanSeats >= 2;
         if (w.matchOver && humans.length >= 2) {
           const hostId = matchHostIdRef.current ?? deviceId;
           const next = restartInviteMatch(w, deviceId, nickname, color, hostId, humans);
@@ -439,7 +444,7 @@ export function BomberGame() {
             hostPlayer.bombsLeft = hostPlayer.bombsMax;
           }
         }
-        tickBomberWorld(w, Date.now(), { deferMatchEnd });
+        tickBomberWorld(w, Date.now(), { deferMatchEnd, skipBots });
         const next = snap(w);
         worldRef.current = next;
         setWorld(next);

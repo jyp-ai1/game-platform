@@ -1030,15 +1030,17 @@ export function upsertRemoteBomb(world: BomberWorld, bomb: Bomb): void {
 export function tickBomberWorld(
   world: BomberWorld,
   now = Date.now(),
-  opts?: { deferMatchEnd?: boolean }
+  opts?: { deferMatchEnd?: boolean; skipBots?: boolean }
 ): void {
   if (world.matchOver) return;
   world.tick += 1;
 
   applySuddenDeath(world, now);
 
-  for (const p of Object.values(world.players)) {
-    if (p.isBot) botThink(world, p, now);
+  if (!opts?.skipBots) {
+    for (const p of Object.values(world.players)) {
+      if (p.isBot) botThink(world, p, now);
+    }
   }
 
   const fuse = world.fuseMs || BOMBER_BOMB_FUSE_MS;
