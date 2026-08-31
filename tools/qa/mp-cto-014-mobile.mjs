@@ -48,7 +48,7 @@ async function clickEnter(page) {
   }
 }
 
-async function waitAgarAlive(page, maxTries = 6) {
+async function waitAgarAlive(page, maxTries = 10) {
   for (let i = 0; i < maxTries; i += 1) {
     const ok = await page
       .waitForFunction(
@@ -56,7 +56,7 @@ async function waitAgarAlive(page, maxTries = 6) {
           const qa = window.__AGAR_QA__?.();
           return !!(qa?.started && qa?.alive && qa.cells > 0 && qa.tick > 0);
         },
-        { timeout: 10_000 }
+        { timeout: 15_000 }
       )
       .then(() => true)
       .catch(() => false);
@@ -65,15 +65,17 @@ async function waitAgarAlive(page, maxTries = 6) {
     const retry = page.locator('[data-testid="mp-death-retry"]');
     if ((await retry.count()) > 0 && (await retry.isVisible())) {
       await retry.click({ timeout: 8_000 }).catch(() => {});
-      await page.waitForTimeout(800);
-      await clickEnter(page);
       await page.waitForTimeout(1200);
+      await clickEnter(page);
+      await page.waitForTimeout(1500);
       continue;
     }
     if ((await page.locator('[data-testid="mp-enter-world"]').count()) > 0) {
       await clickEnter(page);
-      await page.waitForTimeout(1200);
+      await page.waitForTimeout(1500);
+      continue;
     }
+    await page.waitForTimeout(800);
   }
   throw new Error("Agar did not reach alive playable state");
 }
@@ -90,8 +92,7 @@ async function enterAgar(page, opts = { mobile: true }) {
       state: "visible",
       timeout: 30_000,
     });
-    await shortDragPad(page, "right");
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
   } else {
     await page.waitForTimeout(800);
   }

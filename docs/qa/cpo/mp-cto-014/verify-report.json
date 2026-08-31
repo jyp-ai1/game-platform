@@ -1,9 +1,9 @@
 {
   "gate": "MP-CTO-014",
   "scope": "Agar Mobile Control Only",
-  "commit": "5a2b920",
-  "base": "http://localhost:3025",
-  "finishedAt": "2026-08-31T02:59:04.139Z",
+  "commit": "fee12ea",
+  "base": "https://game29-kp6n6jfy2-jyp-ai1s-projects.vercel.app",
+  "finishedAt": "2026-08-31T03:09:28.439Z",
   "p0": {
     "gameStart": true,
     "floatingPadShow": true,
@@ -26,46 +26,46 @@
     {
       "name": "p0-game-start",
       "ok": true,
-      "mass": 92,
+      "mass": 93,
       "cells": 1,
       "canSplit": true,
       "alive": true,
       "ready": true,
       "started": true,
-      "tick": 32,
-      "aimX": 1128.5807155555874,
-      "aimY": 540.6341024148838,
-      "x": 1025.0529937726656,
-      "y": 540.6341024148838,
-      "t": "2026-08-31T02:58:53.149Z"
+      "tick": 18,
+      "aimX": 1092.3094944633663,
+      "aimY": 1648.97168230097,
+      "x": 1092.3094944633663,
+      "y": 1648.97168230097,
+      "t": "2026-08-31T03:09:17.808Z"
     },
     {
       "name": "p0-agar-regression",
       "ok": true,
-      "mass": 92,
+      "mass": 93,
       "cells": 1,
       "canSplit": true,
       "alive": true,
       "ready": true,
       "started": true,
-      "tick": 32,
-      "aimX": 1128.5807155555874,
-      "aimY": 540.6341024148838,
-      "x": 1025.0529937726656,
-      "y": 540.6341024148838,
-      "t": "2026-08-31T02:58:53.158Z"
+      "tick": 18,
+      "aimX": 1092.3094944633663,
+      "aimY": 1648.97168230097,
+      "x": 1092.3094944633663,
+      "y": 1648.97168230097,
+      "t": "2026-08-31T03:09:17.810Z"
     },
     {
       "name": "p0-floating-pad-visible",
       "ok": true,
-      "t": "2026-08-31T02:58:53.175Z"
+      "t": "2026-08-31T03:09:17.815Z"
     },
     {
       "name": "p0-pad-at-touch",
       "ok": true,
       "touchX": 85,
       "touchY": 298,
-      "t": "2026-08-31T02:58:53.372Z"
+      "t": "2026-08-31T03:09:17.966Z"
     },
     {
       "name": "p0-screen-interference",
@@ -74,85 +74,85 @@
       "y": 246,
       "width": 104,
       "height": 104,
-      "t": "2026-08-31T02:58:53.473Z"
+      "t": "2026-08-31T03:09:17.977Z"
     },
     {
       "name": "p0-ui-selection-block",
       "ok": true,
       "found": true,
       "userSelect": "none",
-      "t": "2026-08-31T02:58:53.480Z"
+      "t": "2026-08-31T03:09:17.978Z"
     },
     {
       "name": "p0-hold-movement",
       "ok": true,
-      "d0": 44.79825047733266,
-      "d1": 153.53709303360552,
+      "d0": 41.92887106446324,
+      "d1": 153.56284858831327,
       "holdStart": {
+        "mass": 93,
+        "cells": 1,
+        "canSplit": true,
+        "alive": true,
+        "ready": true,
+        "started": true,
+        "tick": 27,
+        "aimX": 1092.3094944633663,
+        "aimY": 1648.97168230097,
+        "x": 1092.3094944633663,
+        "y": 1648.97168230097
+      },
+      "holdEnd": {
         "mass": 92,
         "cells": 1,
         "canSplit": true,
         "alive": true,
         "ready": true,
         "started": true,
-        "tick": 46,
-        "aimX": 1128.5807155555874,
-        "aimY": 540.6341024148838,
-        "x": 1064.1979338806773,
-        "y": 540.6341024148838
+        "tick": 98,
+        "aimX": 1427.8012141161428,
+        "aimY": 1648.97168230097,
+        "x": 1287.8012141161428,
+        "y": 1648.97168230097
       },
-      "holdEnd": {
-        "mass": 94,
-        "cells": 1,
-        "canSplit": true,
-        "alive": true,
-        "ready": true,
-        "started": true,
-        "tick": 117,
-        "aimX": 1402.5332773916155,
-        "aimY": 540.6341024148838,
-        "x": 1262.5332773916155,
-        "y": 540.6341024148838
-      },
-      "t": "2026-08-31T02:58:55.964Z"
+      "t": "2026-08-31T03:09:20.450Z"
     },
     {
       "name": "p0-input-persistence",
       "ok": true,
-      "totalDist": 198.33534351093817,
-      "t": "2026-08-31T02:58:55.965Z"
+      "totalDist": 195.4917196527765,
+      "t": "2026-08-31T03:09:20.450Z"
     },
     {
       "name": "p0-pad-hidden-on-release",
       "ok": true,
-      "t": "2026-08-31T02:58:56.095Z"
+      "t": "2026-08-31T03:09:20.584Z"
     },
     {
       "name": "p0-direction-input",
       "ok": true,
       "dirPass": 4,
-      "t": "2026-08-31T02:58:59.748Z"
+      "t": "2026-08-31T03:09:24.123Z"
     },
     {
       "name": "p0-split",
       "ok": true,
       "cellsBefore": 1,
       "cellsAfter": 2,
-      "t": "2026-08-31T02:59:00.606Z"
+      "t": "2026-08-31T03:09:24.923Z"
     },
     {
       "name": "p0-eject",
       "ok": true,
-      "massBefore": 93,
-      "massAfter": 65,
-      "t": "2026-08-31T02:59:01.128Z"
+      "massBefore": 155,
+      "massAfter": 127,
+      "t": "2026-08-31T03:09:25.444Z"
     },
     {
       "name": "p0-pc-regression",
       "ok": true,
       "aimOk": true,
       "cells": 2,
-      "t": "2026-08-31T02:59:04.005Z"
+      "t": "2026-08-31T03:09:28.376Z"
     }
   ],
   "realDevice": "PENDING_EXTERNAL"
