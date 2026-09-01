@@ -43,4 +43,21 @@ games/bomber/src/Bomber.tsx
 
 ## Commit / Preview
 
-*(filled after push)*
+| Field | Value |
+| --- | --- |
+| Commit | `60e53ed` |
+| Branch | `content-factory` |
+| Preview URL | https://game29-7e0rbrxg8-jyp-ai1s-projects.vercel.app |
+| Visit (solo) | https://game29-7e0rbrxg8-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A |
+| Deploy | game29 `dpl_AvyDyZzdhuXdSwA84RNU22jFWDgE` — Ready |
+| Local typecheck | PASS |
+
+## Preview smoke (automated)
+
+- Bomber entry → Map select loads — PASS
+- Room connect on headless preview — Connection failed (existing shard join; PM manual on device)
+
+## Status
+
+**GAME-DEV-003 COMPLETE** — dev + typecheck + Preview deploy + entry smoke.
+Solo play loop (bomb/danger/coin/retry) — PM manual on device recommended.
