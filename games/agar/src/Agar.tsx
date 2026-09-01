@@ -34,6 +34,8 @@ import {
   createAgarWorld,
   ejectMass,
   gemRenderSize,
+  growthStage,
+  growthStageLabel,
   inViewport,
   massToRadius,
   setPlayerAim,
@@ -80,11 +82,21 @@ function snapshotWorld(w: AgarWorld): AgarWorld {
     size: w.size,
     food: w.food,
     viruses: w.viruses,
+    hazards: w.hazards,
     players: w.players,
     rankings: w.rankings,
     aiDifficulty: w.aiDifficulty,
   };
 }
+
+type AgarPopup = {
+  id: number;
+  sx: number;
+  sy: number;
+  text: string;
+  color: string;
+  until: number;
+};
 
 function applyLocalLook(w: AgarWorld, localId: string, color: string): void {
   const p = w.players[localId];
@@ -141,6 +153,11 @@ export function AgarGame() {
   const aiDifficulty = DEFAULT_MP_AI_DIFFICULTY;
   const reportedRef = useRef(false);
   const lastEjectAtRef = useRef(0);
+  const popupIdRef = useRef(0);
+  const prevTickRef = useRef(0);
+  const [popups, setPopups] = useState<AgarPopup[]>([]);
+  const [eatPulseUntil, setEatPulseUntil] = useState(0);
+  const [hazardFlashUntil, setHazardFlashUntil] = useState(0);
   /** Keep last non-dead steer vector while pad is held (mobile hold persistence). */
   const lastSteerRef = useRef({ vx: 0, vy: 0 });
 
@@ -171,6 +188,39 @@ export function AgarGame() {
   const mass = me ? Math.round(totalMass(me)) : 0;
   const rank = localRank(world, deviceId);
   const cam = cameraFocus(me);
+  const stage = growthStage(mass);
+
+  useEffect(() => {
+    if (world.tick === prevTickRef.current) return;
+    prevTickRef.current = world.tick;
+    const fb = me?.feedback;
+    if (!fb) return;
+    const ox = VIEW / 2 - cam.x;
+    const oy = VIEW / 2 - cam.y;
+    const id = popupIdRef.current++;
+    const now = Date.now();
+    if (fb.kind === "eat") {
+      setPopups((p) => [
+        ...p,
+        { id, sx: fb.x + ox, sy: fb.y + oy, text: `+${Math.round(fb.amount)}`, color: "#fde047", until: now + 650 },
+      ]);
+      setEatPulseUntil(now + 180);
+    } else {
+      setPopups((p) => [
+        ...p,
+        { id, sx: fb.x + ox, sy: fb.y + oy, text: `-${Math.round(fb.amount)}`, color: "#f87171", until: now + 750 },
+      ]);
+      setHazardFlashUntil(now + 320);
+    }
+  }, [world.tick, me?.feedback, cam.x, cam.y]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const now = Date.now();
+      setPopups((p) => (p.some((x) => x.until <= now) ? p.filter((x) => x.until > now) : p));
+    }, 120);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!started) return;
@@ -309,7 +359,14 @@ export function AgarGame() {
 
   function handleRetry() {
     reportedRef.current = false;
-    setStarted(false);
+    lastSteerRef.current = { vx: 0, vy: 0 };
+    setPopups([]);
+    const w = worldRef.current;
+    respawnPlayer(w, deviceId, nickname);
+    applyLocalLook(w, deviceId, color);
+    const snap = snapshotWorld(w);
+    worldRef.current = snap;
+    setWorld(snap);
   }
 
   function exitToDetail() {
@@ -431,8 +488,22 @@ export function AgarGame() {
             metric={`L:${mass}`}
             rank={rank}
             extra={
-              <span className="text-[10px] font-normal text-white/45">
-                Space = Split · W = Eject (feeds Virus) · Virus pops #1
+              <span className="flex flex-wrap items-center gap-2 text-[10px] font-normal text-white/45">
+                <span
+                  className="rounded px-1.5 py-0.5 font-semibold text-white/80"
+                  style={{
+                    backgroundColor:
+                      stage === "large"
+                        ? "rgba(251,191,36,0.25)"
+                        : stage === "medium"
+                          ? "rgba(96,165,250,0.22)"
+                          : "rgba(255,255,255,0.12)",
+                  }}
+                  data-testid="agar-growth-stage"
+                >
+                  {growthStageLabel(stage)}
+                </span>
+                <span>Space = Split · W = Eject (feeds Virus) · Virus pops #1</span>
               </span>
             }
           />
@@ -468,6 +539,30 @@ export function AgarGame() {
               transform: `translate(${offsetX}px, ${offsetY}px)`,
             }}
           >
+            {world.hazards.map((h) => {
+              if (!inViewport(h.x, h.y, cam.x, cam.y, VIEW, h.radius + 20)) return null;
+              const pulse = 1 + Math.sin(Date.now() / 280) * 0.04;
+              const d = h.radius * 2 * pulse;
+              return (
+                <div
+                  key={h.id}
+                  className="absolute rounded-full pointer-events-none"
+                  style={{
+                    left: h.x - d / 2,
+                    top: h.y - d / 2,
+                    width: d,
+                    height: d,
+                    background:
+                      "radial-gradient(circle, rgba(239,68,68,0.38) 0%, rgba(127,29,29,0.18) 65%, transparent 100%)",
+                    border: "2px dashed rgba(248,113,113,0.6)",
+                    boxShadow: "0 0 16px rgba(239,68,68,0.4)",
+                    zIndex: 0,
+                  }}
+                  title="Toxic zone"
+                  data-testid="agar-hazard"
+                />
+              );
+            })}
             {world.food.map((f) => {
               if (!inViewport(f.x, f.y, cam.x, cam.y, VIEW)) return null;
               const isEject = f.kind === "eject" || f.id.startsWith("e");
@@ -561,11 +656,18 @@ export function AgarGame() {
                     if (!inViewport(c.x, c.y, cam.x, cam.y, VIEW, r + 24)) return null;
                     const isYou = p.id === deviceId;
                     const showEmoji = isYou && r > 16;
+                    const cellStage = isYou ? stage : growthStage(c.mass);
+                    const eatPulse = isYou && Date.now() < eatPulseUntil ? 1.06 : 1;
                     // Identity chrome outside the fill via outline/glow — does not shrink disc
                     const chrome = isYou
                       ? {
                           outline: "2px solid rgba(255,255,255,0.95)",
-                          boxShadow: `0 0 14px ${p.color}, 0 0 5px rgba(255,255,255,0.7)`,
+                          boxShadow:
+                            cellStage === "large"
+                              ? `0 0 18px #fbbf24, 0 0 8px ${p.color}`
+                              : cellStage === "medium"
+                                ? `0 0 12px rgba(96,165,250,0.75), 0 0 5px ${p.color}`
+                                : `0 0 14px ${p.color}, 0 0 5px rgba(255,255,255,0.7)`,
                         }
                       : {
                           outline: "1px solid rgba(255,255,255,0.25)",
@@ -585,6 +687,8 @@ export function AgarGame() {
                           outline: chrome.outline,
                           outlineOffset: 0,
                           boxShadow: chrome.boxShadow,
+                          transform: eatPulse !== 1 ? `scale(${eatPulse})` : undefined,
+                          transition: eatPulse !== 1 ? "transform 120ms ease-out" : undefined,
                           zIndex: Math.min(50, Math.round(c.mass) + (isYou ? 10 : 0)),
                         }}
                         title={isYou ? "YOU" : p.nickname}
@@ -595,7 +699,28 @@ export function AgarGame() {
                   })
                 : null
             )}
+            {popups.map((pop) => (
+              <div
+                key={pop.id}
+                className="pointer-events-none absolute text-xs font-bold"
+                style={{
+                  left: pop.sx,
+                  top: pop.sy - 12,
+                  color: pop.color,
+                  textShadow: "0 1px 4px rgba(0,0,0,0.85)",
+                  zIndex: 60,
+                }}
+              >
+                {pop.text}
+              </div>
+            ))}
           </div>
+          {Date.now() < hazardFlashUntil ? (
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{ backgroundColor: "rgba(239,68,68,0.12)", zIndex: 55 }}
+            />
+          ) : null}
         </div>
       </MultiplayerPlayShell>
 
@@ -612,12 +737,14 @@ export function AgarGame() {
       ) : null}
 
       {!alive && !qaPadProbeRef.current ? (
-        <MultiplayerDeathOverlay
-          score={finalScore}
-          metric={`L:${finalScore}`}
-          onRetry={handleRetry}
-          onExit={exitToDetail}
-        />
+        <div data-testid="agar-game-over">
+          <MultiplayerDeathOverlay
+            score={finalScore}
+            metric={`L:${finalScore}`}
+            onRetry={handleRetry}
+            onExit={exitToDetail}
+          />
+        </div>
       ) : null}
     </>
   );

@@ -63,6 +63,15 @@ export const AGAR_VIRUS_POP_LOSS = 0.06;
 export const AGAR_GEM_SMALL = 1;
 export const AGAR_GEM_MEDIUM = 2;
 export const AGAR_GEM_LARGE = 3;
+/** GAME-DEV-002 — player size tiers (feel only; speed curve unchanged). */
+export const AGAR_STAGE_MEDIUM = 80;
+export const AGAR_STAGE_LARGE = 200;
+/** Toxic zone hazard — mass chip, not death. */
+export const AGAR_HAZARD_RADIUS = 52;
+export const AGAR_HAZARD_MASS_LOSS = 10;
+export const AGAR_HAZARD_MASS_LOSS_PCT = 0.08;
+export const AGAR_HAZARD_COOLDOWN_MS = 1400;
+export const AGAR_HAZARD_COUNT = 8;
 /** Early-game ring of small gems around the local spawn. */
 export const AGAR_EARLY_GEM_COUNT = 16;
 /** Board / grid tone — shared visual target for Snake WORLD map. */
@@ -102,6 +111,23 @@ export type AgarVirus = {
   feedDirY?: number;
 };
 
+/** GAME-DEV-002 — static toxic zone; contact chips mass (cooldown, no kill). */
+export type AgarHazard = {
+  id: string;
+  x: number;
+  y: number;
+  radius: number;
+};
+
+export type AgarGrowthStage = "small" | "medium" | "large";
+
+export type AgarFeedback = {
+  kind: "eat" | "hazard";
+  amount: number;
+  x: number;
+  y: number;
+};
+
 export type AgarCell = {
   x: number;
   y: number;
@@ -127,6 +153,10 @@ export type AgarPlayer = {
   score: number;
   /** Last successful Space split (cooldown gate). */
   lastSplitAt?: number;
+  /** GAME-DEV-002 — hazard contact cooldown (per player). */
+  lastHazardHitAt?: number;
+  /** One-shot UI feedback from last tick (eat / hazard). */
+  feedback?: AgarFeedback;
 };
 
 export type AgarAiDifficulty = "easy" | "normal" | "hard";
@@ -143,6 +173,7 @@ export type AgarWorld = {
   size: number;
   food: AgarFood[];
   viruses: AgarVirus[];
+  hazards: AgarHazard[];
   players: Record<string, AgarPlayer>;
   rankings: Array<{ id: string; nickname: string; mass: number; color: string }>;
   /** Entry AI tier — Easy food-first / Normal chase / Hard split. */
@@ -233,6 +264,19 @@ export function totalMass(p: AgarPlayer): number {
   return p.cells.reduce((s, c) => s + c.mass, 0);
 }
 
+/** GAME-DEV-002 — Small / Medium / Large by total mass. */
+export function growthStage(mass: number): AgarGrowthStage {
+  if (mass >= AGAR_STAGE_LARGE) return "large";
+  if (mass >= AGAR_STAGE_MEDIUM) return "medium";
+  return "small";
+}
+
+export function growthStageLabel(stage: AgarGrowthStage): string {
+  if (stage === "large") return "Large";
+  if (stage === "medium") return "Medium";
+  return "Small";
+}
+
 /** Size → speed curve (exported for QA / HUD feel checks). */
 export function speedForMass(mass: number): number {
   // small★★★★★ (~4.5) · mid★★★ (~2.5) · large★ (~1.4) — clear feel gap
@@ -274,6 +318,31 @@ export function gemRenderSize(mass: number): number {
 
 let foodSeq = 0;
 let virusSeq = 0;
+let hazardSeq = 0;
+
+/** GAME-DEV-002 — fixed toxic zones (single hazard type). */
+function spawnHazards(world: AgarWorld): void {
+  const s = world.size;
+  const fixed: Vec[] = [
+    { x: s * 0.35, y: s * 0.5 },
+    { x: s * 0.65, y: s * 0.5 },
+    { x: s * 0.5, y: s * 0.32 },
+    { x: s * 0.5, y: s * 0.68 },
+    { x: s * 0.22, y: s * 0.38 },
+    { x: s * 0.78, y: s * 0.62 },
+    { x: s * 0.28, y: s * 0.72 },
+    { x: s * 0.72, y: s * 0.28 },
+  ];
+  for (let i = 0; i < Math.min(AGAR_HAZARD_COUNT, fixed.length); i++) {
+    const pos = fixed[i]!;
+    world.hazards.push({
+      id: `h${hazardSeq++}`,
+      x: pos.x,
+      y: pos.y,
+      radius: AGAR_HAZARD_RADIUS,
+    });
+  }
+}
 
 function spawnFood(world: AgarWorld, n: number): void {
   for (let i = 0; i < n; i++) {
@@ -386,6 +455,7 @@ export function createAgarWorld(
     size: AGAR_WORLD,
     food: [],
     viruses: [],
+    hazards: [],
     players: {},
     rankings: [],
     aiDifficulty,
@@ -393,6 +463,7 @@ export function createAgarWorld(
   world.players[localId] = makePlayer(localId, nickname || "You", false, world.size, 0);
   spawnFood(world, AGAR_FOOD_TARGET);
   spawnViruses(world);
+  spawnHazards(world);
   const local = world.players[localId]!;
   const localCell = local.cells[0]!;
   seedEarlyGems(world, localCell.x, localCell.y);
@@ -737,6 +808,9 @@ function botMaybeSplit(world: AgarWorld, bot: AgarPlayer, now: number): void {
 }
 
 function tryEatFood(world: AgarWorld, player: AgarPlayer): void {
+  let totalGain = 0;
+  let fx = player.cells[0]?.x ?? 0;
+  let fy = player.cells[0]?.y ?? 0;
   for (const cell of player.cells) {
     const r = massToRadius(cell.mass);
     for (let i = world.food.length - 1; i >= 0; i--) {
@@ -744,7 +818,36 @@ function tryEatFood(world: AgarWorld, player: AgarPlayer): void {
       if (Math.hypot(f.x - cell.x, f.y - cell.y) < r * 0.85) {
         cell.mass += f.mass;
         player.score += f.mass;
+        totalGain += f.mass;
+        fx = cell.x;
+        fy = cell.y;
         world.food.splice(i, 1);
+      }
+    }
+  }
+  if (totalGain > 0) {
+    player.feedback = { kind: "eat", amount: totalGain, x: fx, y: fy };
+  }
+}
+
+/** GAME-DEV-002 — toxic zone chips mass; cooldown prevents drain-loop. */
+function tryHazardContact(world: AgarWorld, now: number): void {
+  for (const player of Object.values(world.players)) {
+    if (!player.alive) continue;
+    if ((player.lastHazardHitAt ?? 0) + AGAR_HAZARD_COOLDOWN_MS > now) continue;
+    for (const cell of player.cells) {
+      const cr = massToRadius(cell.mass);
+      for (const h of world.hazards) {
+        const d = Math.hypot(cell.x - h.x, cell.y - h.y);
+        if (d >= h.radius + cr * 0.55) continue;
+        const loss = Math.max(
+          3,
+          Math.min(AGAR_HAZARD_MASS_LOSS, Math.round(cell.mass * AGAR_HAZARD_MASS_LOSS_PCT))
+        );
+        cell.mass = Math.max(AGAR_START_MASS * 0.55, cell.mass - loss);
+        player.lastHazardHitAt = now;
+        player.feedback = { kind: "hazard", amount: loss, x: cell.x, y: cell.y };
+        return;
       }
     }
   }
@@ -961,6 +1064,7 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
 
   for (const p of Object.values(world.players)) {
     if (!p.alive) continue;
+    p.feedback = undefined;
     if (p.isBot) {
       botAim(world, p);
       botMaybeSplit(world, p, now);
@@ -973,6 +1077,7 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
     tryEatFood(world, p);
   }
   tryVirusCollisions(world, now);
+  tryHazardContact(world, now);
   tryEatPlayers(world, now);
 
   if (world.food.length < AGAR_FOOD_TARGET * 0.7) {
@@ -1001,6 +1106,7 @@ export function respawnPlayer(world: AgarWorld, playerId: string, nickname?: str
     aimY: pos.y,
     score: existing?.score ?? 0,
     lastSplitAt: 0,
+    lastHazardHitAt: 0,
   };
   updateRankings(world);
 }
