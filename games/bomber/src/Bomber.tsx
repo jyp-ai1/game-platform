@@ -40,10 +40,12 @@ import {
   bomberRoomCodeForMap,
   createBomberWorld,
   firePowerOf,
+  getBombDangerCells,
   plantBomb,
   powerUpEmoji,
   reconcileHumans,
   remainingTimeSec,
+  restartSoloMatch,
   rosterForMap,
   serializeBomberState,
   tickBomberWorld,
@@ -99,6 +101,7 @@ function snap(w: BomberWorld): BomberWorld {
     fuseMs: w.fuseMs,
     difficulty: w.difficulty,
     powerUps: w.powerUps.slice(),
+    coins: w.coins.slice(),
     suddenDeathActive: w.suddenDeathActive,
     suddenDeathRing: w.suddenDeathRing,
     maxFire: w.maxFire,
@@ -175,6 +178,20 @@ function restartInviteMatch(
 function roomHasOtherHumans(room: GameRoom, deviceId: string): boolean {
   return room.players.some((p) => p.deviceId !== deviceId);
 }
+
+function isSoloSession(code: string, deviceId: string): boolean {
+  const room = getRoom(code);
+  return !room || !roomHasOtherHumans(room, deviceId);
+}
+
+type BomberPopup = {
+  id: number;
+  sx: number;
+  sy: number;
+  text: string;
+  color: string;
+  until: number;
+};
 
 /** Bootstrap map shard room when missing (host-only). */
 async function ensureJoinedRoom(code: string, nickname: string): Promise<GameRoom | null> {
@@ -325,6 +342,10 @@ export function BomberGame() {
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
   const [mapId, setMapId] = useState(0);
   const [nowTick, setNowTick] = useState(() => Date.now());
+  const [popups, setPopups] = useState<BomberPopup[]>([]);
+  const popupIdRef = useRef(0);
+  const prevTickRef = useRef(0);
+  const [plantFlashUntil, setPlantFlashUntil] = useState(0);
   const [isHost, setIsHost] = useState(false);
   const isHostRef = useRef(false);
   const setHostAuthority = useCallback((host: boolean) => {
@@ -376,7 +397,45 @@ export function BomberGame() {
   const alive = !!me?.alive;
   const wins = me?.wins ?? 0;
   const kills = me?.kills ?? 0;
+  const score = me?.score ?? 0;
   const rank = localRank(world, deviceId);
+  const soloSession = isSoloSession(activeRoom, deviceId);
+
+  useEffect(() => {
+    if (world.tick === prevTickRef.current) return;
+    prevTickRef.current = world.tick;
+    const fb = me?.feedback;
+    if (!fb) return;
+    const sx = fb.x * CELL + CELL / 2;
+    const sy = fb.y * CELL;
+    const id = popupIdRef.current++;
+    const now = Date.now();
+    if (fb.kind === "plant") {
+      setPlantFlashUntil(now + 220);
+      return;
+    }
+    const label =
+      fb.kind === "block"
+        ? `+${fb.amount}`
+        : fb.kind === "coin"
+          ? `+${fb.amount} 🪙`
+          : fb.kind === "kill"
+            ? `+${fb.amount} KILL`
+            : fb.kind === "blast"
+              ? "💥"
+              : `+${fb.amount}`;
+    const color =
+      fb.kind === "kill" ? "#fbbf24" : fb.kind === "coin" ? "#fde047" : fb.kind === "blast" ? "#fb923c" : "#86efac";
+    setPopups((p) => [...p, { id, sx, sy, text: label, color, until: now + (fb.kind === "blast" ? 420 : 650) }]);
+  }, [world.tick, me?.feedback]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const now = Date.now();
+      setPopups((p) => (p.some((x) => x.until <= now) ? p.filter((x) => x.until > now) : p));
+    }, 120);
+    return () => window.clearInterval(id);
+  }, []);
 
   // Authoritative tick: host, or takeover if host state goes stale (fixes frozen AI/bombs)
   useEffect(() => {
@@ -1058,12 +1117,25 @@ export function BomberGame() {
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
+    const code = roomRef.current;
+    if (isSoloSession(code, deviceId) && started) {
+      setPopups([]);
+      const next = restartSoloMatch(worldRef.current, deviceId, nickname, color);
+      applyLocalLook(next, deviceId, color);
+      worldRef.current = next;
+      setWorld(next);
+      setNowTick(Date.now());
+      if (isHostRef.current || qaLocalProbeRef.current) {
+        send(code, "state", serializeBomberState(next));
+      }
+      return;
+    }
     setStateAckReady(false);
     setStarted(false);
     setConnecting(false);
     setConnectError(false);
     setLobbyPhase("map");
-  }, [setStateAckReady]);
+  }, [deviceId, nickname, color, started, setStateAckReady]);
 
   const exitToDetail = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -1088,7 +1160,8 @@ export function BomberGame() {
   const width = world.cols * CELL;
   const height = world.rows * CELL;
   const timeLeft = remainingTimeSec(world, nowTick);
-  const showDeath = !!world.matchOver;
+  const dangerCells = getBombDangerCells(world, nowTick);
+  const showDeath = world.matchOver || (soloSession && !alive && started && stateAck);
 
   if (lobbyPhase === "entry" && !started) {
     return (
@@ -1219,10 +1292,16 @@ export function BomberGame() {
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
-            metric={`K:${kills}`}
+            metric={`S:${score} · K:${kills}`}
             rank={rank}
             extra={
               <>
+                <span
+                  data-testid="bomber-score-hud"
+                  className="touch-none select-none rounded-md bg-amber-500/20 px-2 py-1 text-[11px] font-semibold text-amber-100"
+                >
+                  SCORE {score}
+                </span>
                 <span
                   data-testid="bomber-match-hud"
                   className="touch-none select-none rounded-md bg-black/55 px-2.5 py-1 tabular-nums"
@@ -1286,15 +1365,56 @@ export function BomberGame() {
               />
             ))
           )}
+          {dangerCells.map((c) => (
+            <div
+              key={`danger-${c.x}-${c.y}`}
+              data-testid="bomber-danger-cell"
+              className="pointer-events-none absolute"
+              style={{
+                left: c.x * CELL,
+                top: c.y * CELL,
+                width: CELL - 1,
+                height: CELL - 1,
+                backgroundColor: "rgba(239,68,68,0.2)",
+                border: "1px dashed rgba(248,113,113,0.55)",
+                zIndex: 4,
+              }}
+            />
+          ))}
           {world.blasts.flatMap((bl) =>
             bl.cells.map((c, i) => (
               <div
                 key={`${bl.id}-${i}`}
-                className="absolute bg-orange-400/80"
-                style={{ left: c.x * CELL, top: c.y * CELL, width: CELL - 1, height: CELL - 1 }}
+                className="absolute"
+                style={{
+                  left: c.x * CELL,
+                  top: c.y * CELL,
+                  width: CELL - 1,
+                  height: CELL - 1,
+                  background: "linear-gradient(135deg, #fef08a 0%, #fb923c 55%, #ef4444 100%)",
+                  boxShadow: "0 0 10px rgba(251,146,60,0.85)",
+                  opacity: 0.92,
+                  zIndex: 6,
+                }}
               />
             ))
           )}
+          {world.coins.map((coin) => (
+            <div
+              key={coin.id}
+              data-testid="bomber-coin"
+              className="absolute z-10 flex items-center justify-center text-sm"
+              style={{
+                left: coin.x * CELL + 4,
+                top: coin.y * CELL + 4,
+                width: CELL - 8,
+                height: CELL - 8,
+              }}
+              title="Coin"
+            >
+              🪙
+            </div>
+          ))}
           {world.powerUps.map((pu) => (
             <div
               key={pu.id}
@@ -1350,7 +1470,11 @@ export function BomberGame() {
                   top: b.y * CELL + 4,
                   width: CELL - 8,
                   height: CELL - 8,
-                  boxShadow: urgent ? "0 0 10px rgba(248,113,113,0.9)" : "0 0 6px rgba(255,255,255,0.5)",
+                  boxShadow: urgent
+                    ? "0 0 12px rgba(248,113,113,0.95)"
+                    : Date.now() < plantFlashUntil
+                      ? "0 0 14px rgba(250,204,21,0.95)"
+                      : "0 0 6px rgba(255,255,255,0.5)",
                 }}
               >
                 <span className="text-xs">💣</span>
@@ -1362,7 +1486,21 @@ export function BomberGame() {
               </div>
             );
           })}
-          {!alive && !world.matchOver ? (
+          {popups.map((pop) => (
+            <div
+              key={pop.id}
+              className="pointer-events-none absolute z-40 text-xs font-bold"
+              style={{
+                left: pop.sx,
+                top: pop.sy - 10,
+                color: pop.color,
+                textShadow: "0 1px 4px rgba(0,0,0,0.85)",
+              }}
+            >
+              {pop.text}
+            </div>
+          ))}
+          {!alive && !world.matchOver && !soloSession ? (
             <div className="absolute inset-x-0 bottom-4 z-20 text-center text-xs text-white/70">
               Spectating · last survivor wins
             </div>
@@ -1379,12 +1517,18 @@ export function BomberGame() {
       ) : null}
 
       {showDeath ? (
-        <MultiplayerDeathOverlay
-          score={wins}
-          metric={`${resultLabel} · Place #${rank || "-"} · Kills ${kills}`}
-          onRetry={handleRetry}
-          onExit={exitToDetail}
-        />
+        <div data-testid="bomber-game-over">
+          <MultiplayerDeathOverlay
+            score={Math.max(score, wins)}
+            metric={
+              world.matchOver
+                ? `${resultLabel} · Place #${rank || "-"} · Kills ${kills}`
+                : `DEAD · Score ${score} · Kills ${kills}`
+            }
+            onRetry={handleRetry}
+            onExit={exitToDetail}
+          />
+        </div>
       ) : null}
     </>
   );

@@ -5,6 +5,14 @@ export const BOMBER_ROWS = 13;
 export const BOMBER_TICK_MS = 50;
 export const BOMBER_BOMB_FUSE_MS = 1800;
 export const BOMBER_BLAST_MS = 420;
+/** GAME-DEV-003 — solo gameplay score ticks (no new ranking system). */
+export const BOMBER_SCORE_BLOCK = 5;
+export const BOMBER_SCORE_COIN = 10;
+export const BOMBER_SCORE_KILL = 25;
+/** Chance a destroyed soft block drops a coin pickup. */
+export const BOMBER_COIN_DROP_CHANCE = 0.22;
+/** Fuse fraction elapsed before danger zone is shown. */
+export const BOMBER_DANGER_FUSE_RATIO = 0.55;
 
 /** Fire power starts at 1; map caps max fire. */
 export const BOMBER_FIRE_START = 1;
@@ -14,6 +22,22 @@ export const BOMBER_SUDDEN_DEATH_INTERVAL_SEC = 8;
 export type Cell = "empty" | "soft" | "hard";
 export type PlayerSlots = 4 | 6;
 export type PowerUpKind = "bomb" | "speed" | "range";
+
+/** GAME-DEV-003 — single reward pickup (coin). */
+export type BomberCoin = {
+  id: string;
+  x: number;
+  y: number;
+};
+
+export type BomberFeedbackKind = "plant" | "block" | "coin" | "kill" | "blast";
+
+export type BomberFeedback = {
+  kind: BomberFeedbackKind;
+  amount: number;
+  x: number;
+  y: number;
+};
 
 export type BomberPlayer = {
   id: string;
@@ -27,10 +51,14 @@ export type BomberPlayer = {
   bombsLeft: number;
   kills: number;
   wins: number;
+  /** GAME-DEV-003 — session score (HUD feedback). */
+  score?: number;
   blastBonus?: number;
   speedBonus?: number;
   /** Placement when eliminated (1 = winner). */
   place?: number;
+  /** One-shot UI feedback from last tick. */
+  feedback?: BomberFeedback;
 };
 
 export type PowerUp = {
@@ -131,6 +159,8 @@ export type BomberWorld = {
   fuseMs: number;
   difficulty: MatchDifficulty;
   powerUps: PowerUp[];
+  /** GAME-DEV-003 — coin pickups from destroyed blocks. */
+  coins: BomberCoin[];
   suddenDeathActive: boolean;
   suddenDeathRing: number;
   maxFire: number;
@@ -155,7 +185,7 @@ function maybeSpawnPowerUp(world: BomberWorld, x: number, y: number): void {
   world.powerUps.push({ id: `pu-${world.tick}-${x}-${y}`, kind, x, y });
 }
 
-function applyPowerUp(p: BomberPlayer, kind: PowerUpKind, maxFire: number): void {
+export function applyPowerUp(p: BomberPlayer, kind: PowerUpKind, maxFire: number): void {
   if (kind === "bomb") {
     p.bombsMax = Math.min(5, p.bombsMax + 1);
     p.bombsLeft = Math.min(p.bombsMax, p.bombsLeft + 1);
@@ -172,6 +202,7 @@ function resetPlayerLoadout(p: BomberPlayer, diff: MatchDifficulty): void {
   p.speedBonus = 0;
   p.bombsMax = diff.bombsMax;
   p.bombsLeft = diff.bombsMax;
+  p.score = 0;
 }
 
 export function powerUpEmoji(kind: PowerUpKind): string {
@@ -369,6 +400,7 @@ function fillPlayers(
       bombsLeft: diff.bombsMax,
       kills: 0,
       wins: 0,
+      score: 0,
       blastBonus: 0,
       speedBonus: 0,
     };
@@ -414,6 +446,7 @@ export function createBomberWorld(
     fuseMs: diff.fuseMs,
     difficulty: diff,
     powerUps: [],
+    coins: [],
     suddenDeathActive: false,
     suddenDeathRing: 0,
     maxFire,
@@ -438,6 +471,7 @@ export function createBomberWorld(
       bombsLeft: diff.bombsMax,
       kills: 0,
       wins: 0,
+      score: 0,
       blastBonus: 0,
       speedBonus: 0,
     };
@@ -575,6 +609,7 @@ export function reconcileHumans(
       bombsLeft: world.difficulty.bombsMax,
       kills: 0,
       wins: 0,
+      score: 0,
       blastBonus: 0,
       speedBonus: 0,
     };
@@ -612,6 +647,7 @@ export function tryMove(world: BomberWorld, playerId: string, dx: number, dy: nu
   p.x = nx;
   p.y = ny;
   pickupPowerUps(world, p);
+  pickupCoins(world, p);
 }
 
 /** Mobile pad repeat interval — speed ⚡ reduces cadence, not cells per tick. */
@@ -637,10 +673,15 @@ export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()
     range,
   };
   world.bombs.push(bomb);
+  p.feedback = { kind: "plant", amount: 0, x: p.x, y: p.y };
   return bomb;
 }
 
-function blastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: number }> {
+function blastCells(
+  world: BomberWorld,
+  bomb: Bomb,
+  owner?: BomberPlayer
+): Array<{ x: number; y: number }> {
   const cells = [{ x: bomb.x, y: bomb.y }];
   const dirs = [
     [1, 0],
@@ -658,6 +699,11 @@ function blastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: numbe
       if (cell === "soft") {
         world.grid[y]![x] = "empty";
         maybeSpawnPowerUp(world, x, y);
+        maybeDropCoin(world, x, y);
+        if (owner) {
+          owner.score = (owner.score ?? 0) + BOMBER_SCORE_BLOCK;
+          owner.feedback = { kind: "block", amount: BOMBER_SCORE_BLOCK, x, y };
+        }
         break;
       }
     }
@@ -738,6 +784,65 @@ function applySuddenDeath(world: BomberWorld, now: number): void {
       }
     }
   }
+}
+
+function pickupCoins(world: BomberWorld, p: BomberPlayer): void {
+  const idx = world.coins.findIndex((c) => c.x === p.x && c.y === p.y);
+  if (idx < 0) return;
+  world.coins.splice(idx, 1);
+  p.score = (p.score ?? 0) + BOMBER_SCORE_COIN;
+  p.feedback = { kind: "coin", amount: BOMBER_SCORE_COIN, x: p.x, y: p.y };
+}
+
+function maybeDropCoin(world: BomberWorld, x: number, y: number): void {
+  const roll = ((x * 31 + y * 17 + world.tick * 13) % 100) / 100;
+  if (roll > BOMBER_COIN_DROP_CHANCE) return;
+  if (world.coins.some((c) => c.x === x && c.y === y)) return;
+  world.coins.push({ id: `coin-${world.tick}-${x}-${y}`, x, y });
+}
+
+/** Read-only blast ray — no grid mutation (danger preview). */
+function previewBlastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y: number }> {
+  const cells = [{ x: bomb.x, y: bomb.y }];
+  const dirs = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ] as const;
+  for (const [dx, dy] of dirs) {
+    for (let i = 1; i <= bomb.range; i++) {
+      const x = bomb.x + dx * i;
+      const y = bomb.y + dy * i;
+      const cell = world.grid[y]?.[x];
+      if (!cell || cell === "hard") break;
+      cells.push({ x, y });
+      if (cell === "soft") break;
+    }
+  }
+  return cells;
+}
+
+/** GAME-DEV-003 — cells in imminent blast range (fuse past danger threshold). */
+export function getBombDangerCells(world: BomberWorld, now = Date.now()): Array<{ x: number; y: number }> {
+  const fuse = world.fuseMs || BOMBER_BOMB_FUSE_MS;
+  const out: Array<{ x: number; y: number }> = [];
+  const seen = new Set<string>();
+  for (const bomb of world.bombs) {
+    const elapsed = now - bomb.plantedAt;
+    if (elapsed < fuse * BOMBER_DANGER_FUSE_RATIO) continue;
+    for (const c of previewBlastCells(world, bomb)) {
+      const key = `${c.x},${c.y}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(c);
+    }
+  }
+  return out;
+}
+
+export function isCellInBlastDanger(world: BomberWorld, x: number, y: number): boolean {
+  return cellInBlastPreview(world, x, y);
 }
 
 function cellInBlastPreview(world: BomberWorld, x: number, y: number): boolean {
@@ -945,6 +1050,7 @@ export type BomberSyncState = {
   bombs: Bomb[];
   blasts: Blast[];
   powerUps: PowerUp[];
+  coins: BomberCoin[];
   deathOrder: string[];
   fuseMs: number;
   maxFire: number;
@@ -966,6 +1072,7 @@ export function serializeBomberState(world: BomberWorld): BomberSyncState {
     bombs: world.bombs.map((b) => ({ ...b })),
     blasts: world.blasts.map((b) => ({ ...b, cells: b.cells.map((c) => ({ ...c })) })),
     powerUps: world.powerUps.map((p) => ({ ...p })),
+    coins: world.coins.map((c) => ({ ...c })),
     deathOrder: world.deathOrder.slice(),
     fuseMs: world.fuseMs,
     maxFire: world.maxFire,
@@ -1009,6 +1116,7 @@ export function applyBomberSyncState(
   world.bombs = state.bombs.map((b) => ({ ...b }));
   world.blasts = state.blasts.map((b) => ({ ...b, cells: b.cells.map((c) => ({ ...c })) }));
   world.powerUps = state.powerUps.map((p) => ({ ...p }));
+  world.coins = (state.coins ?? []).map((c) => ({ ...c }));
   world.deathOrder = state.deathOrder.slice();
   world.fuseMs = state.fuseMs;
   world.maxFire = state.maxFire;
@@ -1039,7 +1147,12 @@ export function tickBomberWorld(
 
   if (!opts?.skipBots) {
     for (const p of Object.values(world.players)) {
+      p.feedback = undefined;
       if (p.isBot) botThink(world, p, now);
+    }
+  } else {
+    for (const p of Object.values(world.players)) {
+      p.feedback = undefined;
     }
   }
 
@@ -1050,15 +1163,22 @@ export function tickBomberWorld(
       remain.push(bomb);
       continue;
     }
-    const cells = blastCells(world, bomb);
+    const ownerRef = world.players[bomb.ownerId];
+    const cells = blastCells(world, bomb, ownerRef);
     world.blasts.push({ id: `blast-${bomb.id}`, cells, until: now + BOMBER_BLAST_MS });
-    const owner = world.players[bomb.ownerId];
-    if (owner) owner.bombsLeft = Math.min(owner.bombsMax, owner.bombsLeft + 1);
+    if (ownerRef) {
+      ownerRef.feedback = { kind: "blast", amount: 0, x: bomb.x, y: bomb.y };
+    }
+    if (ownerRef) ownerRef.bombsLeft = Math.min(ownerRef.bombsMax, ownerRef.bombsLeft + 1);
     for (const p of Object.values(world.players)) {
       if (!p.alive) continue;
       if (cells.some((c) => c.x === p.x && c.y === p.y)) {
         markDeath(world, p);
-        if (owner && owner.id !== p.id) owner.kills += 1;
+        if (ownerRef && ownerRef.id !== p.id) {
+          ownerRef.kills += 1;
+          ownerRef.score = (ownerRef.score ?? 0) + BOMBER_SCORE_KILL;
+          ownerRef.feedback = { kind: "kill", amount: BOMBER_SCORE_KILL, x: p.x, y: p.y };
+        }
       }
     }
   }
@@ -1068,4 +1188,24 @@ export function tickBomberWorld(
   const living = Object.values(world.players).filter((p) => p.alive);
   if (living.length <= 1 && !opts?.deferMatchEnd) finalizeMatch(world);
   updateRankings(world);
+}
+
+/** GAME-DEV-003 — in-place solo restart (same map, fresh grid). */
+export function restartSoloMatch(
+  world: BomberWorld,
+  localId: string,
+  nickname: string,
+  color?: string
+): BomberWorld {
+  const next = createBomberWorld(localId, nickname, {
+    mapId: world.mapId,
+    playerSlots: world.playerSlots,
+    humans: [{ id: localId, nickname, color }],
+    matchStartedAt: Date.now(),
+  });
+  if (color) {
+    const p = next.players[localId];
+    if (p) p.color = color;
+  }
+  return next;
 }
