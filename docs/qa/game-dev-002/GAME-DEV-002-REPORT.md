@@ -39,4 +39,21 @@ games/agar/src/Agar.tsx
 
 ## Commit / Preview
 
-*(filled after push)*
+| Field | Value |
+| --- | --- |
+| Commit | `157d4de` |
+| Branch | `content-factory` |
+| Preview URL | https://game29-8timpe6ny-jyp-ai1s-projects.vercel.app |
+| Visit (WORLD) | https://game29-8timpe6ny-jyp-ai1s-projects.vercel.app/games/agar/play?room=WORLD |
+| Deploy | game29 `dpl_2JEdunL8wyePhTgnfoAQ45nW7pUs` — Ready |
+| Local typecheck | PASS |
+
+## Preview smoke (automated)
+
+- ENTER → Agar canvas/HUD/TOP10 loads — PASS
+- Screenshot: `docs/qa/game-dev-002/01-world-playing.png`
+
+## Status
+
+**GAME-DEV-002 COMPLETE** — dev + typecheck + Preview deploy + entry smoke PASS.
+Eat feedback / hazard / death-retry — PM manual play recommended.
