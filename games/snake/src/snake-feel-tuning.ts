@@ -71,6 +71,9 @@ export const SNAKE_FEEL = {
   killSoundHz: 540,
   rareFoodHz: 1040,
   rankUpHz: 880,
+  /** GAME-DEV-001 — gentle speed ramp while alive (+6%/min, cap +25%) */
+  progressiveSpeedPerMinute: 0.06,
+  progressiveSpeedMax: 1.25,
 } as const;
 
 /** World / spawn polish — density & growth pacing */
@@ -87,4 +90,9 @@ export const SNAKE_POLISH = {
   bossDamagePerHit: 10,
   safeZoneRadiusMult: 1.12,
   eatValueMult: 1.12,
+  /** GAME-DEV-001 — timed bonus gem near active human snakes */
+  bonusSpawnIntervalTicks: 400,
+  bonusMinSegments: 8,
+  bonusLifetimeTicks: 600,
+  bonusMaxOnMap: 1,
 } as const;

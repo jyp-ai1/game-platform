@@ -1,6 +1,6 @@
 import type { FoodKind } from "@game-platform/shared";
 
-export type FoodTier = "small" | "medium" | "large" | "epic" | "death";
+export type FoodTier = "small" | "medium" | "large" | "epic" | "bonus" | "death";
 
 export interface FoodTierConfig {
   tier: FoodTier;
@@ -54,6 +54,16 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
     particleCount: 24,
     soundHz: 980,
   },
+  bonus: {
+    tier: "bonus",
+    kind: "golden_apple",
+    score: 8,
+    sizePx: 16,
+    color: "#fde047",
+    glow: "0 0 16px #facc15",
+    particleCount: 20,
+    soundHz: 920,
+  },
   death: {
     tier: "death",
     kind: "golden_apple",
@@ -76,6 +86,7 @@ export function rollFoodTier(): FoodTier {
 }
 
 export function tierFromKind(kind: FoodKind, value: number): FoodTier {
+  if (value >= 7 && value <= 9 && kind === "golden_apple") return "bonus";
   if (value >= 18 || kind === "golden_apple" && value >= 15) return value >= 18 ? "death" : "epic";
   if (value >= 8) return "large";
   if (value >= 3) return "medium";

@@ -171,7 +171,7 @@ import {
   isViewportFullscreen,
   measureGameBoardRect,
 } from "./snake-fullscreen";
-import { getFoodVisual, tierFromKind } from "./snake-food-types";
+import { getFoodVisual, tierFromKind, type FoodTier } from "./snake-food-types";
 import { drawWorldCanvas, getWorldCanvasStats } from "./snake-world-canvas";
 import { initSnakePath } from "./snake-path-movement";
 import { SnakeMinimap } from "./snake-minimap";
@@ -1861,11 +1861,7 @@ export function SnakeIoGame({
     if (!activeRoom || !worldRef.current) return;
     postDeath("replay");
     emitGameRetry("snake");
-    // PLATFORM-UX-CONTRACT-001 — Death RETRY → Common Lobby
-    if (onExitToLobbyRef.current) {
-      onExitToLobbyRef.current();
-      return;
-    }
+    // GAME-DEV-001 — Retry restarts in-place; Exit handles lobby/detail navigation.
     recordSnakeRematch(activeRoom);
     recordSpectatorRejoin(activeRoom);
 
@@ -1924,14 +1920,24 @@ export function SnakeIoGame({
       if (prevMe && me && me.score > prevMe.score && me.segments[0]) {
         const delta = me.score - prevMe.score;
         const head = me.segments[0]!;
-        const tier =
-          delta === 1 ? "small" : delta === 2 ? "medium" : delta === 3 ? "large" : tierFromKind("normal", delta);
+        const tier: FoodTier =
+          delta === 8
+            ? "bonus"
+            : delta === 1
+              ? "small"
+              : delta === 2
+                ? "medium"
+                : delta === 3
+                  ? "large"
+                  : tierFromKind("normal", delta);
         const vis = getFoodVisual(tier);
-        if (delta >= 12 || tier === "death" || tier === "epic") playLootGemSound();
+        if (delta >= 12 || tier === "death" || tier === "epic" || tier === "bonus") playLootGemSound();
         else playEatSound("normal", vis.soundHz);
         markFirstFun(activeRoom);
         setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, isGlobalWorld ? Math.max(vis.particleCount, 6) : vis.particleCount));
-        setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y, delta, vis.color));
+        setScorePopups((pop) =>
+          spawnScorePopup(pop, head.x, head.y, tier === "bonus" ? "BONUS!" : delta, vis.color)
+        );
         const buf = me.gemsEaten ?? 0;
         const perSeg = SNAKE_MVP_RC1.growthFoodPerSegment;
         setScorePopups((pop) =>
@@ -2803,11 +2809,12 @@ export function SnakeIoGame({
 
       {/* STEP 3.5 — Death Overlay via shared portal (z-[200]) so Retry/Exit stay above HUD/map */}
       {!isStageMode && mySnake && !mySnake.alive ? (
-        <MultiplayerDeathOverlay
-          score={Math.round(mySnake.score ?? 0)}
-          metric={`L:${getSegmentCount(mySnake)}`}
-          onRetry={handleRetry}
-          onExit={() => {
+        <div data-testid="snake-game-over">
+          <MultiplayerDeathOverlay
+            score={Math.round(mySnake.score ?? 0)}
+            metric={`L:${getSegmentCount(mySnake)}`}
+            onRetry={handleRetry}
+            onExit={() => {
             emitGameExit("snake");
             postDeath("exit");
             if (activeRoom && !isLocalOnly) {
@@ -2826,7 +2833,8 @@ export function SnakeIoGame({
               window.location.href = "/games/snake";
             }
           }}
-        />
+          />
+        </div>
       ) : null}
 
       {!isSpectating && mySnake?.alive && !isPaused ? (

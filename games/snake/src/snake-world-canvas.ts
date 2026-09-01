@@ -99,8 +99,11 @@ function collectVisibleFoods(
     visible.push(f);
   }
   if (visible.length <= budget) return visible;
-  // Prefer death gems so on-screen corpse loot stays visible under budget.
-  visible.sort((a, b) => (a.tier === "death" ? 0 : 1) - (b.tier === "death" ? 0 : 1));
+  // Prefer death/bonus gems so special loot stays visible under budget.
+  visible.sort((a, b) => {
+    const pri = (t?: string) => (t === "death" || t === "bonus" ? 0 : 1);
+    return pri(a.tier) - pri(b.tier);
+  });
   return visible.slice(0, budget);
 }
 
@@ -121,15 +124,25 @@ function drawGem(
   const fd = myHead ? Math.hypot(f.x - myHead.x, f.y - myHead.y) : 999;
   const magneted = fd < magnetR && fd > 0.05;
   const magnetScale = magneted ? 1 + (1 - fd / magnetR) * 0.4 : 1;
-  const r = (size * magnetScale) / 2;
+  const pulse = tier === "bonus" ? 1 + Math.sin(Date.now() / 180) * 0.12 : 1;
+  const r = (size * magnetScale * pulse) / 2;
   ctx.beginPath();
   ctx.arc(s.x + cellSize / 2, s.y + cellSize / 2, r, 0, Math.PI * 2);
   ctx.fillStyle = vis.color;
-  ctx.globalAlpha = magneted ? 0.85 + (1 - fd / magnetR) * 0.15 : 1;
+  ctx.globalAlpha = magneted ? 0.85 + (1 - fd / magnetR) * 0.15 : tier === "bonus" ? 0.92 : 1;
   ctx.fill();
   if (tier === "death") {
     ctx.strokeStyle = "rgba(248,113,113,0.7)";
     ctx.lineWidth = 2;
+    ctx.stroke();
+  } else if (tier === "bonus") {
+    ctx.strokeStyle = "rgba(253,224,71,0.85)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(s.x + cellSize / 2, s.y + cellSize / 2, r + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(250,204,21,0.35)";
+    ctx.lineWidth = 1;
     ctx.stroke();
   } else if (tier !== "small") {
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
