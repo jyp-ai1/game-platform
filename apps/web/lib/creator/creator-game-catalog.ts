@@ -26,6 +26,8 @@ export function creatorRecordToGame(record: CreatorGameRecord): Game {
     howToPlay: "Arrow keys · platform contract entry",
     playCount: record.playCount,
     nostalgiaNote: null,
+    playUrl: null,
+    sourceType: "native",
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
   };

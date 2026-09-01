@@ -83,6 +83,8 @@ export function buildLocalMvpGame(slug: string): Game | null {
     howToPlay: meta.controls,
     playCount: 0,
     nostalgiaNote: null,
+    playUrl: null,
+    sourceType: "native",
     createdAt: now,
     updatedAt: now,
   };
