@@ -1,8 +1,5 @@
 import type { Game } from "@game-platform/shared";
 
-import { creatorDisplayName, isCreatorMultiplayerSlug } from "@/lib/creator/creator-game-catalog";
-import { isCreatorGameSlug } from "@/lib/creator/creator-game-registry";
-
 /** One-line summary for catalog cards and detail meta. */
 export function gameSummaryDescription(game: Game, slug: string, maxLen = 100): string {
   if (slug === "snake") {
@@ -21,12 +18,21 @@ export function gameSummaryDescription(game: Game, slug: string, maxLen = 100): 
   return text;
 }
 
+/** Client-safe creator label (no server registry / fs). */
 export function gameCreatorLabel(slug: string): string {
   if (slug === "snake" || slug === "agar" || slug === "bomber") return "Replay Studio";
-  if (isCreatorGameSlug(slug)) return creatorDisplayName(slug) ?? "Creator";
+  if (slug.startsWith("creator-")) return "Creator";
   return "Community";
 }
 
-export function isDiscoveryMultiplayerSlug(slug: string): boolean {
-  return slug === "snake" || slug === "agar" || slug === "bomber" || isCreatorMultiplayerSlug(slug);
+export function isDiscoveryMultiplayerSlug(
+  slug: string,
+  game?: Pick<Game, "tags">
+): boolean {
+  return (
+    slug === "snake" ||
+    slug === "agar" ||
+    slug === "bomber" ||
+    (game?.tags?.includes("multiplayer") ?? false)
+  );
 }

@@ -12,15 +12,21 @@ import { GameStatusBlock } from "@/components/game-status-block";
 import { InviteDetailPin } from "@/components/invite-detail-pin";
 import { MpWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug, REPLAY_DETAIL_SOLO_CTA, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
+import { creatorDisplayName } from "@/lib/creator/creator-game-catalog";
 import {
   gameCreatorLabel,
   gameSummaryDescription,
   isDiscoveryMultiplayerSlug,
 } from "@/lib/game-discovery-ui";
 
+function detailCreatorLabel(slug: string): string {
+  if (slug.startsWith("creator-")) return creatorDisplayName(slug) ?? "Creator";
+  return gameCreatorLabel(slug);
+}
+
 function popularityLabel(game: Game, slug: string): string {
   const plays = game.playCount ?? 0;
-  if (isDiscoveryMultiplayerSlug(slug)) {
+  if (isDiscoveryMultiplayerSlug(slug, game)) {
     return `🔥 LIVE · ${(plays > 0 ? plays : 12_400).toLocaleString()} plays`;
   }
   return `Play count · ${plays.toLocaleString()}`;
@@ -45,9 +51,9 @@ export function GameDetailTemplate({
   inviteCode?: string | null;
 }) {
   const desc = gameSummaryDescription(game, slug, 120);
-  const creator = gameCreatorLabel(slug);
+  const creator = detailCreatorLabel(slug);
   const playHref = playHrefForCatalogSlug(slug);
-  const mp = isDiscoveryMultiplayerSlug(slug);
+  const mp = isDiscoveryMultiplayerSlug(slug, game);
 
   return (
     <main className="flex flex-1 flex-col" data-testid="game-detail-page">
