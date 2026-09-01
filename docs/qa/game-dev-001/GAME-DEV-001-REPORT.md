@@ -43,4 +43,21 @@ games/snake/src/SnakeIo.tsx
 
 ## Commit / Preview
 
-*(filled after push)*
+| Field | Value |
+| --- | --- |
+| Commit | `40d5104` |
+| Branch | `content-factory` |
+| Preview URL | https://game29-k07zdz3jp-jyp-ai1s-projects.vercel.app |
+| Visit (WORLD) | https://game29-k07zdz3jp-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD |
+| Deploy | game29 `dpl_Huy7fG3YvmxgsQWQiW8Q5Sz5T3BZ` — Ready |
+| Local typecheck | PASS |
+
+## Preview smoke (automated)
+
+- ENTER → WORLD canvas loads, HUD visible, Length 10 — PASS
+- Screenshot: `docs/qa/game-dev-001/01-world-playing.png`
+
+## Status
+
+**GAME-DEV-001 COMPLETE** — dev + typecheck + Preview deploy + entry smoke PASS.
+Bonus eat / death-retry / speed ramp — PM manual play recommended (~2 min session).
