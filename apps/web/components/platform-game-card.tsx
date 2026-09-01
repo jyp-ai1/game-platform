@@ -114,6 +114,9 @@ export function PlatformGameCard({
   isNew,
   hero = false,
   showFavorite = true,
+  summary,
+  creator,
+  detailHref,
   className,
 }: {
   game: Game;
@@ -125,6 +128,11 @@ export function PlatformGameCard({
   /** Subtle motion + parallax — hero LIVE card only. */
   hero?: boolean;
   showFavorite?: boolean;
+  /** Optional one-line blurb for discovery grids. */
+  summary?: string;
+  creator?: string;
+  /** When set, thumbnail + title link to game detail. */
+  detailHref?: string;
   className?: string;
 }) {
   const isComingSoon = game.status === "COMING_SOON";
@@ -138,11 +146,13 @@ export function PlatformGameCard({
   const playerLabel = live ? `${playerCount} Players` : `${Math.max(1, Math.round(game.playCount / 1000))}k plays`;
   const diffBadge = difficultyBadgeVariant(game.difficulty);
 
+  const cardDetailHref = detailHref ?? `/games/${game.slug}`;
+
   return (
     <article
-      data-testid={hero ? "home-hero-card" : undefined}
+      data-testid={hero ? "home-hero-card" : "platform-game-card"}
       className={cn(
-        "group flex h-full min-h-[340px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-md motion-base transition-all",
+        "group flex h-full min-h-[300px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-md motion-base transition-all sm:min-h-[340px]",
         hero && "hover:scale-[1.01] hover:border-primary/30 hover:shadow-lg",
         !hero && "hover:border-primary/30 hover:shadow-lg",
         live && "border-emerald-500/35 shadow-emerald-500/10",
@@ -150,7 +160,15 @@ export function PlatformGameCard({
       )}
     >
       {/* Thumbnail — ~60%+ of card height */}
-      <div className="relative min-h-[200px] flex-[3] overflow-hidden bg-muted sm:min-h-[240px]">
+      <div className="relative min-h-[160px] flex-[3] overflow-hidden bg-muted sm:min-h-[200px] lg:min-h-[240px]">
+        {detailHref ? (
+          <Link
+            href={cardDetailHref}
+            aria-label={`${game.title} 상세 보기`}
+            className="absolute inset-0 z-[1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            tabIndex={-1}
+          />
+        ) : null}
         {game.thumbnailUrl ? (
           <Image
             src={game.thumbnailUrl}
@@ -202,10 +220,35 @@ export function PlatformGameCard({
       </div>
 
       {/* Meta + actions — compact footer */}
-      <div className="flex flex-[2] flex-col gap-2 p-4">
+      <div className="relative z-[2] flex flex-[2] flex-col gap-2 p-3 sm:p-4">
         <div>
-          <h3 className="text-lg font-bold leading-tight">{game.title}</h3>
-          <p className="mt-0.5 text-sm text-muted-foreground">{genreLabel(game)}</p>
+          {detailHref ? (
+            <Link
+              href={cardDetailHref}
+              className="block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <h3 className="text-base font-bold leading-tight sm:text-lg">{game.title}</h3>
+            </Link>
+          ) : (
+            <h3 className="text-base font-bold leading-tight sm:text-lg">{game.title}</h3>
+          )}
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">{genreLabel(game)}</p>
+          {creator ? (
+            <p
+              data-testid="platform-game-card-creator"
+              className="mt-1 text-[11px] text-muted-foreground/90 sm:text-xs"
+            >
+              by {creator}
+            </p>
+          ) : null}
+          {summary ? (
+            <p
+              data-testid="platform-game-card-summary"
+              className="mt-1.5 line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm"
+            >
+              {summary}
+            </p>
+          ) : null}
           {!live && !isComingSoon && !isMaintenance ? (
             <div className="mt-2 flex flex-wrap gap-1">
               <PlatformBadge variant={diffBadge}>{difficultyLabel[game.difficulty]}</PlatformBadge>
