@@ -2,7 +2,7 @@
 
 ## STATUS
 
-**BLOCKED** — schema migration 0034 not applied on Supabase · build FAIL · Vercel Preview FAIL
+**IN PROGRESS** — schema 0034 applied ✅ · local build PASS · Preview redeploy pending
 
 ## COMMIT
 
