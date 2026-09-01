@@ -37,6 +37,8 @@ export function SnakeLiveGameCard({
       howToPlay: null,
       playCount: 50000,
       nostalgiaNote: null,
+      playUrl: null,
+      sourceType: "native",
       createdAt: "",
       updatedAt: "",
     } satisfies Game);
