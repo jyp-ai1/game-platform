@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { GameDetailTemplate } from "@/components/game-detail-template";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { selectRelated } from "@/lib/game-sections";
+import { selectMoreGames } from "@/lib/game-sections";
 import {
   buildLocalMvpGame,
   getGameOrLocalMvp,
@@ -72,7 +72,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
     notFound();
   }
 
-  const related = selectRelated(allGames, game);
+  const moreGames = selectMoreGames(allGames, game, 3);
   const isPlayable =
     (game.status === "ACTIVE" && isPlayableSlug(slug)) ||
     isCreatorPlayableSlug(slug) ||
@@ -97,7 +97,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
         slug={slug}
         isPlayable={isPlayable}
         rankingEnabled={rankingEnabled}
-        related={related}
+        related={moreGames}
         allGames={allGames}
         inviteCode={invite}
       />

@@ -7,13 +7,22 @@ import { FavoriteButton } from "@/components/favorite-button";
 export function GameDetailHero({
   game,
   creator,
+  compact = false,
 }: {
   game: Game;
   creator?: string;
+  /** Smaller hero — PLAY CTA visible above fold on mobile. */
+  compact?: boolean;
 }) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10">
-      <div className="relative aspect-[21/9] min-h-[120px] bg-muted sm:min-h-[140px]">
+      <div
+        className={
+          compact
+            ? "relative aspect-[2.4/1] min-h-[88px] bg-muted sm:min-h-[100px]"
+            : "relative aspect-[21/9] min-h-[120px] bg-muted sm:min-h-[140px]"
+        }
+      >
         {game.thumbnailUrl ? (
           <Image
             src={game.thumbnailUrl}

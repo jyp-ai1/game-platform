@@ -21,7 +21,7 @@ import {
 import { ensureRoom, getRoom, joinRoomAsync, leaveRoom, send, subscribeRoom } from "@game-platform/multiplayer-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { AgarGameOver } from "./agar-game-over";
+import { AgarGameOver, type AgarMoreGame } from "./agar-game-over";
 import { formatAgarMass } from "./agar-format";
 import { applyPeerPose, buildPeerPose, type AgarPeerPose } from "./agar-mp-sync";
 import { pinAgarRoom, resolveAgarRoomCode } from "./agar-room";
@@ -87,6 +87,11 @@ function toAgarEngineTier(tier: MpAiDifficulty): AgarAiDifficulty {
 }
 
 const VIEW = 520;
+
+const AGAR_MORE_GAMES: AgarMoreGame[] = [
+  { slug: "snake", title: "Snake", playHref: "/flagship/snake-io/play?room=WORLD" },
+  { slug: "bomber", title: "Bomber", playHref: "/games/bomber/play?room=BOMBER-A" },
+];
 
 /**
  * AGAR-FUN-005.2 — Virus silhouette tips sit on the massToRadius circle (viewBox edge).
@@ -559,6 +564,12 @@ export function AgarGame() {
     setMissions(buildMissionList(tier, sessionRef.current));
   }
 
+  function playAnotherGame() {
+    if (typeof window !== "undefined") {
+      window.location.href = "/games";
+    }
+  }
+
   function exitToDetail() {
     if (typeof window !== "undefined") {
       window.location.href = "/games/agar";
@@ -990,7 +1001,8 @@ export function AgarGame() {
           missions={deathSummary.missions}
           bestRecord={bestRecord}
           onRetry={handleRetry}
-          onExit={exitToDetail}
+          onPlayAnother={playAnotherGame}
+          otherGames={AGAR_MORE_GAMES}
         />
       ) : null}
     </>

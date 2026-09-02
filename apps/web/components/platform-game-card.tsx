@@ -2,7 +2,7 @@
 
 import type { Difficulty, Game } from "@game-platform/shared";
 import { Button, cn } from "@game-platform/ui";
-import { Gamepad2, Star, Users, Zap } from "lucide-react";
+import { Gamepad2, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -14,10 +14,8 @@ import { useLivePlayerCount } from "@/lib/use-live-player-count";
 import { useMounted } from "@/lib/use-mounted";
 
 /** Stable display rating for platform cards (no DB field yet). */
-export function platformGameRating(slug: string): string {
-  if (slug === "snake") return "4.8";
-  const n = slug.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  return (4.2 + (n % 6) / 10).toFixed(1);
+export function platformGameRating(_slug: string): string | null {
+  return null;
 }
 
 function genreLabel(game: Game): string {
@@ -138,12 +136,11 @@ export function PlatformGameCard({
   const isComingSoon = game.status === "COMING_SOON";
   const isMaintenance = game.status === "MAINTENANCE";
   const mounted = useMounted();
-  const rating = platformGameRating(game.slug);
   const basePlayers = live?.players ?? 0;
   const animatedPlayers = useLivePlayerCount(basePlayers, 5000);
   const playerCount =
     !mounted || live?.animatePlayers === false || !live ? basePlayers : animatedPlayers;
-  const playerLabel = live ? `${playerCount} Players` : `${Math.max(1, Math.round(game.playCount / 1000))}k plays`;
+  const playerLabel = live ? `${playerCount} Players` : null;
   const diffBadge = difficultyBadgeVariant(game.difficulty);
 
   const cardDetailHref = detailHref ?? `/games/${game.slug}`;
@@ -152,23 +149,22 @@ export function PlatformGameCard({
     <article
       data-testid={hero ? "home-hero-card" : "platform-game-card"}
       className={cn(
-        "group flex h-full min-h-[300px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-md motion-base transition-all sm:min-h-[340px]",
+        "group relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-md motion-base transition-all sm:min-h-[340px]",
         hero && "hover:scale-[1.01] hover:border-primary/30 hover:shadow-lg",
         !hero && "hover:border-primary/30 hover:shadow-lg",
         live && "border-emerald-500/35 shadow-emerald-500/10",
         className
       )}
     >
-      {/* Thumbnail — ~60%+ of card height */}
+      {!isComingSoon && !isMaintenance ? (
+        <Link
+          href={cardDetailHref}
+          aria-label={`${game.title} — 상세 보기`}
+          className="absolute inset-0 z-[1] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          tabIndex={-1}
+        />
+      ) : null}
       <div className="relative min-h-[160px] flex-[3] overflow-hidden bg-muted sm:min-h-[200px] lg:min-h-[240px]">
-        {detailHref ? (
-          <Link
-            href={cardDetailHref}
-            aria-label={`${game.title} 상세 보기`}
-            className="absolute inset-0 z-[1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            tabIndex={-1}
-          />
-        ) : null}
         {game.thumbnailUrl ? (
           <Image
             src={game.thumbnailUrl}
@@ -195,7 +191,7 @@ export function PlatformGameCard({
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
 
         {showFavorite && !isComingSoon ? (
-          <FavoriteButton slug={game.slug} className="absolute left-2 top-2 z-10" />
+          <FavoriteButton slug={game.slug} className="absolute left-2 top-2 z-20" />
         ) : null}
 
         {live ? (
@@ -222,16 +218,7 @@ export function PlatformGameCard({
       {/* Meta + actions — compact footer */}
       <div className="relative z-[2] flex flex-[2] flex-col gap-2 p-3 sm:p-4">
         <div>
-          {detailHref ? (
-            <Link
-              href={cardDetailHref}
-              className="block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <h3 className="text-base font-bold leading-tight sm:text-lg">{game.title}</h3>
-            </Link>
-          ) : (
-            <h3 className="text-base font-bold leading-tight sm:text-lg">{game.title}</h3>
-          )}
+          <h3 className="text-base font-bold leading-tight sm:text-lg">{game.title}</h3>
           <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">{genreLabel(game)}</p>
           {creator ? (
             <p
@@ -258,16 +245,9 @@ export function PlatformGameCard({
           ) : null}
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-0.5">
-            <Star className="size-3 fill-amber-400 text-amber-400" />
-            {rating}
-          </span>
-          <span className="inline-flex items-center gap-0.5 tabular-nums">
-            <Users className="size-3" />
-            {playerLabel}
-          </span>
-        </div>
+        {live && playerLabel && mounted ? (
+          <p className="text-xs text-emerald-400/90 tabular-nums">{playerLabel}</p>
+        ) : null}
 
         {friend && mounted ? (
           <p className="text-sm leading-snug">
@@ -284,7 +264,7 @@ export function PlatformGameCard({
         {actions ? (
           <div
             className={cn(
-              "mt-auto flex flex-wrap gap-2 pt-1",
+              "relative z-20 mt-auto flex flex-wrap gap-2 pt-1",
               !actions.secondary && "flex-col"
             )}
           >

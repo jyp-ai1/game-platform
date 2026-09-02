@@ -6,6 +6,12 @@ import { useEffect, useState } from "react";
 import type { AgarBestRecord, AgarMissionProgress } from "./agar-retention";
 import { formatAgarMass } from "./agar-format";
 
+export type AgarMoreGame = {
+  slug: string;
+  title: string;
+  playHref: string;
+};
+
 export function AgarGameOver({
   finalRank,
   finalMass,
@@ -13,7 +19,8 @@ export function AgarGameOver({
   missions,
   bestRecord,
   onRetry,
-  onExit,
+  onPlayAnother,
+  otherGames = [],
 }: {
   finalRank: number;
   finalMass: number;
@@ -21,7 +28,8 @@ export function AgarGameOver({
   missions: AgarMissionProgress[];
   bestRecord: AgarBestRecord;
   onRetry: () => void;
-  onExit: () => void;
+  onPlayAnother: () => void;
+  otherGames?: AgarMoreGame[];
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -82,22 +90,40 @@ export function AgarGameOver({
           ))}
         </div>
 
-        <div className="flex w-full gap-2 pt-1">
+        {otherGames.length > 0 ? (
+          <div className="space-y-2 border-t border-white/10 pt-3" data-testid="agar-more-games">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-white/50">More Games</p>
+            {otherGames.map((g) => (
+              <div key={g.slug} className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-white/90">{g.title}</span>
+                <a
+                  href={g.playHref}
+                  data-testid={`agar-more-games-play-${g.slug}`}
+                  className="inline-flex min-h-9 items-center rounded-lg bg-cyan-500/20 px-3 text-xs font-bold text-cyan-100 ring-1 ring-cyan-400/40"
+                >
+                  PLAY
+                </a>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="flex w-full flex-col gap-2 pt-1">
           <button
             type="button"
             data-testid="mp-death-retry"
-            className="h-11 flex-1 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
+            className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
             onClick={onRetry}
           >
             RETRY
           </button>
           <button
             type="button"
-            data-testid="mp-death-exit"
-            className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
-            onClick={onExit}
+            data-testid="mp-death-play-another"
+            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
+            onClick={onPlayAnother}
           >
-            EXIT
+            PLAY ANOTHER GAME
           </button>
         </div>
       </div>

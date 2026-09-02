@@ -10,6 +10,7 @@ import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
 import { GameStatusBlock } from "@/components/game-status-block";
 import { InviteDetailPin } from "@/components/invite-detail-pin";
+import { MoreGamesPanel } from "@/components/more-games-panel";
 import { MpWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug, REPLAY_DETAIL_SOLO_CTA, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
 import { creatorDisplayName } from "@/lib/creator/creator-game-catalog";
@@ -24,20 +25,12 @@ function detailCreatorLabel(slug: string): string {
   return gameCreatorLabel(slug);
 }
 
-function popularityLabel(game: Game, slug: string): string {
-  const plays = game.playCount ?? 0;
-  if (isDiscoveryMultiplayerSlug(slug, game)) {
-    return `🔥 LIVE · ${(plays > 0 ? plays : 12_400).toLocaleString()} plays`;
-  }
-  return `Play count · ${plays.toLocaleString()}`;
-}
-
 export function GameDetailTemplate({
   game,
   slug,
   isPlayable,
   rankingEnabled = true,
-  related: _related = [],
+  related = [],
   allGames = [],
   inviteCode = null,
 }: {
@@ -58,7 +51,7 @@ export function GameDetailTemplate({
   return (
     <main className="flex flex-1 flex-col" data-testid="game-detail-page">
       <Container className="max-w-3xl space-y-4 py-4 sm:space-y-5 sm:py-6">
-        <GameDetailHero game={game} creator={creator} />
+        <GameDetailHero game={game} creator={creator} compact />
 
         {isPlayable ? (
           <>
@@ -68,7 +61,14 @@ export function GameDetailTemplate({
               className="rounded-2xl border border-white/10 bg-card/40 p-4 text-center backdrop-blur sm:p-5"
               data-testid="game-detail-play-panel"
             >
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <p
+                data-testid="game-detail-description"
+                className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground"
+              >
+                {desc}
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                 {mp ? (
                   <span
                     data-testid="game-detail-mp-badge"
@@ -85,12 +85,12 @@ export function GameDetailTemplate({
                 </span>
               </div>
 
-              <div className="mt-4 flex flex-col items-center gap-2">
+              <div className="mt-5 flex flex-col items-center gap-2">
                 {mp && (slug === "snake" || slug === "agar" || slug === "bomber") ? (
                   <MpWorldPlayLink
                     slug={slug as "snake" | "agar" | "bomber"}
                     data-testid="game-detail-play-cta"
-                    className="inline-flex min-h-12 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-w-[240px]"
+                    className="inline-flex min-h-14 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     {REPLAY_DETAIL_WORLD_CTA}
                   </MpWorldPlayLink>
@@ -98,7 +98,7 @@ export function GameDetailTemplate({
                   <Link
                     href={playHref}
                     data-testid="game-detail-play-cta"
-                    className="inline-flex min-h-12 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 py-3 text-base font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-w-[240px]"
+                    className="inline-flex min-h-14 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     {REPLAY_DETAIL_SOLO_CTA}
                   </Link>
@@ -108,23 +108,14 @@ export function GameDetailTemplate({
                 ) : null}
               </div>
 
-              <p
-                data-testid="game-detail-description"
-                className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted-foreground"
-              >
-                {desc}
-              </p>
-              <p
-                data-testid="game-detail-popularity"
-                className="mt-2 text-xs text-muted-foreground tabular-nums"
-              >
-                {popularityLabel(game, slug)}
-              </p>
-
               <div className="mx-auto mt-4 w-full max-w-sm" data-testid="game-detail-share">
                 <GameDetailShare gameSlug={slug} title={game.title} />
               </div>
             </section>
+
+            {related.length > 0 ? (
+              <MoreGamesPanel games={related} currentSlug={slug} />
+            ) : null}
 
             {allGames.length > 0 ? (
               <GameDetailRecentStrip games={allGames} currentSlug={slug} />

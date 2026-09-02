@@ -119,3 +119,12 @@ export function selectBySlugs(games: Game[], slugs: string[], limit = 8): Game[]
     .sort((a, b) => order.get(a.slug)! - order.get(b.slug)!)
     .slice(0, limit);
 }
+
+/** Detail / game-over picks — related first, flagship fallback (real catalog only). */
+export function selectMoreGames(games: Game[], current: Game, limit = 3): Game[] {
+  const related = selectRelated(games, current, limit);
+  if (related.length >= 2) return related;
+  return selectBySlugs(games, ["snake", "agar", "bomber"], limit + 1)
+    .filter((g) => g.slug !== current.slug)
+    .slice(0, limit);
+}
