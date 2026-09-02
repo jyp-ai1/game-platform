@@ -1,0 +1,33 @@
+{
+  "baseUrl": "https://game29-i3dgcup4p-jyp-ai1s-projects.vercel.app",
+  "at": "2026-09-02T00:43:45.698Z",
+  "p0": {
+    "registration": "PASS",
+    "catalogVisible": "PASS",
+    "refreshPersistence": "PASS",
+    "detail": "PASS",
+    "externalPlayOrFallback": "PASS",
+    "duplicateSlugRejected": "PASS",
+    "incognitoVisibility": "PASS"
+  },
+  "validation": {
+    "rejectJavascript": "PASS",
+    "rejectDataUrl": "PASS",
+    "rejectFileUrl": "PASS",
+    "rejectShortTitle": "PASS",
+    "rejectNoDescription": "PASS",
+    "rejectBadSlug": "PASS"
+  },
+  "native": {
+    "snake": "PASS",
+    "agar": "PASS",
+    "bomber": "PASS"
+  },
+  "mobile": {
+    "gamesList": "PASS",
+    "detailPlayCta": "PASS",
+    "studioUpload": "PASS"
+  },
+  "errors": [],
+  "summary": "19/19 PASS"
+}

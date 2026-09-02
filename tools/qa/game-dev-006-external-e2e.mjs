@@ -143,10 +143,15 @@ async function runP0(browser) {
     await page.waitForURL(new RegExp(`/games/${TEST_SLUG}/play`), { timeout: 30_000 });
     const iframe = page.locator('[data-testid="external-game-iframe"]');
     const fallback = page.locator('a:has-text("새 탭에서 열기")');
-    if ((await iframe.count()) > 0 || (await fallback.count()) > 0) {
+    try {
+      await iframe.waitFor({ timeout: 15_000 });
       pass("p0", "externalPlayOrFallback");
-    } else {
-      fail("p0", "externalPlayOrFallback", "no iframe or fallback");
+    } catch {
+      if ((await fallback.count()) > 0) {
+        pass("p0", "externalPlayOrFallback");
+      } else {
+        fail("p0", "externalPlayOrFallback", "no iframe or fallback");
+      }
     }
     await page.screenshot({ path: path.join(OUT, "03-play.png"), fullPage: true });
 
