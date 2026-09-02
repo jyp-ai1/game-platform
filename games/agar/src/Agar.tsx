@@ -5,7 +5,6 @@
  * Shared MP shell UX kept: entry / YOU / TOP10 / minimap / death.
  */
 import {
-  DEFAULT_MP_AI_DIFFICULTY,
   getDeviceId,
   getLastNickname,
   MobileControlPad,
@@ -15,8 +14,8 @@ import {
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
   MultiplayerYouBar,
-  toEngineAiTier,
   useGameSDK,
+  type MpAiDifficulty,
   type MpStyleOption,
   type PadDirection,
 } from "@game-platform/game-sdk";
@@ -46,7 +45,14 @@ import {
   AGAR_MIN_SPLIT_MASS,
   AGAR_MIN_EJECT_MASS,
   type AgarWorld,
+  type AgarAiDifficulty,
 } from "./agar-io-engine";
+
+function toAgarEngineTier(tier: MpAiDifficulty): AgarAiDifficulty {
+  if (tier === "hard") return "hard";
+  if (tier === "superhard") return "superhard";
+  return "normal";
+}
 
 const VIEW = 520;
 
@@ -150,7 +156,7 @@ export function AgarGame() {
   const [started, setStarted] = useState(false);
   const [styleId, setStyleId] = useState(AGAR_STYLES[0]!.id);
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
-  const aiDifficulty = DEFAULT_MP_AI_DIFFICULTY;
+  const [aiDifficulty, setAiDifficulty] = useState<MpAiDifficulty>("normal");
   const reportedRef = useRef(false);
   const lastEjectAtRef = useRef(0);
   const popupIdRef = useRef(0);
@@ -343,7 +349,7 @@ export function AgarGame() {
 
   function handleStart() {
     reportedRef.current = false;
-    const engineTier = toEngineAiTier(aiDifficulty);
+    const engineTier = toAgarEngineTier(aiDifficulty);
     const next = createAgarWorld(deviceId, nickname, engineTier);
     if (qaSplitProbeRef.current) {
       const me = next.players[deviceId];
@@ -361,12 +367,11 @@ export function AgarGame() {
     reportedRef.current = false;
     lastSteerRef.current = { vx: 0, vy: 0 };
     setPopups([]);
-    const w = worldRef.current;
-    respawnPlayer(w, deviceId, nickname);
-    applyLocalLook(w, deviceId, color);
-    const snap = snapshotWorld(w);
-    worldRef.current = snap;
-    setWorld(snap);
+    const tier = worldRef.current.aiDifficulty ?? toAgarEngineTier(aiDifficulty);
+    const next = createAgarWorld(deviceId, nickname, tier);
+    applyLocalLook(next, deviceId, color);
+    worldRef.current = next;
+    setWorld(next);
   }
 
   function exitToDetail() {
@@ -435,18 +440,21 @@ export function AgarGame() {
     return (
       <MultiplayerEntrySelect
         title="Agar"
-        subtitle="캐릭터 · 색상 선택 후 ENTER"
+        subtitle="캐릭터 · 색상 · 난이도 선택 후 ENTER"
         styles={AGAR_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
         colors={MP_PLAYER_COLORS}
         color={color}
         onColorChange={setColor}
+        difficulty={aiDifficulty}
+        onDifficultyChange={setAiDifficulty}
+        entryMode="solo"
         onPlay={handleStart}
         playLabel="ENTER"
         showColorStep
         players={1}
-        bots={agarBotCountForDifficulty(toEngineAiTier(aiDifficulty))}
+        bots={agarBotCountForDifficulty(toAgarEngineTier(aiDifficulty))}
         roomCode={roomCode}
       />
     );
@@ -503,7 +511,7 @@ export function AgarGame() {
                 >
                   {growthStageLabel(stage)}
                 </span>
-                <span>Space = Split · W = Eject (feeds Virus) · Virus pops #1</span>
+                <span>Space = Split attack · W = Eject behind (kite / feed Virus) · Virus pops big cells</span>
               </span>
             }
           />

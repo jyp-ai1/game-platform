@@ -31,7 +31,7 @@ export const AGAR_EJECT_COST = 14;
 /** Food pellet mass spawned by eject (slightly less than cost). */
 export const AGAR_EJECT_FOOD = 12;
 /** Ballistic eject speed (world units / tick) — must be visibly moving. */
-export const AGAR_EJECT_SPEED = 8.2;
+export const AGAR_EJECT_SPEED = 9.4;
 /** How many ticks an eject pellet keeps gliding. */
 export const AGAR_EJECT_GLIDE_TICKS = 32;
 export const AGAR_TICK_MS = 33;
@@ -46,7 +46,7 @@ export const AGAR_SPLIT_BOOST_MS = 640;
 /** Virus base mass / visual size. */
 export const AGAR_VIRUS_MASS = 100;
 /** Large cell must exceed this mass to pop on virus (not instant death). */
-export const AGAR_VIRUS_POP_MIN = 130;
+export const AGAR_VIRUS_POP_MIN = 122;
 /** Fragments created when a large cell hits a virus (player pieces + food). */
 export const AGAR_VIRUS_FRAGMENTS = 8;
 /** Hard cap on edible food pieces from one virus pop (comeback fuel). */
@@ -159,13 +159,70 @@ export type AgarPlayer = {
   feedback?: AgarFeedback;
 };
 
-export type AgarAiDifficulty = "easy" | "normal" | "hard";
+/** GAME-DEV-007 — Normal / Hard / Super Hard only (no Easy). */
+export type AgarAiDifficulty = "normal" | "hard" | "superhard";
 
-/** Fewer / normal / more bots by session difficulty (~1.4× FUN-003 for 2× map). */
+/** Bot count + density by session tier. */
 export function agarBotCountForDifficulty(tier: AgarAiDifficulty = "normal"): number {
-  if (tier === "easy") return 18;
-  if (tier === "hard") return 34;
+  if (tier === "superhard") return 40;
+  if (tier === "hard") return 32;
   return AGAR_BOT_COUNT;
+}
+
+type AgarAiTuning = {
+  avoidMul: number;
+  avoidRange: number;
+  preyRange: number;
+  preyMassMul: number;
+  foodScan: number;
+  hazardRange: number;
+  virusAvoidPad: number;
+  packOrbit: boolean;
+  reactTicks: number;
+  fleeVirusKite: boolean;
+};
+
+function aiTuning(tier: AgarAiDifficulty): AgarAiTuning {
+  if (tier === "superhard") {
+    return {
+      avoidMul: 1.18,
+      avoidRange: 240,
+      preyRange: 280,
+      preyMassMul: 0.96,
+      foodScan: 260,
+      hazardRange: 110,
+      virusAvoidPad: 52,
+      packOrbit: true,
+      reactTicks: 1,
+      fleeVirusKite: true,
+    };
+  }
+  if (tier === "hard") {
+    return {
+      avoidMul: 1.14,
+      avoidRange: 210,
+      preyRange: 240,
+      preyMassMul: 0.9,
+      foodScan: 240,
+      hazardRange: 95,
+      virusAvoidPad: 44,
+      packOrbit: true,
+      reactTicks: 2,
+      fleeVirusKite: true,
+    };
+  }
+  return {
+    avoidMul: 1.1,
+    avoidRange: 185,
+    preyRange: 210,
+    preyMassMul: 0.85,
+    foodScan: 220,
+    hazardRange: 85,
+    virusAvoidPad: 38,
+    packOrbit: false,
+    reactTicks: 3,
+    fleeVirusKite: false,
+  };
 }
 
 export type AgarWorld = {
@@ -691,117 +748,212 @@ function tryVirusFeed(world: AgarWorld): void {
   }
 }
 
+/** Nearest alive human (for pack / kite tactics). */
+function findHumanPlayer(world: AgarWorld): AgarPlayer | null {
+  for (const p of Object.values(world.players)) {
+    if (!p.isBot && p.alive) return p;
+  }
+  return null;
+}
+
+/** Flee toward a virus the hunter must cross — comeback bait. */
+function aimVirusKite(
+  bot: AgarPlayer,
+  head: AgarCell,
+  hunter: AgarCell,
+  world: AgarWorld
+): boolean {
+  let best: AgarVirus | null = null;
+  let bestScore = Infinity;
+  for (const v of world.viruses) {
+    const dBot = Math.hypot(v.x - head.x, v.y - head.y);
+    const dHunt = Math.hypot(v.x - hunter.x, v.y - hunter.y);
+    if (dBot > 360) continue;
+    const score = dBot - dHunt * 0.35;
+    if (score < bestScore) {
+      bestScore = score;
+      best = v;
+    }
+  }
+  if (!best) return false;
+  bot.aimX = best.x;
+  bot.aimY = best.y;
+  return true;
+}
+
 function botAim(world: AgarWorld, bot: AgarPlayer): void {
   const head = bot.cells[0];
   if (!head) return;
   const myMass = totalMass(bot);
   const tier = world.aiDifficulty ?? "normal";
-  const avoidMul = tier === "easy" ? 1.05 : tier === "hard" ? 1.2 : 1.12;
-  const avoidRange = tier === "easy" ? 140 : tier === "hard" ? 220 : 180;
-  const preyRange = tier === "easy" ? 130 : tier === "hard" ? 260 : 200;
-  const preyMassMul = tier === "easy" ? 0.7 : tier === "hard" ? 0.95 : 0.88;
-  const chasePrey = tier !== "easy";
+  const tune = aiTuning(tier);
+  if (world.tick % tune.reactTicks !== bot.id.charCodeAt(4) % tune.reactTicks) return;
 
-  // Large bots steer clear of viruses when oversized — but sometimes mistake (rank flips)
-  if (myMass >= AGAR_VIRUS_POP_MIN) {
-    for (const v of world.viruses) {
-      const d = Math.hypot(v.x - head.x, v.y - head.y);
-      if (d < massToRadius(v.mass) + massToRadius(head.mass) + 40) {
-        const mistakeChance = myMass > 400 ? 0.28 : myMass > 250 ? 0.18 : 0.1;
-        if (Math.random() < mistakeChance) {
-          // Charge the virus — creates pop drama / TOP10 churn
-          bot.aimX = v.x;
-          bot.aimY = v.y;
-          return;
-        }
-        bot.aimX = clamp(head.x - (v.x - head.x) * 1.6, 0, world.size);
-        bot.aimY = clamp(head.y - (v.y - head.y) * 1.6, 0, world.size);
-        return;
-      }
-    }
-  }
-
-  // Avoid larger cells first
-  for (const other of Object.values(world.players)) {
-    if (other.id === bot.id || !other.alive) continue;
-    const o = other.cells[0];
-    if (!o) continue;
-    if (totalMass(other) > myMass * avoidMul) {
-      const d = Math.hypot(o.x - head.x, o.y - head.y);
-      if (d < avoidRange) {
-        bot.aimX = clamp(head.x - (o.x - head.x) * 1.4, 0, world.size);
-        bot.aimY = clamp(head.y - (o.y - head.y) * 1.4, 0, world.size);
-        return;
-      }
-    }
-  }
-
-  // Chase smaller cells (Normal/Hard) — Easy prefers food
-  if (chasePrey) {
-    let prey: AgarPlayer | null = null;
-    let preyD = preyRange;
-    for (const other of Object.values(world.players)) {
-      if (other.id === bot.id || !other.alive) continue;
-      const oMass = totalMass(other);
-      if (oMass >= myMass * preyMassMul) continue;
-      const o = other.cells[0];
-      if (!o) continue;
-      const d = Math.hypot(o.x - head.x, o.y - head.y);
-      if (d < preyD) {
-        preyD = d;
-        prey = other;
-      }
-    }
-    if (prey?.cells[0] && preyD < preyRange - 10) {
-      bot.aimX = prey.cells[0].x;
-      bot.aimY = prey.cells[0].y;
+  // Toxic zones — steer away before other goals
+  for (const h of world.hazards) {
+    const d = Math.hypot(h.x - head.x, h.y - head.y);
+    if (d < h.radius + tune.hazardRange) {
+      bot.aimX = clamp(head.x - (h.x - head.x) * 1.5, 0, world.size);
+      bot.aimY = clamp(head.y - (h.y - head.y) * 1.5, 0, world.size);
       return;
     }
   }
 
-  // Prefer nearby food (and ejected / virus fragments)
+  // Large cells vs virus — avoid (occasional mistake on Super Hard leaders)
+  if (myMass >= AGAR_VIRUS_POP_MIN * 0.92) {
+    for (const v of world.viruses) {
+      const d = Math.hypot(v.x - head.x, v.y - head.y);
+      const danger = massToRadius(v.mass) + massToRadius(head.mass) + tune.virusAvoidPad;
+      if (d < danger) {
+        const mistakeChance =
+          tier === "superhard" && myMass > 420
+            ? 0.22
+            : tier === "hard" && myMass > 350
+              ? 0.14
+              : 0.06;
+        if (Math.random() < mistakeChance) {
+          bot.aimX = v.x;
+          bot.aimY = v.y;
+          return;
+        }
+        bot.aimX = clamp(head.x - (v.x - head.x) * 1.65, 0, world.size);
+        bot.aimY = clamp(head.y - (v.y - head.y) * 1.65, 0, world.size);
+        return;
+      }
+    }
+  }
+
+  // Flee larger threats — kite toward virus when hunted
+  let nearestThreat: AgarPlayer | null = null;
+  let threatD = tune.avoidRange;
+  for (const other of Object.values(world.players)) {
+    if (other.id === bot.id || !other.alive) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    const oMass = totalMass(other);
+    if (oMass <= myMass * tune.avoidMul) continue;
+    const d = Math.hypot(o.x - head.x, o.y - head.y);
+    if (d < threatD) {
+      threatD = d;
+      nearestThreat = other;
+    }
+  }
+  if (nearestThreat?.cells[0]) {
+    const hunter = nearestThreat.cells[0];
+    if (
+      tune.fleeVirusKite &&
+      myMass < totalMass(nearestThreat) * 0.55 &&
+      aimVirusKite(bot, head, hunter, world)
+    ) {
+      return;
+    }
+    bot.aimX = clamp(head.x - (hunter.x - head.x) * 1.55, 0, world.size);
+    bot.aimY = clamp(head.y - (hunter.y - head.y) * 1.55, 0, world.size);
+    return;
+  }
+
+  // Pack orbit — small bots circle a large human for pressure / comeback windows
+  if (tune.packOrbit && myMass < AGAR_STAGE_MEDIUM) {
+    const human = findHumanPlayer(world);
+    const hc = human?.cells[0];
+    if (human && hc && totalMass(human) >= AGAR_STAGE_LARGE) {
+      const d = Math.hypot(hc.x - head.x, hc.y - head.y);
+      if (d > 55 && d < 220) {
+        const ang = Math.atan2(head.y - hc.y, head.x - hc.x) + 0.42;
+        bot.aimX = clamp(hc.x + Math.cos(ang) * 160, 0, world.size);
+        bot.aimY = clamp(hc.y + Math.sin(ang) * 160, 0, world.size);
+        return;
+      }
+    }
+  }
+
+  // Chase smaller prey
+  let prey: AgarPlayer | null = null;
+  let preyD = tune.preyRange;
+  for (const other of Object.values(world.players)) {
+    if (other.id === bot.id || !other.alive) continue;
+    const oMass = totalMass(other);
+    if (oMass >= myMass * tune.preyMassMul) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    const d = Math.hypot(o.x - head.x, o.y - head.y);
+    if (d < preyD) {
+      preyD = d;
+      prey = other;
+    }
+  }
+  if (prey?.cells[0] && preyD < tune.preyRange - 12) {
+    bot.aimX = prey.cells[0].x;
+    bot.aimY = prey.cells[0].y;
+    return;
+  }
+
+  // Food / fragments — prefer rich comeback pellets
   let best: AgarFood | null = null;
-  let bestD = tier === "easy" ? 280 : 230;
+  let bestScore = tune.foodScan;
   for (const f of world.food) {
     const d = Math.hypot(f.x - head.x, f.y - head.y);
-    // Prefer richer fragments (comeback food)
-    const score = d - f.mass * 2;
-    if (score < bestD) {
-      bestD = score;
+    const fragBonus = f.kind === "frag" ? f.mass * 3 : f.mass * 1.6;
+    const score = d - fragBonus;
+    if (score < bestScore) {
+      bestScore = score;
       best = f;
     }
   }
   if (best) {
     bot.aimX = best.x;
     bot.aimY = best.y;
-  } else if (world.tick % 40 === 0) {
+  } else if (world.tick % 36 === 0) {
     const p = randPos(world.size);
     bot.aimX = p.x;
     bot.aimY = p.y;
   }
 }
 
-/** Split-attack: Hard only (Normal rare, Easy never). */
+/** Split-attack — tiered aggression (Normal rare · Hard often · Super Hard frequent). */
 function botMaybeSplit(world: AgarWorld, bot: AgarPlayer, now: number): void {
   const tier = world.aiDifficulty ?? "normal";
-  if (tier === "easy") return;
   const head = bot.cells[0];
   if (!head || head.mass < AGAR_MIN_SPLIT_MASS) return;
   if (bot.cells.length >= 4) return;
-  if (world.tick % 17 !== (bot.id.charCodeAt(0) % 17)) return;
+  const cadence = tier === "superhard" ? 11 : tier === "hard" ? 14 : 19;
+  if (world.tick % cadence !== (bot.id.charCodeAt(0) % cadence)) return;
   const myMass = totalMass(bot);
-  const splitChance = tier === "hard" ? 0.12 : 0.035;
-  const maxDist = tier === "hard" ? 120 : 95;
+  const splitChance = tier === "superhard" ? 0.16 : tier === "hard" ? 0.1 : 0.04;
+  const maxDist = tier === "superhard" ? 135 : tier === "hard" ? 115 : 90;
   for (const other of Object.values(world.players)) {
     if (!other.alive || other.id === bot.id) continue;
-    if (totalMass(other) > myMass * 0.7) continue;
+    if (totalMass(other) > myMass * 0.72) continue;
     const o = other.cells[0];
     if (!o) continue;
     const d = Math.hypot(o.x - head.x, o.y - head.y);
-    if (d > 35 && d < maxDist && Math.random() < splitChance) {
+    if (d > 32 && d < maxDist && Math.random() < splitChance) {
       bot.aimX = o.x;
       bot.aimY = o.y;
       splitPlayer(world, bot.id, now);
+      return;
+    }
+  }
+}
+
+/** W eject while fleeing — sheds mass, leaves bait, can feed virus behind pursuer. */
+function botMaybeEject(world: AgarWorld, bot: AgarPlayer): void {
+  const tier = world.aiDifficulty ?? "normal";
+  if (tier === "normal") return;
+  const head = bot.cells[0];
+  if (!head || head.mass < AGAR_MIN_EJECT_MASS + 8) return;
+  if (world.tick % 9 !== (bot.id.charCodeAt(2) % 9)) return;
+  const myMass = totalMass(bot);
+  for (const other of Object.values(world.players)) {
+    if (other.id === bot.id || !other.alive) continue;
+    if (totalMass(other) <= myMass * 1.08) continue;
+    const o = other.cells[0];
+    if (!o) continue;
+    const d = Math.hypot(o.x - head.x, o.y - head.y);
+    if (d < 100 && d > 28) {
+      bot.aimX = o.x;
+      bot.aimY = o.y;
+      ejectMass(world, bot.id);
       return;
     }
   }
@@ -1068,6 +1220,7 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
     if (p.isBot) {
       botAim(world, p);
       botMaybeSplit(world, p, now);
+      botMaybeEject(world, p);
     }
     for (const cell of p.cells) {
       applyMassDecay(cell, dtSec);
