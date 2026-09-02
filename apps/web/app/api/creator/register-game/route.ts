@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import {
   registerExternalGame,
@@ -18,6 +19,10 @@ export async function POST(request: Request) {
     const status = result.field ? 400 : 503;
     return NextResponse.json(result, { status });
   }
+
+  revalidatePath("/games");
+  revalidatePath(`/games/${result.game.slug}`);
+  revalidatePath(`/games/${result.game.slug}/play`);
 
   return NextResponse.json(result, { status: 201 });
 }

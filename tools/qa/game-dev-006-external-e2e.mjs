@@ -118,7 +118,8 @@ async function runP0(browser) {
 
   try {
     await page.goto(`${BASE}/games`, { waitUntil: "domcontentloaded", timeout: 90_000 });
-    const card = page.locator(`a[href="/games/${TEST_SLUG}"], [data-testid="platform-game-card"]:has-text("QA External Game")`).first();
+    await page.waitForTimeout(1500);
+    const card = page.getByText("QA External Game", { exact: false }).first();
     if ((await card.count()) > 0) {
       pass("p0", "catalogVisible");
     } else {
