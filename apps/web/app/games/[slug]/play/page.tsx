@@ -1,9 +1,10 @@
+import { ExternalGamePlayClient } from "@/components/external-game-play-client";
 import { GamePlayClient } from "@/components/game-play-client";
 import { buildLocalMvpGame } from "@/lib/local-mvp-games";
 import { getCreatorGameOrNull } from "@/lib/creator/creator-game-catalog";
 import { isCreatorPlayableSlug, resolvePlaySlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
-import { getGameBySlug } from "@/lib/supabase/games";
+import { getGameBySlug, isExternalGame } from "@/lib/supabase/games";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -31,6 +32,16 @@ export async function generateMetadata({ params }: GamePlayPageProps): Promise<M
  */
 export default async function GamePlayPage({ params, searchParams }: GamePlayPageProps) {
   const { slug } = await params;
+
+  const dbGame = await getGameBySlug(slug);
+  if (dbGame && isExternalGame(dbGame)) {
+    return (
+      <main className="fixed inset-0 z-[100] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black">
+        <ExternalGamePlayClient slug={slug} title={dbGame.title} playUrl={dbGame.playUrl!} />
+      </main>
+    );
+  }
+
   const playable = isPlayableSlug(slug) || isCreatorPlayableSlug(slug);
   if (!playable) {
     notFound();

@@ -22,7 +22,7 @@ import {
   gameJsonLd,
   softwareApplicationJsonLd,
 } from "@/lib/seo";
-import { getGameBySlug, getGames } from "@/lib/supabase/games";
+import { getGameBySlug, getGames, isExternalGame } from "@/lib/supabase/games";
 
 interface GamePageProps {
   params: Promise<{ slug: string }>;
@@ -74,7 +74,9 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
 
   const related = selectRelated(allGames, game);
   const isPlayable =
-    (game.status === "ACTIVE" && isPlayableSlug(slug)) || isCreatorPlayableSlug(slug);
+    (game.status === "ACTIVE" && isPlayableSlug(slug)) ||
+    isCreatorPlayableSlug(slug) ||
+    (game.status === "ACTIVE" && isExternalGame(game));
 
   return (
     <>
