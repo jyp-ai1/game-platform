@@ -72,6 +72,16 @@ export const AGAR_HAZARD_MASS_LOSS = 10;
 export const AGAR_HAZARD_MASS_LOSS_PCT = 0.08;
 export const AGAR_HAZARD_COOLDOWN_MS = 1400;
 export const AGAR_HAZARD_COUNT = 8;
+/** Rare gem — high reward, short lifetime, risk/reward bait. */
+export const AGAR_RARE_GEM_MASS = 8;
+/** ~3s at 33ms tick. */
+export const AGAR_RARE_GEM_LIFETIME_TICKS = 90;
+/** Max rare gems on map at once. */
+export const AGAR_RARE_GEM_MAX = 3;
+/** Spawn attempt cadence (ticks). */
+export const AGAR_RARE_SPAWN_EVERY = 165;
+/** Combo window (ms) for chained eats. */
+export const AGAR_COMBO_WINDOW_MS = 2200;
 /** Early-game ring of small gems around the local spawn. */
 export const AGAR_EARLY_GEM_COUNT = 16;
 /** Board / grid tone — shared visual target for Snake WORLD map. */
@@ -97,7 +107,9 @@ export type AgarFood = {
   /** Remaining glide ticks; undefined/0 = static. */
   glide?: number;
   /** Render / feed hint — eject pellets feed viruses. */
-  kind?: "food" | "eject" | "frag";
+  kind?: "food" | "eject" | "frag" | "rare";
+  /** Rare gem expiry tick (GAME-DEV-008). */
+  expiresAt?: number;
 };
 
 /** Spiky virus / bomb — distinct from food pellets and player cells. */
@@ -121,12 +133,29 @@ export type AgarHazard = {
 
 export type AgarGrowthStage = "small" | "medium" | "large";
 
+export type AgarFeedbackKind =
+  | "eat"
+  | "hazard"
+  | "combo"
+  | "rare"
+  | "eat_player";
+
 export type AgarFeedback = {
-  kind: "eat" | "hazard";
+  kind: AgarFeedbackKind;
   amount: number;
   x: number;
   y: number;
+  combo?: number;
 };
+
+/** Per-tick session events for local player retention tracking. */
+export type AgarSessionEvent =
+  | { type: "eat_bot"; splitAttack?: boolean }
+  | { type: "eat_player"; splitAttack: boolean }
+  | { type: "eject" }
+  | { type: "virus_escape" }
+  | { type: "rare_gem"; mass: number }
+  | { type: "combo"; count: number };
 
 export type AgarCell = {
   x: number;
@@ -155,8 +184,14 @@ export type AgarPlayer = {
   lastSplitAt?: number;
   /** GAME-DEV-002 — hazard contact cooldown (per player). */
   lastHazardHitAt?: number;
-  /** One-shot UI feedback from last tick (eat / hazard). */
+  /** One-shot UI feedback from last tick (eat / hazard / combo). */
   feedback?: AgarFeedback;
+  /** GAME-DEV-008 — combo chain state. */
+  comboCount?: number;
+  lastEatAt?: number;
+  bestCombo?: number;
+  /** Cleared each tick; UI consumes for missions. */
+  sessionEvents?: AgarSessionEvent[];
 };
 
 /** GAME-DEV-007 — Normal / Hard / Super Hard only (no Easy). */
@@ -376,6 +411,48 @@ export function gemRenderSize(mass: number): number {
 let foodSeq = 0;
 let virusSeq = 0;
 let hazardSeq = 0;
+
+function pushSessionEvent(player: AgarPlayer, event: AgarSessionEvent): void {
+  if (player.isBot) return;
+  player.sessionEvents = player.sessionEvents ?? [];
+  player.sessionEvents.push(event);
+}
+
+function comboBonusMass(baseMass: number, combo: number, cellMass: number): number {
+  if (combo < 2) return 0;
+  const stacks = Math.min(combo, 5);
+  const raw = baseMass * 0.06 * stacks;
+  const cap = cellMass > 200 ? 1.2 : cellMass > 100 ? 1.8 : 2.5;
+  return Math.min(raw, cap);
+}
+
+function countRareGems(world: AgarWorld): number {
+  return world.food.filter((f) => f.kind === "rare").length;
+}
+
+function spawnRareGem(world: AgarWorld): void {
+  if (countRareGems(world) >= AGAR_RARE_GEM_MAX) return;
+  if (Math.random() > 0.38) return;
+  const pos = randPos(world.size);
+  world.food.push({
+    id: `r${foodSeq++}`,
+    x: pos.x,
+    y: pos.y,
+    mass: AGAR_RARE_GEM_MASS,
+    color: "#e879f9",
+    kind: "rare",
+    expiresAt: world.tick + AGAR_RARE_GEM_LIFETIME_TICKS,
+  });
+}
+
+function expireRareGems(world: AgarWorld): void {
+  for (let i = world.food.length - 1; i >= 0; i--) {
+    const f = world.food[i]!;
+    if (f.kind === "rare" && f.expiresAt != null && world.tick >= f.expiresAt) {
+      world.food.splice(i, 1);
+    }
+  }
+}
 
 /** GAME-DEV-002 — fixed toxic zones (single hazard type). */
 function spawnHazards(world: AgarWorld): void {
@@ -624,8 +701,10 @@ export function splitPlayer(world: AgarWorld, playerId: string, now = Date.now()
 export function ejectMass(world: AgarWorld, playerId: string): void {
   const p = world.players[playerId];
   if (!p || !p.alive) return;
+  let didEject = false;
   for (const cell of p.cells) {
     if (cell.mass < AGAR_MIN_EJECT_MASS) continue;
+    didEject = true;
     cell.mass -= AGAR_EJECT_COST;
     const ang = Math.atan2(p.aimY - cell.y, p.aimX - cell.x);
     // Opposite of movement direction (chase feed / flee shed)
@@ -646,6 +725,7 @@ export function ejectMass(world: AgarWorld, playerId: string): void {
       kind: "eject",
     });
   }
+  if (didEject) pushSessionEvent(p, { type: "eject" });
 }
 
 /**
@@ -893,7 +973,7 @@ function botAim(world: AgarWorld, bot: AgarPlayer): void {
   let bestScore = tune.foodScan;
   for (const f of world.food) {
     const d = Math.hypot(f.x - head.x, f.y - head.y);
-    const fragBonus = f.kind === "frag" ? f.mass * 3 : f.mass * 1.6;
+    const fragBonus = f.kind === "frag" ? f.mass * 3 : f.kind === "rare" ? f.mass * 5 : f.mass * 1.6;
     const score = d - fragBonus;
     if (score < bestScore) {
       bestScore = score;
@@ -959,26 +1039,52 @@ function botMaybeEject(world: AgarWorld, bot: AgarPlayer): void {
   }
 }
 
-function tryEatFood(world: AgarWorld, player: AgarPlayer): void {
+function tryEatFood(world: AgarWorld, player: AgarPlayer, now: number): void {
   let totalGain = 0;
   let fx = player.cells[0]?.x ?? 0;
   let fy = player.cells[0]?.y ?? 0;
+  let ateRare = false;
+  let rareMass = 0;
   for (const cell of player.cells) {
     const r = massToRadius(cell.mass);
     for (let i = world.food.length - 1; i >= 0; i--) {
       const f = world.food[i]!;
       if (Math.hypot(f.x - cell.x, f.y - cell.y) < r * 0.85) {
-        cell.mass += f.mass;
-        player.score += f.mass;
-        totalGain += f.mass;
+        const gain = f.mass;
+        const combo =
+          now - (player.lastEatAt ?? 0) <= AGAR_COMBO_WINDOW_MS
+            ? (player.comboCount ?? 0) + 1
+            : 1;
+        player.comboCount = combo;
+        player.lastEatAt = now;
+        player.bestCombo = Math.max(player.bestCombo ?? 0, combo);
+        const bonus = comboBonusMass(gain, combo, cell.mass);
+        cell.mass += gain + bonus;
+        player.score += gain + Math.round(bonus);
+        totalGain += gain + bonus;
         fx = cell.x;
         fy = cell.y;
         world.food.splice(i, 1);
+        if (f.kind === "rare") {
+          ateRare = true;
+          rareMass = gain;
+        }
+        if (combo >= 2) {
+          pushSessionEvent(player, { type: "combo", count: combo });
+        }
       }
     }
   }
   if (totalGain > 0) {
-    player.feedback = { kind: "eat", amount: totalGain, x: fx, y: fy };
+    const combo = player.comboCount ?? 1;
+    if (ateRare) {
+      player.feedback = { kind: "rare", amount: rareMass, x: fx, y: fy, combo };
+      pushSessionEvent(player, { type: "rare_gem", mass: rareMass });
+    } else if (combo >= 2) {
+      player.feedback = { kind: "combo", amount: totalGain, x: fx, y: fy, combo };
+    } else {
+      player.feedback = { kind: "eat", amount: totalGain, x: fx, y: fy };
+    }
   }
 }
 
@@ -1108,6 +1214,20 @@ function popCellOnVirus(
       });
     }
   }
+
+  // Human nearby when a larger cell pops — virus comeback credit
+  if (total >= AGAR_VIRUS_POP_MIN) {
+    for (const witness of Object.values(world.players)) {
+      if (witness.isBot || !witness.alive) continue;
+      const wc = witness.cells[0];
+      if (!wc) continue;
+      if (totalMass(witness) >= total * 0.85) continue;
+      const d = Math.hypot(wc.x - virus.x, wc.y - virus.y);
+      if (d < 240) {
+        pushSessionEvent(witness, { type: "virus_escape" });
+      }
+    }
+  }
 }
 
 function tryVirusCollisions(world: AgarWorld, now: number): void {
@@ -1148,12 +1268,28 @@ function tryEatPlayers(world: AgarWorld, now: number): void {
           const d = Math.hypot(hc.x - pc.x, hc.y - pc.y);
           // Contact → eat/death same physics tick (auth); render reads auth state
           if (circlesContact(d, hr, pr)) {
+            const splitAttack = !!(hc.boostUntil && now < hc.boostUntil);
             hc.mass += pc.mass * 0.9;
             hunter.score += Math.round(pc.mass);
             deathX = pc.x;
             deathY = pc.y;
             dropped += pc.mass;
             prey.cells.splice(pi, 1);
+            if (prey.cells.length === 0) {
+              if (prey.isBot) {
+                pushSessionEvent(hunter, { type: "eat_bot", splitAttack });
+              } else {
+                pushSessionEvent(hunter, { type: "eat_player", splitAttack });
+              }
+              if (!hunter.isBot) {
+                hunter.feedback = {
+                  kind: "eat_player",
+                  amount: pc.mass,
+                  x: pc.x,
+                  y: pc.y,
+                };
+              }
+            }
           }
         }
       }
@@ -1213,10 +1349,12 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
 
   moveEjectPellets(world);
   tryVirusFeed(world);
+  expireRareGems(world);
 
   for (const p of Object.values(world.players)) {
     if (!p.alive) continue;
     p.feedback = undefined;
+    p.sessionEvents = undefined;
     if (p.isBot) {
       botAim(world, p);
       botMaybeSplit(world, p, now);
@@ -1227,11 +1365,15 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
       moveCell(cell, p.aimX, p.aimY, world.size, now);
     }
     mergeOwnCells(p, now);
-    tryEatFood(world, p);
+    tryEatFood(world, p, now);
   }
   tryVirusCollisions(world, now);
   tryHazardContact(world, now);
   tryEatPlayers(world, now);
+
+  if (world.tick % AGAR_RARE_SPAWN_EVERY === 0) {
+    spawnRareGem(world);
+  }
 
   if (world.food.length < AGAR_FOOD_TARGET * 0.7) {
     spawnFood(world, Math.min(36, AGAR_FOOD_TARGET - world.food.length));
@@ -1287,7 +1429,7 @@ export function countGemTiers(world: AgarWorld): { small: number; medium: number
   let medium = 0;
   let large = 0;
   for (const f of world.food) {
-    if (f.kind === "eject" || f.kind === "frag") continue;
+    if (f.kind === "eject" || f.kind === "frag" || f.kind === "rare") continue;
     if (f.mass >= AGAR_GEM_LARGE) large += 1;
     else if (f.mass >= AGAR_GEM_MEDIUM) medium += 1;
     else small += 1;

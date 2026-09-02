@@ -9,7 +9,6 @@ import {
   getLastNickname,
   MobileControlPad,
   MP_PLAYER_COLORS,
-  MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
@@ -22,7 +21,18 @@ import {
 import { ensureRoom, getRoom, joinRoomAsync, leaveRoom } from "@game-platform/multiplayer-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { AgarGameOver } from "./agar-game-over";
 import { AgarMinimap } from "./agar-minimap";
+import {
+  buildMissionList,
+  createSessionStats,
+  loadBestRecord,
+  saveBestRecord,
+  syncMissionComplete,
+  type AgarBestRecord,
+  type AgarMissionProgress,
+  type AgarSessionStats,
+} from "./agar-retention";
 import {
   AGAR_BOARD_BG,
   AGAR_GRID_LINE,
@@ -46,8 +56,27 @@ import {
   AGAR_MIN_EJECT_MASS,
   type AgarWorld,
   type AgarAiDifficulty,
+  type AgarSessionEvent,
 } from "./agar-io-engine";
 
+type RankToast = { text: string; until: number };
+
+function applySessionEvents(stats: AgarSessionStats, events: AgarSessionEvent[] | undefined): void {
+  for (const ev of events ?? []) {
+    if (ev.type === "eat_bot") {
+      stats.botsEaten += 1;
+      if (ev.splitAttack) stats.splitKills += 1;
+    } else if (ev.type === "eat_player" && ev.splitAttack) {
+      stats.splitKills += 1;
+    } else if (ev.type === "eject") {
+      stats.ejectCount += 1;
+    } else if (ev.type === "virus_escape") {
+      stats.virusEscapes += 1;
+    } else if (ev.type === "combo") {
+      stats.bestCombo = Math.max(stats.bestCombo, ev.count);
+    }
+  }
+}
 function toAgarEngineTier(tier: MpAiDifficulty): AgarAiDifficulty {
   if (tier === "hard") return "hard";
   if (tier === "superhard") return "superhard";
@@ -161,9 +190,21 @@ export function AgarGame() {
   const lastEjectAtRef = useRef(0);
   const popupIdRef = useRef(0);
   const prevTickRef = useRef(0);
+  const sessionTickRef = useRef(-1);
   const [popups, setPopups] = useState<AgarPopup[]>([]);
   const [eatPulseUntil, setEatPulseUntil] = useState(0);
   const [hazardFlashUntil, setHazardFlashUntil] = useState(0);
+  const sessionRef = useRef(createSessionStats());
+  const prevRankRef = useRef(99);
+  const [missions, setMissions] = useState<AgarMissionProgress[]>([]);
+  const [rankToast, setRankToast] = useState<RankToast | null>(null);
+  const [bestRecord, setBestRecord] = useState<AgarBestRecord>(() => loadBestRecord());
+  const [deathSummary, setDeathSummary] = useState<{
+    finalRank: number;
+    finalMass: number;
+    bestCombo: number;
+    missions: AgarMissionProgress[];
+  } | null>(null);
   /** Keep last non-dead steer vector while pad is held (mobile hold persistence). */
   const lastSteerRef = useRef({ vx: 0, vy: 0 });
 
@@ -195,6 +236,34 @@ export function AgarGame() {
   const rank = localRank(world, deviceId);
   const cam = cameraFocus(me);
   const stage = growthStage(mass);
+  const comboCount = me?.comboCount ?? 0;
+  const tier = world.aiDifficulty ?? toAgarEngineTier(aiDifficulty);
+
+  useEffect(() => {
+    if (!started || !me) return;
+    if (world.tick === sessionTickRef.current) return;
+    sessionTickRef.current = world.tick;
+    applySessionEvents(sessionRef.current, me.sessionEvents);
+    sessionRef.current.peakMass = Math.max(sessionRef.current.peakMass, mass);
+    sessionRef.current.peakRank = Math.min(sessionRef.current.peakRank, rank || 99);
+    sessionRef.current.bestCombo = Math.max(sessionRef.current.bestCombo, me.bestCombo ?? 0);
+    syncMissionComplete(sessionRef.current, tier);
+    setMissions(buildMissionList(tier, sessionRef.current));
+    if (rank > 0 && rank < prevRankRef.current) {
+      const now = Date.now();
+      const label = rank <= 10 ? `▲ TOP ${rank}!` : `▲ #${rank}!`;
+      setRankToast({ text: label, until: now + 1400 });
+    }
+    if (rank > 0) prevRankRef.current = rank;
+  }, [world.tick, started, me, mass, rank, tier]);
+
+  useEffect(() => {
+    if (!rankToast) return;
+    const id = window.setInterval(() => {
+      if (Date.now() >= rankToast.until) setRankToast(null);
+    }, 120);
+    return () => window.clearInterval(id);
+  }, [rankToast]);
 
   useEffect(() => {
     if (world.tick === prevTickRef.current) return;
@@ -211,6 +280,55 @@ export function AgarGame() {
         { id, sx: fb.x + ox, sy: fb.y + oy, text: `+${Math.round(fb.amount)}`, color: "#fde047", until: now + 650 },
       ]);
       setEatPulseUntil(now + 180);
+    } else if (fb.kind === "combo") {
+      const id2 = popupIdRef.current++;
+      setPopups((p) => [
+        ...p,
+        {
+          id,
+          sx: fb.x + ox,
+          sy: fb.y + oy - 16,
+          text: `COMBO x${fb.combo ?? 2}`,
+          color: "#f472b6",
+          until: now + 800,
+        },
+        {
+          id: id2,
+          sx: fb.x + ox,
+          sy: fb.y + oy,
+          text: `+${Math.round(fb.amount)}`,
+          color: "#fde047",
+          until: now + 650,
+        },
+      ]);
+      setEatPulseUntil(now + 220);
+    } else if (fb.kind === "rare") {
+      const id2 = popupIdRef.current++;
+      setPopups((p) => [
+        ...p,
+        {
+          id,
+          sx: fb.x + ox,
+          sy: fb.y + oy - 18,
+          text: "💎 GEM",
+          color: "#e879f9",
+          until: now + 900,
+        },
+        {
+          id: id2,
+          sx: fb.x + ox,
+          sy: fb.y + oy,
+          text: `+${Math.round(fb.amount)}`,
+          color: "#fde047",
+          until: now + 700,
+        },
+      ]);
+      setEatPulseUntil(now + 260);
+    } else if (fb.kind === "eat_player") {
+      setPopups((p) => [
+        ...p,
+        { id, sx: fb.x + ox, sy: fb.y + oy, text: "ABSORB!", color: "#34d399", until: now + 750 },
+      ]);
     } else {
       setPopups((p) => [
         ...p,
@@ -244,8 +362,26 @@ export function AgarGame() {
   useEffect(() => {
     if (!started || alive || reportedRef.current) return;
     reportedRef.current = true;
-    void reportScore("agar", Math.max(mass, me?.score ?? 0));
-  }, [started, alive, mass, me?.score, reportScore]);
+    const stats = sessionRef.current;
+    const finalRank = rank || prevRankRef.current;
+    const finalMass = Math.max(mass, me?.score ?? 0);
+    syncMissionComplete(stats, tier);
+    const missionList = buildMissionList(tier, stats);
+    setDeathSummary({
+      finalRank,
+      finalMass,
+      bestCombo: Math.max(stats.bestCombo, me?.bestCombo ?? 0),
+      missions: missionList,
+    });
+    const saved = saveBestRecord({
+      ...stats,
+      finalRank,
+      finalMass,
+      difficulty: tier,
+    });
+    setBestRecord(saved);
+    void reportScore("agar", finalMass);
+  }, [started, alive, mass, me?.score, me?.bestCombo, rank, tier, reportScore]);
 
   const onPointer = useCallback(
     (clientX: number, clientY: number) => {
@@ -347,8 +483,18 @@ export function AgarGame() {
     return () => window.removeEventListener("keydown", onKey);
   }, [started, doSplit, doEject]);
 
+  function resetSession() {
+    sessionRef.current = createSessionStats();
+    prevRankRef.current = 99;
+    sessionTickRef.current = -1;
+    setMissions([]);
+    setDeathSummary(null);
+    setRankToast(null);
+  }
+
   function handleStart() {
     reportedRef.current = false;
+    resetSession();
     const engineTier = toAgarEngineTier(aiDifficulty);
     const next = createAgarWorld(deviceId, nickname, engineTier);
     if (qaSplitProbeRef.current) {
@@ -360,11 +506,13 @@ export function AgarGame() {
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
+    setMissions(buildMissionList(engineTier, sessionRef.current));
     setStarted(true);
   }
 
   function handleRetry() {
     reportedRef.current = false;
+    resetSession();
     lastSteerRef.current = { vx: 0, vy: 0 };
     setPopups([]);
     const tier = worldRef.current.aiDifficulty ?? toAgarEngineTier(aiDifficulty);
@@ -372,6 +520,7 @@ export function AgarGame() {
     applyLocalLook(next, deviceId, color);
     worldRef.current = next;
     setWorld(next);
+    setMissions(buildMissionList(tier, sessionRef.current));
   }
 
   function exitToDetail() {
@@ -424,6 +573,9 @@ export function AgarGame() {
         localDeviceId: deviceId,
         roomPlayerIds,
         peerWorldIds,
+        combo: p?.comboCount ?? 0,
+        bestCombo: p?.bestCombo ?? 0,
+        missions: buildMissionList(wr.aiDifficulty ?? "normal", sessionRef.current),
       };
     };
     return () => {
@@ -484,8 +636,6 @@ export function AgarGame() {
     </div>
   );
 
-  const finalScore = Math.max(mass, me?.score ?? 0);
-
   return (
     <>
       <MultiplayerPlayShell
@@ -511,7 +661,16 @@ export function AgarGame() {
                 >
                   {growthStageLabel(stage)}
                 </span>
-                <span>Space = Split attack · W = Eject behind (kite / feed Virus) · Virus pops big cells</span>
+                {comboCount >= 2 ? (
+                  <span
+                    className="rounded px-1.5 py-0.5 font-semibold text-pink-200"
+                    style={{ backgroundColor: "rgba(244,114,182,0.22)" }}
+                    data-testid="agar-combo"
+                  >
+                    COMBO x{comboCount}
+                  </span>
+                ) : null}
+                <span>Space = Split · W = Eject · 💎 Gem = bonus</span>
               </span>
             }
           />
@@ -573,27 +732,42 @@ export function AgarGame() {
             })}
             {world.food.map((f) => {
               if (!inViewport(f.x, f.y, cam.x, cam.y, VIEW)) return null;
+              const isRare = f.kind === "rare";
               const isEject = f.kind === "eject" || f.id.startsWith("e");
               const isFrag = f.kind === "frag" || f.id.startsWith("vf") || f.id.startsWith("vo");
-              const size = isEject ? 9 : isFrag ? Math.max(6, gemRenderSize(f.mass)) : gemRenderSize(f.mass);
+              const size = isRare
+                ? 14
+                : isEject
+                  ? 9
+                  : isFrag
+                    ? Math.max(6, gemRenderSize(f.mass))
+                    : gemRenderSize(f.mass);
+              const pulse = isRare ? 1 + Math.sin(Date.now() / 180) * 0.12 : 1;
               return (
                 <div
                   key={f.id}
                   className="absolute rounded-full"
                   style={{
-                    left: f.x - size / 2,
-                    top: f.y - size / 2,
-                    width: size,
-                    height: size,
+                    left: f.x - (size * pulse) / 2,
+                    top: f.y - (size * pulse) / 2,
+                    width: size * pulse,
+                    height: size * pulse,
                     backgroundColor: f.color,
-                    boxShadow: isEject
-                      ? `0 0 10px ${f.color}, 0 0 4px #fff`
-                      : f.mass >= 2
-                        ? `0 0 6px ${f.color}`
+                    boxShadow: isRare
+                      ? "0 0 16px #e879f9, 0 0 8px #fff, 0 0 24px rgba(232,121,249,0.55)"
+                      : isEject
+                        ? `0 0 10px ${f.color}, 0 0 4px #fff`
+                        : f.mass >= 2
+                          ? `0 0 6px ${f.color}`
+                          : undefined,
+                    border: isRare
+                      ? "2px solid rgba(255,255,255,0.85)"
+                      : isEject
+                        ? "1px solid rgba(255,255,255,0.55)"
                         : undefined,
-                    border: isEject ? "1px solid rgba(255,255,255,0.55)" : undefined,
-                    zIndex: isEject ? 9 : 1,
+                    zIndex: isRare ? 12 : isEject ? 9 : 1,
                   }}
+                  data-testid={isRare ? "agar-rare-gem" : undefined}
                 />
               );
             })}
@@ -729,6 +903,34 @@ export function AgarGame() {
               style={{ backgroundColor: "rgba(239,68,68,0.12)", zIndex: 55 }}
             />
           ) : null}
+          {rankToast && Date.now() < rankToast.until ? (
+            <div
+              className="pointer-events-none absolute left-1/2 top-14 z-[70] -translate-x-1/2 rounded-full bg-cyan-500/25 px-4 py-1.5 text-sm font-bold text-cyan-100 shadow-lg backdrop-blur-sm"
+              data-testid="agar-rank-toast"
+            >
+              {rankToast.text}
+            </div>
+          ) : null}
+          {alive && missions.length > 0 ? (
+            <div
+              className="pointer-events-none absolute bottom-3 left-3 z-[65] max-w-[11rem] rounded-lg border border-white/10 bg-black/55 px-2.5 py-2 text-[10px] text-white/80 backdrop-blur-sm"
+              data-testid="agar-mission-hud"
+            >
+              <p className="mb-1 font-semibold uppercase tracking-wide text-white/45">Missions</p>
+              {missions.map((m) => (
+                <div key={m.id} className="flex justify-between gap-2 leading-relaxed">
+                  <span className={m.done ? "text-emerald-300" : ""}>
+                    {m.done ? "✓" : "○"} {m.emoji} {m.label}
+                  </span>
+                  <span className="tabular-nums text-white/40">
+                    {m.id === "top3"
+                      ? `${m.done ? 1 : 0}/1`
+                      : `${Math.min(m.current, m.target)}/${m.target}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </MultiplayerPlayShell>
 
@@ -744,15 +946,16 @@ export function AgarGame() {
         />
       ) : null}
 
-      {!alive && !qaPadProbeRef.current ? (
-        <div data-testid="agar-game-over">
-          <MultiplayerDeathOverlay
-            score={finalScore}
-            metric={`L:${finalScore}`}
-            onRetry={handleRetry}
-            onExit={exitToDetail}
-          />
-        </div>
+      {!alive && !qaPadProbeRef.current && deathSummary ? (
+        <AgarGameOver
+          finalRank={deathSummary.finalRank}
+          finalMass={deathSummary.finalMass}
+          bestCombo={deathSummary.bestCombo}
+          missions={deathSummary.missions}
+          bestRecord={bestRecord}
+          onRetry={handleRetry}
+          onExit={exitToDetail}
+        />
       ) : null}
     </>
   );
