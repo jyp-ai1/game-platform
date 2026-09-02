@@ -134,21 +134,7 @@ export function FloatingMobilePad({
       };
       syncJoy(state);
       e.currentTarget.setPointerCapture(e.pointerId);
-      return;
     }
-
-    const n = actions.length;
-    if (n === 0) return;
-    let idx = 0;
-    if (n > 1) {
-      const zoneH = window.innerHeight / n;
-      idx = Math.min(n - 1, Math.floor(e.clientY / zoneH));
-    }
-    const action = actions[idx]!;
-    if (action.disabled) return;
-    action.onPress();
-    if ((action.mode ?? "tap") === "hold") holdRef.current.set(e.pointerId, action.id);
-    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onOverlayMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -169,6 +155,17 @@ export function FloatingMobilePad({
       /* ignore */
     }
   };
+
+  const fireAction = useCallback(
+    (action: MobileControlAction, e: PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (action.disabled) return;
+      action.onPress();
+      if ((action.mode ?? "tap") === "hold") holdRef.current.set(e.pointerId, action.id);
+    },
+    []
+  );
 
   const joyDir = joy?.dir;
 
@@ -219,25 +216,31 @@ export function FloatingMobilePad({
         </div>
       ) : null}
 
-      {/* Right-half action zones (invisible, testable) */}
-      {actions.map((action, i) => {
-        const n = actions.length;
-        const topPct = n <= 1 ? 0 : (i / n) * 100;
-        const heightPct = n <= 1 ? 100 : 100 / n;
-        return (
-          <div
-            key={action.id}
-            data-testid={`mp-pad-action-${action.id}`}
-            className="pointer-events-none absolute right-0"
-            style={{
-              top: `${topPct}%`,
-              width: "50%",
-              height: `${heightPct}%`,
-            }}
-            aria-label={action.label}
-          />
-        );
-      })}
+      {/* Visible action buttons — right side (Split / Eject) */}
+      {actions.length > 0 ? (
+        <div className="pointer-events-none absolute bottom-24 right-4 z-[260] flex flex-col gap-3">
+          {actions.map((action) => (
+            <button
+              key={action.id}
+              type="button"
+              data-testid={`mp-pad-action-${action.id}`}
+              disabled={action.disabled}
+              aria-label={action.label}
+              className={cn(
+                "pointer-events-auto min-h-12 min-w-[5.5rem] touch-none select-none rounded-xl border px-4 py-2.5 text-xs font-bold uppercase tracking-wide shadow-lg backdrop-blur-sm",
+                action.active
+                  ? "border-primary/60 bg-primary/35 text-white"
+                  : "border-white/25 bg-black/55 text-white/90 active:bg-black/75",
+                action.disabled && "opacity-40"
+              )}
+              style={{ touchAction: "none" }}
+              onPointerDown={(e) => fireAction(action, e)}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

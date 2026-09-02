@@ -175,6 +175,8 @@ export type AgarPlayer = {
   color: string;
   alive: boolean;
   isBot: boolean;
+  /** Multiplayer guest — pose driven by network, not local sim. */
+  networkRemote?: boolean;
   cells: AgarCell[];
   /** Desired move target in world coords */
   aimX: number;
@@ -1355,6 +1357,7 @@ export function tickAgarWorld(world: AgarWorld, now = Date.now()): AgarWorld {
     if (!p.alive) continue;
     p.feedback = undefined;
     p.sessionEvents = undefined;
+    if (p.networkRemote) continue;
     if (p.isBot) {
       botAim(world, p);
       botMaybeSplit(world, p, now);

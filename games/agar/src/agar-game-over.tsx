@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 
 import type { AgarBestRecord, AgarMissionProgress } from "./agar-retention";
+import { formatAgarMass } from "./agar-format";
 
 export function AgarGameOver({
   finalRank,
@@ -53,7 +54,7 @@ export function AgarGameOver({
           </div>
           <div className="rounded-lg bg-white/5 px-2 py-2">
             <p className="text-[10px] uppercase text-white/45">Mass</p>
-            <p className="font-bold tabular-nums text-white">{finalMass}</p>
+            <p className="font-bold tabular-nums text-white">{formatAgarMass(finalMass)}</p>
             {beatMass ? <p className="text-[9px] text-cyan-300">NEW BEST</p> : null}
           </div>
           <div className="rounded-lg bg-white/5 px-2 py-2">

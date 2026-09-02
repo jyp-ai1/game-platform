@@ -47,9 +47,16 @@ export async function joinRoomAsync(code: string, options?: JoinRoomOptions): Pr
   }
 
   if (!room && isWorldRoom(key)) {
+    const slug = options?.gameSlug ?? "snake";
+    const maxPlayers: MaxPlayers =
+      options?.maxPlayers === 8 || options?.maxPlayers === 50
+        ? options.maxPlayers
+        : slug === "snake"
+          ? 50
+          : 8;
     room = createRoom({
-      gameSlug: "snake",
-      maxPlayers: 50,
+      gameSlug: slug,
+      maxPlayers,
       matchMode: "public",
       code: key,
     });

@@ -13,6 +13,9 @@ export interface CreateRoomParams {
 export interface JoinRoomOptions {
   nickname?: string;
   isGuest?: boolean;
+  /** Bootstrap missing WORLD shard with this slug (default snake for legacy). */
+  gameSlug?: string;
+  maxPlayers?: MaxPlayers;
 }
 
 export interface MultiplayerTransport {

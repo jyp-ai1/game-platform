@@ -18,10 +18,13 @@ import {
   type MpStyleOption,
   type PadDirection,
 } from "@game-platform/game-sdk";
-import { ensureRoom, getRoom, joinRoomAsync, leaveRoom } from "@game-platform/multiplayer-sdk";
+import { ensureRoom, getRoom, joinRoomAsync, leaveRoom, send, subscribeRoom } from "@game-platform/multiplayer-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AgarGameOver } from "./agar-game-over";
+import { formatAgarMass } from "./agar-format";
+import { applyPeerPose, buildPeerPose, type AgarPeerPose } from "./agar-mp-sync";
+import { pinAgarRoom, resolveAgarRoomCode } from "./agar-room";
 import { AgarMinimap } from "./agar-minimap";
 import {
   buildMissionList,
@@ -149,13 +152,23 @@ function localRank(world: AgarWorld, id: string): number {
 function syncRoomPeers(w: AgarWorld, code: string, localId: string): void {
   const room = getRoom(code);
   if (!room) return;
+  const mpActive = room.players.length >= 2;
   for (const rp of room.players) {
     if (rp.deviceId === localId) continue;
     const existing = w.players[rp.deviceId];
     if (!existing?.alive) {
       respawnPlayer(w, rp.deviceId, rp.nickname || "Guest");
       const peer = w.players[rp.deviceId];
-      if (peer) peer.isBot = false;
+      if (peer) {
+        peer.isBot = false;
+        peer.networkRemote = mpActive;
+      }
+    } else if (existing) {
+      existing.isBot = false;
+      existing.networkRemote = mpActive;
+      if (rp.nickname && existing.nickname !== rp.nickname) {
+        existing.nickname = rp.nickname;
+      }
     }
   }
 }
@@ -163,10 +176,7 @@ function syncRoomPeers(w: AgarWorld, code: string, localId: string): void {
 export function AgarGame() {
   const deviceId = useMemo(() => getDeviceId(), []);
   const nickname = useMemo(() => getLastNickname() || "You", []);
-  const roomCode = useMemo(() => {
-    if (typeof window === "undefined") return "WORLD";
-    return new URLSearchParams(window.location.search).get("room")?.toUpperCase() || "WORLD";
-  }, []);
+  const roomCode = useMemo(() => resolveAgarRoomCode(), []);
   /** QA-only: keep mobile pad visible for automation pad probes (no gameplay change). */
   const qaPadProbeRef = useRef(false);
   /** QA-only: seed split-ready mass before split harness (no gameplay change in normal play). */
@@ -211,11 +221,14 @@ export function AgarGame() {
   const styleEmoji = AGAR_STYLES.find((s) => s.id === styleId)?.emoji ?? "⚪";
 
   useEffect(() => {
+    pinAgarRoom(roomCode);
     let mounted = true;
     void (async () => {
       try {
         await ensureRoom(roomCode);
-        await joinRoomAsync(roomCode, { nickname });
+        await joinRoomAsync(roomCode, { nickname, gameSlug: "agar", maxPlayers: 8 });
+        if (!mounted) return;
+        syncRoomPeers(worldRef.current, roomCode, deviceId);
       } catch {
         /* local MVP still playable without transport */
       }
@@ -228,7 +241,25 @@ export function AgarGame() {
         /* ignore */
       }
     };
-  }, [roomCode, nickname]);
+  }, [roomCode, nickname, deviceId]);
+
+  useEffect(() => {
+    if (!started) return;
+    return subscribeRoom(roomCode, (room) => {
+      const gs = room.gameState ?? {};
+      const last = String(gs._lastEvent ?? "");
+      if (!last.startsWith("peer:")) return;
+      const peerId = last.slice("peer:".length);
+      if (!peerId || peerId === deviceId) return;
+      const pose = gs[last] as AgarPeerPose | undefined;
+      if (!pose?.deviceId) return;
+      const w = worldRef.current;
+      applyPeerPose(w, pose);
+      const snap = snapshotWorld(w);
+      worldRef.current = snap;
+      setWorld(snap);
+    });
+  }, [started, roomCode, deviceId]);
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
@@ -352,6 +383,11 @@ export function AgarGame() {
       const w = worldRef.current;
       syncRoomPeers(w, roomCode, deviceId);
       tickAgarWorld(w);
+      const room = getRoom(roomCode);
+      if (room && room.players.length >= 2 && w.tick % 3 === 0) {
+        const pose = buildPeerPose(w, deviceId);
+        if (pose) send(roomCode, `peer:${deviceId}`, pose);
+      }
       const snap = snapshotWorld(w);
       worldRef.current = snap;
       setWorld(snap);
@@ -364,7 +400,7 @@ export function AgarGame() {
     reportedRef.current = true;
     const stats = sessionRef.current;
     const finalRank = rank || prevRankRef.current;
-    const finalMass = Math.max(mass, me?.score ?? 0);
+    const finalMass = Math.max(mass, Math.round(me?.score ?? 0));
     syncMissionComplete(stats, tier);
     const missionList = buildMissionList(tier, stats);
     setDeathSummary({
@@ -623,7 +659,7 @@ export function AgarGame() {
         entries={world.rankings.map((r) => ({
           id: r.id,
           label: r.nickname.slice(0, 8),
-          value: `L:${r.mass}`,
+          value: `L:${formatAgarMass(r.mass)}`,
         }))}
       />
       <AgarMinimap
@@ -643,7 +679,7 @@ export function AgarGame() {
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
-            metric={`L:${mass}`}
+            metric={`L:${formatAgarMass(mass)}`}
             rank={rank}
             extra={
               <span className="flex flex-wrap items-center gap-2 text-[10px] font-normal text-white/45">
