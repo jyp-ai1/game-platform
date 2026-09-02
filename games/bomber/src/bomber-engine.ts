@@ -9,10 +9,13 @@ export const BOMBER_BLAST_MS = 420;
 export const BOMBER_SCORE_BLOCK = 5;
 export const BOMBER_SCORE_COIN = 10;
 export const BOMBER_SCORE_KILL = 25;
+/** GAME-DEV-011 — bonus per chain link (x2 → +8, x3 → +16, …). */
+export const BOMBER_CHAIN_BONUS = 8;
+export const BOMBER_SCORE_RISK = 20;
 /** Chance a destroyed soft block drops a coin pickup. */
 export const BOMBER_COIN_DROP_CHANCE = 0.22;
 /** Fuse fraction elapsed before danger zone is shown. */
-export const BOMBER_DANGER_FUSE_RATIO = 0.55;
+export const BOMBER_DANGER_FUSE_RATIO = 0.45;
 
 /** Fire power starts at 1; map caps max fire. */
 export const BOMBER_FIRE_START = 1;
@@ -21,7 +24,7 @@ export const BOMBER_SUDDEN_DEATH_INTERVAL_SEC = 8;
 
 export type Cell = "empty" | "soft" | "hard";
 export type PlayerSlots = 4 | 6;
-export type PowerUpKind = "bomb" | "speed" | "range";
+export type PowerUpKind = "bomb" | "speed" | "range" | "risk";
 
 /** GAME-DEV-003 — single reward pickup (coin). */
 export type BomberCoin = {
@@ -30,7 +33,7 @@ export type BomberCoin = {
   y: number;
 };
 
-export type BomberFeedbackKind = "plant" | "block" | "coin" | "kill" | "blast";
+export type BomberFeedbackKind = "plant" | "block" | "coin" | "kill" | "blast" | "chain" | "item";
 
 export type BomberFeedback = {
   kind: BomberFeedbackKind;
@@ -59,6 +62,12 @@ export type BomberPlayer = {
   place?: number;
   /** One-shot UI feedback from last tick. */
   feedback?: BomberFeedback;
+  /** GAME-DEV-011 — bot behavior archetype */
+  botRole?: "chaser" | "patrol" | "evader" | "rusher";
+  /** GAME-DEV-011 — ticks alive (for rusher pattern) */
+  aliveSinceTick?: number;
+  /** GAME-DEV-011 — temporary speed penalty from risk pickup */
+  speedPenalty?: number;
 };
 
 export type PowerUp = {
@@ -170,7 +179,14 @@ const POWERUP_EMOJI: Record<PowerUpKind, string> = {
   bomb: "💣",
   speed: "⚡",
   range: "🔥",
+  risk: "☠️",
 };
+
+const BOT_ROLES = ["chaser", "patrol", "evader", "rusher"] as const;
+
+function assignBotRole(idx: number): BomberPlayer["botRole"] {
+  return BOT_ROLES[idx % BOT_ROLES.length]!;
+}
 
 const COLORS = ["#22d3ee", "#f472b6", "#fbbf24", "#34d399", "#a78bfa", "#fb7185", "#60a5fa", "#4ade80"];
 
@@ -181,7 +197,8 @@ function maybeSpawnPowerUp(world: BomberWorld, x: number, y: number): void {
   if (roll > chance) return;
   if (world.powerUps.some((p) => p.x === x && p.y === y)) return;
   const kinds: PowerUpKind[] = ["bomb", "speed", "range"];
-  const kind = kinds[(x + y + world.tick) % kinds.length]!;
+  const riskRoll = ((x * 13 + y * 7 + world.tick) % 100) / 100;
+  const kind: PowerUpKind = riskRoll < 0.08 ? "risk" : kinds[(x + y + world.tick) % kinds.length]!;
   world.powerUps.push({ id: `pu-${world.tick}-${x}-${y}`, kind, x, y });
 }
 
@@ -194,6 +211,9 @@ export function applyPowerUp(p: BomberPlayer, kind: PowerUpKind, maxFire: number
   } else if (kind === "range") {
     const next = Math.min(maxFire - BOMBER_FIRE_START, (p.blastBonus ?? 0) + 1);
     p.blastBonus = Math.max(0, next);
+  } else if (kind === "risk") {
+    p.score = (p.score ?? 0) + BOMBER_SCORE_RISK;
+    p.speedPenalty = Math.min(2, (p.speedPenalty ?? 0) + 1);
   }
 }
 
@@ -403,6 +423,7 @@ function fillPlayers(
       score: 0,
       blastBonus: 0,
       speedBonus: 0,
+      ...(isBot ? { botRole: assignBotRole(i), aliveSinceTick: 0 } : {}),
     };
   });
 }
@@ -612,6 +633,8 @@ export function reconcileHumans(
       score: 0,
       blastBonus: 0,
       speedBonus: 0,
+      botRole: assignBotRole(idx),
+      aliveSinceTick: world.tick,
     };
   }
 
@@ -634,8 +657,10 @@ function walkable(world: BomberWorld, x: number, y: number): boolean {
 function pickupPowerUps(world: BomberWorld, p: BomberPlayer): void {
   const idx = world.powerUps.findIndex((pu) => pu.x === p.x && pu.y === p.y);
   if (idx < 0) return;
-  applyPowerUp(p, world.powerUps[idx]!.kind, world.maxFire);
+  const kind = world.powerUps[idx]!.kind;
+  applyPowerUp(p, kind, world.maxFire);
   world.powerUps.splice(idx, 1);
+  p.feedback = { kind: "item", amount: 0, x: p.x, y: p.y };
 }
 
 export function tryMove(world: BomberWorld, playerId: string, dx: number, dy: number): void {
@@ -650,9 +675,10 @@ export function tryMove(world: BomberWorld, playerId: string, dx: number, dy: nu
   pickupCoins(world, p);
 }
 
-/** Mobile pad repeat interval — speed ⚡ reduces cadence, not cells per tick. */
-export function bomberPadRepeatMs(speedBonus = 0): number {
-  return Math.max(50, 100 - speedBonus * 25);
+/** Mobile pad repeat interval — speed ⚡ reduces cadence; risk ☠️ slows it. */
+export function bomberPadRepeatMs(speedBonus = 0, speedPenalty = 0): number {
+  const net = Math.max(0, (speedBonus ?? 0) - (speedPenalty ?? 0));
+  return Math.max(50, 100 - net * 25);
 }
 
 export function plantBomb(world: BomberWorld, playerId: string, now = Date.now()): Bomb | null {
@@ -823,19 +849,36 @@ function previewBlastCells(world: BomberWorld, bomb: Bomb): Array<{ x: number; y
   return cells;
 }
 
-/** GAME-DEV-003 — cells in imminent blast range (fuse past danger threshold). */
+/** GAME-DEV-011 — cells in imminent blast range (fuse past danger threshold + chain preview). */
 export function getBombDangerCells(world: BomberWorld, now = Date.now()): Array<{ x: number; y: number }> {
   const fuse = world.fuseMs || BOMBER_BOMB_FUSE_MS;
   const out: Array<{ x: number; y: number }> = [];
   const seen = new Set<string>();
+  const queue: Bomb[] = [];
+  const queued = new Set<string>();
+
   for (const bomb of world.bombs) {
     const elapsed = now - bomb.plantedAt;
     if (elapsed < fuse * BOMBER_DANGER_FUSE_RATIO) continue;
+    queue.push(bomb);
+    queued.add(bomb.id);
+  }
+
+  while (queue.length > 0) {
+    const bomb = queue.shift()!;
     for (const c of previewBlastCells(world, bomb)) {
       const key = `${c.x},${c.y}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(c);
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(c);
+      }
+      for (const other of world.bombs) {
+        if (other.id === bomb.id || queued.has(other.id)) continue;
+        if (other.x === c.x && other.y === c.y) {
+          queue.push(other);
+          queued.add(other.id);
+        }
+      }
     }
   }
   return out;
@@ -960,7 +1003,23 @@ function hasSafeBombEscape(world: BomberWorld, bot: BomberPlayer, range: number)
 function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
   if (!bot.alive || world.matchOver) return;
   const every = Math.max(2, world.difficulty.aiTickEvery);
-  const chaseChance = 0.62;
+  const role = bot.botRole ?? "patrol";
+  let chaseChance = 0.62;
+  let bombChance = world.difficulty.aiBombChance;
+  if (role === "chaser") chaseChance = 0.88;
+  else if (role === "patrol") chaseChance = 0.35;
+  else if (role === "evader") {
+    chaseChance = 0.42;
+    bombChance *= 0.55;
+  } else if (role === "rusher") {
+    const aliveTicks = world.tick - (bot.aliveSinceTick ?? world.tick);
+    if (aliveTicks > 600) {
+      chaseChance = 0.92;
+      bombChance *= 1.75;
+    } else {
+      chaseChance = 0.5;
+    }
+  }
   const range = Math.min(world.maxFire, BOMBER_FIRE_START + (bot.blastBonus ?? 0));
 
   if (world.tick % every === 0) {
@@ -1020,8 +1079,68 @@ function botThink(world: BomberWorld, bot: BomberPlayer, now: number): void {
   const target = pickChaseTarget(world, bot);
   const wantHunt =
     target && linedUpForBomb(world, bot, target, range) && Math.random() < world.difficulty.aiHuntChance;
-  const wantWander = Math.random() < world.difficulty.aiBombChance;
+  const wantWander = Math.random() < bombChance;
   if (wantHunt || wantWander) plantBomb(world, bot.id, now);
+}
+
+/** GAME-DEV-011 — detonate one bomb; chain-trigger others in blast path. Returns chain index (1-based). */
+function detonateOneBomb(
+  world: BomberWorld,
+  bomb: Bomb,
+  now: number,
+  chainIndex: number,
+  queue: Bomb[]
+): void {
+  const ownerRef = world.players[bomb.ownerId];
+  const cells = blastCells(world, bomb, ownerRef);
+  world.blasts.push({ id: `blast-${bomb.id}`, cells, until: now + BOMBER_BLAST_MS });
+
+  if (ownerRef) {
+    ownerRef.bombsLeft = Math.min(ownerRef.bombsMax, ownerRef.bombsLeft + 1);
+    if (chainIndex >= 2) {
+      const bonus = BOMBER_CHAIN_BONUS * (chainIndex - 1);
+      ownerRef.score = (ownerRef.score ?? 0) + bonus;
+      ownerRef.feedback = { kind: "chain", amount: chainIndex, x: bomb.x, y: bomb.y };
+    } else {
+      ownerRef.feedback = { kind: "blast", amount: 0, x: bomb.x, y: bomb.y };
+    }
+  }
+
+  for (const cell of cells) {
+    const idx = world.bombs.findIndex((b) => b.x === cell.x && b.y === cell.y);
+    if (idx >= 0) {
+      queue.push(world.bombs[idx]!);
+      world.bombs.splice(idx, 1);
+    }
+  }
+
+  for (const p of Object.values(world.players)) {
+    if (!p.alive) continue;
+    if (cells.some((c) => c.x === p.x && c.y === p.y)) {
+      markDeath(world, p);
+      if (ownerRef && ownerRef.id !== p.id) {
+        ownerRef.kills += 1;
+        ownerRef.score = (ownerRef.score ?? 0) + BOMBER_SCORE_KILL;
+        ownerRef.feedback = { kind: "kill", amount: BOMBER_SCORE_KILL, x: p.x, y: p.y };
+      }
+    }
+  }
+}
+
+function processBombDetonations(world: BomberWorld, now: number): void {
+  const fuse = world.fuseMs || BOMBER_BOMB_FUSE_MS;
+  const ready = world.bombs.filter((b) => now - b.plantedAt >= fuse);
+  if (ready.length === 0) return;
+
+  world.bombs = world.bombs.filter((b) => !ready.some((r) => r.id === b.id));
+  const queue = [...ready];
+  let chainIndex = 0;
+
+  while (queue.length > 0) {
+    const bomb = queue.shift()!;
+    chainIndex += 1;
+    detonateOneBomb(world, bomb, now, chainIndex, queue);
+  }
 }
 
 export function remainingTimeSec(world: BomberWorld, now = Date.now()): number {
@@ -1156,34 +1275,15 @@ export function tickBomberWorld(
     }
   }
 
-  const fuse = world.fuseMs || BOMBER_BOMB_FUSE_MS;
-  const remain: Bomb[] = [];
-  for (const bomb of world.bombs) {
-    if (now - bomb.plantedAt < fuse) {
-      remain.push(bomb);
-      continue;
-    }
-    const ownerRef = world.players[bomb.ownerId];
-    const cells = blastCells(world, bomb, ownerRef);
-    world.blasts.push({ id: `blast-${bomb.id}`, cells, until: now + BOMBER_BLAST_MS });
-    if (ownerRef) {
-      ownerRef.feedback = { kind: "blast", amount: 0, x: bomb.x, y: bomb.y };
-    }
-    if (ownerRef) ownerRef.bombsLeft = Math.min(ownerRef.bombsMax, ownerRef.bombsLeft + 1);
-    for (const p of Object.values(world.players)) {
-      if (!p.alive) continue;
-      if (cells.some((c) => c.x === p.x && c.y === p.y)) {
-        markDeath(world, p);
-        if (ownerRef && ownerRef.id !== p.id) {
-          ownerRef.kills += 1;
-          ownerRef.score = (ownerRef.score ?? 0) + BOMBER_SCORE_KILL;
-          ownerRef.feedback = { kind: "kill", amount: BOMBER_SCORE_KILL, x: p.x, y: p.y };
-        }
-      }
+  processBombDetonations(world, now);
+  world.blasts = world.blasts.filter((b) => b.until > now);
+
+  // Gradual risk penalty decay
+  for (const p of Object.values(world.players)) {
+    if ((p.speedPenalty ?? 0) > 0 && world.tick % 40 === 0) {
+      p.speedPenalty = Math.max(0, (p.speedPenalty ?? 0) - 1);
     }
   }
-  world.bombs = remain;
-  world.blasts = world.blasts.filter((b) => b.until > now);
 
   const living = Object.values(world.players).filter((p) => p.alive);
   if (living.length <= 1 && !opts?.deferMatchEnd) finalizeMatch(world);

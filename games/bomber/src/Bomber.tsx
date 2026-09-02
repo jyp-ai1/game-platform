@@ -7,7 +7,6 @@ import {
   getLastNickname,
   MobileControlPad,
   MP_PLAYER_COLORS,
-  MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
   MultiplayerMinimap,
   MultiplayerPlayShell,
@@ -18,6 +17,17 @@ import {
   type MpStyleOption,
   type PadDirection,
 } from "@game-platform/game-sdk";
+import { BomberGameOver } from "./bomber-game-over";
+import { BomberMissionHud } from "./bomber-mission-hud";
+import {
+  buildMissionList,
+  createSessionStats,
+  saveBestRecord,
+  syncMissionComplete,
+  type BomberBestRecord,
+  type BomberMissionProgress,
+  type BomberRunSummary,
+} from "./bomber-retention";
 import {
   createRoom,
   ensureRoom,
@@ -346,6 +356,14 @@ export function BomberGame() {
   const popupIdRef = useRef(0);
   const prevTickRef = useRef(0);
   const [plantFlashUntil, setPlantFlashUntil] = useState(0);
+  const [shakeUntil, setShakeUntil] = useState(0);
+  const sessionStatsRef = useRef(createSessionStats());
+  const [deathSummary, setDeathSummary] = useState<{
+    run: BomberRunSummary;
+    missions: BomberMissionProgress[];
+    bestRecord: BomberBestRecord;
+    title: string;
+  } | null>(null);
   const [isHost, setIsHost] = useState(false);
   const isHostRef = useRef(false);
   const setHostAuthority = useCallback((host: boolean) => {
@@ -401,6 +419,13 @@ export function BomberGame() {
   const rank = localRank(world, deviceId);
   const soloSession = isSoloSession(activeRoom, deviceId);
 
+  const liveMissions = useMemo(() => {
+    const stats = sessionStatsRef.current;
+    stats.enemiesDefeated = Math.max(stats.enemiesDefeated, kills);
+    stats.peakScore = Math.max(stats.peakScore, score);
+    return buildMissionList(stats);
+  }, [world.tick, kills, score]);
+
   useEffect(() => {
     if (world.tick === prevTickRef.current) return;
     prevTickRef.current = world.tick;
@@ -410,10 +435,21 @@ export function BomberGame() {
     const sy = fb.y * CELL;
     const id = popupIdRef.current++;
     const now = Date.now();
+    const stats = sessionStatsRef.current;
     if (fb.kind === "plant") {
       setPlantFlashUntil(now + 220);
       return;
     }
+    if (fb.kind === "block") stats.blocksDestroyed += 1;
+    if (fb.kind === "kill") stats.enemiesDefeated += 1;
+    if (fb.kind === "item") stats.itemsCollected += 1;
+    if (fb.kind === "chain") stats.bestChain = Math.max(stats.bestChain, fb.amount);
+    if (me) stats.peakScore = Math.max(stats.peakScore, me.score ?? 0);
+
+    if (fb.kind === "blast" || fb.kind === "chain") {
+      setShakeUntil(now + (fb.kind === "chain" ? 280 : 180));
+    }
+
     const label =
       fb.kind === "block"
         ? `+${fb.amount}`
@@ -421,13 +457,37 @@ export function BomberGame() {
           ? `+${fb.amount} 🪙`
           : fb.kind === "kill"
             ? `+${fb.amount} KILL`
-            : fb.kind === "blast"
-              ? "💥"
-              : `+${fb.amount}`;
+            : fb.kind === "chain"
+              ? `CHAIN x${fb.amount}`
+              : fb.kind === "item"
+                ? "ITEM!"
+                : fb.kind === "blast"
+                  ? "💥"
+                  : `+${fb.amount}`;
     const color =
-      fb.kind === "kill" ? "#fbbf24" : fb.kind === "coin" ? "#fde047" : fb.kind === "blast" ? "#fb923c" : "#86efac";
-    setPopups((p) => [...p, { id, sx, sy, text: label, color, until: now + (fb.kind === "blast" ? 420 : 650) }]);
-  }, [world.tick, me?.feedback]);
+      fb.kind === "kill"
+        ? "#fbbf24"
+        : fb.kind === "coin"
+          ? "#fde047"
+          : fb.kind === "chain"
+            ? "#fb923c"
+            : fb.kind === "item"
+              ? "#a78bfa"
+              : fb.kind === "blast"
+                ? "#fb923c"
+                : "#86efac";
+    setPopups((p) => [
+      ...p,
+      {
+        id,
+        sx,
+        sy,
+        text: label,
+        color,
+        until: now + (fb.kind === "blast" || fb.kind === "chain" ? 720 : 650),
+      },
+    ]);
+  }, [world.tick, me?.feedback, me?.score]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -1120,6 +1180,8 @@ export function BomberGame() {
     const code = roomRef.current;
     if (isSoloSession(code, deviceId) && started) {
       setPopups([]);
+      sessionStatsRef.current = createSessionStats();
+      setDeathSummary(null);
       const next = restartSoloMatch(worldRef.current, deviceId, nickname, color);
       applyLocalLook(next, deviceId, color);
       worldRef.current = next;
@@ -1285,10 +1347,38 @@ export function BomberGame() {
       ? "WIN"
       : "LOSE";
 
+  const deathReportedRef = useRef(false);
+
+  useEffect(() => {
+    if (!showDeath) {
+      deathReportedRef.current = false;
+      return;
+    }
+    if (deathReportedRef.current) return;
+    deathReportedRef.current = true;
+    const stats = sessionStatsRef.current;
+    stats.enemiesDefeated = Math.max(stats.enemiesDefeated, kills);
+    stats.peakScore = Math.max(stats.peakScore, score);
+    syncMissionComplete(stats);
+    const run: BomberRunSummary = {
+      ...stats,
+      finalScore: score,
+      finalKills: kills,
+    };
+    const bestRecord = saveBestRecord(run);
+    setDeathSummary({
+      run,
+      missions: buildMissionList(stats),
+      bestRecord,
+      title: world.matchOver ? resultLabel : "Game Over",
+    });
+  }, [showDeath, world.matchOver, score, kills, resultLabel]);
+
   return (
     <>
       <MultiplayerPlayShell
         onExit={exitToDetail}
+        inputActive={started && stateAck && alive}
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar
@@ -1345,10 +1435,19 @@ export function BomberGame() {
           />
         }
       >
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden"
-          style={{ width, height, background: "#0f172a" }}
-        >
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div
+            className="overflow-hidden"
+            style={{
+              width,
+              height,
+              background: "#0f172a",
+              transform:
+                Date.now() < shakeUntil
+                  ? `translate(${(Math.sin(Date.now() / 40) * 2).toFixed(1)}px, ${(Math.cos(Date.now() / 35) * 2).toFixed(1)}px)`
+                  : undefined,
+            }}
+          >
           {world.grid.map((row, y) =>
             row.map((cell, x) => (
               <div
@@ -1375,8 +1474,9 @@ export function BomberGame() {
                 top: c.y * CELL,
                 width: CELL - 1,
                 height: CELL - 1,
-                backgroundColor: "rgba(239,68,68,0.2)",
-                border: "1px dashed rgba(248,113,113,0.55)",
+                backgroundColor: "rgba(239,68,68,0.28)",
+                border: "1px dashed rgba(248,113,113,0.75)",
+                boxShadow: "inset 0 0 8px rgba(239,68,68,0.25)",
                 zIndex: 4,
               }}
             />
@@ -1457,29 +1557,40 @@ export function BomberGame() {
           {world.bombs.map((b) => {
             const fuseMs = world.fuseMs || 1800;
             const fuseLeft = Math.max(0, fuseMs - (nowTick - b.plantedAt));
-            const urgent = fuseLeft / fuseMs < 0.45;
+            const urgent = fuseLeft / fuseMs < 0.55;
+            const critical = fuseLeft / fuseMs < 0.25;
             return (
               <div
                 key={b.id}
                 data-testid="bomber-bomb"
                 className={`absolute z-30 flex items-center justify-center rounded-full border-2 ${
-                  urgent ? "animate-pulse border-red-400 bg-amber-100" : "border-zinc-400 bg-zinc-200"
+                  critical
+                    ? "animate-pulse border-red-500 bg-red-100"
+                    : urgent
+                      ? "animate-pulse border-red-400 bg-amber-100"
+                      : "border-zinc-400 bg-zinc-200"
                 }`}
                 style={{
                   left: b.x * CELL + 4,
                   top: b.y * CELL + 4,
                   width: CELL - 8,
                   height: CELL - 8,
-                  boxShadow: urgent
-                    ? "0 0 12px rgba(248,113,113,0.95)"
-                    : Date.now() < plantFlashUntil
-                      ? "0 0 14px rgba(250,204,21,0.95)"
-                      : "0 0 6px rgba(255,255,255,0.5)",
+                  boxShadow: critical
+                    ? "0 0 16px rgba(239,68,68,1)"
+                    : urgent
+                      ? "0 0 12px rgba(248,113,113,0.95)"
+                      : Date.now() < plantFlashUntil
+                        ? "0 0 14px rgba(250,204,21,0.95)"
+                        : "0 0 6px rgba(255,255,255,0.5)",
                 }}
               >
                 <span className="text-xs">💣</span>
                 {urgent ? (
-                  <span className="absolute -top-2 rounded bg-red-600 px-1 text-[9px] font-bold text-white">
+                  <span
+                    className={`absolute -top-2 rounded px-1 text-[9px] font-bold text-white ${
+                      critical ? "bg-red-700 animate-pulse" : "bg-red-600"
+                    }`}
+                  >
                     {Math.ceil(fuseLeft / 1000)}
                   </span>
                 ) : null}
@@ -1505,30 +1616,40 @@ export function BomberGame() {
               Spectating · last survivor wins
             </div>
           ) : null}
+          </div>
         </div>
       </MultiplayerPlayShell>
+
+      {alive && started && stateAck ? (
+        <div className="pointer-events-none fixed left-3 top-24 z-[240] sm:top-20">
+          <BomberMissionHud missions={liveMissions} />
+        </div>
+      ) : null}
 
       {alive && !world.matchOver && stateAck ? (
         <MobileControlPad
           onDirection={padMove}
-          repeatMs={bomberPadRepeatMs(me?.speedBonus ?? 0)}
+          repeatMs={bomberPadRepeatMs(me?.speedBonus ?? 0, me?.speedPenalty ?? 0)}
           actions={[{ id: "bomb", label: "BOMB", mode: "tap", onPress: () => pushInput({ plant: true }) }]}
         />
       ) : null}
 
-      {showDeath ? (
-        <div data-testid="bomber-game-over">
-          <MultiplayerDeathOverlay
-            score={Math.max(score, wins)}
-            metric={
-              world.matchOver
-                ? `${resultLabel} · Place #${rank || "-"} · Kills ${kills}`
-                : `DEAD · Score ${score} · Kills ${kills}`
+      {showDeath && deathSummary ? (
+        <BomberGameOver
+          finalScore={deathSummary.run.finalScore}
+          blocksDestroyed={deathSummary.run.blocksDestroyed}
+          enemiesDefeated={deathSummary.run.enemiesDefeated}
+          bestChain={deathSummary.run.bestChain}
+          missions={deathSummary.missions}
+          bestRecord={deathSummary.bestRecord}
+          title={deathSummary.title}
+          onRetry={handleRetry}
+          onPlayAnother={() => {
+            if (typeof window !== "undefined") {
+              window.location.href = "/games";
             }
-            onRetry={handleRetry}
-            onExit={exitToDetail}
-          />
-        </div>
+          }}
+        />
       ) : null}
     </>
   );

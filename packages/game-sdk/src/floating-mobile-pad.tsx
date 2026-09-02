@@ -174,7 +174,7 @@ export function FloatingMobilePad({
       ref={overlayRef}
       data-testid="mp-mobile-control-pad"
       className={cn(
-        "fixed inset-0 z-[250] touch-none select-none lg:hidden",
+        "pointer-events-none fixed inset-0 z-[250] touch-none select-none lg:hidden",
         className
       )}
       style={{
@@ -182,11 +182,15 @@ export function FloatingMobilePad({
         userSelect: "none",
         touchAction: "none",
       }}
-      onPointerDown={onOverlayDown}
-      onPointerMove={onOverlayMove}
-      onPointerUp={onOverlayUp}
-      onPointerCancel={onOverlayUp}
     >
+      {/* Left-half joystick capture — only active zone receives pointer events */}
+      <div
+        className="pointer-events-auto absolute inset-y-0 left-0 w-1/2 touch-none"
+        onPointerDown={onOverlayDown}
+        onPointerMove={onOverlayMove}
+        onPointerUp={onOverlayUp}
+        onPointerCancel={onOverlayUp}
+      />
       {joy ? (
         <div
           data-testid="mp-floating-joystick"

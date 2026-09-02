@@ -687,6 +687,7 @@ export function AgarGame() {
     <>
       <MultiplayerPlayShell
         onExit={exitToDetail}
+        inputActive={started}
         sideHud={rankHud}
         topBar={
           <MultiplayerYouBar

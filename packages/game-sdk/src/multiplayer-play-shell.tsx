@@ -16,6 +16,7 @@ import {
   getActiveFullscreenElement,
   isViewportFullscreen,
 } from "./multiplayer-fullscreen";
+import { installMpKeyboardPassthrough } from "./multiplayer-input-bridge";
 
 /**
  * Common multiplayer outer frame — same aspect container + chrome.
@@ -28,6 +29,8 @@ export function MultiplayerPlayShell({
   onExit,
   className,
   boardClassName,
+  /** When true, game keys get focus + scroll prevention (default on). */
+  inputActive = true,
 }: {
   children: ReactNode;
   /** Rankings / LIVE info — outside playfield (not overlaying top-right). */
@@ -36,8 +39,10 @@ export function MultiplayerPlayShell({
   onExit?: () => void;
   className?: string;
   boardClassName?: string;
+  inputActive?: boolean;
 }) {
   const shellRef = useRef<HTMLDivElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const isGameFullscreen = isFullscreen || pseudoFullscreen;
@@ -77,6 +82,22 @@ export function MultiplayerPlayShell({
       document.body.style.overflow = "";
     };
   }, [pseudoFullscreen]);
+
+  const inputActiveRef = useRef(inputActive);
+  inputActiveRef.current = inputActive;
+
+  useEffect(() => {
+    return installMpKeyboardPassthrough(() => inputActiveRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!inputActive) return;
+    boardRef.current?.focus({ preventScroll: true });
+  }, [inputActive]);
+
+  const focusBoard = useCallback(() => {
+    boardRef.current?.focus({ preventScroll: true });
+  }, []);
 
   return (
     <div
@@ -120,8 +141,14 @@ export function MultiplayerPlayShell({
         )}
       >
         <div
+          ref={boardRef}
+          data-mp-play-board
+          tabIndex={0}
+          role="application"
+          aria-label="Game board"
+          onPointerDown={focusBoard}
           className={cn(
-            "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black touch-none select-none",
+            "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black touch-none select-none outline-none focus:outline-none",
             isGameFullscreen && "max-h-[min(100dvh,100dvw)] max-w-[min(100dvh,100dvw)]",
             boardClassName
           )}
