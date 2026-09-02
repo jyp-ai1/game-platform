@@ -7,7 +7,6 @@ import {
   emitGameExit,
   emitGameRetry,
   MobileControlPad,
-  MultiplayerDeathOverlay,
 } from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
@@ -195,6 +194,18 @@ import {
   type Particle,
   type ScorePopup,
 } from "./snake-feel";
+import { SnakeGameOver } from "./snake-game-over";
+import { SnakeMissionHud } from "./snake-mission-hud";
+import {
+  buildMissionList,
+  createSessionStats,
+  loadBestRecord,
+  saveBestRecord,
+  syncMissionComplete,
+  type SnakeBestRecord,
+  type SnakeMissionProgress,
+  type SnakeRunSummary,
+} from "./snake-retention";
 
 const DIRECTION_KEYS: Record<string, Direction> = {
   ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
@@ -388,6 +399,14 @@ export function SnakeIoGame({
   const [joinBrief, setJoinBrief] = useState<GlobalWorldJoinBrief | null>(null);
   const sessionMomentsRef = useRef<ReplayMoment[]>([]);
   const prevTotalKillsRef = useRef(0);
+  const prevFoodComboRef = useRef(0);
+  const prevNearMissTickRef = useRef<number | undefined>(undefined);
+  const sessionStatsRef = useRef(createSessionStats());
+  const [deathSummary, setDeathSummary] = useState<{
+    run: SnakeRunSummary;
+    missions: SnakeMissionProgress[];
+    bestRecord: SnakeBestRecord;
+  } | null>(null);
   const sessionKillsRef = useRef<Record<string, number>>({});
   const sessionDeathsRef = useRef<Record<string, number>>({});
   const processedKillsRef = useRef<Set<string>>(new Set());
@@ -453,6 +472,17 @@ export function SnakeIoGame({
   // RC-SYNC-001: WORLD clients simulate locally; applyRoom merges host world around local snake.
   const shouldTickWorld = isLocalOnly || isHost || isGlobalWorld;
   const mySnake = world?.snakes[deviceId];
+  const liveMissions = useMemo(() => {
+    const stats = sessionStatsRef.current;
+    if (mySnake?.alive) {
+      stats.foodEaten = mySnake.foodEaten ?? stats.foodEaten;
+      stats.nearMissCount = mySnake.nearMissCount ?? stats.nearMissCount;
+      stats.bestCombo = Math.max(stats.bestCombo, mySnake.sessionBestCombo ?? 0);
+      stats.peakScore = Math.max(stats.peakScore, Math.round(mySnake.score));
+      stats.maxLength = Math.max(stats.maxLength, mySnake.maxLength ?? getSegmentCount(mySnake));
+    }
+    return buildMissionList(stats);
+  }, [mySnake?.alive, mySnake?.foodEaten, mySnake?.nearMissCount, mySnake?.sessionBestCombo, mySnake?.score, mySnake?.maxLength, world?.tick]);
   const isSpectating = !isStageMode && mySnake?.spectating && !mySnake?.alive;
   const stageConfig = isStageMode ? getSnakeStage(stageIndex) : null;
   const matchRule = useMemo(
@@ -1873,6 +1903,10 @@ export function SnakeIoGame({
     setScorePopups([]);
     prevAliveRef.current = true;
     prevTotalKillsRef.current = 0;
+    prevFoodComboRef.current = 0;
+    prevNearMissTickRef.current = undefined;
+    sessionStatsRef.current = createSessionStats();
+    setDeathSummary(null);
     zoomMultRef.current = 1;
 
     const next = structuredClone(worldRef.current);
@@ -1917,27 +1951,48 @@ export function SnakeIoGame({
         }
         prevSegCountRef.current[deviceId] = getSegmentCount(me);
       }
+      if (me) {
+        const stats = sessionStatsRef.current;
+        stats.foodEaten = me.foodEaten ?? 0;
+        stats.nearMissCount = me.nearMissCount ?? 0;
+        stats.bestCombo = Math.max(stats.bestCombo, me.sessionBestCombo ?? 0);
+        stats.peakScore = Math.max(stats.peakScore, Math.round(me.score));
+        stats.maxLength = Math.max(stats.maxLength, me.maxLength ?? getSegmentCount(me));
+      }
       if (prevMe && me && me.score > prevMe.score && me.segments[0]) {
         const delta = me.score - prevMe.score;
         const head = me.segments[0]!;
         const tier: FoodTier =
           delta === 8
             ? "bonus"
-            : delta === 1
-              ? "small"
-              : delta === 2
-                ? "medium"
-                : delta === 3
-                  ? "large"
-                  : tierFromKind("normal", delta);
+            : delta >= 22
+              ? "risk"
+              : delta >= 15
+                ? "golden"
+                : delta === 1
+                  ? "small"
+                  : delta === 2
+                    ? "medium"
+                    : delta === 3
+                      ? "large"
+                      : tierFromKind("normal", delta);
         const vis = getFoodVisual(tier);
-        if (delta >= 12 || tier === "death" || tier === "epic" || tier === "bonus") playLootGemSound();
-        else playEatSound("normal", vis.soundHz);
+        if (delta >= 12 || tier === "death" || tier === "epic" || tier === "bonus" || tier === "golden" || tier === "risk") {
+          playLootGemSound();
+        } else {
+          playEatSound("normal", vis.soundHz);
+        }
         markFirstFun(activeRoom);
         setParticles((p) => spawnEatParticles(p, head.x, head.y, vis.color, isGlobalWorld ? Math.max(vis.particleCount, 6) : vis.particleCount));
-        setScorePopups((pop) =>
-          spawnScorePopup(pop, head.x, head.y, tier === "bonus" ? "BONUS!" : delta, vis.color)
-        );
+        const label =
+          tier === "bonus"
+            ? "BONUS!"
+            : tier === "golden"
+              ? "GOLDEN!"
+              : tier === "risk"
+                ? "RISK!"
+                : String(delta);
+        setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y, label, vis.color));
         const buf = me.gemsEaten ?? 0;
         const perSeg = SNAKE_MVP_RC1.growthFoodPerSegment;
         setScorePopups((pop) =>
@@ -1948,6 +2003,24 @@ export function SnakeIoGame({
           setParticles((p) => spawnBoostTrail(p, head.x, head.y, me.color, 2));
         }
       }
+      if (me && (me.foodCombo ?? 0) >= 2 && (me.foodCombo ?? 0) > prevFoodComboRef.current && me.segments[0]) {
+        const head = me.segments[0]!;
+        setScorePopups((pop) =>
+          spawnScorePopup(pop, head.x, head.y - 2.2, `COMBO x${me.foodCombo}`, "#fb923c")
+        );
+      }
+      if (me) prevFoodComboRef.current = me.foodCombo ?? 0;
+      if (
+        me &&
+        me.lastNearMissTick != null &&
+        me.lastNearMissTick !== prevNearMissTickRef.current &&
+        me.segments[0]
+      ) {
+        const head = me.segments[0]!;
+        setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y - 2.5, "NEAR MISS!", "#38bdf8"));
+        if (isGlobalWorld) shakeRef.current = Math.max(shakeRef.current, 2);
+      }
+      if (me) prevNearMissTickRef.current = me.lastNearMissTick;
       if (me && prevMe && getSegmentCount(me) > getSegmentCount(prevMe) && me.segments[0]) {
         const head = me.segments[0]!;
         setScorePopups((pop) => spawnScorePopup(pop, head.x, head.y - 1.2, "Grow!", "#22c55e"));
@@ -1959,6 +2032,23 @@ export function SnakeIoGame({
         playDeathSound();
         setParticles((p) => spawnDeathBurst(p, prevMe.segments[0]!.x, prevMe.segments[0]!.y, prevMe.color));
         if (isGlobalWorld) shakeRef.current = 14;
+        const stats = sessionStatsRef.current;
+        stats.foodEaten = Math.max(stats.foodEaten, prevMe.foodEaten ?? me?.foodEaten ?? 0);
+        stats.nearMissCount = Math.max(stats.nearMissCount, prevMe.nearMissCount ?? me?.nearMissCount ?? 0);
+        stats.bestCombo = Math.max(stats.bestCombo, prevMe.sessionBestCombo ?? me?.sessionBestCombo ?? 0);
+        stats.peakScore = Math.max(stats.peakScore, Math.round(prevMe.score));
+        stats.maxLength = Math.max(
+          stats.maxLength,
+          prevMe.maxLength ?? getSegmentCount(prevMe)
+        );
+        syncMissionComplete(stats);
+        const run: SnakeRunSummary = {
+          ...stats,
+          finalScore: Math.round(prevMe.score),
+          finalLength: prevMe.maxLength ?? getSegmentCount(prevMe),
+        };
+        const bestRecord = saveBestRecord(run);
+        setDeathSummary({ run, missions: buildMissionList(stats), bestRecord });
       }
       if (prevMe && !prevMe.alive && me?.alive && isGlobalWorld) {
         setGoFlashUntil(Date.now() + 600);
@@ -2482,6 +2572,12 @@ export function SnakeIoGame({
           />
         ) : null}
 
+        {mySnake?.alive && !isSpectating && !isStageMode ? (
+          <div className="pointer-events-none absolute left-2 top-14 z-40 sm:top-12">
+            <SnakeMissionHud missions={liveMissions} />
+          </div>
+        ) : null}
+
         {/* Kill Feed — soft, fades ~2s */}
         {isGlobalWorld && !immersivePlay && world.killFeed.length > 0 ? (
           <div className="pointer-events-none absolute right-2 top-[11.5rem] z-30 max-w-[10rem] space-y-1">
@@ -2807,14 +2903,16 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {/* STEP 3.5 — Death Overlay via shared portal (z-[200]) so Retry/Exit stay above HUD/map */}
-      {!isStageMode && mySnake && !mySnake.alive ? (
-        <div data-testid="snake-game-over">
-          <MultiplayerDeathOverlay
-            score={Math.round(mySnake.score ?? 0)}
-            metric={`L:${getSegmentCount(mySnake)}`}
-            onRetry={handleRetry}
-            onExit={() => {
+      {/* GAME-DEV-010 — retention game over with missions + PLAY ANOTHER GAME */}
+      {!isStageMode && mySnake && !mySnake.alive && deathSummary ? (
+        <SnakeGameOver
+          finalScore={deathSummary.run.finalScore}
+          finalLength={deathSummary.run.finalLength}
+          bestCombo={deathSummary.run.bestCombo}
+          missions={deathSummary.missions}
+          bestRecord={deathSummary.bestRecord}
+          onRetry={handleRetry}
+          onPlayAnother={() => {
             emitGameExit("snake");
             postDeath("exit");
             if (activeRoom && !isLocalOnly) {
@@ -2824,17 +2922,11 @@ export function SnakeIoGame({
                 /* ignore */
               }
             }
-            // PLATFORM-UX-CONTRACT-001 — Death EXIT → Game Detail
-            if (onExitToDetailRef.current) {
-              onExitToDetailRef.current();
-              return;
-            }
             if (typeof window !== "undefined") {
-              window.location.href = "/games/snake";
+              window.location.href = "/games";
             }
           }}
-          />
-        </div>
+        />
       ) : null}
 
       {!isSpectating && mySnake?.alive && !isPaused ? (

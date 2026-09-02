@@ -95,4 +95,22 @@ export const SNAKE_POLISH = {
   bonusMinSegments: 8,
   bonusLifetimeTicks: 600,
   bonusMaxOnMap: 1,
+  /** GAME-DEV-010 — golden gem (high score, short TTL) */
+  goldenSpawnIntervalTicks: 500,
+  goldenMinSegments: 10,
+  goldenLifetimeTicks: 420,
+  goldenMaxOnMap: 1,
+  /** GAME-DEV-010 — risk gem (big score, movement debuff on eat) */
+  riskSpawnIntervalTicks: 700,
+  riskMinSegments: 12,
+  riskMaxOnMap: 1,
+  riskDebuffTicks: 360,
+  riskSpeedMult: 1.22,
+  riskTurnMult: 0.62,
+  /** GAME-DEV-010 — food combo streak */
+  comboWindowTicks: 72,
+  comboMax: 8,
+  /** GAME-DEV-010 — near miss bonus */
+  nearMissCooldownTicks: 90,
+  nearMissBonusScore: 3,
 } as const;

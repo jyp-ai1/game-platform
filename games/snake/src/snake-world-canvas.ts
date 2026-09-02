@@ -101,7 +101,8 @@ function collectVisibleFoods(
   if (visible.length <= budget) return visible;
   // Prefer death/bonus gems so special loot stays visible under budget.
   visible.sort((a, b) => {
-    const pri = (t?: string) => (t === "death" || t === "bonus" ? 0 : 1);
+    const pri = (t?: string) =>
+      t === "death" || t === "bonus" || t === "golden" || t === "risk" ? 0 : 1;
     return pri(a.tier) - pri(b.tier);
   });
   return visible.slice(0, budget);
@@ -124,7 +125,10 @@ function drawGem(
   const fd = myHead ? Math.hypot(f.x - myHead.x, f.y - myHead.y) : 999;
   const magneted = fd < magnetR && fd > 0.05;
   const magnetScale = magneted ? 1 + (1 - fd / magnetR) * 0.4 : 1;
-  const pulse = tier === "bonus" ? 1 + Math.sin(Date.now() / 180) * 0.12 : 1;
+  const pulse =
+    tier === "bonus" || tier === "golden" || tier === "risk"
+      ? 1 + Math.sin(Date.now() / 180) * 0.12
+      : 1;
   const r = (size * magnetScale * pulse) / 2;
   ctx.beginPath();
   ctx.arc(s.x + cellSize / 2, s.y + cellSize / 2, r, 0, Math.PI * 2);
@@ -135,13 +139,22 @@ function drawGem(
     ctx.strokeStyle = "rgba(248,113,113,0.7)";
     ctx.lineWidth = 2;
     ctx.stroke();
-  } else if (tier === "bonus") {
-    ctx.strokeStyle = "rgba(253,224,71,0.85)";
+  } else if (tier === "bonus" || tier === "golden") {
+    ctx.strokeStyle = tier === "golden" ? "rgba(251,191,36,0.9)" : "rgba(253,224,71,0.85)";
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.beginPath();
     ctx.arc(s.x + cellSize / 2, s.y + cellSize / 2, r + 3, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(250,204,21,0.35)";
+    ctx.strokeStyle = tier === "golden" ? "rgba(251,191,36,0.4)" : "rgba(250,204,21,0.35)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  } else if (tier === "risk") {
+    ctx.strokeStyle = "rgba(239,68,68,0.85)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(s.x + cellSize / 2, s.y + cellSize / 2, r + 4, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(249,115,22,0.35)";
     ctx.lineWidth = 1;
     ctx.stroke();
   } else if (tier !== "small") {

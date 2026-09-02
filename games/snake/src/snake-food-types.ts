@@ -1,6 +1,6 @@
 import type { FoodKind } from "@game-platform/shared";
 
-export type FoodTier = "small" | "medium" | "large" | "epic" | "bonus" | "death";
+export type FoodTier = "small" | "medium" | "large" | "epic" | "bonus" | "golden" | "risk" | "death";
 
 export interface FoodTierConfig {
   tier: FoodTier;
@@ -63,6 +63,26 @@ export const FOOD_TIERS: Record<FoodTier, FoodTierConfig> = {
     glow: "0 0 16px #facc15",
     particleCount: 20,
     soundHz: 920,
+  },
+  golden: {
+    tier: "golden",
+    kind: "golden_apple",
+    score: 15,
+    sizePx: 18,
+    color: "#fcd34d",
+    glow: "0 0 22px #fbbf24",
+    particleCount: 28,
+    soundHz: 1040,
+  },
+  risk: {
+    tier: "risk",
+    kind: "golden_apple",
+    score: 22,
+    sizePx: 20,
+    color: "#f97316",
+    glow: "0 0 18px #ef4444",
+    particleCount: 22,
+    soundHz: 720,
   },
   death: {
     tier: "death",

@@ -4,6 +4,7 @@ import type { ActivePowerUp, ComputedBalance, FoodKind, MatchObjective, ReplayMo
 
 import type { LivingWorldState } from "./snake-living-world";
 import { FOOD_TIERS, rollFoodTier, type FoodTier } from "./snake-food-types";
+import { comboBonusScore } from "./snake-retention";
 import { SNAKE_MVP_RC1 } from "./snake-mvp-rc1";
 import { SNAKE_FEEL, SNAKE_POLISH } from "./snake-feel-tuning";
 import { deathTrace } from "./snake-death-trace";
@@ -74,7 +75,7 @@ export function cullAmbientFood(world: SnakeIoWorld, ambientCap = world.config.f
   // Prefer newer ambient (tail of array) — death loot appended last stays intact via death bucket.
   for (let i = world.food.length - 1; i >= 0; i--) {
     const f = world.food[i]!;
-    if (f.tier === "death" || f.tier === "bonus") {
+    if (f.tier === "death" || f.tier === "bonus" || f.tier === "golden" || f.tier === "risk") {
       death.push(f);
     } else if (keep.length < cap) {
       keep.push(f);
@@ -142,6 +143,19 @@ export interface SnakeEntity {
   lastMoveTick?: number;
   lastHeadX?: number;
   lastHeadY?: number;
+  /** GAME-DEV-010 — food combo streak */
+  foodCombo?: number;
+  lastFoodEatTick?: number;
+  sessionBestCombo?: number;
+  /** GAME-DEV-010 — near miss tracking */
+  nearMissCount?: number;
+  nearMissCooldownUntil?: number;
+  lastNearMissTick?: number;
+  /** GAME-DEV-010 — peak length this life */
+  maxLength?: number;
+  /** GAME-DEV-010 — risk food debuff */
+  riskDebuffUntilTick?: number;
+  turnRateMult?: number;
 }
 
 export interface SnakeIoWorld {
@@ -275,7 +289,7 @@ export function spawnFoodItems(world: SnakeIoWorld, count = 1): void {
     }
     const tier = rollFoodTier();
     // Ambient only — death loot is exclusively from dropFoodFromSnake (not rollFoodTier).
-    const ambientTier = tier === "death" || tier === "bonus" ? "small" : tier;
+    const ambientTier = tier === "death" || tier === "bonus" || tier === "golden" || tier === "risk" ? "small" : tier;
     const cfg = FOOD_TIERS[ambientTier];
     world.food.push({
       id: nextFoodId(),
@@ -302,6 +316,8 @@ function gemLengthGain(tier: FoodTier): number {
   if (tier === "medium") return 2;
   if (tier === "large") return 3;
   if (tier === "bonus") return 4;
+  if (tier === "golden") return 4;
+  if (tier === "risk") return 3;
   if (tier === "epic") return 5;
   // Death loot: modest length so corpse piles near spawn aren't an L500 vacuum.
   if (tier === "death") return 1;
@@ -339,11 +355,29 @@ function countBonusFood(world: SnakeIoWorld): number {
   return n;
 }
 
+function countTierFood(world: SnakeIoWorld, tier: FoodTier): number {
+  let n = 0;
+  for (const f of world.food) if (f.tier === tier) n += 1;
+  return n;
+}
+
+function expireSpecialFood(world: SnakeIoWorld): void {
+  world.food = world.food.filter((f) => {
+    if (f.tier === "bonus") {
+      const maxAge = SNAKE_POLISH.bonusLifetimeTicks;
+      return !f.spawnedAtTick || world.tick - f.spawnedAtTick < maxAge;
+    }
+    if (f.tier === "golden") {
+      const maxAge = SNAKE_POLISH.goldenLifetimeTicks;
+      return !f.spawnedAtTick || world.tick - f.spawnedAtTick < maxAge;
+    }
+    return true;
+  });
+}
+
+/** Legacy alias */
 function expireBonusFood(world: SnakeIoWorld): void {
-  const maxAge = SNAKE_POLISH.bonusLifetimeTicks;
-  world.food = world.food.filter(
-    (f) => f.tier !== "bonus" || !f.spawnedAtTick || world.tick - f.spawnedAtTick < maxAge
-  );
+  expireSpecialFood(world);
 }
 
 /** Spawn a high-value bonus gem near an active human snake (GAME-DEV-001). */
@@ -380,6 +414,141 @@ function trySpawnBonusFood(world: SnakeIoWorld): void {
     tier: "bonus",
     spawnedAtTick: world.tick,
   });
+}
+
+function trySpawnGoldenFood(world: SnakeIoWorld): void {
+  if (world.tick % SNAKE_POLISH.goldenSpawnIntervalTicks !== 0) return;
+  if (countTierFood(world, "golden") >= SNAKE_POLISH.goldenMaxOnMap) return;
+
+  const humans = Object.values(world.snakes).filter(
+    (s) => s.alive && !s.spectating && !isBotEntity(s) && !s.awaitingInput
+  );
+  if (humans.length === 0) return;
+
+  const eligible = humans.filter((s) => getSegmentCount(s) >= SNAKE_POLISH.goldenMinSegments);
+  if (eligible.length === 0) return;
+
+  const snake = eligible[Math.floor(Math.random() * eligible.length)]!;
+  const head = snake.segments[0];
+  if (!head) return;
+
+  cullAmbientFood(world, Math.max(0, world.config.foodCount - 1));
+  const cfg = FOOD_TIERS.golden;
+  let pos = randPosNearPoint(world, head, SNAKE_POLISH.nearPlayerFoodRadius);
+  let tries = 0;
+  while ((occupied(world, pos) || isBlocked(world, pos)) && tries < 80) {
+    pos = randPosNearPoint(world, head, SNAKE_POLISH.nearPlayerFoodRadius + tries * 0.5);
+    tries++;
+  }
+  world.food.push({
+    id: nextFoodId(),
+    x: pos.x,
+    y: pos.y,
+    kind: cfg.kind,
+    value: cfg.score,
+    tier: "golden",
+    spawnedAtTick: world.tick,
+  });
+}
+
+function trySpawnRiskFood(world: SnakeIoWorld): void {
+  if (world.tick % SNAKE_POLISH.riskSpawnIntervalTicks !== 0) return;
+  if (countTierFood(world, "risk") >= SNAKE_POLISH.riskMaxOnMap) return;
+
+  const humans = Object.values(world.snakes).filter(
+    (s) => s.alive && !s.spectating && !isBotEntity(s) && !s.awaitingInput
+  );
+  if (humans.length === 0) return;
+
+  const eligible = humans.filter((s) => getSegmentCount(s) >= SNAKE_POLISH.riskMinSegments);
+  if (eligible.length === 0) return;
+
+  const snake = eligible[Math.floor(Math.random() * eligible.length)]!;
+  const head = snake.segments[0];
+  if (!head) return;
+
+  cullAmbientFood(world, Math.max(0, world.config.foodCount - 1));
+  const cfg = FOOD_TIERS.risk;
+  let pos = randPosNearPoint(world, head, SNAKE_POLISH.nearPlayerFoodRadius + 4);
+  let tries = 0;
+  while ((occupied(world, pos) || isBlocked(world, pos)) && tries < 80) {
+    pos = randPosNearPoint(world, head, SNAKE_POLISH.nearPlayerFoodRadius + tries * 0.6);
+    tries++;
+  }
+  world.food.push({
+    id: nextFoodId(),
+    x: pos.x,
+    y: pos.y,
+    kind: cfg.kind,
+    value: cfg.score,
+    tier: "risk",
+  });
+}
+
+function applyFoodCombo(snake: SnakeEntity, world: SnakeIoWorld): number {
+  const window = SNAKE_POLISH.comboWindowTicks;
+  const prevTick = snake.lastFoodEatTick ?? -9999;
+  if (world.tick - prevTick <= window) {
+    snake.foodCombo = Math.min(SNAKE_POLISH.comboMax, (snake.foodCombo ?? 0) + 1);
+  } else {
+    snake.foodCombo = 1;
+  }
+  snake.lastFoodEatTick = world.tick;
+  const combo = snake.foodCombo ?? 1;
+  snake.sessionBestCombo = Math.max(snake.sessionBestCombo ?? 0, combo);
+  return combo;
+}
+
+function tryNearMiss(
+  world: SnakeIoWorld,
+  snake: SnakeEntity,
+  head: Vec,
+  nearestBodyD: number,
+  collisionThreshold: number,
+  now: number
+): void {
+  if (isBotEntity(snake)) return;
+  if (snake.nearMissCooldownUntil && world.tick < snake.nearMissCooldownUntil) return;
+  if (snake.invincibleUntil && now < snake.invincibleUntil) return;
+
+  const minD = collisionThreshold * 1.02;
+  const maxD = collisionThreshold * 1.55;
+  let triggered = false;
+
+  if (Number.isFinite(nearestBodyD) && nearestBodyD >= minD && nearestBodyD <= maxD) {
+    triggered = true;
+  }
+
+  if (!triggered && snake.segments.length > 6) {
+    for (let i = 4; i < snake.segments.length; i++) {
+      const d = dist(snake.segments[i]!, head);
+      if (d >= minD && d <= maxD) {
+        triggered = true;
+        break;
+      }
+    }
+  }
+
+  if (!triggered) {
+    const wSize = world.config.worldSize;
+    const margin = 0.45;
+    const wallDist = Math.min(
+      head.x - margin,
+      head.y - margin,
+      wSize - margin - head.x,
+      wSize - margin - head.y
+    );
+    if (wallDist >= 0 && wallDist <= 0.65) {
+      triggered = true;
+    }
+  }
+
+  if (triggered) {
+    snake.nearMissCount = (snake.nearMissCount ?? 0) + 1;
+    snake.nearMissCooldownUntil = world.tick + SNAKE_POLISH.nearMissCooldownTicks;
+    snake.lastNearMissTick = world.tick;
+    snake.score += SNAKE_POLISH.nearMissBonusScore;
+  }
 }
 
 function randPosNearPoint(world: SnakeIoWorld, center: Vec, radius: number): Vec {
@@ -999,6 +1168,12 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     }
   }
 
+  if (!hitOther) {
+    tryNearMiss(world, snake, head, nearestBodyD, collisionThreshold, now);
+  }
+
+  snake.maxLength = Math.max(snake.maxLength ?? getSegmentCount(snake), getSegmentCount(snake));
+
   if (foodIdx >= 0) {
     const food = world.food[foodIdx]!;
     const foodBeforeCollect = world.food.length;
@@ -1017,8 +1192,15 @@ function moveSnakePath(world: SnakeIoWorld, snake: SnakeEntity, now: number, spe
     if (food.kind === "golden_apple") mult *= 1.5;
     if (snake.powerUp?.kind === "double_score") mult *= 2;
     const baseScore = food.value || FOOD_TIERS.small.score;
-    snake.score += Math.round(baseScore * mult);
+    const roundedBase = Math.round(baseScore * mult);
+    const combo = !isBotEntity(snake) ? applyFoodCombo(snake, world) : 0;
+    const comboBonus = !isBotEntity(snake) ? comboBonusScore(roundedBase, combo) : 0;
+    snake.score += roundedBase + comboBonus;
     snake.foodEaten = (snake.foodEaten ?? 0) + 1;
+    if (foodTier === "risk") {
+      snake.riskDebuffUntilTick = world.tick + SNAKE_POLISH.riskDebuffTicks;
+      snake.turnRateMult = SNAKE_POLISH.riskTurnMult;
+    }
     world.objective.progress[snake.deviceId] = (world.objective.progress[snake.deviceId] ?? 0) + 1;
     applyGemGrowth(snake, foodTier);
     spawnFoodItems(world, 1);
@@ -1306,6 +1488,15 @@ export function restartPlayerSnake(
   snake.aliveSinceTick = world.tick;
   snake.killStreak = 0;
   snake.foodEaten = 0;
+  snake.foodCombo = 0;
+  snake.lastFoodEatTick = undefined;
+  snake.sessionBestCombo = 0;
+  snake.nearMissCount = 0;
+  snake.nearMissCooldownUntil = undefined;
+  snake.lastNearMissTick = undefined;
+  snake.maxLength = SNAKE_MVP_RC1.startingSegments;
+  snake.riskDebuffUntilTick = undefined;
+  snake.turnRateMult = undefined;
   snake.lastKillerId = undefined;
   snake.nickname = nickname;
   finalizeSnake(snake, pos, SNAKE_MVP_RC1.startingSegments, 0);
@@ -1359,6 +1550,8 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
 
   expireBonusFood(world);
   trySpawnBonusFood(world);
+  trySpawnGoldenFood(world);
+  trySpawnRiskFood(world);
 
   for (const [i, snake] of Object.entries(world.snakes)) {
     const idx = Object.keys(world.snakes).indexOf(i);
@@ -1389,8 +1582,16 @@ export function tickWorld(world: SnakeIoWorld, now = Date.now()): SnakeIoWorld {
     const boostActive = snake.boosting && getSegmentCount(snake) > SNAKE_FEEL.boostMinSegments;
     const stageSpeed = world.living?.stageSpeedMult ?? 1;
     const progSpeed = !isBotEntity(snake) ? progressiveSpeedMult(snake, world.tick) : 1;
+    const riskActive = (snake.riskDebuffUntilTick ?? 0) > world.tick;
+    if (riskActive) {
+      snake.turnRateMult = SNAKE_POLISH.riskTurnMult;
+    } else {
+      snake.turnRateMult = undefined;
+    }
+    const riskSpeed = riskActive ? SNAKE_POLISH.riskSpeedMult : 1;
     const speed =
-      SNAKE_FEEL.baseSpeed * stageSpeed * progSpeed * (boostActive ? SNAKE_FEEL.boostSpeedMult : 1);
+      SNAKE_FEEL.baseSpeed * stageSpeed * progSpeed * riskSpeed *
+      (boostActive ? SNAKE_FEEL.boostSpeedMult : 1);
     moveSnakePath(world, snake, now, speed);
 
     if (boostActive && snake.alive) {
