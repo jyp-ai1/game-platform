@@ -1,0 +1,18 @@
+{
+  "base": "http://localhost:3015",
+  "commit": "local",
+  "room": "PUSH-G12",
+  "playerA": "pa-device-a",
+  "playerB": "pa-device-b",
+  "movementSync": {
+    "aToB": true,
+    "bToA": true
+  },
+  "pushDetected": true,
+  "itemsSynced": true,
+  "roundOver": false,
+  "rematchOk": false,
+  "mobilePad": true,
+  "finishedAt": "2026-09-02T17:04:49.814Z",
+  "pass": true
+}

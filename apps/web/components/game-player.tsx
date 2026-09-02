@@ -317,6 +317,10 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
     () => import("@game-platform/game-bomber").then((mod) => mod.BomberGame),
     { ssr: false, loading: Loading }
   ),
+  "push-arena": dynamic(
+    () => import("@game-platform/game-push-arena").then((mod) => mod.PushArenaGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({

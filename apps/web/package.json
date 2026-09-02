@@ -19,6 +19,7 @@
     "@game-platform/game-basketball": "*",
     "@game-platform/game-billiards": "*",
     "@game-platform/game-bomber": "*",
+    "@game-platform/game-push-arena": "*",
     "@game-platform/game-breakout": "*",
     "@game-platform/game-bowling": "*",
     "@game-platform/game-bubble-pop": "*",

@@ -53,6 +53,13 @@ const LOCAL_MVP_META: Record<
     sessionDifficulty: "normal",
     controls: "Pointer / keys move · Space / click Boost",
   },
+  "push-arena": {
+    title: "Push Arena",
+    description: "2~4인 밀어내기 배틀. 아이템을 먹고 상대를 낭떠러지로 밀어내세요.",
+    tags: ["multiplayer", "realtime"],
+    sessionDifficulty: "normal",
+    controls: "WASD move · Space Boost · E Push",
+  },
 };
 
 export function resolveLocalThumb(
