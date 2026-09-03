@@ -32,7 +32,7 @@ export type CreatorGameMeta = {
   /** Creator placeholder — metadata-only slug for shared detail template. */
 const CREATOR_STUB_SLUGS = new Set(["creator-demo"]);
 
-const MP_SLUGS = new Set(["snake", "agar", "bomber", "push-arena"]);
+const MP_SLUGS = new Set(["snake", "agar", "bomber", "territory-war"]);
 const CREATOR_MP_SLUGS = new Set<string>();
 
 /** Sprint 23 — web registry registers published creator MP slugs at catalog merge. */

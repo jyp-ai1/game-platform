@@ -1,0 +1,14 @@
+{
+  "base": "http://localhost:3020",
+  "commit": "local",
+  "room": "TW-G12R",
+  "playerA": "tw-a",
+  "playerB": "tw-b",
+  "movementSync": true,
+  "territoryExpanded": true,
+  "trailCreated": true,
+  "territorySynced": true,
+  "mobilePad": true,
+  "pass": true,
+  "finishedAt": "2026-09-03T01:03:58.086Z"
+}

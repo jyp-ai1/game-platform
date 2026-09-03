@@ -230,7 +230,7 @@ export const PARTY_GAMES = new Set([
 ]);
 
 /** Tier3 realtime flagship candidates (home LIVE strip) */
-export const REALTIME_GAMES = new Set(["snake", "agar", "bomber", "push-arena"]);
+export const REALTIME_GAMES = new Set(["snake", "agar", "bomber", "territory-war"]);
 
 export function getGameTier(slug: string): "single" | "party" | "realtime" {
   if (REALTIME_GAMES.has(slug)) return "realtime";
@@ -244,7 +244,7 @@ export function isMultiplayerGame(slug: string): boolean {
 
 export function defaultMaxPlayers(slug: string): MaxPlayers {
   if (slug === "bomber") return 8;
-  if (slug === "push-arena") return 4;
+  if (slug === "territory-war") return 4;
   if (REALTIME_GAMES.has(slug)) return 50;
   return 2;
 }
