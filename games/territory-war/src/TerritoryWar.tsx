@@ -4,8 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getDeviceId,
   getLastNickname,
+  isMpBoardInputActive,
+  isMpGameKey,
   MobileControlPad,
   MP_PLAYER_COLORS,
+  MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
   MultiplayerPlayShell,
   MultiplayerSideRankHud,
@@ -25,10 +28,12 @@ import {
 } from "@game-platform/multiplayer-sdk";
 
 import {
+  TW_ABILITY_READY,
   TW_CELL,
   TW_GRID,
   TW_MAX_PLAYERS,
   TW_TICK_MS,
+  TW_TRAIL_DANGER_CELLS,
   TW_WORLD,
   applyTwInput,
   applyTwSyncState,
@@ -71,7 +76,12 @@ function snapWorld(w: TerritoryWorld): TerritoryWorld {
     winnerId: w.winnerId,
     owner: new Uint8Array(w.owner),
     trail: new Uint8Array(w.trail),
-    players: Object.fromEntries(Object.entries(w.players).map(([k, p]) => [k, { ...p, trail: p.trail.slice() }])),
+    players: Object.fromEntries(
+      Object.entries(w.players).map(([k, p]) => [
+        k,
+        { ...p, trail: p.trail.slice(), trailPoints: p.trailPoints.slice() },
+      ])
+    ),
     items: w.items.map((i) => ({ ...i })),
     rankings: w.rankings.slice(),
     idToSlot: { ...w.idToSlot },
@@ -113,7 +123,31 @@ function saveBest(pct: number): number {
   return prev;
 }
 
-type Popup = { id: number; sx: number; sy: number; text: string; color: string; until: number };
+type Popup = { id: number; sx: number; sy: number; text: string; color: string; until: number; scale?: number };
+
+const ONBOARD_HINTS = [
+  { untilTick: 120, text: "Move with WASD / touch pad" },
+  { untilTick: 240, text: "Leave your territory → draw a trail → return to expand" },
+  { untilTick: 420, text: "Cut enemy trails · avoid crossing your own" },
+  { untilTick: 600, text: "Expand · compete · don't die" },
+];
+
+function resolveTwSimulationHost(
+  deviceId: string,
+  code: string,
+  opts: { lastHostStateAt: number; startedAt: number; now?: number }
+): boolean {
+  const now = opts.now ?? Date.now();
+  const room = sync(code) ?? getRoom(code);
+  if (!room) return true;
+  if (room.hostId === deviceId) return true;
+  const hostPresent = room.players.some((p) => p.deviceId === room.hostId);
+  if (!hostPresent) return true;
+  if (room.players.length <= 1) return true;
+  if (opts.lastHostStateAt <= 0 && now - opts.startedAt > 400) return true;
+  if (opts.lastHostStateAt > 0 && now - opts.lastHostStateAt > 1200) return true;
+  return false;
+}
 
 function slotColor(world: TerritoryWorld, slot: number): string {
   const id = world.slotToId[slot];
@@ -121,7 +155,7 @@ function slotColor(world: TerritoryWorld, slot: number): string {
   return p?.color ?? SLOT_COLORS[slot] ?? "#64748b";
 }
 
-function drawWorld(
+function drawTrailCells(
   ctx: CanvasRenderingContext2D,
   world: TerritoryWorld,
   cam: { x: number; y: number },
@@ -133,6 +167,107 @@ function drawWorld(
   const minCy = Math.max(0, Math.floor((cam.y - half) / TW_CELL));
   const maxCy = Math.min(TW_GRID - 1, Math.ceil((cam.y + half) / TW_CELL));
 
+  for (let cy = minCy; cy <= maxCy; cy++) {
+    for (let cx = minCx; cx <= maxCx; cx++) {
+      const i = cy * TW_GRID + cx;
+      const slot = world.trail[i]!;
+      if (!slot) continue;
+      const p = world.players[world.slotToId[slot] ?? ""];
+      if (!p?.alive) continue;
+      const isSelf = p.id === deviceId;
+      const sx = cx * TW_CELL - cam.x + half;
+      const sy = cy * TW_CELL - cam.y + half;
+      ctx.fillStyle = isSelf ? p.color + "55" : p.color + "77";
+      ctx.fillRect(sx, sy, TW_CELL + 1, TW_CELL + 1);
+    }
+  }
+}
+
+function drawTrailLines(
+  ctx: CanvasRenderingContext2D,
+  world: TerritoryWorld,
+  cam: { x: number; y: number },
+  deviceId: string
+): void {
+  const half = VIEW / 2;
+  for (const p of Object.values(world.players)) {
+    if (!p.alive || p.trailPoints.length < 2) continue;
+    const isSelf = p.id === deviceId;
+    const isEnemy = !isSelf;
+    const danger = isSelf && p.trail.length >= TW_TRAIL_DANGER_CELLS;
+    ctx.beginPath();
+    for (let i = 0; i < p.trailPoints.length; i++) {
+      const pt = p.trailPoints[i]!;
+      const sx = pt.x - cam.x + half;
+      const sy = pt.y - cam.y + half;
+      if (i === 0) ctx.moveTo(sx, sy);
+      else ctx.lineTo(sx, sy);
+    }
+    ctx.strokeStyle = danger ? "#f87171ee" : isSelf ? p.color + "ee" : "#fca5a5ee";
+    ctx.lineWidth = danger ? 6 : isSelf ? 4 : 7;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.shadowColor = danger ? "#ef4444" : isEnemy ? "#ef4444" : p.color;
+    ctx.shadowBlur = isSelf ? (danger ? 16 : 4) : 18;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function drawEdgeIndicators(
+  ctx: CanvasRenderingContext2D,
+  world: TerritoryWorld,
+  cam: { x: number; y: number },
+  deviceId: string
+): void {
+  const half = VIEW / 2;
+  const margin = 28;
+  for (const p of Object.values(world.players)) {
+    if (!p.alive || p.id === deviceId) continue;
+    const sx = p.x - cam.x + half;
+    const sy = p.y - cam.y + half;
+    if (sx >= margin && sx <= VIEW - margin && sy >= margin && sy <= VIEW - margin) continue;
+    const dx = sx - VIEW / 2;
+    const dy = sy - VIEW / 2;
+    const ang = Math.atan2(dy, dx);
+    const cx = VIEW / 2 + Math.cos(ang) * (VIEW / 2 - margin);
+    const cy = VIEW / 2 + Math.sin(ang) * (VIEW / 2 - margin);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(ang);
+    ctx.fillStyle = p.botRole === "hunter" ? "#ef4444" : p.color;
+    ctx.beginPath();
+    ctx.moveTo(8, 0);
+    ctx.lineTo(-6, -5);
+    ctx.lineTo(-6, 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = "9px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(p.nickname.slice(0, 6).toUpperCase(), 0, -10);
+    ctx.restore();
+  }
+}
+
+function drawWorld(
+  ctx: CanvasRenderingContext2D,
+  world: TerritoryWorld,
+  cam: { x: number; y: number },
+  deviceId: string,
+  now = Date.now()
+): void {
+  const half = VIEW / 2;
+  const minCx = Math.max(0, Math.floor((cam.x - half) / TW_CELL));
+  const maxCx = Math.min(TW_GRID - 1, Math.ceil((cam.x + half) / TW_CELL));
+  const minCy = Math.max(0, Math.floor((cam.y - half) / TW_CELL));
+  const maxCy = Math.min(TW_GRID - 1, Math.ceil((cam.y + half) / TW_CELL));
+  const me = world.players[deviceId];
+  const claimPulse =
+    me?.claimFlashUntil && now < me.claimFlashUntil
+      ? 0.35 + 0.25 * Math.sin((now / 80) * Math.PI * 2)
+      : 0;
+
   ctx.fillStyle = "#0f172a";
   ctx.fillRect(0, 0, VIEW, VIEW);
 
@@ -140,46 +275,77 @@ function drawWorld(
     for (let cx = minCx; cx <= maxCx; cx++) {
       const i = cy * TW_GRID + cx;
       const owner = world.owner[i]!;
-      const trail = world.trail[i]!;
       const sx = cx * TW_CELL - cam.x + half;
       const sy = cy * TW_CELL - cam.y + half;
       if (owner > 0) {
-        ctx.fillStyle = slotColor(world, owner) + "55";
+        const isSelf = owner === me?.slot;
+        const alpha = isSelf ? (claimPulse > 0 ? "aa" : "77") : "44";
+        ctx.fillStyle = slotColor(world, owner) + alpha;
         ctx.fillRect(sx, sy, TW_CELL + 1, TW_CELL + 1);
-      }
-      if (trail > 0) {
-        ctx.fillStyle = slotColor(world, trail) + "cc";
-        ctx.fillRect(sx + 4, sy + 4, TW_CELL - 6, TW_CELL - 6);
+        if (isSelf && claimPulse > 0) {
+          ctx.fillStyle = `rgba(251, 191, 36, ${claimPulse})`;
+          ctx.fillRect(sx, sy, TW_CELL + 1, TW_CELL + 1);
+        }
       }
     }
   }
 
-  for (const it of world.items) {
-    const sx = it.x - cam.x + half;
-    const sy = it.y - cam.y + half;
-    if (sx < -20 || sy < -20 || sx > VIEW + 20 || sy > VIEW + 20) continue;
-    ctx.font = "16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(it.kind === "boost" ? "⚡" : it.kind === "cutter" ? "✂️" : "🛡️", sx, sy);
-  }
+  drawTrailCells(ctx, world, cam, deviceId);
+  drawTrailLines(ctx, world, cam, deviceId);
 
   for (const p of Object.values(world.players)) {
     if (!p.alive) continue;
     const sx = p.x - cam.x + half;
     const sy = p.y - cam.y + half;
     const r = playerVisualRadius(p);
+    const isSelf = p.id === deviceId;
+    const ang = Math.atan2(p.vy || p.aimDy, p.vx || p.aimDx);
+
     ctx.beginPath();
-    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.arc(sx, sy, r + (isSelf ? 3 : 0), 0, Math.PI * 2);
     ctx.fillStyle = p.color;
     ctx.fill();
-    ctx.lineWidth = p.id === deviceId ? 3 : 1;
-    ctx.strokeStyle = p.id === deviceId ? "#fff" : "#000";
+    ctx.lineWidth = isSelf ? 3 : p.isBot && p.botRole === "hunter" ? 3 : 2;
+    ctx.strokeStyle = isSelf ? "#fff" : p.botRole === "hunter" ? "#ef4444" : "#1e293b";
     ctx.stroke();
-    ctx.fillStyle = "#e2e8f0";
-    ctx.font = "10px sans-serif";
-    ctx.fillText(p.nickname.slice(0, 8), sx, sy - r - 6);
+
+    if (isSelf) {
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 6, 0, Math.PI * 2);
+      ctx.strokeStyle = "#ffffff44";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + Math.cos(ang) * (r + 6), sy + Math.sin(ang) * (r + 6));
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    if (p.isBot) {
+      const isHunter = p.botRole === "hunter";
+      if (isHunter) {
+        ctx.beginPath();
+        ctx.arc(sx, sy, r + 10, 0, Math.PI * 2);
+        ctx.strokeStyle = "#ef444488";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.fillStyle = isHunter ? "#fca5a5" : "#fbbf24";
+      ctx.font = "bold 8px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(isHunter ? "HUNTER" : (p.botRole?.toUpperCase() ?? "BOT"), sx, sy + r + 12);
+    }
+
+    ctx.fillStyle = isSelf ? "#fff" : "#e2e8f0";
+    ctx.font = isSelf ? "bold 11px sans-serif" : "10px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(isSelf ? "YOU" : p.nickname.slice(0, 10), sx, sy - r - 8);
   }
+
+  drawEdgeIndicators(ctx, world, cam, deviceId);
 }
 
 export function TerritoryWarGame() {
@@ -201,22 +367,26 @@ export function TerritoryWarGame() {
   const [nowTick, setNowTick] = useState(Date.now());
   const [popups, setPopups] = useState<Popup[]>([]);
   const [bestTerritory, setBestTerritory] = useState(loadBest);
-  const [banner, setBanner] = useState<string | null>("EXPAND YOUR TERRITORY");
+  const [banner, setBanner] = useState<string | null>(null);
+  const [koFlash, setKoFlash] = useState(false);
+  const prevAliveRef = useRef(true);
 
   const roomRef = useRef(roomCode);
   roomRef.current = roomCode;
   const isHostRef = useRef(false);
+  const forceSimHostRef = useRef(false);
   const pendingInputs = useRef<TwInput[]>([]);
   const lastInputsRef = useRef<Record<string, TwInput>>({});
   const lastGuestInputAt = useRef<Record<string, number>>({});
   const lastHostStateAt = useRef(0);
   const steerRef = useRef({ dx: 0, dy: 0 });
-  const boostHeldRef = useRef(false);
+  const keysHeldRef = useRef({ up: false, down: false, left: false, right: false });
   const popupIdRef = useRef(0);
   const prevTickRef = useRef(0);
   const prevRankRef = useRef(99);
   const rematchRequestedRef = useRef(false);
   const rafRef = useRef(0);
+  const gameStartedAtRef = useRef(0);
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
@@ -283,10 +453,11 @@ export function TerritoryWarGame() {
         deviceId,
         dx: partial.dx ?? steerRef.current.dx,
         dy: partial.dy ?? steerRef.current.dy,
-        boost: partial.boost ?? boostHeldRef.current,
+        boost: partial.boost,
+        ability: partial.ability,
         at: Date.now(),
       };
-      if (isHostRef.current) {
+      if (isHostRef.current || forceSimHostRef.current) {
         pendingInputs.current.push(payload);
       } else {
         send(code, `input:${deviceId}`, payload);
@@ -304,52 +475,119 @@ export function TerritoryWarGame() {
     [pushInput]
   );
 
+  const syncSteerFromKeys = useCallback(() => {
+    const k = keysHeldRef.current;
+    let dx = 0;
+    let dy = 0;
+    if (k.up) dy -= 1;
+    if (k.down) dy += 1;
+    if (k.left) dx -= 1;
+    if (k.right) dx += 1;
+    const len = Math.hypot(dx, dy);
+    if (len > 0.01) applySteer(dx / len, dy / len);
+    else applySteer(0, 0);
+  }, [applySteer]);
+
+  const refreshKeyboardSteer = useCallback(() => {
+    const k = keysHeldRef.current;
+    if (!k.up && !k.down && !k.left && !k.right) return;
+    syncSteerFromKeys();
+  }, [syncSteerFromKeys]);
+
   useEffect(() => {
     if (!started || !alive || world.roundOver) return;
+
+    const setKey = (code: string, down: boolean) => {
+      if (code === "ArrowUp" || code === "KeyW") keysHeldRef.current.up = down;
+      if (code === "ArrowDown" || code === "KeyS") keysHeldRef.current.down = down;
+      if (code === "ArrowLeft" || code === "KeyA") keysHeldRef.current.left = down;
+      if (code === "ArrowRight" || code === "KeyD") keysHeldRef.current.right = down;
+    };
+
     const onKey = (e: KeyboardEvent) => {
-      let dx = 0;
-      let dy = 0;
-      const k = e.key.toLowerCase();
-      if (k === "arrowup" || k === "w") dy = -1;
-      if (k === "arrowdown" || k === "s") dy = 1;
-      if (k === "arrowleft" || k === "a") dx = -1;
-      if (k === "arrowright" || k === "d") dx = 1;
-      if (k === " " || k === "shift") {
-        boostHeldRef.current = true;
-        pushInput({ boost: true });
+      if (!isMpBoardInputActive()) return;
+      if (!isMpGameKey(e.code)) return;
+      if (e.code === "Space" || e.code === "ShiftLeft" || e.code === "ShiftRight") {
+        e.preventDefault();
+        pushInput({ ability: "boost" });
         return;
       }
-      if (dx || dy) {
-        const len = Math.hypot(dx, dy);
-        applySteer(dx / len, dy / len);
+      if (e.code === "KeyQ") {
+        e.preventDefault();
+        pushInput({ ability: "cutter" });
+        return;
       }
+      if (e.code === "KeyE") {
+        e.preventDefault();
+        pushInput({ ability: "shield" });
+        return;
+      }
+      if (
+        e.code !== "ArrowUp" &&
+        e.code !== "ArrowDown" &&
+        e.code !== "ArrowLeft" &&
+        e.code !== "ArrowRight" &&
+        e.code !== "KeyW" &&
+        e.code !== "KeyA" &&
+        e.code !== "KeyS" &&
+        e.code !== "KeyD"
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setKey(e.code, true);
+      syncSteerFromKeys();
     };
     const onKeyUp = (e: KeyboardEvent) => {
-      const k = e.key.toLowerCase();
-      if (k === " " || k === "shift") {
-        boostHeldRef.current = false;
-        pushInput({ boost: false });
+      if (!isMpBoardInputActive()) return;
+      if (
+        e.code !== "ArrowUp" &&
+        e.code !== "ArrowDown" &&
+        e.code !== "ArrowLeft" &&
+        e.code !== "ArrowRight" &&
+        e.code !== "KeyW" &&
+        e.code !== "KeyA" &&
+        e.code !== "KeyS" &&
+        e.code !== "KeyD"
+      ) {
+        return;
       }
+      setKey(e.code, false);
+      syncSteerFromKeys();
     };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("keyup", onKeyUp);
+
+    const board = document.querySelector("[data-mp-play-board]") as HTMLElement | null;
+    if (!board) return;
+    const onKeyBoard = onKey as EventListener;
+    const onKeyUpBoard = onKeyUp as EventListener;
+    board.addEventListener("keydown", onKeyBoard);
+    board.addEventListener("keyup", onKeyUpBoard);
     return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("keyup", onKeyUp);
+      board.removeEventListener("keydown", onKeyBoard);
+      board.removeEventListener("keyup", onKeyUpBoard);
+      keysHeldRef.current = { up: false, down: false, left: false, right: false };
+      applySteer(0, 0);
     };
-  }, [started, alive, world.roundOver, applySteer, pushInput]);
+  }, [started, alive, world.roundOver, syncSteerFromKeys, pushInput, applySteer]);
 
   useEffect(() => {
     if (!started) return;
     const id = window.setInterval(() => {
       const code = roomRef.current;
-      const room = getRoom(code);
-      const hostNow = !!room && room.hostId === deviceId;
+      const hostNow = resolveTwSimulationHost(deviceId, code, {
+        lastHostStateAt: lastHostStateAt.current,
+        startedAt: gameStartedAtRef.current,
+        now: Date.now(),
+      });
+      forceSimHostRef.current = hostNow;
       isHostRef.current = hostNow;
       setIsHost(hostNow);
 
       const w = worldRef.current;
+      refreshKeyboardSteer();
+
       if (hostNow) {
+        const room = getRoom(code);
         sync(code);
         let humans = collectHumans(code, deviceId, nickname, color);
         if (!humans.some((h) => h.id === deviceId)) {
@@ -363,7 +601,7 @@ export function TerritoryWarGame() {
           worldRef.current = next;
           setWorld(next);
           send(code, "state", serializeTwState(next));
-          setBanner("EXPAND YOUR TERRITORY");
+          setBanner(null);
           return;
         }
 
@@ -402,7 +640,7 @@ export function TerritoryWarGame() {
       }
     }, TW_TICK_MS);
     return () => window.clearInterval(id);
-  }, [started, deviceId, nickname, color]);
+  }, [started, deviceId, nickname, color, refreshKeyboardSteer]);
 
   useEffect(() => {
     if (!started) return;
@@ -423,7 +661,7 @@ export function TerritoryWarGame() {
       }
 
       if (last === "state" && gs.state) {
-        if (amHost) return;
+        if (amHost || forceSimHostRef.current) return;
         const state = gs.state as TwSyncState;
         lastHostStateAt.current = Date.now();
         const w = worldRef.current;
@@ -440,7 +678,7 @@ export function TerritoryWarGame() {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (ctx) {
-        drawWorld(ctx, worldRef.current, cameraFocus(worldRef.current.players[deviceId]), deviceId);
+        drawWorld(ctx, worldRef.current, cameraFocus(worldRef.current.players[deviceId]), deviceId, Date.now());
       }
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -451,7 +689,12 @@ export function TerritoryWarGame() {
   useEffect(() => {
     if (world.tick === prevTickRef.current) return;
     prevTickRef.current = world.tick;
-    if (banner && world.tick > 60) setBanner(null);
+
+    if (me && prevAliveRef.current && !me.alive) {
+      setKoFlash(true);
+      window.setTimeout(() => setKoFlash(false), 450);
+    }
+    if (me) prevAliveRef.current = me.alive;
 
     if (rank === 1 && rank < prevRankRef.current) {
       setBanner("YOU ARE #1");
@@ -467,17 +710,33 @@ export function TerritoryWarGame() {
       const ox = fb.x - cam.x + VIEW / 2;
       const oy = fb.y - cam.y + VIEW / 2;
       const colorFb =
-        fb.kind === "cut" || fb.kind === "big_claim"
+        fb.kind === "cut" || fb.kind === "big_claim" || fb.kind === "mega_claim"
           ? "#fbbf24"
-          : fb.kind === "danger" || fb.kind === "ko"
+          : fb.kind === "danger" || fb.kind === "ko" || fb.kind === "trail_cut"
             ? "#f87171"
-            : "#86efac";
+            : fb.kind === "boost_ready" || fb.kind === "boost"
+              ? "#67e8f9"
+              : fb.kind === "cutter_ready" || fb.kind === "cutter"
+                ? "#fcd34d"
+                : fb.kind === "shield_ready" || fb.kind === "shield_block" || fb.kind === "shield"
+                  ? "#a78bfa"
+                  : "#86efac";
+      const scale =
+        fb.kind === "mega_claim" || fb.kind === "cut" || fb.kind === "ko" ? 1.2 : 1;
       setPopups((prev) => [
         ...prev,
-        { id, sx: ox, sy: oy, text: fb.text, color: colorFb, until: now + 800 },
+        {
+          id,
+          sx: ox,
+          sy: oy,
+          text: fb.text,
+          color: colorFb,
+          until: now + (fb.kind === "ko" || fb.kind === "trail_cut" ? 1200 : 900),
+          scale,
+        },
       ]);
     }
-  }, [world.tick, world.players, rank, banner, cam.x, cam.y]);
+  }, [world.tick, world.players, rank, cam.x, cam.y, me]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -499,7 +758,19 @@ export function TerritoryWarGame() {
         tick: number;
         deviceId: string;
         isHost: boolean;
-        players: Array<{ id: string; x: number; y: number; territoryPct: number; trailLen: number; alive: boolean }>;
+        players: Array<{
+          id: string;
+          x: number;
+          y: number;
+          vx: number;
+          vy: number;
+          hasAim: boolean;
+          outside: boolean;
+          territoryPct: number;
+          trailLen: number;
+          alive: boolean;
+          knockouts: number;
+        }>;
         ownerCells: number;
       };
       __TW_QA_INPUT__?: (dx: number, dy: number, opts?: { boost?: boolean }) => void;
@@ -514,16 +785,26 @@ export function TerritoryWarGame() {
         isHost: isHostRef.current,
         players: Object.values(cur.players).map((p) => ({
           id: p.id,
-          x: Math.round(p.x),
-          y: Math.round(p.y),
+          x: Math.round(p.x * 10) / 10,
+          y: Math.round(p.y * 10) / 10,
+          vx: Math.round(p.vx * 100) / 100,
+          vy: Math.round(p.vy * 100) / 100,
+          hasAim: p.hasAim,
+          outside: p.outside,
           territoryPct: p.territoryPct,
           trailLen: p.trail.length,
           alive: p.alive,
+          knockouts: p.knockouts,
         })),
         ownerCells: owned,
       };
     };
-    w.__TW_QA_INPUT__ = (dx, dy, opts) => pushInput({ dx, dy, boost: opts?.boost });
+    w.__TW_QA_INPUT__ = (dx, dy, opts) =>
+      pushInput({
+        dx,
+        dy,
+        ability: opts?.boost ? "boost" : undefined,
+      });
   }, [deviceId, pushInput]);
 
   const onPlay = useCallback(() => {
@@ -532,7 +813,10 @@ export function TerritoryWarGame() {
     worldRef.current = w;
     setWorld(w);
     setStarted(true);
-    setBanner("EXPAND YOUR TERRITORY");
+    gameStartedAtRef.current = Date.now();
+    lastHostStateAt.current = 0;
+    prevAliveRef.current = true;
+    setBanner(null);
     if (getRoom(roomCode)?.hostId === deviceId) {
       send(roomCode, "state", serializeTwState(w));
     }
@@ -548,19 +832,47 @@ export function TerritoryWarGame() {
       worldRef.current = next;
       setWorld(next);
       send(roomRef.current, "state", serializeTwState(next));
-      setBanner("EXPAND YOUR TERRITORY");
+      prevAliveRef.current = true;
+      gameStartedAtRef.current = Date.now();
+      lastHostStateAt.current = 0;
+      setBanner(null);
     }
   }, [deviceId, nickname, color]);
 
   const onExit = useCallback(() => {
+    keysHeldRef.current = { up: false, down: false, left: false, right: false };
+    applySteer(0, 0);
+    document.querySelector("[data-mp-play-board]")?.removeAttribute("data-mp-board-input");
+    try {
+      leaveRoom(roomRef.current);
+    } catch {
+      /* ignore */
+    }
     window.location.href = "/";
-  }, []);
+  }, [applySteer]);
+
+  const onboardHint = ONBOARD_HINTS.find((h) => world.tick < h.untilTick);
+  const deathTitle =
+    me?.deathCause === "enemy"
+      ? `Cut by ${me.killerNickname ?? "enemy"}`
+      : me?.deathCause === "self"
+        ? "You hit your trail"
+        : "Trail Cut";
+  const deathSubtitle =
+    me?.deathCause === "enemy"
+      ? "Enemy crossed your trail — return faster next time"
+      : me?.deathCause === "self"
+        ? "Don't cross your own trail while expanding"
+        : "Your trail was broken";
+  const boostPct = me?.boostCharge ?? 0;
+  const cutterPct = me?.cutterCharge ?? 0;
+  const shieldPct = me?.shieldCharge ?? 0;
 
   if (!started) {
     return (
       <MultiplayerEntrySelect
         title="Territory War"
-        subtitle="영토를 확장하고 상대 trail을 끊으세요 · 2~4인"
+        subtitle="Leave territory · draw trail · return to expand · cut enemies"
         styles={TW_STYLES}
         styleId={styleId}
         onStyleChange={setStyleId}
@@ -604,11 +916,57 @@ export function TerritoryWarGame() {
     >
       <div className="relative mx-auto overflow-hidden rounded-xl border border-white/10" style={{ width: VIEW, height: VIEW }}>
         <canvas ref={canvasRef} width={VIEW} height={VIEW} className="block" />
+        {koFlash ? (
+          <div className="pointer-events-none absolute inset-0 bg-red-500/25 animate-pulse" />
+        ) : null}
+        {onboardHint ? (
+          <div className="pointer-events-none absolute inset-x-3 top-3 rounded-lg border border-white/15 bg-black/55 px-3 py-2 text-center text-xs font-medium text-white/95">
+            {onboardHint.text}
+          </div>
+        ) : null}
         {banner ? (
-          <div className="pointer-events-none absolute inset-x-0 top-4 text-center text-sm font-bold tracking-wide text-amber-300">
+          <div className="pointer-events-none absolute inset-x-0 top-14 text-center text-sm font-bold tracking-wide text-amber-300">
             {banner}
           </div>
         ) : null}
+        <div className="pointer-events-none absolute inset-x-2 bottom-2 space-y-1 text-[10px] font-semibold text-white/90">
+          <div className="flex items-center gap-2">
+            <span className="w-14">⚡ BOOST</span>
+            <div className="h-2 flex-1 overflow-hidden rounded bg-black/50">
+              <div
+                className="h-full bg-cyan-400 transition-all"
+                style={{ width: `${(boostPct / TW_ABILITY_READY) * 100}%` }}
+              />
+            </div>
+            <span className={boostPct >= TW_ABILITY_READY ? "text-cyan-300 font-bold" : ""}>
+              {boostPct >= TW_ABILITY_READY ? "READY · Space" : `${Math.round(boostPct)}%`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-14">✂️ CUT</span>
+            <div className="h-2 flex-1 overflow-hidden rounded bg-black/50">
+              <div
+                className="h-full bg-amber-400 transition-all"
+                style={{ width: `${(cutterPct / TW_ABILITY_READY) * 100}%` }}
+              />
+            </div>
+            <span className={cutterPct >= TW_ABILITY_READY ? "text-amber-300 font-bold" : ""}>
+              {cutterPct >= TW_ABILITY_READY ? "READY · Q" : `${Math.round(cutterPct)}%`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-14">🛡️ SHLD</span>
+            <div className="h-2 flex-1 overflow-hidden rounded bg-black/50">
+              <div
+                className="h-full bg-violet-400 transition-all"
+                style={{ width: `${(shieldPct / TW_ABILITY_READY) * 100}%` }}
+              />
+            </div>
+            <span className={shieldPct >= TW_ABILITY_READY ? "text-violet-300 font-bold" : ""}>
+              {shieldPct >= TW_ABILITY_READY ? "READY · E" : `${Math.round(shieldPct)}%`}
+            </span>
+          </div>
+        </div>
         {popups.map((p) => (
           <div
             key={p.id}
@@ -616,10 +974,10 @@ export function TerritoryWarGame() {
             style={{
               left: p.sx,
               top: p.sy,
-              transform: "translate(-50%, -50%)",
+              transform: `translate(-50%, -50%) scale(${p.scale ?? 1})`,
               color: p.color,
               textShadow: "0 2px 8px rgba(0,0,0,0.9)",
-              fontSize: p.text.includes("BIG") ? 16 : 13,
+              fontSize: p.text.includes("BIG") || p.text.includes("MEGA") ? 16 : p.text.includes("CUT") ? 14 : 13,
             }}
           >
             {p.text}
@@ -635,18 +993,33 @@ export function TerritoryWarGame() {
           actions={[
             {
               id: "boost",
-              label: "BOOST",
-              mode: "hold",
-              onPress: () => {
-                boostHeldRef.current = true;
-                pushInput({ boost: true });
-              },
-              onRelease: () => {
-                boostHeldRef.current = false;
-                pushInput({ boost: false });
-              },
+              label: boostPct >= TW_ABILITY_READY ? "⚡ GO" : "⚡",
+              mode: "tap",
+              onPress: () => pushInput({ ability: "boost" }),
+            },
+            {
+              id: "cutter",
+              label: cutterPct >= TW_ABILITY_READY ? "✂️ GO" : "✂️",
+              mode: "tap",
+              onPress: () => pushInput({ ability: "cutter" }),
+            },
+            {
+              id: "shield",
+              label: shieldPct >= TW_ABILITY_READY ? "🛡 GO" : "🛡",
+              mode: "tap",
+              onPress: () => pushInput({ ability: "shield" }),
             },
           ]}
+        />
+      ) : null}
+
+      {started && !world.roundOver && me && !me.alive ? (
+        <MultiplayerDeathOverlay
+          title={deathTitle}
+          score={score}
+          metric={`Territory ${territoryPct.toFixed(1)}% · KO ${knockouts} · ${deathSubtitle}`}
+          onRetry={onRematch}
+          onExit={onExit}
         />
       ) : null}
 

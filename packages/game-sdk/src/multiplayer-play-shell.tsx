@@ -16,7 +16,7 @@ import {
   getActiveFullscreenElement,
   isViewportFullscreen,
 } from "./multiplayer-fullscreen";
-import { installMpKeyboardPassthrough } from "./multiplayer-input-bridge";
+import { installMpKeyboardPassthrough, isMpBoardInputActive } from "./multiplayer-input-bridge";
 
 /**
  * Common multiplayer outer frame — same aspect container + chrome.
@@ -85,19 +85,54 @@ export function MultiplayerPlayShell({
 
   const inputActiveRef = useRef(inputActive);
   inputActiveRef.current = inputActive;
+  const boardInputActiveRef = useRef(false);
+
+  const setBoardInputActive = useCallback((next: boolean) => {
+    boardInputActiveRef.current = next;
+    const el = boardRef.current;
+    if (!el) return;
+    if (next) {
+      el.setAttribute("data-mp-board-input", "active");
+    } else {
+      el.removeAttribute("data-mp-board-input");
+      if (document.activeElement === el) el.blur();
+    }
+  }, []);
 
   useEffect(() => {
-    return installMpKeyboardPassthrough(() => inputActiveRef.current);
+    return installMpKeyboardPassthrough(() => inputActiveRef.current && isMpBoardInputActive());
   }, []);
+
+  useEffect(() => {
+    if (!inputActive) setBoardInputActive(false);
+  }, [inputActive, setBoardInputActive]);
 
   useEffect(() => {
     if (!inputActive) return;
-    boardRef.current?.focus({ preventScroll: true });
-  }, [inputActive]);
+    const onDocPointerDown = (e: PointerEvent) => {
+      const el = boardRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && el.contains(e.target)) return;
+      setBoardInputActive(false);
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
+  }, [inputActive, setBoardInputActive]);
 
   const focusBoard = useCallback(() => {
+    if (!inputActiveRef.current) return;
     boardRef.current?.focus({ preventScroll: true });
-  }, []);
+    setBoardInputActive(true);
+  }, [setBoardInputActive]);
+
+  const onBoardBlur = useCallback(() => {
+    setBoardInputActive(false);
+  }, [setBoardInputActive]);
+
+  const handleExit = useCallback(() => {
+    setBoardInputActive(false);
+    onExit?.();
+  }, [onExit, setBoardInputActive]);
 
   return (
     <div
@@ -115,7 +150,7 @@ export function MultiplayerPlayShell({
         {onExit ? (
           <button
             type="button"
-            onClick={onExit}
+            onClick={handleExit}
             className="rounded-lg border border-white/20 bg-black/70 px-3 py-1.5 text-xs font-medium text-white hover:bg-black/90"
           >
             나가기
@@ -147,6 +182,8 @@ export function MultiplayerPlayShell({
           role="application"
           aria-label="Game board"
           onPointerDown={focusBoard}
+          onFocus={focusBoard}
+          onBlur={onBoardBlur}
           className={cn(
             "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black touch-none select-none outline-none focus:outline-none",
             isGameFullscreen && "max-h-[min(100dvh,100dvw)] max-w-[min(100dvh,100dvw)]",

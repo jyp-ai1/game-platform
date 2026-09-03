@@ -16,6 +16,14 @@ export function isMpGameKey(code: string): boolean {
   return MP_GAME_KEY_CODES.has(code);
 }
 
+/** True only after the player explicitly activated the board (click/tap), not on page load. */
+export function isMpBoardInputActive(): boolean {
+  if (typeof document === "undefined") return false;
+  return (
+    document.querySelector('[data-mp-play-board][data-mp-board-input="active"]') != null
+  );
+}
+
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
@@ -33,6 +41,7 @@ export function installMpKeyboardPassthrough(active: () => boolean): () => void 
     if (e.code === "Escape") return;
     if (!isMpGameKey(e.code)) return;
     if (isTypingTarget(e.target)) return;
+    if (!isMpBoardInputActive()) return;
     e.preventDefault();
   };
   window.addEventListener("keydown", onKeyDown, { capture: true });

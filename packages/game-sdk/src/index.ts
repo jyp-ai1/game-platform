@@ -132,6 +132,10 @@ export {
   type PlatformJourneyStep,
 } from "./platform-game-contract";
 export {
+  isMpBoardInputActive,
+  isMpGameKey,
+} from "./multiplayer-input-bridge";
+export {
   MultiplayerDeathOverlay,
   MultiplayerMinimap,
   MultiplayerPlayShell,

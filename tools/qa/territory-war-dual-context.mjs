@@ -17,21 +17,27 @@ async function qaInput(page, dx, dy, opts = {}) {
   await page.evaluate(([x, y, o]) => window.__TW_QA_INPUT__?.(x, y, o), [dx, dy, opts]);
 }
 
-async function expandLoop(page, deviceId, rounds = 3) {
+async function expandLoop(page, deviceId, rounds = 1) {
+  const legs = [
+    [1, 0, 30],
+    [0, 1, 30],
+    [-1, 0, 30],
+    [0, -1, 30],
+  ];
   for (let r = 0; r < rounds; r++) {
-    const dirs = [
-      [1, 0],
-      [0, 1],
-      [-1, 0],
-      [0, -1],
-    ];
-    for (const [dx, dy] of dirs) {
-      for (let i = 0; i < 35; i++) {
-        await qaInput(page, dx, dy, { boost: true });
+    for (const [dx, dy, n] of legs) {
+      for (let i = 0; i < n; i++) {
+        await qaInput(page, dx, dy);
         await page.waitForTimeout(80);
       }
     }
   }
+  for (let i = 0; i < 40; i++) {
+    await qaInput(page, -0.7, -0.7);
+    await page.waitForTimeout(80);
+  }
+  await qaInput(page, 0, 0);
+  await page.waitForTimeout(500);
   const qa = await readQa(page);
   return qa?.players.find((p) => p.id === deviceId);
 }
@@ -46,6 +52,7 @@ async function main() {
     movementSync: false,
     territoryExpanded: false,
     trailCreated: false,
+    playerAliveAfterExpand: false,
     territorySynced: false,
     mobilePad: false,
     pass: false,
@@ -78,6 +85,9 @@ async function main() {
     await pageA.waitForFunction(() => typeof window.__TW_QA__ === "function", { timeout: 30_000 });
     await pageB.waitForFunction(() => typeof window.__TW_QA__ === "function", { timeout: 30_000 });
 
+    await pageA.locator("[data-mp-play-board]").click();
+    await pageB.locator("[data-mp-play-board]").click();
+
     const qaA0 = await readQa(pageA);
     const qaB0 = await readQa(pageB);
     report.playerA = qaA0?.deviceId ?? null;
@@ -85,6 +95,24 @@ async function main() {
 
     const distinct = qaA0?.deviceId && qaB0?.deviceId && qaA0.deviceId !== qaB0.deviceId;
     const pctA0 = qaA0?.players.find((p) => p.id === report.playerA)?.territoryPct ?? 0;
+
+    // Expand first on a clean state — pre-moving for sync left a trail that self-KO'd the square loop.
+    const playerAfterExpand = await expandLoop(pageA, report.playerA, 1);
+    await pageB.waitForTimeout(1200);
+    const qaB2 = await readQa(pageB);
+    const remoteAfter = qaB2?.players.find((p) => p.id === report.playerA);
+
+    report.playerAliveAfterExpand = playerAfterExpand?.alive === true;
+    report.territoryExpanded =
+      playerAfterExpand?.alive === true &&
+      (playerAfterExpand?.territoryPct ?? pctA0) > pctA0 + 0.3;
+    report.territorySynced =
+      !!remoteAfter &&
+      Math.abs((remoteAfter.territoryPct ?? 0) - (playerAfterExpand?.territoryPct ?? 0)) < 2;
+    report.trailCreated =
+      report.territoryExpanded ||
+      (playerAfterExpand?.trailLen ?? 0) > 0 ||
+      (remoteAfter?.trailLen ?? 0) > 0;
 
     await qaInput(pageA, 1, 0);
     for (let i = 0; i < 15; i++) {
@@ -101,24 +129,14 @@ async function main() {
       !!remoteA &&
       Math.hypot(localA.x - remoteA.x, localA.y - remoteA.y) < 80;
 
-    const playerAfterExpand = await expandLoop(pageA, report.playerA, 2);
-    await pageB.waitForTimeout(1200);
-    const qaB2 = await readQa(pageB);
-    const remoteAfter = qaB2?.players.find((p) => p.id === report.playerA);
-
-    report.trailCreated = (playerAfterExpand?.trailLen ?? 0) > 0 || (remoteAfter?.trailLen ?? 0) > 0;
-    report.territoryExpanded =
-      (playerAfterExpand?.territoryPct ?? pctA0) > pctA0 + 0.3;
-    report.territorySynced =
-      !!remoteAfter &&
-      Math.abs((remoteAfter.territoryPct ?? 0) - (playerAfterExpand?.territoryPct ?? 0)) < 2;
-
     report.mobilePad = (await pageA.locator('[data-testid="mp-mobile-control-pad"]').count()) > 0;
 
     report.pass =
       distinct &&
       report.movementSync &&
+      report.playerAliveAfterExpand &&
       report.territoryExpanded &&
+      report.trailCreated &&
       report.territorySynced &&
       report.mobilePad;
 
@@ -127,7 +145,7 @@ async function main() {
 
     console.log("distinct", distinct);
     console.log("movementSync", report.movementSync);
-    console.log("territoryExpanded", report.territoryExpanded, pctA0, "->", playerAfterExpand?.territoryPct);
+    console.log("territoryExpanded", report.territoryExpanded, pctA0, "->", playerAfterExpand?.territoryPct, "alive", playerAfterExpand?.alive);
     console.log("territorySynced", report.territorySynced);
     console.log("trailCreated", report.trailCreated);
     console.log("mobilePad", report.mobilePad);

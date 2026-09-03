@@ -7,11 +7,24 @@ export const TW_CELL = 20;
 export const TW_WORLD = TW_GRID * TW_CELL;
 export const TW_MAX_PLAYERS = 4;
 export const TW_START_RADIUS = 5;
-export const TW_BASE_SPEED = 3.6;
-export const TW_BOOST_MULT = 1.65;
-export const TW_BOOST_MS = 4_000;
-export const TW_CUTTER_MS = 5_000;
-export const TW_SHIELD_MS = 5_000;
+export const TW_BASE_SPEED = 5.2;
+export const TW_ACCEL = 0.58;
+export const TW_FRICTION = 0.09;
+export const TW_STEER_LERP = 0.22;
+export const TW_BOOST_MULT = 1.68;
+export const TW_BOOST_MS = 3_200;
+export const TW_CUTTER_MS = 4_000;
+export const TW_SHIELD_MS = 4_000;
+export const TW_TRAIL_HIT_RADIUS = 11;
+export const TW_SELF_TRAIL_SKIP_DIST = 360;
+export const TW_SELF_TRAIL_MIN_POINTS = 64;
+export const TW_SELF_TRAIL_MIN_CELLS = 22;
+export const TW_CUTTER_HIT_MULT = 1.72;
+export const TW_CHARGE_PER_CELL = 0.48;
+export const TW_TRAIL_DANGER_CELLS = 16;
+export const TW_HUNTER_CUT_RANGE = 150;
+export const TW_HUNTER_CHASE_RANGE = 520;
+export const TW_ABILITY_READY = 100;
 export const TW_SCORE_PER_CELL = 2;
 export const TW_SCORE_CUT = 250;
 
@@ -23,10 +36,16 @@ export type FeedbackKind =
   | "cut"
   | "ko"
   | "danger"
+  | "mega_claim"
+  | "trail_cut"
+  | "boost_ready"
+  | "shield_block"
   | "rank1"
   | "boost"
   | "cutter"
-  | "shield";
+  | "shield"
+  | "cutter_ready"
+  | "shield_ready";
 
 export type TwFeedback = {
   kind: FeedbackKind;
@@ -44,6 +63,9 @@ export type TwPlayer = {
   y: number;
   vx: number;
   vy: number;
+  aimDx: number;
+  aimDy: number;
+  hasAim: boolean;
   alive: boolean;
   score: number;
   knockouts: number;
@@ -52,16 +74,24 @@ export type TwPlayer = {
   sizeTier: 0 | 1 | 2;
   outside: boolean;
   trail: number[];
+  trailPoints: Array<{ x: number; y: number }>;
   boostUntil: number;
   cutterUntil: number;
   shieldUntil: number;
   shieldCharges: number;
+  boostCharge: number;
+  cutterCharge: number;
+  shieldCharge: number;
   isBot?: boolean;
   botRole?: BotRole;
   place?: number;
   feedback?: TwFeedback;
   spawnX: number;
   spawnY: number;
+  deathCause?: "self" | "enemy";
+  killerNickname?: string;
+  claimFlashUntil?: number;
+  claimFlashPct?: number;
 };
 
 export type TwItem = {
@@ -90,6 +120,7 @@ export type TwInput = {
   dx: number;
   dy: number;
   boost?: boolean;
+  ability?: "boost" | "cutter" | "shield";
   at?: number;
 };
 
@@ -240,15 +271,27 @@ export function reconcileHumans(world: TerritoryWorld, humans: HumanSeat[]): voi
   }
 
   const spawns = spawnPoints(list.length);
-  const roles: BotRole[] = ["expander", "hunter", "defender", "expander"];
+  const botRoles: BotRole[] = ["hunter", "expander", "defender", "hunter"];
+  let botN = 0;
   list.forEach((h, i) => {
     const existing = world.players[h.id];
     const sp = spawns[i]!;
+    const botRole = h.id.startsWith("bot:") ? botRoles[botN++ % botRoles.length]! : undefined;
     if (existing) {
       existing.nickname = h.nickname;
       existing.isBot = h.id.startsWith("bot:");
       if (h.color) existing.color = h.color;
-      if (existing.isBot) existing.botRole = roles[i % roles.length];
+      if (existing.isBot) existing.botRole = botRole;
+      if (existing.isBot && existing.botRole === "hunter" && (existing.cutterCharge ?? 0) < 40) {
+        existing.cutterCharge = TW_ABILITY_READY * 0.82;
+      }
+      existing.trailPoints = existing.trailPoints ?? [];
+      existing.aimDx = existing.aimDx ?? 1;
+      existing.aimDy = existing.aimDy ?? 0;
+      existing.hasAim = existing.hasAim ?? false;
+      existing.boostCharge = existing.boostCharge ?? 0;
+      existing.cutterCharge = existing.cutterCharge ?? 0;
+      existing.shieldCharge = existing.shieldCharge ?? 0;
       return;
     }
     const slot = i + 1;
@@ -264,6 +307,9 @@ export function reconcileHumans(world: TerritoryWorld, humans: HumanSeat[]): voi
       y: sp.y,
       vx: 0,
       vy: 0,
+      aimDx: 1,
+      aimDy: 0,
+      hasAim: false,
       alive: true,
       score: 0,
       knockouts: 0,
@@ -272,37 +318,30 @@ export function reconcileHumans(world: TerritoryWorld, humans: HumanSeat[]): voi
       sizeTier: 0,
       outside: false,
       trail: [],
+      trailPoints: [],
       boostUntil: 0,
       cutterUntil: 0,
       shieldUntil: 0,
       shieldCharges: 0,
+      boostCharge: 0,
+      cutterCharge: 0,
+      shieldCharge: 0,
       isBot: h.id.startsWith("bot:"),
-      botRole: h.id.startsWith("bot:") ? roles[i % roles.length] : undefined,
+      botRole,
       spawnX: sp.x,
       spawnY: sp.y,
     };
-    recountPlayer(world, world.players[h.id]!);
+    const created = world.players[h.id]!;
+    if (created.isBot && created.botRole === "hunter") {
+      created.cutterCharge = TW_ABILITY_READY * 0.82;
+      created.boostCharge = TW_ABILITY_READY * 0.48;
+    }
+    recountPlayer(world, created);
   });
 }
 
-function spawnInitialItems(world: TerritoryWorld): void {
-  const kinds: ItemKind[] = ["boost", "cutter", "shield"];
-  for (let i = 0; i < 4; i++) {
-    world.items.push(randomItem(world, kinds[i % 3]!));
-  }
-}
-
-function randomItem(world: TerritoryWorld, kind?: ItemKind): TwItem {
-  const kinds: ItemKind[] = ["boost", "cutter", "shield"];
-  const k = kind ?? kinds[(world.tick + world.items.length) % kinds.length]!;
-  const cx = 20 + ((world.tick * 17 + world.items.length * 31) % (TW_GRID - 40));
-  const cy = 20 + ((world.tick * 13 + world.items.length * 23) % (TW_GRID - 40));
-  return {
-    id: `item-${world.tick}-${world.items.length}-${k}`,
-    kind: k,
-    x: cx * TW_CELL + TW_CELL / 2,
-    y: cy * TW_CELL + TW_CELL / 2,
-  };
+function spawnInitialItems(_world: TerritoryWorld): void {
+  /* Abilities charge from territory — no map pickups (GAME-DEV-012R-FIX). */
 }
 
 function clearPlayerTrail(world: TerritoryWorld, p: TwPlayer): void {
@@ -310,7 +349,127 @@ function clearPlayerTrail(world: TerritoryWorld, p: TwPlayer): void {
     if (world.trail[t] === p.slot) world.trail[t] = 0;
   }
   p.trail = [];
+  p.trailPoints = [];
   p.outside = false;
+}
+
+function distToSegment(
+  px: number,
+  py: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): number {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len2 = dx * dx + dy * dy;
+  if (len2 < 0.001) return Math.hypot(px - x1, py - y1);
+  let t = ((px - x1) * dx + (py - y1) * dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx = x1 + t * dx;
+  const cy = y1 + t * dy;
+  return Math.hypot(px - cx, py - cy);
+}
+
+function trailSegmentHit(
+  px: number,
+  py: number,
+  hitR: number,
+  points: Array<{ x: number; y: number }>,
+  skipLast = 4
+): boolean {
+  if (points.length < 2) return false;
+  const end = Math.max(1, points.length - skipLast);
+  for (let i = 1; i < end; i++) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    if (distToSegment(px, py, a.x, a.y, b.x, b.y) < hitR) return true;
+  }
+  return false;
+}
+
+/** Self-trail KO: skip recent path by distance so 90° turns don't instant-kill. */
+function trailSelfHit(
+  px: number,
+  py: number,
+  hitR: number,
+  points: Array<{ x: number; y: number }>,
+  skipDist: number
+): boolean {
+  if (points.length < 12) return false;
+  let distFromEnd = 0;
+  for (let i = points.length - 1; i >= 1; i--) {
+    const tip = points[i]!;
+    const prev = points[i - 1]!;
+    const segLen = Math.hypot(tip.x - prev.x, tip.y - prev.y);
+    if (distFromEnd + segLen <= skipDist) {
+      distFromEnd += segLen;
+      continue;
+    }
+    if (distToSegment(px, py, prev.x, prev.y, tip.x, tip.y) < hitR) return true;
+  }
+  return false;
+}
+
+function addAbilityCharge(p: TwPlayer, claimed: number): void {
+  const gain = claimed * TW_CHARGE_PER_CELL;
+  const oldBoost = p.boostCharge;
+  const oldCutter = p.cutterCharge;
+  const oldShield = p.shieldCharge;
+  p.boostCharge = Math.min(TW_ABILITY_READY, p.boostCharge + gain * 0.58);
+  p.cutterCharge = Math.min(TW_ABILITY_READY, p.cutterCharge + gain * 0.24);
+  p.shieldCharge = Math.min(TW_ABILITY_READY, p.shieldCharge + gain * 0.24);
+  if (oldBoost < TW_ABILITY_READY && p.boostCharge >= TW_ABILITY_READY) {
+    p.feedback = { kind: "boost_ready", text: "BOOST READY!", x: p.x, y: p.y };
+  } else if (oldCutter < TW_ABILITY_READY && p.cutterCharge >= TW_ABILITY_READY) {
+    p.feedback = { kind: "cutter_ready", text: "CUTTER READY!", x: p.x, y: p.y };
+  } else if (oldShield < TW_ABILITY_READY && p.shieldCharge >= TW_ABILITY_READY) {
+    p.feedback = { kind: "shield_ready", text: "SHIELD READY!", x: p.x, y: p.y };
+  }
+}
+
+function tryActivateAbility(
+  p: TwPlayer,
+  ability: "boost" | "cutter" | "shield",
+  now: number
+): void {
+  if (ability === "boost" && p.boostCharge >= TW_ABILITY_READY && now >= p.boostUntil) {
+    p.boostCharge = 0;
+    p.boostUntil = now + TW_BOOST_MS;
+    p.feedback = { kind: "boost", text: "BOOST!", x: p.x, y: p.y };
+  } else if (ability === "cutter" && p.cutterCharge >= TW_ABILITY_READY && now >= p.cutterUntil) {
+    p.cutterCharge = 0;
+    p.cutterUntil = now + TW_CUTTER_MS;
+    p.feedback = { kind: "cutter", text: "CUTTER!", x: p.x, y: p.y };
+  } else if (ability === "shield" && p.shieldCharge >= TW_ABILITY_READY && p.shieldCharges === 0) {
+    p.shieldCharge = 0;
+    p.shieldUntil = now + TW_SHIELD_MS;
+    p.shieldCharges = 1;
+    p.feedback = { kind: "shield", text: "SHIELD!", x: p.x, y: p.y };
+  }
+}
+
+function applyMovementPhysics(p: TwPlayer, now: number): void {
+  const maxSpeed = TW_BASE_SPEED * (now < p.boostUntil ? TW_BOOST_MULT : 1);
+  if (p.hasAim) {
+    const targetVx = p.aimDx * maxSpeed;
+    const targetVy = p.aimDy * maxSpeed;
+    p.vx += (targetVx - p.vx) * TW_STEER_LERP;
+    p.vy += (targetVy - p.vy) * TW_STEER_LERP;
+  } else {
+    p.vx *= 1 - TW_FRICTION;
+    p.vy *= 1 - TW_FRICTION;
+  }
+  const spd = Math.hypot(p.vx, p.vy);
+  if (spd > maxSpeed) {
+    p.vx = (p.vx / spd) * maxSpeed;
+    p.vy = (p.vy / spd) * maxSpeed;
+  }
+  if (spd < 0.05 && !p.hasAim) {
+    p.vx = 0;
+    p.vy = 0;
+  }
 }
 
 function claimEnclosed(world: TerritoryWorld, p: TwPlayer): number {
@@ -373,10 +532,16 @@ function claimEnclosed(world: TerritoryWorld, p: TwPlayer): number {
   p.score += claimed * TW_SCORE_PER_CELL;
   const pctGain = territoryPctFor(claimed);
   recountPlayer(world, p);
+  addAbilityCharge(p, claimed);
 
-  if (claimed >= 80) {
+  p.claimFlashUntil = Date.now() + 700;
+  p.claimFlashPct = pctGain;
+
+  if (claimed >= 120) {
+    p.feedback = { kind: "mega_claim", text: "MEGA CLAIM!", x: p.x, y: p.y };
+  } else if (claimed >= 40) {
     p.feedback = { kind: "big_claim", text: "BIG CLAIM!", x: p.x, y: p.y };
-  } else if (pctGain >= 0.5) {
+  } else if (pctGain >= 0.25) {
     p.feedback = {
       kind: "claim",
       text: `+${pctGain.toFixed(1)}% TERRITORY`,
@@ -391,11 +556,22 @@ function killPlayer(world: TerritoryWorld, victim: TwPlayer, killer: TwPlayer | 
   if (!victim.alive) return;
   victim.alive = false;
   clearPlayerTrail(world, victim);
-  victim.feedback = { kind: "ko", text: "KO!", x: victim.x, y: victim.y };
   if (killer && killer.id !== victim.id) {
     killer.knockouts += 1;
     killer.score += TW_SCORE_CUT;
     killer.feedback = { kind: "cut", text: "CUT! +250", x: killer.x, y: killer.y };
+    victim.deathCause = "enemy";
+    victim.killerNickname = killer.nickname;
+    victim.feedback = {
+      kind: "ko",
+      text: `CUT BY ${killer.nickname.slice(0, 8).toUpperCase()}!`,
+      x: victim.x,
+      y: victim.y,
+    };
+  } else {
+    victim.deathCause = "self";
+    victim.killerNickname = undefined;
+    victim.feedback = { kind: "trail_cut", text: "HIT YOUR TRAIL!", x: victim.x, y: victim.y };
   }
   const slot = victim.slot;
   for (let i = 0; i < TOTAL_CELLS; i++) {
@@ -408,21 +584,51 @@ function killPlayer(world: TerritoryWorld, victim: TwPlayer, killer: TwPlayer | 
 }
 
 function checkTrailCollisions(world: TerritoryWorld, now: number): void {
-  for (const p of Object.values(world.players)) {
-    if (!p.alive) continue;
-    const { i } = cellOf(p.x, p.y);
-    for (const other of Object.values(world.players)) {
-      if (!other.alive || other.id === p.id) continue;
-      if (!other.outside || other.trail.length === 0) continue;
-      if (world.trail[i] !== other.slot) continue;
-      if (other.shieldCharges > 0 && other.shieldUntil > now) {
-        other.shieldCharges -= 1;
-        other.feedback = { kind: "danger", text: "BLOCKED!", x: other.x, y: other.y };
+  for (const attacker of Object.values(world.players)) {
+    if (!attacker.alive) continue;
+    const atkR = playerVisualRadius(attacker);
+    const cutMult = now < attacker.cutterUntil ? TW_CUTTER_HIT_MULT : 1;
+    const hitR = atkR + TW_TRAIL_HIT_RADIUS * cutMult;
+
+    for (const victim of Object.values(world.players)) {
+      if (!victim.alive || victim.id === attacker.id) continue;
+      if (!victim.outside || victim.trailPoints.length < 2) continue;
+      if (!trailSegmentHit(attacker.x, attacker.y, hitR, victim.trailPoints)) continue;
+
+      if (victim.shieldCharges > 0 && now < victim.shieldUntil) {
+        victim.shieldCharges = 0;
+        victim.feedback = { kind: "shield_block", text: "SHIELD BLOCK", x: victim.x, y: victim.y };
         continue;
       }
-      killPlayer(world, other, p);
+      killPlayer(world, victim, attacker);
+    }
+
+    if (
+      attacker.outside &&
+      attacker.trail.length > TW_SELF_TRAIL_MIN_CELLS &&
+      attacker.trailPoints.length > TW_SELF_TRAIL_MIN_POINTS
+    ) {
+      const selfR = atkR + TW_TRAIL_HIT_RADIUS * 0.5;
+      if (
+        trailSelfHit(
+          attacker.x,
+          attacker.y,
+          selfR,
+          attacker.trailPoints,
+          TW_SELF_TRAIL_SKIP_DIST
+        )
+      ) {
+        killPlayer(world, attacker, null);
+      }
     }
   }
+}
+
+function appendTrailPoint(p: TwPlayer): void {
+  const last = p.trailPoints[p.trailPoints.length - 1];
+  if (last && Math.hypot(last.x - p.x, last.y - p.y) < 3.5) return;
+  p.trailPoints.push({ x: p.x, y: p.y });
+  if (p.trailPoints.length > 240) p.trailPoints.shift();
 }
 
 function addTrailCell(world: TerritoryWorld, p: TwPlayer, cellI: number): void {
@@ -430,86 +636,116 @@ function addTrailCell(world: TerritoryWorld, p: TwPlayer, cellI: number): void {
   if (world.trail[cellI] === p.slot) return;
   world.trail[cellI] = p.slot;
   p.trail.push(cellI);
+  appendTrailPoint(p);
   p.outside = true;
+  if (p.trail.length >= TW_TRAIL_DANGER_CELLS && world.tick % 8 === 0) {
+    p.feedback = { kind: "danger", text: "TRAIL DANGER!", x: p.x, y: p.y };
+  }
 }
 
 export function applyTwInput(world: TerritoryWorld, input: TwInput, now = Date.now()): void {
   const p = world.players[input.deviceId];
   if (!p || !p.alive || world.roundOver) return;
 
-  let dx = input.dx;
-  let dy = input.dy;
+  const dx = input.dx;
+  const dy = input.dy;
   const len = Math.hypot(dx, dy);
   if (len > 0.01) {
-    dx /= len;
-    dy /= len;
+    p.aimDx = dx / len;
+    p.aimDy = dy / len;
+    p.hasAim = true;
   } else {
-    return;
+    p.hasAim = false;
   }
 
-  const speed = TW_BASE_SPEED * (now < p.boostUntil || input.boost ? TW_BOOST_MULT : 1);
-  p.vx = dx * speed;
-  p.vy = dy * speed;
-}
-
-function pickupItems(world: TerritoryWorld, p: TwPlayer, now: number): void {
-  const idxItem = world.items.findIndex((it) => Math.hypot(it.x - p.x, it.y - p.y) < 22);
-  if (idxItem < 0) return;
-  const item = world.items[idxItem]!;
-  world.items.splice(idxItem, 1);
-
-  if (item.kind === "boost") {
-    p.boostUntil = now + TW_BOOST_MS;
-    p.feedback = { kind: "boost", text: "BOOST!", x: p.x, y: p.y };
-  } else if (item.kind === "cutter") {
-    p.cutterUntil = now + TW_CUTTER_MS;
-    p.feedback = { kind: "cutter", text: "CUTTER!", x: p.x, y: p.y };
-  } else if (item.kind === "shield") {
-    p.shieldUntil = now + TW_SHIELD_MS;
-    p.shieldCharges = 1;
-    p.feedback = { kind: "shield", text: "SHIELD!", x: p.x, y: p.y };
-  }
+  const ability = input.ability ?? (input.boost ? "boost" : undefined);
+  if (ability) tryActivateAbility(p, ability, now);
 }
 
 function botThink(world: TerritoryWorld, bot: TwPlayer, now: number): void {
   if (!bot.alive || world.roundOver) return;
-  if (world.tick % 3 !== 0) return;
-
   const role = bot.botRole ?? "expander";
+  if (world.tick % 2 !== 0 && role !== "hunter") return;
   let dx = 0;
   let dy = 0;
 
   if (role === "hunter") {
     let target: TwPlayer | null = null;
     let best = Infinity;
+    let aimX = 0;
+    let aimY = 0;
     for (const p of Object.values(world.players)) {
-      if (!p.alive || p.id === bot.id || !p.outside || p.isBot) continue;
-      const d = Math.hypot(p.x - bot.x, p.y - bot.y);
-      if (d < best) {
-        best = d;
-        target = p;
+      if (!p.alive || p.id === bot.id || p.isBot) continue;
+      const playerDist = Math.hypot(p.x - bot.x, p.y - bot.y);
+      if (playerDist > TW_HUNTER_CHASE_RANGE && !p.outside) continue;
+      if (p.trailPoints.length >= 2) {
+        for (const tp of p.trailPoints) {
+          const d = Math.hypot(tp.x - bot.x, tp.y - bot.y);
+          if (d < best && d <= TW_HUNTER_CHASE_RANGE) {
+            best = d;
+            target = p;
+            aimX = tp.x;
+            aimY = tp.y;
+          }
+        }
+      }
+      if (!target && p.outside && playerDist < TW_HUNTER_CHASE_RANGE) {
+        if (playerDist < best) {
+          best = playerDist;
+          target = p;
+          aimX = p.x;
+          aimY = p.y;
+        }
       }
     }
-    if (target && target.trail.length > 0) {
-      const last = target.trail[target.trail.length - 1]!;
-      const tx = (last % TW_GRID) * TW_CELL;
-      const ty = Math.floor(last / TW_GRID) * TW_CELL;
-      dx = tx - bot.x;
-      dy = ty - bot.y;
+    if (target) {
+      dx = aimX - bot.x;
+      dy = aimY - bot.y;
+      const preyTrailLong = target.trail.length >= 24;
+      const cutRange = TW_HUNTER_CUT_RANGE + (preyTrailLong ? 50 : 20);
+      const cutCharge = TW_ABILITY_READY * (preyTrailLong ? 0.78 : 0.88);
+      if (best < cutRange && bot.cutterCharge >= cutCharge) {
+        tryActivateAbility(bot, "cutter", now);
+      } else if (
+        bot.boostCharge >= TW_ABILITY_READY * (preyTrailLong ? 0.55 : 1) &&
+        best > 70 &&
+        best < TW_HUNTER_CHASE_RANGE + (preyTrailLong ? 120 : 0)
+      ) {
+        tryActivateAbility(bot, "boost", now);
+      }
+    } else {
+      const ang = (world.tick / 18 + bot.slot) * 0.18;
+      dx = Math.cos(ang) * 50;
+      dy = Math.sin(ang) * 50;
     }
   }
 
   if (role === "defender" || (dx === 0 && dy === 0 && role !== "expander")) {
-    const ang = (world.tick / 20 + bot.slot) * 0.15;
-    dx = Math.cos(ang) * (bot.spawnX - bot.x) + Math.cos(ang + 1.2) * 40;
-    dy = Math.sin(ang) * (bot.spawnY - bot.y) + Math.sin(ang + 1.2) * 40;
+    let nearestHuman: TwPlayer | null = null;
+    let nearD = Infinity;
+    for (const p of Object.values(world.players)) {
+      if (!p.alive || p.id === bot.id || p.isBot) continue;
+      const d = Math.hypot(p.x - bot.x, p.y - bot.y);
+      if (d < nearD) {
+        nearD = d;
+        nearestHuman = p;
+      }
+    }
+    if (nearestHuman && nearD < 420) {
+      dx = nearestHuman.x - bot.x;
+      dy = nearestHuman.y - bot.y;
+    } else {
+      const ang = (world.tick / 20 + bot.slot) * 0.15;
+      dx = Math.cos(ang) * (bot.spawnX - bot.x) + Math.cos(ang + 1.2) * 40;
+      dy = Math.sin(ang) * (bot.spawnY - bot.y) + Math.sin(ang + 1.2) * 40;
+    }
   }
 
   if (role === "expander" && dx === 0 && dy === 0) {
     const ang = (world.tick / 15 + bot.slot * 1.7) * 0.2;
     dx = Math.cos(ang) * 60;
     dy = Math.sin(ang) * 60;
-    if (bot.outside && bot.trail.length > 40) {
+    if (bot.outside && bot.trail.length > 20) {
       dx = bot.spawnX - bot.x;
       dy = bot.spawnY - bot.y;
     }
@@ -523,7 +759,6 @@ function botThink(world: TerritoryWorld, bot: TwPlayer, now: number): void {
         deviceId: bot.id,
         dx: dx / len,
         dy: dy / len,
-        boost: bot.outside && bot.trail.length > 25,
       },
       now
     );
@@ -570,6 +805,8 @@ export function tickTerritoryWorld(
   for (const p of Object.values(world.players)) {
     if (!p.alive) continue;
 
+    applyMovementPhysics(p, now);
+
     p.x = Math.max(12, Math.min(TW_WORLD - 12, p.x + p.vx));
     p.y = Math.max(12, Math.min(TW_WORLD - 12, p.y + p.vy));
 
@@ -582,17 +819,13 @@ export function tickTerritoryWorld(
       }
     } else {
       addTrailCell(world, p, i);
+      if (p.outside) appendTrailPoint(p);
     }
 
-    pickupItems(world, p, now);
     recountPlayer(world, p);
   }
 
   checkTrailCollisions(world, now);
-
-  if (world.tick % 200 === 0 && world.items.length < 6) {
-    world.items.push(randomItem(world));
-  }
 
   updateRankings(world);
 }
@@ -620,6 +853,7 @@ export function serializeTwState(world: TerritoryWorld): TwSyncState {
     players: Object.values(world.players).map((p) => ({
       ...p,
       trail: p.trail.slice(-120),
+      trailPoints: p.trailPoints.slice(-80),
     })),
     items: world.items.map((i) => ({ ...i })),
   };
@@ -643,7 +877,17 @@ export function applyTwSyncState(
   world.idToSlot = {};
   world.slotToId = {};
   for (const p of state.players) {
-    world.players[p.id] = { ...p, trail: p.trail.slice() };
+    world.players[p.id] = {
+      ...p,
+      trail: p.trail.slice(),
+      trailPoints: p.trailPoints?.slice() ?? [],
+      aimDx: p.aimDx ?? 1,
+      aimDy: p.aimDy ?? 0,
+      hasAim: p.hasAim ?? false,
+      boostCharge: p.boostCharge ?? 0,
+      cutterCharge: p.cutterCharge ?? 0,
+      shieldCharge: p.shieldCharge ?? 0,
+    };
     world.idToSlot[p.id] = p.slot;
     world.slotToId[p.slot] = p.id;
   }
