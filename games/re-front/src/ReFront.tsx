@@ -26,29 +26,44 @@ import {
   RF_GRID,
   RF_TICK_MS,
   RF_MAX_PLAYERS,
+  RF_VICTORY_PCT,
   RF_EXPAND_COST,
-  RF_ATTACK_COST,
   applyRfAction,
   applyRfSyncState,
   canAttack,
+  canBuild,
   canExpand,
   cellAt,
   createRfWorld,
+  findExpandTargets,
+  findNearestEnemy,
   localNation,
+  nationCenter,
   reconcileHumans,
   restartRfRound,
   rfQaForceWin,
   serializeRfState,
+  terrainExpandCost,
+  terrainLabel,
   tickRfWorld,
   type HumanSeat,
   type RfAction,
   type RfSyncState,
   type RfWorld,
 } from "./re-front-engine";
+import {
+  advanceMissionAfterAttack,
+  advanceMissionAfterCounterSeen,
+  advanceMissionAfterDefend,
+  advanceMissionAfterExpand,
+  advanceMissionAfterGrowTimer,
+  createMissionState,
+  missionObjective,
+  type RfMissionState,
+} from "./re-front-missions";
 
-const VIEW = 640;
-const MIN_ZOOM = 0.6;
-const MAX_ZOOM = 2.4;
+const MIN_ZOOM = 0.45;
+const MAX_ZOOM = 2.8;
 
 const RF_STYLES: MpStyleOption[] = [
   { id: "cyan", label: "Cyan", emoji: "🔵", color: MP_PLAYER_COLORS[0]! },
@@ -56,6 +71,9 @@ const RF_STYLES: MpStyleOption[] = [
   { id: "gold", label: "Gold", emoji: "🟡", color: MP_PLAYER_COLORS[2]! },
   { id: "green", label: "Green", emoji: "🟢", color: MP_PLAYER_COLORS[3]! },
 ];
+
+const TERRAIN_FILL = ["#1e3a2f", "#3d3520", "#2d3748"] as const;
+const HIGHLIGHT_NEUTRAL = "rgba(74, 222, 128, 0.45)";
 
 function resolveRoomCode(): string {
   if (typeof window === "undefined") return "RF-LOBBY";
@@ -67,12 +85,15 @@ function snapWorld(w: RfWorld): RfWorld {
   return {
     ...w,
     owner: new Uint8Array(w.owner),
+    terrain: new Uint8Array(w.terrain),
+    buildings: new Uint8Array(w.buildings),
     nations: Object.fromEntries(Object.entries(w.nations).map(([k, n]) => [k, { ...n }])),
     slotToId: { ...w.slotToId },
     idToSlot: { ...w.idToSlot },
     flashes: w.flashes.map((f) => ({ ...f })),
     popups: w.popups.map((p) => ({ ...p })),
     rankings: w.rankings.slice(),
+    battle: w.battle ? { ...w.battle } : null,
   };
 }
 
@@ -110,16 +131,58 @@ function isSimHost(code: string, deviceId: string, lastStateAt: number, startedA
 function screenToCell(
   sx: number,
   sy: number,
+  viewW: number,
+  viewH: number,
   cam: { x: number; y: number },
   zoom: number
 ): { cx: number; cy: number } | null {
   const mapPx = RF_GRID * RF_CELL * zoom;
-  const ox = (VIEW - mapPx) / 2 - cam.x * RF_CELL * zoom;
-  const oy = (VIEW - mapPx) / 2 - cam.y * RF_CELL * zoom;
+  const ox = (viewW - mapPx) / 2 - cam.x * RF_CELL * zoom;
+  const oy = (viewH - mapPx) / 2 - cam.y * RF_CELL * zoom;
   const cx = Math.floor((sx - ox) / (RF_CELL * zoom));
   const cy = Math.floor((sy - oy) / (RF_CELL * zoom));
   if (cx < 0 || cy < 0 || cx >= RF_GRID || cy >= RF_GRID) return null;
   return { cx, cy };
+}
+
+function HowToPlayModal({ onStart }: { onStart: () => void }) {
+  return (
+    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/75 p-4">
+      <div
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-violet-400/40 bg-slate-900 p-6 text-white shadow-2xl"
+        data-testid="rf-how-to-play"
+      >
+        <h2 className="text-2xl font-bold text-violet-200">Re:Front</h2>
+        <p className="mt-2 text-sm text-slate-300">
+          작은 나라에서 시작해 땅을 넓히고, 군대를 키우고, 주변국과 싸워 세계를 차지하는 실시간 전략 게임
+        </p>
+        <h3 className="mt-4 text-sm font-bold uppercase tracking-wide text-amber-300">How to Play</h3>
+        <ul className="mt-2 space-y-1.5 text-sm text-slate-200">
+          <li>🖱️ <strong>내 영토 / 맵 클릭</strong> → 행동 메뉴</li>
+          <li>➕ <strong>EXPAND</strong> → 주변 중립 영토 점령</li>
+          <li>⚔️ <strong>ATTACK</strong> → 적 영토 공격</li>
+          <li>🛡️ <strong>DEFEND</strong> → 국경 방어 강화</li>
+          <li>💰 Gold · 👥 Population · ⚔️ Troops → 행동에 사용</li>
+          <li>🏆 <strong>{RF_VICTORY_PCT}%</strong> 영토 = 승리</li>
+        </ul>
+        <h3 className="mt-4 text-sm font-bold uppercase tracking-wide text-cyan-300">Controls</h3>
+        <ul className="mt-2 space-y-1 text-xs text-slate-400">
+          <li>🖱️ Click — select territory</li>
+          <li>WASD / ↑↓←→ — pan map (camera)</li>
+          <li>Wheel — zoom in / out</li>
+          <li>ESC — clear selection</li>
+        </ul>
+        <button
+          type="button"
+          onClick={onStart}
+          className="mt-6 w-full rounded-xl bg-violet-600 py-3 text-base font-bold text-white hover:bg-violet-500"
+          data-testid="rf-how-to-play-start"
+        >
+          START — Expand your first lands
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function ReFrontGame() {
@@ -136,17 +199,58 @@ export function ReFrontGame() {
   const [color, setColor] = useState<string>(MP_PLAYER_COLORS[0]!);
   const [selected, setSelected] = useState<{ cx: number; cy: number } | null>(null);
   const [cam, setCam] = useState({ x: RF_GRID / 2, y: RF_GRID / 2 });
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.85);
   const [isHost, setIsHost] = useState(false);
   const [nowMs, setNowMs] = useState(Date.now());
+  const [attackPct, setAttackPct] = useState(0.5);
+  const [mission, setMission] = useState<RfMissionState>(() => createMissionState());
+  const [viewSize, setViewSize] = useState({ w: 800, h: 520 });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mapWrapRef = useRef<HTMLDivElement>(null);
   const startedAtRef = useRef(Date.now());
   const lastHostStateAtRef = useRef(0);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
+  const keysRef = useRef<Set<string>>(new Set());
 
   const me = localNation(world, deviceId);
+  const objective = missionObjective(mission);
+  const expandHints = useMemo(
+    () => (mission.phase === "expand" ? findExpandTargets(world, deviceId, 8) : []),
+    [world, deviceId, mission.phase]
+  );
+  const nearestEnemy = useMemo(() => findNearestEnemy(world, deviceId), [world, deviceId]);
+
+  useEffect(() => {
+    const el = mapWrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setViewSize({ w: el.clientWidth, h: el.clientHeight });
+    });
+    ro.observe(el);
+    setViewSize({ w: el.clientWidth, h: el.clientHeight });
+    return () => ro.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (mission.phase !== "grow") return;
+    const t = window.setTimeout(() => {
+      setMission((m) => advanceMissionAfterGrowTimer(m));
+    }, 2800);
+    return () => clearTimeout(t);
+  }, [mission.phase]);
+
+  useEffect(() => {
+    if (world.pendingCounterAttack && !mission.counterSeen) {
+      setMission((m) => advanceMissionAfterCounterSeen(m));
+    }
+  }, [world.pendingCounterAttack, mission.counterSeen]);
+
+  const centerOnPlayer = useCallback(() => {
+    const c = nationCenter(worldRef.current, deviceId);
+    if (c) setCam({ x: c.cx, y: c.cy });
+  }, [deviceId]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -155,21 +259,30 @@ export function ReFrontGame() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const mapPx = RF_GRID * RF_CELL * zoom;
-    const ox = (VIEW - mapPx) / 2 - cam.x * RF_CELL * zoom;
-    const oy = (VIEW - mapPx) / 2 - cam.y * RF_CELL * zoom;
+    const { w: viewW, h: viewH } = viewSize;
+    canvas.width = viewW;
+    canvas.height = viewH;
 
-    ctx.fillStyle = "#0b1220";
-    ctx.fillRect(0, 0, VIEW, VIEW);
+    const mapPx = RF_GRID * RF_CELL * zoom;
+    const ox = (viewW - mapPx) / 2 - cam.x * RF_CELL * zoom;
+    const oy = (viewH - mapPx) / 2 - cam.y * RF_CELL * zoom;
+
+    ctx.fillStyle = "#060a12";
+    ctx.fillRect(0, 0, viewW, viewH);
+
+    const hintSet = new Set(expandHints.map((h) => `${h.cx},${h.cy}`));
 
     for (let cy = 0; cy < RF_GRID; cy++) {
       for (let cx = 0; cx < RF_GRID; cx++) {
-        const slot = w.owner[cy * RF_GRID + cx]!;
+        const i = cy * RF_GRID + cx;
+        const slot = w.owner[i]!;
+        const terrain = w.terrain[i]!;
         const sx = ox + cx * RF_CELL * zoom;
         const sy = oy + cy * RF_CELL * zoom;
         const sz = RF_CELL * zoom + 0.5;
+
         if (slot === 0) {
-          ctx.fillStyle = "#1e293b";
+          ctx.fillStyle = TERRAIN_FILL[terrain] ?? TERRAIN_FILL[0];
         } else {
           const id = w.slotToId[slot];
           const n = id ? w.nations[id] : undefined;
@@ -177,6 +290,21 @@ export function ReFrontGame() {
           if (n && !n.alive) ctx.fillStyle = "#334155";
         }
         ctx.fillRect(sx, sy, sz, sz);
+
+        if (slot === 0 && hintSet.has(`${cx},${cy}`)) {
+          ctx.fillStyle = HIGHLIGHT_NEUTRAL;
+          ctx.fillRect(sx, sy, sz, sz);
+        }
+
+        const b = w.buildings[i];
+        if (b === 1) {
+          ctx.fillStyle = "#fbbf24";
+          ctx.fillRect(sx + sz * 0.3, sy + sz * 0.3, sz * 0.4, sz * 0.4);
+        } else if (b === 2) {
+          ctx.strokeStyle = "#94a3b8";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(sx + 1, sy + 1, sz - 2, sz - 2);
+        }
       }
     }
 
@@ -196,13 +324,7 @@ export function ReFrontGame() {
       ctx.lineWidth = 2;
       ctx.strokeRect(sx - 1, sy - 1, RF_CELL * zoom + 2, RF_CELL * zoom + 2);
     }
-
-    ctx.fillStyle = "rgba(15,23,42,0.55)";
-    ctx.fillRect(0, 0, VIEW, 28);
-    ctx.fillStyle = "#e2e8f0";
-    ctx.font = "12px system-ui,sans-serif";
-    ctx.fillText("Re:Front — expand · grow · conquer", 10, 18);
-  }, [cam, selected, zoom]);
+  }, [cam, expandHints, selected, viewSize, zoom]);
 
   useEffect(() => {
     draw();
@@ -213,42 +335,101 @@ export function ReFrontGame() {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    if (!started || world.roundOver) return;
+    const pan = () => {
+      const speed = 0.35 / zoom;
+      let dx = 0;
+      let dy = 0;
+      const k = keysRef.current;
+      if (k.has("w") || k.has("arrowup")) dy -= speed;
+      if (k.has("s") || k.has("arrowdown")) dy += speed;
+      if (k.has("a") || k.has("arrowleft")) dx -= speed;
+      if (k.has("d") || k.has("arrowright")) dx += speed;
+      if (dx || dy) setCam((c) => ({ x: c.x + dx, y: c.y + dy }));
+    };
+    const id = setInterval(pan, 32);
+    return () => clearInterval(id);
+  }, [started, world.roundOver, zoom]);
+
+  useEffect(() => {
+    if (!started) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      keysRef.current.add(e.key.toLowerCase());
+      if (e.key === "Escape") setSelected(null);
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      keysRef.current.delete(e.key.toLowerCase());
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, [started]);
+
   const dispatchAction = useCallback(
     (action: RfAction) => {
       const w = snapWorld(worldRef.current);
       const host = isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current);
       if (host) {
-        applyRfAction(w, action);
-        tickRfWorld(w);
-        setWorld(w);
-        send(roomCode, "state", serializeRfState(w));
-        lastHostStateAtRef.current = Date.now();
-      } else {
-        send(roomCode, "rf:action", action);
+        const ok = applyRfAction(w, action);
+        if (ok) {
+          tickRfWorld(w);
+          setWorld(w);
+          send(roomCode, "state", serializeRfState(w));
+          lastHostStateAtRef.current = Date.now();
+        }
+        return ok;
       }
+      send(roomCode, "rf:action", action);
+      return true;
     },
     [deviceId, roomCode]
   );
 
   const onExpand = useCallback(() => {
     if (!selected || !me?.alive) return;
-    dispatchAction({ type: "expand", cx: selected.cx, cy: selected.cy, nationId: deviceId });
+    const ok = dispatchAction({ type: "expand", cx: selected.cx, cy: selected.cy, nationId: deviceId });
+    if (ok) setMission((m) => advanceMissionAfterExpand(m));
   }, [deviceId, dispatchAction, me?.alive, selected]);
 
   const onAttack = useCallback(() => {
     if (!selected || !me?.alive) return;
-    dispatchAction({ type: "attack", cx: selected.cx, cy: selected.cy, nationId: deviceId });
-  }, [deviceId, dispatchAction, me?.alive, selected]);
+    const ok = dispatchAction({
+      type: "attack",
+      cx: selected.cx,
+      cy: selected.cy,
+      nationId: deviceId,
+      pct: attackPct,
+    });
+    if (ok) setMission((m) => advanceMissionAfterAttack(m));
+  }, [attackPct, deviceId, dispatchAction, me?.alive, selected]);
+
+  const onDefend = useCallback(() => {
+    if (!me?.alive) return;
+    const ok = dispatchAction({ type: "defend", nationId: deviceId });
+    if (ok) setMission((m) => advanceMissionAfterDefend(m));
+  }, [deviceId, dispatchAction, me?.alive]);
+
+  const onBuild = useCallback(
+    (kind: "city" | "defense") => {
+      if (!selected || !me?.alive) return;
+      dispatchAction({ type: "build", cx: selected.cx, cy: selected.cy, nationId: deviceId, kind });
+    },
+    [deviceId, dispatchAction, me?.alive, selected]
+  );
 
   const onCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
-      const sx = ((e.clientX - rect.left) / rect.width) * VIEW;
-      const sy = ((e.clientY - rect.top) / rect.height) * VIEW;
-      const cell = screenToCell(sx, sy, cam, zoom);
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const cell = screenToCell(sx, sy, viewSize.w, viewSize.h, cam, zoom);
       if (cell) setSelected(cell);
     },
-    [cam, zoom]
+    [cam, viewSize.h, viewSize.w, zoom]
   );
 
   const onWheel = useCallback((e: React.WheelEvent) => {
@@ -288,13 +469,15 @@ export function ReFrontGame() {
     const humans = collectHumans(roomCode, deviceId, nickname, color);
     const w = createRfWorld(deviceId, nickname, humans);
     if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mp_qa_local")) {
-      w.fastVictoryPct = 12;
+      w.fastVictoryPct = 15;
     }
     reconcileHumans(w, humans);
     worldRef.current = w;
     setWorld(w);
     setStarted(true);
+    setMission(createMissionState());
     startedAtRef.current = Date.now();
+    centerOnPlayer();
 
     const host = isSimHost(roomCode, deviceId, 0, startedAtRef.current);
     setIsHost(host);
@@ -313,6 +496,7 @@ export function ReFrontGame() {
         restartRfRound(local, deviceId, nickname, h);
         worldRef.current = local;
         setWorld(local);
+        setMission(createMissionState());
         send(roomCode, "state", serializeRfState(local));
         lastHostStateAtRef.current = Date.now();
         return;
@@ -351,7 +535,7 @@ export function ReFrontGame() {
       send(roomCode, "state", serializeRfState(local));
       lastHostStateAtRef.current = Date.now();
     }, RF_TICK_MS);
-  }, [color, deviceId, nickname, roomCode]);
+  }, [centerOnPlayer, color, deviceId, nickname, roomCode]);
 
   useEffect(() => {
     return () => {
@@ -370,10 +554,12 @@ export function ReFrontGame() {
       restartRfRound(w, deviceId, nickname, humans);
       worldRef.current = w;
       setWorld(w);
+      setMission(createMissionState());
       send(roomCode, "state", serializeRfState(w));
     }
     setSelected(null);
-  }, [color, deviceId, nickname, roomCode]);
+    centerOnPlayer();
+  }, [centerOnPlayer, color, deviceId, nickname, roomCode]);
 
   const onExit = useCallback(() => {
     leaveRoom(roomCode);
@@ -387,82 +573,21 @@ export function ReFrontGame() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    (window as unknown as { __RF_QA__?: () => unknown }).__RF_QA__ = () => {
-      const w = worldRef.current;
-      const n = localNation(w, deviceId);
-      return {
-        deviceId,
-        isHost,
-        tick: w.tick,
-        roundOver: w.roundOver,
-        winnerId: w.winnerId,
-        me: n,
-        nations: Object.values(w.nations).map((x) => ({
-          id: x.id,
-          nickname: x.nickname,
-          alive: x.alive,
-          isBot: x.isBot,
-          territoryPct: x.territoryPct,
-          gold: Math.floor(x.gold),
-          troops: Math.floor(x.troops),
-        })),
-        selected,
-      };
-    };
+    (window as unknown as { __RF_QA__?: () => unknown }).__RF_QA__ = () => ({
+      deviceId,
+      isHost,
+      tick: worldRef.current.tick,
+      mission,
+      me: localNation(worldRef.current, deviceId),
+    });
     (window as unknown as { __RF_QA_ACTION__?: (type: string, cx: number, cy: number) => boolean }).__RF_QA_ACTION__ =
       (type, cx, cy) => {
         const action: RfAction =
           type === "attack"
-            ? { type: "attack", cx, cy, nationId: deviceId }
+            ? { type: "attack", cx, cy, nationId: deviceId, pct: 0.5 }
             : { type: "expand", cx, cy, nationId: deviceId };
-        const host = isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current);
-        if (host) {
-          const w = snapWorld(worldRef.current);
-          const ok = applyRfAction(w, action);
-          if (ok) {
-            tickRfWorld(w);
-            worldRef.current = w;
-            setWorld(w);
-            send(roomCode, "state", serializeRfState(w));
-            lastHostStateAtRef.current = Date.now();
-          }
-          return ok;
-        }
-        send(roomCode, "rf:action", action);
-        return true;
+        return dispatchAction(action) as boolean;
       };
-    (window as unknown as { __RF_QA_FIND__?: (kind: string) => { cx: number; cy: number } | null }).__RF_QA_FIND__ = (
-      kind
-    ) => {
-      const w = worldRef.current;
-      if (kind === "expand-toward-enemy") {
-        const meN = w.nations[deviceId];
-        if (!meN) return null;
-        let best: { cx: number; cy: number; d: number } | null = null;
-        for (let cy = 0; cy < RF_GRID; cy++) {
-          for (let cx = 0; cx < RF_GRID; cx++) {
-            if (!canExpand(w, cx, cy, deviceId)) continue;
-            let minD = Infinity;
-            for (let ey = 0; ey < RF_GRID; ey++) {
-              for (let ex = 0; ex < RF_GRID; ex++) {
-                const slot = w.owner[ey * RF_GRID + ex]!;
-                if (!slot || slot === meN.slot) continue;
-                minD = Math.min(minD, Math.hypot(cx - ex, cy - ey));
-              }
-            }
-            if (!best || minD < best.d) best = { cx, cy, d: minD };
-          }
-        }
-        return best ? { cx: best.cx, cy: best.cy } : null;
-      }
-      for (let cy = 0; cy < RF_GRID; cy++) {
-        for (let cx = 0; cx < RF_GRID; cx++) {
-          if (kind === "attack" && canAttack(w, cx, cy, deviceId)) return { cx, cy };
-          if (kind === "expand" && canExpand(w, cx, cy, deviceId)) return { cx, cy };
-        }
-      }
-      return null;
-    };
     (window as unknown as { __RF_QA_WIN__?: () => void }).__RF_QA_WIN__ = () => {
       const w = snapWorld(worldRef.current);
       rfQaForceWin(w, deviceId);
@@ -470,62 +595,20 @@ export function ReFrontGame() {
       setWorld(w);
       send(roomCode, "state", serializeRfState(w));
     };
-    (window as unknown as { __RF_QA_BRING_COMBAT__?: () => boolean }).__RF_QA_BRING_COMBAT__ = () => {
-      const w = snapWorld(worldRef.current);
-      const meN = w.nations[deviceId];
-      if (!meN) return false;
-      for (let i = 0; i < 80; i++) {
-        tickRfWorld(w);
-        let atk: { cx: number; cy: number } | null = null;
-        for (let cy = 0; cy < RF_GRID; cy++) {
-          for (let cx = 0; cx < RF_GRID; cx++) {
-            if (canAttack(w, cx, cy, deviceId)) {
-              atk = { cx, cy };
-              break;
-            }
-          }
-          if (atk) break;
-        }
-        if (atk) {
-          applyRfAction(w, { type: "attack", cx: atk.cx, cy: atk.cy, nationId: deviceId });
-          worldRef.current = w;
-          setWorld(w);
-          send(roomCode, "state", serializeRfState(w));
-          return true;
-        }
-        let best: { cx: number; cy: number; d: number } | null = null;
-        for (let cy = 0; cy < RF_GRID; cy++) {
-          for (let cx = 0; cx < RF_GRID; cx++) {
-            if (!canExpand(w, cx, cy, deviceId)) continue;
-            let minD = Infinity;
-            for (let ey = 0; ey < RF_GRID; ey++) {
-              for (let ex = 0; ex < RF_GRID; ex++) {
-                const slot = w.owner[ey * RF_GRID + ex]!;
-                if (!slot || slot === meN.slot) continue;
-                minD = Math.min(minD, Math.hypot(cx - ex, cy - ey));
-              }
-            }
-            if (!best || minD < best.d) best = { cx, cy, d: minD };
-          }
-        }
-        if (best) applyRfAction(w, { type: "expand", cx: best.cx, cy: best.cy, nationId: deviceId });
-      }
-      worldRef.current = w;
-      setWorld(w);
-      send(roomCode, "state", serializeRfState(w));
-      return false;
-    };
-  }, [deviceId, isHost, roomCode, selected]);
+  }, [deviceId, dispatchAction, isHost, mission, roomCode]);
 
   const selectedInfo = selected ? cellAt(world, selected.cx, selected.cy) : null;
   const canExp = selected && me ? canExpand(world, selected.cx, selected.cy, deviceId) : false;
   const canAtk = selected && me ? canAttack(world, selected.cx, selected.cy, deviceId) : false;
+  const canCity = selected && me ? canBuild(world, selected.cx, selected.cy, deviceId, "city") : false;
+  const canDefPost = selected && me ? canBuild(world, selected.cx, selected.cy, deviceId, "defense") : false;
+  const expandCost = selected ? terrainExpandCost(world, selected.cx, selected.cy) : RF_EXPAND_COST;
 
   if (!started) {
     return (
       <MultiplayerEntrySelect
         title="Re:Front"
-        subtitle="Expand your nation · grow economy · conquer rivals"
+        subtitle="영토를 넓히고 적을 공격해 세계를 지배하세요"
         styles={RF_STYLES}
         styleId={styleId}
         onStyleChange={(id) => {
@@ -536,7 +619,7 @@ export function ReFrontGame() {
         color={color}
         onColorChange={setColor}
         roomCode={roomCode}
-        playLabel="DEPLOY"
+        playLabel="START GAME"
         onPlay={startGame}
       />
     );
@@ -544,85 +627,189 @@ export function ReFrontGame() {
 
   const won = world.roundOver && world.winnerId === deviceId;
   const lost = world.roundOver && world.winnerId !== deviceId;
+  const victoryPct = world.fastVictoryPct ?? RF_VICTORY_PCT;
 
   return (
     <MultiplayerPlayShell inputActive={!world.roundOver} onExit={onExit}>
-      <div className="relative mx-auto w-full max-w-[640px] select-none">
-        <canvas
-          ref={canvasRef}
-          width={VIEW}
-          height={VIEW}
-          className="w-full touch-none rounded-lg border border-slate-700/80 bg-slate-950"
-          data-mp-play-board
-          data-mp-board-input="active"
-          onClick={onCanvasClick}
-          onWheel={onWheel}
-        />
+      <div className="flex min-h-[calc(100dvh-8rem)] w-full max-w-none flex-col bg-slate-950 text-white" data-testid="rf-game-shell">
+        {/* Top HUD */}
+        <header className="flex flex-wrap items-center gap-3 border-b border-slate-800 px-3 py-2 text-sm">
+          <span className="font-bold text-violet-300">Re:Front</span>
+          <span className="text-slate-400">🪙 {Math.floor(me?.gold ?? 0).toLocaleString()}</span>
+          <span className="text-slate-400">👥 {Math.floor(me?.population ?? 0).toLocaleString()}</span>
+          <span className="text-slate-400">⚔ {Math.floor(me?.troops ?? 0).toLocaleString()}</span>
+          <span className="ml-auto rounded-full bg-amber-500/20 px-3 py-0.5 text-xs font-semibold text-amber-200" data-testid="rf-victory-bar">
+            🏆 You {me?.territoryPct ?? 0}% · Victory {victoryPct}%
+          </span>
+        </header>
 
-        <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-200">
-          <div className="rounded-lg border border-slate-700/60 bg-slate-900/80 p-2">
-            <div>Territory {me?.territoryPct ?? 0}%</div>
-            <div>Gold {Math.floor(me?.gold ?? 0).toLocaleString()}</div>
-            <div>Troops {Math.floor(me?.troops ?? 0).toLocaleString()}</div>
-            <div className="mt-1 text-[10px] text-slate-400">
-              Expand {RF_EXPAND_COST} · Attack {RF_ATTACK_COST} troops — grow or strike?
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+          {/* Objective panel */}
+          <aside className="w-full shrink-0 border-b border-slate-800 p-3 lg:w-52 lg:border-b-0 lg:border-r" data-testid="rf-objective-panel">
+            <div className="text-xs font-bold uppercase tracking-wide text-violet-300">{objective.title}</div>
+            <p className="mt-1 text-sm text-slate-200">{objective.detail}</p>
+            {mission.phase === "expand" && (
+              <p className="mt-2 text-xs text-emerald-300">💡 Green tiles = easy first expands</p>
+            )}
+            {mission.phase === "attack-prompt" && nearestEnemy && (
+              <div className="mt-3 rounded-lg border border-red-500/40 bg-red-950/40 p-2 text-xs">
+                <div className="font-bold text-red-300">🚨 ENEMY DETECTED</div>
+                <div className="mt-1">{nearestEnemy.nickname}</div>
+                <div>Territory {nearestEnemy.territoryPct}% · Troops {Math.floor(nearestEnemy.troops)}</div>
+              </div>
+            )}
+            {mission.phase === "counter" && (
+              <div className="mt-3 rounded-lg border border-orange-500/40 bg-orange-950/30 p-2 text-xs text-orange-200">
+                🚨 INCOMING ATTACK! DEFEND or counter-attack.
+              </div>
+            )}
+            <div className="mt-4 hidden text-[10px] leading-relaxed text-slate-500 lg:block">
+              🖱 Click select · WASD pan · Wheel zoom · ESC clear
             </div>
+          </aside>
+
+          {/* Map */}
+          <div ref={mapWrapRef} className="relative min-h-[280px] flex-1 lg:min-h-[420px]">
+            <canvas
+              ref={canvasRef}
+              className="h-full w-full touch-none"
+              data-mp-play-board
+              data-mp-board-input="active"
+              onClick={onCanvasClick}
+              onWheel={onWheel}
+            />
+
+            {world.battle && world.battle.until > nowMs ? (
+              <div className="pointer-events-none absolute bottom-4 left-1/2 w-[min(90%,20rem)] -translate-x-1/2 rounded-xl border border-white/20 bg-black/80 p-3 text-center text-sm">
+                <div className="font-bold text-rose-300">⚔️ BATTLE</div>
+                <div className="mt-1">
+                  YOU {world.battle.atkTroops} ⚔️ vs ENEMY {world.battle.defTroops} 🛡️
+                </div>
+                <div className="mx-auto mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-700">
+                  <div
+                    className="h-full bg-rose-500 transition-all"
+                    style={{ width: `${Math.round(world.battle.progress * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {world.popups.map((p) =>
+              p.until > nowMs ? (
+                <div
+                  key={p.id}
+                  className="pointer-events-none absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full px-4 py-1.5 text-sm font-bold text-white shadow-lg"
+                  style={{ backgroundColor: p.color + "dd" }}
+                >
+                  {p.text}
+                </div>
+              ) : null
+            )}
+
+            {mission.phase === "how-to-play" ? (
+              <HowToPlayModal
+                onStart={() => setMission((m) => ({ ...m, phase: "expand" }))}
+              />
+            ) : null}
           </div>
-          <div className="rounded-lg border border-slate-700/60 bg-slate-900/80 p-2">
+
+          {/* Action panel */}
+          <aside className="w-full shrink-0 border-t border-slate-800 p-3 lg:w-56 lg:border-l lg:border-t-0" data-testid="rf-action-panel">
             <div className="text-xs text-slate-400">Selected</div>
-            <div>{selected ? `(${selected.cx}, ${selected.cy})` : "Click map"}</div>
-            <div>{selectedInfo?.nation?.nickname ?? (selectedInfo?.slot ? "Neutral" : "—")}</div>
-          </div>
-        </div>
-
-        <div className="mt-2 flex gap-2">
-          <button
-            type="button"
-            disabled={!canExp || world.roundOver}
-            onClick={onExpand}
-            className="flex-1 rounded-lg bg-cyan-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
-          >
-            EXPAND
-          </button>
-          <button
-            type="button"
-            disabled={!canAtk || world.roundOver}
-            onClick={onAttack}
-            className="flex-1 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
-          >
-            ATTACK
-          </button>
-        </div>
-
-        {world.popups.map((p) =>
-          p.until > nowMs ? (
-            <div
-              key={p.id}
-              className="pointer-events-none absolute left-1/2 top-8 -translate-x-1/2 rounded-full px-3 py-1 text-sm font-bold text-white shadow-lg"
-              style={{ backgroundColor: p.color + "cc" }}
-            >
-              {p.text}
+            <div className="text-sm font-medium">
+              {selected
+                ? selectedInfo?.nation?.nickname ?? `Neutral · ${terrainLabel(selectedInfo?.terrain ?? 0)}`
+                : "Click a tile on the map"}
             </div>
-          ) : null
-        )}
+            {selected && selectedInfo?.slot === 0 ? (
+              <div className="text-xs text-slate-500">Expand cost: {expandCost} troops</div>
+            ) : null}
+
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={!canExp || world.roundOver}
+                onClick={onExpand}
+                className="rounded-lg bg-cyan-600 py-2.5 text-sm font-bold disabled:opacity-40"
+                data-testid="rf-expand-btn"
+              >
+                EXPAND
+              </button>
+              <button
+                type="button"
+                disabled={!canAtk || world.roundOver}
+                onClick={onAttack}
+                className="rounded-lg bg-rose-600 py-2.5 text-sm font-bold disabled:opacity-40"
+                data-testid="rf-attack-btn"
+              >
+                ATTACK
+              </button>
+              <button
+                type="button"
+                disabled={!me?.alive || world.roundOver}
+                onClick={onDefend}
+                className="rounded-lg bg-indigo-700 py-2.5 text-sm font-bold disabled:opacity-40"
+                data-testid="rf-defend-btn"
+              >
+                DEFEND
+              </button>
+              <button
+                type="button"
+                disabled={!canCity || world.roundOver}
+                onClick={() => onBuild("city")}
+                className="rounded-lg bg-amber-700 py-2 text-xs font-bold disabled:opacity-40"
+              >
+                🏙️ CITY
+              </button>
+              <button
+                type="button"
+                disabled={!canDefPost || world.roundOver}
+                onClick={() => onBuild("defense")}
+                className="col-span-2 rounded-lg bg-slate-700 py-2 text-xs font-bold disabled:opacity-40"
+              >
+                🛡️ DEFENSE POST
+              </button>
+            </div>
+
+            {canAtk ? (
+              <div className="mt-3">
+                <div className="text-xs text-slate-400">Attack power</div>
+                <div className="mt-1 flex gap-1">
+                  {[0.25, 0.5, 0.75, 1].map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setAttackPct(p)}
+                      className={`flex-1 rounded py-1 text-xs font-semibold ${
+                        attackPct === p ? "bg-rose-500 text-white" : "bg-slate-800 text-slate-300"
+                      }`}
+                    >
+                      {Math.round(p * 100)}%
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-[10px] text-slate-500">Tutorial: 50% recommended</p>
+              </div>
+            ) : null}
+
+            <div className="mt-3 text-[10px] text-slate-500 lg:hidden">
+              WASD / arrows = pan map · Wheel = zoom
+            </div>
+          </aside>
+        </div>
 
         {world.roundOver ? (
-          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/70 p-4">
-            <div className="w-full max-w-sm rounded-2xl border border-slate-600 bg-slate-900 p-6 text-center text-white">
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/75 p-4">
+            <div className="w-full max-w-sm rounded-2xl border border-slate-600 bg-slate-900 p-6 text-center">
               <h2 className="text-2xl font-bold">{won ? "YOU WIN" : lost ? "GAME OVER" : "DRAW"}</h2>
               <p className="mt-2 text-slate-300">
-                Territory {me?.territoryPct ?? 0}% · Troops {Math.floor(me?.troops ?? 0)} · Gold{" "}
-                {Math.floor(me?.gold ?? 0)}
+                Territory {me?.territoryPct ?? 0}% · World control target was {victoryPct}%
               </p>
               <div className="mt-4 flex flex-col gap-2">
                 <button type="button" onClick={onRematch} className="rounded-lg bg-white py-2 font-bold text-black">
                   REMATCH
                 </button>
-                <button
-                  type="button"
-                  onClick={onAnotherGame}
-                  className="rounded-lg border border-slate-500 py-2 font-semibold"
-                >
+                <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2 font-semibold">
                   ANOTHER GAME
                 </button>
                 <button type="button" onClick={onExit} className="rounded-lg border border-slate-600 py-2 text-slate-300">
