@@ -7,6 +7,7 @@ import { setCreatorMultiplayerSlugs } from "@game-platform/game-sdk/src/game-met
 import type { CreatorGameRecord } from "@/lib/creator/creator-game-registry";
 import { listPublishedCreatorGames, listServerCreatorGames } from "@/lib/creator/creator-game-server";
 import { mergeLocalMvpGames } from "@/lib/local-mvp-games";
+import { filterProductCatalogGames } from "@/lib/product-catalog-sync";
 
 export function creatorRecordToGame(record: CreatorGameRecord): Game {
   const mp = record.gameType === "multiplayer";
@@ -65,9 +66,9 @@ export function mergeCreatorPublishedGames(games: Game[]): Game[] {
   return [...bySlug.values()];
 }
 
-/** Catalog merge: local MVP + creator published. */
+/** Catalog merge: local MVP + creator published; deprecated slugs excluded. */
 export function mergeCatalogGames(games: Game[]): Game[] {
-  return mergeCreatorPublishedGames(mergeLocalMvpGames(games));
+  return filterProductCatalogGames(mergeCreatorPublishedGames(mergeLocalMvpGames(games)));
 }
 
 export function getCreatorGameOrNull(slug: string): Game | null {

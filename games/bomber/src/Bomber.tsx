@@ -418,6 +418,9 @@ export function BomberGame() {
   const score = me?.score ?? 0;
   const rank = localRank(world, deviceId);
   const soloSession = isSoloSession(activeRoom, deviceId);
+  const onlyLocalHuman = !Object.values(world.players).some(
+    (p) => !p.isBot && p.id !== deviceId
+  );
 
   const liveMissions = useMemo(() => {
     const stats = sessionStatsRef.current;
@@ -838,6 +841,7 @@ export function BomberGame() {
       __BOMBER_QA_MOVE__?: (dx: number, dy: number) => void;
       __BOMBER_QA_PLANT__?: () => boolean;
       __BOMBER_QA_PLAYER__?: (id: string) => { x: number; y: number; alive: boolean } | null;
+      __BOMBER_QA_DIE__?: () => boolean;
     };
     w.__BOMBER_QA__ = () => {
       const wr = worldRef.current;
@@ -872,10 +876,39 @@ export function BomberGame() {
       const p = worldRef.current.players[id];
       return p ? { x: p.x, y: p.y, alive: p.alive } : null;
     };
+    w.__BOMBER_QA_DIE__ = () => {
+      const wr = worldRef.current;
+      const me = wr.players[deviceId];
+      if (!me?.alive) return false;
+      const finalScore = me.score ?? 0;
+      const finalKills = me.kills ?? 0;
+      me.alive = false;
+      const next = structuredClone(wr);
+      worldRef.current = next;
+      setWorld(next);
+      const stats = sessionStatsRef.current;
+      stats.enemiesDefeated = Math.max(stats.enemiesDefeated, finalKills);
+      stats.peakScore = Math.max(stats.peakScore, finalScore);
+      syncMissionComplete(stats);
+      const run: BomberRunSummary = {
+        ...stats,
+        finalScore,
+        finalKills,
+      };
+      const bestRecord = saveBestRecord(run);
+      setDeathSummary({
+        run,
+        missions: buildMissionList(stats),
+        bestRecord,
+        title: "Game Over",
+      });
+      return true;
+    };
     return () => {
       delete w.__BOMBER_QA__;
       delete w.__BOMBER_QA_PLANT__;
       delete w.__BOMBER_QA_PLAYER__;
+      delete w.__BOMBER_QA_DIE__;
     };
   }, [deviceId, pushInput]);
 
@@ -1178,7 +1211,11 @@ export function BomberGame() {
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
     const code = roomRef.current;
-    if (isSoloSession(code, deviceId) && started) {
+    const soloRetry =
+      isSoloSession(code, deviceId) ||
+      qaLocalProbeRef.current ||
+      !Object.values(worldRef.current.players).some((p) => !p.isBot && p.id !== deviceId);
+    if (soloRetry && started) {
       setPopups([]);
       sessionStatsRef.current = createSessionStats();
       setDeathSummary(null);
@@ -1223,7 +1260,44 @@ export function BomberGame() {
   const height = world.rows * CELL;
   const timeLeft = remainingTimeSec(world, nowTick);
   const dangerCells = getBombDangerCells(world, nowTick);
-  const showDeath = world.matchOver || (soloSession && !alive && started && stateAck);
+  const showDeath =
+    world.matchOver ||
+    (!alive &&
+      started &&
+      stateAck &&
+      (soloSession || qaLocalProbeRef.current || onlyLocalHuman));
+  const resultLabel = world.isDraw
+    ? "DRAW"
+    : world.winnerId === deviceId
+      ? "WIN"
+      : "LOSE";
+
+  const deathReportedRef = useRef(false);
+
+  useEffect(() => {
+    if (!showDeath) {
+      deathReportedRef.current = false;
+      return;
+    }
+    if (deathReportedRef.current) return;
+    deathReportedRef.current = true;
+    const stats = sessionStatsRef.current;
+    stats.enemiesDefeated = Math.max(stats.enemiesDefeated, kills);
+    stats.peakScore = Math.max(stats.peakScore, score);
+    syncMissionComplete(stats);
+    const run: BomberRunSummary = {
+      ...stats,
+      finalScore: score,
+      finalKills: kills,
+    };
+    const bestRecord = saveBestRecord(run);
+    setDeathSummary({
+      run,
+      missions: buildMissionList(stats),
+      bestRecord,
+      title: world.matchOver ? resultLabel : "Game Over",
+    });
+  }, [showDeath, world.matchOver, score, kills, resultLabel]);
 
   if (lobbyPhase === "entry" && !started) {
     return (
@@ -1340,39 +1414,6 @@ export function BomberGame() {
       <MultiplayerMinimap dots={minimapDots} />
     </div>
   );
-
-  const resultLabel = world.isDraw
-    ? "DRAW"
-    : world.winnerId === deviceId
-      ? "WIN"
-      : "LOSE";
-
-  const deathReportedRef = useRef(false);
-
-  useEffect(() => {
-    if (!showDeath) {
-      deathReportedRef.current = false;
-      return;
-    }
-    if (deathReportedRef.current) return;
-    deathReportedRef.current = true;
-    const stats = sessionStatsRef.current;
-    stats.enemiesDefeated = Math.max(stats.enemiesDefeated, kills);
-    stats.peakScore = Math.max(stats.peakScore, score);
-    syncMissionComplete(stats);
-    const run: BomberRunSummary = {
-      ...stats,
-      finalScore: score,
-      finalKills: kills,
-    };
-    const bestRecord = saveBestRecord(run);
-    setDeathSummary({
-      run,
-      missions: buildMissionList(stats),
-      bestRecord,
-      title: world.matchOver ? resultLabel : "Game Over",
-    });
-  }, [showDeath, world.matchOver, score, kills, resultLabel]);
 
   return (
     <>
@@ -1626,7 +1667,7 @@ export function BomberGame() {
         </div>
       ) : null}
 
-      {alive && !world.matchOver && stateAck ? (
+      {alive && !world.matchOver && (stateAck || qaLocalProbeRef.current) ? (
         <MobileControlPad
           onDirection={padMove}
           repeatMs={bomberPadRepeatMs(me?.speedBonus ?? 0, me?.speedPenalty ?? 0)}

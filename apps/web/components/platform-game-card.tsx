@@ -19,7 +19,7 @@ export function platformGameRating(_slug: string): string | null {
 }
 
 function genreLabel(game: Game): string {
-  if (game.slug === "snake" || game.slug === "agar" || game.slug === "bomber") {
+  if (game.slug === "snake" || game.slug === "agar" || game.slug === "bomber" || game.slug === "re-front") {
     return "실시간 멀티플레이";
   }
   if (game.tags.includes("multiplayer")) return "멀티플레이";

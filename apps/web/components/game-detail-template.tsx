@@ -19,6 +19,7 @@ import {
   gameSummaryDescription,
   isDiscoveryMultiplayerSlug,
 } from "@/lib/game-discovery-ui";
+import { getProductGameModes, productModeLabel } from "@/lib/product-catalog-sync";
 
 function detailCreatorLabel(slug: string): string {
   if (slug.startsWith("creator-")) return creatorDisplayName(slug) ?? "Creator";
@@ -47,6 +48,8 @@ export function GameDetailTemplate({
   const creator = detailCreatorLabel(slug);
   const playHref = playHrefForCatalogSlug(slug);
   const mp = isDiscoveryMultiplayerSlug(slug, game);
+  const modes = getProductGameModes(slug);
+  const modeLabel = productModeLabel(slug);
 
   return (
     <main className="flex flex-1 flex-col" data-testid="game-detail-page">
@@ -69,6 +72,14 @@ export function GameDetailTemplate({
               </p>
 
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                {modeLabel ? (
+                  <span
+                    data-testid="game-detail-mode-badge"
+                    className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-200"
+                  >
+                    {modeLabel}
+                  </span>
+                ) : null}
                 {mp ? (
                   <span
                     data-testid="game-detail-mp-badge"
@@ -86,6 +97,15 @@ export function GameDetailTemplate({
               </div>
 
               <div className="mt-5 flex flex-col items-center gap-2">
+                {modes?.solo && modes.soloHref ? (
+                  <Link
+                    href={modes.soloHref}
+                    data-testid="game-detail-solo-cta"
+                    className="inline-flex min-h-12 w-full max-w-sm items-center justify-center rounded-xl border border-white/20 bg-white/5 px-8 py-3 text-base font-semibold text-white transition hover:bg-white/10"
+                  >
+                    PLAY SOLO
+                  </Link>
+                ) : null}
                 {mp && (slug === "snake" || slug === "agar" || slug === "bomber") ? (
                   <MpWorldPlayLink
                     slug={slug as "snake" | "agar" | "bomber"}

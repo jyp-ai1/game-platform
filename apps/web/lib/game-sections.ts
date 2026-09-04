@@ -124,7 +124,7 @@ export function selectBySlugs(games: Game[], slugs: string[], limit = 8): Game[]
 export function selectMoreGames(games: Game[], current: Game, limit = 3): Game[] {
   const related = selectRelated(games, current, limit);
   if (related.length >= 2) return related;
-  return selectBySlugs(games, ["snake", "agar", "bomber"], limit + 1)
+  return selectBySlugs(games, ["snake", "agar", "bomber", "re-front"], limit + 1)
     .filter((g) => g.slug !== current.slug)
     .slice(0, limit);
 }

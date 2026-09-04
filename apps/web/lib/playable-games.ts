@@ -55,7 +55,7 @@ export const PLAYABLE_SLUGS = [
   "word-search",
   "agar",
   "bomber",
-  "territory-war",
+  "re-front",
 ] as const;
 
 export type PlayableSlug = (typeof PLAYABLE_SLUGS)[number];

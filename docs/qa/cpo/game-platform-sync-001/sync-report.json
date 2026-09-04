@@ -1,0 +1,42 @@
+{
+  "sprint": "GAME-PLATFORM-SYNC-001",
+  "base": "http://localhost:3045",
+  "finishedAt": "2026-09-04T00:46:31.833Z",
+  "productSync": {
+    "agar": {
+      "catalog": true,
+      "detail": "PASS",
+      "playCta": "PASS",
+      "modeBadge": "SOLO · MULTIPLAYER",
+      "play": "PASS"
+    },
+    "snake": {
+      "catalog": true,
+      "detail": "PASS",
+      "playCta": "PASS",
+      "modeBadge": "SOLO · MULTIPLAYER",
+      "play": "PASS"
+    },
+    "bomber": {
+      "catalog": true,
+      "detail": "PASS",
+      "playCta": "PASS",
+      "modeBadge": "SOLO · MULTIPLAYER",
+      "play": "PASS"
+    },
+    "re-front": {
+      "catalog": true,
+      "detail": "PASS",
+      "playCta": "PASS",
+      "modeBadge": "MULTIPLAYER",
+      "play": "PASS",
+      "mobile": "PASS"
+    }
+  },
+  "territoryWar": {
+    "gamesListHidden": true,
+    "catalogHidden": true,
+    "detail404": true
+  },
+  "pass": true
+}

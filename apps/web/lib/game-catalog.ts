@@ -62,6 +62,7 @@ export function playHrefForCatalogSlug(slug: string): string {
   if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
   if (slug === "agar") return "/games/agar/play?room=WORLD";
   if (slug === "bomber") return "/games/bomber/play?room=BOMBER-A";
+  if (slug === "re-front") return "/games/re-front/play?room=RF-LOBBY";
   return `/games/${slug}/play`;
 }
 

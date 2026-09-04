@@ -55,7 +55,7 @@ export type PlatformGameContractMeta = {
   knownDeviations: string[];
 };
 
-export const PLATFORM_FLAGSHIP_MP_SLUGS = ["snake", "agar", "bomber"] as const;
+export const PLATFORM_FLAGSHIP_MP_SLUGS = ["snake", "agar", "bomber", "re-front"] as const;
 
 export function resolveEntryMode(slug: string): PlatformEntryMode {
   return isMultiplayerGameSlug(slug) ? "multiplayer" : "solo";

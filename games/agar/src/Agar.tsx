@@ -579,7 +579,7 @@ export function AgarGame() {
   useEffect(() => {
     if (!started) return;
     const w = window as Window & {
-        __AGAR_QA__?: () => {
+      __AGAR_QA__?: () => {
         mass: number;
         cells: number;
         canSplit: boolean;
@@ -592,6 +592,7 @@ export function AgarGame() {
         x: number;
         y: number;
       };
+      __AGAR_QA_DIE__?: () => boolean;
     };
     w.__AGAR_QA__ = () => {
       const wr = worldRef.current;
@@ -625,10 +626,42 @@ export function AgarGame() {
         missions: buildMissionList(wr.aiDifficulty ?? "normal", sessionRef.current),
       };
     };
+    w.__AGAR_QA_DIE__ = () => {
+      const wr = worldRef.current;
+      const p = wr.players[deviceId];
+      if (!p?.alive) return false;
+      const finalMass = Math.round(totalMass(p));
+      const finalRank = rank || prevRankRef.current;
+      p.alive = false;
+      p.cells = [];
+      const snap = snapshotWorld(wr);
+      worldRef.current = snap;
+      setWorld(snap);
+      const stats = sessionRef.current;
+      syncMissionComplete(stats, tier);
+      const missionList = buildMissionList(tier, stats);
+      setDeathSummary({
+        finalRank,
+        finalMass,
+        bestCombo: Math.max(stats.bestCombo, p?.bestCombo ?? 0),
+        missions: missionList,
+      });
+      setBestRecord(
+        saveBestRecord({
+          ...stats,
+          finalRank,
+          finalMass,
+          difficulty: tier,
+        })
+      );
+      reportedRef.current = true;
+      return true;
+    };
     return () => {
       delete w.__AGAR_QA__;
+      delete w.__AGAR_QA_DIE__;
     };
-  }, [started, deviceId, roomCode]);
+  }, [started, deviceId, roomCode, tier, rank]);
 
   const offsetX = VIEW / 2 - cam.x;
   const offsetY = VIEW / 2 - cam.y;

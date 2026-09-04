@@ -15,6 +15,7 @@ export const LOCAL_GAME_THUMBS: Record<string, string> = {
   bomber: "/images/games/bomber.png?v=2",
   agar: "/images/games/agar.png?v=2",
   snake: "/images/games/snake.png?v=2",
+  "re-front": "/images/games/bomber.png?v=2",
 };
 
 /** Intrinsic sizes for og:image:width / height (static public thumbs). */
@@ -53,12 +54,12 @@ const LOCAL_MVP_META: Record<
     sessionDifficulty: "normal",
     controls: "Pointer / keys move · Space / click Boost",
   },
-  "territory-war": {
-    title: "Territory War",
-    description: "영토를 확장하고 상대 trail을 끊으세요. Paper.io 스타일 2~4인 배틀.",
-    tags: ["multiplayer", "realtime"],
+  "re-front": {
+    title: "Re:Front",
+    description: "영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.",
+    tags: ["multiplayer", "strategy", "realtime"],
     sessionDifficulty: "normal",
-    controls: "WASD move · Space Boost",
+    controls: "Click territory · EXPAND / ATTACK",
   },
 };
 
@@ -118,7 +119,7 @@ export function buildLocalMvpCreatorMeta(slug: string): CreatorGameMeta | null {
 /** Prefer DB row; fill missing MVP slugs; always force known local thumbs. */
 export function mergeLocalMvpGames(
   games: Game[],
-  mvpSlugs: readonly string[] = ["bomber", "agar", "snake"]
+  mvpSlugs: readonly string[] = ["bomber", "agar", "snake", "re-front"]
 ): Game[] {
   const bySlug = new Map(games.map((g) => [g.slug, g]));
   for (const slug of mvpSlugs) {

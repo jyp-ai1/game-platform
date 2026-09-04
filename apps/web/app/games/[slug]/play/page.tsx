@@ -4,6 +4,7 @@ import { buildLocalMvpGame } from "@/lib/local-mvp-games";
 import { getCreatorGameOrNull } from "@/lib/creator/creator-game-catalog";
 import { isCreatorPlayableSlug, resolvePlaySlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
+import { isDeprecatedProductSlug } from "@/lib/product-catalog-sync";
 import { getGameBySlug, isExternalGame } from "@/lib/supabase/games";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -32,6 +33,10 @@ export async function generateMetadata({ params }: GamePlayPageProps): Promise<M
  */
 export default async function GamePlayPage({ params, searchParams }: GamePlayPageProps) {
   const { slug } = await params;
+
+  if (isDeprecatedProductSlug(slug)) {
+    notFound();
+  }
 
   const dbGame = await getGameBySlug(slug);
   if (dbGame && isExternalGame(dbGame)) {

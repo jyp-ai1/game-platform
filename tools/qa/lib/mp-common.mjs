@@ -162,6 +162,7 @@ export async function createDualPages(browser, deviceA, deviceB) {
 }
 
 export async function dragFloatingPad(page, dir = "right") {
+  const capture = page.locator('[data-testid="mp-mobile-control-pad"] .pointer-events-auto').first();
   const overlay = page.locator('[data-testid="mp-mobile-control-pad"]');
   if ((await overlay.count()) === 0) return false;
   const vp = page.viewportSize() ?? { width: 390, height: 844 };
@@ -169,14 +170,15 @@ export async function dragFloatingPad(page, dir = "right") {
   const cy = Math.floor(vp.height * 0.55);
   const dx = dir === "right" ? 55 : dir === "left" ? -55 : 0;
   const dy = dir === "down" ? 55 : dir === "up" ? -55 : 0;
-  await overlay.dispatchEvent("pointerdown", {
+  const target = (await capture.count()) > 0 ? capture : overlay;
+  await target.dispatchEvent("pointerdown", {
     pointerId: 7,
     clientX: cx,
     clientY: cy,
     pointerType: "touch",
     bubbles: true,
   });
-  await overlay.dispatchEvent("pointermove", {
+  await target.dispatchEvent("pointermove", {
     pointerId: 7,
     clientX: cx + dx,
     clientY: cy + dy,
@@ -184,7 +186,7 @@ export async function dragFloatingPad(page, dir = "right") {
     bubbles: true,
   });
   await page.waitForTimeout(900);
-  await overlay.dispatchEvent("pointerup", {
+  await target.dispatchEvent("pointerup", {
     pointerId: 7,
     clientX: cx + dx,
     clientY: cy + dy,

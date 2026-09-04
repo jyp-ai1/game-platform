@@ -11,6 +11,9 @@ export function gameSummaryDescription(game: Game, slug: string, maxLen = 100): 
   if (slug === "bomber") {
     return "폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.";
   }
+  if (slug === "re-front") {
+    return "영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.";
+  }
   const raw = game.description?.trim();
   if (!raw) return "방향키와 버튼으로 플레이하세요.";
   const first = raw.split(/[.!?]\s/)[0] ?? raw;
@@ -20,7 +23,9 @@ export function gameSummaryDescription(game: Game, slug: string, maxLen = 100): 
 
 /** Client-safe creator label (no server registry / fs). */
 export function gameCreatorLabel(slug: string): string {
-  if (slug === "snake" || slug === "agar" || slug === "bomber") return "Replay Studio";
+  if (slug === "snake" || slug === "agar" || slug === "bomber" || slug === "re-front") {
+    return "Replay Studio";
+  }
   if (slug.startsWith("creator-")) return "Creator";
   return "Community";
 }
@@ -33,6 +38,7 @@ export function isDiscoveryMultiplayerSlug(
     slug === "snake" ||
     slug === "agar" ||
     slug === "bomber" ||
+    slug === "re-front" ||
     (game?.tags?.includes("multiplayer") ?? false)
   );
 }

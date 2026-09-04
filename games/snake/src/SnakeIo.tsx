@@ -1213,14 +1213,41 @@ export function SnakeIoGame({
   }, [deviceId]);
 
   useEffect(() => {
-    setDeath007ForceDeath(() => {
+    const forceDie = () => {
       const w = worldRef.current;
       const snake = w?.snakes[deviceId];
       if (!w || !snake || !snake.alive) return false;
+      const prevScore = Math.round(snake.score);
+      const prevLength = snake.maxLength ?? getSegmentCount(snake);
       damageSnake(w, snake, 10_000);
-      setWorld(structuredClone(w));
-      return !w.snakes[deviceId]?.alive;
-    });
+      const next = structuredClone(w);
+      worldRef.current = next;
+      setWorld(next);
+      const dead = !next.snakes[deviceId]?.alive;
+      if (dead) {
+        const stats = sessionStatsRef.current;
+        stats.peakScore = Math.max(stats.peakScore, prevScore);
+        stats.maxLength = Math.max(stats.maxLength, prevLength);
+        syncMissionComplete(stats);
+        const run: SnakeRunSummary = {
+          ...stats,
+          finalScore: prevScore,
+          finalLength: prevLength,
+        };
+        const bestRecord = saveBestRecord(run);
+        setDeathSummary({ run, missions: buildMissionList(stats), bestRecord });
+      }
+      return dead;
+    };
+    setDeath007ForceDeath(forceDie);
+    if (typeof window !== "undefined") {
+      (window as Window & { __SNAKE_QA_DIE__?: () => boolean }).__SNAKE_QA_DIE__ = forceDie;
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        delete (window as Window & { __SNAKE_QA_DIE__?: () => boolean }).__SNAKE_QA_DIE__;
+      }
+    };
   }, [deviceId]);
 
   useEffect(() => {

@@ -1,0 +1,177 @@
+{
+  "project": "Re:Play",
+  "sprint": "GAME-PLATFORM-SYNC-002-FIX-R2",
+  "base": "http://localhost:3045",
+  "finishedAt": "2026-09-04T12:15:43.187Z",
+  "agar": {
+    "detail": {
+      "ok": true
+    },
+    "detail-play": {
+      "ok": true
+    },
+    "enter": {
+      "ok": true
+    },
+    "keyboard": {
+      "ok": true
+    },
+    "death-trigger": {
+      "ok": true
+    },
+    "death-overlay": {
+      "ok": true
+    },
+    "rematch": {
+      "ok": true
+    },
+    "death-overlay-2": {
+      "ok": true
+    },
+    "another-game": {
+      "ok": true
+    },
+    "exit": {
+      "ok": true
+    }
+  },
+  "snake": {
+    "detail": {
+      "ok": true
+    },
+    "detail-play": {
+      "ok": true
+    },
+    "enter": {
+      "ok": true
+    },
+    "keyboard": {
+      "ok": true
+    },
+    "death-trigger": {
+      "ok": true
+    },
+    "death-overlay": {
+      "ok": true
+    },
+    "rematch": {
+      "ok": true
+    },
+    "death-overlay-2": {
+      "ok": true
+    },
+    "another-game": {
+      "ok": true
+    },
+    "exit": {
+      "ok": true
+    }
+  },
+  "bomber": {
+    "detail": {
+      "ok": true
+    },
+    "detail-play": {
+      "ok": true
+    },
+    "enter": {
+      "ok": true
+    },
+    "keyboard": {
+      "ok": true
+    },
+    "death-trigger": {
+      "ok": true
+    },
+    "death-overlay": {
+      "ok": true
+    },
+    "rematch": {
+      "ok": true
+    },
+    "death-overlay-2": {
+      "ok": true
+    },
+    "another-game": {
+      "ok": true
+    },
+    "exit": {
+      "ok": true
+    }
+  },
+  "reFront": {
+    "detail": {
+      "ok": true
+    },
+    "enter": {
+      "ok": true
+    },
+    "exit": {
+      "ok": true
+    }
+  },
+  "comments": {
+    "agar": {
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "persist": {
+        "ok": true
+      }
+    },
+    "snake": {
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "persist": {
+        "ok": true
+      }
+    },
+    "bomber": {
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "persist": {
+        "ok": true
+      }
+    },
+    "re-front": {
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "persist": {
+        "ok": true
+      }
+    }
+  },
+  "mobile": {
+    "bomber-pad-visible": {
+      "ok": true
+    },
+    "bomber-pad-input": {
+      "ok": true
+    },
+    "bomber-mobile-exit": {
+      "ok": true
+    }
+  },
+  "pass": true,
+  "typecheck": {
+    "ok": true
+  },
+  "build": {
+    "ok": true
+  }
+}

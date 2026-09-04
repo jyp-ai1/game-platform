@@ -15,6 +15,7 @@ import {
 } from "@/lib/creator/creator-game-catalog";
 import { isCreatorPlayableSlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
+import { isDeprecatedProductSlug } from "@/lib/product-catalog-sync";
 import {
   breadcrumbJsonLd,
   buildGameMetadata,
@@ -50,6 +51,11 @@ export async function generateMetadata({
 
 export default async function GamePage({ params, searchParams }: GamePageProps) {
   const { slug } = await params;
+
+  if (isDeprecatedProductSlug(slug)) {
+    notFound();
+  }
+
   const q = await searchParams;
   // Sprint 21 — Invite lands on Detail (pin room via InviteDetailPin), then WORLD PLAY.
   // Do not auto-redirect past Detail (same-world join still uses pinned room).

@@ -1,0 +1,173 @@
+{
+  "sprint": "GAME-PLATFORM-SYNC-002",
+  "base": "http://localhost:3045",
+  "marker": "sync002-1788487969786",
+  "finishedAt": "2026-09-04T02:20:37.640Z",
+  "shell": {
+    "agar": {
+      "games-detail": {
+        "ok": true
+      },
+      "detail-play": {
+        "ok": true
+      },
+      "game-entry": {
+        "ok": true
+      },
+      "keyboard-scope-active": {
+        "ok": true
+      },
+      "keyboard-scope-input": {
+        "ok": true
+      },
+      "keyboard-scope-blur": {
+        "ok": true
+      },
+      "death-overlay": {
+        "ok": false
+      },
+      "rematch": {
+        "ok": false,
+        "note": "no death overlay"
+      },
+      "another-game": {
+        "ok": false,
+        "note": "no death overlay"
+      },
+      "exit": {
+        "ok": true
+      }
+    },
+    "snake": {
+      "games-detail": {
+        "ok": true
+      },
+      "detail-play": {
+        "ok": true
+      },
+      "game-entry": {
+        "ok": true
+      },
+      "keyboard-scope-active": {
+        "ok": true
+      },
+      "keyboard-scope-input": {
+        "ok": true
+      },
+      "keyboard-scope-blur": {
+        "ok": true
+      },
+      "death-overlay": {
+        "ok": false
+      },
+      "rematch": {
+        "ok": false,
+        "note": "no death overlay"
+      },
+      "another-game": {
+        "ok": false,
+        "note": "no death overlay"
+      },
+      "exit": {
+        "ok": true
+      }
+    },
+    "bomber": {
+      "games-detail": {
+        "ok": true
+      },
+      "detail-play": {
+        "ok": true
+      },
+      "game-entry": {
+        "ok": false
+      }
+    },
+    "agar-mobile": {
+      "detail-cta": {
+        "ok": true
+      },
+      "mobile-pad": {
+        "ok": true
+      }
+    },
+    "snake-mobile": {
+      "detail-cta": {
+        "ok": true
+      },
+      "mobile-pad": {
+        "ok": true
+      }
+    },
+    "bomber-mobile": {
+      "detail-cta": {
+        "ok": true
+      },
+      "mobile-pad": {
+        "ok": false
+      }
+    }
+  },
+  "comments": {
+    "agar": {
+      "detail-entry": {
+        "ok": true
+      },
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "api-persist": {
+        "ok": true
+      }
+    },
+    "snake": {
+      "detail-entry": {
+        "ok": true
+      },
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "api-persist": {
+        "ok": true
+      }
+    },
+    "bomber": {
+      "detail-entry": {
+        "ok": true
+      },
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "api-persist": {
+        "ok": true
+      }
+    },
+    "re-front": {
+      "detail-entry": {
+        "ok": true
+      },
+      "write": {
+        "ok": true
+      },
+      "refresh": {
+        "ok": true
+      },
+      "api-persist": {
+        "ok": true
+      }
+    }
+  },
+  "pass": false,
+  "shellPass": false,
+  "commentsPass": true,
+  "mobilePass": false
+}
