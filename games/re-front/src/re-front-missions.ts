@@ -115,6 +115,10 @@ export function missionObjective(state: RfMissionState): RfMissionObjective {
   }
 }
 
+export function showExpandUi(phase: RfMissionPhase): boolean {
+  return phase === "expand" || phase === "grow" || phase === "free" || phase === "attack-prompt";
+}
+
 export function showAttackUi(phase: RfMissionPhase): boolean {
   return phase === "attack-prompt" || phase === "attack" || phase === "counter" || phase === "free";
 }

@@ -67,6 +67,7 @@ import {
   showAttackUi,
   showBuildUi,
   showDefendUi,
+  showExpandUi,
   type RfMissionState,
 } from "./re-front-missions";
 
@@ -234,7 +235,10 @@ export function ReFrontGame() {
   const mySlot = me?.slot ?? 0;
   const objective = missionObjective(mission);
   const expandHints = useMemo(
-    () => (mission.phase === "expand" ? findExpandTargets(world, deviceId, 6) : []),
+    () =>
+      mission.phase === "expand" || mission.phase === "attack-prompt"
+        ? findExpandTargets(world, deviceId, 6)
+        : [],
     [world, deviceId, mission.phase]
   );
   const nearestEnemy = useMemo(() => findNearestEnemy(world, deviceId), [world, deviceId]);
@@ -582,6 +586,8 @@ export function ReFrontGame() {
       setSelected(cell);
       if (mission.phase === "expand" && canExpand(worldRef.current, cell.cx, cell.cy, deviceId)) {
         setPendingExpand(cell);
+      } else if (mission.phase === "attack-prompt" && canExpand(worldRef.current, cell.cx, cell.cy, deviceId)) {
+        setPendingExpand(cell);
       } else {
         setPendingExpand(null);
       }
@@ -751,12 +757,18 @@ export function ReFrontGame() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const debug = new URLSearchParams(window.location.search).get("debug") === "1";
     (window as unknown as { __RF_QA__?: () => unknown }).__RF_QA__ = () => ({
       deviceId,
       mission,
       me: localNation(worldRef.current, deviceId),
+      selected,
+      canAttackSelected:
+        selected && me ? canAttack(worldRef.current, selected.cx, selected.cy, deviceId) : false,
+      phase: mission.phase,
+      debug,
     });
-  }, [deviceId, mission]);
+  }, [deviceId, me, mission, selected]);
 
   const selectedInfo = selected ? cellAt(world, selected.cx, selected.cy) : null;
   const canExp = (pendingExpand ?? selected) && me ? canExpand(world, (pendingExpand ?? selected)!.cx, (pendingExpand ?? selected)!.cy, deviceId) : false;
@@ -901,7 +913,7 @@ export function ReFrontGame() {
           <p className="mt-0.5 text-sm font-bold text-amber-100 sm:text-base">{objective.nextAction}</p>
           <p className="mt-0.5 text-[10px] text-slate-400 sm:text-xs">{objective.title} — {objective.cta}</p>
         </div>
-        {pendingExpand && mission.phase === "expand" ? (
+        {pendingExpand && (mission.phase === "expand" || mission.phase === "attack-prompt") ? (
           <div className="mb-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-center" data-testid="rf-expand-confirm">
             <div className="font-bold text-emerald-200">EXPAND</div>
             <p className="mt-1 text-sm text-slate-200">이 땅을 차지하시겠습니까?</p>
@@ -915,7 +927,7 @@ export function ReFrontGame() {
           <>
             <p className="text-[10px] text-slate-400 sm:text-xs">{selectionHint}</p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {(mission.phase === "expand" || mission.phase === "grow" || mission.phase === "free") && (
+              {(showExpandUi(mission.phase)) && (
                 <button type="button" disabled={!canExp || world.roundOver} onClick={onExpand} className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-base font-bold disabled:opacity-40" data-testid="rf-expand-btn">
                   🟢 EXPAND
                 </button>

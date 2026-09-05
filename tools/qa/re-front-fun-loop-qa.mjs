@@ -52,14 +52,14 @@ async function tryExpand(page) {
 
 async function expandUntil(page, goal, maxAttempts = 12) {
   const offsets = [
-    [0, 2],
     [2, 0],
+    [2, 0],
+    [1, 0],
+    [3, 0],
+    [0, 2],
+    [2, 1],
     [-2, 0],
     [0, -2],
-    [1, 2],
-    [2, 1],
-    [-1, 2],
-    [2, -1],
   ];
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const count = await page.evaluate(() => window.__RF_QA__?.()?.mission?.expandCount ?? 0);
@@ -84,6 +84,21 @@ async function enterGame(page) {
   await page.waitForTimeout(1200);
   await page.getByRole("button", { name: "📍" }).click({ timeout: 5_000 }).catch(() => {});
   await page.waitForTimeout(600);
+}
+
+async function bruteForceAttack(page) {
+  for (let dx = -3; dx <= 3; dx++) {
+    for (let dy = -3; dy <= 3; dy++) {
+      await clickCanvasOffset(page, dx, dy);
+      const q = await page.evaluate(() => window.__RF_QA__?.());
+      if (q?.canAttackSelected) {
+        await page.locator('[data-testid="rf-attack-btn"]').click();
+        await page.waitForTimeout(1500);
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 async function waitPhase(page, phases, timeoutMs = 30_000) {
@@ -136,23 +151,9 @@ async function main() {
     detail: { phase: phase120, elapsed: Date.now() - t0 },
   });
 
-  // Red Kingdom spawns east of player — try border tiles
-  const attackBtn = page.locator('[data-testid="rf-attack-btn"]');
-  for (const [dx, dy] of [
-    [2, 0],
-    [1, 0],
-    [3, 0],
-    [0, 0],
-    [2, 1],
-    [-2, 0],
-  ]) {
-    await clickCanvasOffset(page, dx, dy);
-    if (await attackBtn.isEnabled().catch(() => false)) {
-      await attackBtn.click();
-      await page.waitForTimeout(1500);
-      break;
-    }
-  }
+  // Bridge toward Red Kingdom if needed, then attack
+  await expandUntil(page, 4);
+  await bruteForceAttack(page);
   await page.screenshot({ path: join(SHOTS, "05-first-battle.png") });
   const missionAtk = await page.evaluate(() => window.__RF_QA__?.());
   mark("gate-120s-attack", (missionAtk?.mission?.attackCount ?? 0) >= 1 || missionAtk?.mission?.phase === "counter", {
