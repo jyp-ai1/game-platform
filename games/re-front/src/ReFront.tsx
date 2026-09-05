@@ -204,6 +204,7 @@ export function ReFrontGame() {
   const [styleId, setStyleId] = useState("green");
   const [color, setColor] = useState<string>(PLAYER_GREEN);
   const [selected, setSelected] = useState<{ cx: number; cy: number } | null>(null);
+  const selectedRef = useRef<{ cx: number; cy: number } | null>(null);
   const [pendingExpand, setPendingExpand] = useState<{ cx: number; cy: number } | null>(null);
   const [cam, setCam] = useState({ x: RF_GRID / 2, y: RF_GRID / 2 });
   const [zoom, setZoom] = useState(1.15);
@@ -583,6 +584,7 @@ export function ReFrontGame() {
       const rect = e.currentTarget.getBoundingClientRect();
       const cell = screenToCell(e.clientX - rect.left, e.clientY - rect.top, viewSize.w, viewSize.h, cam, zoom);
       if (!cell) return;
+      selectedRef.current = cell;
       setSelected(cell);
       if (mission.phase === "expand" && canExpand(worldRef.current, cell.cx, cell.cy, deviceId)) {
         setPendingExpand(cell);
@@ -758,17 +760,21 @@ export function ReFrontGame() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const debug = new URLSearchParams(window.location.search).get("debug") === "1";
-    (window as unknown as { __RF_QA__?: () => unknown }).__RF_QA__ = () => ({
-      deviceId,
-      mission,
-      me: localNation(worldRef.current, deviceId),
-      selected,
-      canAttackSelected:
-        selected && me ? canAttack(worldRef.current, selected.cx, selected.cy, deviceId) : false,
-      phase: mission.phase,
-      debug,
-    });
-  }, [deviceId, me, mission, selected]);
+    (window as unknown as { __RF_QA__?: () => unknown }).__RF_QA__ = () => {
+      const w = worldRef.current;
+      const sel = selectedRef.current;
+      const local = localNation(w, deviceId);
+      return {
+        deviceId,
+        mission,
+        me: local,
+        selected: sel,
+        canAttackSelected: sel && local ? canAttack(w, sel.cx, sel.cy, deviceId) : false,
+        phase: mission.phase,
+        debug,
+      };
+    };
+  }, [deviceId, me, mission]);
 
   const selectedInfo = selected ? cellAt(world, selected.cx, selected.cy) : null;
   const canExp = (pendingExpand ?? selected) && me ? canExpand(world, (pendingExpand ?? selected)!.cx, (pendingExpand ?? selected)!.cy, deviceId) : false;

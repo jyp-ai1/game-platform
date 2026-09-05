@@ -284,7 +284,7 @@ export function createRfWorld(localId: string, nickname: string, humans: HumanSe
     const botId = `bot-${slot}`;
     const spawn =
       b === 0
-        ? { cx: Math.min(RF_GRID - 4, humanSpawn.cx + 4), cy: humanSpawn.cy }
+        ? { cx: Math.min(RF_GRID - 4, humanSpawn.cx + 3), cy: humanSpawn.cy }
         : findSpawn(seats.length + b, 0);
     world.nations[botId] = {
       id: botId,

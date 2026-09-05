@@ -90,6 +90,7 @@ async function bruteForceAttack(page) {
   for (let dx = -3; dx <= 3; dx++) {
     for (let dy = -3; dy <= 3; dy++) {
       await clickCanvasOffset(page, dx, dy);
+      await page.waitForTimeout(350);
       const q = await page.evaluate(() => window.__RF_QA__?.());
       if (q?.canAttackSelected) {
         await page.locator('[data-testid="rf-attack-btn"]').click();
