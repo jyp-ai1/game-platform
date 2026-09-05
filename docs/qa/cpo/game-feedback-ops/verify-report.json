@@ -1,0 +1,37 @@
+{
+  "gate": "game-feedback-ops",
+  "title": "Game Feedback & QA Operations Foundation",
+  "status": "READY_FOR_DEPLOY",
+  "reFrontFrozen": true,
+  "step4Touched": false,
+  "p0Games": ["agar", "snake", "bomber", "re-front"],
+  "territoryWarExcluded": true,
+  "typecheckWeb": "PASS",
+  "build": "PASS",
+  "previewQa": "PENDING_DEPLOY",
+  "migrationRequired": "0036_game_comment_feedback.sql",
+  "successCriteria": {
+    "dailyGameIssueVisibility": "YES (after migration + deploy)",
+    "workOrderReady": "YES (admin summary API + status field NEW)"
+  },
+  "changedFiles": [
+    "supabase/migrations/0036_game_comment_feedback.sql",
+    "apps/web/lib/game-feedback-types.ts",
+    "apps/web/lib/supabase/game-comments.ts",
+    "apps/web/app/api/games/[slug]/comments/route.ts",
+    "apps/web/app/api/admin/feedback/summary/route.ts",
+    "apps/web/components/game-detail-extras.tsx",
+    "tools/qa/game-feedback-ops-qa.mjs",
+    "package.json"
+  ],
+  "apis": {
+    "postComment": "POST /api/games/[slug]/comments { author, content, feedbackType? }",
+    "listComments": "GET /api/games/[slug]/comments",
+    "dailySummary": "GET /api/admin/feedback/summary?date=YYYY-MM-DD (admin auth)",
+    "gameSummary": "GET /api/admin/feedback/summary?gameSlug=snake (admin auth)",
+    "listDates": "GET /api/admin/feedback/summary?listDates=1 (admin auth)"
+  },
+  "feedbackTypes": ["opinion", "bug", "idea", "fun", "mobile"],
+  "statusWorkflow": ["NEW", "REVIEWING", "PLANNED", "IN_PROGRESS", "QA", "RELEASED"],
+  "finishedAt": "2026-09-06T01:45:00+09:00"
+}
