@@ -93,9 +93,12 @@ async function bruteForceAttack(page) {
       await page.waitForTimeout(350);
       const q = await page.evaluate(() => window.__RF_QA__?.());
       if (q?.canAttackSelected) {
-        await page.locator('[data-testid="rf-attack-btn"]').click();
-        await page.waitForTimeout(1500);
-        return true;
+        const attackBtn = page.locator('[data-testid="rf-attack-btn"]');
+        if ((await attackBtn.count()) > 0 && (await attackBtn.isEnabled().catch(() => false))) {
+          await attackBtn.click();
+          await page.waitForTimeout(1500);
+          return true;
+        }
       }
     }
   }
@@ -132,7 +135,7 @@ async function main() {
     detail: { expandCount, elapsed: Date.now() - t0 },
   });
 
-  await expandUntil(page, 3);
+  await expandUntil(page, 3, 20);
   await page.waitForTimeout(3500);
   await page.screenshot({ path: join(SHOTS, "03-growth.png") });
   const mission60 = await page.evaluate(() => window.__RF_QA__?.());
