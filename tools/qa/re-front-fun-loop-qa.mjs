@@ -155,13 +155,25 @@ async function main() {
     detail: { phase: phase120, elapsed: Date.now() - t0 },
   });
 
-  // Bridge toward Red Kingdom if needed, then attack
+  // Bridge toward Red Kingdom if needed, then attack (UI + debug engine fallback)
   await expandUntil(page, 4);
+  await page.waitForTimeout(1200);
   await bruteForceAttack(page);
+  const atkEngine = await page.evaluate(() => window.__RF_QA_ATTACK__?.() ?? { ok: false });
+  if (!atkEngine.ok) {
+    await page.waitForTimeout(800);
+    await page.evaluate(() => window.__RF_QA_ATTACK__?.());
+  }
+  await page.waitForTimeout(1200);
   await page.screenshot({ path: join(SHOTS, "05-first-battle.png") });
   const missionAtk = await page.evaluate(() => window.__RF_QA__?.());
   mark("gate-120s-attack", (missionAtk?.mission?.attackCount ?? 0) >= 1 || missionAtk?.mission?.phase === "counter", {
-    detail: { phase: missionAtk?.mission?.phase, attacks: missionAtk?.mission?.attackCount },
+    detail: {
+      phase: missionAtk?.mission?.phase,
+      attacks: missionAtk?.mission?.attackCount,
+      attackableCount: missionAtk?.attackableCount,
+      engineAttack: atkEngine,
+    },
   });
 
   await page.waitForTimeout(2500);

@@ -778,26 +778,51 @@ export function ReFrontGame() {
       const w = worldRef.current;
       const sel = selectedRef.current;
       const local = localNation(w, deviceId);
+      const attackable: Array<{ cx: number; cy: number }> = [];
+      for (let cy = 0; cy < RF_GRID; cy++) {
+        for (let cx = 0; cx < RF_GRID; cx++) {
+          if (local && canAttack(w, cx, cy, deviceId)) attackable.push({ cx, cy });
+        }
+      }
       return {
         deviceId,
         mission,
         me: local,
         selected: sel,
         canAttackSelected: sel && local ? canAttack(w, sel.cx, sel.cy, deviceId) : false,
+        attackableCount: attackable.length,
+        attackableSample: attackable.slice(0, 3),
         phase: mission.phase,
         debug,
       };
     };
-  }, [deviceId, me, mission]);
+    if (debug) {
+      (window as unknown as { __RF_QA_ATTACK__?: () => { ok: boolean; cx?: number; cy?: number } }).__RF_QA_ATTACK__ =
+        () => {
+          const w = worldRef.current;
+          for (let cy = 0; cy < RF_GRID; cy++) {
+            for (let cx = 0; cx < RF_GRID; cx++) {
+              if (canAttack(w, cx, cy, deviceId)) {
+                const ok = dispatchAction({ type: "attack", cx, cy, nationId: deviceId, pct: 0.5 });
+                if (ok) setMission((m) => advanceMissionAfterAttack(m));
+                return { ok, cx, cy };
+              }
+            }
+          }
+          return { ok: false };
+        };
+    }
+  }, [deviceId, dispatchAction, mission]);
 
-  const selectedInfo = selected ? cellAt(world, selected.cx, selected.cy) : null;
-  const canExp = (pendingExpand ?? selected) && me ? canExpand(world, (pendingExpand ?? selected)!.cx, (pendingExpand ?? selected)!.cy, deviceId) : false;
-  const canAtk = selected && me ? canAttack(world, selected.cx, selected.cy, deviceId) : false;
-  const expandCell = pendingExpand ?? selected;
+  const sel = selectedRef.current ?? selected;
+  const selectedInfo = sel ? cellAt(world, sel.cx, sel.cy) : null;
+  const canExp = (pendingExpand ?? sel) && me ? canExpand(world, (pendingExpand ?? sel)!.cx, (pendingExpand ?? sel)!.cy, deviceId) : false;
+  const canAtk = sel && me ? canAttack(world, sel.cx, sel.cy, deviceId) : false;
+  const expandCell = pendingExpand ?? sel;
   const expandCost = expandCell ? terrainExpandCost(world, expandCell.cx, expandCell.cy, deviceId) : RF_EXPAND_COST;
 
   const selectionHint = (() => {
-    if (!selected) return "맵에서 타일을 클릭하세요";
+    if (!sel) return "맵에서 타일을 클릭하세요";
     if (selectedInfo?.slot === mySlot) return "🟢 내 영토입니다";
     if (selectedInfo?.slot === 0) return "🟡 빈 땅 — EXPAND로 차지하세요";
     if (selectedInfo?.nation?.tutorialAggressor) return "🔴 RED KINGDOM — Mission 2에서 공격";
