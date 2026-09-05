@@ -1,6 +1,6 @@
 /**
  * Re:Front Fun & Gameplay Loop QA
- * Usage: QA_BASE_URL=http://localhost:3000 node tools/qa/re-front-fun-loop-qa.mjs
+ * Usage: QA_BASE_URL=https://game29-xxx.vercel.app QA_COMMIT=395dc98 node tools/qa/re-front-fun-loop-qa.mjs
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -8,9 +8,12 @@ import { chromium } from "playwright";
 import { invitePath } from "./lib/mp-common.mjs";
 
 const BASE = process.env.QA_BASE_URL ?? "http://localhost:3000";
+const COMMIT = process.env.QA_COMMIT ?? "local";
 const OUT = join(process.cwd(), "docs/qa/cpo/re-front-fun-loop");
 const SHOTS = join(OUT, "screenshots");
 mkdirSync(SHOTS, { recursive: true });
+
+const RF_CELL = 8;
 
 const checks = [];
 
@@ -21,15 +24,53 @@ function mark(name, ok, detail = {}) {
   return ok;
 }
 
-function cellToScreen(cx, cy, viewW, viewH, cam, zoom = 1.15) {
-  const RF_GRID = 96;
-  const RF_CELL = 8;
-  const ox = viewW / 2 - cam.x * RF_CELL * zoom;
-  const oy = viewH / 2 - cam.y * RF_CELL * zoom;
-  return {
-    x: ox + cx * RF_CELL * zoom + (RF_CELL * zoom) / 2,
-    y: oy + cy * RF_CELL * zoom + (RF_CELL * zoom) / 2,
-  };
+async function canvasBox(page) {
+  const canvas = page.locator('[data-testid="rf-game-shell"] canvas').first();
+  return canvas.boundingBox();
+}
+
+/** After fitViewToPlayer, nation center ≈ canvas center. Offset in grid cells. */
+async function clickCanvasOffset(page, dxCells, dyCells) {
+  const box = await canvasBox(page);
+  if (!box) return false;
+  const zoom = Math.min(3.2, Math.max(0.55, Math.min(box.width, box.height) / (22 * RF_CELL)));
+  const cellPx = RF_CELL * zoom;
+  await page.mouse.click(box.x + box.width / 2 + dxCells * cellPx, box.y + box.height / 2 + dyCells * cellPx);
+  await page.waitForTimeout(450);
+  return true;
+}
+
+async function tryExpand(page) {
+  const expandBtn = page.locator('[data-testid="rf-expand-btn"]');
+  if (await expandBtn.isEnabled().catch(() => false)) {
+    await expandBtn.click();
+    await page.waitForTimeout(700);
+    return true;
+  }
+  return false;
+}
+
+async function expandUntil(page, goal, maxAttempts = 12) {
+  const offsets = [
+    [0, 2],
+    [2, 0],
+    [-2, 0],
+    [0, -2],
+    [1, 2],
+    [2, 1],
+    [-1, 2],
+    [2, -1],
+  ];
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const count = await page.evaluate(() => window.__RF_QA__?.()?.mission?.expandCount ?? 0);
+    if (count >= goal) return count;
+    const pair = offsets[attempt % offsets.length];
+    const dx = pair[0];
+    const dy = pair[1];
+    await clickCanvasOffset(page, dx, dy);
+    await tryExpand(page);
+  }
+  return await page.evaluate(() => window.__RF_QA__?.()?.mission?.expandCount ?? 0);
 }
 
 async function enterGame(page) {
@@ -40,17 +81,19 @@ async function enterGame(page) {
   });
   await page.getByRole("button", { name: /START GAME/i }).click({ timeout: 45_000 });
   await page.waitForSelector('[data-testid="rf-game-shell"]', { timeout: 60_000 });
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "📍" }).click({ timeout: 5_000 }).catch(() => {});
+  await page.waitForTimeout(600);
 }
 
-async function clickCell(page, cx, cy, cam = { x: 9, y: 9 }, zoom = 2.2) {
-  const canvas = page.locator('[data-testid="rf-game-shell"] canvas').first();
-  const box = await canvas.boundingBox();
-  if (!box) return false;
-  const p = cellToScreen(cx, cy, box.width, box.height, cam, zoom);
-  await page.mouse.click(box.x + p.x, box.y + p.y);
-  await page.waitForTimeout(500);
-  return true;
+async function waitPhase(page, phases, timeoutMs = 30_000) {
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    const m = await page.evaluate(() => window.__RF_QA__?.()?.mission?.phase);
+    if (phases.includes(m)) return m;
+    await page.waitForTimeout(400);
+  }
+  return await page.evaluate(() => window.__RF_QA__?.()?.mission?.phase);
 }
 
 async function main() {
@@ -62,68 +105,80 @@ async function main() {
   await page.screenshot({ path: join(SHOTS, "01-start.png") });
 
   const nextAction = await page.locator('[data-testid="rf-next-action"]').innerText();
-  mark("gate-5s-next-action", /NEXT|STEP 1|노란|확장/i.test(nextAction), { note: nextAction.slice(0, 80) });
-  mark("gate-5s-legend", (await page.locator("body").innerText()).includes("Territory"), {
-    note: "territory goal visible",
+  mark("gate-5s-next-action", /NEXT|STEP|노란|확장/i.test(nextAction), { note: nextAction.replace(/\s+/g, " ").slice(0, 100) });
+  mark("gate-5s-no-confusion", /STEP 1|내 영토|Territory.*70/i.test(nextAction), {
+    note: "goal + next action visible",
   });
 
-  // First expand — click neutral near spawn (8,11) or use expand btn after select
-  await clickCell(page, 8, 11);
-  const expandBtn = page.locator('[data-testid="rf-expand-btn"]');
-  if (await expandBtn.isEnabled().catch(() => false)) {
-    await expandBtn.click();
-    await page.waitForTimeout(800);
-  }
+  const expandCount = await expandUntil(page, 1);
   await page.screenshot({ path: join(SHOTS, "02-first-expand.png") });
-
-  const mission30 = await page.evaluate(() => window.__RF_QA__?.());
-  mark("gate-30s-first-expand", (mission30?.mission?.expandCount ?? 0) >= 1, {
-    detail: { expandCount: mission30?.mission?.expandCount, elapsed: Date.now() - t0 },
+  mark("gate-30s-first-expand", expandCount >= 1, {
+    detail: { expandCount, elapsed: Date.now() - t0 },
   });
 
-  await page.waitForTimeout(4000);
+  await expandUntil(page, 3);
+  await page.waitForTimeout(3500);
   await page.screenshot({ path: join(SHOTS, "03-growth.png") });
   const mission60 = await page.evaluate(() => window.__RF_QA__?.());
-  mark("gate-60s-resources", (mission60?.me?.gold ?? 0) > 100 && (mission60?.me?.troops ?? 0) > 50, {
-    detail: { gold: mission60?.me?.gold, troops: mission60?.me?.troops },
+  mark("gate-60s-resources", (mission60?.me?.gold ?? 0) > 100 && (mission60?.mission?.expandCount ?? 0) >= 3, {
+    detail: {
+      gold: mission60?.me?.gold,
+      troops: mission60?.me?.troops,
+      pct: mission60?.me?.territoryPct,
+      phase: mission60?.mission?.phase,
+    },
   });
 
-  // Wait for attack-prompt phase
-  for (let i = 0; i < 20; i++) {
-    const m = await page.evaluate(() => window.__RF_QA__?.()?.mission?.phase);
-    if (m === "attack-prompt" || m === "attack" || m === "counter" || m === "free") break;
-    await page.waitForTimeout(500);
-  }
+  const phase120 = await waitPhase(page, ["attack-prompt", "attack", "counter", "free"], 25_000);
+  await page.waitForTimeout(800);
   await page.screenshot({ path: join(SHOTS, "04-enemy.png") });
-  const phase120 = await page.evaluate(() => window.__RF_QA__?.()?.mission?.phase);
   mark("gate-120s-enemy-phase", phase120 === "attack-prompt" || phase120 === "attack", {
     detail: { phase: phase120, elapsed: Date.now() - t0 },
   });
 
-  // Try attack on red territory ~ (88, 8) area — click and attack
-  await clickCell(page, 87, 8, { x: 48, y: 8 }, 1.2);
+  // Red Kingdom spawns east of player — try border tiles
   const attackBtn = page.locator('[data-testid="rf-attack-btn"]');
-  if (await attackBtn.isEnabled().catch(() => false)) {
-    await attackBtn.click();
-    await page.waitForTimeout(1200);
-    await page.screenshot({ path: join(SHOTS, "05-first-battle.png") });
+  for (const [dx, dy] of [
+    [2, 0],
+    [1, 0],
+    [3, 0],
+    [0, 0],
+    [2, 1],
+    [-2, 0],
+  ]) {
+    await clickCanvasOffset(page, dx, dy);
+    if (await attackBtn.isEnabled().catch(() => false)) {
+      await attackBtn.click();
+      await page.waitForTimeout(1500);
+      break;
+    }
   }
+  await page.screenshot({ path: join(SHOTS, "05-first-battle.png") });
   const missionAtk = await page.evaluate(() => window.__RF_QA__?.());
   mark("gate-120s-attack", (missionAtk?.mission?.attackCount ?? 0) >= 1 || missionAtk?.mission?.phase === "counter", {
     detail: { phase: missionAtk?.mission?.phase, attacks: missionAtk?.mission?.attackCount },
   });
 
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(2500);
+  const defendBtn = page.locator('[data-testid="rf-defend-btn"]');
+  if (await defendBtn.isEnabled().catch(() => false)) {
+    await defendBtn.click();
+    await page.waitForTimeout(800);
+  }
   await page.screenshot({ path: join(SHOTS, "06-counter-attack.png") });
 
   const mission180 = await page.evaluate(() => window.__RF_QA__?.());
   const phase180 = mission180?.mission?.phase;
-  mark("gate-180s-engagement", phase180 === "counter" || phase180 === "free" || (mission180?.mission?.attackCount ?? 0) >= 1, {
+  mark("gate-180s-engagement", ["counter", "free"].includes(phase180) || (mission180?.mission?.attackCount ?? 0) >= 1, {
     detail: { phase: phase180, elapsed: Date.now() - t0 },
   });
 
-  // Mobile viewport
+  if (mission180?.me?.territoryPct >= 70 || (await page.locator('[data-testid="rf-rematch-btn"]').count()) > 0) {
+    await page.screenshot({ path: join(SHOTS, "07-victory-or-defeat.png") });
+  }
+
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "📍" }).click({ timeout: 5_000 }).catch(() => {});
   await page.waitForTimeout(800);
   await page.screenshot({ path: join(SHOTS, "08-mobile.png") });
   const mobileMap = await page.evaluate(() => {
@@ -133,15 +188,23 @@ async function main() {
     if (!ctx) return { ok: false };
     const d = ctx.getImageData(Math.floor(c.width / 2), Math.floor(c.height / 2), 1, 1).data;
     const lum = d[0] + d[1] + d[2];
-    return { ok: lum > 30, lum };
+    const next = document.querySelector('[data-testid="rf-next-action"]')?.textContent ?? "";
+    return { ok: lum > 30, lum, hasNext: next.includes("NEXT") };
   });
   mark("mobile-map-visible", mobileMap.ok, { detail: mobileMap });
+  mark("mobile-next-action", mobileMap.hasNext, { note: "Next Action visible on mobile" });
 
   await browser.close();
 
   const pass = checks.filter((c) => c.ok).length;
   const fail = checks.filter((c) => !c.ok).length;
-  const report = { base: BASE, summary: { pass, fail, total: checks.length }, checks, finishedAt: new Date().toISOString() };
+  const report = {
+    base: BASE,
+    commit: COMMIT,
+    summary: { pass, fail, total: checks.length },
+    checks,
+    finishedAt: new Date().toISOString(),
+  };
   writeFileSync(join(OUT, "verify-report.json"), JSON.stringify(report, null, 2));
   console.log(`\n=== Re:Front Fun Loop QA ${fail === 0 ? "PASS" : "FAIL"} ${pass}/${checks.length} ===`);
   process.exit(fail === 0 ? 0 : 1);

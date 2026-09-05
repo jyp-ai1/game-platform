@@ -256,9 +256,11 @@ export function createRfWorld(localId: string, nickname: string, humans: HumanSe
   const seats: HumanSeat[] =
     humans.length > 0 ? humans.slice(0, RF_MAX_PLAYERS) : [{ id: localId, nickname, color: NATION_COLORS[0] }];
 
+  let humanSpawn = findSpawn(0);
   seats.forEach((seat, i) => {
     const slot = i + 1;
     const spawn = findSpawn(i);
+    if (i === 0) humanSpawn = spawn;
     world.nations[seat.id] = {
       id: seat.id,
       slot,
@@ -280,7 +282,10 @@ export function createRfWorld(localId: string, nickname: string, humans: HumanSe
   for (let b = 0; b < botCount; b++) {
     const slot = seats.length + b + 1;
     const botId = `bot-${slot}`;
-    const spawn = findSpawn(seats.length + b, b === 0 ? 1 : 0);
+    const spawn =
+      b === 0
+        ? { cx: Math.min(RF_GRID - 4, humanSpawn.cx + 4), cy: humanSpawn.cy }
+        : findSpawn(seats.length + b, 0);
     world.nations[botId] = {
       id: botId,
       slot,
