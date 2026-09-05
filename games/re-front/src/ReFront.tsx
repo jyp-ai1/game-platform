@@ -541,6 +541,20 @@ export function ReFrontGame() {
     [broadcastRfSync, deviceId, recordReward, roomCode]
   );
 
+  useEffect(() => {
+    if (mission.phase !== "attack-prompt") return;
+    const w = worldRef.current;
+    for (let cy = 0; cy < RF_GRID; cy++) {
+      for (let cx = 0; cx < RF_GRID; cx++) {
+        if (canAttack(w, cx, cy, deviceId)) return;
+      }
+    }
+    const bridge = findExpandTargets(w, deviceId, 1)[0];
+    if (!bridge) return;
+    if (!isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current)) return;
+    dispatchAction({ type: "expand", cx: bridge.cx, cy: bridge.cy, nationId: deviceId });
+  }, [deviceId, dispatchAction, mission.phase, roomCode]);
+
   const onExpand = useCallback(() => {
     const cell = pendingExpand ?? selected;
     if (!cell || !me?.alive) return;
