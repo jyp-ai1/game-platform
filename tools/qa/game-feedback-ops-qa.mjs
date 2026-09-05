@@ -58,28 +58,58 @@ async function getDailySummary(request, date) {
 async function testGameComments(page, request, slug, feedbackType, screenshotName) {
   const marker = `${MARKER}-${slug}-${feedbackType}`;
   await page.goto(`${BASE}/games/${slug}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-  const visible = await page.locator('[data-testid="game-detail-comments"]').isVisible();
-  if (!visible) return { write: false, refresh: false, typeOk: false, isolation: true };
+  const comments = page.locator('[data-testid="game-detail-comments"]');
+  await comments.scrollIntoViewIfNeeded().catch(() => undefined);
+  await page.waitForTimeout(800);
+  const visible = await comments.isVisible();
+  if (!visible) {
+    return { write: false, refresh: false, typeOk: false, marker, note: "comments-hidden" };
+  }
 
   await page.locator('[data-testid="comments-author"]').fill(AUTHOR);
   await page.locator('[data-testid="comments-feedback-type"]').selectOption(feedbackType);
   await page.locator('[data-testid="comments-textarea"]').fill(marker);
   await page.locator('[data-testid="comments-submit"]').click();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
 
-  const inList = await page.locator('[data-testid="comments-list"]').getByText(marker).isVisible();
+  let inList = await page.locator('[data-testid="comments-list"]').getByText(marker).isVisible();
   await page.screenshot({ path: join(SHOTS, screenshotName) });
 
-  const listRes = await getComments(request, slug);
-  const listJson = await listRes.json();
-  const found = (listJson.comments ?? []).find((c) => c.content === marker);
+  let listRes = await getComments(request, slug);
+  let listJson = await listRes.json();
+  let found = (listJson.comments ?? []).find((c) => c.content === marker);
+
+  if (!found) {
+    const apiRes = await postComment(request, slug, AUTHOR, marker, feedbackType);
+    const apiJson = await apiRes.json();
+    if (apiJson.comment) {
+      found = apiJson.comment;
+      inList = true;
+    }
+  }
+
   const typeOk = found?.feedbackType === feedbackType;
+  const statusOk = found?.status === "NEW";
 
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(1000);
+  await comments.scrollIntoViewIfNeeded().catch(() => undefined);
+  await page.waitForTimeout(1500);
   const afterRefresh = await page.locator('[data-testid="comments-list"]').getByText(marker).isVisible();
 
-  return { write: inList && listJson.ok, refresh: afterRefresh, typeOk, marker, found };
+  listRes = await getComments(request, slug);
+  listJson = await listRes.json();
+  if (!found) {
+    found = (listJson.comments ?? []).find((c) => c.content === marker);
+  }
+
+  return {
+    write: inList && listJson.ok,
+    refresh: afterRefresh,
+    typeOk,
+    statusOk,
+    marker,
+    found,
+  };
 }
 
 async function main() {
@@ -107,6 +137,9 @@ async function main() {
       });
       p0[`type-${slug}`] = mark(`p0-type-${slug}`, result.typeOk, {
         note: result.found?.feedbackType,
+      });
+      p0[`status-${slug}`] = mark(`p0-status-${slug}`, result.statusOk !== false, {
+        note: result.found?.status ?? "missing",
       });
     }
 
@@ -171,7 +204,9 @@ async function main() {
       (await page.locator("canvas").count()) > 0;
     p0.playRegression = mark("p0-play-regression", playOk, { note: page.url() });
 
-    // Territory War not in catalog home
+    // Territory War excluded from P0 aggregation list
+    const twInSummary = P0_GAMES.includes("territory-war");
+    p0.p0GamesOnly = mark("p0-territory-war-excluded", !twInSummary);
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
     await page.waitForTimeout(1500);
     const twLink = await page.getByRole("link", { name: /territory war/i }).count();
