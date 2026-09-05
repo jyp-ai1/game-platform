@@ -1,0 +1,84 @@
+{
+  "source": "public GET /api/games/[slug]/comments",
+  "preview": "https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app",
+  "migration0036": "APPLIED",
+  "total": 66,
+  "byGame": {
+    "agar": 15,
+    "snake": 22,
+    "bomber": 15,
+    "re-front": 14
+  },
+  "byType": {
+    "opinion": 57,
+    "bug": 3,
+    "idea": 2,
+    "fun": 2,
+    "mobile": 2
+  },
+  "games": [
+    {
+      "gameSlug": "agar",
+      "total": 15,
+      "byType": {
+        "opinion": 13,
+        "bug": 0,
+        "idea": 0,
+        "fun": 0,
+        "mobile": 2
+      }
+    },
+    {
+      "gameSlug": "snake",
+      "total": 22,
+      "byType": {
+        "opinion": 19,
+        "bug": 3,
+        "idea": 0,
+        "fun": 0,
+        "mobile": 0
+      }
+    },
+    {
+      "gameSlug": "bomber",
+      "total": 15,
+      "byType": {
+        "opinion": 13,
+        "bug": 0,
+        "idea": 0,
+        "fun": 2,
+        "mobile": 0
+      }
+    },
+    {
+      "gameSlug": "re-front",
+      "total": 14,
+      "byType": {
+        "opinion": 12,
+        "bug": 0,
+        "idea": 2,
+        "fun": 0,
+        "mobile": 0
+      }
+    }
+  ],
+  "daily": {
+    "date": "2026-09-05",
+    "total": 18,
+    "byGame": {
+      "agar": 3,
+      "snake": 8,
+      "bomber": 4,
+      "re-front": 3
+    },
+    "byType": {
+      "opinion": 9,
+      "bug": 3,
+      "idea": 2,
+      "fun": 2,
+      "mobile": 2
+    }
+  },
+  "territoryWarExcluded": true,
+  "finishedAt": "2026-09-05T17:17:58.283Z"
+}

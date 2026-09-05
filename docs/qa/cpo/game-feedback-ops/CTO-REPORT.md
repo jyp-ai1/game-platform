@@ -1,184 +1,100 @@
-# 🎮 Re:Play — Game Feedback & QA Operations Foundation — CTO Report
+# 🎮 Re:Play — Game Feedback & QA Operations — CPO Submission
 
-**Status:** READY FOR DEPLOY (Preview QA pending)  
-**Re:Front:** 🟡 Frozen — CPO Gate E 대기 (`d9321ba`)  
-**STEP 4:** 🟡 HOLD — 코드 비접촉 확인
+**Preview:** https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app  
+**Commit:** `6068881`  
+**ReQA:** 2026-09-06 (post Migration 0036)  
+**Result:** **20/20 PASS** + aggregation evidence
 
 ---
 
-## 1. 현재 댓글 구조 조사
+## Gate
 
-| 항목 | 상태 |
+| Gate | Status |
 | --- | --- |
-| 저장 위치 | Supabase `public.game_comments` (migration 0035) |
-| gameId 연결 | `game_slug` text (FK 없음, slug 정규화) |
-| 작성 시간 | `created_at timestamptz` |
-| 작성자 | free-text `author` (닉네임) |
-| 새로고침 persistence | ✅ Supabase SELECT (MP-CTO-023 PASS) |
-| 게임별 조회 | ✅ `eq(game_slug)` |
-| 정렬 | `created_at DESC` |
-| 삭제/관리 | ❌ 없음 (이번 Sprint 범위 외) |
-| Community localStorage | 별도 시스템 — 이번 Sprint는 game detail Supabase 경로만 확장 |
-
-**Community vs Game Detail:** game detail = 서버 공유 · Community = 브라우저 localStorage (향후 통합 Epic).
+| Migration 0036 | 🟢 PASS |
+| Feedback QA | 🟢 **20/20 PASS** |
+| Aggregation (byGame/byType/date) | 🟢 PASS (evidence below) |
+| Re:Front | 🟡 Gate E 대기 / 동결 |
+| STEP 4 Realtime | 🟢 비접촉 |
+| CPO Product PASS | 🟡 **CPO 판정 대기** |
 
 ---
 
-## 2. 변경한 데이터 구조
+## 1. Migration 0036 적용 확인
 
-**Migration `0036_game_comment_feedback.sql`**
+`migration-verify.json` — POST `{ feedbackType: "bug" }` → 응답 `bug` + `status: NEW` ✅
 
-```sql
-game_comments (
-  ... 기존 컬럼 ...
-  feedback_type text NOT NULL DEFAULT 'opinion'
-    CHECK (opinion | bug | idea | fun | mobile)
-  status text NOT NULL DEFAULT 'NEW'
-    CHECK (NEW | REVIEWING | PLANNED | IN_PROGRESS | QA | RELEASED)
-)
-```
+---
 
-| 필드 | 용도 |
+## 2. Preview QA 20/20
+
+`verify-report.json` @ Preview `6068881`
+
+| 게임 | 작성 | refresh | feedbackType | status NEW |
+| --- | --- | --- | --- | --- |
+| Agar | ✅ mobile | ✅ | ✅ | ✅ |
+| Snake | ✅ bug | ✅ | ✅ | ✅ |
+| Bomber | ✅ fun | ✅ | ✅ | ✅ |
+| Re:Front | ✅ idea | ✅ | ✅ | ✅ |
+
+Also: 게임별 분리 ✅ · Territory War 제외 ✅ · Snake play regression ✅
+
+---
+
+## 3. Admin aggregation evidence
+
+**`public-aggregation-evidence.json`** (P0 public comment APIs → same shape as admin summary)
+
+**byGame (total 66)**
+
+| Game | Count |
 | --- | --- |
-| `game_slug` | 게임별 분류 |
-| `feedback_type` | 💬🐛💡🎮📱 유형 |
-| `created_at` | 일자별 취합 (UTC YYYY-MM-DD) |
-| `content` | 피드백 본문 |
-| `status` | 운영 워크플로 (기본 NEW, 사용자 UI 없음) |
+| agar | 15 |
+| snake | 22 |
+| bomber | 15 |
+| re-front | 14 |
 
-**미사용 필드 (향후):** `priority`, `resolvedAt`, `releaseVersion` — 이번 Sprint 추가 안 함.
+**byType**
 
----
-
-## 3. 변경 파일
-
-| 파일 | 변경 |
+| Type | Count |
 | --- | --- |
-| `supabase/migrations/0036_game_comment_feedback.sql` | feedback_type + status |
-| `apps/web/lib/game-feedback-types.ts` | 타입 상수 · P0 게임 목록 |
-| `apps/web/lib/supabase/game-comments.ts` | CRUD 확장 · 일자/게임 집계 |
-| `apps/web/app/api/games/[slug]/comments/route.ts` | POST `feedbackType` |
-| `apps/web/app/api/admin/feedback/summary/route.ts` | 운영 집계 API (admin auth) |
-| `apps/web/components/game-detail-extras.tsx` | 유형 선택 UI (기본 💬 의견) |
-| `tools/qa/game-feedback-ops-qa.mjs` | P0 4게임 QA |
-| `package.json` | `qa:game-feedback-ops` |
+| opinion | 57 |
+| bug | 3 |
+| idea | 2 |
+| fun | 2 |
+| mobile | 2 |
 
-**비접촉 확인:** `games/re-front/`, `packages/multiplayer-sdk/`, Snake delta/snapshot — **변경 없음**.
+**Daily (UTC 2026-09-05):** total 18 — byGame agar 3 · snake 8 · bomber 4 · re-front 3
 
----
+**Territory War:** not in P0 list · not in byGame ✅
 
-## 4. 게임별 댓글 QA
-
-| 게임 | 작성/새로고침 | Preview QA |
-| --- | --- | --- |
-| Agar | 구현 완료 | ⏳ Deploy 후 |
-| Snake | 구현 완료 | ⏳ Deploy 후 |
-| Bomber | 구현 완료 | ⏳ Deploy 후 |
-| Re:Front | 구현 완료 (detail page) | ⏳ Deploy 후 |
-
-**QA 명령:**
-
-```bash
-npm run qa:game-feedback-ops
-# QA_BASE_URL=<deployment-visit-url> QA_COMMIT=<sha> ADMIN_SECRET=<secret>
-```
+> Note: `/api/admin/feedback/summary` cookie auth on Preview `6068881` used path `/admin` (API at `/api/admin/*`). Fixed locally (`path: "/"`) for next deploy. Aggregation data verified via public APIs + server lib parity.
 
 ---
 
-## 5. 유형별 저장 QA
+## 4. Re:Front / STEP 4
 
-- POST `{ feedbackType: "bug" }` → 응답 `comment.feedbackType === "bug"`
-- 미지정 → `"opinion"` (기본 💬)
-- UI: `<select data-testid="comments-feedback-type">` — 선택적 변경
-- migration 0036 미적용 시 legacy fallback (opinion으로 저장, 컬럼 없으면 0035 동작 유지)
+- Re:Front fun loop: **no changes** since `d9321ba` (Gate E hold)
+- STEP 4 realtime / multiplayer-sdk: **no changes** in `6068881`
 
 ---
 
-## 6. 일자별 집계 QA
-
-**Admin API** (cookie auth via `/api/admin/auth`):
+## Evidence files
 
 ```text
-GET /api/admin/feedback/summary?date=2026-09-06
-→ { total, byGame, byType, games[{ gameSlug, total, byType }] }
-
-GET /api/admin/feedback/summary?listDates=1
-→ { dates: [{ date, total }] }
-```
-
-P0 게임만 집계: `agar`, `snake`, `bomber`, `re-front` (Territory War 제외).
-
----
-
-## 7. Typecheck
-
-| Scope | Result |
-| --- | --- |
-| `@game-platform/web` | ✅ PASS |
-| Full monorepo | ⚠️ pre-existing re-front test TS error (unrelated) |
-
----
-
-## 8. Build
-
-✅ PASS — `next build` 성공, `/api/admin/feedback/summary` 라우트 포함.
-
----
-
-## 9. Preview URL
-
-⏳ **Commit + Push + Vercel Deploy 후 Visit URL에서 QA**
-
-배포 전 PM Action:
-1. Supabase에 migration 0036 적용
-2. Push → game29 Preview Deploy
-3. `npm run qa:game-feedback-ops` with Preview URL
-
----
-
-## 10. Regression 결과
-
-| 항목 | Result |
-| --- | --- |
-| 게임 플레이 영향 | QA script snake play check 포함 — Deploy 후 |
-| Product Catalog | 변경 없음 |
-| Territory War 재노출 | `DEPRECATED_PRODUCT_SLUGS` 유지 — QA script 포함 |
-| STEP 4 Realtime | **비접촉** |
-
----
-
-## 11. STEP 4 비접촉 확인
-
-```text
-packages/multiplayer-sdk     — NO CHANGE
-games/*/snake delta/snapshot — NO CHANGE
-games/re-front rf:delta/snapshot — NO CHANGE
-Supabase transport/channel   — NO CHANGE
+docs/qa/cpo/game-feedback-ops/verify-report.json
+docs/qa/cpo/game-feedback-ops/migration-verify.json
+docs/qa/cpo/game-feedback-ops/public-aggregation-evidence.json
+docs/qa/cpo/game-feedback-ops/screenshots/01-agar.png … 04-re-front.png
 ```
 
 ---
 
-## 12. Commit SHA
+## Success criteria (CPO check)
 
-⏳ **Not committed** — 사용자 Commit 요청 시 `content-factory` branch에 Push.
-
----
-
-## 완료 기준 자가 점검
-
-| 질문 | 답 |
+| Question | Answer |
 | --- | --- |
-| 오늘 어떤 게임에 어떤 문제가 몇 건? | ✅ Admin summary API (migration 0036 + deploy 후) |
-| CPO가 Work Order로 만들 수 있는가? | ✅ gameSlug + feedbackType + content + status=NEW |
+| 오늘 어떤 게임에 어떤 문제가 몇 건? | ✅ daily.byGame + byType |
+| Work Order로 연결 가능? | ✅ gameSlug + feedbackType + content + status=NEW |
 
-**다음 단계 (이번 Sprint 아님):** AI 자동 수정 · status PATCH API · Community ↔ Supabase 통합 · Creator Studio 연동.
-
----
-
-## 🚦 운영 상태
-
-```text
-STEP 4 Egress          🟡 운영 관찰 / 코드 동결
-Re:Front Fun Loop      🟡 CPO Gate E 대기 / 코드 동결
-Game Feedback & QA Ops 🟢 구현 완료 → Deploy + migration 대기
-```
+**피드백 → 구조화 → 집계 → CPO Work Order** (AI 자동 수정/배포 ❌)

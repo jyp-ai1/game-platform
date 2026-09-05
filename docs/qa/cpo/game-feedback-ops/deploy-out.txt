@@ -1,0 +1,14 @@
+Game Feedback & QA Operations — Preview deploy @ 6068881
+
+Visit URL: https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app
+Deployment: dpl_3NoB1qW5ByvwHYFc3ce6HxYsNeDZ
+Branch: content-factory
+Commit: 6068881
+
+Migration 0036 status: NOT APPLIED (DATABASE_URL / SUPABASE_ACCESS_TOKEN unavailable locally)
+Apply: Supabase SQL editor → supabase/migrations/0036_game_comment_feedback.sql
+Or: DATABASE_URL=... node tools/qa/apply-migration-0036.mjs
+
+Preview QA: 16/20 FAIL (4× feedbackType blocked by migration; admin summary skipped without ADMIN_SECRET)
+Re-run after migration:
+  ADMIN_SECRET=... QA_BASE_URL=<visit-url> QA_COMMIT=6068881 npm run qa:game-feedback-ops

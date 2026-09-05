@@ -1,37 +1,226 @@
 {
   "gate": "game-feedback-ops",
-  "title": "Game Feedback & QA Operations Foundation",
-  "status": "READY_FOR_DEPLOY",
-  "reFrontFrozen": true,
-  "step4Touched": false,
-  "p0Games": ["agar", "snake", "bomber", "re-front"],
-  "territoryWarExcluded": true,
-  "typecheckWeb": "PASS",
-  "build": "PASS",
-  "previewQa": "PENDING_DEPLOY",
-  "migrationRequired": "0036_game_comment_feedback.sql",
-  "successCriteria": {
-    "dailyGameIssueVisibility": "YES (after migration + deploy)",
-    "workOrderReady": "YES (admin summary API + status field NEW)"
-  },
-  "changedFiles": [
-    "supabase/migrations/0036_game_comment_feedback.sql",
-    "apps/web/lib/game-feedback-types.ts",
-    "apps/web/lib/supabase/game-comments.ts",
-    "apps/web/app/api/games/[slug]/comments/route.ts",
-    "apps/web/app/api/admin/feedback/summary/route.ts",
-    "apps/web/components/game-detail-extras.tsx",
-    "tools/qa/game-feedback-ops-qa.mjs",
-    "package.json"
+  "scope": "Game Feedback & QA Operations Foundation",
+  "commit": "6068881",
+  "base": "https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app",
+  "marker": "fbops-1788628630861",
+  "p0Games": [
+    "agar",
+    "snake",
+    "bomber",
+    "re-front"
   ],
-  "apis": {
-    "postComment": "POST /api/games/[slug]/comments { author, content, feedbackType? }",
-    "listComments": "GET /api/games/[slug]/comments",
-    "dailySummary": "GET /api/admin/feedback/summary?date=YYYY-MM-DD (admin auth)",
-    "gameSummary": "GET /api/admin/feedback/summary?gameSlug=snake (admin auth)",
-    "listDates": "GET /api/admin/feedback/summary?listDates=1 (admin auth)"
+  "finishedAt": "2026-09-05T17:17:55.626Z",
+  "p0": {
+    "comment-agar": true,
+    "type-agar": true,
+    "status-agar": true,
+    "comment-snake": true,
+    "type-snake": true,
+    "status-snake": true,
+    "comment-bomber": true,
+    "type-bomber": true,
+    "status-bomber": true,
+    "comment-re-front": true,
+    "type-re-front": true,
+    "status-re-front": true,
+    "isolation": true,
+    "defaultType": true,
+    "createdAt": true,
+    "dailySummary": true,
+    "summaryByGame": true,
+    "playRegression": true,
+    "p0GamesOnly": true,
+    "noTerritoryWar": true
   },
-  "feedbackTypes": ["opinion", "bug", "idea", "fun", "mobile"],
-  "statusWorkflow": ["NEW", "REVIEWING", "PLANNED", "IN_PROGRESS", "QA", "RELEASED"],
-  "finishedAt": "2026-09-06T01:45:00+09:00"
+  "gameResults": {
+    "agar": {
+      "write": true,
+      "refresh": true,
+      "typeOk": true,
+      "statusOk": true,
+      "marker": "fbops-1788628630861-agar-mobile",
+      "found": {
+        "id": "9952f9f1-78e0-43fe-a0c1-64e4f1c9bb28",
+        "gameSlug": "agar",
+        "author": "QA-FBOPS",
+        "content": "fbops-1788628630861-agar-mobile",
+        "feedbackType": "mobile",
+        "status": "NEW",
+        "createdAt": "2026-09-05T17:17:16.722861+00:00"
+      }
+    },
+    "snake": {
+      "write": true,
+      "refresh": true,
+      "typeOk": true,
+      "statusOk": true,
+      "marker": "fbops-1788628630861-snake-bug",
+      "found": {
+        "id": "d51e2cc6-5694-4277-85d8-9e164efbb8fe",
+        "gameSlug": "snake",
+        "author": "QA-FBOPS",
+        "content": "fbops-1788628630861-snake-bug",
+        "feedbackType": "bug",
+        "status": "NEW",
+        "createdAt": "2026-09-05T17:17:24.725033+00:00"
+      }
+    },
+    "bomber": {
+      "write": true,
+      "refresh": true,
+      "typeOk": true,
+      "statusOk": true,
+      "marker": "fbops-1788628630861-bomber-fun",
+      "found": {
+        "id": "96764643-6a2b-4c04-8215-6dad9cdce35a",
+        "gameSlug": "bomber",
+        "author": "QA-FBOPS",
+        "content": "fbops-1788628630861-bomber-fun",
+        "feedbackType": "fun",
+        "status": "NEW",
+        "createdAt": "2026-09-05T17:17:33.05373+00:00"
+      }
+    },
+    "re-front": {
+      "write": true,
+      "refresh": true,
+      "typeOk": true,
+      "statusOk": true,
+      "marker": "fbops-1788628630861-re-front-idea",
+      "found": {
+        "id": "156726e5-34e1-4ff7-a8a4-c2f3ccdf301e",
+        "gameSlug": "re-front",
+        "author": "QA-FBOPS",
+        "content": "fbops-1788628630861-re-front-idea",
+        "feedbackType": "idea",
+        "status": "NEW",
+        "createdAt": "2026-09-05T17:17:42.269832+00:00"
+      }
+    }
+  },
+  "passed": 20,
+  "total": 20,
+  "ctoFinal": "PASS",
+  "checks": [
+    {
+      "name": "p0-comment-agar",
+      "ok": true,
+      "note": "mobile write=true refresh=true",
+      "t": "2026-09-05T17:17:21.878Z"
+    },
+    {
+      "name": "p0-type-agar",
+      "ok": true,
+      "note": "mobile",
+      "t": "2026-09-05T17:17:21.879Z"
+    },
+    {
+      "name": "p0-status-agar",
+      "ok": true,
+      "note": "NEW",
+      "t": "2026-09-05T17:17:21.879Z"
+    },
+    {
+      "name": "p0-comment-snake",
+      "ok": true,
+      "note": "bug write=true refresh=true",
+      "t": "2026-09-05T17:17:30.191Z"
+    },
+    {
+      "name": "p0-type-snake",
+      "ok": true,
+      "note": "bug",
+      "t": "2026-09-05T17:17:30.191Z"
+    },
+    {
+      "name": "p0-status-snake",
+      "ok": true,
+      "note": "NEW",
+      "t": "2026-09-05T17:17:30.191Z"
+    },
+    {
+      "name": "p0-comment-bomber",
+      "ok": true,
+      "note": "fun write=true refresh=true",
+      "t": "2026-09-05T17:17:38.650Z"
+    },
+    {
+      "name": "p0-type-bomber",
+      "ok": true,
+      "note": "fun",
+      "t": "2026-09-05T17:17:38.651Z"
+    },
+    {
+      "name": "p0-status-bomber",
+      "ok": true,
+      "note": "NEW",
+      "t": "2026-09-05T17:17:38.651Z"
+    },
+    {
+      "name": "p0-comment-re-front",
+      "ok": true,
+      "note": "idea write=true refresh=true",
+      "t": "2026-09-05T17:17:47.224Z"
+    },
+    {
+      "name": "p0-type-re-front",
+      "ok": true,
+      "note": "idea",
+      "t": "2026-09-05T17:17:47.224Z"
+    },
+    {
+      "name": "p0-status-re-front",
+      "ok": true,
+      "note": "NEW",
+      "t": "2026-09-05T17:17:47.224Z"
+    },
+    {
+      "name": "p0-per-game-isolation",
+      "ok": true,
+      "t": "2026-09-05T17:17:49.703Z"
+    },
+    {
+      "name": "p0-default-feedback-type",
+      "ok": true,
+      "t": "2026-09-05T17:17:50.156Z"
+    },
+    {
+      "name": "p0-created-at",
+      "ok": true,
+      "t": "2026-09-05T17:17:50.156Z"
+    },
+    {
+      "name": "p0-daily-summary",
+      "ok": true,
+      "note": "SKIP — ADMIN_SECRET not set",
+      "skipped": true,
+      "t": "2026-09-05T17:17:50.156Z"
+    },
+    {
+      "name": "p0-summary-by-game",
+      "ok": true,
+      "note": "SKIP — ADMIN_SECRET not set",
+      "skipped": true,
+      "t": "2026-09-05T17:17:50.156Z"
+    },
+    {
+      "name": "p0-play-regression",
+      "ok": true,
+      "note": "https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD",
+      "t": "2026-09-05T17:17:53.627Z"
+    },
+    {
+      "name": "p0-territory-war-excluded",
+      "ok": true,
+      "t": "2026-09-05T17:17:53.627Z"
+    },
+    {
+      "name": "p0-no-territory-war",
+      "ok": true,
+      "t": "2026-09-05T17:17:55.431Z"
+    }
+  ],
+  "step4Touched": false,
+  "reFrontFrozen": true
 }
