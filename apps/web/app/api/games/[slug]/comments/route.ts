@@ -17,14 +17,23 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function POST(request: Request, context: RouteContext) {
   const { slug } = await context.params;
-  let body: { author?: string; content?: string };
+  let body: { author?: string; content?: string; feedbackType?: string };
   try {
-    body = (await request.json()) as { author?: string; content?: string };
+    body = (await request.json()) as {
+      author?: string;
+      content?: string;
+      feedbackType?: string;
+    };
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
   }
 
-  const result = await createGameComment(slug, body.author ?? "", body.content ?? "");
+  const result = await createGameComment(
+    slug,
+    body.author ?? "",
+    body.content ?? "",
+    body.feedbackType
+  );
   if (!result.ok) {
     const status = result.field ? 400 : 503;
     return NextResponse.json(result, { status });

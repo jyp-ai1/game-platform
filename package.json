@@ -63,7 +63,8 @@
     "qa:rc3-preview": "node tools/qa/run-rc3-preview.mjs",
     "qa:rc4-production": "node tools/qa/run-rc4-production.mjs",
     "qa:web-bundle-top": "node tools/qa/web-bundle-top.mjs",
-    "qa:lighthouse-perf": "node tools/qa/run-lighthouse-perf-report.mjs"
+    "qa:lighthouse-perf": "node tools/qa/run-lighthouse-perf-report.mjs",
+    "qa:game-feedback-ops": "node tools/qa/game-feedback-ops-qa.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

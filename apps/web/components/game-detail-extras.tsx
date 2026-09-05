@@ -9,6 +9,11 @@ import { StarRatingPanel } from "@/components/community-ratings-panel";
 import type { GameComment } from "@/lib/supabase/game-comments";
 import { MAX_COMMENT_LENGTH } from "@/lib/supabase/game-comments";
 import {
+  FEEDBACK_TYPES,
+  FEEDBACK_TYPE_LABELS,
+  type FeedbackType,
+} from "@/lib/game-feedback-types";
+import {
   buildInvitePlayUrl,
   readInviteOrigin,
   resolveInviteRoomCode,
@@ -18,6 +23,7 @@ import { getLastNickname } from "@game-platform/game-sdk";
 export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
   const [author, setAuthor] = useState("");
   const [message, setMessage] = useState("");
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>("opinion");
   const [gateMsg, setGateMsg] = useState<string | null>(null);
   const [comments, setComments] = useState<GameComment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +62,7 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
       const res = await fetch(`/api/games/${encodeURIComponent(gameSlug)}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ author: author || "Player", content: message }),
+        body: JSON.stringify({ author: author || "Player", content: message, feedbackType }),
       });
       const data = (await res.json()) as {
         ok: boolean;
@@ -99,7 +105,7 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
     >
       <h3 className="font-semibold">Comments</h3>
       <p className="mt-1 text-xs text-muted-foreground">
-        서버에 저장되는 공유 댓글 · 로그인 없이 작성 가능
+        서버에 저장되는 피드백 · 기본 💬 의견 · 유형 선택 가능
       </p>
       <form className="mt-3 space-y-2" onSubmit={handleSubmit}>
         <input
@@ -111,6 +117,24 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
           maxLength={32}
           data-testid="comments-author"
         />
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor={`feedback-type-${gameSlug}`} className="text-xs text-muted-foreground">
+            유형
+          </label>
+          <select
+            id={`feedback-type-${gameSlug}`}
+            className="rounded-lg border bg-background/60 px-2 py-1 text-xs backdrop-blur"
+            value={feedbackType}
+            onChange={(e) => setFeedbackType(e.target.value as FeedbackType)}
+            data-testid="comments-feedback-type"
+          >
+            {FEEDBACK_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {FEEDBACK_TYPE_LABELS[type].emoji} {FEEDBACK_TYPE_LABELS[type].label}
+              </option>
+            ))}
+          </select>
+        </div>
         <textarea
           className="w-full rounded-xl border bg-background/60 px-3 py-2 text-sm backdrop-blur"
           rows={2}
@@ -150,7 +174,12 @@ export function GameDetailComments({ gameSlug }: { gameSlug: string }) {
           {comments.map((c) => (
             <li key={c.id} className="rounded-lg border border-white/5 px-3 py-2 text-sm" data-testid="comment-item">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-xs text-muted-foreground">{c.author}</p>
+                <p className="text-xs text-muted-foreground">
+                  {c.author}
+                  <span className="ml-2" data-testid="comment-feedback-type">
+                    {FEEDBACK_TYPE_LABELS[c.feedbackType]?.emoji ?? "💬"}
+                  </span>
+                </p>
                 <p className="text-[10px] text-muted-foreground">{formatDate(c.createdAt)}</p>
               </div>
               <p data-testid="comment-content">{c.content}</p>
