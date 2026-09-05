@@ -1,0 +1,93 @@
+{
+  "base": "https://game29-4w102erxn-jyp-ai1s-projects.vercel.app",
+  "commit": "59a60c5",
+  "summary": {
+    "pass": 9,
+    "fail": 0,
+    "total": 9
+  },
+  "checks": [
+    {
+      "name": "gate-5s-next-action",
+      "ok": true,
+      "note": "STEP 1 — START 🎯 NEXT: 노란 땅을 확장하세요 내 영토 — 내 초록 영토 주변을 확인하세요",
+      "t": "2026-09-05T09:20:10.120Z"
+    },
+    {
+      "name": "gate-5s-no-confusion",
+      "ok": true,
+      "note": "goal + next action visible",
+      "t": "2026-09-05T09:20:10.127Z"
+    },
+    {
+      "name": "gate-30s-first-expand",
+      "ok": true,
+      "detail": {
+        "expandCount": 1,
+        "elapsed": 10014
+      },
+      "t": "2026-09-05T09:20:12.866Z"
+    },
+    {
+      "name": "gate-60s-resources",
+      "ok": true,
+      "detail": {
+        "gold": 548.64,
+        "troops": 221.5436,
+        "pct": 0.13,
+        "phase": "attack-prompt"
+      },
+      "t": "2026-09-05T09:20:21.291Z"
+    },
+    {
+      "name": "gate-120s-enemy-phase",
+      "ok": true,
+      "detail": {
+        "phase": "attack-prompt",
+        "elapsed": 19310
+      },
+      "t": "2026-09-05T09:20:22.162Z"
+    },
+    {
+      "name": "gate-120s-attack",
+      "ok": true,
+      "detail": {
+        "phase": "attack",
+        "attacks": 1,
+        "attackableCount": 3,
+        "engineAttack": {
+          "ok": true,
+          "cx": 12,
+          "cy": 8
+        }
+      },
+      "t": "2026-09-05T09:21:12.757Z"
+    },
+    {
+      "name": "gate-180s-engagement",
+      "ok": true,
+      "detail": {
+        "phase": "attack",
+        "elapsed": 102502
+      },
+      "t": "2026-09-05T09:21:45.354Z"
+    },
+    {
+      "name": "mobile-map-visible",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "lum": 227,
+        "hasNext": true
+      },
+      "t": "2026-09-05T09:21:46.354Z"
+    },
+    {
+      "name": "mobile-next-action",
+      "ok": true,
+      "note": "Next Action visible on mobile",
+      "t": "2026-09-05T09:21:46.354Z"
+    }
+  ],
+  "finishedAt": "2026-09-05T09:21:46.727Z"
+}
