@@ -120,6 +120,18 @@ export function terrainLabel(t: RfTerrain): string {
   return "Plains";
 }
 
+export function personalityLabel(p: RfAiPersonality): string {
+  if (p === "aggressor") return "AGGRESSOR";
+  if (p === "turtle") return "TURTLE";
+  return "EXPANDER";
+}
+
+export function personalityEmoji(p: RfAiPersonality): string {
+  if (p === "aggressor") return "⚔️";
+  if (p === "turtle") return "🛡️";
+  return "🌱";
+}
+
 export function terrainExpandCost(world: RfWorld, cx: number, cy: number, nationId?: string): number {
   if (nationId) {
     const n = world.nations[nationId];
@@ -399,7 +411,7 @@ export function applyExpand(world: RfWorld, cx: number, cy: number, nationId: st
   recomputePct(world);
   addPopup(
     world,
-    tutorial ? "🎉 영토 +1! 나라가 성장했습니다." : `+1 TERRITORY · +120 GOLD`,
+    tutorial ? "+1 TERRITORY · +GOLD · 영토가 성장했습니다!" : "+1 TERRITORY · +120 GOLD",
     n.color
   );
   checkVictory(world);

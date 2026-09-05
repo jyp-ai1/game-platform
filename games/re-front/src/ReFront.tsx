@@ -41,6 +41,8 @@ import {
   findNearestEnemy,
   localNation,
   nationCenter,
+  personalityEmoji,
+  personalityLabel,
   reconcileHumans,
   restartRfRound,
   rfQaForceWin,
@@ -140,6 +142,18 @@ function isSimHost(code: string, deviceId: string, lastStateAt: number, startedA
   return false;
 }
 
+function camOffset(viewW: number, viewH: number, cam: { x: number; y: number }, zoom: number) {
+  return {
+    ox: viewW / 2 - cam.x * RF_CELL * zoom,
+    oy: viewH / 2 - cam.y * RF_CELL * zoom,
+  };
+}
+
+function computeFitZoom(viewW: number, viewH: number, cellsVisible = 22): number {
+  const z = Math.min(viewW, viewH) / (cellsVisible * RF_CELL);
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+}
+
 function screenToCell(
   sx: number,
   sy: number,
@@ -148,9 +162,7 @@ function screenToCell(
   cam: { x: number; y: number },
   zoom: number
 ): { cx: number; cy: number } | null {
-  const mapPx = RF_GRID * RF_CELL * zoom;
-  const ox = (viewW - mapPx) / 2 - cam.x * RF_CELL * zoom;
-  const oy = (viewH - mapPx) / 2 - cam.y * RF_CELL * zoom;
+  const { ox, oy } = camOffset(viewW, viewH, cam, zoom);
   const cx = Math.floor((sx - ox) / (RF_CELL * zoom));
   const cy = Math.floor((sy - oy) / (RF_CELL * zoom));
   if (cx < 0 || cy < 0 || cx >= RF_GRID || cy >= RF_GRID) return null;
@@ -205,6 +217,12 @@ export function ReFrontGame() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapWrapRef = useRef<HTMLDivElement>(null);
+  const touchPanRef = useRef<{ active: boolean; lastX: number; lastY: number; moved: boolean }>({
+    active: false,
+    lastX: 0,
+    lastY: 0,
+    moved: false,
+  });
   const startedAtRef = useRef(Date.now());
   const lastHostStateAtRef = useRef(0);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -220,6 +238,27 @@ export function ReFrontGame() {
     [world, deviceId, mission.phase]
   );
   const nearestEnemy = useMemo(() => findNearestEnemy(world, deviceId), [world, deviceId]);
+  const attackTargets = useMemo(() => {
+    if (mission.phase !== "attack-prompt" && mission.phase !== "attack") return [];
+    const out: Array<{ cx: number; cy: number }> = [];
+    for (let cy = 0; cy < RF_GRID; cy++) {
+      for (let cx = 0; cx < RF_GRID; cx++) {
+        const slot = world.owner[cy * RF_GRID + cx]!;
+        if (!slot) continue;
+        const id = world.slotToId[slot];
+        const n = id ? world.nations[id] : undefined;
+        if (n?.tutorialAggressor && n.alive && canAttack(world, cx, cy, deviceId)) {
+          out.push({ cx, cy });
+          if (out.length >= 8) return out;
+        }
+      }
+    }
+    return out;
+  }, [world, deviceId, mission.phase]);
+  const botNations = useMemo(
+    () => Object.values(world.nations).filter((n) => n.isBot && n.alive),
+    [world.nations]
+  );
   const victoryPct = world.fastVictoryPct ?? RF_VICTORY_PCT;
 
   useEffect(() => {
@@ -235,9 +274,23 @@ export function ReFrontGame() {
 
   useEffect(() => {
     if (mission.phase !== "grow") return;
-    const t = window.setTimeout(() => setMission((m) => advanceMissionAfterGrowTimer(m)), 2500);
+    const t = window.setTimeout(() => setMission((m) => advanceMissionAfterGrowTimer(m)), 3500);
     return () => clearTimeout(t);
   }, [mission.phase]);
+
+  useEffect(() => {
+    if (mission.phase !== "attack-prompt") return;
+    for (const n of Object.values(worldRef.current.nations)) {
+      if (n.tutorialAggressor && n.alive) {
+        const c = nationCenter(worldRef.current, n.id);
+        if (c) {
+          setCam({ x: c.cx, y: c.cy });
+          setZoom((z) => Math.max(z, computeFitZoom(viewSize.w, viewSize.h, 26)));
+        }
+        break;
+      }
+    }
+  }, [mission.phase, viewSize.h, viewSize.w]);
 
   useEffect(() => {
     if (world.pendingCounterAttack && !mission.counterSeen) {
@@ -260,10 +313,19 @@ export function ReFrontGame() {
     };
   }, [me?.gold, me?.population, me?.troops, me?.territoryPct, me]);
 
-  const centerOnPlayer = useCallback(() => {
+  const fitViewToPlayer = useCallback(() => {
     const c = nationCenter(worldRef.current, deviceId);
-    if (c) setCam({ x: c.cx, y: c.cy });
-  }, [deviceId]);
+    if (!c) return;
+    setCam({ x: c.cx, y: c.cy });
+    const el = mapWrapRef.current;
+    const vw = el?.clientWidth ?? viewSize.w;
+    const vh = el?.clientHeight ?? viewSize.h;
+    setZoom(computeFitZoom(vw, vh, 22));
+  }, [deviceId, viewSize.h, viewSize.w]);
+
+  const centerOnPlayer = useCallback(() => {
+    fitViewToPlayer();
+  }, [fitViewToPlayer]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -276,11 +338,11 @@ export function ReFrontGame() {
     canvas.width = viewW;
     canvas.height = viewH;
 
-    const mapPx = RF_GRID * RF_CELL * zoom;
-    const ox = (viewW - mapPx) / 2 - cam.x * RF_CELL * zoom;
-    const oy = (viewH - mapPx) / 2 - cam.y * RF_CELL * zoom;
+    const { ox, oy } = camOffset(viewW, viewH, cam, zoom);
+    const cellPx = RF_CELL * zoom;
     const pulse = 0.35 + Math.sin(nowMs / 280) * 0.35;
     const hintSet = new Set(expandHints.map((h) => `${h.cx},${h.cy}`));
+    const attackSet = new Set(attackTargets.map((h) => `${h.cx},${h.cy}`));
 
     ctx.fillStyle = "#060a12";
     ctx.fillRect(0, 0, viewW, viewH);
@@ -289,9 +351,9 @@ export function ReFrontGame() {
       for (let cx = 0; cx < RF_GRID; cx++) {
         const i = cy * RF_GRID + cx;
         const slot = w.owner[i]!;
-        const sx = ox + cx * RF_CELL * zoom;
-        const sy = oy + cy * RF_CELL * zoom;
-        const sz = RF_CELL * zoom + 0.5;
+        const sx = ox + cx * cellPx;
+        const sy = oy + cy * cellPx;
+        const sz = cellPx + 0.5;
 
         if (slot === 0) {
           ctx.fillStyle = NEUTRAL_LAND;
@@ -305,33 +367,74 @@ export function ReFrontGame() {
         }
         ctx.fillRect(sx, sy, sz, sz);
 
+        if (slot === mySlot) {
+          ctx.strokeStyle = "rgba(21, 128, 61, 0.85)";
+          ctx.lineWidth = Math.max(1, zoom * 0.6);
+          ctx.strokeRect(sx + 0.5, sy + 0.5, sz - 1, sz - 1);
+        } else if (slot !== 0) {
+          ctx.strokeStyle = "rgba(127, 29, 29, 0.7)";
+          ctx.lineWidth = Math.max(1, zoom * 0.5);
+          ctx.strokeRect(sx + 0.5, sy + 0.5, sz - 1, sz - 1);
+        } else {
+          ctx.strokeStyle = "rgba(234, 179, 8, 0.35)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(sx + 0.5, sy + 0.5, sz - 1, sz - 1);
+        }
+
+        const building = w.buildings[i];
+        if (building === 1 && cellPx >= 6) {
+          ctx.fillStyle = "#fbbf24";
+          ctx.fillRect(sx + sz * 0.35, sy + sz * 0.35, sz * 0.3, sz * 0.3);
+        } else if (building === 2 && cellPx >= 6) {
+          ctx.fillStyle = "#94a3b8";
+          ctx.fillRect(sx + sz * 0.3, sy + sz * 0.3, sz * 0.4, sz * 0.4);
+        }
+
         if (slot === 0 && hintSet.has(`${cx},${cy}`)) {
           ctx.fillStyle = `rgba(74, 222, 128, ${pulse})`;
           ctx.fillRect(sx, sy, sz, sz);
           ctx.strokeStyle = "#4ade80";
           ctx.lineWidth = 2;
           ctx.strokeRect(sx + 1, sy + 1, sz - 2, sz - 2);
+          if (cellPx >= 10) {
+            ctx.font = `${Math.floor(cellPx * 0.7)}px sans-serif`;
+            ctx.fillStyle = "#052e16";
+            ctx.fillText("⭐", sx + sz * 0.15, sy + sz * 0.85);
+          }
+        }
+
+        if (attackSet.has(`${cx},${cy}`)) {
+          ctx.fillStyle = `rgba(248, 113, 113, ${pulse * 0.65})`;
+          ctx.fillRect(sx, sy, sz, sz);
+          ctx.strokeStyle = "#fca5a5";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx + 1, sy + 1, sz - 2, sz - 2);
+          if (cellPx >= 10) {
+            ctx.font = `${Math.floor(cellPx * 0.65)}px sans-serif`;
+            ctx.fillStyle = "#fff";
+            ctx.fillText("⚔", sx + sz * 0.2, sy + sz * 0.82);
+          }
         }
       }
     }
 
     for (const f of w.flashes) {
       if (f.until <= Date.now()) continue;
-      const sx = ox + f.cx * RF_CELL * zoom;
-      const sy = oy + f.cy * RF_CELL * zoom;
+      const sx = ox + f.cx * cellPx;
+      const sy = oy + f.cy * cellPx;
       ctx.strokeStyle = f.color;
       ctx.lineWidth = 2;
-      ctx.strokeRect(sx, sy, RF_CELL * zoom, RF_CELL * zoom);
+      ctx.strokeRect(sx, sy, cellPx, cellPx);
     }
 
     if (selected) {
-      const sx = ox + selected.cx * RF_CELL * zoom;
-      const sy = oy + selected.cy * RF_CELL * zoom;
+      const sx = ox + selected.cx * cellPx;
+      const sy = oy + selected.cy * cellPx;
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
-      ctx.strokeRect(sx - 1, sy - 1, RF_CELL * zoom + 2, RF_CELL * zoom + 2);
+      ctx.strokeRect(sx - 1, sy - 1, cellPx + 2, cellPx + 2);
     }
-  }, [cam, expandHints, me?.color, mySlot, nowMs, selected, viewSize, zoom]);
+  }, [attackTargets, cam, expandHints, me?.color, mySlot, nowMs, selected, viewSize, zoom]);
 
   useEffect(() => {
     draw();
@@ -472,6 +575,7 @@ export function ReFrontGame() {
 
   const onCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (touchPanRef.current.moved) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const cell = screenToCell(e.clientX - rect.left, e.clientY - rect.top, viewSize.w, viewSize.h, cam, zoom);
       if (!cell) return;
@@ -484,6 +588,36 @@ export function ReFrontGame() {
     },
     [cam, deviceId, mission.phase, viewSize.h, viewSize.w, zoom]
   );
+
+  const onCanvasPointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    touchPanRef.current = { active: true, lastX: e.clientX, lastY: e.clientY, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }, []);
+
+  const onCanvasPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      const t = touchPanRef.current;
+      if (!t.active) return;
+      const dxPx = e.clientX - t.lastX;
+      const dyPx = e.clientY - t.lastY;
+      if (Math.abs(dxPx) + Math.abs(dyPx) > 6) t.moved = true;
+      const dx = dxPx / (RF_CELL * zoom);
+      const dy = dyPx / (RF_CELL * zoom);
+      if (dx || dy) setCam((c) => ({ x: c.x - dx, y: c.y - dy }));
+      touchPanRef.current.lastX = e.clientX;
+      touchPanRef.current.lastY = e.clientY;
+    },
+    [zoom]
+  );
+
+  const onCanvasPointerUp = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    touchPanRef.current.active = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const onWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -510,8 +644,8 @@ export function ReFrontGame() {
     setStarted(true);
     setMission(createMissionState());
     startedAtRef.current = Date.now();
-    setZoom(1.15);
-    window.setTimeout(centerOnPlayer, 50);
+    window.setTimeout(() => fitViewToPlayer(), 80);
+    window.setTimeout(() => fitViewToPlayer(), 400);
 
     const host = isSimHost(roomCode, deviceId, 0, startedAtRef.current);
     setIsHost(host);
@@ -579,7 +713,7 @@ export function ReFrontGame() {
       broadcastRfSync(local);
       lastHostStateAtRef.current = Date.now();
     }, RF_TICK_MS);
-  }, [broadcastRfSync, centerOnPlayer, color, deviceId, nickname, roomCode]);
+  }, [broadcastRfSync, fitViewToPlayer, color, deviceId, nickname, roomCode]);
 
   useEffect(() => {
     return () => {
@@ -666,42 +800,58 @@ export function ReFrontGame() {
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-[#060a12] text-white" data-testid="rf-game-shell">
-      <header className="shrink-0 border-b border-white/10 px-3 py-2">
+      <header className="shrink-0 border-b border-white/10 px-2 py-1.5 sm:px-3 sm:py-2">
         <div className="flex items-center justify-between gap-2">
-          <button type="button" onClick={onExit} className="text-xs text-slate-400 hover:text-white">
-            ← 나가기
+          <button type="button" onClick={onExit} className="text-[10px] text-slate-400 hover:text-white sm:text-xs">
+            ← Exit
           </button>
-          <span className="font-bold text-emerald-300">🌎 Re:Front</span>
-          <span className="w-12" />
+          <span className="text-sm font-bold text-emerald-300 sm:text-base">🌎 Re:Front</span>
+          <button type="button" onClick={fitViewToPlayer} className="text-[10px] text-slate-400 hover:text-emerald-300 sm:text-xs" title="내 영토로 이동">
+            📍
+          </button>
         </div>
-        <div className="mt-2 flex flex-wrap gap-2 text-xs">
-          <ResourceStat icon="🪙" label="Gold — 확장·건물" value={Math.floor(me?.gold ?? 0)} hint="영토 확장과 건물에 사용" />
-          <ResourceStat icon="👥" label="Population — 성장" value={Math.floor(me?.population ?? 0)} hint="나라가 커질수록 증가" />
-          <ResourceStat icon="⚔" label="Troops — 전투" value={Math.floor(me?.troops ?? 0)} hint="공격과 방어에 사용하는 병력" />
+        <div className="mt-1 flex flex-wrap gap-1 text-[10px] sm:mt-2 sm:gap-2 sm:text-xs">
+          <ResourceStat icon="🪙" label="Gold" value={Math.floor(me?.gold ?? 0)} hint="Territory → Gold" />
+          <ResourceStat icon="👥" label="Pop" value={Math.floor(me?.population ?? 0)} hint="Territory → Population" />
+          <ResourceStat icon="⚔" label="Troops" value={Math.floor(me?.troops ?? 0)} hint="Pop → Troops → Battle" />
         </div>
-        <div className="mt-2" data-testid="rf-empire-bar">
-          <div className="flex justify-between text-[10px] text-slate-400">
-            <span>YOUR EMPIRE</span>
-            <span>{me?.territoryPct?.toFixed(1) ?? 0}% / {victoryPct}%</span>
+        <div className="mt-1" data-testid="rf-empire-bar">
+          <div className="flex justify-between text-[9px] text-slate-400 sm:text-[10px]">
+            <span>Territory {me?.territoryPct?.toFixed(1) ?? 0}% / {victoryPct}%</span>
+            <span>{Math.max(0, victoryPct - (me?.territoryPct ?? 0)).toFixed(1)}% to win</span>
           </div>
-          <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-800">
+          <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-slate-800 sm:mt-1 sm:h-2">
             <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${empirePct}%` }} />
           </div>
-          {pctFlash ? <p className="mt-1 text-xs font-bold text-emerald-300">🌎 BORDER EXPANDED! {pctFlash}</p> : null}
+          {pctFlash ? <p className="mt-0.5 text-[10px] font-bold text-emerald-300 sm:text-xs">🌎 +1 TERRITORY · {pctFlash}</p> : null}
           {rewardFlash && rewardFlash.until > nowMs ? (
-            <p className="mt-1 text-[10px] text-amber-200">
+            <p className="mt-0.5 text-[9px] text-amber-200 sm:text-[10px]">
               +{rewardFlash.gold} Gold · +{rewardFlash.pop} Pop · +{rewardFlash.troops} Troops
             </p>
           ) : null}
         </div>
+        {botNations.length > 0 ? (
+          <div className="mt-1 flex flex-wrap gap-1 text-[9px] sm:text-[10px]" data-testid="rf-ai-nations">
+            {botNations.map((b) => (
+              <span
+                key={b.id}
+                className="rounded-full border border-white/10 bg-black/40 px-1.5 py-0.5"
+                title={personalityLabel(b.personality ?? "expander")}
+              >
+                {personalityEmoji(b.personality ?? "expander")} {b.nickname}{" "}
+                <span className="text-slate-400">({personalityLabel(b.personality ?? "expander")})</span>
+              </span>
+            ))}
+          </div>
+        ) : null}
       </header>
 
-      <section className="shrink-0 border-b border-white/10 bg-violet-950/30 px-3 py-2 text-xs leading-relaxed" data-testid="rf-inline-tutorial">
-        <p className="font-semibold text-violet-100">내 나라를 키우고 주변 땅을 차지하세요.</p>
-        <p className="mt-1 text-slate-300">
-          ① 🟢 내 땅 · ② 🟡 빈 땅 선택 → EXPAND · ③ 군대 증가 · ④ 🔴 적 공격 · ⑤ 최대 영토
-        </p>
-        <p className="mt-1 font-bold text-emerald-300">{objective.title} — {objective.detail}</p>
+      <section
+        className="hidden shrink-0 border-b border-white/10 bg-violet-950/30 px-3 py-1.5 text-[10px] leading-relaxed sm:block sm:py-2 sm:text-xs"
+        data-testid="rf-inline-tutorial"
+      >
+        <p className="font-semibold text-violet-100">{objective.stepLabel}</p>
+        <p className="mt-0.5 text-slate-300">{objective.detail}</p>
       </section>
 
       <div ref={mapWrapRef} className="relative min-h-0 flex-1">
@@ -712,9 +862,13 @@ export function ReFrontGame() {
           data-mp-board-input="active"
           onClick={onCanvasClick}
           onWheel={onWheel}
+          onPointerDown={onCanvasPointerDown}
+          onPointerMove={onCanvasPointerMove}
+          onPointerUp={onCanvasPointerUp}
+          onPointerCancel={onCanvasPointerUp}
         />
-        <div className="pointer-events-none absolute bottom-2 left-2 rounded-lg bg-black/60 px-2 py-1 text-[10px] text-slate-200">
-          🟢 내 땅 · 🟡 빈 땅 · 🔴 적 · WASD 이동 · Wheel 확대
+        <div className="pointer-events-none absolute bottom-2 left-2 rounded-lg bg-black/60 px-2 py-1 text-[9px] text-slate-200 sm:text-[10px]">
+          🟢 Mine · 🟡 Expand · 🔴 Enemy · ⭐ 추천 · Drag 이동
         </div>
         {world.battle && world.battle.until > nowMs ? (
           <div className="pointer-events-none absolute left-1/2 top-1/2 w-[min(90%,18rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-rose-400/50 bg-black/85 p-4 text-center text-sm shadow-xl">
@@ -738,21 +892,28 @@ export function ReFrontGame() {
         )}
       </div>
 
-      <footer className="shrink-0 border-t border-white/10 bg-slate-950/95 p-3" data-testid="rf-action-panel">
+      <footer className="shrink-0 border-t border-white/10 bg-slate-950/95 p-2 sm:p-3" data-testid="rf-action-panel">
+        <div
+          className="mb-2 rounded-xl border border-amber-400/40 bg-amber-950/30 px-3 py-2 text-center"
+          data-testid="rf-next-action"
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-200/80 sm:text-xs">{objective.stepLabel}</p>
+          <p className="mt-0.5 text-sm font-bold text-amber-100 sm:text-base">{objective.nextAction}</p>
+          <p className="mt-0.5 text-[10px] text-slate-400 sm:text-xs">{objective.title} — {objective.cta}</p>
+        </div>
         {pendingExpand && mission.phase === "expand" ? (
-          <div className="mb-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-center" data-testid="rf-expand-confirm">
-            <div className="font-bold text-emerald-200">EASY EXPAND</div>
+          <div className="mb-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-center" data-testid="rf-expand-confirm">
+            <div className="font-bold text-emerald-200">EXPAND</div>
             <p className="mt-1 text-sm text-slate-200">이 땅을 차지하시겠습니까?</p>
-            <p className="mt-1 text-xs text-amber-200">+ Territory · +120 Gold · +8 Population</p>
-            <p className="text-[10px] text-slate-400">비용: {expandCost} troops</p>
+            <p className="mt-1 text-xs text-amber-200">보상: Territory +1 · Gold +120 · Pop +8</p>
+            <p className="text-[10px] text-slate-400">비용: Troops {expandCost}</p>
             <button type="button" disabled={!canExp} onClick={onExpand} className="mt-2 w-full rounded-xl bg-emerald-600 py-3 text-base font-bold disabled:opacity-40" data-testid="rf-expand-btn">
               🟢 EXPAND
             </button>
           </div>
         ) : (
           <>
-            <p className="text-xs text-slate-400">{selectionHint}</p>
-            <p className="text-[10px] text-slate-500">{objective.cta}</p>
+            <p className="text-[10px] text-slate-400 sm:text-xs">{selectionHint}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {(mission.phase === "expand" || mission.phase === "grow" || mission.phase === "free") && (
                 <button type="button" disabled={!canExp || world.roundOver} onClick={onExpand} className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-base font-bold disabled:opacity-40" data-testid="rf-expand-btn">
@@ -800,19 +961,28 @@ export function ReFrontGame() {
           </>
         )}
         {mission.phase === "counter" && world.pendingCounterAttack ? (
-          <p className="mt-2 text-center text-sm font-bold text-red-300">🚨 RED KINGDOM IS ATTACKING!</p>
+          <p className="mt-2 text-center text-sm font-bold text-red-300">🔴 적의 반격! DEFEND 또는 ATTACK</p>
         ) : null}
       </footer>
 
       {world.roundOver ? (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
           <div className="w-full max-w-sm rounded-2xl border border-slate-600 bg-slate-900 p-6 text-center">
-            <h2 className="text-2xl font-bold">{won ? "YOU WIN" : lost ? "GAME OVER" : "DRAW"}</h2>
-            <p className="mt-2 text-slate-300">Territory {me?.territoryPct ?? 0}%</p>
+            <h2 className="text-2xl font-bold">
+              {won ? "👑 EMPIRE COMPLETE" : lost ? "💀 YOUR EMPIRE HAS FALLEN" : "DRAW"}
+            </h2>
+            <p className="mt-2 text-lg font-semibold text-emerald-300">{won ? "YOU WIN" : lost ? "DEFEAT" : "STALEMATE"}</p>
+            <p className="mt-2 text-slate-300">Territory {me?.territoryPct?.toFixed(1) ?? 0}% / {victoryPct}%</p>
             <div className="mt-4 flex flex-col gap-2">
-              <button type="button" onClick={onRematch} className="rounded-lg bg-white py-2 font-bold text-black">REMATCH</button>
-              <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2">ANOTHER GAME</button>
-              <button type="button" onClick={onExit} className="rounded-lg border border-slate-600 py-2 text-slate-300">EXIT</button>
+              <button type="button" onClick={onRematch} className="rounded-lg bg-white py-2 font-bold text-black" data-testid="rf-rematch-btn">
+                RETRY
+              </button>
+              <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2">
+                ANOTHER GAME
+              </button>
+              <button type="button" onClick={onExit} className="rounded-lg border border-slate-600 py-2 text-slate-300">
+                EXIT
+              </button>
             </div>
           </div>
         </div>
