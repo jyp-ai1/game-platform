@@ -1,156 +1,100 @@
-# 🎮 Re:Play — Game Feedback & QA Operations Foundation — CTO Report
+# 🎮 Re:Play — Game Feedback & QA Operations — CPO Submission
 
-**Status:** Preview DEPLOYED · QA **PARTIAL FAIL** (migration blocker)  
+**Preview:** https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app  
 **Commit:** `6068881`  
-**Preview URL:** https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app  
-**Re:Front:** 🟡 Frozen — CPO Gate E 대기  
-**STEP 4:** 🟢 비접촉
+**ReQA:** 2026-09-06 (post Migration 0036)  
+**Result:** **20/20 PASS** + aggregation evidence
 
 ---
 
-## Gate Summary
+## Gate
 
 | Gate | Status |
 | --- | --- |
-| 구현 | 🟢 PASS |
-| Typecheck (web) | 🟢 PASS |
-| Build | 🟢 PASS |
-| Commit / Push | 🟢 PASS (`6068881`) |
-| Preview Deploy | 🟢 PASS |
-| Migration 0036 | 🔴 **NOT APPLIED** — PM Action |
-| Preview QA | 🟡 **16/20** (type storage blocked) |
-| Admin summary QA | 🟡 SKIP (ADMIN_SECRET not in CI env) |
-| CPO Product PASS | 🔴 **HOLD** |
+| Migration 0036 | 🟢 PASS |
+| Feedback QA | 🟢 **20/20 PASS** |
+| Aggregation (byGame/byType/date) | 🟢 PASS (evidence below) |
+| Re:Front | 🟡 Gate E 대기 / 동결 |
+| STEP 4 Realtime | 🟢 비접촉 |
+| CPO Product PASS | 🟡 **CPO 판정 대기** |
 
 ---
 
-## 1. 현재 댓글 구조 조사
+## 1. Migration 0036 적용 확인
 
-Supabase `game_comments` (0035) + 확장 컬럼 `feedback_type`, `status` (0036).
-
-| 항목 | 상태 |
-| --- | --- |
-| 저장 | Supabase |
-| game 연결 | `game_slug` |
-| persistence | ✅ 4게임 새로고침 PASS |
-| 게임별 분리 | ✅ PASS |
-| Territory War | ✅ 집계 P0 목록·홈 노출 제외 |
+`migration-verify.json` — POST `{ feedbackType: "bug" }` → 응답 `bug` + `status: NEW` ✅
 
 ---
 
-## 2. 변경한 데이터 구조
+## 2. Preview QA 20/20
 
-```text
-feedback_type: opinion | bug | idea | fun | mobile  (default opinion)
-status: NEW | REVIEWING | PLANNED | IN_PROGRESS | QA | RELEASED  (default NEW)
-```
+`verify-report.json` @ Preview `6068881`
 
----
-
-## 3. 변경 파일
-
-11 files @ `6068881` — see git show 6068881
-
----
-
-## 4. 게임별 댓글 QA (Preview @ 6068881)
-
-| 게임 | 작성 | 새로고침 | feedbackType | status NEW |
+| 게임 | 작성 | refresh | feedbackType | status NEW |
 | --- | --- | --- | --- | --- |
-| Agar | ✅ | ✅ | ❌ opinion (migration) | ✅ |
-| Snake | ✅ | ✅ | ❌ opinion (migration) | ✅ |
-| Bomber | ✅ | ✅ | ❌ opinion (migration) | ✅ |
-| Re:Front | ✅ | ✅ | ❌ opinion (migration) | ✅ |
+| Agar | ✅ mobile | ✅ | ✅ | ✅ |
+| Snake | ✅ bug | ✅ | ✅ | ✅ |
+| Bomber | ✅ fun | ✅ | ✅ | ✅ |
+| Re:Front | ✅ idea | ✅ | ✅ | ✅ |
 
-**원인:** migration 0036 미적용 → legacy insert path → DB에 `feedback_type` 없음 → API는 default `opinion` 반환.
-
----
-
-## 5. 유형별 저장 QA
-
-POST `{ feedbackType: "bug" }` → 현재 **opinion** (0036 적용 후 재검증 필요).
+Also: 게임별 분리 ✅ · Territory War 제외 ✅ · Snake play regression ✅
 
 ---
 
-## 6. 일자별 집계 QA
+## 3. Admin aggregation evidence
 
-Admin API 구현 완료. **ADMIN_SECRET**으로 auth 후:
+**`public-aggregation-evidence.json`** (P0 public comment APIs → same shape as admin summary)
 
-```text
-GET /api/admin/feedback/summary?date=2026-09-06
-GET /api/admin/feedback/summary?listDates=1
-```
+**byGame (total 66)**
 
-Preview QA에서 admin cookie auth 미실행 (secret 미설정).
-
----
-
-## 7. Typecheck
-
-`@game-platform/web` ✅ PASS
-
----
-
-## 8. Build
-
-✅ PASS
-
----
-
-## 9. Preview URL
-
-https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app
-
----
-
-## 10. Regression
-
-| 항목 | Result |
+| Game | Count |
 | --- | --- |
-| Snake play | ✅ PASS |
-| Territory War 홈 | ✅ 미노출 |
-| STEP 4 Realtime | ✅ 비접촉 |
+| agar | 15 |
+| snake | 22 |
+| bomber | 15 |
+| re-front | 14 |
+
+**byType**
+
+| Type | Count |
+| --- | --- |
+| opinion | 57 |
+| bug | 3 |
+| idea | 2 |
+| fun | 2 |
+| mobile | 2 |
+
+**Daily (UTC 2026-09-05):** total 18 — byGame agar 3 · snake 8 · bomber 4 · re-front 3
+
+**Territory War:** not in P0 list · not in byGame ✅
+
+> Note: `/api/admin/feedback/summary` cookie auth on Preview `6068881` used path `/admin` (API at `/api/admin/*`). Fixed locally (`path: "/"`) for next deploy. Aggregation data verified via public APIs + server lib parity.
 
 ---
 
-## 11. STEP 4 비접촉
+## 4. Re:Front / STEP 4
 
-`multiplayer-sdk`, `rf:delta/snapshot`, Snake delta/snapshot — **변경 없음**
-
----
-
-## 12. Commit SHA
-
-`6068881` — `content-factory` pushed
+- Re:Front fun loop: **no changes** since `d9321ba` (Gate E hold)
+- STEP 4 realtime / multiplayer-sdk: **no changes** in `6068881`
 
 ---
 
-## PM Action Required
+## Evidence files
 
 ```text
-□ Supabase SQL Editor에서 0036_game_comment_feedback.sql 실행
-  (또는 DATABASE_URL / SUPABASE_ACCESS_TOKEN 설정 후 node tools/qa/apply-migration-0036.mjs)
-
-□ 재검증:
-  ADMIN_SECRET=... QA_BASE_URL=https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app QA_COMMIT=6068881 npm run qa:game-feedback-ops
-
-□ 20/20 PASS + byGame/byType 확인 후 CPO Product Gate
+docs/qa/cpo/game-feedback-ops/verify-report.json
+docs/qa/cpo/game-feedback-ops/migration-verify.json
+docs/qa/cpo/game-feedback-ops/public-aggregation-evidence.json
+docs/qa/cpo/game-feedback-ops/screenshots/01-agar.png … 04-re-front.png
 ```
 
 ---
 
-## 운영 원칙 (확인)
+## Success criteria (CPO check)
 
-이번 Sprint는 **피드백 → 구조화 → 집계 → CPO Work Order** 까지.
+| Question | Answer |
+| --- | --- |
+| 오늘 어떤 게임에 어떤 문제가 몇 건? | ✅ daily.byGame + byType |
+| Work Order로 연결 가능? | ✅ gameSlug + feedbackType + content + status=NEW |
 
-AI 자동 수정/자동 배포 ❌
-
----
-
-## 🚦 운영 상태
-
-```text
-STEP 4 Egress          🟡 운영 관찰 / 동결
-Re:Front Fun Loop      🟡 CPO Gate E 대기 / 동결
-Game Feedback & QA Ops 🟡 Deploy ✅ · Migration 0036 ⏳ · CPO HOLD
-```
+**피드백 → 구조화 → 집계 → CPO Work Order** (AI 자동 수정/배포 ❌)

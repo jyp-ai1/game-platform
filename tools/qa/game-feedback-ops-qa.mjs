@@ -2,12 +2,24 @@
  * Game Feedback & QA Operations Foundation — technical QA.
  * QA_BASE_URL=<preview> QA_COMMIT=<sha> node tools/qa/game-feedback-ops-qa.mjs
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
+
+function loadEnvFile(path) {
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, "utf8").split("\n")) {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
+  }
+}
+
+loadEnvFile(join(ROOT, "apps/web/.env.qa.tmp"));
+loadEnvFile(join(ROOT, "apps/web/.env.local"));
+
 const BASE = process.env.QA_BASE_URL ?? "https://game29.vercel.app";
 const COMMIT = process.env.QA_COMMIT ?? "local";
 const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "";

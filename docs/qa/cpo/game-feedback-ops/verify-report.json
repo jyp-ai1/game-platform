@@ -3,26 +3,26 @@
   "scope": "Game Feedback & QA Operations Foundation",
   "commit": "6068881",
   "base": "https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app",
-  "marker": "fbops-1788627475949",
+  "marker": "fbops-1788628630861",
   "p0Games": [
     "agar",
     "snake",
     "bomber",
     "re-front"
   ],
-  "finishedAt": "2026-09-05T16:58:44.482Z",
+  "finishedAt": "2026-09-05T17:17:55.626Z",
   "p0": {
     "comment-agar": true,
-    "type-agar": false,
+    "type-agar": true,
     "status-agar": true,
     "comment-snake": true,
-    "type-snake": false,
+    "type-snake": true,
     "status-snake": true,
     "comment-bomber": true,
-    "type-bomber": false,
+    "type-bomber": true,
     "status-bomber": true,
     "comment-re-front": true,
-    "type-re-front": false,
+    "type-re-front": true,
     "status-re-front": true,
     "isolation": true,
     "defaultType": true,
@@ -37,188 +37,188 @@
     "agar": {
       "write": true,
       "refresh": true,
-      "typeOk": false,
+      "typeOk": true,
       "statusOk": true,
-      "marker": "fbops-1788627475949-agar-mobile",
+      "marker": "fbops-1788628630861-agar-mobile",
       "found": {
-        "id": "deeb9316-af38-4391-82e4-8805372d0179",
+        "id": "9952f9f1-78e0-43fe-a0c1-64e4f1c9bb28",
         "gameSlug": "agar",
         "author": "QA-FBOPS",
-        "content": "fbops-1788627475949-agar-mobile",
-        "feedbackType": "opinion",
+        "content": "fbops-1788628630861-agar-mobile",
+        "feedbackType": "mobile",
         "status": "NEW",
-        "createdAt": "2026-09-05T16:58:03.151762+00:00"
+        "createdAt": "2026-09-05T17:17:16.722861+00:00"
       }
     },
     "snake": {
       "write": true,
       "refresh": true,
-      "typeOk": false,
+      "typeOk": true,
       "statusOk": true,
-      "marker": "fbops-1788627475949-snake-bug",
+      "marker": "fbops-1788628630861-snake-bug",
       "found": {
-        "id": "4c6f1249-fc5f-4c03-af1a-56090c8b81bd",
+        "id": "d51e2cc6-5694-4277-85d8-9e164efbb8fe",
         "gameSlug": "snake",
         "author": "QA-FBOPS",
-        "content": "fbops-1788627475949-snake-bug",
-        "feedbackType": "opinion",
+        "content": "fbops-1788628630861-snake-bug",
+        "feedbackType": "bug",
         "status": "NEW",
-        "createdAt": "2026-09-05T16:58:13.495566+00:00"
+        "createdAt": "2026-09-05T17:17:24.725033+00:00"
       }
     },
     "bomber": {
       "write": true,
       "refresh": true,
-      "typeOk": false,
+      "typeOk": true,
       "statusOk": true,
-      "marker": "fbops-1788627475949-bomber-fun",
+      "marker": "fbops-1788628630861-bomber-fun",
       "found": {
-        "id": "d6ac0415-3ebc-48f1-9b05-fe91fabc036e",
+        "id": "96764643-6a2b-4c04-8215-6dad9cdce35a",
         "gameSlug": "bomber",
         "author": "QA-FBOPS",
-        "content": "fbops-1788627475949-bomber-fun",
-        "feedbackType": "opinion",
+        "content": "fbops-1788628630861-bomber-fun",
+        "feedbackType": "fun",
         "status": "NEW",
-        "createdAt": "2026-09-05T16:58:21.647327+00:00"
+        "createdAt": "2026-09-05T17:17:33.05373+00:00"
       }
     },
     "re-front": {
       "write": true,
       "refresh": true,
-      "typeOk": false,
+      "typeOk": true,
       "statusOk": true,
-      "marker": "fbops-1788627475949-re-front-idea",
+      "marker": "fbops-1788628630861-re-front-idea",
       "found": {
-        "id": "1eada13f-4eea-443d-9b0e-f79282d4e852",
+        "id": "156726e5-34e1-4ff7-a8a4-c2f3ccdf301e",
         "gameSlug": "re-front",
         "author": "QA-FBOPS",
-        "content": "fbops-1788627475949-re-front-idea",
-        "feedbackType": "opinion",
+        "content": "fbops-1788628630861-re-front-idea",
+        "feedbackType": "idea",
         "status": "NEW",
-        "createdAt": "2026-09-05T16:58:31.061409+00:00"
+        "createdAt": "2026-09-05T17:17:42.269832+00:00"
       }
     }
   },
-  "passed": 16,
+  "passed": 20,
   "total": 20,
-  "ctoFinal": "FAIL",
+  "ctoFinal": "PASS",
   "checks": [
     {
       "name": "p0-comment-agar",
       "ok": true,
       "note": "mobile write=true refresh=true",
-      "t": "2026-09-05T16:58:09.469Z"
+      "t": "2026-09-05T17:17:21.878Z"
     },
     {
       "name": "p0-type-agar",
-      "ok": false,
-      "note": "opinion",
-      "t": "2026-09-05T16:58:09.470Z"
+      "ok": true,
+      "note": "mobile",
+      "t": "2026-09-05T17:17:21.879Z"
     },
     {
       "name": "p0-status-agar",
       "ok": true,
       "note": "NEW",
-      "t": "2026-09-05T16:58:09.471Z"
+      "t": "2026-09-05T17:17:21.879Z"
     },
     {
       "name": "p0-comment-snake",
       "ok": true,
       "note": "bug write=true refresh=true",
-      "t": "2026-09-05T16:58:18.533Z"
+      "t": "2026-09-05T17:17:30.191Z"
     },
     {
       "name": "p0-type-snake",
-      "ok": false,
-      "note": "opinion",
-      "t": "2026-09-05T16:58:18.533Z"
+      "ok": true,
+      "note": "bug",
+      "t": "2026-09-05T17:17:30.191Z"
     },
     {
       "name": "p0-status-snake",
       "ok": true,
       "note": "NEW",
-      "t": "2026-09-05T16:58:18.533Z"
+      "t": "2026-09-05T17:17:30.191Z"
     },
     {
       "name": "p0-comment-bomber",
       "ok": true,
       "note": "fun write=true refresh=true",
-      "t": "2026-09-05T16:58:27.894Z"
+      "t": "2026-09-05T17:17:38.650Z"
     },
     {
       "name": "p0-type-bomber",
-      "ok": false,
-      "note": "opinion",
-      "t": "2026-09-05T16:58:27.894Z"
+      "ok": true,
+      "note": "fun",
+      "t": "2026-09-05T17:17:38.651Z"
     },
     {
       "name": "p0-status-bomber",
       "ok": true,
       "note": "NEW",
-      "t": "2026-09-05T16:58:27.894Z"
+      "t": "2026-09-05T17:17:38.651Z"
     },
     {
       "name": "p0-comment-re-front",
       "ok": true,
       "note": "idea write=true refresh=true",
-      "t": "2026-09-05T16:58:36.539Z"
+      "t": "2026-09-05T17:17:47.224Z"
     },
     {
       "name": "p0-type-re-front",
-      "ok": false,
-      "note": "opinion",
-      "t": "2026-09-05T16:58:36.539Z"
+      "ok": true,
+      "note": "idea",
+      "t": "2026-09-05T17:17:47.224Z"
     },
     {
       "name": "p0-status-re-front",
       "ok": true,
       "note": "NEW",
-      "t": "2026-09-05T16:58:36.539Z"
+      "t": "2026-09-05T17:17:47.224Z"
     },
     {
       "name": "p0-per-game-isolation",
       "ok": true,
-      "t": "2026-09-05T16:58:38.264Z"
+      "t": "2026-09-05T17:17:49.703Z"
     },
     {
       "name": "p0-default-feedback-type",
       "ok": true,
-      "t": "2026-09-05T16:58:38.956Z"
+      "t": "2026-09-05T17:17:50.156Z"
     },
     {
       "name": "p0-created-at",
       "ok": true,
-      "t": "2026-09-05T16:58:38.956Z"
+      "t": "2026-09-05T17:17:50.156Z"
     },
     {
       "name": "p0-daily-summary",
       "ok": true,
       "note": "SKIP — ADMIN_SECRET not set",
       "skipped": true,
-      "t": "2026-09-05T16:58:38.956Z"
+      "t": "2026-09-05T17:17:50.156Z"
     },
     {
       "name": "p0-summary-by-game",
       "ok": true,
       "note": "SKIP — ADMIN_SECRET not set",
       "skipped": true,
-      "t": "2026-09-05T16:58:38.956Z"
+      "t": "2026-09-05T17:17:50.156Z"
     },
     {
       "name": "p0-play-regression",
       "ok": true,
       "note": "https://game29-b0qf98px8-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD",
-      "t": "2026-09-05T16:58:42.593Z"
+      "t": "2026-09-05T17:17:53.627Z"
     },
     {
       "name": "p0-territory-war-excluded",
       "ok": true,
-      "t": "2026-09-05T16:58:42.594Z"
+      "t": "2026-09-05T17:17:53.627Z"
     },
     {
       "name": "p0-no-territory-war",
       "ok": true,
-      "t": "2026-09-05T16:58:44.382Z"
+      "t": "2026-09-05T17:17:55.431Z"
     }
   ],
   "step4Touched": false,

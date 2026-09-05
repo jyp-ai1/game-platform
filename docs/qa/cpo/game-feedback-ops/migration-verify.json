@@ -1,0 +1,14 @@
+{
+  "migration": "0036_game_comment_feedback.sql",
+  "status": "APPLIED",
+  "verifiedAt": "2026-09-06T02:10:00+09:00",
+  "method": "POST /api/games/snake/comments { feedbackType: bug }",
+  "result": {
+    "feedbackType": "bug",
+    "status": "NEW",
+    "sampleContent": "m36-verify-020910"
+  },
+  "columns": ["feedback_type", "status"],
+  "feedbackTypeAllowed": ["opinion", "bug", "idea", "fun", "mobile"],
+  "statusDefault": "NEW"
+}
