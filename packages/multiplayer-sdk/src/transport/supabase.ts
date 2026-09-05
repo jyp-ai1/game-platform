@@ -29,6 +29,15 @@ interface MpRoomRow {
 const channels = new Map<string, RealtimeChannel>();
 const fetchPromises = new Map<string, Promise<GameRoom | null>>();
 
+function detachChannel(code: string): void {
+  const key = code.toUpperCase();
+  const ch = channels.get(key);
+  if (!ch) return;
+  const supabase = getMultiplayerSupabase();
+  if (supabase) void supabase.removeChannel(ch);
+  channels.delete(key);
+}
+
 function rowToRoom(row: MpRoomRow): GameRoom {
   return {
     code: row.code,
@@ -298,6 +307,7 @@ export const supabaseTransport: MultiplayerTransport = {
     const nextSpectators = room.spectators.filter((id) => id !== deviceId);
     if (nextPlayers.length === 0) {
       cacheRemove(code);
+      detachChannel(code);
       void deleteRoom(code);
     } else {
       const next: GameRoom = {
@@ -311,6 +321,7 @@ export const supabaseTransport: MultiplayerTransport = {
     }
     const supabase = getMultiplayerSupabase();
     if (supabase) void supabase.from("mp_presence").delete().eq("device_id", deviceId);
+    detachChannel(code);
   },
 
   getRoom(code: string): GameRoom | null {
@@ -340,7 +351,10 @@ export const supabaseTransport: MultiplayerTransport = {
       event === "state" ||
       event === "input" ||
       event.startsWith("peer:") ||
-      event.startsWith("input:");
+      event.startsWith("input:") ||
+      event.startsWith("snake:") ||
+      event === "rf:delta" ||
+      event === "rf:snapshot";
     const next: GameRoom = {
       ...room,
       gameState: {

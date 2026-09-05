@@ -43,7 +43,13 @@ function wrap(base: MultiplayerTransport): MultiplayerTransport {
       const room = base.send(c, e, p);
       if (!room) return null;
       const ephemeral =
-        e === "state" || e === "input" || e.startsWith("peer:") || e.startsWith("input:");
+        e === "state" ||
+        e === "input" ||
+        e.startsWith("peer:") ||
+        e.startsWith("input:") ||
+        e.startsWith("snake:") ||
+        e === "rf:delta" ||
+        e === "rf:snapshot";
       if (ephemeral && typeof BroadcastChannel !== "undefined") {
         try {
           const bc = new BroadcastChannel(CHANNEL);

@@ -25,6 +25,7 @@ export type RfNation = {
   troops: number;
   population: number;
   territoryPct: number;
+  tutorialExpands?: number;
   personality?: RfAiPersonality;
   defendUntil?: number;
   tutorialAggressor?: boolean;
@@ -103,7 +104,10 @@ export type RfSyncState = {
 
 export type HumanSeat = { id: string; nickname: string; color?: string };
 
-const NATION_COLORS = ["#22d3ee", "#ef4444", "#fbbf24", "#34d399", "#a78bfa", "#fb7185", "#38bdf8", "#f97316"];
+const PLAYER_GREEN = "#22c55e";
+const NEUTRAL_YELLOW = "#ca8a04";
+const ENEMY_RED = "#ef4444";
+const NATION_COLORS = [PLAYER_GREEN, ENEMY_RED, "#60a5fa", "#fbbf24", "#a78bfa", "#fb7185", "#38bdf8", "#f97316"];
 const BOT_NAMES = ["Red Kingdom", "Eastwood", "Ironvale"];
 const BOT_PERSONALITIES: RfAiPersonality[] = ["aggressor", "expander", "turtle"];
 
@@ -116,7 +120,11 @@ export function terrainLabel(t: RfTerrain): string {
   return "Plains";
 }
 
-export function terrainExpandCost(world: RfWorld, cx: number, cy: number): number {
+export function terrainExpandCost(world: RfWorld, cx: number, cy: number, nationId?: string): number {
+  if (nationId) {
+    const n = world.nations[nationId];
+    if (n && !n.isBot && (n.tutorialExpands ?? 0) < 3) return 1;
+  }
   const t = world.terrain[idx(cx, cy)] as RfTerrain;
   return Math.ceil(RF_EXPAND_COST * TERRAIN_EXPAND_MULT[t]);
 }
@@ -265,7 +273,7 @@ export function createRfWorld(localId: string, nickname: string, humans: HumanSe
       id: botId,
       slot,
       nickname: BOT_NAMES[b % BOT_NAMES.length]!,
-      color: NATION_COLORS[(seats.length + b) % NATION_COLORS.length]!,
+      color: b === 0 ? ENEMY_RED : NATION_COLORS[(seats.length + b) % NATION_COLORS.length]!,
       alive: true,
       isBot: true,
       gold: 90,
@@ -313,7 +321,7 @@ export function canExpand(world: RfWorld, cx: number, cy: number, nationId: stri
   if (!n?.alive || world.roundOver) return false;
   if (!inBounds(cx, cy)) return false;
   if (world.owner[idx(cx, cy)] !== 0) return false;
-  const cost = terrainExpandCost(world, cx, cy);
+  const cost = terrainExpandCost(world, cx, cy, nationId);
   if (n.troops < cost) return false;
   return isAdjacentToSlot(world, cx, cy, n.slot);
 }
@@ -380,14 +388,20 @@ export function findNearestEnemy(world: RfWorld, nationId: string): RfNation | n
 export function applyExpand(world: RfWorld, cx: number, cy: number, nationId: string): boolean {
   if (!canExpand(world, cx, cy, nationId)) return false;
   const n = world.nations[nationId]!;
-  const cost = terrainExpandCost(world, cx, cy);
+  const tutorial = !n.isBot && (n.tutorialExpands ?? 0) < 3;
+  const cost = terrainExpandCost(world, cx, cy, nationId);
   world.owner[idx(cx, cy)] = n.slot;
   n.troops -= cost;
-  n.gold += 12;
-  n.population += 2;
+  n.gold += tutorial ? 120 : 12;
+  n.population += tutorial ? 8 : 2;
+  if (tutorial) n.tutorialExpands = (n.tutorialExpands ?? 0) + 1;
   addFlash(world, cx, cy, n.color, "expand");
   recomputePct(world);
-  addPopup(world, `+1 TERRITORY · +120 GOLD`, n.color);
+  addPopup(
+    world,
+    tutorial ? "🎉 영토 +1! 나라가 성장했습니다." : `+1 TERRITORY · +120 GOLD`,
+    n.color
+  );
   checkVictory(world);
   return true;
 }
@@ -431,7 +445,7 @@ export function applyAttack(
     attacker.troops = Math.max(10, attacker.troops - commit);
     defender.troops = Math.max(0, defender.troops - Math.floor(defensePower * 0.55));
     addFlash(world, cx, cy, attacker.color, "capture");
-    addPopup(world, `VICTORY! +${captured} Territory · +340 Gold`, attacker.color);
+    addPopup(world, `🏆 VICTORY! ${defender.nickname} 영토 점령!`, attacker.color);
     attacker.gold += 340;
     if (defender.troops <= 0 && countOwned(world, defender.slot) <= 4) {
       eliminateNation(world, defender.id);
@@ -679,6 +693,106 @@ export function applyRfSyncState(world: RfWorld, state: RfSyncState, opts?: { re
     world.nations[n.id] = { ...n };
     world.slotToId[n.slot] = n.id;
     world.idToSlot[n.id] = n.slot;
+  }
+}
+
+/** Full snapshot interval for Re:Front host tick (every 60 ticks ≈ 12s). */
+export const RF_SNAPSHOT_TICK_INTERVAL = 60;
+
+export type RfSyncDelta = {
+  v: 1;
+  tick: number;
+  econTick?: number;
+  roundOver?: boolean;
+  winnerId?: string | null;
+  cells?: Array<{ i: number; o: number; b?: number }>;
+  nations?: RfNation[];
+  flashes?: RfFlash[];
+  popups?: RfPopup[];
+  rankings?: RfWorld["rankings"];
+  battle?: RfBattle | null;
+  pendingCounterAttack?: string | null;
+};
+
+export type RfSyncTracker = {
+  owner: number[];
+  buildings: number[];
+  nations: Map<string, string>;
+};
+
+function nationSig(n: RfNation): string {
+  return `${n.gold}|${n.troops}|${n.population}|${n.territoryPct}|${n.alive}|${n.defendUntil ?? 0}`;
+}
+
+export function createRfSyncTracker(world: RfWorld): RfSyncTracker {
+  return {
+    owner: Array.from(world.owner),
+    buildings: Array.from(world.buildings),
+    nations: new Map(Object.values(world.nations).map((n) => [n.id, nationSig(n)])),
+  };
+}
+
+export function buildRfSyncDelta(prev: RfSyncTracker, world: RfWorld): RfSyncDelta {
+  const delta: RfSyncDelta = { v: 1, tick: world.tick };
+
+  const cells: Array<{ i: number; o: number; b?: number }> = [];
+  for (let i = 0; i < world.owner.length; i++) {
+    const o = world.owner[i]!;
+    const b = world.buildings[i]!;
+    if (o !== prev.owner[i] || b !== prev.buildings[i]) {
+      cells.push({ i, o, b });
+    }
+  }
+  if (cells.length) delta.cells = cells;
+
+  const nations: RfNation[] = [];
+  for (const n of Object.values(world.nations)) {
+    const sig = nationSig(n);
+    if (prev.nations.get(n.id) !== sig) nations.push({ ...n });
+  }
+  if (nations.length) delta.nations = nations;
+
+  delta.econTick = world.econTick;
+  delta.roundOver = world.roundOver;
+  delta.winnerId = world.winnerId;
+  delta.flashes = world.flashes.map((f) => ({ ...f }));
+  delta.popups = world.popups.map((p) => ({ ...p }));
+  delta.rankings = world.rankings.slice();
+  delta.battle = world.battle ? { ...world.battle } : null;
+  delta.pendingCounterAttack = world.pendingCounterAttack ?? null;
+
+  prev.owner = Array.from(world.owner);
+  prev.buildings = Array.from(world.buildings);
+  prev.nations = new Map(Object.values(world.nations).map((n) => [n.id, nationSig(n)]));
+
+  return delta;
+}
+
+export function applyRfSyncDelta(world: RfWorld, delta: RfSyncDelta, opts?: { rejectStaleTick?: boolean }): void {
+  if (opts?.rejectStaleTick && delta.tick < world.tick) return;
+  world.tick = delta.tick;
+  if (delta.econTick !== undefined) world.econTick = delta.econTick;
+  if (delta.roundOver !== undefined) world.roundOver = delta.roundOver;
+  if (delta.winnerId !== undefined) world.winnerId = delta.winnerId;
+  if (delta.cells) {
+    for (const c of delta.cells) {
+      world.owner[c.i] = c.o;
+      world.buildings[c.i] = c.b ?? 0;
+    }
+  }
+  if (delta.nations) {
+    for (const n of delta.nations) {
+      world.nations[n.id] = { ...n };
+      world.slotToId[n.slot] = n.id;
+      world.idToSlot[n.id] = n.slot;
+    }
+  }
+  if (delta.flashes) world.flashes = delta.flashes.map((f) => ({ ...f }));
+  if (delta.popups) world.popups = delta.popups.map((p) => ({ ...p }));
+  if (delta.rankings) world.rankings = delta.rankings.slice();
+  if (delta.battle !== undefined) world.battle = delta.battle ? { ...delta.battle } : null;
+  if (delta.pendingCounterAttack !== undefined) {
+    world.pendingCounterAttack = delta.pendingCounterAttack ?? undefined;
   }
 }
 

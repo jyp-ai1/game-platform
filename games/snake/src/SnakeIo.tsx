@@ -97,6 +97,16 @@ import {
   type GlobalWorldJoinBrief,
 } from "./snake-global-world";
 import {
+  SNAKE_SNAPSHOT_TICK_INTERVAL,
+  applySnakeWorldDelta,
+  applySnakeWorldSnapshot,
+  buildSnakeWorldDelta,
+  buildSnakeWorldSnapshot,
+  createSnakeSyncTracker,
+  type SnakeSyncDelta,
+  type SnakeSyncSnapshot,
+} from "./snake-world-sync";
+import {
   flushSnakeTelemetry,
   markFirstFun,
   markFirstMove,
@@ -417,6 +427,7 @@ export function SnakeIoGame({
   const localSpawnBoundRef = useRef(false);
   const connectDoneRef = useRef(false);
   const tickEpochRef = useRef(0);
+  const snakeSyncTrackerRef = useRef<ReturnType<typeof createSnakeSyncTracker> | null>(null);
   const [tickEpoch, setTickEpoch] = useState(0);
   /** Stage mode — current stage index (0-based), cumulative run score, overlay gate. */
   const [stageIndex, setStageIndex] = useState(0);
@@ -1113,7 +1124,54 @@ export function SnakeIoGame({
       return attachLocalPlayer(next, r);
     };
 
+    const applyGlobalHostSnapshot = (_snap: SnakeSyncSnapshot, r: GameRoom) => {
+      if (!worldRef.current) {
+        const cfg = Replay.multiplayer.balance("snake", SNAKE_WORLD_TARGET);
+        const initial = attachLocalPlayer(createInitialWorld(humansForRoom(r), cfg), r);
+        worldRef.current = initial;
+        setWorld(initial);
+        localSpawnBoundRef.current = true;
+      }
+    };
+
+    const applyGlobalGuestSync = (snap: SnakeSyncSnapshot, r: GameRoom) => {
+      const base =
+        worldRef.current ??
+        attachLocalPlayer(createInitialWorld(humansForRoom(r), snap.config), r);
+      let next = applySnakeWorldSnapshot(base, snap, deviceId);
+      const local = worldRef.current?.snakes[deviceId];
+      if (local) next.snakes[deviceId] = structuredClone(local);
+      next = mergeGlobalWorldState(next, r);
+      worldRef.current = next;
+      setWorld(next);
+      localSpawnBoundRef.current = true;
+    };
+
     const applyRoom = (r: GameRoom) => {
+      const gs = r.gameState ?? {};
+      const last = String(gs._lastEvent ?? "");
+
+      if (isGlobalWorld && last === "snake:delta" && gs["snake:delta"]) {
+        if (isHost || !worldRef.current) return;
+        const delta = gs["snake:delta"] as SnakeSyncDelta;
+        let next = applySnakeWorldDelta(worldRef.current, delta, deviceId);
+        const local = worldRef.current.snakes[deviceId];
+        if (local) next.snakes[deviceId] = structuredClone(local);
+        worldRef.current = next;
+        setWorld(next);
+        return;
+      }
+
+      if (isGlobalWorld && gs["snake:snapshot"] && (last === "snake:snapshot" || !gs.state)) {
+        const snap = gs["snake:snapshot"] as SnakeSyncSnapshot;
+        if (isHost) {
+          applyGlobalHostSnapshot(snap, r);
+          return;
+        }
+        applyGlobalGuestSync(snap, r);
+        return;
+      }
+
       const state = r.gameState?.state as SnakeIoWorld | undefined;
       if (state) {
         if (isGlobalWorld) {
@@ -1164,7 +1222,10 @@ export function SnakeIoGame({
           setJoinBrief(buildJoinBrief(initial));
           setTimeout(() => setJoinBrief(null), 4500);
         }
-        if (isHost) send(effectiveRoomCode, "state", initial);
+        if (isHost) {
+          send(effectiveRoomCode, "snake:snapshot", buildSnakeWorldSnapshot(initial));
+          snakeSyncTrackerRef.current = createSnakeSyncTracker(initial);
+        }
       }
     };
     const unsub = subscribeRoom(effectiveRoomCode, applyRoom);
@@ -1719,8 +1780,19 @@ export function SnakeIoGame({
           ...sessionMomentsRef.current.filter((m) => !next.moments.some((n) => n.id === m.id)),
         ].slice(0, 20);
       }
-      // Shared food/gems + bots: host broadcasts world (ephemeral — no Postgres blob)
-      if (isHost && next.tick % 2 === 0) send(activeRoom, "state", next);
+      // Shared food/gems + bots: host broadcasts compact delta (WORLD) or legacy state (private MP)
+      if (isHost && isGlobalWorld && next.tick % 2 === 0) {
+        if (!snakeSyncTrackerRef.current) snakeSyncTrackerRef.current = createSnakeSyncTracker(next);
+        if (next.tick % SNAKE_SNAPSHOT_TICK_INTERVAL === 0) {
+          send(activeRoom, "snake:snapshot", buildSnakeWorldSnapshot(next));
+          snakeSyncTrackerRef.current = createSnakeSyncTracker(next);
+        } else {
+          const delta = buildSnakeWorldDelta(snakeSyncTrackerRef.current, next);
+          if (delta) send(activeRoom, "snake:delta", delta);
+        }
+      } else if (isHost && !isGlobalWorld && next.tick % 2 === 0) {
+        send(activeRoom, "state", next);
+      }
       setWorld(next);
       } catch (err) {
         diagTickError(err);
@@ -1942,7 +2014,12 @@ export function SnakeIoGame({
     worldRef.current = next;
     setWorld(next);
 
-    if (isHost) send(activeRoom, "state", next);
+    if (isHost && isGlobalWorld) {
+      send(activeRoom, "snake:snapshot", buildSnakeWorldSnapshot(next));
+      snakeSyncTrackerRef.current = createSnakeSyncTracker(next);
+    } else if (isHost) {
+      send(activeRoom, "state", next);
+    }
 
     beginSpawnReady();
 
