@@ -4,8 +4,18 @@ import { notFound } from "next/navigation";
 import { GameDetailTemplate } from "@/components/game-detail-template";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { selectRelated } from "@/lib/game-sections";
+import { selectMoreGames } from "@/lib/game-sections";
+import {
+  buildLocalMvpGame,
+  getGameOrLocalMvp,
+} from "@/lib/local-mvp-games";
+import {
+  getCreatorGameOrNull,
+  mergeCatalogGames,
+} from "@/lib/creator/creator-game-catalog";
+import { isCreatorPlayableSlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
+import { isDeprecatedProductSlug } from "@/lib/product-catalog-sync";
 import {
   breadcrumbJsonLd,
   buildGameMetadata,
@@ -13,10 +23,15 @@ import {
   gameJsonLd,
   softwareApplicationJsonLd,
 } from "@/lib/seo";
-import { getGameBySlug, getGames } from "@/lib/supabase/games";
+import { getGameBySlug, getGames, isExternalGame } from "@/lib/supabase/games";
 
 interface GamePageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 export const revalidate = 60;
@@ -25,7 +40,7 @@ export async function generateMetadata({
   params,
 }: GamePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const game = await getGameBySlug(slug);
+  const game = (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug);
 
   if (!game) {
     return { title: "Game Not Found", robots: { index: false, follow: false } };
@@ -34,20 +49,40 @@ export async function generateMetadata({
   return buildGameMetadata(game);
 }
 
-export default async function GamePage({ params }: GamePageProps) {
+export default async function GamePage({ params, searchParams }: GamePageProps) {
   const { slug } = await params;
-  const [game, allGames, rankingEnabled] = await Promise.all([
+
+  if (isDeprecatedProductSlug(slug)) {
+    notFound();
+  }
+
+  const q = await searchParams;
+  // Sprint 21 — Invite lands on Detail (pin room via InviteDetailPin), then WORLD PLAY.
+  // Do not auto-redirect past Detail (same-world join still uses pinned room).
+  const invite =
+    firstParam(q.invite)?.trim().toUpperCase() ||
+    firstParam(q.room)?.trim().toUpperCase() ||
+    null;
+
+  const [dbGame, rawGames, rankingEnabled] = await Promise.all([
     getGameBySlug(slug),
     getGames(),
     isFeatureEnabled("ranking"),
   ]);
+  const allGames = mergeCatalogGames(rawGames);
+  const game = dbGame
+    ? getGameOrLocalMvp([dbGame], slug)
+    : getGameOrLocalMvp(allGames, slug) ?? getCreatorGameOrNull(slug);
 
   if (!game || game.status === "HIDDEN") {
     notFound();
   }
 
-  const related = selectRelated(allGames, game);
-  const isPlayable = game.status === "ACTIVE" && isPlayableSlug(slug);
+  const moreGames = selectMoreGames(allGames, game, 3);
+  const isPlayable =
+    (game.status === "ACTIVE" && isPlayableSlug(slug)) ||
+    isCreatorPlayableSlug(slug) ||
+    (game.status === "ACTIVE" && isExternalGame(game));
 
   return (
     <>
@@ -68,8 +103,9 @@ export default async function GamePage({ params }: GamePageProps) {
         slug={slug}
         isPlayable={isPlayable}
         rankingEnabled={rankingEnabled}
-        related={related}
+        related={moreGames}
         allGames={allGames}
+        inviteCode={invite}
       />
     </>
   );

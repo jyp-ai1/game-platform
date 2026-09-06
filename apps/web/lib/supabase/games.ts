@@ -1,4 +1,4 @@
-import type { Difficulty, Game, GameStatus } from "@game-platform/shared";
+import type { Difficulty, Game, GameSourceType, GameStatus } from "@game-platform/shared";
 import { cache } from "react";
 
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -20,6 +20,8 @@ interface GameRow {
   how_to_play: string | null;
   play_count: number;
   nostalgia_note: string | null;
+  play_url: string | null;
+  source_type: GameSourceType;
   categories: { name: string; slug: string } | null;
   created_at: string;
   updated_at: string;
@@ -30,7 +32,7 @@ interface GameRow {
 // relationship paths between the two tables, and PostgREST needs to be told
 // explicitly which FK column to embed through.
 const GAME_COLUMNS =
-  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, play_count, nostalgia_note, created_at, updated_at, categories!category_id(name, slug)";
+  "id, slug, title, description, thumbnail_url, difficulty, status, sort_order, category_id, is_featured, tags, how_to_play, play_count, nostalgia_note, play_url, source_type, created_at, updated_at, categories!category_id(name, slug)";
 
 function mapGameRow(row: GameRow): Game {
   return {
@@ -49,9 +51,15 @@ function mapGameRow(row: GameRow): Game {
     howToPlay: row.how_to_play,
     playCount: row.play_count,
     nostalgiaNote: row.nostalgia_note,
+    playUrl: row.play_url ?? null,
+    sourceType: row.source_type ?? "native",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+export function isExternalGame(game: Game | null | undefined): boolean {
+  return game?.sourceType === "external" && !!game.playUrl;
 }
 
 // Cached per-request so generateMetadata and the page component (which both

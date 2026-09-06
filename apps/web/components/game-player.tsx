@@ -313,20 +313,32 @@ const gameComponents: Record<PlayableSlug, ComponentType> = {
     () => import("@game-platform/game-agar").then((mod) => mod.AgarGame),
     { ssr: false, loading: Loading }
   ),
+  bomber: dynamic(
+    () => import("@game-platform/game-bomber").then((mod) => mod.BomberGame),
+    { ssr: false, loading: Loading }
+  ),
+  "re-front": dynamic(
+    () => import("@game-platform/game-re-front").then((mod) => mod.ReFrontGame),
+    { ssr: false, loading: Loading }
+  ),
 };
 
 export function GamePlayer({
   slug,
+  catalogSlug,
   rankingEnabled = true,
   instantPlay = false,
   fullscreen = false,
 }: {
   slug: PlayableSlug;
+  /** Catalog slug for analytics when playing creator stub (engine may differ). */
+  catalogSlug?: string;
   rankingEnabled?: boolean;
   instantPlay?: boolean;
   fullscreen?: boolean;
 }) {
   const Component = gameComponents[slug];
+  const trackSlug = catalogSlug ?? slug;
 
   async function submitScoreWithFlags(
     gameSlug: string,
@@ -343,8 +355,8 @@ export function GamePlayer({
   return (
     <GameSDKProvider sdk={{ submitScore: submitScoreWithFlags }}>
       <InstantPlayProvider enabled={instantPlay}>
-        <GameSlugProvider slug={slug}>
-          <GameErrorMonitor gameSlug={slug} />
+        <GameSlugProvider slug={trackSlug}>
+          <GameErrorMonitor gameSlug={trackSlug} />
           <div
             className={
               fullscreen

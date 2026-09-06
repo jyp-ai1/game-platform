@@ -1,6 +1,10 @@
 import type { Game } from "@game-platform/shared";
 import type { Metadata } from "next";
 
+import {
+  LOCAL_GAME_OG_DIMS,
+  resolveLocalThumb,
+} from "@/lib/local-mvp-games";
 import { siteConfig } from "@/lib/site-config";
 import { siteUrl } from "@/lib/site";
 
@@ -28,6 +32,46 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
 export function absoluteUrl(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${siteUrl}${normalized}`;
+}
+
+/**
+ * Absolute HTTPS URL for crawler-fetched assets (og:image / Twitter).
+ * Prefer the current Vercel deployment host so Preview shares resolve on the
+ * same origin Kakao scraped (production canonical stays on siteUrl).
+ */
+export function absoluteAssetUrl(path: string): string {
+  const base = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : siteUrl;
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
+}
+
+function resolveGameOgImage(game: Game): {
+  url: string;
+  width: number;
+  height: number;
+  alt: string;
+} {
+  const thumb = resolveLocalThumb(game.slug, game.thumbnailUrl);
+  const dims = LOCAL_GAME_OG_DIMS[game.slug] ?? { width: 1200, height: 630 };
+  if (thumb) {
+    return {
+      url: absoluteAssetUrl(thumb),
+      width: dims.width,
+      height: dims.height,
+      alt: game.title,
+    };
+  }
+  return {
+    url: absoluteAssetUrl(`/games/${game.slug}/opengraph-image`),
+    width: 1200,
+    height: 630,
+    alt: game.title,
+  };
 }
 
 export function buildHomeMetadata(): Metadata {
@@ -65,7 +109,7 @@ export function buildGameMetadata(game: Game): Metadata {
     ? `${game.title}을(를) 무료로 플레이하세요. ${game.description} ${game.howToPlay.slice(0, 80)}… 랭킹, 시즌, 업적, 저장/이어하기를 지원합니다.`
     : `${game.title}을(를) 무료로 플레이하세요. ${game.description} 랭킹, 시즌, 업적, 저장/이어하기를 지원합니다.`;
   const url = absoluteUrl(`/games/${game.slug}`);
-  const ogImage = absoluteUrl(`/games/${game.slug}/opengraph-image`);
+  const ogImage = resolveGameOgImage(game);
 
   const indexable = game.status === "ACTIVE" || game.status === "COMING_SOON";
 
@@ -89,13 +133,20 @@ export function buildGameMetadata(game: Game): Metadata {
       siteName: siteConfig.name,
       type: "website",
       locale: "ko_KR",
-      images: [{ url: ogImage, width: 1200, height: 630, alt: game.title }],
+      images: [
+        {
+          url: ogImage.url,
+          width: ogImage.width,
+          height: ogImage.height,
+          alt: ogImage.alt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      images: [ogImage.url],
     },
     robots: indexable
       ? { index: true, follow: true }

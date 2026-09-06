@@ -2,6 +2,8 @@ export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
 export type GameStatus = "ACTIVE" | "COMING_SOON" | "HIDDEN" | "MAINTENANCE";
 
+export type GameSourceType = "native" | "external";
+
 export interface Game {
   id: string;
   slug: string;
@@ -18,6 +20,9 @@ export interface Game {
   howToPlay: string | null;
   playCount: number;
   nostalgiaNote: string | null;
+  /** External iframe target when sourceType is external. */
+  playUrl: string | null;
+  sourceType: GameSourceType;
   createdAt: string;
   updatedAt: string;
 }

@@ -2,20 +2,17 @@
 
 import type { Game } from "@game-platform/shared";
 import { GlobalWorldPersist } from "@game-platform/game-snake";
-import { entryLogFail } from "@game-platform/game-snake";
 import {
   getGlobalWorldStatus,
   GLOBAL_WORLD_TARGET,
-  quickPlayGlobal,
 } from "@game-platform/multiplayer-sdk";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   PlatformGameCard,
   type PlatformGameCardFriend,
 } from "@/components/platform-game-card";
-import { enterSnakeQuickPlay, enterSnakeRoom, PRACTICE_URL } from "@/lib/snake-entry";
+import { detailHrefForCatalogSlug, REPLAY_CARD_CTA } from "@/lib/game-catalog";
 import { useMounted } from "@/lib/use-mounted";
 
 export interface LiveMultiplayerFriendPresence {
@@ -55,14 +52,9 @@ function readLiveMeta(slug: string) {
   };
 }
 
-function playHrefForSlug(slug: string): string {
-  if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
-  return `/games/${slug}/play`;
-}
-
 /**
- * Home Multiplayer strip — unified LIVE card for all realtime games
- * (snake, agar, future REALTIME_GAMES).
+ * Home Multiplayer strip — unified LIVE card for all realtime games.
+ * MP-DETAIL-001: card → Game Detail only (never Character lobby).
  */
 export function LiveMultiplayerGameCard({
   game,
@@ -73,11 +65,8 @@ export function LiveMultiplayerGameCard({
   friend?: LiveMultiplayerFriendPresence | null;
   className?: string;
 }) {
-  const router = useRouter();
   const mounted = useMounted();
   const slug = game.slug;
-  const [joining, setJoining] = useState(false);
-  const [joiningFriend, setJoiningFriend] = useState(false);
   const [liveMeta, setLiveMeta] = useState(defaultLiveMeta);
 
   useEffect(() => {
@@ -98,46 +87,7 @@ export function LiveMultiplayerGameCard({
     };
   }, [friend, mounted]);
 
-  const handleQuickPlay = useCallback(async () => {
-    setJoining(true);
-    try {
-      if (slug === "snake") {
-        await enterSnakeQuickPlay(router);
-        return;
-      }
-      try {
-        const { href } = await quickPlayGlobal(slug);
-        // Prefer /play path for agar scaffold; keep room query when present.
-        const playBase = playHrefForSlug(slug);
-        const roomMatch = href.match(/[?&]room=([^&]+)/);
-        router.push(roomMatch ? `${playBase}?room=${roomMatch[1]}` : playBase);
-      } catch {
-        router.push(playHrefForSlug(slug));
-      }
-    } finally {
-      setJoining(false);
-    }
-  }, [router, slug]);
-
-  const handleJoinFriend = useCallback(async () => {
-    if (!friend) return;
-    setJoiningFriend(true);
-    try {
-      if (slug === "snake") {
-        const match = friend.playHref.match(/room=([^&]+)/);
-        const roomCode = match ? decodeURIComponent(match[1]!) : "WORLD";
-        await enterSnakeRoom(router, roomCode);
-        return;
-      }
-      router.push(friend.playHref || playHrefForSlug(slug));
-    } catch (err) {
-      entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
-      if (slug === "snake") router.push(PRACTICE_URL);
-      else router.push(playHrefForSlug(slug));
-    } finally {
-      setJoiningFriend(false);
-    }
-  }, [friend, router, slug]);
+  const detailHref = detailHrefForCatalogSlug(slug);
 
   return (
     <PlatformGameCard
@@ -149,15 +99,17 @@ export function LiveMultiplayerGameCard({
       className={className}
       actions={{
         primary: {
-          label: joining ? "입장 중…" : "바로 참가",
-          onClick: handleQuickPlay,
-          loading: joining,
+          label: REPLAY_CARD_CTA,
+          href: detailHref,
         },
         secondary: friend
           ? {
-              label: joiningFriend ? "입장 중…" : "같이하기",
-              onClick: handleJoinFriend,
-              loading: joiningFriend,
+              label: "같이하기",
+              onClick: () => {
+                if (typeof window !== "undefined") {
+                  window.location.href = friend.playHref || detailHref;
+                }
+              },
             }
           : undefined,
       }}

@@ -2,7 +2,9 @@ import type { Game } from "@game-platform/shared";
 
 import { siteConfig } from "@/lib/site-config";
 
-import { absoluteUrl } from "./metadata";
+import { resolveLocalThumb } from "@/lib/local-mvp-games";
+
+import { absoluteAssetUrl, absoluteUrl } from "./metadata";
 
 type JsonLd = Record<string, unknown>;
 
@@ -48,11 +50,10 @@ export function breadcrumbJsonLd(
 
 export function gameJsonLd(game: Game): JsonLd {
   const url = absoluteUrl(`/games/${game.slug}`);
-  const image = game.thumbnailUrl
-    ? game.thumbnailUrl.startsWith("http")
-      ? game.thumbnailUrl
-      : absoluteUrl(game.thumbnailUrl)
-    : absoluteUrl(`/games/${game.slug}/opengraph-image`);
+  const thumb = resolveLocalThumb(game.slug, game.thumbnailUrl);
+  const image = thumb
+    ? absoluteAssetUrl(thumb)
+    : absoluteAssetUrl(`/games/${game.slug}/opengraph-image`);
 
   return {
     "@context": "https://schema.org",

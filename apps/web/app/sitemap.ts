@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { getCategories } from "@/lib/supabase/categories";
+import { filterProductCatalogGames } from "@/lib/product-catalog-sync";
 import { getGames } from "@/lib/supabase/games";
 import { siteUrl } from "@/lib/site";
 
@@ -30,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [games, categories] = await Promise.all([getGames(), getCategories()]);
 
-    const gameRoutes: MetadataRoute.Sitemap = games
+    const gameRoutes: MetadataRoute.Sitemap = filterProductCatalogGames(games)
       .filter((game) => game.status === "ACTIVE" || game.status === "COMING_SOON")
       .map((game) => ({
         url: `${base}/games/${encodeURIComponent(game.slug)}`,

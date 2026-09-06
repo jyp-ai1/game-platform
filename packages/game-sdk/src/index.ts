@@ -86,6 +86,71 @@ export {
 export { useStandardGameFeel, standardFeelFromState, feelWithScore, type StandardGameFeelOptions } from "./use-standard-game-feel";
 export { StandardGameOverOverlay } from "./standard-game-over-overlay";
 export { StandardGameShell } from "./standard-game-shell";
+
+export {
+  enterViewportFullscreen,
+  exitViewportFullscreen,
+  getActiveFullscreenElement,
+  isViewportFullscreen,
+} from "./multiplayer-fullscreen";
+export {
+  DEFAULT_MP_AI_DIFFICULTY,
+  MP_AI_DIFFICULTIES,
+  toEngineAiTier,
+  type EngineAiTier,
+  type MpAiDifficulty,
+} from "./mp-difficulty";
+export {
+  MP_PLAYER_COLORS,
+  MultiplayerEntrySelect,
+  type MpStyleOption,
+} from "./multiplayer-entry-select";
+export {
+  buildCreatorGameMeta,
+  getCreatorMultiplayerSlugs,
+  isMultiplayerGameSlug,
+  resolveGameType,
+  setCreatorMultiplayerSlugs,
+  toSessionDifficulty,
+  type CreatorGameMeta,
+  type GameType,
+  type SessionDifficulty,
+} from "./game-metadata";
+export {
+  PLATFORM_CONTRACT_CHECKLIST_KEYS,
+  PLATFORM_FLAGSHIP_MP_SLUGS,
+  PLATFORM_JOURNEY,
+  assertEntryLobbyContract,
+  buildPlatformGameContract,
+  entryStepsForMode,
+  flagshipMpContractSmoke,
+  resolveEntryMode,
+  type PlatformContractChecklist,
+  type PlatformEntryMode,
+  type PlatformEntrySteps,
+  type PlatformGameContractMeta,
+  type PlatformJourneyStep,
+} from "./platform-game-contract";
+export {
+  isMpBoardInputActive,
+  isMpGameKey,
+} from "./multiplayer-input-bridge";
+export {
+  MultiplayerDeathOverlay,
+  MultiplayerMinimap,
+  MultiplayerPlayShell,
+  MultiplayerSideRankHud,
+  MultiplayerYouBar,
+  type MpMinimapDot,
+} from "./multiplayer-play-shell";
+export {
+  FloatingMobilePad,
+  MobileControlPad,
+  type FloatingMobilePadProps,
+  type MobileControlAction,
+  type MobileControlPadProps,
+  type PadDirection,
+} from "./mobile-control-pad";
 export { GameFeelLayer } from "./game-feel-layer";
 export { playGameFeel, type GameFeelEvent } from "./game-feel-events";
 export { PuzzlePlayField } from "./puzzle-play-field";
