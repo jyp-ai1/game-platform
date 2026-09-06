@@ -1,0 +1,54 @@
+{
+  "gate": "feedback-intelligence",
+  "commit": "d5e417d",
+  "base": "https://game29-gesflptjl-jyp-ai1s-projects.vercel.app",
+  "p0": {
+    "feedbackApi": true,
+    "adminPage": true,
+    "adminApiAuth": true,
+    "noTerritoryWar": true,
+    "homeNoTw": true,
+    "playRegression": true
+  },
+  "passed": 6,
+  "total": 6,
+  "ctoFinal": "PASS",
+  "migration0037": "MANUAL_SQL_EDITOR_REQUIRED",
+  "checks": [
+    {
+      "name": "p0-feedback-api-regression",
+      "ok": true,
+      "t": "2026-09-06T01:41:23.405Z"
+    },
+    {
+      "name": "p0-admin-feedback-route",
+      "ok": true,
+      "note": "login-gate",
+      "t": "2026-09-06T01:41:26.777Z"
+    },
+    {
+      "name": "p0-admin-api-auth",
+      "ok": true,
+      "t": "2026-09-06T01:41:27.078Z"
+    },
+    {
+      "name": "p0-territory-war-excluded",
+      "ok": true,
+      "note": "territory-war comments route exists but not in dashboard P0 list",
+      "t": "2026-09-06T01:41:27.663Z"
+    },
+    {
+      "name": "p0-home-no-territory-war",
+      "ok": true,
+      "t": "2026-09-06T01:41:29.763Z"
+    },
+    {
+      "name": "p0-snake-play-regression",
+      "ok": true,
+      "note": "https://game29-gesflptjl-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD",
+      "t": "2026-09-06T01:41:33.713Z"
+    }
+  ],
+  "reFrontFrozen": true,
+  "step4Touched": false
+}

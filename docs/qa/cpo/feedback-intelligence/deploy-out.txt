@@ -1,0 +1,25 @@
+Feedback Intelligence — Preview deploy @ d5e417d
+
+Visit URL: https://game29-gesflptjl-jyp-ai1s-projects.vercel.app
+Branch: content-factory
+Commit: d5e417d
+
+Preview Build: SUCCESS (Vercel deploy READY)
+Typecheck (web): PASS
+Local build: FAIL (OOM — not used as gate; Preview build PASS)
+
+Migration 0037: MANUAL — apply supabase/migrations/0037_feedback_work_orders.sql in SQL Editor before Work Order QA
+
+Technical QA:
+- feedback-intelligence-qa.mjs: 6/6 PASS
+- game-feedback-ops-qa.mjs: 20/20 PASS (admin summary skipped without ADMIN_SECRET)
+
+Routes:
+- GET /admin/feedback → 200 (login gate)
+- GET /api/admin/feedback/dashboard → 401 (unauthenticated)
+- GET /api/games/snake/comments → 200
+
+CPO entry: https://game29-gesflptjl-jyp-ai1s-projects.vercel.app/admin/feedback
+(ADMIN_SECRET login required)
+
+Re:Front / STEP 4: no changes in d5e417d
