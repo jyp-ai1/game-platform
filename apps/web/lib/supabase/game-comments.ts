@@ -3,6 +3,11 @@
  * Game Feedback & QA Operations — feedback type + daily aggregation.
  */
 import {
+  detectFeedbackProvenance,
+  isFeedbackProvenance,
+  type FeedbackProvenance,
+} from "@/lib/feedback-provenance";
+import {
   emptyTypeCounts,
   FEEDBACK_TYPES,
   isFeedbackType,
@@ -25,9 +30,15 @@ export type GameComment = {
   content: string;
   feedbackType: FeedbackType;
   status: FeedbackStatus;
+  feedbackProvenance: FeedbackProvenance;
   createdAt: string;
   workOrderId?: string | null;
   releaseVersion?: string | null;
+};
+
+export type ListFeedbackOptions = {
+  /** Admin ops default: REAL_PLAYER only. Use "all" for export/audit. */
+  provenance?: FeedbackProvenance | "all";
 };
 
 export type GameFeedbackSummary = {
@@ -49,7 +60,7 @@ export type CommentValidationResult =
   | { ok: false; error: string; field?: "author" | "content" | "feedbackType" };
 
 const COMMENT_COLUMNS =
-  "id, game_slug, author, content, feedback_type, status, created_at, work_order_id, release_version";
+  "id, game_slug, author, content, feedback_type, status, feedback_provenance, created_at, work_order_id, release_version";
 const LEGACY_COMMENT_COLUMNS = "id, game_slug, author, content, created_at";
 
 function mapRow(row: Record<string, unknown>): GameComment {
@@ -63,6 +74,12 @@ function mapRow(row: Record<string, unknown>): GameComment {
       ? (rawStatus as FeedbackStatus)
       : "NEW";
 
+  const rawProv = row.feedback_provenance;
+  const feedbackProvenance =
+    typeof rawProv === "string" && isFeedbackProvenance(rawProv)
+      ? rawProv
+      : detectFeedbackProvenance(String(row.author ?? ""), String(row.content ?? ""));
+
   return {
     id: String(row.id),
     gameSlug: String(row.game_slug),
@@ -70,10 +87,16 @@ function mapRow(row: Record<string, unknown>): GameComment {
     content: String(row.content),
     feedbackType,
     status,
+    feedbackProvenance,
     createdAt: String(row.created_at),
     workOrderId: row.work_order_id ? String(row.work_order_id) : null,
     releaseVersion: row.release_version ? String(row.release_version) : null,
   };
+}
+
+function filterByProvenance(rows: GameComment[], provenance: FeedbackProvenance | "all") {
+  if (provenance === "all") return rows;
+  return rows.filter((r) => r.feedbackProvenance === provenance);
 }
 
 export function validateCommentInput(
@@ -116,17 +139,41 @@ export function validateCommentInput(
 async function selectComments(
   client: typeof supabase,
   slug: string,
-  limit: number
+  limit: number,
+  provenance: FeedbackProvenance | "all" = "REAL_PLAYER"
 ): Promise<GameComment[]> {
-  const full = await client
+  let query = client
     .from("game_comments")
     .select(COMMENT_COLUMNS)
     .eq("game_slug", slug)
     .order("created_at", { ascending: false })
     .limit(limit);
 
+  if (provenance !== "all") {
+    query = query.eq("feedback_provenance", provenance);
+  }
+
+  const full = await query;
+
   if (!full.error) {
-    return (full.data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+    return filterByProvenance(
+      (full.data ?? []).map((row) => mapRow(row as Record<string, unknown>)),
+      provenance
+    );
+  }
+
+  if (full.error.message.includes("feedback_provenance")) {
+    const legacy = await client
+      .from("game_comments")
+      .select("id, game_slug, author, content, feedback_type, status, created_at, work_order_id, release_version")
+      .eq("game_slug", slug)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (legacy.error) throw new Error(legacy.error.message);
+    return filterByProvenance(
+      (legacy.data ?? []).map((row) => mapRow(row as Record<string, unknown>)),
+      provenance
+    );
   }
 
   if (full.error.message.includes("feedback_type") || full.error.message.includes("status")) {
@@ -173,6 +220,8 @@ async function insertComment(
   | { ok: true; comment: GameComment }
   | { ok: false; error: string; field?: "author" | "content" | "feedbackType" }
 > {
+  const feedbackProvenance = detectFeedbackProvenance(validation.author, validation.content);
+
   const withFeedback = await admin
     .from("game_comments")
     .insert({
@@ -181,12 +230,31 @@ async function insertComment(
       content: validation.content,
       feedback_type: validation.feedbackType,
       status: "NEW",
+      feedback_provenance: feedbackProvenance,
     })
     .select(COMMENT_COLUMNS)
     .single();
 
   if (!withFeedback.error) {
     return { ok: true, comment: mapRow(withFeedback.data as Record<string, unknown>) };
+  }
+
+  if (withFeedback.error.message.includes("feedback_provenance")) {
+    const withoutProv = await admin
+      .from("game_comments")
+      .insert({
+        game_slug: slug,
+        author: validation.author,
+        content: validation.content,
+        feedback_type: validation.feedbackType,
+        status: "NEW",
+      })
+      .select("id, game_slug, author, content, feedback_type, status, created_at, work_order_id, release_version")
+      .single();
+    if (withoutProv.error) {
+      return { ok: false, error: withoutProv.error.message };
+    }
+    return { ok: true, comment: mapRow(withoutProv.data as Record<string, unknown>) };
   }
 
   if (
@@ -387,20 +455,50 @@ export async function listFeedbackDates(limit = 14): Promise<
     .slice(0, limit);
 }
 
-/** All P0 game feedback for admin ops (Territory War excluded). */
-export async function listAllP0Feedback(limit = 5000): Promise<GameComment[]> {
+/** All P0 game feedback for admin ops (Territory War excluded). Default: REAL_PLAYER only. */
+export async function listAllP0Feedback(
+  limit = 5000,
+  options: ListFeedbackOptions = {}
+): Promise<GameComment[]> {
+  const provenance = options.provenance ?? "REAL_PLAYER";
   const admin = getAdminSupabase();
   if (!admin) return [];
 
-  const full = await admin
+  let query = admin
     .from("game_comments")
     .select(COMMENT_COLUMNS)
     .in("game_slug", [...P0_FEEDBACK_GAMES])
     .order("created_at", { ascending: false })
     .limit(limit);
 
+  if (provenance !== "all") {
+    query = query.eq("feedback_provenance", provenance);
+  }
+
+  const full = await query;
+
   if (!full.error) {
-    return (full.data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+    return filterByProvenance(
+      (full.data ?? []).map((row) => mapRow(row as Record<string, unknown>)),
+      provenance
+    );
+  }
+
+  if (full.error.message.includes("feedback_provenance")) {
+    const legacy = await admin
+      .from("game_comments")
+      .select("id, game_slug, author, content, feedback_type, status, created_at, work_order_id, release_version")
+      .in("game_slug", [...P0_FEEDBACK_GAMES])
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (legacy.error) {
+      if (legacy.error.message.includes("game_comments")) return [];
+      throw new Error(legacy.error.message);
+    }
+    return filterByProvenance(
+      (legacy.data ?? []).map((row) => mapRow(row as Record<string, unknown>)),
+      provenance
+    );
   }
 
   const legacyCols =

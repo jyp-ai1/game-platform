@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 200), 500);
 
   try {
-    let items = await listAllP0Feedback();
+    let items = await listAllP0Feedback(5000, { provenance: "REAL_PLAYER" });
     if (gameSlug) items = items.filter((i) => i.gameSlug === gameSlug);
     if (feedbackType && isFeedbackType(feedbackType)) {
       items = items.filter((i) => i.feedbackType === feedbackType);

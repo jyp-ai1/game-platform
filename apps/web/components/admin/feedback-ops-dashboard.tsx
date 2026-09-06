@@ -110,7 +110,8 @@ export function FeedbackOpsDashboard() {
       <header>
         <h1 className="text-2xl font-bold">Feedback Intelligence</h1>
         <p className="text-sm text-muted-foreground">
-          피드백 → 패턴 → Work Order · AI 자동 수정/배포 없음 · Territory War 제외
+          피드백 → 패턴 → Work Order · AI 자동 수정/배포 없음 · Territory War 제외 ·{" "}
+          <span className="text-primary">REAL_PLAYER만 표시 (QA/Automation 제외)</span>
         </p>
       </header>
 
