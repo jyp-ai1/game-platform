@@ -26,6 +26,8 @@ export type GameComment = {
   feedbackType: FeedbackType;
   status: FeedbackStatus;
   createdAt: string;
+  workOrderId?: string | null;
+  releaseVersion?: string | null;
 };
 
 export type GameFeedbackSummary = {
@@ -47,7 +49,7 @@ export type CommentValidationResult =
   | { ok: false; error: string; field?: "author" | "content" | "feedbackType" };
 
 const COMMENT_COLUMNS =
-  "id, game_slug, author, content, feedback_type, status, created_at";
+  "id, game_slug, author, content, feedback_type, status, created_at, work_order_id, release_version";
 const LEGACY_COMMENT_COLUMNS = "id, game_slug, author, content, created_at";
 
 function mapRow(row: Record<string, unknown>): GameComment {
@@ -69,6 +71,8 @@ function mapRow(row: Record<string, unknown>): GameComment {
     feedbackType,
     status,
     createdAt: String(row.created_at),
+    workOrderId: row.work_order_id ? String(row.work_order_id) : null,
+    releaseVersion: row.release_version ? String(row.release_version) : null,
   };
 }
 
@@ -134,6 +138,20 @@ async function selectComments(
       .limit(limit);
     if (legacy.error) throw new Error(legacy.error.message);
     return (legacy.data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+  }
+
+  if (
+    full.error.message.includes("work_order_id") ||
+    full.error.message.includes("release_version")
+  ) {
+    const mid = await client
+      .from("game_comments")
+      .select("id, game_slug, author, content, feedback_type, status, created_at")
+      .eq("game_slug", slug)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (mid.error) throw new Error(mid.error.message);
+    return (mid.data ?? []).map((row) => mapRow(row as Record<string, unknown>));
   }
 
   if (full.error.message.includes("game_comments")) return [];
@@ -367,6 +385,97 @@ export async function listFeedbackDates(limit = 14): Promise<
     .map(([date, total]) => ({ date, total }))
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, limit);
+}
+
+/** All P0 game feedback for admin ops (Territory War excluded). */
+export async function listAllP0Feedback(limit = 5000): Promise<GameComment[]> {
+  const admin = getAdminSupabase();
+  if (!admin) return [];
+
+  const full = await admin
+    .from("game_comments")
+    .select(COMMENT_COLUMNS)
+    .in("game_slug", [...P0_FEEDBACK_GAMES])
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (!full.error) {
+    return (full.data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+  }
+
+  const legacyCols =
+    "id, game_slug, author, content, feedback_type, status, created_at";
+  if (
+    full.error.message.includes("work_order_id") ||
+    full.error.message.includes("release_version")
+  ) {
+    const legacy = await admin
+      .from("game_comments")
+      .select(legacyCols)
+      .in("game_slug", [...P0_FEEDBACK_GAMES])
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (legacy.error) {
+      if (legacy.error.message.includes("game_comments")) return [];
+      throw new Error(legacy.error.message);
+    }
+    return (legacy.data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+  }
+
+  if (full.error.message.includes("game_comments")) return [];
+  throw new Error(full.error.message);
+}
+
+export async function getFeedbackById(id: string): Promise<GameComment | null> {
+  const admin = getAdminSupabase();
+  if (!admin) return null;
+
+  const { data, error } = await admin
+    .from("game_comments")
+    .select(COMMENT_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapRow(data as Record<string, unknown>);
+}
+
+export async function updateFeedbackStatus(
+  id: string,
+  status: FeedbackStatus
+): Promise<{ ok: true; comment: GameComment } | { ok: false; error: string }> {
+  const admin = getAdminSupabase();
+  if (!admin) return { ok: false, error: "DB unavailable" };
+
+  const { data, error } = await admin
+    .from("game_comments")
+    .update({ status })
+    .eq("id", id)
+    .in("game_slug", [...P0_FEEDBACK_GAMES])
+    .select(COMMENT_COLUMNS)
+    .maybeSingle();
+
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Not found" };
+  }
+  return { ok: true, comment: mapRow(data as Record<string, unknown>) };
+}
+
+export async function linkFeedbackToWorkOrder(
+  feedbackIds: string[],
+  workOrderId: string
+): Promise<void> {
+  const admin = getAdminSupabase();
+  if (!admin || feedbackIds.length === 0) return;
+
+  const { error } = await admin
+    .from("game_comments")
+    .update({ work_order_id: workOrderId })
+    .in("id", feedbackIds);
+
+  if (error && !error.message.includes("work_order_id")) {
+    throw new Error(error.message);
+  }
 }
 
 export { FEEDBACK_TYPES, P0_FEEDBACK_GAMES };
