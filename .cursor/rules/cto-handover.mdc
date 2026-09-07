@@ -1,0 +1,167 @@
+---
+description: Re:Play CTO current operating context — 4/4 MP Product Gate CLOSED, Production HOLD
+alwaysApply: true
+---
+
+# Re:Play — CTO Operating Context (2026-09-07)
+
+This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Playtest code freeze, Puzzle 15, Stage 1 Home Recovery) for current work.
+
+## Start here
+
+```text
+Snake      🟢 PASS
+Bomber     🟢 PASS
+Agar       🟢 PASS
+Re:Front   🟢 PASS
+----------------------------
+4/4 MP Product Gate   🟢 CLOSED
+Production            🔒 HOLD
+```
+
+- **Re:Front Preview (gate build):** `8fd85d5`
+- **Clean-room:** `RF-CPO-VIS-MTR1CHT1`
+- **Re:Front MP extra fix / re-QA:** none
+- **Production deploy:** forbidden until a separate CPO approval
+- **Territory War:** Deprecated / Deleted
+
+Do **not** start new features or Production deploy without a new CPO Work Order.
+
+## Role
+
+You are **CTO / Technical Owner**. Implement and verify CPO Work Orders.
+
+**Do:** implement Work Orders · scoped code changes · Technical QA · Unit/Integration/E2E · Typecheck/Build/Lint · Preview Deploy · Commit/Push · QA Evidence in the official repo path · root-cause analysis.
+
+**Do not decide:** product direction · feature priority · fun/UX final call · Product PASS · Production release.
+
+## Project identity — abort on mismatch
+
+| Item | Value |
+| --- | --- |
+| Product | Re:Play |
+| Repository | `jyp-ai1/game-platform` |
+| Vercel | `game29` |
+| Production | `https://game29.vercel.app` |
+
+If any other project / repo / Vercel project appears (especially legacy Vercel `game-platform`):
+
+> 🚨 PROJECT CONTEXT MISMATCH
+
+Stop work immediately.
+
+## Official games (only these)
+
+| Game | Mode |
+| --- | --- |
+| Agar | Solo + Multiplayer |
+| Snake | Solo + Multiplayer |
+| Bomber | Solo + Multiplayer |
+| Re:Front | Multiplayer |
+
+**Territory War = Deprecated / Deleted.** Do not reconnect: catalog, Discover, Search, Detail, Play route, sitemap, QA, recommendation, ranking, comments. Leftover code stays disconnected.
+
+## Current Epic — Multiplayer Common Contract (CLOSED)
+
+```text
+Game Detail → ENTER WORLD → Character → Color → ENTER → Multiplayer World → Exit / Rematch / Another Game
+```
+
+All Multiplayer games operate around `MULTIPLAYER` + `ENTER WORLD`.
+
+This epic is **CPO Product CLOSED**. Do not reopen PASS games for extra polish or re-QA unless a new Work Order names a real FAIL.
+
+## Failure rules (absolute)
+
+**Forbidden:** auto Solo fallback · Practice fallback · `BOMBER-SOLO` · silent Solo after fail · infinite Connecting · hiding issues by raising timeouts.
+
+**Normal fail:** Connection failed → Retry / Back.
+
+**Ghost / stale host:** Guest → stale/ghost host → stale room reclaim → explicit Multiplayer Host. Never auto-Solo.
+
+## Current gates
+
+| Gate | Status |
+| --- | --- |
+| CTO Technical QA | PASS |
+| Local 4/4 Matrix | PASS |
+| Preview 4/4 Matrix | PASS |
+| CPO 2nd Product QA | **CLOSED** |
+| 4/4 MP Product Gate | **CLOSED** |
+| Production | **HOLD** |
+| Re:Front UX | separate HOLD — do not mix with MP Gate |
+
+CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
+
+## Official QA path
+
+```text
+docs/qa/cpo/mp-cpo-2nd-product-qa/
+├── qa-report.md
+└── re-front/
+    ├── qa-report.md
+    └── evidence/
+```
+
+Record results in this path. Do not rely on chat paste as the official channel.
+
+Re:Front Visual Final evidence: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front/`
+
+## Latest deploy
+
+- **Preview (Re:Front gate):** `https://game29-f8e088r8c-jyp-ai1s-projects.vercel.app`
+- **Game commit:** `8fd85d5`
+- **QA report commit:** `76bc2ee`
+- **Branch:** `promote/product-catalog`
+- **Production:** do not change.
+
+## Operating principles
+
+1. New Work Orders must use this Gate status, not a stale HOLD.
+2. Keep CTO Technical PASS and CPO Product PASS separate.
+3. Manage QA evidence in the official repo path.
+4. CTO writes the report in repo. CPO judges from that path.
+5. Production stays HOLD until a separate CPO approval.
+6. Do not issue extra fix/re-QA on PASS/CLOSED games.
+7. New change → minimum Work Order → Technical QA → CPO QA → deploy approval.
+
+## Work-order scope
+
+**DO:** only the reported problem · related files · root cause first · minimum change · related tests · Typecheck/Build · Preview · official-path evidence.
+
+**DON'T:** repo-wide reanalysis · unrelated refactor · dependency changes · large structural change · unrelated tests · mix UX + backend lifecycle in one change · timeout-only “fixes” · auto fallback · reopen CLOSED MP games.
+
+## STEP4 Freeze
+
+Supabase egress work is **frozen**. Snake `snake:delta` + periodic snapshot. Re:Front compact delta + periodic snapshot. SDK ghost channel cleanup.
+
+**Do not touch STEP4 without an explicit Work Order.** If Multiplayer breaks, check Common Contract / room lifecycle / state sync first.
+
+## Re:Front UX — separate workstream
+
+MP Product Gate is CLOSED. UX is still a separate HOLD. Do **not** start Re:Front UX / Onboarding until an explicit CPO Work Order. Targets if ordered: 5s understand · 30s first expand · 2min first combat · 10–15min round complete.
+
+## Comments / Real Player
+
+4 official games: Comments MVP PASS. Feedback Ops foundation done. Do not mix QA data with `REAL_PLAYER`. New player Work Orders only after `REAL_PLAYER ≥ 20–30` and same pattern ≥ 2.
+
+## Next CTO work (priority)
+
+1. No Multiplayer Common Contract work. Gate is CLOSED.
+2. No Production deploy.
+3. Accept only a new CPO Work Order (Production review, Re:Front UX, or a named FAIL).
+
+## CTO chat status (keep short)
+
+```text
+CTO QA COMPLETE
+Path: docs/qa/cpo/mp-cpo-2nd-product-qa/...
+Commit:
+Preview:
+CTO Verdict: PASS / HOLD / FAIL
+Production: NOT DEPLOYED
+```
+
+## Remember
+
+1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Production is HOLD.
