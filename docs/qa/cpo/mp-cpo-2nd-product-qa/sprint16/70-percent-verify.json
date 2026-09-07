@@ -1,0 +1,41 @@
+{
+  "gate": "sprint16-70-percent-victory",
+  "baseUrl": "https://game29-i6sl4q2a1-jyp-ai1s-projects.vercel.app",
+  "room": "RF-S16-70-MTRC9FYW",
+  "helperUsed": false,
+  "startedAt": "2026-09-07T14:31:20.602Z",
+  "start": {
+    "pct": 0.1,
+    "troops": 184.4628,
+    "gold": 124.62,
+    "population": 61.9,
+    "phase": "expand",
+    "expandCount": 0,
+    "youWin": false,
+    "resultVisible": false,
+    "territoryHud": true,
+    "practice": false
+  },
+  "expandClicks": 3,
+  "end": {
+    "pct": 0.14,
+    "troops": 750.5076000000005,
+    "gold": 980.9400000000028,
+    "population": 296.3000000000008,
+    "phase": "attack-prompt",
+    "expandCount": 3,
+    "youWin": false,
+    "resultVisible": false,
+    "territoryHud": true,
+    "practice": false
+  },
+  "playMs": 90087,
+  "endHud": {
+    "territoryLine": "Territory 0.1% / 70%",
+    "toWinLine": "69.9% to win",
+    "youWin": false
+  },
+  "pass": false,
+  "verdict": "HOLD",
+  "finishedAt": "2026-09-07T14:33:01.506Z"
+}
