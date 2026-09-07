@@ -15,13 +15,16 @@ import {
 } from "@game-platform/game-sdk";
 import {
   getRoom,
+  isListedHostPresent,
   leaveRoom,
   resolveMultiplayerEntry,
   resolveRoomCodeFromLocation,
+  roomGameStateAgeMs,
   send,
   subscribeRoom,
   sync,
 } from "@game-platform/multiplayer-sdk";
+import type { GameRoom } from "@game-platform/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -130,26 +133,19 @@ function collectHumans(
   return mergeHumanSeats(list);
 }
 
-function isAgarHost(
-  code: string,
-  deviceId: string,
-  mpRole: "host" | "guest",
-  lastStateAt: number,
-  startedAt: number
-): boolean {
-  const room = sync(code) ?? getRoom(code);
-  if (mpRole === "host") {
-    if (!room || room.hostId === deviceId) return true;
-    if (!room.players.some((p) => p.deviceId === room.hostId)) return true;
-    return room.hostId === deviceId;
-  }
-  if (!room) return false;
-  if (room.hostId === deviceId) return true;
-  if (room.players.length <= 1) return true;
-  const now = Date.now();
-  if (lastStateAt <= 0 && now - startedAt > 400) return false;
-  if (lastStateAt > 0 && now - lastStateAt > 1200) return true;
-  return false;
+const AGAR_HOST_STALE_MS = 2500;
+
+function isGhostAgarHost(room: GameRoom): boolean {
+  if (!isListedHostPresent(room)) return true;
+  const hasState = !!room.gameState?.["agar:state"];
+  if (!hasState) return roomGameStateAgeMs(room) > 1500;
+  return roomGameStateAgeMs(room) >= AGAR_HOST_STALE_MS;
+}
+
+function isLiveAgarHost(room: GameRoom): boolean {
+  if (!isListedHostPresent(room)) return false;
+  if (!room.gameState?.["agar:state"]) return false;
+  return roomGameStateAgeMs(room) < AGAR_HOST_STALE_MS;
 }
 
 export function AgarGame() {
@@ -325,6 +321,8 @@ export function AgarGame() {
       nickname: liveNick,
       maxPlayers: AGAR_MAX_PLAYERS,
       resolveGlobalCluster: true,
+      isGhostHost: isGhostAgarHost,
+      isLiveHost: isLiveAgarHost,
     });
 
     if (!entry.ok) {
