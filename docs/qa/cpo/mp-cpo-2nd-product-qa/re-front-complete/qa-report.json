@@ -1,72 +1,155 @@
 {
-  "gate": "re-front-complete",
-  "baseUrl": "https://game29-3rkccrsqx-jyp-ai1s-projects.vercel.app",
-  "room": "RF-DONE-MTRER02J",
-  "helperUsed": false,
-  "startedAt": "2026-09-07T15:40:59.035Z",
+  "gate": "re-front-complete-final",
+  "baseUrl": "https://game29-k8rrave69-jyp-ai1s-projects.vercel.app",
+  "room": "RF-FIN-MTRGX66T",
+  "expandHookUsed": false,
+  "endRoundHelperUsed": false,
+  "startedAt": "2026-09-07T16:41:46.134Z",
   "detailEnterWorld": true,
   "entryLobby": true,
-  "coreGameplay": {
-    "pct": 0.88,
-    "troops": 184.4628,
-    "phase": "expand",
+  "mp": {
+    "hostRole": "host",
+    "guestRole": "guest",
+    "hostSeesGuest": true,
+    "guestSeesHost": true,
+    "hostBots": true,
+    "guestBots": true,
+    "practice": false,
+    "hostHumans": [
+      {
+        "nick": "RFHostFIN",
+        "pct": 0.88
+      },
+      {
+        "nick": "RFGuestFIN",
+        "pct": 0.88
+      }
+    ],
+    "guestHumans": [
+      {
+        "nick": "RFHostFIN",
+        "pct": 0.88
+      },
+      {
+        "nick": "RFGuestFIN",
+        "pct": 0.88
+      }
+    ]
+  },
+  "hostToGuest": {
+    "hostPctBefore": 0.88,
+    "hostPctAfter": 1.07,
+    "guestSeesHostPct": 1.07
+  },
+  "guestToHost": {
+    "guestPctBefore": 0.88,
+    "guestPctAfter": 1.37,
+    "hostSeesGuestPct": 1.37
+  },
+  "gameplay": {
+    "pct": 1.07,
+    "troops": 221.14839999999998,
+    "role": "host",
+    "nick": "RFHostFIN",
+    "humans": [
+      {
+        "nick": "RFHostFIN",
+        "pct": 1.07
+      },
+      {
+        "nick": "RFGuestFIN",
+        "pct": 1.37
+      }
+    ],
     "youWin": false,
     "defeat": false,
     "resultVisible": false,
-    "territoryHud": true,
-    "practice": false
+    "practice": false,
+    "bodyHasHost": true,
+    "bodyHasGuest": true,
+    "botsVisible": true
   },
-  "progress": {
-    "pct": 8.59,
-    "troops": 2.3719999999999697,
-    "phase": "grow",
-    "youWin": false,
-    "defeat": false,
-    "resultVisible": false,
-    "territoryHud": true,
-    "practice": false
-  },
-  "end": {
+  "victory": {
     "pct": 70.02,
-    "troops": 6033.823199999999,
-    "phase": "attack-prompt",
+    "troops": 7996,
+    "role": "host",
+    "nick": "RFHostFIN",
+    "humans": [
+      {
+        "nick": "RFHostFIN",
+        "pct": 70.02
+      },
+      {
+        "nick": "RFGuestFIN",
+        "pct": 1.46
+      }
+    ],
     "youWin": true,
     "defeat": false,
     "resultVisible": true,
-    "territoryHud": true,
-    "practice": false
+    "practice": false,
+    "bodyHasHost": true,
+    "bodyHasGuest": true,
+    "botsVisible": true,
+    "playMs": 140539
   },
-  "playMs": 21308,
-  "firstEnd": {
-    "pct": 70.02,
-    "troops": 5803.613999999999,
-    "phase": "attack-prompt",
-    "youWin": true,
-    "defeat": false,
-    "resultVisible": true,
-    "territoryHud": true,
-    "practice": false
-  },
-  "realPlayEnd": true,
   "rematch": {
     "backInWorld": true,
     "noResult": true
   },
-  "secondEnd": {
+  "victory2": {
     "pct": 70.02,
-    "troops": 6033.823199999999,
-    "phase": "attack-prompt",
+    "troops": 7988,
+    "role": "host",
+    "nick": "RFHostFIN",
+    "humans": [
+      {
+        "nick": "RFHostFIN",
+        "pct": 70.02
+      },
+      {
+        "nick": "RFGuestFIN",
+        "pct": 0.88
+      }
+    ],
     "youWin": true,
     "defeat": false,
     "resultVisible": true,
-    "territoryHud": true,
-    "practice": false
+    "practice": false,
+    "bodyHasHost": true,
+    "bodyHasGuest": true,
+    "botsVisible": true,
+    "playMs": 141173
+  },
+  "anotherGame": {
+    "url": "https://game29-k8rrave69-jyp-ai1s-projects.vercel.app/games",
+    "ok": true
+  },
+  "victory3": {
+    "pct": 70.02,
+    "troops": 7996,
+    "role": "host",
+    "nick": "RFHostFIN",
+    "humans": [
+      {
+        "nick": "RFHostFIN",
+        "pct": 70.02
+      }
+    ],
+    "youWin": true,
+    "defeat": false,
+    "resultVisible": true,
+    "practice": false,
+    "bodyHasHost": true,
+    "bodyHasGuest": false,
+    "botsVisible": true,
+    "playMs": 141019
   },
   "exit": {
-    "url": "https://game29-3rkccrsqx-jyp-ai1s-projects.vercel.app/games/re-front",
+    "url": "https://game29-k8rrave69-jyp-ai1s-projects.vercel.app/games/re-front",
     "ok": true
   },
   "pass": true,
   "verdict": "PASS",
-  "finishedAt": "2026-09-07T15:42:17.226Z"
+  "finishedAt": "2026-09-07T16:49:02.609Z"
 }

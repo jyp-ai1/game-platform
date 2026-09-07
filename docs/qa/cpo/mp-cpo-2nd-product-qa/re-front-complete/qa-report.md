@@ -1,82 +1,82 @@
-# Re:Front Long Sprint — CTO Final QA
+# Re:Front Complete — CTO Final QA
 
 ## Gate
 
 ```text
 4/4 MP Product Gate   🟢 CLOSED (a7ae3aa)
 Snake / Bomber / Agar not re-QA’d
-Re:Front Long Sprint  CTO PASS
+Re:Front Complete     CTO PASS
 CPO Product QA        pending
 Production            🔒 HOLD
 ```
 
 ## Product
 
-Flow verified on Preview:
-
-```text
-Detail → ENTER WORLD → Character/Color → ENTER
-→ EXPAND play → Territory 70.02%
-→ Result YOU WIN
-→ REMATCH → new World
-→ second real 70% win
-→ EXIT → /games/re-front
-```
+Clean room → Detail → ENTER WORLD → Character/Color → ENTER → World → EXPAND → 70% → Result → REMATCH → ANOTHER GAME → EXIT.
 
 | Item | Result | Evidence |
 | --- | --- | --- |
-| Detail + ENTER WORLD | PASS | 01-detail.png |
-| Entry lobby | PASS | 02-entry.png |
-| Core gameplay (EXPAND) | PASS | 03-core-gameplay.png |
-| Progress toward 70% | PASS | 04-progress-or-state.png — 8.59% |
-| Real win/lose | PASS | 05-real-win-or-lose.png — `69.9% → 70.0%`, Territory `70.0% / 70%`, YOU WIN |
-| Result | PASS | 06-result.png — REMATCH / ANOTHER GAME / EXIT |
-| Rematch | PASS | 07-rematch-or-another-game.png — back in World at 0.9% |
-| Exit | PASS | 08-exit.png — `/games/re-front` |
+| Detail | PASS | 01-detail.png — MULTIPLAYER + ENTER WORLD |
+| Entry | PASS | 02-entry.png |
+| Host World | PASS | 03-host-world.png — RFHostFIN + RFGuestFIN + bots |
+| Guest World | PASS | 04-guest-world.png — same humans, same room |
+| Gameplay | PASS | 05-gameplay.png — EXPAND, Territory / 70% |
+| Real victory | PASS | 06-real-victory.png — `Territory 70.0% / 70%`, YOU WIN |
+| Result | PASS | 07-result.png — REMATCH / ANOTHER GAME / EXIT |
+| Rematch | PASS | 08-rematch.png — back in World |
+| Another Game | PASS | 09-another-game.png — `/games` Discover |
+| Exit | PASS | 10-exit.png — `/games/re-front` |
 
 **Was 70% reached by real play?** YES.
 
-Win path is `applyExpand` until `territoryPct >= 70`. `__RF_QA_END_ROUND__` was not used. HUD popup shows `+1 TERRITORY · 69.9% → 70.0%`. PLAYERS roster `RFComplete 70.02%`.
+Host held EXPAND / Space. Territory went to **70.02%**. Result shows `YOU WIN` and `Territory 70.0% / 70%`. `__RF_QA_END_ROUND__` was not used. No Practice / Solo fallback.
 
-Lose path: if the last human is eliminated, the round ends and the local player sees DEFEAT. Covered by unit test `eliminating the last human ends the round with a bot winner`.
+Three real 70% wins in this run (first Result, after Rematch, after re-entry for Exit). First win **141s**.
 
-UX: first screen still says EXPAND + `70%면 승리`. EXPAND stays available after the tutorial. Hold EXPAND keeps claiming the next yellow tile. Confirm copy uses tutorial vs normal gold/pop. No Practice / Solo fallback.
+UX: first action is EXPAND. HUD shows Territory / 70% and `% to win`. PLAYERS lists humans. Bots are named separately. Result CTAs are visible. Hold EXPAND or Space keeps expanding.
+
+## Multiplayer
+
+Room: `RF-FIN-MTRGX66T`. Browser A = Host `RFHostFIN`. Browser B = Guest `RFGuestFIN`.
+
+| Check | Result |
+| --- | --- |
+| Same room | PASS |
+| Host sees Guest | PASS — 03 / PLAYERS |
+| Guest sees Host | PASS — 04 / PLAYERS |
+| Human identification | PASS — RFHostFIN, RFGuestFIN |
+| Human vs Bot | PASS — PLAYERS vs Red Kingdom / Eastwood / Ironvale |
+| Human territory on map | PASS — green blocks labeled with nicks |
+| Host → Guest sync | PASS — Host 0.88% → 1.07%; Guest roster shows Host 1.07% |
+| Guest → Host sync | PASS — Guest 0.88% → 1.37%; Host roster shows Guest 1.37% |
+| Result / Rematch / Another / Exit | PASS |
 
 ## Technical
 
-- Developer QA: unit tests 11/11 PASS (`@game-platform/game-re-front`)
-- Automated QA: `rf-victory.test.ts` reaches 70% via `applyExpand`; last-human eliminate ends the round
-- Browser QA: Chromium 1280×900, room `RF-DONE-MTRER02J`, first win in 21s of real expands
-- Regression: Re:Front tests only. Snake / Bomber / Agar not run
-- Console / Practice / fallback: none
+- Developer QA: Re:Front unit tests 11/11 PASS
+- Automated QA: `applyExpand` reaches 70%; last-human eliminate → DEFEAT
+- Browser QA: two Chromium sessions, 1280×900, Preview below
+- Regression: Re:Front tests only. Snake / Bomber / Agar not re-run
 - MP Common Contract / STEP4 / SDK: unchanged
 
-### Changed files
+### Commits
 
-- `games/re-front/src/re-front-engine.ts` — `RF_GRID` 32, expand cost 4, bot expand softened, last-human defeat
-- `games/re-front/src/re-front-missions.ts` — EXPAND in every phase; first combat → free
-- `games/re-front/src/ReFront.tsx` — next-tile arm, hold EXPAND, confirm copy
-- `games/re-front/src/__tests__/*` — victory, first-session, sync size, guest camera
-- `.cursor/rules/cto-handover.mdc` — Long Sprint rule
-
-### Build
-
-- Repository: jyp-ai1/game-platform
-- Branch: promote/product-catalog
-- Game commit: `462bb5f`
-- Preview: https://game29-3rkccrsqx-jyp-ai1s-projects.vercel.app
+- Game: `b66422a`
+- Preview: https://game29-k8rrave69-jyp-ai1s-projects.vercel.app
 - Production: NOT DEPLOYED
 
 ## Evidence
 
 - evidence/01-detail.png
 - evidence/02-entry.png
-- evidence/03-core-gameplay.png
-- evidence/04-progress-or-state.png
-- evidence/05-real-win-or-lose.png
-- evidence/06-result.png
-- evidence/07-rematch-or-another-game.png
-- evidence/08-exit.png
+- evidence/03-host-world.png
+- evidence/04-guest-world.png
+- evidence/05-gameplay.png
+- evidence/06-real-victory.png
+- evidence/07-result.png
+- evidence/08-rematch.png
+- evidence/09-another-game.png
+- evidence/10-exit.png
 - qa-report.json
 
 ## CTO Verdict

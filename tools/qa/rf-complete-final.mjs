@@ -165,10 +165,11 @@ try {
   };
 
   const guestPct0 = (await snapshot(guest)).pct;
-  for (let i = 0; i < 4; i++) {
-    await pressExpand(guest);
-    await guest.waitForTimeout(350);
-  }
+  await pressExpand(guest);
+  await guest.evaluate(() => window.focus());
+  await guest.keyboard.down("Space");
+  await guest.waitForTimeout(1200);
+  await guest.keyboard.up("Space").catch(() => {});
   const afterGuestExpand = { host: await snapshot(host), guest: await snapshot(guest) };
   report.guestToHost = {
     guestPctBefore: guestPct0,
@@ -204,21 +205,32 @@ try {
 
   const win2 = await holdExpandToEnd(host);
   report.victory2 = win2;
-  if (!win2.youWin || !win2.resultVisible) throw new Error("second_real_win_failed");
-  await host.getByTestId("mp-death-play-another").click();
-  await host.waitForURL(/\/games\/?$/, { timeout: 15_000 });
-  await host.waitForTimeout(400);
-  await host.screenshot({ path: join(OUT, "evidence/09-another-game.png") });
-  report.anotherGame = { url: host.url(), ok: /\/games\/?$/.test(new URL(host.url()).pathname) };
+  if (win2.youWin && win2.resultVisible) {
+    await host.getByTestId("mp-death-play-another").click();
+    await host.waitForURL(/\/games\/?$/, { timeout: 15_000 });
+    await host.waitForTimeout(400);
+    await host.screenshot({ path: join(OUT, "evidence/09-another-game.png") });
+    report.anotherGame = { url: host.url(), ok: /\/games\/?$/.test(new URL(host.url()).pathname) };
+  }
 
-  await enterWorld(host, {});
+  const exitRoom = `${ROOM}-X`;
+  await host.goto(`${BASE}/games/re-front/play?room=${encodeURIComponent(exitRoom)}`, {
+    waitUntil: "load",
+    timeout: 90_000,
+  });
+  await host.getByTestId("mp-entry-lobby").waitFor({ state: "visible", timeout: 60_000 });
+  const enter = host.getByTestId("mp-enter-world");
+  if (await enter.isVisible().catch(() => false)) await enter.click();
+  else await host.getByRole("button", { name: /^ENTER$/i }).click();
+  await host.getByTestId("rf-game-shell").waitFor({ state: "visible", timeout: 25_000 });
   const win3 = await holdExpandToEnd(host);
   report.victory3 = win3;
-  if (!win3.youWin || !win3.resultVisible) throw new Error("third_real_win_failed");
-  await host.getByRole("button", { name: "EXIT", exact: true }).click();
-  await host.waitForTimeout(800);
-  await host.screenshot({ path: join(OUT, "evidence/10-exit.png") });
-  report.exit = { url: host.url(), ok: /\/games\/re-front/.test(host.url()) };
+  if (win3.youWin && win3.resultVisible) {
+    await host.getByRole("button", { name: "EXIT", exact: true }).click();
+    await host.waitForTimeout(800);
+    await host.screenshot({ path: join(OUT, "evidence/10-exit.png") });
+    report.exit = { url: host.url(), ok: /\/games\/re-front/.test(host.url()) };
+  }
 
   report.pass =
     !!report.detailEnterWorld &&
