@@ -701,8 +701,15 @@ export function ReFrontGame() {
   }, [deviceId]);
 
   const onExpand = useCallback(() => {
-    const cell = pendingExpandRef.current ?? selectedRef.current;
-    if (!cell || !me?.alive) return;
+    if (!me?.alive) return;
+    const w = worldRef.current;
+    let cell = pendingExpandRef.current ?? selectedRef.current;
+    if (!cell || !canExpand(w, cell.cx, cell.cy, deviceId)) {
+      cell = findExpandTargets(w, deviceId, 1)[0] ?? null;
+      if (!cell) return;
+      pendingExpandRef.current = cell;
+      selectedRef.current = cell;
+    }
     const ok = dispatchAction({ type: "expand", cx: cell.cx, cy: cell.cy, nationId: deviceId });
     if (ok) {
       setMission((m) => advanceMissionAfterExpand(m));

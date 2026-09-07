@@ -97,7 +97,8 @@ async function holdExpandToEnd(page) {
   const started = Date.now();
   let lastPct = -1;
   let stallAt = Date.now();
-  await page.getByTestId("rf-game-shell").click({ timeout: 3_000 }).catch(() => {});
+  await pressExpand(page);
+  await page.evaluate(() => window.focus());
   await page.keyboard.down("Space");
   try {
     while (Date.now() - started < PLAY_MS) {
