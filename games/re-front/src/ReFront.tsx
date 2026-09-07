@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
   getDeviceId,
   getLastNickname,
@@ -717,10 +717,11 @@ export function ReFrontGame() {
       expandHoldRef.current = null;
     }
   }, []);
-  const startExpandHold = useCallback(() => {
+  const startExpandHold = useCallback((ev?: PointerEvent<HTMLButtonElement>) => {
+    ev?.currentTarget.setPointerCapture?.(ev.pointerId);
     stopExpandHold();
     onExpand();
-    expandHoldRef.current = window.setInterval(() => onExpand(), 280);
+    expandHoldRef.current = window.setInterval(() => onExpand(), 200);
   }, [onExpand, stopExpandHold]);
 
   useEffect(() => () => stopExpandHold(), [stopExpandHold]);
@@ -1312,9 +1313,8 @@ export function ReFrontGame() {
               type="button"
               disabled={!canExp}
               onClick={onExpand}
-              onPointerDown={startExpandHold}
+              onPointerDown={(ev) => startExpandHold(ev)}
               onPointerUp={stopExpandHold}
-              onPointerLeave={stopExpandHold}
               onPointerCancel={stopExpandHold}
               className="mt-2 w-full rounded-xl bg-emerald-600 py-3 text-base font-bold disabled:opacity-40"
               data-testid="rf-expand-btn"
@@ -1331,9 +1331,8 @@ export function ReFrontGame() {
                   type="button"
                   disabled={!canExp || world.roundOver}
                   onClick={onExpand}
-                  onPointerDown={startExpandHold}
+                  onPointerDown={(ev) => startExpandHold(ev)}
                   onPointerUp={stopExpandHold}
-                  onPointerLeave={stopExpandHold}
                   onPointerCancel={stopExpandHold}
                   className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-base font-bold disabled:opacity-40"
                   data-testid="rf-expand-btn"

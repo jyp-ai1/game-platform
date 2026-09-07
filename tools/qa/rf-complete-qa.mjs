@@ -91,22 +91,22 @@ async function playToEnd(page, labels) {
       report.playMs = Date.now() - started;
       return snap;
     }
-    const enabled = await expandBtn.isEnabled().catch(() => false);
-    const visible = await expandBtn.isVisible().catch(() => false);
-    if (enabled && visible) {
-      const box = await expandBtn.boundingBox();
-      if (box) {
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await page.mouse.down();
-        await page.waitForTimeout(500);
-        await page.mouse.up();
-        continue;
+    const n = await page.evaluate(() => {
+      let ok = 0;
+      for (let i = 0; i < 24; i++) {
+        const r = window.__RF_QA_EXPAND__?.();
+        if (!r?.ok) break;
+        ok += 1;
       }
-      await expandBtn.click({ timeout: 2_000 }).catch(() => {});
-      await page.waitForTimeout(80);
+      return ok;
+    });
+    if (n > 0) {
+      await page.waitForTimeout(40);
       continue;
     }
-    await page.waitForTimeout(180);
+    const enabled = await expandBtn.isEnabled().catch(() => false);
+    if (enabled) await expandBtn.click({ timeout: 1_500 }).catch(() => {});
+    await page.waitForTimeout(200);
   }
   report.end = await snapshot(page);
   report.playMs = Date.now() - started;
