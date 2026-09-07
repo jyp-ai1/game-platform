@@ -44,6 +44,12 @@ import {
   updateRankings,
   type AgarWorld,
 } from "./agar-io-engine";
+import {
+  agarCellNickname,
+  agarHumanHudNicknames,
+  agarHumanLabelAboveCell,
+  shouldShowAgarCellNickname,
+} from "./agar-human-display";
 
 const VIEW = 520;
 const AGAR_MAX_PLAYERS = 20;
@@ -268,6 +274,7 @@ export function AgarGame() {
         tick: number;
         food: number;
         humanNicknames: string[];
+        hudHumans: string[];
         rankings: string[];
       };
       __AGAR_QA_DIE__?: () => boolean;
@@ -281,6 +288,7 @@ export function AgarGame() {
       humanNicknames: Object.values(worldRef.current.players)
         .filter((p) => !p.isBot)
         .map((p) => p.nickname),
+      hudHumans: agarHumanHudNicknames(Object.values(worldRef.current.players)),
       rankings: worldRef.current.rankings.map((r) => r.nickname),
     });
     w.__AGAR_QA_DIE__ = () => {
@@ -549,28 +557,71 @@ export function AgarGame() {
                   p.alive
                     ? p.cells.map((c, i) => {
                         const r = massToRadius(c.mass);
+                        const isHuman = !p.isBot;
+                        const showNick = shouldShowAgarCellNickname(p.isBot, r);
+                        const nick = agarCellNickname(p.nickname);
+                        const labelAbove = agarHumanLabelAboveCell(p.isBot, r);
                         return (
                           <div
                             key={`${p.id}-${i}`}
-                            className="absolute flex items-center justify-center rounded-full border border-white/20 text-[9px] font-semibold text-white/90"
+                            className="absolute flex items-center justify-center rounded-full text-[9px] font-semibold text-white/90"
                             style={{
                               left: c.x - r,
                               top: c.y - r,
                               width: r * 2,
                               height: r * 2,
+                              overflow: "visible",
                               backgroundColor: p.color,
-                              boxShadow: p.id === deviceId ? `0 0 12px ${p.color}` : undefined,
-                              zIndex: Math.round(c.mass),
+                              border: isHuman
+                                ? "2px solid rgba(255,255,255,0.92)"
+                                : "1px solid rgba(255,255,255,0.2)",
+                              boxShadow: isHuman
+                                ? `${p.id === deviceId ? `0 0 12px ${p.color}, ` : ""}0 0 0 2px rgba(251,191,36,0.6)`
+                                : p.id === deviceId
+                                  ? `0 0 12px ${p.color}`
+                                  : undefined,
+                              zIndex: Math.round(c.mass) + (isHuman ? 80 : 0),
                             }}
                             title={p.nickname}
+                            data-agar-human={isHuman ? "1" : undefined}
+                            data-agar-nick={showNick ? nick : undefined}
                           >
-                            {r > 14 ? p.nickname.slice(0, 6) : null}
+                            {showNick ? (
+                              <span
+                                className={
+                                  labelAbove
+                                    ? "pointer-events-none absolute left-1/2 top-[-13px] -translate-x-1/2 whitespace-nowrap rounded bg-black/65 px-1 text-[9px] text-amber-100"
+                                    : undefined
+                                }
+                              >
+                                {nick}
+                              </span>
+                            ) : null}
                           </div>
                         );
                       })
                     : null
                 )}
               </div>
+
+              <aside
+                data-testid="agar-human-roster"
+                className="absolute left-2 top-2 w-36 rounded-lg border border-amber-200/30 bg-black/55 p-2 text-[11px] backdrop-blur"
+              >
+                <p className="mb-1 font-semibold text-amber-200">PLAYERS</p>
+                <ul className="space-y-0.5">
+                  {Object.values(world.players)
+                    .filter((p) => !p.isBot)
+                    .map((p) => (
+                      <li
+                        key={p.id}
+                        className={p.id === deviceId ? "text-cyan-300" : "text-amber-50"}
+                      >
+                        {p.nickname.slice(0, 10)}
+                      </li>
+                    ))}
+                </ul>
+              </aside>
 
               <aside className="absolute right-2 top-2 w-36 rounded-lg border border-white/10 bg-black/50 p-2 text-[11px] backdrop-blur">
                 <p className="mb-1 font-semibold text-amber-200">TOP 10</p>
