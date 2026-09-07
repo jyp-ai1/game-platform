@@ -1,0 +1,72 @@
+{
+  "gate": "re-front-complete",
+  "baseUrl": "https://game29-3rkccrsqx-jyp-ai1s-projects.vercel.app",
+  "room": "RF-DONE-MTRER02J",
+  "helperUsed": false,
+  "startedAt": "2026-09-07T15:40:59.035Z",
+  "detailEnterWorld": true,
+  "entryLobby": true,
+  "coreGameplay": {
+    "pct": 0.88,
+    "troops": 184.4628,
+    "phase": "expand",
+    "youWin": false,
+    "defeat": false,
+    "resultVisible": false,
+    "territoryHud": true,
+    "practice": false
+  },
+  "progress": {
+    "pct": 8.59,
+    "troops": 2.3719999999999697,
+    "phase": "grow",
+    "youWin": false,
+    "defeat": false,
+    "resultVisible": false,
+    "territoryHud": true,
+    "practice": false
+  },
+  "end": {
+    "pct": 70.02,
+    "troops": 6033.823199999999,
+    "phase": "attack-prompt",
+    "youWin": true,
+    "defeat": false,
+    "resultVisible": true,
+    "territoryHud": true,
+    "practice": false
+  },
+  "playMs": 21308,
+  "firstEnd": {
+    "pct": 70.02,
+    "troops": 5803.613999999999,
+    "phase": "attack-prompt",
+    "youWin": true,
+    "defeat": false,
+    "resultVisible": true,
+    "territoryHud": true,
+    "practice": false
+  },
+  "realPlayEnd": true,
+  "rematch": {
+    "backInWorld": true,
+    "noResult": true
+  },
+  "secondEnd": {
+    "pct": 70.02,
+    "troops": 6033.823199999999,
+    "phase": "attack-prompt",
+    "youWin": true,
+    "defeat": false,
+    "resultVisible": true,
+    "territoryHud": true,
+    "practice": false
+  },
+  "exit": {
+    "url": "https://game29-3rkccrsqx-jyp-ai1s-projects.vercel.app/games/re-front",
+    "ok": true
+  },
+  "pass": true,
+  "verdict": "PASS",
+  "finishedAt": "2026-09-07T15:42:17.226Z"
+}
