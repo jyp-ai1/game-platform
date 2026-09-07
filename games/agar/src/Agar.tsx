@@ -53,30 +53,81 @@ const AGAR_STYLES: MpStyleOption[] = [
 ];
 
 type HumanSeat = { id: string; nickname: string; color?: string };
+type AgarHello = { id: string; nickname: string; color?: string };
 
 function readLiveNickname(fallback: string): string {
   if (typeof window === "undefined") return fallback;
   return window.localStorage.getItem("play29:nickname")?.trim() || getLastNickname() || fallback;
 }
 
-function collectHumans(code: string, localId: string, nickname: string, color: string): HumanSeat[] {
+function seatsFromPlayers(
+  players: Array<{ deviceId: string; nickname?: string }>,
+  localId: string,
+  nickname: string,
+  color: string
+): HumanSeat[] {
+  return players.map((p) => ({
+    id: p.deviceId,
+    nickname: p.nickname?.trim() || nickname || "Player",
+    color: p.deviceId === localId ? color : undefined,
+  }));
+}
+
+function mergeHumanSeats(...lists: HumanSeat[][]): HumanSeat[] {
+  const deduped = new Map<string, HumanSeat>();
+  for (const list of lists) {
+    for (const h of list) {
+      const prev = deduped.get(h.id);
+      deduped.set(h.id, {
+        id: h.id,
+        nickname: h.nickname || prev?.nickname || "Player",
+        color: h.color ?? prev?.color,
+      });
+    }
+  }
+  return [...deduped.values()].slice(0, AGAR_MAX_PLAYERS);
+}
+
+function rememberHuman(known: Map<string, HumanSeat>, seat: HumanSeat | null | undefined): void {
+  if (!seat?.id) return;
+  const prev = known.get(seat.id);
+  known.set(seat.id, {
+    id: seat.id,
+    nickname: seat.nickname || prev?.nickname || "Player",
+    color: seat.color ?? prev?.color,
+  });
+}
+
+function rememberHello(known: Map<string, HumanSeat>, raw: unknown): void {
+  if (!raw || typeof raw !== "object") return;
+  const h = raw as Partial<AgarHello>;
+  if (typeof h.id !== "string" || !h.id) return;
+  rememberHuman(known, {
+    id: h.id,
+    nickname: typeof h.nickname === "string" ? h.nickname : "Player",
+    color: typeof h.color === "string" ? h.color : undefined,
+  });
+}
+
+function collectHumans(
+  code: string,
+  localId: string,
+  nickname: string,
+  color: string,
+  known?: Map<string, HumanSeat>,
+  roomPlayers?: Array<{ deviceId: string; nickname?: string }>
+): HumanSeat[] {
   const room = sync(code) ?? getRoom(code);
   const hostId = room?.hostId;
-  const fromRoom =
-    room?.players.map((p) => ({
-      id: p.deviceId,
-      nickname: p.nickname?.trim() || nickname || "Player",
-      color: p.deviceId === localId ? color : undefined,
-    })) ?? [];
+  const fromRoom = seatsFromPlayers(roomPlayers ?? room?.players ?? [], localId, nickname, color);
   let list = fromRoom.some((h) => h.id === localId)
     ? fromRoom
     : [{ id: localId, nickname, color }, ...fromRoom];
+  if (known) list = [...list, ...known.values()];
   if (hostId) {
     list = [...list.filter((h) => h.id === hostId), ...list.filter((h) => h.id !== hostId)];
   }
-  const deduped = new Map<string, HumanSeat>();
-  for (const h of list) deduped.set(h.id, h);
-  return [...deduped.values()].slice(0, AGAR_MAX_PLAYERS);
+  return mergeHumanSeats(list);
 }
 
 function isAgarHost(
@@ -123,6 +174,8 @@ export function AgarGame() {
   const startedAtRef = useRef(0);
   const unsubRef = useRef<(() => void) | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const knownHumansRef = useRef<Map<string, HumanSeat>>(new Map());
+  const helloTimersRef = useRef<number[]>([]);
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
@@ -150,7 +203,9 @@ export function AgarGame() {
       sync(roomCode);
       const liveNick = readLiveNickname(nickname);
       const next = structuredClone(worldRef.current);
-      reconcileAgarHumans(next, collectHumans(roomCode, deviceId, liveNick, color));
+      const humans = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current);
+      for (const h of humans) rememberHuman(knownHumansRef.current, h);
+      reconcileAgarHumans(next, humans);
       applyAimsFromRoom(roomCode, next);
       tickAgarWorld(next);
       worldRef.current = next;
@@ -250,6 +305,8 @@ export function AgarGame() {
   useEffect(() => {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
+      helloTimersRef.current.forEach((id) => window.clearTimeout(id));
+      helloTimersRef.current = [];
       unsubRef.current?.();
       leaveRoom(roomCode);
     };
@@ -280,7 +337,9 @@ export function AgarGame() {
     isHostRef.current = entry.role === "host";
     setIsHost(entry.role === "host");
 
-    const humans = collectHumans(roomCode, deviceId, liveNick, color);
+    knownHumansRef.current = new Map();
+    rememberHuman(knownHumansRef.current, { id: deviceId, nickname: liveNick, color });
+    const humans = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current);
     const next = createAgarWorld(deviceId, liveNick);
     const local = next.players[deviceId];
     if (local) local.color = color;
@@ -301,11 +360,28 @@ export function AgarGame() {
     unsubRef.current = subscribeRoom(roomCode, (room) => {
       const gs = room.gameState ?? {};
       const last = String(gs._lastEvent ?? "");
+      rememberHello(knownHumansRef.current, gs["agar:hello"]);
+      for (const p of room.players) {
+        rememberHuman(knownHumansRef.current, {
+          id: p.deviceId,
+          nickname: p.nickname?.trim() || liveNick,
+          color: p.deviceId === deviceId ? color : undefined,
+        });
+      }
 
       if (mpRoleRef.current === "host") {
         const local = structuredClone(worldRef.current);
         sync(roomCode);
-        reconcileAgarHumans(local, collectHumans(roomCode, deviceId, liveNick, color));
+        const humansBefore = Object.values(local.players).filter((p) => !p.isBot).length;
+        const humans = collectHumans(
+          roomCode,
+          deviceId,
+          liveNick,
+          color,
+          knownHumansRef.current,
+          room.players
+        );
+        reconcileAgarHumans(local, humans);
         if (last.startsWith("agar:split:")) {
           splitPlayer(local, last.slice("agar:split:".length));
         }
@@ -314,7 +390,8 @@ export function AgarGame() {
         }
         worldRef.current = local;
         setWorld(local);
-        if (last !== "agar:state") {
+        const humansAfter = Object.values(local.players).filter((p) => !p.isBot).length;
+        if (last !== "agar:state" || humansAfter > humansBefore) {
           send(roomCode, "agar:state", serializeAgarState(local));
           lastHostStateAtRef.current = Date.now();
         }
@@ -331,6 +408,17 @@ export function AgarGame() {
         setWorld(local);
       }
     });
+
+    if (mpRoleRef.current === "guest") {
+      const hello: AgarHello = { id: deviceId, nickname: liveNick, color };
+      send(roomCode, "agar:hello", hello);
+      helloTimersRef.current.forEach((id) => window.clearTimeout(id));
+      helloTimersRef.current = [200, 700, 1500].map((ms) =>
+        window.setTimeout(() => {
+          if (mpRoleRef.current === "guest") send(roomCode, "agar:hello", hello);
+        }, ms)
+      );
+    }
   }, [color, deviceId, nickname, roomCode]);
 
   const exitToDetail = useCallback(() => {

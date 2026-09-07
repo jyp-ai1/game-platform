@@ -284,7 +284,12 @@ export function updateRankings(world: AgarWorld): void {
       mass: Math.round(totalMass(p)),
       color: p.color,
     }))
-    .sort((a, b) => b.mass - a.mass)
+    .sort((a, b) => {
+      if (b.mass !== a.mass) return b.mass - a.mass;
+      const aBot = world.players[a.id]?.isBot ? 1 : 0;
+      const bBot = world.players[b.id]?.isBot ? 1 : 0;
+      return aBot - bBot;
+    })
     .slice(0, 10);
 }
 
