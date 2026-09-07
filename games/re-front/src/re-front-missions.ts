@@ -115,8 +115,8 @@ export function missionObjective(state: RfMissionState): RfMissionObjective {
   }
 }
 
-export function showExpandUi(phase: RfMissionPhase): boolean {
-  return phase === "expand" || phase === "grow" || phase === "free" || phase === "attack-prompt";
+export function showExpandUi(_phase: RfMissionPhase): boolean {
+  return true;
 }
 
 export function showAttackUi(phase: RfMissionPhase): boolean {
@@ -146,11 +146,8 @@ export function advanceMissionAfterGrowTimer(state: RfMissionState): RfMissionSt
 }
 
 export function advanceMissionAfterAttack(state: RfMissionState): RfMissionState {
-  if (state.phase === "attack-prompt") {
-    return { ...state, phase: "attack", attackCount: 1 };
-  }
-  if (state.phase === "attack") {
-    return { ...state, phase: "counter", attackCount: state.attackCount + 1 };
+  if (state.phase === "attack-prompt" || state.phase === "attack" || state.phase === "counter") {
+    return { ...state, phase: "free", attackCount: state.attackCount + 1 };
   }
   return { ...state, attackCount: state.attackCount + 1 };
 }

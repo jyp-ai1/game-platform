@@ -89,7 +89,7 @@ This epic is **CPO Product CLOSED**. Do not reopen PASS games for extra polish o
 | CPO 2nd Product QA | **CLOSED** |
 | 4/4 MP Product Gate | **CLOSED** |
 | Production | **HOLD** |
-| Re:Front UX | separate HOLD — do not mix with MP Gate |
+| Re:Front Long Sprint | in progress — do not mix with 4/4 MP Gate |
 
 CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
 
@@ -98,14 +98,16 @@ CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approva
 ```text
 docs/qa/cpo/mp-cpo-2nd-product-qa/
 ├── qa-report.md
-└── re-front/
+├── re-front/
+└── re-front-complete/
     ├── qa-report.md
     └── evidence/
 ```
 
 Record results in this path. Do not rely on chat paste as the official channel.
 
-Re:Front Visual Final evidence: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front/`
+Re:Front Visual Final (CLOSED): `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front/`
+Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 
 ## Latest deploy
 
@@ -137,9 +139,29 @@ Supabase egress work is **frozen**. Snake `snake:delta` + periodic snapshot. Re:
 
 **Do not touch STEP4 without an explicit Work Order.** If Multiplayer breaks, check Common Contract / room lifecycle / state sync first.
 
-## Re:Front UX — separate workstream
+## Long Sprint — one game to complete
 
-MP Product Gate is CLOSED. UX is still a separate HOLD. Do **not** start Re:Front UX / Onboarding until an explicit CPO Work Order. Targets if ordered: 5s understand · 30s first expand · 2min first combat · 10–15min round complete.
+From 2026-09-07: complete **one game** end-to-end inside the Sprint. CPO does not QA feature-by-feature.
+
+```text
+Entry → Core play → Real win/lose → Result → Rematch / Another Game / Exit
+→ needed Multiplayer → Browser QA → Evidence → CTO Final QA
+```
+
+CPO Product QA happens **once**, after CTO Final QA PASS. HOLD stays inside the Sprint.
+
+Do not reopen Snake / Bomber / Agar. Do not reopen the 4/4 MP Product Gate.
+
+## Re:Front Long Sprint (current)
+
+Target: finish Re:Front as a complete product on Baseline `a7ae3aa`.
+
+- Honest **70%** territory win by real play (no end-round helper)
+- Playable map (`RF_GRID` 32) so 70% is reachable in ~10–15 minutes
+- EXPAND stays available after the first-session tutorial
+- Result + REMATCH / ANOTHER GAME / EXIT
+- Official path: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
+- Production: HOLD
 
 ## Comments / Real Player
 
@@ -147,18 +169,20 @@ MP Product Gate is CLOSED. UX is still a separate HOLD. Do **not** start Re:Fron
 
 ## Next CTO work (priority)
 
-1. **Sprint 16** is in progress: Re:Front first-session UX on Baseline `a7ae3aa`. Do not reopen 4/4 MP QA.
+1. **Re:Front Long Sprint** — complete the game, then CTO Final QA. Do not reopen 4/4 MP QA.
 2. No Production deploy.
-3. After Sprint 16: CPO Product QA, then a separate Production decision.
+3. After CTO PASS: CPO Product QA once. Production stays a separate decision.
 
 ## CTO chat status (keep short)
 
 ```text
-CTO QA COMPLETE
-Path: docs/qa/cpo/mp-cpo-2nd-product-qa/...
+CTO FINAL QA COMPLETE
+Game:
+Sprint:
+Path: docs/qa/cpo/mp-cpo-2nd-product-qa/<game-sprint>/qa-report.md
 Commit:
 Preview:
-CTO Verdict: PASS / HOLD / FAIL
+CTO Verdict: PASS
 Production: NOT DEPLOYED
 ```
 

@@ -1,13 +1,13 @@
 /** Re:Front P0 — territory strategy core with onboarding loop. */
 
-export const RF_GRID = 96;
+export const RF_GRID = 32;
 export const RF_CELL = 8;
 export const RF_TICK_MS = 200;
 export const RF_ECON_MS = 1000;
 export const RF_MAX_PLAYERS = 4;
 export const RF_MAX_NATIONS = 8;
 export const RF_VICTORY_PCT = 70;
-export const RF_EXPAND_COST = 8;
+export const RF_EXPAND_COST = 4;
 export const RF_ATTACK_COST = 20;
 
 export type RfTerrain = 0 | 1 | 2;
@@ -220,7 +220,7 @@ function claimBlock(world: RfWorld, cx: number, cy: number, w: number, h: number
 }
 
 function findSpawn(slot: number, offset = 0): { cx: number; cy: number } {
-  const margin = 8;
+  const margin = Math.max(2, Math.floor(RF_GRID / 10));
   const positions: Array<[number, number]> = [
     [margin, margin],
     [RF_GRID - margin - 3, margin],
@@ -571,7 +571,7 @@ export function applyBuild(
   return true;
 }
 
-function eliminateNation(world: RfWorld, nationId: string): void {
+export function eliminateNation(world: RfWorld, nationId: string): void {
   const n = world.nations[nationId];
   if (!n || !n.alive) return;
   n.alive = false;
@@ -581,6 +581,8 @@ function eliminateNation(world: RfWorld, nationId: string): void {
     if (world.owner[i] === n.slot) world.owner[i] = 0;
   }
   addPopup(world, `${n.nickname} eliminated`, "#94a3b8");
+  recomputePct(world);
+  checkVictory(world);
 }
 
 function checkVictory(world: RfWorld): void {
@@ -597,10 +599,17 @@ function checkVictory(world: RfWorld): void {
   if (alive.length === 1) {
     world.roundOver = true;
     world.winnerId = alive[0]!.id;
+    return;
   }
   if (alive.length === 0) {
     world.roundOver = true;
     world.winnerId = null;
+    return;
+  }
+  const humansAlive = alive.filter((n) => !n.isBot);
+  if (humansAlive.length === 0) {
+    world.roundOver = true;
+    world.winnerId = [...alive].sort((a, b) => b.territoryPct - a.territoryPct)[0]!.id;
   }
 }
 
@@ -676,7 +685,7 @@ function tickAi(world: RfWorld): void {
       }
     } else if (p === "turtle") {
       if (n.troops > 200 && Math.random() < 0.08) applyDefend(world, n.id);
-      if (n.troops >= RF_EXPAND_COST && Math.random() < 0.25) {
+      if (n.troops >= RF_EXPAND_COST && Math.random() < 0.08) {
         const expand = pickAiExpand(world, n.id);
         if (expand) applyExpand(world, expand[0], expand[1], n.id);
       }
@@ -687,7 +696,7 @@ function tickAi(world: RfWorld): void {
       applyAttack(world, attack[0], attack[1], n.id, 0.4);
       continue;
     }
-    if (n.troops >= RF_EXPAND_COST) {
+    if (n.troops >= RF_EXPAND_COST && Math.random() < 0.22) {
       const expand = pickAiExpand(world, n.id);
       if (expand) applyExpand(world, expand[0], expand[1], n.id);
     }
@@ -707,7 +716,7 @@ export function tickRfWorld(world: RfWorld, now = Date.now()): void {
   if (world.pendingCounterAttack && world.tick % 5 === 0) {
     tickTutorialCounter(world);
   }
-  if (world.tick % 4 === 0) {
+  if (world.tick % 8 === 0) {
     tickAi(world);
   }
 }

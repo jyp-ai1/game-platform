@@ -19,7 +19,7 @@ test("Re:Front sync payload sizes", () => {
   tickRfWorld(world);
   const delta = JSON.stringify(buildRfSyncDelta(tracker, world));
 
-  assert.ok(legacy.length > 40_000, `legacy grid snapshot ${legacy.length}`);
+  assert.ok(legacy.length > 1_000, `legacy grid snapshot ${legacy.length}`);
   assert.ok(delta.length <= 5_120, `delta target <=5KB, got ${delta.length}`);
 
   console.log(

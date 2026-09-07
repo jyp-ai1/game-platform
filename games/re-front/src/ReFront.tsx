@@ -265,6 +265,8 @@ export function ReFrontGame() {
   const [selected, setSelected] = useState<{ cx: number; cy: number } | null>(null);
   const selectedRef = useRef<{ cx: number; cy: number } | null>(null);
   const [pendingExpand, setPendingExpand] = useState<{ cx: number; cy: number } | null>(null);
+  const pendingExpandRef = useRef<{ cx: number; cy: number } | null>(null);
+  pendingExpandRef.current = pendingExpand;
   const [cam, setCam] = useState({ x: RF_GRID / 2, y: RF_GRID / 2 });
   const [zoom, setZoom] = useState(1.15);
   const camRef = useRef(cam);
@@ -354,12 +356,11 @@ export function ReFrontGame() {
   useEffect(() => {
     if (!started || world.roundOver) return;
     if (pendingExpand || selected) return;
-    if (mission.phase === "expand" || mission.phase === "grow") {
-      const t = expandHints[0];
-      if (!t) return;
-      selectedRef.current = t;
-      setSelected(t);
-      setPendingExpand(t);
+    const nextExpand = expandHints[0];
+    if (nextExpand) {
+      selectedRef.current = nextExpand;
+      setSelected(nextExpand);
+      setPendingExpand(nextExpand);
       return;
     }
     if (mission.phase === "attack-prompt" || mission.phase === "attack") {
@@ -684,16 +685,45 @@ export function ReFrontGame() {
     dispatchAction({ type: "expand", cx: bridge.cx, cy: bridge.cy, nationId: deviceId });
   }, [deviceId, dispatchAction, mission.phase, roomCode]);
 
+  const armNextExpand = useCallback(() => {
+    const next = findExpandTargets(worldRef.current, deviceId, 1)[0];
+    if (next) {
+      selectedRef.current = next;
+      pendingExpandRef.current = next;
+      setSelected(next);
+      setPendingExpand(next);
+      return;
+    }
+    pendingExpandRef.current = null;
+    selectedRef.current = null;
+    setPendingExpand(null);
+    setSelected(null);
+  }, [deviceId]);
+
   const onExpand = useCallback(() => {
-    const cell = pendingExpand ?? selected;
+    const cell = pendingExpandRef.current ?? selectedRef.current;
     if (!cell || !me?.alive) return;
     const ok = dispatchAction({ type: "expand", cx: cell.cx, cy: cell.cy, nationId: deviceId });
     if (ok) {
       setMission((m) => advanceMissionAfterExpand(m));
-      setPendingExpand(null);
-      setSelected(null);
+      armNextExpand();
     }
-  }, [deviceId, dispatchAction, me?.alive, pendingExpand, selected]);
+  }, [armNextExpand, deviceId, dispatchAction, me?.alive]);
+
+  const expandHoldRef = useRef<number | null>(null);
+  const stopExpandHold = useCallback(() => {
+    if (expandHoldRef.current != null) {
+      window.clearInterval(expandHoldRef.current);
+      expandHoldRef.current = null;
+    }
+  }, []);
+  const startExpandHold = useCallback(() => {
+    stopExpandHold();
+    onExpand();
+    expandHoldRef.current = window.setInterval(() => onExpand(), 280);
+  }, [onExpand, stopExpandHold]);
+
+  useEffect(() => () => stopExpandHold(), [stopExpandHold]);
 
   const onAttack = useCallback(() => {
     if (!selected || !me?.alive) return;
@@ -1270,13 +1300,24 @@ export function ReFrontGame() {
           <p className="mt-0.5 text-sm font-bold text-amber-100 sm:text-base">{objective.nextAction}</p>
           <p className="mt-0.5 text-[10px] text-slate-400 sm:text-xs">{objective.title} — {objective.cta}</p>
         </div>
-        {pendingExpand && (mission.phase === "expand" || mission.phase === "attack-prompt") ? (
+        {pendingExpand ? (
           <div className="mb-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-center" data-testid="rf-expand-confirm">
             <div className="font-bold text-emerald-200">EXPAND</div>
             <p className="mt-1 text-sm text-slate-200">이 땅을 차지하시겠습니까?</p>
-            <p className="mt-1 text-xs text-amber-200">보상: Territory +1 · Gold +120 · Pop +8</p>
-            <p className="text-[10px] text-slate-400">비용: Troops {expandCost}</p>
-            <button type="button" disabled={!canExp} onClick={onExpand} className="mt-2 w-full rounded-xl bg-emerald-600 py-3 text-base font-bold disabled:opacity-40" data-testid="rf-expand-btn">
+            <p className="mt-1 text-xs text-amber-200">
+              보상: Territory +1 · Gold +{(me?.tutorialExpands ?? 0) < 3 ? 120 : 12} · Pop +{(me?.tutorialExpands ?? 0) < 3 ? 8 : 2}
+            </p>
+            <p className="text-[10px] text-slate-400">비용: Troops {expandCost} · 누르고 있으면 계속 확장</p>
+            <button
+              type="button"
+              disabled={!canExp}
+              onPointerDown={startExpandHold}
+              onPointerUp={stopExpandHold}
+              onPointerLeave={stopExpandHold}
+              onPointerCancel={stopExpandHold}
+              className="mt-2 w-full rounded-xl bg-emerald-600 py-3 text-base font-bold disabled:opacity-40"
+              data-testid="rf-expand-btn"
+            >
               🟢 EXPAND
             </button>
           </div>
@@ -1285,7 +1326,16 @@ export function ReFrontGame() {
             <p className="text-[10px] text-slate-400 sm:text-xs">{selectionHint}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {(showExpandUi(mission.phase)) && (
-                <button type="button" disabled={!canExp || world.roundOver} onClick={onExpand} className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-base font-bold disabled:opacity-40" data-testid="rf-expand-btn">
+                <button
+                  type="button"
+                  disabled={!canExp || world.roundOver}
+                  onPointerDown={startExpandHold}
+                  onPointerUp={stopExpandHold}
+                  onPointerLeave={stopExpandHold}
+                  onPointerCancel={stopExpandHold}
+                  className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-base font-bold disabled:opacity-40"
+                  data-testid="rf-expand-btn"
+                >
                   🟢 EXPAND
                 </button>
               )}
