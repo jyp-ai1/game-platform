@@ -1,0 +1,24 @@
+{
+  "gate": "sprint16-rf-first-session",
+  "baseUrl": "https://game29-i6sl4q2a1-jyp-ai1s-projects.vercel.app",
+  "room": "RF-S16-MTR7N9JF",
+  "startedAt": "2026-09-07T12:22:07.371Z",
+  "detailEnterWorld": true,
+  "firstSession": {
+    "hasExpandCta": true,
+    "hasWinGoal": true,
+    "noStep1Chrome": true,
+    "expandEnabled": true,
+    "practice": false
+  },
+  "afterExpand": true,
+  "result": {
+    "rematch": true,
+    "another": true,
+    "exit": true,
+    "retryGone": true
+  },
+  "exit": true,
+  "pass": true,
+  "finishedAt": "2026-09-07T12:22:15.887Z"
+}

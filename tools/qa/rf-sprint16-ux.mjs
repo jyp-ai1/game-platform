@@ -70,7 +70,7 @@ try {
     retryGone: !/\bRETRY\b/.test(resultText),
   };
 
-  await page.getByRole("button", { name: /EXIT/i }).click();
+  await page.getByRole("button", { name: "EXIT", exact: true }).click();
   await page.waitForTimeout(500);
   report.exit = /re-front/i.test(page.url());
 
