@@ -28,7 +28,7 @@ export function MpWorldPlayLink({
   children,
   "data-testid": testId,
 }: {
-  slug: "snake" | "agar" | "bomber";
+  slug: "snake" | "agar" | "bomber" | "re-front";
   className?: string;
   children: ReactNode;
   "data-testid"?: string;

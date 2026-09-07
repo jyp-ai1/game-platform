@@ -55,6 +55,24 @@ export {
   type EntryCrashRecord,
 } from "./client/entry-crash-log";
 
+export {
+  DEFAULT_ROOM_BY_SLUG,
+  isListedHostPresent,
+  joinMultiplayerRoom,
+  reclaimStaleMultiplayerRoom,
+  reclaimStaleMultiplayerRoomAsync,
+  resolveDefaultRoomCode,
+  resolveMultiplayerEntry,
+  resolveRoomCodeFromLocation,
+  roomGameStateAgeMs,
+  type MultiplayerEntryFailure,
+  type MultiplayerEntryResult,
+  type MultiplayerEntryRole,
+  type MultiplayerEntrySuccess,
+  type MultiplayerFlagshipSlug,
+  type ResolveMultiplayerEntryOptions,
+} from "./client/resolve-multiplayer-entry";
+
 // Lobby / invites
 export {
   getPartyLinkUrl,

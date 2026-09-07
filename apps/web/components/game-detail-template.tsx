@@ -12,14 +12,14 @@ import { GameStatusBlock } from "@/components/game-status-block";
 import { InviteDetailPin } from "@/components/invite-detail-pin";
 import { MoreGamesPanel } from "@/components/more-games-panel";
 import { MpWorldPlayLink } from "@/components/snake-world-play-link";
-import { playHrefForCatalogSlug, REPLAY_DETAIL_SOLO_CTA, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
+import { playHrefForCatalogSlug, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
+import { isProductFlagshipSlug, productModeLabel } from "@/lib/product-catalog-sync";
 import { creatorDisplayName } from "@/lib/creator/creator-game-catalog";
 import {
   gameCreatorLabel,
   gameSummaryDescription,
   isDiscoveryMultiplayerSlug,
 } from "@/lib/game-discovery-ui";
-import { getProductGameModes, productModeLabel } from "@/lib/product-catalog-sync";
 
 function detailCreatorLabel(slug: string): string {
   if (slug.startsWith("creator-")) return creatorDisplayName(slug) ?? "Creator";
@@ -48,8 +48,8 @@ export function GameDetailTemplate({
   const creator = detailCreatorLabel(slug);
   const playHref = playHrefForCatalogSlug(slug);
   const mp = isDiscoveryMultiplayerSlug(slug, game);
-  const modes = getProductGameModes(slug);
   const modeLabel = productModeLabel(slug);
+  const flagshipMp = isProductFlagshipSlug(slug) && mp;
 
   return (
     <main className="flex flex-1 flex-col" data-testid="game-detail-page">
@@ -97,18 +97,9 @@ export function GameDetailTemplate({
               </div>
 
               <div className="mt-5 flex flex-col items-center gap-2">
-                {modes?.solo && modes.soloHref ? (
-                  <Link
-                    href={modes.soloHref}
-                    data-testid="game-detail-solo-cta"
-                    className="inline-flex min-h-12 w-full max-w-sm items-center justify-center rounded-xl border border-white/20 bg-white/5 px-8 py-3 text-base font-semibold text-white transition hover:bg-white/10"
-                  >
-                    PLAY SOLO
-                  </Link>
-                ) : null}
-                {mp && (slug === "snake" || slug === "agar" || slug === "bomber") ? (
+                {flagshipMp ? (
                   <MpWorldPlayLink
-                    slug={slug as "snake" | "agar" | "bomber"}
+                    slug={slug as "snake" | "agar" | "bomber" | "re-front"}
                     data-testid="game-detail-play-cta"
                     className="inline-flex min-h-14 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
@@ -120,7 +111,7 @@ export function GameDetailTemplate({
                     data-testid="game-detail-play-cta"
                     className="inline-flex min-h-14 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    {REPLAY_DETAIL_SOLO_CTA}
+                    {REPLAY_DETAIL_WORLD_CTA}
                   </Link>
                 )}
                 {mp ? (

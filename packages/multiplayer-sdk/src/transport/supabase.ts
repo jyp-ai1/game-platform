@@ -72,10 +72,14 @@ async function persistRoom(room: GameRoom): Promise<void> {
   await supabase.from("mp_rooms").upsert({ ...row, updated_at: new Date().toISOString() });
 }
 
-async function deleteRoom(code: string): Promise<void> {
+/** Remove stale shard row before explicit reclaim (ghost host cleanup). */
+export async function deleteMultiplayerRoom(code: string): Promise<void> {
+  const key = code.toUpperCase();
+  cacheRemove(key);
   const supabase = getMultiplayerSupabase();
   if (!supabase) return;
-  await supabase.from("mp_rooms").delete().eq("code", code.toUpperCase());
+  await supabase.from("mp_rooms").delete().eq("code", key);
+  await supabase.from("mp_presence").delete().eq("room_code", key);
 }
 
 export async function fetchRoomFromSupabase(code: string): Promise<GameRoom | null> {
@@ -255,7 +259,7 @@ export const supabaseTransport: MultiplayerTransport = {
     const nextSpectators = room.spectators.filter((id) => id !== deviceId);
     if (nextPlayers.length === 0) {
       cacheRemove(code);
-      void deleteRoom(code);
+      void deleteMultiplayerRoom(code);
     } else {
       const next: GameRoom = {
         ...room,

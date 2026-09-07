@@ -1,8 +1,12 @@
 import { getDeviceId } from "@game-platform/game-sdk";
 import type { GameRoom, MatchMode, MatchResult, MaxPlayers } from "@game-platform/shared";
 
-import { getMultiplayerTransport, setMultiplayerTransport, initMultiplayerTransport } from "../transport/init";
-import { ensureRoomLoaded, joinRoomAsync as supabaseJoinAsync } from "../transport/supabase";
+import { getMultiplayerTransport, initMultiplayerTransport, setMultiplayerTransport } from "../transport/init";
+import {
+  deleteMultiplayerRoom,
+  ensureRoomLoaded,
+  joinRoomAsync as supabaseJoinAsync,
+} from "../transport/supabase";
 import type { CreateRoomParams, JoinRoomOptions, MultiplayerTransport } from "../transport/interface";
 
 if (typeof window !== "undefined") initMultiplayerTransport();
@@ -12,6 +16,33 @@ export { setMultiplayerTransport, getMultiplayerTransport, initMultiplayerTransp
 function isWorldRoom(code: string): boolean {
   const upper = code.toUpperCase();
   return upper === "WORLD" || /^WORLD-\d+$/.test(upper);
+}
+
+function isBootstrapRoom(code: string): boolean {
+  const upper = code.toUpperCase();
+  return (
+    isWorldRoom(upper) ||
+    upper.startsWith("BOMBER-") ||
+    upper.startsWith("RF-") ||
+    upper.startsWith("AGAR-")
+  );
+}
+
+function bootstrapGameSlug(code: string, options?: JoinRoomOptions): string {
+  if (options?.gameSlug) return options.gameSlug;
+  const upper = code.toUpperCase();
+  if (upper.startsWith("BOMBER")) return "bomber";
+  if (upper.startsWith("RF-")) return "re-front";
+  if (upper.startsWith("AGAR")) return "agar";
+  return "snake";
+}
+
+function bootstrapMaxPlayers(code: string, options?: JoinRoomOptions): MaxPlayers {
+  if (options?.maxPlayers) return options.maxPlayers;
+  const upper = code.toUpperCase();
+  if (upper.startsWith("BOMBER") || upper.startsWith("RF-")) return 8;
+  if (upper.startsWith("AGAR")) return 20;
+  return 50;
 }
 
 export function createRoom(params: CreateRoomParams): GameRoom;
@@ -37,10 +68,10 @@ export async function joinRoomAsync(code: string, options?: JoinRoomOptions): Pr
   const key = code.toUpperCase();
   let room = await ensureRoom(key);
 
-  if (!room && isWorldRoom(key)) {
+  if (!room && isBootstrapRoom(key)) {
     room = createRoom({
-      gameSlug: "snake",
-      maxPlayers: 50,
+      gameSlug: bootstrapGameSlug(key, options),
+      maxPlayers: bootstrapMaxPlayers(key, options),
       matchMode: "public",
       code: key,
     });
@@ -122,5 +153,7 @@ export function tickRoomCountdown(code: string): GameRoom | null {
 export function subscribeRoom(code: string, listener: (room: GameRoom) => void): () => void {
   return getMultiplayerTransport().subscribe(code, listener);
 }
+
+export { deleteMultiplayerRoom } from "../transport/supabase";
 
 export type { CreateRoomParams, JoinRoomOptions, MultiplayerTransport };

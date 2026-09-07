@@ -1,0 +1,80 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "startedAt": "2026-09-07T00:12:23.104Z",
+  "tests": {
+    "A_first_host": {
+      "pass": true,
+      "entryMs": 1357,
+      "worldMs": 167,
+      "room": "BOMBER-A",
+      "ok": true,
+      "ms": 167,
+      "reason": "world",
+      "hud": {
+        "hud": "BOMBER-A",
+        "href": "http://localhost:3000/games/bomber/play?room=BOMBER-A",
+        "body": "Re:Play2.0\nHome\nDiscover\nJourney\nCommunity\nProfile\nLv.1 · 0 / 100 XP\n로그인\n← Bomber\n★ YOU\nS:0 · K:0\nRANK #1\nSCORE 0\n4P · A Classic\nBOMBER-A\nFIRE 1/4\nSD 105s\n❤️ · HOST\n나가기\n전체화면\n💣\n💣\n💣\n\nPLACE\n\n1. ★ You\n#1\n2. Bomber2\n#1\n3. Bomber3\n#1\n4. Bomber4\n#1\n\nMINIMAP\n\n1\n1\n1\n★\n1\n\nMISSIONS\n\n○ 🧱 0/20\n\n○ ⛓️ 0/3\n\n○ 🎁 0/5\n\n○ 💀 0/10\n\n© 2026 Re:Play. All rights reserved.\n\nPrivacy\nTerms\nContact"
+      }
+    },
+    "B_guest_join": {
+      "pass": false,
+      "hostWorld": {
+        "ok": true,
+        "ms": 4928,
+        "reason": "world"
+      },
+      "guestWorld": {
+        "ok": false,
+        "ms": 4680,
+        "reason": "connection_failed"
+      },
+      "sameRoom": true,
+      "hostHud": {
+        "hud": "BOMBER-A",
+        "href": "http://localhost:3000/games/bomber/play?room=BOMBER-A",
+        "body": "Re:Play2.0\nHome\nDiscover\nJourney\nCommunity\nProfile\nLv.1 · 0 / 100 XP\n로그인\n← Bomber\n★ YOU\nS:0 · K:0\nRANK #1\nSCORE 0\n4P · A Classic\nBOMBER-A\nFIRE 1/4\nSD 97s\n❤️ · HOST\n나가기\n전체화면\n🪙\n⚡\n💣\n\nPLACE\n\n1. ★ You\n#1\n2. Bomber3\n#99\n3. Bomber4\n#99\n4. Bomber4\n#99\n\nMINIMAP\n\n★\n1\n\nMISSIONS\n\n○ 🧱 0/20\n\n○ ⛓️ 0/3\n\n○ 🎁 0/5\n\n○ 💀 0/10\n\n© 2026 Re:Play. All rights reserved.\n\nPrivacy\nTerms\nContact"
+      },
+      "guestHud": {
+        "hud": "",
+        "href": "http://localhost:3000/games/bomber/play?room=BOMBER-A",
+        "body": "Re:Play2.0\nHome\nDiscover\nJourney\nCommunity\nProfile\nLv.1 · 0 / 100 XP\n로그인\n← Bomber\nMap Select\n\nSame map = same room · AI fills empty seats\n\nConnection failed\n\nCould not join this room. Host may be unavailable.\n\nRetry\nBack to game\n\n© 2026 Re:Play. All rights reserved.\n\nPrivacy\nTerms\nContact"
+      }
+    },
+    "C_ghost_reclaim": {
+      "pass": true,
+      "worldMs": 4934,
+      "reclaimedAsHost": true,
+      "ok": true,
+      "ms": 4934,
+      "reason": "world"
+    },
+    "D_live_host_no_reclaim": {
+      "pass": false,
+      "hostWorld": {
+        "ok": true,
+        "ms": 4948,
+        "reason": "world"
+      },
+      "guestWorld": {
+        "ok": false,
+        "ms": 4605,
+        "reason": "connection_failed"
+      },
+      "guestConnectionFailed": true,
+      "note": "Live host kept — guest must join, not reclaim"
+    },
+    "E_retry": {
+      "pass": true,
+      "firstAttempt": {
+        "ok": true,
+        "ms": 5079,
+        "reason": "world"
+      },
+      "afterRetry": null,
+      "hadErrorUi": false,
+      "note": "First attempt succeeded — Retry UI not shown (acceptable for fresh reclaim)"
+    }
+  },
+  "finishedAt": "2026-09-07T00:13:16.116Z",
+  "allPass": false
+}

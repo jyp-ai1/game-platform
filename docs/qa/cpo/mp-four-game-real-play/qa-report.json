@@ -1,0 +1,92 @@
+{
+  "gate": "mp-four-game-real-play",
+  "baseUrl": "http://localhost:3000",
+  "runId": 1788740007099,
+  "hostNick": "QAHostM6RF",
+  "guestNick": "QAGuestM6RF",
+  "startedAt": "2026-09-07T00:13:27.099Z",
+  "matrix": {
+    "snake": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    },
+    "bomber": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    },
+    "agar": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    },
+    "re-front": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    }
+  },
+  "games": {
+    "bomber": {
+      "roomCode": "BOMBER-A",
+      "sync": {
+        "pass": true,
+        "hostIsHost": true,
+        "guestIsHost": false,
+        "hostHumans": 2,
+        "guestHumans": 2,
+        "hostStateAck": true,
+        "guestStateAck": true
+      }
+    },
+    "agar": {
+      "roomCode": "AGAR-QA-M6RF",
+      "sync": {
+        "pass": true,
+        "hostRole": "HOST",
+        "guestRole": "SYNC",
+        "hostTick": 160,
+        "guestTick": 158,
+        "hostSeesGuest": true,
+        "guestSeesHost": true,
+        "sharedState": true
+      }
+    },
+    "re-front": {
+      "roomCode": "RF-QA-M6RF",
+      "sync": {
+        "pass": true,
+        "hostTerBefore": 0.1,
+        "hostTerAfter": 0.11,
+        "guestHostTerBefore": 0.1,
+        "guestHostTerAfter": 0.11,
+        "hostTerDelta": 0.01,
+        "guestHostTerDelta": 0.01
+      }
+    },
+    "snake": {
+      "roomCode": "WORLD",
+      "sync": { "pass": true }
+    }
+  },
+  "gateResult": "PASS",
+  "finishedAt": "2026-09-07T00:15:48.849Z",
+  "note": "CTO certified 4/4 Matrix PASS (runId 1788740007099). CPO 2nd Product QA pending Preview."
+}

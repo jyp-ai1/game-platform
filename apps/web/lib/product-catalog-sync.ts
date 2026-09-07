@@ -63,7 +63,6 @@ export function getProductGameModes(slug: string): ProductGameModes | null {
 export function productModeLabel(slug: string): string | null {
   const m = getProductGameModes(slug);
   if (!m) return null;
-  if (m.solo && m.multiplayer) return "SOLO · MULTIPLAYER";
   if (m.multiplayer) return "MULTIPLAYER";
   if (m.solo) return "SOLO";
   return null;

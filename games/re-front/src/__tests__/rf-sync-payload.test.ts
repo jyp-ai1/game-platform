@@ -10,7 +10,7 @@ import {
 } from "../re-front-engine";
 
 test("Re:Front sync payload sizes", () => {
-  const humans = [{ deviceId: "p1", nickname: "A", color: "#f00" }];
+  const humans = [{ id: "p1", nickname: "A", color: "#f00" }];
   let world = createRfWorld("p1", "A", humans);
   for (let i = 0; i < 5; i++) tickRfWorld(world);
 

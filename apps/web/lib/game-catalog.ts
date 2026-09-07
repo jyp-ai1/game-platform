@@ -54,8 +54,9 @@ export function inviteHrefForCatalogSlug(slug: string, roomCode: string): string
 export const REPLAY_CARD_CTA = "▶ Re:Play";
 /** Catalog grid — lands on detail where Play CTA lives. */
 export const DISCOVERY_CARD_CTA = "▶ Play";
-export const REPLAY_DETAIL_WORLD_CTA = "PLAY NOW";
-export const REPLAY_DETAIL_SOLO_CTA = "PLAY NOW";
+/** Flagship multiplayer detail — one CTA (Character → Color → ENTER in-game). */
+export const REPLAY_DETAIL_WORLD_CTA = "ENTER WORLD";
+export const REPLAY_DETAIL_SOLO_CTA = "ENTER WORLD";
 
 export function playHrefForCatalogSlug(slug: string): string {
   // Detail CTA → Character/Color entry (flagship Snake or /games/{slug}/play).

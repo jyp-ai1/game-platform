@@ -336,3 +336,98 @@ export function cameraFocus(player: AgarPlayer | undefined): Vec {
   }
   return { x: x / m, y: y / m };
 }
+
+export type AgarSyncState = {
+  tick: number;
+  size: number;
+  food: AgarFood[];
+  players: Record<
+    string,
+    {
+      id: string;
+      nickname: string;
+      color: string;
+      alive: boolean;
+      isBot: boolean;
+      cells: AgarCell[];
+      aimX: number;
+      aimY: number;
+      score: number;
+    }
+  >;
+  rankings: AgarWorld["rankings"];
+};
+
+export function serializeAgarState(world: AgarWorld): AgarSyncState {
+  return {
+    tick: world.tick,
+    size: world.size,
+    food: world.food.map((f) => ({ ...f })),
+    players: Object.fromEntries(
+      Object.entries(world.players).map(([id, p]) => [
+        id,
+        {
+          id: p.id,
+          nickname: p.nickname,
+          color: p.color,
+          alive: p.alive,
+          isBot: p.isBot,
+          cells: p.cells.map((c) => ({ ...c })),
+          aimX: p.aimX,
+          aimY: p.aimY,
+          score: p.score,
+        },
+      ])
+    ),
+    rankings: world.rankings.map((r) => ({ ...r })),
+  };
+}
+
+export function applyAgarState(
+  world: AgarWorld,
+  state: AgarSyncState,
+  opts?: { rejectStaleTick?: boolean }
+): void {
+  if (opts?.rejectStaleTick && state.tick < world.tick) return;
+  world.tick = state.tick;
+  world.size = state.size;
+  world.food = state.food.map((f) => ({ ...f }));
+  world.players = Object.fromEntries(
+    Object.entries(state.players).map(([id, p]) => [
+      id,
+      {
+        id: p.id,
+        nickname: p.nickname,
+        color: p.color,
+        alive: p.alive,
+        isBot: p.isBot,
+        cells: p.cells.map((c) => ({ ...c })),
+        aimX: p.aimX,
+        aimY: p.aimY,
+        score: p.score,
+      },
+    ])
+  );
+  world.rankings = state.rankings.map((r) => ({ ...r }));
+}
+
+export function reconcileAgarHumans(
+  world: AgarWorld,
+  humans: Array<{ id: string; nickname: string; color?: string }>
+): void {
+  for (const h of humans) {
+    const existing = world.players[h.id];
+    if (existing) {
+      existing.nickname = h.nickname;
+      existing.isBot = false;
+      if (h.color) existing.color = h.color;
+      continue;
+    }
+    const botId = Object.keys(world.players).find((id) => world.players[id]!.isBot);
+    if (botId) delete world.players[botId];
+    const p = makePlayer(h.id, h.nickname, false, world.size, Object.keys(world.players).length);
+    if (h.color) p.color = h.color;
+    world.players[h.id] = p;
+  }
+  updateRankings(world);
+}

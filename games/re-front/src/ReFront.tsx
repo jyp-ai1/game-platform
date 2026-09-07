@@ -9,11 +9,9 @@ import {
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import {
-  createRoom,
-  ensureRoom,
   getRoom,
-  joinRoom,
-  joinRoomAsync,
+  resolveMultiplayerEntry,
+  resolveRoomCodeFromLocation,
   leaveRoom,
   send,
   subscribeRoom,
@@ -92,9 +90,7 @@ type RewardFlash = {
 };
 
 function resolveRoomCode(): string {
-  if (typeof window === "undefined") return "RF-LOBBY";
-  const q = new URLSearchParams(window.location.search).get("room");
-  return (q && q.trim()) || "RF-LOBBY";
+  return resolveRoomCodeFromLocation("re-front");
 }
 
 function snapWorld(w: RfWorld): RfWorld {
@@ -111,6 +107,11 @@ function snapWorld(w: RfWorld): RfWorld {
     rankings: w.rankings.slice(),
     battle: w.battle ? { ...w.battle } : null,
   };
+}
+
+function readLiveNickname(fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  return window.localStorage.getItem("play29:nickname")?.trim() || getLastNickname() || fallback;
 }
 
 function collectHumans(code: string, localId: string, nickname: string, color: string): HumanSeat[] {
@@ -201,6 +202,8 @@ export function ReFrontGame() {
   worldRef.current = world;
 
   const [started, setStarted] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState(false);
   const [styleId, setStyleId] = useState("green");
   const [color, setColor] = useState<string>(PLAYER_GREEN);
   const [selected, setSelected] = useState<{ cx: number; cy: number } | null>(null);
@@ -227,6 +230,7 @@ export function ReFrontGame() {
   });
   const startedAtRef = useRef(Date.now());
   const lastHostStateAtRef = useRef(0);
+  const mpRoleRef = useRef<"host" | "guest">("host");
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rfSyncTrackerRef = useRef<ReturnType<typeof createRfSyncTracker> | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
@@ -522,8 +526,7 @@ export function ReFrontGame() {
         };
       }
       const w = snapWorld(worldRef.current);
-      const host = isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current);
-      if (host) {
+      if (mpRoleRef.current === "host") {
         const ok = applyRfAction(w, action);
         if (ok) {
           tickRfWorld(w);
@@ -551,7 +554,7 @@ export function ReFrontGame() {
     }
     const bridge = findExpandTargets(w, deviceId, 1)[0];
     if (!bridge) return;
-    if (!isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current)) return;
+    if (!mpRoleRef.current || mpRoleRef.current !== "host") return;
     dispatchAction({ type: "expand", cx: bridge.cx, cy: bridge.cy, nationId: deviceId });
   }, [deviceId, dispatchAction, mission.phase, roomCode]);
 
@@ -647,42 +650,51 @@ export function ReFrontGame() {
   }, []);
 
   const startGame = useCallback(async () => {
-    try {
-      await ensureRoom(roomCode);
-      await joinRoomAsync(roomCode, { nickname, gameSlug: "re-front", maxPlayers: RF_MAX_PLAYERS });
-    } catch {
-      if (!getRoom(roomCode)) {
-        createRoom({ gameSlug: "re-front", maxPlayers: RF_MAX_PLAYERS, code: roomCode, matchMode: "private" });
-      }
-      joinRoom(roomCode, { nickname, gameSlug: "re-front", maxPlayers: RF_MAX_PLAYERS });
+    setConnecting(true);
+    setConnectError(false);
+
+    const liveNick = readLiveNickname(nickname);
+
+    const entry = await resolveMultiplayerEntry({
+      gameSlug: "re-front",
+      roomCode,
+      nickname: liveNick,
+      maxPlayers: RF_MAX_PLAYERS,
+    });
+
+    if (!entry.ok) {
+      setConnecting(false);
+      setConnectError(true);
+      return;
     }
 
-    const humans = collectHumans(roomCode, deviceId, nickname, color);
-    const w = createRfWorld(deviceId, nickname, humans);
+    mpRoleRef.current = entry.role;
+    setIsHost(entry.role === "host");
+
+    const humans = collectHumans(roomCode, deviceId, liveNick, color);
+    const w = createRfWorld(deviceId, liveNick, humans);
     w.nations[deviceId]!.color = color;
     reconcileHumans(w, humans);
     worldRef.current = w;
     setWorld(w);
     setStarted(true);
+    setConnecting(false);
     setMission(createMissionState());
     startedAtRef.current = Date.now();
     window.setTimeout(() => fitViewToPlayer(), 80);
     window.setTimeout(() => fitViewToPlayer(), 400);
 
-    const host = isSimHost(roomCode, deviceId, 0, startedAtRef.current);
-    setIsHost(host);
-    if (host) broadcastRfSync(w, true);
+    if (mpRoleRef.current === "host") broadcastRfSync(w, true);
 
     unsubRef.current?.();
     unsubRef.current = subscribeRoom(roomCode, (room) => {
       const gs = room.gameState ?? {};
       const last = String(gs._lastEvent ?? "");
-      const amHost = isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current);
-      setIsHost(amHost);
-      if (last === "rf:rematch" && amHost) {
-        const h = collectHumans(roomCode, deviceId, nickname, color);
+
+      if (last === "rf:rematch" && mpRoleRef.current === "host") {
+        const h = collectHumans(roomCode, deviceId, liveNick, color);
         const local = snapWorld(worldRef.current);
-        restartRfRound(local, deviceId, nickname, h);
+        restartRfRound(local, deviceId, liveNick, h);
         worldRef.current = local;
         setWorld(local);
         setMission(createMissionState());
@@ -690,7 +702,7 @@ export function ReFrontGame() {
         lastHostStateAtRef.current = Date.now();
         return;
       }
-      if (last === "rf:action" && gs["rf:action"] && amHost) {
+      if (last === "rf:action" && gs["rf:action"] && mpRoleRef.current === "host") {
         const local = snapWorld(worldRef.current);
         applyRfAction(local, gs["rf:action"] as RfAction);
         tickRfWorld(local);
@@ -700,7 +712,7 @@ export function ReFrontGame() {
         lastHostStateAtRef.current = Date.now();
         return;
       }
-      if (last === "rf:delta" && gs["rf:delta"] && !amHost) {
+      if (last === "rf:delta" && gs["rf:delta"] && mpRoleRef.current === "guest") {
         lastHostStateAtRef.current = Date.now();
         const local = snapWorld(worldRef.current);
         applyRfSyncDelta(local, gs["rf:delta"] as RfSyncDelta, { rejectStaleTick: true });
@@ -708,7 +720,7 @@ export function ReFrontGame() {
         setWorld(local);
         return;
       }
-      if (last === "rf:snapshot" && gs["rf:snapshot"] && !amHost) {
+      if (last === "rf:snapshot" && gs["rf:snapshot"] && mpRoleRef.current === "guest") {
         lastHostStateAtRef.current = Date.now();
         const local = snapWorld(worldRef.current);
         applyRfSyncState(local, gs["rf:snapshot"] as RfSyncState, { rejectStaleTick: true });
@@ -716,7 +728,7 @@ export function ReFrontGame() {
         setWorld(local);
         return;
       }
-      if (last === "state" && gs.state && !amHost) {
+      if (last === "state" && gs.state && mpRoleRef.current === "guest") {
         lastHostStateAtRef.current = Date.now();
         const local = snapWorld(worldRef.current);
         applyRfSyncState(local, gs.state as RfSyncState, { rejectStaleTick: true });
@@ -726,7 +738,7 @@ export function ReFrontGame() {
     });
 
     tickRef.current = setInterval(() => {
-      if (!isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current)) return;
+      if (mpRoleRef.current !== "host") return;
       const local = snapWorld(worldRef.current);
       if (local.roundOver) return;
       tickRfWorld(local);
@@ -747,10 +759,10 @@ export function ReFrontGame() {
 
   const onRematch = useCallback(() => {
     send(roomCode, "rf:rematch", { at: Date.now() });
-    if (isSimHost(roomCode, deviceId, lastHostStateAtRef.current, startedAtRef.current)) {
-      const humans = collectHumans(roomCode, deviceId, nickname, color);
+    if (mpRoleRef.current === "host") {
+      const humans = collectHumans(roomCode, deviceId, readLiveNickname(nickname), color);
       const w = snapWorld(worldRef.current);
-      restartRfRound(w, deviceId, nickname, humans);
+      restartRfRound(w, deviceId, readLiveNickname(nickname), humans);
       worldRef.current = w;
       setWorld(w);
       setMission(createMissionState());
@@ -786,8 +798,13 @@ export function ReFrontGame() {
       }
       return {
         deviceId,
+        mpRole: mpRoleRef.current,
+        isHost: mpRoleRef.current === "host",
         mission,
         me: local,
+        opponents: Object.values(w.nations)
+          .filter((n) => !n.isBot && n.id !== deviceId && n.alive)
+          .map((n) => ({ id: n.id, nickname: n.nickname, territoryPct: n.territoryPct })),
         selected: sel,
         canAttackSelected: sel && local ? canAttack(w, sel.cx, sel.cy, deviceId) : false,
         attackableCount: attackable.length,
@@ -795,6 +812,29 @@ export function ReFrontGame() {
         phase: mission.phase,
         debug,
       };
+    };
+    (window as unknown as { __RF_QA_EXPAND__?: () => { ok: boolean; cx?: number; cy?: number } }).__RF_QA_EXPAND__ =
+      () => {
+        if (mpRoleRef.current !== "host") return { ok: false };
+        const target = findExpandTargets(worldRef.current, deviceId, 1)[0];
+        if (!target) return { ok: false };
+        const ok = dispatchAction({ type: "expand", cx: target.cx, cy: target.cy, nationId: deviceId });
+        if (ok) {
+          setMission((m) => advanceMissionAfterExpand(m));
+          setPendingExpand(null);
+        }
+        return { ok, cx: target.cx, cy: target.cy };
+      };
+    (window as unknown as { __RF_QA_END_ROUND__?: () => { ok: boolean } }).__RF_QA_END_ROUND__ = () => {
+      if (mpRoleRef.current !== "host") return { ok: false };
+      const local = snapWorld(worldRef.current);
+      local.roundOver = true;
+      local.winnerId = deviceId;
+      worldRef.current = local;
+      setWorld(local);
+      broadcastRfSync(local, true);
+      lastHostStateAtRef.current = Date.now();
+      return { ok: true };
     };
     if (debug) {
       (window as unknown as { __RF_QA_ATTACK__?: () => { ok: boolean; cx?: number; cy?: number } }).__RF_QA_ATTACK__ =
@@ -812,7 +852,13 @@ export function ReFrontGame() {
           return { ok: false };
         };
     }
-  }, [deviceId, dispatchAction, mission]);
+    return () => {
+      delete (window as unknown as { __RF_QA__?: unknown }).__RF_QA__;
+      delete (window as unknown as { __RF_QA_EXPAND__?: unknown }).__RF_QA_EXPAND__;
+      delete (window as unknown as { __RF_QA_END_ROUND__?: unknown }).__RF_QA_END_ROUND__;
+      delete (window as unknown as { __RF_QA_ATTACK__?: unknown }).__RF_QA_ATTACK__;
+    };
+  }, [broadcastRfSync, deviceId, dispatchAction, mission]);
 
   const sel = selectedRef.current ?? selected;
   const selectedInfo = sel ? cellAt(world, sel.cx, sel.cy) : null;
@@ -831,6 +877,55 @@ export function ReFrontGame() {
   })();
 
   if (!started) {
+    if (connecting) {
+      return (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-[#060a12] text-white">
+          <div
+            data-testid="rf-connecting"
+            className="flex flex-col items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-8 py-6"
+          >
+            <p className="text-lg font-semibold">Connecting…</p>
+            <p className="text-sm text-white/60">Joining multiplayer room</p>
+          </div>
+        </div>
+      );
+    }
+    if (connectError) {
+      return (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-[#060a12] text-white">
+          <div
+            data-testid="rf-connect-error"
+            className="flex flex-col items-center gap-3 rounded-xl border border-red-500/40 bg-red-950/40 px-8 py-6"
+          >
+            <p className="text-lg font-semibold text-red-200">Connection failed</p>
+            <p className="text-sm text-white/60">Could not join this room. Host may be unavailable.</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                data-testid="rf-connect-retry"
+                onClick={() => {
+                  setConnectError(false);
+                  void startGame();
+                }}
+                className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-black"
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                data-testid="rf-connect-back"
+                onClick={() => {
+                  window.location.href = "/games/re-front";
+                }}
+                className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Back to game
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <MultiplayerEntrySelect
         title="Re:Front"
@@ -845,8 +940,8 @@ export function ReFrontGame() {
         color={color}
         onColorChange={setColor}
         roomCode={roomCode}
-        playLabel="START GAME"
-        onPlay={startGame}
+        playLabel="ENTER"
+        onPlay={() => void startGame()}
       />
     );
   }
@@ -904,7 +999,7 @@ export function ReFrontGame() {
       </header>
 
       <section
-        className="hidden shrink-0 border-b border-white/10 bg-violet-950/30 px-3 py-1.5 text-[10px] leading-relaxed sm:block sm:py-2 sm:text-xs"
+        className="shrink-0 border-b border-white/10 bg-violet-950/30 px-3 py-1.5 text-[10px] leading-relaxed sm:py-2 sm:text-xs"
         data-testid="rf-inline-tutorial"
       >
         <p className="font-semibold text-violet-100">{objective.stepLabel}</p>
@@ -1034,7 +1129,7 @@ export function ReFrontGame() {
               <button type="button" onClick={onRematch} className="rounded-lg bg-white py-2 font-bold text-black" data-testid="rf-rematch-btn">
                 RETRY
               </button>
-              <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2">
+              <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2" data-testid="mp-death-play-another">
                 ANOTHER GAME
               </button>
               <button type="button" onClick={onExit} className="rounded-lg border border-slate-600 py-2 text-slate-300">

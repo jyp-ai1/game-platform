@@ -6,6 +6,7 @@ import { isCreatorPlayableSlug, resolvePlaySlug } from "@/lib/creator/creator-pl
 import { isPlayableSlug } from "@/lib/playable-games";
 import { isDeprecatedProductSlug } from "@/lib/product-catalog-sync";
 import { getGameBySlug, isExternalGame } from "@/lib/supabase/games";
+import type { Game } from "@game-platform/shared";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -16,6 +17,15 @@ interface GamePlayPageProps {
 
 function firstParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+/** DB row may be non-ACTIVE — local MVP flagship slugs must still enter /play. */
+function resolvePlayableGame(slug: string, dbGame: Game | null): Game | null {
+  const local = buildLocalMvpGame(slug);
+  if (!dbGame) return local ?? getCreatorGameOrNull(slug);
+  if (dbGame.status === "ACTIVE" || isCreatorPlayableSlug(slug)) return dbGame;
+  if (local && isPlayableSlug(slug)) return local;
+  return dbGame;
 }
 
 export async function generateMetadata({ params }: GamePlayPageProps): Promise<Metadata> {
@@ -73,8 +83,7 @@ export default async function GamePlayPage({ params, searchParams }: GamePlayPag
     );
   }
 
-  const game =
-    (await getGameBySlug(slug)) ?? buildLocalMvpGame(slug) ?? getCreatorGameOrNull(slug);
+  const game = resolvePlayableGame(slug, dbGame);
   if (!game || (game.status !== "ACTIVE" && !isCreatorPlayableSlug(slug))) {
     notFound();
   }

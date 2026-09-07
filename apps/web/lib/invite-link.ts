@@ -25,7 +25,12 @@ export function isWorldRoom(code: string): boolean {
 }
 
 export function isBomberRoom(code: string): boolean {
-  return /^BOMBER-[A-D]$/.test(code.trim().toUpperCase());
+  const u = code.trim().toUpperCase();
+  return u === "BOMBER-SOLO" || /^BOMBER-[A-D]$/.test(u);
+}
+
+export function isReFrontRoom(code: string): boolean {
+  return /^RF-[A-Z0-9-]+$/.test(code.trim().toUpperCase());
 }
 
 export function pinActiveRoom(code: string): void {
@@ -55,6 +60,10 @@ export function readPinnedRoom(gameSlug: string): string | null {
         pinActiveRoom(fromUrl);
         return fromUrl;
       }
+      if (gameSlug === "re-front" && isReFrontRoom(fromUrl)) {
+        pinActiveRoom(fromUrl);
+        return fromUrl;
+      }
     }
     const active = window.localStorage.getItem(ACTIVE_ROOM_KEY)?.toUpperCase() ?? null;
     if (!active) return null;
@@ -63,6 +72,9 @@ export function readPinnedRoom(gameSlug: string): string | null {
     }
     if (gameSlug === "bomber") {
       return isBomberRoom(active) ? active : null;
+    }
+    if (gameSlug === "re-front") {
+      return isReFrontRoom(active) ? active : null;
     }
     return active;
   } catch {
@@ -89,6 +101,13 @@ export function resolveInviteRoomCode(gameSlug: string): string {
 
   if (gameSlug === "bomber") {
     const code = defaultBomberInviteRoom();
+    createRoom({ gameSlug, maxPlayers: 8, matchMode: "public", code });
+    pinActiveRoom(code);
+    return code;
+  }
+
+  if (gameSlug === "re-front") {
+    const code = "RF-LOBBY";
     createRoom({ gameSlug, maxPlayers: 8, matchMode: "public", code });
     pinActiveRoom(code);
     return code;

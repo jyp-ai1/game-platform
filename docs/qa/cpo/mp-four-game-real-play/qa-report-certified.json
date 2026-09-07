@@ -1,0 +1,49 @@
+{
+  "gate": "mp-four-game-real-play",
+  "baseUrl": "http://localhost:3000",
+  "runId": 1788740007099,
+  "hostNick": "QAHostM6RF",
+  "guestNick": "QAGuestM6RF",
+  "startedAt": "2026-09-07T00:13:27.099Z",
+  "matrix": {
+    "snake": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    },
+    "bomber": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    },
+    "agar": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    },
+    "re-front": {
+      "host": true,
+      "guest": true,
+      "sync": true,
+      "exit": true,
+      "rematch": true,
+      "another": true,
+      "result": "PASS"
+    }
+  },
+  "gateResult": "PASS",
+  "finishedAt": "2026-09-07T00:15:48.849Z",
+  "note": "CTO certified 4/4 Matrix PASS — CPO 2nd QA pending on Preview"
+}

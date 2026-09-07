@@ -15,7 +15,7 @@ export const LOCAL_GAME_THUMBS: Record<string, string> = {
   bomber: "/images/games/bomber.png?v=2",
   agar: "/images/games/agar.png?v=2",
   snake: "/images/games/snake.png?v=2",
-  "re-front": "/images/games/bomber.png?v=2",
+  "re-front": "/images/games/re-front.png?v=1",
 };
 
 /** Intrinsic sizes for og:image:width / height (static public thumbs). */
