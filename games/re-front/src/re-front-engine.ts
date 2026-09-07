@@ -762,6 +762,7 @@ export function applyRfSyncState(world: RfWorld, state: RfSyncState, opts?: { re
   world.battle = state.battle ? { ...state.battle } : null;
   world.pendingCounterAttack = state.pendingCounterAttack;
 
+  world.nations = {};
   world.slotToId = {};
   world.idToSlot = {};
   for (const n of state.nations) {

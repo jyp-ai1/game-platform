@@ -55,6 +55,7 @@ import {
   type RfWorld,
 } from "./re-front-engine";
 import { rfHumanNickname, rfHumanRoster } from "./rf-human-display";
+import { humanViewTarget, humansVisibleInView } from "./rf-human-view";
 import {
   advanceMissionAfterAttack,
   advanceMissionAfterCounterSeen,
@@ -266,6 +267,11 @@ export function ReFrontGame() {
   const [pendingExpand, setPendingExpand] = useState<{ cx: number; cy: number } | null>(null);
   const [cam, setCam] = useState({ x: RF_GRID / 2, y: RF_GRID / 2 });
   const [zoom, setZoom] = useState(1.15);
+  const camRef = useRef(cam);
+  const zoomRef = useRef(zoom);
+  camRef.current = cam;
+  zoomRef.current = zoom;
+  const humanViewReadyRef = useRef(false);
   const [isHost, setIsHost] = useState(false);
   const [nowMs, setNowMs] = useState(Date.now());
   const [attackPct, setAttackPct] = useState(0.5);
@@ -381,13 +387,35 @@ export function ReFrontGame() {
   }, [me?.gold, me?.population, me?.troops, me?.territoryPct, me]);
 
   const fitViewToPlayer = useCallback(() => {
-    const c = nationCenter(worldRef.current, deviceId);
+    const c = humanViewTarget(worldRef.current, deviceId);
     if (!c) return;
     setCam({ x: c.cx, y: c.cy });
     const el = mapWrapRef.current;
     const vw = el?.clientWidth ?? viewSize.w;
     const vh = el?.clientHeight ?? viewSize.h;
     setZoom(computeFitZoom(vw, vh, 22));
+  }, [deviceId, viewSize.h, viewSize.w]);
+
+  const pullGuestCamToHumans = useCallback(() => {
+    if (mpRoleRef.current !== "guest") return;
+    const w = worldRef.current;
+    const el = mapWrapRef.current;
+    const vw = el?.clientWidth ?? viewSize.w;
+    const vh = el?.clientHeight ?? viewSize.h;
+    if (vw < 32 || vh < 32) return;
+    if (humansVisibleInView(w, camRef.current, vw, vh, zoomRef.current)) {
+      humanViewReadyRef.current = true;
+      return;
+    }
+    if (humanViewReadyRef.current) return;
+    const target = humanViewTarget(w, deviceId);
+    if (!target) return;
+    const zFit = computeFitZoom(vw, vh, 22);
+    setCam({ x: target.cx, y: target.cy });
+    setZoom(zFit);
+    if (humansVisibleInView(w, { x: target.cx, y: target.cy }, vw, vh, zFit)) {
+      humanViewReadyRef.current = true;
+    }
   }, [deviceId, viewSize.h, viewSize.w]);
 
   const centerOnPlayer = useCallback(() => {
@@ -749,6 +777,7 @@ export function ReFrontGame() {
 
     mpRoleRef.current = entry.role;
     setIsHost(entry.role === "host");
+    humanViewReadyRef.current = false;
 
     rememberHuman(knownHumansRef.current, { id: deviceId, nickname: liveNick, color });
     const humans = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current);
@@ -764,6 +793,9 @@ export function ReFrontGame() {
     startedAtRef.current = Date.now();
     window.setTimeout(() => fitViewToPlayer(), 80);
     window.setTimeout(() => fitViewToPlayer(), 400);
+    window.setTimeout(() => pullGuestCamToHumans(), 120);
+    window.setTimeout(() => pullGuestCamToHumans(), 500);
+    window.setTimeout(() => pullGuestCamToHumans(), 1200);
 
     if (mpRoleRef.current === "host") broadcastRfSync(w, true);
 
@@ -828,6 +860,7 @@ export function ReFrontGame() {
         applyRfSyncDelta(local, gs["rf:delta"] as RfSyncDelta, { rejectStaleTick: true });
         worldRef.current = local;
         setWorld(local);
+        pullGuestCamToHumans();
         return;
       }
       if (last === "rf:snapshot" && gs["rf:snapshot"] && mpRoleRef.current === "guest") {
@@ -836,6 +869,7 @@ export function ReFrontGame() {
         applyRfSyncState(local, gs["rf:snapshot"] as RfSyncState, { rejectStaleTick: true });
         worldRef.current = local;
         setWorld(local);
+        pullGuestCamToHumans();
         return;
       }
       if (last === "state" && gs.state && mpRoleRef.current === "guest") {
@@ -844,6 +878,7 @@ export function ReFrontGame() {
         applyRfSyncState(local, gs.state as RfSyncState, { rejectStaleTick: true });
         worldRef.current = local;
         setWorld(local);
+        pullGuestCamToHumans();
       }
     });
 
@@ -885,7 +920,7 @@ export function ReFrontGame() {
         }, ms)
       );
     }
-  }, [broadcastRfSync, fitViewToPlayer, color, deviceId, nickname, roomCode]);
+  }, [broadcastRfSync, fitViewToPlayer, pullGuestCamToHumans, color, deviceId, nickname, roomCode]);
 
   useEffect(() => {
     return () => {
@@ -915,6 +950,7 @@ export function ReFrontGame() {
     }
     setSelected(null);
     setPendingExpand(null);
+    humanViewReadyRef.current = false;
     centerOnPlayer();
   }, [centerOnPlayer, color, deviceId, nickname, roomCode]);
 
