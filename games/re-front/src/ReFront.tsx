@@ -54,6 +54,7 @@ import {
   type RfSyncState,
   type RfWorld,
 } from "./re-front-engine";
+import { rfHumanNickname, rfHumanRoster } from "./rf-human-display";
 import {
   advanceMissionAfterAttack,
   advanceMissionAfterCounterSeen,
@@ -437,8 +438,11 @@ export function ReFrontGame() {
           ctx.lineWidth = Math.max(1, zoom * 0.6);
           ctx.strokeRect(sx + 0.5, sy + 0.5, sz - 1, sz - 1);
         } else if (slot !== 0) {
-          ctx.strokeStyle = "rgba(127, 29, 29, 0.7)";
-          ctx.lineWidth = Math.max(1, zoom * 0.5);
+          const id = w.slotToId[slot];
+          const n = id ? w.nations[id] : undefined;
+          ctx.strokeStyle =
+            n && !n.isBot ? "rgba(251, 191, 36, 0.95)" : "rgba(127, 29, 29, 0.7)";
+          ctx.lineWidth = Math.max(1, zoom * (n && !n.isBot ? 0.9 : 0.5));
           ctx.strokeRect(sx + 0.5, sy + 0.5, sz - 1, sz - 1);
         } else {
           ctx.strokeStyle = "rgba(234, 179, 8, 0.35)";
@@ -483,6 +487,23 @@ export function ReFrontGame() {
       }
     }
 
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "center";
+    for (const n of Object.values(w.nations)) {
+      if (n.isBot || !n.alive) continue;
+      const c = nationCenter(w, n.id);
+      if (!c) continue;
+      const lx = ox + c.cx * cellPx + cellPx / 2;
+      const ly = oy + c.cy * cellPx - 4;
+      const label = rfHumanNickname(n.nickname);
+      const tw = Math.max(36, ctx.measureText(label).width + 8);
+      ctx.fillStyle = "rgba(0,0,0,0.72)";
+      ctx.fillRect(lx - tw / 2, ly - 12, tw, 14);
+      ctx.fillStyle = n.id === deviceId ? "#67e8f9" : "#fde68a";
+      ctx.fillText(label, lx, ly - 1);
+    }
+    ctx.textAlign = "start";
+
     for (const f of w.flashes) {
       if (f.until <= Date.now()) continue;
       const sx = ox + f.cx * cellPx;
@@ -499,7 +520,7 @@ export function ReFrontGame() {
       ctx.lineWidth = 2;
       ctx.strokeRect(sx - 1, sy - 1, cellPx + 2, cellPx + 2);
     }
-  }, [attackTargets, cam, expandHints, me?.color, mySlot, nowMs, selected, viewSize, zoom]);
+  }, [attackTargets, cam, deviceId, expandHints, me?.color, mySlot, nowMs, selected, viewSize, zoom]);
 
   useEffect(() => {
     draw();
@@ -921,6 +942,7 @@ export function ReFrontGame() {
         opponents: Object.values(w.nations)
           .filter((n) => !n.isBot && n.id !== deviceId && n.alive)
           .map((n) => ({ id: n.id, nickname: n.nickname, territoryPct: n.territoryPct })),
+        hudHumans: rfHumanRoster(Object.values(w.nations)),
         selected: sel,
         canAttackSelected: sel && local ? canAttack(w, sel.cx, sel.cy, deviceId) : false,
         attackableCount: attackable.length,
@@ -931,7 +953,6 @@ export function ReFrontGame() {
     };
     (window as unknown as { __RF_QA_EXPAND__?: () => { ok: boolean; cx?: number; cy?: number } }).__RF_QA_EXPAND__ =
       () => {
-        if (mpRoleRef.current !== "host") return { ok: false };
         const target = findExpandTargets(worldRef.current, deviceId, 1)[0];
         if (!target) return { ok: false };
         const ok = dispatchAction({ type: "expand", cx: target.cx, cy: target.cy, nationId: deviceId });
@@ -1098,6 +1119,23 @@ export function ReFrontGame() {
             </p>
           ) : null}
         </div>
+        <aside
+          data-testid="rf-human-roster"
+          className="mt-1 rounded-lg border border-amber-200/30 bg-black/45 px-2 py-1 text-[10px]"
+        >
+          <p className="font-semibold text-amber-200">PLAYERS</p>
+          <ul className="mt-0.5 space-y-0.5">
+            {rfHumanRoster(Object.values(world.nations)).map((p) => (
+              <li
+                key={p.id}
+                className={p.id === deviceId ? "text-cyan-300" : "text-amber-50"}
+                data-rf-human={p.id === deviceId ? "self" : "opponent"}
+              >
+                {rfHumanNickname(p.nickname)} {p.territoryPct.toFixed(1)}%
+              </li>
+            ))}
+          </ul>
+        </aside>
         {botNations.length > 0 ? (
           <div className="mt-1 flex flex-wrap gap-1 text-[9px] sm:text-[10px]" data-testid="rf-ai-nations">
             {botNations.map((b) => (

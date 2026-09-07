@@ -233,6 +233,39 @@ function findSpawn(slot: number, offset = 0): { cx: number; cy: number } {
   return { cx, cy };
 }
 
+function isBlockFree(world: RfWorld, cx: number, cy: number, w = 3, h = 3): boolean {
+  if (cx < 0 || cy < 0 || cx + w > RF_GRID || cy + h > RF_GRID) return false;
+  for (let y = cy; y < cy + h; y++) {
+    for (let x = cx; x < cx + w; x++) {
+      if (world.owner[idx(x, y)] !== 0) return false;
+    }
+  }
+  return true;
+}
+
+function findSpawnNearHuman(world: RfWorld): { cx: number; cy: number } {
+  const human = Object.values(world.nations).find((n) => n.alive && !n.isBot);
+  const origin = human ? nationCenter(world, human.id) : null;
+  const ox = origin?.cx ?? 8;
+  const oy = origin?.cy ?? 8;
+  const offsets: Array<[number, number]> = [
+    [0, 4],
+    [0, -4],
+    [4, 0],
+    [-4, 0],
+    [4, 4],
+    [-4, 4],
+    [8, 0],
+    [0, 8],
+  ];
+  for (const [dx, dy] of offsets) {
+    const cx = ox + dx - 1;
+    const cy = oy + dy - 1;
+    if (isBlockFree(world, cx, cy)) return { cx, cy };
+  }
+  return findSpawn(Object.keys(world.nations).length);
+}
+
 export function createRfWorld(localId: string, nickname: string, humans: HumanSeat[] = []): RfWorld {
   const world: RfWorld = {
     tick: 0,
@@ -322,7 +355,7 @@ export function reconcileHumans(world: RfWorld, humans: HumanSeat[]): void {
     let slot = 1;
     while (usedSlots.has(slot)) slot += 1;
     usedSlots.add(slot);
-    const spawn = findSpawn(slot);
+    const spawn = findSpawnNearHuman(world);
     world.nations[h.id] = {
       id: h.id,
       slot,
