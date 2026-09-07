@@ -1,58 +1,57 @@
-# Sprint 16 — CTO Technical QA
+# Sprint 16 — CTO Final QA
 
 ## Gate
 
 ```text
-4/4 MP Product Gate   🟢 CLOSED (baseline a7ae3aa)
-Sprint 16             CTO Technical QA
+4/4 MP Product Gate   🟢 CLOSED (a7ae3aa)
+Sprint 16 game        eddcfa5
+CPO Product QA        pending
 Production            🔒 HOLD
 ```
 
-This Sprint did **not** re-QA Snake / Bomber / Agar / Re:Front Multiplayer.
+Snake / Bomber / Agar / Re:Front Multiplayer were not re-QA’d.
 
 ## Build
 
 - Repository: jyp-ai1/game-platform
 - Branch: promote/product-catalog
-- Baseline: a7ae3aa
-- Sprint commit: eddcfa5
 - Preview: https://game29-i6sl4q2a1-jyp-ai1s-projects.vercel.app
+- Room: RF-S16-MTRBHTM8
+- Browser: Chromium 1280×900, clean session `S16Host`
 - Production: NOT DEPLOYED
 
-## Scope delivered
+## Actual flow (screen, not hook-only)
 
-Re:Front first-session UX only (`games/re-front/src/`).
+| Step | Result | Evidence |
+| --- | --- | --- |
+| Detail → ENTER WORLD | PASS | 01-detail.png — MULTIPLAYER + ENTER WORLD |
+| First Session | PASS | 02-first-session.png — EXPAND copy, 70% win text |
+| Tile pre-selected | PASS | 02 — EXPAND confirm already open, tile selected |
+| EXPAND click | PASS | 03-after-first-expand.png |
+| First expansion state | PASS | 03 — PLAYERS 0.11%, next EXPAND 1/3 |
+| 70% win condition shown | PASS | 02/03/04 HUD `Territory … / 70%` and `70%면 승리` |
+| 70% win actually reached | not played | first-session session stays ~0.1% |
+| Result overlay | PASS | 04-result-rematch.png — REMATCH / ANOTHER GAME / EXIT |
+| REMATCH click | PASS | 05-after-rematch.png — back in World, result closed |
+| ANOTHER GAME click | PASS | 06-another-game.png — `/games` Discover |
+| EXIT click | PASS | 07-exit.png — `/games/re-front` Detail |
 
-- First screen states EXPAND + 70% win in one glance
-- First expand tile is pre-selected so EXPAND is immediately usable
-- Camera frames human territory more tightly
-- Result CTA is REMATCH / ANOTHER GAME / EXIT
-- Multiplayer contract, bots, economy, STEP4, SDK: unchanged
+Result overlay was opened with the host end-round helper so the three Result buttons could be clicked for real. The helper is not treated as a 70% win. YOU WIN on 04 is that helper, not a 70% empire.
 
-## Preview checks (room `RF-S16-MTR7N9JF`)
-
-- Detail → ENTER WORLD: PASS
-- First session copy (EXPAND + 70%, no STEP 1 chrome): PASS
-- EXPAND enabled without hunting empty tiles: PASS
-- First expand applies (0.10% → 0.11%): PASS
-- Result REMATCH / ANOTHER GAME / EXIT: PASS
-- PRACTICE / fallback: none
-- Console blocking error: none observed
-
-## Tests
-
-- Re:Front unit tests: 7/7 PASS
-- Typecheck: PASS
+PRACTICE / fallback: none.
 
 ## Evidence
 
-- evidence/01-detail.png
-- evidence/02-first-session.png
-- evidence/03-after-first-expand.png
-- evidence/04-result-rematch.png
+- evidence/01-detail.png — Detail ENTER WORLD
+- evidence/02-first-session.png — first session + preselect + 70% copy
+- evidence/03-after-first-expand.png — after real EXPAND
+- evidence/04-result-rematch.png — Result CTAs
+- evidence/05-after-rematch.png — after real REMATCH
+- evidence/06-another-game.png — after real ANOTHER GAME
+- evidence/07-exit.png — after real EXIT
 
 ## CTO Verdict
 
 PASS
 
-CPO Product QA is required. Production stays HOLD.
+CPO Final Product QA is next. Production stays HOLD until CPO PASS, then CTO deploys.

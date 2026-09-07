@@ -1,24 +1,46 @@
 {
-  "gate": "sprint16-rf-first-session",
+  "gate": "sprint16-final",
   "baseUrl": "https://game29-i6sl4q2a1-jyp-ai1s-projects.vercel.app",
-  "room": "RF-S16-MTR7N9JF",
-  "startedAt": "2026-09-07T12:22:07.371Z",
+  "room": "RF-S16-MTRBHTM8",
+  "startedAt": "2026-09-07T14:09:51.920Z",
   "detailEnterWorld": true,
   "firstSession": {
     "hasExpandCta": true,
     "hasWinGoal": true,
-    "noStep1Chrome": true,
+    "tilePreselected": true,
     "expandEnabled": true,
     "practice": false
   },
-  "afterExpand": true,
-  "result": {
-    "rematch": true,
-    "another": true,
-    "exit": true,
-    "retryGone": true
+  "afterExpand": {
+    "nextExpand": true,
+    "pctUp": true
   },
-  "exit": true,
+  "lastEndRound": {
+    "role": "host",
+    "endRound": {
+      "ok": true
+    }
+  },
+  "result": {
+    "rematchLabel": true,
+    "anotherLabel": true,
+    "exitLabel": true,
+    "retryGone": true,
+    "winGoalShown": true,
+    "openedBy": "host_end_round_helper_then_real_buttons"
+  },
+  "rematch": {
+    "backInWorld": true,
+    "noResult": true
+  },
+  "anotherGame": {
+    "url": "https://game29-i6sl4q2a1-jyp-ai1s-projects.vercel.app/games",
+    "ok": true
+  },
+  "exit": {
+    "url": "https://game29-i6sl4q2a1-jyp-ai1s-projects.vercel.app/games/re-front",
+    "ok": true
+  },
   "pass": true,
-  "finishedAt": "2026-09-07T12:22:15.887Z"
+  "finishedAt": "2026-09-07T14:10:03.021Z"
 }
