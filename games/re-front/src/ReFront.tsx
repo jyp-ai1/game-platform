@@ -291,6 +291,7 @@ export function ReFrontGame() {
   const unsubRef = useRef<(() => void) | null>(null);
   const knownHumansRef = useRef<Map<string, HumanSeat>>(new Map());
   const helloTimersRef = useRef<number[]>([]);
+  const worldGenRef = useRef(0);
   const keysRef = useRef<Set<string>>(new Set());
 
   const me = localNation(world, deviceId);
@@ -607,6 +608,7 @@ export function ReFrontGame() {
         const ok = applyRfAction(w, action);
         if (ok) {
           tickRfWorld(w);
+          worldGenRef.current += 1;
           worldRef.current = w;
           setWorld(w);
           broadcastRfSync(w, true);
@@ -789,6 +791,7 @@ export function ReFrontGame() {
         reconcileHumans(local, h);
         const after = Object.values(local.nations).filter((n) => !n.isBot).length;
         if (after > before) {
+          worldGenRef.current += 1;
           worldRef.current = local;
           setWorld(local);
           broadcastRfSync(local, true);
@@ -800,6 +803,7 @@ export function ReFrontGame() {
         const h = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current, room.players);
         const local = snapWorld(worldRef.current);
         restartRfRound(local, deviceId, liveNick, h);
+        worldGenRef.current += 1;
         worldRef.current = local;
         setWorld(local);
         setMission(createMissionState());
@@ -811,6 +815,7 @@ export function ReFrontGame() {
         const local = snapWorld(worldRef.current);
         applyRfAction(local, gs["rf:action"] as RfAction);
         tickRfWorld(local);
+        worldGenRef.current += 1;
         worldRef.current = local;
         setWorld(local);
         broadcastRfSync(local, true);
@@ -844,6 +849,7 @@ export function ReFrontGame() {
 
     tickRef.current = setInterval(() => {
       if (mpRoleRef.current !== "host") return;
+      const gen = worldGenRef.current;
       const local = snapWorld(worldRef.current);
       if (local.roundOver) return;
       sync(roomCode);
@@ -861,6 +867,8 @@ export function ReFrontGame() {
       reconcileHumans(local, humans);
       const added = Object.values(local.nations).filter((n) => !n.isBot).length > before;
       tickRfWorld(local);
+      if (worldGenRef.current !== gen) return;
+      worldGenRef.current += 1;
       worldRef.current = local;
       setWorld(local);
       broadcastRfSync(local, added);
