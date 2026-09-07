@@ -726,6 +726,27 @@ export function ReFrontGame() {
 
   useEffect(() => () => stopExpandHold(), [stopExpandHold]);
 
+  useEffect(() => {
+    if (!started || world.roundOver) return;
+    const down = (e: KeyboardEvent) => {
+      if (e.code !== "Space" && e.key !== " ") return;
+      if (e.repeat) return;
+      e.preventDefault();
+      startExpandHold();
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code !== "Space" && e.key !== " ") return;
+      stopExpandHold();
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      stopExpandHold();
+    };
+  }, [startExpandHold, started, stopExpandHold, world.roundOver]);
+
   const onAttack = useCallback(() => {
     if (!selected || !me?.alive) return;
     const ok = dispatchAction({
@@ -1308,7 +1329,7 @@ export function ReFrontGame() {
             <p className="mt-1 text-xs text-amber-200">
               보상: Territory +1 · Gold +{(me?.tutorialExpands ?? 0) < 3 ? 120 : 12} · Pop +{(me?.tutorialExpands ?? 0) < 3 ? 8 : 2}
             </p>
-            <p className="text-[10px] text-slate-400">비용: Troops {expandCost} · 누르고 있으면 계속 확장</p>
+            <p className="text-[10px] text-slate-400">비용: Troops {expandCost} · 버튼 또는 Space를 누르고 있으면 계속 확장</p>
             <button
               type="button"
               disabled={!canExp}
