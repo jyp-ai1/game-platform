@@ -114,22 +114,76 @@ function readLiveNickname(fallback: string): string {
   return window.localStorage.getItem("play29:nickname")?.trim() || getLastNickname() || fallback;
 }
 
-function collectHumans(code: string, localId: string, nickname: string, color: string): HumanSeat[] {
-  const room = getRoom(code);
+type RfHello = { id: string; nickname: string; color?: string };
+
+function seatsFromPlayers(
+  players: Array<{ deviceId: string; nickname?: string }>,
+  localId: string,
+  nickname: string,
+  color: string
+): HumanSeat[] {
+  return players.map((p) => ({
+    id: p.deviceId,
+    nickname: p.nickname?.trim() || nickname || "Player",
+    color: p.deviceId === localId ? color : undefined,
+  }));
+}
+
+function mergeHumanSeats(...lists: HumanSeat[][]): HumanSeat[] {
+  const deduped = new Map<string, HumanSeat>();
+  for (const list of lists) {
+    for (const h of list) {
+      const prev = deduped.get(h.id);
+      deduped.set(h.id, {
+        id: h.id,
+        nickname: h.nickname || prev?.nickname || "Player",
+        color: h.color ?? prev?.color,
+      });
+    }
+  }
+  return [...deduped.values()].slice(0, RF_MAX_PLAYERS);
+}
+
+function rememberHuman(known: Map<string, HumanSeat>, seat: HumanSeat | null | undefined): void {
+  if (!seat?.id) return;
+  const prev = known.get(seat.id);
+  known.set(seat.id, {
+    id: seat.id,
+    nickname: seat.nickname || prev?.nickname || "Player",
+    color: seat.color ?? prev?.color,
+  });
+}
+
+function rememberHello(known: Map<string, HumanSeat>, raw: unknown): void {
+  if (!raw || typeof raw !== "object") return;
+  const h = raw as Partial<RfHello>;
+  if (typeof h.id !== "string" || !h.id) return;
+  rememberHuman(known, {
+    id: h.id,
+    nickname: typeof h.nickname === "string" ? h.nickname : "Player",
+    color: typeof h.color === "string" ? h.color : undefined,
+  });
+}
+
+function collectHumans(
+  code: string,
+  localId: string,
+  nickname: string,
+  color: string,
+  known?: Map<string, HumanSeat>,
+  roomPlayers?: Array<{ deviceId: string; nickname?: string }>
+): HumanSeat[] {
+  const room = sync(code) ?? getRoom(code);
   const hostId = room?.hostId;
-  const fromRoom =
-    room?.players.map((p) => ({
-      id: p.deviceId,
-      nickname: p.nickname || "Player",
-      color: p.deviceId === localId ? color : undefined,
-    })) ?? [];
+  const fromRoom = seatsFromPlayers(roomPlayers ?? room?.players ?? [], localId, nickname, color);
   let list = fromRoom.some((h) => h.id === localId)
     ? fromRoom
     : [{ id: localId, nickname, color }, ...fromRoom];
+  if (known) list = [...list, ...known.values()];
   if (hostId) {
     list = [...list.filter((h) => h.id === hostId), ...list.filter((h) => h.id !== hostId)];
   }
-  return list.slice(0, RF_MAX_PLAYERS);
+  return mergeHumanSeats(list);
 }
 
 function isSimHost(code: string, deviceId: string, lastStateAt: number, startedAt: number): boolean {
@@ -234,6 +288,8 @@ export function ReFrontGame() {
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rfSyncTrackerRef = useRef<ReturnType<typeof createRfSyncTracker> | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
+  const knownHumansRef = useRef<Map<string, HumanSeat>>(new Map());
+  const helloTimersRef = useRef<number[]>([]);
   const keysRef = useRef<Set<string>>(new Set());
 
   const me = localNation(world, deviceId);
@@ -671,7 +727,9 @@ export function ReFrontGame() {
     mpRoleRef.current = entry.role;
     setIsHost(entry.role === "host");
 
-    const humans = collectHumans(roomCode, deviceId, liveNick, color);
+    rememberHuman(knownHumansRef.current, { id: deviceId, nickname: liveNick, color });
+    const humans = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current);
+    for (const h of humans) rememberHuman(knownHumansRef.current, h);
     const w = createRfWorld(deviceId, liveNick, humans);
     w.nations[deviceId]!.color = color;
     reconcileHumans(w, humans);
@@ -691,8 +749,34 @@ export function ReFrontGame() {
       const gs = room.gameState ?? {};
       const last = String(gs._lastEvent ?? "");
 
+      if (last === "rf:hello") {
+        rememberHello(knownHumansRef.current, gs["rf:hello"]);
+      }
+
+      if (mpRoleRef.current === "host" && (last === "rf:hello" || room.players?.length)) {
+        const h = collectHumans(
+          roomCode,
+          deviceId,
+          liveNick,
+          color,
+          knownHumansRef.current,
+          room.players
+        );
+        for (const seat of h) rememberHuman(knownHumansRef.current, seat);
+        const local = snapWorld(worldRef.current);
+        const before = Object.values(local.nations).filter((n) => !n.isBot).length;
+        reconcileHumans(local, h);
+        const after = Object.values(local.nations).filter((n) => !n.isBot).length;
+        if (after > before) {
+          worldRef.current = local;
+          setWorld(local);
+          broadcastRfSync(local, true);
+          lastHostStateAtRef.current = Date.now();
+        }
+      }
+
       if (last === "rf:rematch" && mpRoleRef.current === "host") {
-        const h = collectHumans(roomCode, deviceId, liveNick, color);
+        const h = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current, room.players);
         const local = snapWorld(worldRef.current);
         restartRfRound(local, deviceId, liveNick, h);
         worldRef.current = local;
@@ -741,18 +825,44 @@ export function ReFrontGame() {
       if (mpRoleRef.current !== "host") return;
       const local = snapWorld(worldRef.current);
       if (local.roundOver) return;
+      sync(roomCode);
+      const live = readLiveNickname(nickname);
+      const humans = collectHumans(
+        roomCode,
+        deviceId,
+        live,
+        color,
+        knownHumansRef.current,
+        (sync(roomCode) ?? getRoom(roomCode))?.players
+      );
+      for (const h of humans) rememberHuman(knownHumansRef.current, h);
+      const before = Object.values(local.nations).filter((n) => !n.isBot).length;
+      reconcileHumans(local, humans);
+      const added = Object.values(local.nations).filter((n) => !n.isBot).length > before;
       tickRfWorld(local);
       worldRef.current = local;
       setWorld(local);
-      broadcastRfSync(local);
+      broadcastRfSync(local, added);
       lastHostStateAtRef.current = Date.now();
     }, RF_TICK_MS);
+
+    if (mpRoleRef.current === "guest") {
+      const hello: RfHello = { id: deviceId, nickname: liveNick, color };
+      send(roomCode, "rf:hello", hello);
+      helloTimersRef.current.forEach((id) => window.clearTimeout(id));
+      helloTimersRef.current = [200, 700, 1500].map((ms) =>
+        window.setTimeout(() => {
+          if (mpRoleRef.current === "guest") send(roomCode, "rf:hello", hello);
+        }, ms)
+      );
+    }
   }, [broadcastRfSync, fitViewToPlayer, color, deviceId, nickname, roomCode]);
 
   useEffect(() => {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
       unsubRef.current?.();
+      helloTimersRef.current.forEach((id) => window.clearTimeout(id));
       leaveRoom(roomCode);
     };
   }, [roomCode]);
@@ -760,7 +870,13 @@ export function ReFrontGame() {
   const onRematch = useCallback(() => {
     send(roomCode, "rf:rematch", { at: Date.now() });
     if (mpRoleRef.current === "host") {
-      const humans = collectHumans(roomCode, deviceId, readLiveNickname(nickname), color);
+      const humans = collectHumans(
+        roomCode,
+        deviceId,
+        readLiveNickname(nickname),
+        color,
+        knownHumansRef.current
+      );
       const w = snapWorld(worldRef.current);
       restartRfRound(w, deviceId, readLiveNickname(nickname), humans);
       worldRef.current = w;

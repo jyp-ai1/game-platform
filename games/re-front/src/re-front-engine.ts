@@ -310,12 +310,37 @@ export function createRfWorld(localId: string, nickname: string, humans: HumanSe
 }
 
 export function reconcileHumans(world: RfWorld, humans: HumanSeat[]): void {
+  const usedSlots = new Set(Object.values(world.nations).map((n) => n.slot));
+  let added = false;
   for (const h of humans) {
     if (world.nations[h.id]) {
       world.nations[h.id]!.nickname = h.nickname;
       if (h.color) world.nations[h.id]!.color = h.color;
+      continue;
     }
+    if (Object.keys(world.nations).length >= RF_MAX_NATIONS) continue;
+    let slot = 1;
+    while (usedSlots.has(slot)) slot += 1;
+    usedSlots.add(slot);
+    const spawn = findSpawn(slot);
+    world.nations[h.id] = {
+      id: h.id,
+      slot,
+      nickname: h.nickname,
+      color: h.color ?? NATION_COLORS[slot % NATION_COLORS.length]!,
+      alive: true,
+      isBot: false,
+      gold: 120,
+      troops: 180,
+      population: 60,
+      territoryPct: 0,
+    };
+    world.slotToId[slot] = h.id;
+    world.idToSlot[h.id] = slot;
+    claimBlock(world, spawn.cx, spawn.cy, 3, 3, slot);
+    added = true;
   }
+  if (added) recomputePct(world);
 }
 
 function nationAt(world: RfWorld, cx: number, cy: number): RfNation | null {
