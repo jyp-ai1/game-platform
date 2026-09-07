@@ -147,9 +147,9 @@ MP Product Gate is CLOSED. UX is still a separate HOLD. Do **not** start Re:Fron
 
 ## Next CTO work (priority)
 
-1. No Multiplayer Common Contract work. Gate is CLOSED.
+1. **Sprint 16** is in progress: Re:Front first-session UX on Baseline `a7ae3aa`. Do not reopen 4/4 MP QA.
 2. No Production deploy.
-3. Accept only a new CPO Work Order (Production review, Re:Front UX, or a named FAIL).
+3. After Sprint 16: CPO Product QA, then a separate Production decision.
 
 ## CTO chat status (keep short)
 

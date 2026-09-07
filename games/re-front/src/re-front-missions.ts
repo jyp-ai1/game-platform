@@ -45,21 +45,21 @@ export function missionObjective(state: RfMissionState): RfMissionObjective {
       if (state.expandCount === 0) {
         return {
           step: 1,
-          stepLabel: "STEP 1 — START",
-          title: "내 영토",
-          detail: `🟢 초록 = 내 땅 · 🟡 노랑 = 빈 땅 · 🔴 빨강 = 적 영토 · 목표: 영토 ${RF_VICTORY_GOAL_PCT}%`,
-          cta: "내 초록 영토 주변을 확인하세요",
-          nextAction: "🎯 NEXT: 노란 땅을 확장하세요",
+          stepLabel: "START",
+          title: "영토를 넓히세요",
+          detail: `초록=나 · 노랑=확장 · 빨강=적 · ${RF_VICTORY_GOAL_PCT}%면 승리`,
+          cta: "EXPAND를 누르면 노란 땅을 차지합니다",
+          nextAction: "EXPAND로 영토를 넓히세요",
           done: false,
         };
       }
       return {
         step: 2,
-        stepLabel: "STEP 2 — FIRST EXPAND",
-        title: "첫 번째 미션",
-        detail: `🟡 노란 땅 ${RF_EXPAND_GOAL}개를 차지하세요 (${state.expandCount}/${RF_EXPAND_GOAL})`,
-        cta: "⭐ 깜빡이는 땅을 누르고 EXPAND",
-        nextAction: "🎯 NEXT: 노란 땅을 선택하고 EXPAND",
+        stepLabel: "EXPAND",
+        title: "계속 넓히세요",
+        detail: `노란 땅 ${RF_EXPAND_GOAL}칸 (${state.expandCount}/${RF_EXPAND_GOAL}) · ${RF_VICTORY_GOAL_PCT}%면 승리`,
+        cta: "EXPAND를 다시 누르세요",
+        nextAction: "EXPAND로 옆칸을 차지하세요",
         done: state.expandCount >= RF_EXPAND_GOAL,
       };
     case "grow":

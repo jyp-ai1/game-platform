@@ -352,6 +352,25 @@ export function ReFrontGame() {
   }, [mission.phase]);
 
   useEffect(() => {
+    if (!started || world.roundOver) return;
+    if (pendingExpand || selected) return;
+    if (mission.phase === "expand" || mission.phase === "grow") {
+      const t = expandHints[0];
+      if (!t) return;
+      selectedRef.current = t;
+      setSelected(t);
+      setPendingExpand(t);
+      return;
+    }
+    if (mission.phase === "attack-prompt" || mission.phase === "attack") {
+      const t = attackTargets[0];
+      if (!t) return;
+      selectedRef.current = t;
+      setSelected(t);
+    }
+  }, [attackTargets, expandHints, mission.phase, pendingExpand, selected, started, world.roundOver]);
+
+  useEffect(() => {
     if (mission.phase !== "attack-prompt") return;
     for (const n of Object.values(worldRef.current.nations)) {
       if (n.tutorialAggressor && n.alive) {
@@ -393,7 +412,7 @@ export function ReFrontGame() {
     const el = mapWrapRef.current;
     const vw = el?.clientWidth ?? viewSize.w;
     const vh = el?.clientHeight ?? viewSize.h;
-    setZoom(computeFitZoom(vw, vh, 22));
+    setZoom(computeFitZoom(vw, vh, 16));
   }, [deviceId, viewSize.h, viewSize.w]);
 
   const pullGuestCamToHumans = useCallback(() => {
@@ -410,7 +429,7 @@ export function ReFrontGame() {
     if (humanViewReadyRef.current) return;
     const target = humanViewTarget(w, deviceId);
     if (!target) return;
-    const zFit = computeFitZoom(vw, vh, 22);
+    const zFit = computeFitZoom(vw, vh, 16);
     setCam({ x: target.cx, y: target.cy });
     setZoom(zFit);
     if (humansVisibleInView(w, { x: target.cx, y: target.cy }, vw, vh, zFit)) {
@@ -1049,7 +1068,7 @@ export function ReFrontGame() {
   const expandCost = expandCell ? terrainExpandCost(world, expandCell.cx, expandCell.cy, deviceId) : RF_EXPAND_COST;
 
   const selectionHint = (() => {
-    if (!sel) return "맵에서 타일을 클릭하세요";
+    if (!sel) return "EXPAND를 누르거나 노란 땅을 선택하세요";
     if (selectedInfo?.slot === mySlot) return "🟢 내 영토입니다";
     if (selectedInfo?.slot === 0) return "🟡 빈 땅 — EXPAND로 차지하세요";
     if (selectedInfo?.nation?.tutorialAggressor) return "🔴 RED KINGDOM — Mission 2에서 공격";
@@ -1197,10 +1216,10 @@ export function ReFrontGame() {
       </header>
 
       <section
-        className="shrink-0 border-b border-white/10 bg-violet-950/30 px-3 py-1.5 text-[10px] leading-relaxed sm:py-2 sm:text-xs"
+        className="shrink-0 border-b border-white/10 bg-violet-950/30 px-3 py-1.5 text-[11px] leading-relaxed sm:text-xs"
         data-testid="rf-inline-tutorial"
       >
-        <p className="font-semibold text-violet-100">{objective.stepLabel}</p>
+        <p className="font-semibold text-violet-100">{objective.nextAction}</p>
         <p className="mt-0.5 text-slate-300">{objective.detail}</p>
       </section>
 
@@ -1325,7 +1344,7 @@ export function ReFrontGame() {
             <p className="mt-2 text-slate-300">Territory {me?.territoryPct?.toFixed(1) ?? 0}% / {victoryPct}%</p>
             <div className="mt-4 flex flex-col gap-2">
               <button type="button" onClick={onRematch} className="rounded-lg bg-white py-2 font-bold text-black" data-testid="rf-rematch-btn">
-                RETRY
+                REMATCH
               </button>
               <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2" data-testid="mp-death-play-another">
                 ANOTHER GAME

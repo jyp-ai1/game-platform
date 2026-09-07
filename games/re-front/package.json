@@ -6,7 +6,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/__tests__/rf-sync-payload.test.ts src/__tests__/rf-human-join.test.ts src/__tests__/rf-human-display.test.ts src/__tests__/rf-human-view.test.ts"
+    "test": "node --import tsx --test src/__tests__/rf-sync-payload.test.ts src/__tests__/rf-human-join.test.ts src/__tests__/rf-human-display.test.ts src/__tests__/rf-human-view.test.ts src/__tests__/rf-first-session.test.ts"
   },
   "dependencies": {
     "@game-platform/game-sdk": "*",
