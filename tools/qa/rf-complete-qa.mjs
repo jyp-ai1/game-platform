@@ -10,7 +10,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const BASE = (process.env.QA_BASE_URL || "").replace(/\/$/, "");
 const OUT = join(ROOT, "docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete");
 const ROOM = `RF-DONE-${Date.now().toString(36).toUpperCase()}`;
-const PLAY_MS = Number(process.env.RF_COMPLETE_PLAY_MS || 12 * 60 * 1000);
+const PLAY_MS = Number(process.env.RF_COMPLETE_PLAY_MS || 10 * 60 * 1000);
 mkdirSync(join(OUT, "evidence"), { recursive: true });
 
 if (!BASE) {
@@ -94,11 +94,19 @@ async function playToEnd(page, labels) {
     const enabled = await expandBtn.isEnabled().catch(() => false);
     const visible = await expandBtn.isVisible().catch(() => false);
     if (enabled && visible) {
+      const box = await expandBtn.boundingBox();
+      if (box) {
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.waitForTimeout(500);
+        await page.mouse.up();
+        continue;
+      }
       await expandBtn.click({ timeout: 2_000 }).catch(() => {});
-      await page.waitForTimeout(90);
+      await page.waitForTimeout(80);
       continue;
     }
-    await page.waitForTimeout(220);
+    await page.waitForTimeout(180);
   }
   report.end = await snapshot(page);
   report.playMs = Date.now() - started;

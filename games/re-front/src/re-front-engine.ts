@@ -317,7 +317,7 @@ export function createRfWorld(localId: string, nickname: string, humans: HumanSe
     const botId = `bot-${slot}`;
     const spawn =
       b === 0
-        ? { cx: Math.min(RF_GRID - 4, humanSpawn.cx + 4), cy: humanSpawn.cy }
+        ? { cx: Math.min(RF_GRID - 4, humanSpawn.cx + 8), cy: humanSpawn.cy }
         : findSpawn(seats.length + b, 0);
     world.nations[botId] = {
       id: botId,
@@ -437,9 +437,11 @@ export function findExpandTargets(world: RfWorld, nationId: string, limit = 12):
     }
   }
   out.sort((a, b) => {
+    const open = (c: { cx: number; cy: number }) =>
+      neighbors4(c.cx, c.cy).filter(([x, y]) => world.owner[idx(x, y)] === 0).length;
     const ta = world.terrain[idx(a.cx, a.cy)] as RfTerrain;
     const tb = world.terrain[idx(b.cx, b.cy)] as RfTerrain;
-    return ta - tb;
+    return open(b) - open(a) || ta - tb;
   });
   return out.slice(0, limit);
 }
@@ -674,6 +676,11 @@ function tickTutorialCounter(world: RfWorld): void {
 }
 
 function tickAi(world: RfWorld): void {
+  const humanPct = Math.max(
+    0,
+    ...Object.values(world.nations).filter((n) => n.alive && !n.isBot).map((n) => n.territoryPct)
+  );
+  const expandChance = humanPct < 50 ? 0.04 : 0.16;
   for (const n of Object.values(world.nations)) {
     if (!n.alive || !n.isBot) continue;
     const p = n.personality ?? "expander";
@@ -685,7 +692,7 @@ function tickAi(world: RfWorld): void {
       }
     } else if (p === "turtle") {
       if (n.troops > 200 && Math.random() < 0.08) applyDefend(world, n.id);
-      if (n.troops >= RF_EXPAND_COST && Math.random() < 0.08) {
+      if (n.troops >= RF_EXPAND_COST && Math.random() < expandChance * 0.5) {
         const expand = pickAiExpand(world, n.id);
         if (expand) applyExpand(world, expand[0], expand[1], n.id);
       }
@@ -696,7 +703,7 @@ function tickAi(world: RfWorld): void {
       applyAttack(world, attack[0], attack[1], n.id, 0.4);
       continue;
     }
-    if (n.troops >= RF_EXPAND_COST && Math.random() < 0.22) {
+    if (n.troops >= RF_EXPAND_COST && Math.random() < expandChance) {
       const expand = pickAiExpand(world, n.id);
       if (expand) applyExpand(world, expand[0], expand[1], n.id);
     }

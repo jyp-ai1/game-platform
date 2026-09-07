@@ -1311,6 +1311,7 @@ export function ReFrontGame() {
             <button
               type="button"
               disabled={!canExp}
+              onClick={onExpand}
               onPointerDown={startExpandHold}
               onPointerUp={stopExpandHold}
               onPointerLeave={stopExpandHold}
@@ -1329,6 +1330,7 @@ export function ReFrontGame() {
                 <button
                   type="button"
                   disabled={!canExp || world.roundOver}
+                  onClick={onExpand}
                   onPointerDown={startExpandHold}
                   onPointerUp={stopExpandHold}
                   onPointerLeave={stopExpandHold}
