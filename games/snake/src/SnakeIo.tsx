@@ -15,7 +15,8 @@ import {
   joinRoomAsync,
   leaveRoom,
   replay,
-  resolveAvailableCluster,
+  resolveMultiplayerEntry,
+  joinGlobalWorld,
   send,
   spectator,
   start,
@@ -192,10 +193,13 @@ function sendPlayerInput(roomCode: string, globalWorld: boolean, payload: Player
 export function SnakeIoGame({
   practiceMode = false,
   onJoinTimeout,
+  onConnectFailed,
   headCharacter = "frog",
 }: {
   practiceMode?: boolean;
+  /** @deprecated use onConnectFailed */
   onJoinTimeout?: () => void;
+  onConnectFailed?: () => void;
   headCharacter?: SnakeHeadId;
 } = {}) {
   const params = useSearchParams();
@@ -255,6 +259,7 @@ export function SnakeIoGame({
   const deviceId = getDeviceId();
   const spawnTimeoutRef = useRef<number | undefined>(undefined);
   const onJoinTimeoutRef = useRef(onJoinTimeout);
+  const onConnectFailedRef = useRef(onConnectFailed ?? onJoinTimeout);
   const gameReadyRef = useRef(false);
   const localSpawnBoundRef = useRef(false);
   const connectDoneRef = useRef(false);
@@ -276,6 +281,7 @@ export function SnakeIoGame({
   const frameCounterRef = useRef(0);
   const [, bumpLocalInput] = useReducer((n: number) => n + 1, 0);
   onJoinTimeoutRef.current = onJoinTimeout;
+  onConnectFailedRef.current = onConnectFailed ?? onJoinTimeout;
 
   const effectiveRoomCode = sessionRoom || roomCode;
   const activeRoom = effectiveRoomCode;
@@ -587,8 +593,7 @@ export function SnakeIoGame({
   useEffect(() => {
     if (practiceMode || roomCode) return;
     entryLogFail("JOIN", "missing room param");
-    entryLog("PRACTICE_FALLBACK", "empty-room");
-    onJoinTimeoutRef.current?.();
+    onConnectFailedRef.current?.();
   }, [roomCode, practiceMode]);
 
   useEffect(() => {
@@ -640,8 +645,6 @@ export function SnakeIoGame({
     connectDoneRef.current = true;
 
     let active = true;
-    const CONNECT_TIMEOUT_MS = 5000;
-    const MAX_ATTEMPTS = 1;
 
     const finishConnect = (r: GameRoom, code: string): void => {
       if (code !== sessionRoom) setSessionRoom(code);
@@ -661,28 +664,14 @@ export function SnakeIoGame({
       spawnTimeoutRef.current = window.setTimeout(() => {
         if (!active || worldRef.current) return;
         entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
-        onJoinTimeoutRef.current?.();
+        onConnectFailedRef.current?.();
       }, 12_000);
     };
 
-    const attemptConnect = async (attemptIndex: number): Promise<void> => {
+    const attemptConnect = async (): Promise<void> => {
       let targetCode = roomCode;
-      if (isGlobalWorldRoom(roomCode, "snake") && roomCode === "WORLD") {
-        try {
-          targetCode = await resolveAvailableCluster("snake");
-        } catch (err) {
-          recordJoinRoomDebug({
-            roomCode,
-            returned: false,
-            transport: getMultiplayerTransport().constructor.name,
-            error: err instanceof Error ? err.message : String(err),
-          });
-        }
-      }
 
-      entryTrace("CONNECT", "START", attemptIndex > 0 ? `retry ${attemptIndex + 1}` : targetCode);
-      let timedOut = false;
-      let timeoutId: number | undefined;
+      entryTrace("CONNECT", "START", targetCode);
 
       try {
         const existing = getRoom(targetCode);
@@ -700,60 +689,56 @@ export function SnakeIoGame({
           return;
         }
 
-        await Promise.race([
-          (async () => {
-            try {
-              await ensureRoom(targetCode);
-              if (timedOut || !active) return;
-              const joined = await joinRoomAsync(targetCode);
-              recordJoinRoomDebug({
-                roomCode: targetCode,
-                returned: !!joined,
-                playerId: joined?.players.find((p) => p.deviceId === deviceId)?.deviceId ?? deviceId,
-                playerCount: joined?.players.length,
-                hostId: joined?.hostId,
-                transport: getMultiplayerTransport().constructor.name,
-                error: joined ? undefined : "joinRoom returned null",
-              });
-              if (timedOut || !active) return;
-              if (!joined) throw new Error("join returned no room");
-              if (!joined.players.some((p) => p.deviceId === deviceId)) {
-                throw new Error("player not in room after join");
-              }
-            } catch (e) {
-              if (timedOut || !active) return;
-              recordJoinRoomDebug({
-                roomCode: targetCode,
-                returned: false,
-                playerId: deviceId,
-                transport: getMultiplayerTransport().constructor.name,
-                error: e instanceof Error ? e.message : String(e),
-              });
-              throw e;
-            }
-          })(),
-          new Promise<never>((_, reject) => {
-            timeoutId = window.setTimeout(() => {
-              timedOut = true;
-              reject(new Error("connect timeout"));
-            }, CONNECT_TIMEOUT_MS);
-          }),
-        ]);
-
-        if (timeoutId) window.clearTimeout(timeoutId);
-        if (!active || timedOut) return;
-
-        const r = getRoom(targetCode);
-        if (!r) throw new Error("room missing after connect");
-        finishConnect(r, targetCode);
-      } catch (err) {
-        if (timeoutId) window.clearTimeout(timeoutId);
-        if (!active) return;
-        if (attemptIndex + 1 < MAX_ATTEMPTS) {
-          entryTrace("RETRY", "PASS", `${targetCode} attempt ${attemptIndex + 2}`);
-          await attemptConnect(attemptIndex + 1);
+        if (isGlobalWorldRoom(roomCode, "snake")) {
+          const joined = await joinGlobalWorld("snake");
+          if (!active) return;
+          recordJoinRoomDebug({
+            roomCode: joined.code,
+            returned: true,
+            playerId: deviceId,
+            playerCount: joined.players.length,
+            hostId: joined.hostId,
+            transport: getMultiplayerTransport().constructor.name,
+          });
+          if (!joined.players.some((p) => p.deviceId === deviceId)) {
+            throw new Error("player not in room after join");
+          }
+          finishConnect(joined, joined.code);
           return;
         }
+
+        const entry = await resolveMultiplayerEntry({
+          gameSlug: "snake",
+          roomCode: targetCode,
+          nickname: getLastNickname() || "Player",
+          resolveGlobalCluster: false,
+          allowStaleReclaim: true,
+        });
+
+        if (!active) return;
+
+        recordJoinRoomDebug({
+          roomCode: entry.ok ? entry.roomCode : targetCode,
+          returned: entry.ok,
+          playerId: deviceId,
+          playerCount: entry.ok ? entry.room.players.length : undefined,
+          hostId: entry.ok ? entry.room.hostId : undefined,
+          transport: getMultiplayerTransport().constructor.name,
+          error: entry.ok ? undefined : entry.message,
+        });
+
+        if (!entry.ok) throw new Error(entry.message);
+
+        targetCode = entry.roomCode;
+        const r = entry.room.players.some((p) => p.deviceId === deviceId)
+          ? entry.room
+          : getRoom(targetCode) ?? entry.room;
+        if (!r.players.some((p) => p.deviceId === deviceId)) {
+          throw new Error("player not in room after join");
+        }
+        finishConnect(r, targetCode);
+      } catch (err) {
+        if (!active) return;
         entryTrace(
           "CONNECT",
           "FAIL",
@@ -765,11 +750,11 @@ export function SnakeIoGame({
           { room: targetCode, recordCrash: true }
         );
         connectDoneRef.current = false;
-        onJoinTimeoutRef.current?.();
+        onConnectFailedRef.current?.();
       }
     };
 
-    void attemptConnect(0);
+    void attemptConnect();
     return () => {
       active = false;
       if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);

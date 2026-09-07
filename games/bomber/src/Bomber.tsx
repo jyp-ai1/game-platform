@@ -626,10 +626,12 @@ export function BomberGame() {
               p.bombsLeft = p.bombsMax;
             }
           }
-          const next = snap(w);
-          worldRef.current = next;
-          setWorld(next);
         }
+        const next = snap(w);
+        worldRef.current = next;
+        setWorld(next);
+        send(code, "state", serializeBomberState(next));
+        sync(code);
       }
 
       if (last === "state" && gs.state) {
@@ -1013,6 +1015,9 @@ export function BomberGame() {
               room.hostId === deviceId;
 
             if (!hostNow) {
+              if (isListedHostPresent(room)) {
+                await waitForFreshShardState(code, 4000);
+              }
               const acked = await waitForHostStateAck(code, nextMapId, 5000);
               if (acked) {
                 setConnecting(false);
@@ -1026,9 +1031,21 @@ export function BomberGame() {
                 setStateAckReady(false);
                 return;
               }
-              room = await claimStaleShardRoom(liveRoom, nickname);
-              reclaimedShard = true;
-              hostNow = true;
+              if (isGhostBomberHost(liveRoom)) {
+                room = await claimStaleShardRoom(liveRoom, nickname);
+                reclaimedShard = true;
+                hostNow = true;
+              } else if (isListedHostPresent(liveRoom)) {
+                setConnecting(false);
+                setConnectError(true);
+                setStarted(false);
+                setStateAckReady(false);
+                return;
+              } else {
+                room = await claimStaleShardRoom(liveRoom, nickname);
+                reclaimedShard = true;
+                hostNow = true;
+              }
             }
 
             setHostAuthority(hostNow);

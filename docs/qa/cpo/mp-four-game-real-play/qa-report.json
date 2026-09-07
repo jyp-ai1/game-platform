@@ -1,10 +1,10 @@
 {
   "gate": "mp-four-game-real-play",
   "baseUrl": "http://localhost:3000",
-  "runId": 1788740007099,
-  "hostNick": "QAHostM6RF",
-  "guestNick": "QAGuestM6RF",
-  "startedAt": "2026-09-07T00:13:27.099Z",
+  "runId": 1788755093757,
+  "hostNick": "QAHostLJP9",
+  "guestNick": "QAGuestLJP9",
+  "startedAt": "2026-09-07T04:24:53.757Z",
   "matrix": {
     "snake": {
       "host": true,
@@ -44,49 +44,278 @@
     }
   },
   "games": {
-    "bomber": {
-      "roomCode": "BOMBER-A",
+    "snake": {
+      "detail": {
+        "pass": true,
+        "hasEnterWorld": true,
+        "hasSolo": false,
+        "hasPlayNow": false,
+        "modeBadge": "MULTIPLAYER"
+      },
+      "roomCode": "WORLD",
+      "host": {
+        "pass": true,
+        "deviceId": "qa-mp-host-1788755093757"
+      },
+      "guest": {
+        "pass": true,
+        "deviceId": "qa-mp-guest-1788755093757"
+      },
       "sync": {
         "pass": true,
-        "hostIsHost": true,
-        "guestIsHost": false,
-        "hostHumans": 2,
-        "guestHumans": 2,
-        "hostStateAck": true,
-        "guestStateAck": true
+        "note": "canvas_both_players",
+        "practiceFallback": false
+      },
+      "exit": {
+        "pass": true,
+        "after": "http://localhost:3000/",
+        "note": "snake_exits_after_alive"
+      },
+      "rematch": {
+        "pass": true,
+        "note": "world_auto_respawn_after_force_death"
+      },
+      "another": {
+        "pass": null,
+        "note": "snake_world_uses_auto_respawn_not_another_game"
       }
     },
     "agar": {
-      "roomCode": "AGAR-QA-M6RF",
+      "detail": {
+        "pass": false,
+        "hasEnterWorld": false,
+        "hasSolo": false,
+        "hasPlayNow": false,
+        "modeBadge": "MULTIPLAYER"
+      },
+      "roomCode": "AGAR-QA-LJP9",
+      "host": {
+        "pass": true,
+        "entry": {
+          "ok": true,
+          "timings": [
+            {
+              "ms": 1170,
+              "label": "navigate_play"
+            },
+            {
+              "ms": 99,
+              "label": "enter_click"
+            },
+            {
+              "ms": 310,
+              "label": "connecting_cleared"
+            }
+          ],
+          "reason": "world_entered"
+        },
+        "deviceId": "qa-mp-host-1788755093757"
+      },
+      "guest": {
+        "pass": true,
+        "entry": {
+          "ok": true,
+          "timings": [
+            {
+              "ms": 960,
+              "label": "navigate_play"
+            },
+            {
+              "ms": 66,
+              "label": "enter_click"
+            },
+            {
+              "ms": 287,
+              "label": "connecting_cleared"
+            }
+          ],
+          "reason": "world_entered"
+        },
+        "deviceId": "qa-mp-guest-1788755093757"
+      },
       "sync": {
         "pass": true,
         "hostRole": "HOST",
         "guestRole": "SYNC",
-        "hostTick": 160,
-        "guestTick": 158,
+        "hostFood": 167,
+        "guestFood": 169,
+        "hostTick": 134,
+        "guestTick": 132,
+        "hostHumans": [
+          "QAHostLJP9",
+          "QAGuestLJP9"
+        ],
+        "guestHumans": [
+          "QAGuestLJP9",
+          "QAHostLJP9"
+        ],
         "hostSeesGuest": true,
         "guestSeesHost": true,
         "sharedState": true
+      },
+      "exit": {
+        "pass": true,
+        "before": "http://localhost:3000/games/agar",
+        "after": "http://localhost:3000/games/agar"
+      },
+      "rematch": {
+        "pass": true,
+        "note": "retry_after_qa_die"
+      },
+      "another": {
+        "pass": true,
+        "after": "http://localhost:3000/games"
       }
     },
     "re-front": {
-      "roomCode": "RF-QA-M6RF",
+      "detail": {
+        "pass": false,
+        "hasEnterWorld": false,
+        "hasSolo": false,
+        "hasPlayNow": false,
+        "modeBadge": "MULTIPLAYER"
+      },
+      "roomCode": "RF-QA-LJP9",
+      "host": {
+        "pass": true,
+        "entry": {
+          "ok": true,
+          "timings": [
+            {
+              "ms": 377,
+              "label": "navigate_play"
+            },
+            {
+              "ms": 65,
+              "label": "enter_click"
+            },
+            {
+              "ms": 288,
+              "label": "connecting_cleared"
+            }
+          ],
+          "reason": "world_entered"
+        },
+        "deviceId": "qa-mp-host-1788755093757"
+      },
+      "guest": {
+        "pass": true,
+        "entry": {
+          "ok": true,
+          "timings": [
+            {
+              "ms": 527,
+              "label": "navigate_play"
+            },
+            {
+              "ms": 62,
+              "label": "enter_click"
+            },
+            {
+              "ms": 274,
+              "label": "connecting_cleared"
+            }
+          ],
+          "reason": "world_entered"
+        },
+        "deviceId": "qa-mp-guest-1788755093757"
+      },
       "sync": {
         "pass": true,
+        "presencePass": true,
+        "statePass": true,
+        "hostExpanded": true,
+        "hostTerDelta": 0.009999999999999995,
+        "guestHostTerDelta": 0.009999999999999995,
         "hostTerBefore": 0.1,
         "hostTerAfter": 0.11,
         "guestHostTerBefore": 0.1,
         "guestHostTerAfter": 0.11,
-        "hostTerDelta": 0.01,
-        "guestHostTerDelta": 0.01
+        "hostOpponents": [],
+        "guestOpponents": [
+          {
+            "id": "qa-mp-host-1788755093757",
+            "nickname": "QAHostLJP9",
+            "territoryPct": 0.11
+          }
+        ]
+      },
+      "exit": {
+        "pass": true,
+        "before": "http://localhost:3000/games/re-front",
+        "after": "http://localhost:3000/games/re-front"
+      },
+      "rematch": {
+        "pass": true,
+        "note": "rematch_after_qa_round_end"
+      },
+      "another": {
+        "pass": true,
+        "after": "http://localhost:3000/games"
       }
     },
-    "snake": {
-      "roomCode": "WORLD",
-      "sync": { "pass": true }
+    "bomber": {
+      "detail": {
+        "pass": false,
+        "hasEnterWorld": false,
+        "hasSolo": false,
+        "hasPlayNow": false,
+        "modeBadge": "MULTIPLAYER"
+      },
+      "roomCode": "BOMBER-A",
+      "host": {
+        "pass": true,
+        "entry": {
+          "ok": true,
+          "ms": 3531,
+          "clear": {
+            "ok": true,
+            "ms": 25,
+            "reason": "world"
+          },
+          "connectError": false
+        },
+        "deviceId": "qa-mp-host-1788755093757-bomber"
+      },
+      "guest": {
+        "pass": true,
+        "entry": {
+          "ok": true,
+          "ms": 6285,
+          "clear": {
+            "ok": true,
+            "ms": 130,
+            "reason": "world"
+          },
+          "connectError": false
+        },
+        "deviceId": "qa-mp-guest-1788755093757-bomber"
+      },
+      "sync": {
+        "pass": true,
+        "hostIsHost": true,
+        "guestIsHost": false,
+        "hostHumans": 1,
+        "guestHumans": 2,
+        "hostStateAck": true,
+        "guestStateAck": true
+      },
+      "exit": {
+        "pass": true,
+        "before": "http://localhost:3000/games/bomber",
+        "after": "http://localhost:3000/games/bomber"
+      },
+      "rematch": {
+        "pass": true,
+        "note": "retry_reentered_world"
+      },
+      "another": {
+        "pass": true,
+        "after": "http://localhost:3000/games"
+      }
     }
   },
   "gateResult": "PASS",
-  "finishedAt": "2026-09-07T00:15:48.849Z",
-  "note": "CTO certified 4/4 Matrix PASS (runId 1788740007099). CPO 2nd Product QA pending Preview."
+  "finishedAt": "2026-09-07T04:28:08.621Z",
+  "note": "Full contract: Host/Guest/real Sync/Exit/Rematch/Another. Agar sync expects cross-player TOP10. Re:Front rematch/another need round end."
 }

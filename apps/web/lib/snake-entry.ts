@@ -4,7 +4,7 @@ import { entryLog, entryLogFail, entryTrace } from "@game-platform/game-snake";
 import { joinRoomAsync } from "@game-platform/multiplayer-sdk";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-const PRACTICE_URL = "/flagship/snake-io/play?room=PRACTICE&fallback=1";
+export const PRACTICE_URL = "/flagship/snake-io/play?room=PRACTICE";
 export const STAGE_PLAY_URL = "/flagship/snake-io/play?room=STAGE";
 
 /** Marker href — use navigateSnakePlay() instead of router.push. */
@@ -44,8 +44,7 @@ export async function enterSnakeRoom(router: AppRouterInstance, roomCode: string
     router.push(`/flagship/snake-io/play?room=${encodeURIComponent(roomCode)}`);
   } catch (err) {
     entryLogFail("JOIN", err instanceof Error ? err.message : String(err));
-    entryTrace("PRACTICE_FALLBACK", "PASS", "join-room-fail");
-    router.push(PRACTICE_URL);
+    router.push(`/flagship/snake-io/play?room=${encodeURIComponent(roomCode)}`);
   }
 }
 
@@ -58,8 +57,9 @@ export async function navigateSnakePlay(href: string, router: AppRouterInstance)
   router.push(href);
 }
 
+/** Explicit solo practice — user chose practice, not MP failure disguise. */
 export function enterSnakePractice(router: AppRouterInstance): void {
-  entryTrace("PRACTICE_FALLBACK", "PASS", "direct-practice");
+  entryTrace("CLICK", "START", "practice-mode");
   router.push(PRACTICE_URL);
 }
 
@@ -67,5 +67,3 @@ export function enterSnakeStage(router: AppRouterInstance): void {
   entryTrace("CLICK", "START", "stage-mode");
   router.push(STAGE_PLAY_URL);
 }
-
-export { PRACTICE_URL };

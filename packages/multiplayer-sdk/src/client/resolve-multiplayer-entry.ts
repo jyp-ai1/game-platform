@@ -176,22 +176,25 @@ export async function joinMultiplayerRoom(
   };
   const retries = opts.joinRetries ?? 20;
   const delayMs = opts.joinRetryDelayMs ?? 250;
+  const deviceId = getDeviceId();
+  const hasSelf = (candidate: GameRoom | null | undefined): candidate is GameRoom =>
+    !!candidate?.players.some((p) => p.deviceId === deviceId);
 
   await ensureRoom(code);
   let room = getRoom(code);
-  const deviceId = getDeviceId();
-  if (room?.players.some((p) => p.deviceId === deviceId)) return room;
+  if (hasSelf(room)) return room;
 
-  room = joinRoom(code, joinOpts) ?? room;
-  if (room) return room;
+  room = joinRoom(code, joinOpts);
+  if (hasSelf(room)) return room;
 
   for (let i = 0; i < retries; i++) {
     room = await joinRoomAsync(code, joinOpts);
-    if (room) return room;
+    if (hasSelf(room)) return room;
     await sleep(delayMs);
   }
 
-  return getRoom(code);
+  room = getRoom(code);
+  return hasSelf(room) ? room : null;
 }
 
 /**

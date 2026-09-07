@@ -26,10 +26,6 @@ import {
 
 import { submitScore as submitScoreRpc } from "@/lib/supabase/scores";
 import { trackAnalyticsEvent } from "@/lib/supabase/analytics";
-import { PRACTICE_URL } from "@/lib/snake-entry";
-
-const PRACTICE_FALLBACK_MSG =
-  "멀티플레이 연결이 지연되어 연습모드로 시작합니다.";
 
 const SnakeIoGame = dynamic(
   () => import("@game-platform/game-snake").then((mod) => mod.SnakeIoGame),
@@ -55,8 +51,46 @@ async function submitScore(
   }).catch(() => {});
 }
 
+function SnakeConnectError({
+  onRetry,
+  onBack,
+}: {
+  onRetry: () => void;
+  onBack: () => void;
+}) {
+  return (
+    <div
+      data-testid="snake-connect-error"
+      className="flex min-h-[70vh] flex-col items-center justify-center gap-4 bg-black px-6 text-center"
+    >
+      <p className="text-lg font-semibold text-red-200">Connection failed</p>
+      <p className="max-w-sm text-sm text-white/60">
+        Could not join the multiplayer world. Retry or go back to the game page.
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
+        <button
+          type="button"
+          data-testid="snake-connect-retry"
+          onClick={onRetry}
+          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-black"
+        >
+          Retry
+        </button>
+        <button
+          type="button"
+          data-testid="snake-connect-back"
+          onClick={onBack}
+          className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white"
+        >
+          Back to game
+        </button>
+      </div>
+    </div>
+  );
+}
+
 class SnakePlayErrorBoundary extends Component<
-  { children: ReactNode; onPracticeFallback: () => void },
+  { children: ReactNode; onConnectFailed: () => void },
   { failed: boolean; errorMessage: string | null }
 > {
   state = { failed: false, errorMessage: null as string | null };
@@ -69,14 +103,14 @@ class SnakePlayErrorBoundary extends Component<
     entryLogFail("RENDER", error.message, {
       room: typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("room") ?? undefined : undefined,
     });
-    this.props.onPracticeFallback();
+    this.props.onConnectFailed();
   }
 
   render(): ReactNode {
     if (this.state.failed) {
       return (
         <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-          <p className="text-sm text-amber-300">RENDER FAIL — Practice Mode로 전환 중…</p>
+          <p className="text-sm text-amber-300">Connection failed — could not load multiplayer world.</p>
           {this.state.errorMessage ? (
             <p className="max-w-sm font-mono text-xs text-red-400">{this.state.errorMessage}</p>
           ) : null}
@@ -108,6 +142,8 @@ function SnakeIoPlayInner({
   const [headCharacter, setHeadCharacter] = useState<SnakeHeadId>(() => loadSnakeHeadCharacter());
   const [characterReady, setCharacterReady] = useState(false);
   const [worldEntered, setWorldEntered] = useState(!immersiveWorld);
+  const [connectFailed, setConnectFailed] = useState(false);
+  const [connectRetryKey, setConnectRetryKey] = useState(0);
   const [showPostGameMeta, setShowPostGameMeta] = useState(false);
   const [sessionSummary, setSessionSummary] = useState<{
     score: number;
@@ -143,25 +179,9 @@ function SnakeIoPlayInner({
 
   useEffect(() => {
     if (practiceMode || room) return;
-    entryLog("PRACTICE_FALLBACK", "no-room-param");
-    router.replace(PRACTICE_URL);
-  }, [practiceMode, room, router]);
-
-  useEffect(() => {
-    if (!practiceMode) return;
-    const fallback = params.get("fallback");
-    if (fallback === "1") {
-      emitEngagementEvent({
-        type: "practice-fallback",
-        message: PRACTICE_FALLBACK_MSG,
-      });
-    }
-  }, [practiceMode, params]);
-
-  useEffect(() => {
-    // RC-HUD-001: keep platform chrome / game HUD visible (no immersive shell class).
-    if (!immersiveWorld || !worldEntered) return;
-  }, [immersiveWorld, worldEntered]);
+    entryLogFail("JOIN", "missing room param");
+    setConnectFailed(true);
+  }, [practiceMode, room]);
 
   useEffect(() => {
     if (!isStageMode) return;
@@ -196,13 +216,20 @@ function SnakeIoPlayInner({
     return () => window.removeEventListener("replay:viral-loop-complete", onEnd);
   }, []);
 
-  const goPractice = useCallback(() => {
-    entryLog("PRACTICE_FALLBACK");
-    emitEngagementEvent({
-      type: "practice-fallback",
-      message: PRACTICE_FALLBACK_MSG,
-    });
-    router.replace(PRACTICE_URL);
+  const handleConnectFailed = useCallback(() => {
+    entryLogFail("CONNECT", "multiplayer join failed");
+    setConnectFailed(true);
+  }, []);
+
+  const handleConnectRetry = useCallback(() => {
+    resetEntryStatus();
+    resetEngineSession();
+    setConnectFailed(false);
+    setConnectRetryKey((k) => k + 1);
+  }, []);
+
+  const handleConnectBack = useCallback(() => {
+    router.push("/games/snake");
   }, [router]);
 
   const handleRematch = useCallback(async () => {
@@ -236,6 +263,10 @@ function SnakeIoPlayInner({
         <SnakeIoPlayMeta game={gameMeta} />
       </div>
     );
+  }
+
+  if (connectFailed) {
+    return <SnakeConnectError onRetry={handleConnectRetry} onBack={handleConnectBack} />;
   }
 
   if (!characterReady) {
@@ -273,10 +304,11 @@ function SnakeIoPlayInner({
   return (
     <>
       {debugMode ? <SnakeDebugOverlay /> : null}
-      <SnakePlayErrorBoundary onPracticeFallback={goPractice}>
+      <SnakePlayErrorBoundary onConnectFailed={handleConnectFailed}>
         <SnakeIoGame
+          key={connectRetryKey}
           practiceMode={practiceMode}
-          onJoinTimeout={goPractice}
+          onConnectFailed={handleConnectFailed}
           headCharacter={headCharacter}
         />
       </SnakePlayErrorBoundary>
@@ -299,7 +331,7 @@ function SnakeIoPlayInner({
   );
 }
 
-/** Snake.io play — SDK wrapper, SSR off, practice fallback. */
+/** Snake.io play — SDK wrapper, SSR off, explicit MP connect errors (no practice disguise). */
 export function SnakeIoPlayClient({
   showMetaAfterExit = false,
   gameMeta,

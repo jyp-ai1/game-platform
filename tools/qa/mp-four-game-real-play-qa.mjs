@@ -557,14 +557,23 @@ async function testRfLifecycle(page, roomCode) {
 }
 
 async function testSnakeLifecycle(page) {
-  await page.goto(`${BASE}/flagship/snake-io/play?room=WORLD`, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  if (await page.getByRole("button", { name: "START", exact: true }).isVisible({ timeout: 8000 }).catch(() => false)) {
-    await page.getByRole("button", { name: "START", exact: true }).click();
-  }
-  if (await page.getByRole("button", { name: /ENTER WORLD/i }).isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await page.getByRole("button", { name: /ENTER WORLD/i }).click();
-  }
-  await page.locator(".touch-none, canvas").first().waitFor({ state: "visible", timeout: WORLD_ENTER_MS });
+  const enterWorld = async () => {
+    await page.goto(`${BASE}/flagship/snake-io/play?room=WORLD`, { waitUntil: "load", timeout: 90_000 });
+    const startBtn = page.getByRole("button", { name: "START", exact: true });
+    if (await startBtn.isVisible({ timeout: 12_000 }).catch(() => false)) {
+      await startBtn.click();
+      await page.waitForTimeout(800);
+    }
+    const enterBtn = page.getByRole("button", { name: /ENTER WORLD/i });
+    if (await enterBtn.isVisible({ timeout: 20_000 }).catch(() => false)) {
+      await enterBtn.click();
+      await page.waitForTimeout(500);
+    }
+    await page.locator("canvas, .touch-none").first().waitFor({ state: "visible", timeout: WORLD_ENTER_MS });
+    await page.waitForTimeout(2000);
+  };
+
+  await enterWorld();
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(800);
   await page
@@ -590,14 +599,18 @@ async function testSnakeLifecycle(page) {
     }
   }
 
-  await page.goto(`${BASE}/flagship/snake-io/play?room=WORLD&debug=1`, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  if (await page.getByRole("button", { name: "START", exact: true }).isVisible({ timeout: 8000 }).catch(() => false)) {
-    await page.getByRole("button", { name: "START", exact: true }).click();
+  await page.goto(`${BASE}/flagship/snake-io/play?room=WORLD&debug=1`, { waitUntil: "load", timeout: 90_000 });
+  const startBtn = page.getByRole("button", { name: "START", exact: true });
+  if (await startBtn.isVisible({ timeout: 12_000 }).catch(() => false)) {
+    await startBtn.click();
+    await page.waitForTimeout(800);
   }
-  if (await page.getByRole("button", { name: /ENTER WORLD/i }).isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await page.getByRole("button", { name: /ENTER WORLD/i }).click();
+  const enterBtn = page.getByRole("button", { name: /ENTER WORLD/i });
+  if (await enterBtn.isVisible({ timeout: 20_000 }).catch(() => false)) {
+    await enterBtn.click();
+    await page.waitForTimeout(500);
   }
-  await page.locator(".touch-none, canvas").first().waitFor({ state: "visible", timeout: WORLD_ENTER_MS });
+  await page.locator("canvas, .touch-none").first().waitFor({ state: "visible", timeout: WORLD_ENTER_MS });
   await page.waitForTimeout(3000);
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(800);
@@ -670,28 +683,34 @@ async function qaSnake(browser) {
   const pageB = await ctxB.newPage();
 
   const detail = await verifyDetailCta(pageA, "snake");
-  await pageA.goto(`${BASE}/flagship/snake-io/play?room=WORLD`, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  if (await pageA.getByRole("button", { name: "START", exact: true }).isVisible({ timeout: 8000 }).catch(() => false)) {
-    await pageA.getByRole("button", { name: "START", exact: true }).click();
-  }
-  if (await pageA.getByRole("button", { name: /ENTER WORLD/i }).isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await pageA.getByRole("button", { name: /ENTER WORLD/i }).click();
-  }
-  await pageA.locator(".touch-none, canvas").first().waitFor({ timeout: WORLD_ENTER_MS }).catch(() => {});
-  const hostWorld = await pageA.evaluate(() => !!(document.querySelector("canvas") || document.querySelector(".touch-none")));
+  const enterSnakeWorld = async (page) => {
+    await page.goto(`${BASE}/flagship/snake-io/play?room=WORLD`, { waitUntil: "load", timeout: 90_000 });
+    const startBtn = page.getByRole("button", { name: "START", exact: true });
+    if (await startBtn.isVisible({ timeout: 12_000 }).catch(() => false)) {
+      await startBtn.click();
+      await page.waitForTimeout(800);
+    }
+    const enterWorld = page.getByRole("button", { name: /ENTER WORLD/i });
+    if (await enterWorld.isVisible({ timeout: 20_000 }).catch(() => false)) {
+      await enterWorld.click();
+      await page.waitForTimeout(500);
+    }
+    await page.locator("canvas, .touch-none").first().waitFor({ state: "visible", timeout: WORLD_ENTER_MS }).catch(() => {});
+    const practiceFallback = page.url().includes("PRACTICE") || (await page.locator(':text("연습")').count()) > 0;
+    const connectFailed = await page.getByTestId("snake-connect-error").isVisible().catch(() => false);
+    return {
+      world: await page.evaluate(() => !!(document.querySelector("canvas") || document.querySelector(".touch-none"))),
+      practiceFallback: practiceFallback || connectFailed,
+      top10: await page.getByTestId("mp-top10").isVisible({ timeout: 15_000 }).catch(() => false),
+    };
+  };
 
-  await pageB.goto(`${BASE}/flagship/snake-io/play?room=WORLD`, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  if (await pageB.getByRole("button", { name: "START", exact: true }).isVisible({ timeout: 8000 }).catch(() => false)) {
-    await pageB.getByRole("button", { name: "START", exact: true }).click();
-  }
-  if (await pageB.getByRole("button", { name: /ENTER WORLD/i }).isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await pageB.getByRole("button", { name: /ENTER WORLD/i }).click();
-  }
-  await pageB.locator(".touch-none, canvas").first().waitFor({ timeout: WORLD_ENTER_MS }).catch(() => {});
-  const guestWorld = await pageB.evaluate(() => !!(document.querySelector("canvas") || document.querySelector(".touch-none")));
-
-  const top10Host = await pageA.getByTestId("mp-top10").isVisible({ timeout: 15_000 }).catch(() => false);
-  const top10Guest = await pageB.getByTestId("mp-top10").isVisible({ timeout: 15_000 }).catch(() => false);
+  const hostResult = await enterSnakeWorld(pageA);
+  await pageA.screenshot({ path: join(shotDir, "02-host-world.png"), fullPage: true });
+  const guestResult = await enterSnakeWorld(pageB);
+  await pageB.screenshot({ path: join(shotDir, "03-guest-world.png"), fullPage: true });
+  const hostWorld = hostResult.world && !hostResult.practiceFallback;
+  const guestWorld = guestResult.world && !guestResult.practiceFallback;
   await ctxA.close();
   await ctxB.close();
 
@@ -706,7 +725,11 @@ async function qaSnake(browser) {
     roomCode: "WORLD",
     host: { pass: hostWorld, deviceId: DEVICE_HOST },
     guest: { pass: guestWorld, deviceId: DEVICE_GUEST },
-    sync: { pass: hostWorld && guestWorld, note: top10Host && top10Guest ? "canvas_and_top10" : "canvas_both_players" },
+    sync: {
+      pass: hostWorld && guestWorld,
+      note: hostResult.top10 && guestResult.top10 ? "canvas_and_top10" : "canvas_both_players",
+      practiceFallback: hostResult.practiceFallback || guestResult.practiceFallback,
+    },
     ...lifecycle,
   };
 }
@@ -730,8 +753,11 @@ async function qaBomber(browser) {
   const detail = await verifyDetailCta(pageA, "bomber");
   const hostEntry = await bomberEnterWorld(pageA, roomCode);
   await pageA.screenshot({ path: join(shotDir, "02-host-world.png"), fullPage: true });
-  await pageA.waitForTimeout(5000);
-  await pageB.waitForTimeout(1000);
+  await pageA.waitForFunction(
+    () => window.__BOMBER_QA__?.()?.stateAck === true,
+    { timeout: 15_000 }
+  ).catch(() => {});
+  await pageA.waitForTimeout(2000);
   let guestEntry = await bomberEnterWorld(pageB, roomCode);
   for (let attempt = 0; attempt < 3 && !guestEntry.ok; attempt++) {
     await pageB.waitForTimeout(3000);

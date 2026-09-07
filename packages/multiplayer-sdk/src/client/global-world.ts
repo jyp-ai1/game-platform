@@ -52,7 +52,7 @@ export function isGlobalWorldRoom(code: string, gameSlug = "snake"): boolean {
 
 /** Pick shard with capacity — WORLD first, spill to WORLD-2+ */
 export async function resolveAvailableCluster(gameSlug: string): Promise<string> {
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 15; i++) {
     const code = globalWorldCode(gameSlug, i);
     await ensureRoom(code);
     const room = getRoom(code);
@@ -62,50 +62,61 @@ export async function resolveAvailableCluster(gameSlug: string): Promise<string>
   return globalWorldCode(gameSlug, 1);
 }
 
-/** Find-or-create Global World cluster and join */
+/** Find-or-create Global World cluster and join — spills WORLD → WORLD-2+ when shard full. */
 export async function joinGlobalWorld(gameSlug: string): Promise<GameRoom> {
   const t0 = performance.now();
   entryTrace("JOIN", "START", gameSlug);
+  const deviceId = getDeviceId();
 
-  try {
-    const code = await withTimeout(resolveAvailableCluster(gameSlug), JOIN_TIMEOUT_MS, "cluster");
-    await withTimeout(ensureRoom(code), JOIN_TIMEOUT_MS, "ensureRoom");
+  for (let i = 1; i <= 15; i++) {
+    const code = globalWorldCode(gameSlug, i);
+    try {
+      await withTimeout(ensureRoom(code), JOIN_TIMEOUT_MS, "ensureRoom");
+      let room = getRoom(code);
+      if (!room) {
+        entryTrace("JOIN", "START", `bootstrap ${code}`);
+        room = createRoom({
+          gameSlug,
+          maxPlayers: GLOBAL_WORLD_TARGET,
+          matchMode: "public",
+          code,
+        });
+      }
 
-    let room = getRoom(code);
-    if (!room) {
-      entryTrace("JOIN", "START", `bootstrap ${code}`);
-      room = createRoom({
-        gameSlug,
-        maxPlayers: GLOBAL_WORLD_TARGET,
-        matchMode: "public",
-        code,
-      });
+      if (
+        room.players.length >= GLOBAL_WORLD_TARGET &&
+        !room.players.some((p) => p.deviceId === deviceId)
+      ) {
+        continue;
+      }
+
+      const joined = await withTimeout(
+        joinRoomAsync(code, { gameSlug, maxPlayers: GLOBAL_WORLD_TARGET }),
+        JOIN_TIMEOUT_MS,
+        "joinRoom"
+      );
+      const result =
+        joined && joined.players.some((p) => p.deviceId === deviceId)
+          ? joined
+          : room.players.some((p) => p.deviceId === deviceId)
+            ? room
+            : null;
+
+      if (result) {
+        start(code);
+        cacheGlobalWorldStatus(gameSlug, result, code);
+        entryTrace("JOIN", "PASS", code, Math.round(performance.now() - t0));
+        return result;
+      }
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      entryTrace("JOIN", "FAIL", `${code} ${reason}`);
     }
-
-    const joined = await withTimeout(joinRoomAsync(code), JOIN_TIMEOUT_MS, "joinRoom");
-    if (joined) {
-      start(code);
-      cacheGlobalWorldStatus(gameSlug, joined, code);
-      entryTrace("JOIN", "PASS", code, Math.round(performance.now() - t0));
-      return joined;
-    }
-
-    if (room.players.some((p) => p.deviceId === getDeviceId())) {
-      start(code);
-      entryTrace("JOIN", "PASS", `${code} already-member`, Math.round(performance.now() - t0));
-      return room;
-    }
-
-    entryTrace("JOIN", "FAIL", "Global World full", Math.round(performance.now() - t0));
-    recordEntryCrash("JOIN", "Global World full", { room: code });
-    throw new Error("Global World full");
-  } catch (err) {
-    const reason = err instanceof Error ? err.message : String(err);
-    entryTrace("JOIN", "FAIL", reason, Math.round(performance.now() - t0));
-    const terminal = reason.includes("Global World full");
-    if (terminal) recordEntryCrash("JOIN", reason, { room: GLOBAL_BASE });
-    throw err;
   }
+
+  entryTrace("JOIN", "FAIL", "Global World full", Math.round(performance.now() - t0));
+  recordEntryCrash("JOIN", "Global World full", { room: GLOBAL_BASE });
+  throw new Error("Global World full");
 }
 
 export interface GlobalWorldStatus {
