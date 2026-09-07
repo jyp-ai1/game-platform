@@ -1139,7 +1139,7 @@ export function ReFrontGame() {
                 className={p.id === deviceId ? "text-cyan-300" : "text-amber-50"}
                 data-rf-human={p.id === deviceId ? "self" : "opponent"}
               >
-                {rfHumanNickname(p.nickname)} {p.territoryPct.toFixed(1)}%
+                {rfHumanNickname(p.nickname)} {p.territoryPct.toFixed(2)}%
               </li>
             ))}
           </ul>
