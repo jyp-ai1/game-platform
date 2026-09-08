@@ -72,10 +72,17 @@ import {
   type BomberWorld,
   type HumanSeat,
 } from "./bomber-engine";
+import {
+  SHARD_STATE_STALE_MS,
+  decideBomberGuestTimeout,
+  decideBomberJoinFailed,
+  isGhostBomberHost,
+  isLiveBomberHost,
+  noteBomberHostState,
+  type BomberHostAckWait,
+} from "./bomber-shard-lifecycle";
 
 const CELL = 26;
-/** Map shard rooms (BOMBER-A..D) reuse Supabase rows — reclaim when sim is stale. */
-const SHARD_STATE_STALE_MS = 4000;
 
 const BOMBER_STYLES: MpStyleOption[] = [
   { id: "bomber", label: "Bomber", emoji: "💣", color: MP_PLAYER_COLORS[0] },
@@ -211,25 +218,6 @@ type BomberPopup = {
 /** Reset stale map shard so the entering device becomes authoritative host (no ghost host). */
 async function claimStaleShardRoom(room: GameRoom, nickname: string): Promise<GameRoom> {
   return reclaimStaleMultiplayerRoomAsync(room, nickname, "bomber");
-}
-
-/** Stale sim blob or missing host roster — reclaim before join/wait. */
-function isGhostBomberHost(room: GameRoom): boolean {
-  if (!isListedHostPresent(room)) return true;
-  const hasState = !!room.gameState?.state;
-  if (!hasState) return false;
-  return roomGameStateAgeMs(room) >= SHARD_STATE_STALE_MS;
-}
-
-/** Confirmed live host — fresh state with alive sim host (not stale ghost). */
-function isLiveBomberHost(room: GameRoom): boolean {
-  if (!isListedHostPresent(room)) return false;
-  if (!room.gameState?.state) return false;
-  if (roomGameStateAgeMs(room) >= SHARD_STATE_STALE_MS) return false;
-  const hostId = room.hostId;
-  const gs = room.gameState.state as BomberSyncState;
-  const simHost = gs?.players?.find((p) => p.id === hostId && !p.isBot);
-  return !!simHost?.alive;
 }
 
 function shardStateAgeMs(room: GameRoom | null | undefined): number {
@@ -731,9 +719,16 @@ export function BomberGame() {
 
   /** Guest: block until host state assigns distinct seat + playerId. */
   const waitForHostStateAck = useCallback(
-    (code: string, expectedMapId: number, timeoutMs = 5000): Promise<boolean> =>
+    (code: string, expectedMapId: number, timeoutMs = 5000): Promise<BomberHostAckWait> =>
       new Promise((resolve) => {
         const deadline = Date.now() + timeoutMs;
+        let sawHostState = false;
+
+        const observe = (state: BomberSyncState | undefined, fromStateEvent: boolean) => {
+          if (fromStateEvent || noteBomberHostState(state, expectedMapId)) {
+            if (noteBomberHostState(state, expectedMapId)) sawHostState = true;
+          }
+        };
 
         const tryAck = (state: BomberSyncState | undefined): boolean => {
           if (!state || state.mapId !== expectedMapId || state.matchOver) return false;
@@ -747,19 +742,26 @@ export function BomberGame() {
           return false;
         };
 
+        const finish = (acked: boolean) => {
+          resolve({ acked, sawHostState: acked || sawHostState });
+        };
+
         const room = getRoom(code);
         const existing = room?.gameState?.state as BomberSyncState | undefined;
+        observe(existing, room?.gameState?._lastEvent === "state");
         if (tryAck(existing)) {
-          resolve(true);
+          finish(true);
           return;
         }
 
         const unsub = subscribeRoom(code, (r) => {
           const gs = r.gameState ?? {};
-          if (gs._lastEvent === "state" && gs.state && tryAck(gs.state as BomberSyncState)) {
+          const st = gs.state as BomberSyncState | undefined;
+          observe(st, gs._lastEvent === "state");
+          if (gs._lastEvent === "state" && st && tryAck(st)) {
             unsub();
             window.clearInterval(poll);
-            resolve(true);
+            finish(true);
           }
         });
 
@@ -767,16 +769,17 @@ export function BomberGame() {
           if (Date.now() > deadline) {
             window.clearInterval(poll);
             unsub();
-            resolve(false);
+            finish(false);
             return;
           }
           sync(code);
           const r = getRoom(code);
           const st = r?.gameState?.state as BomberSyncState | undefined;
+          observe(st, r?.gameState?._lastEvent === "state");
           if (tryAck(st)) {
             window.clearInterval(poll);
             unsub();
-            resolve(true);
+            finish(true);
           }
         }, 100);
       }),
@@ -994,23 +997,33 @@ export function BomberGame() {
               isLiveHost: isLiveBomberHost,
             });
 
+            let room: GameRoom;
+            let reclaimedShard = false;
+
             if (!entry.ok) {
-              setConnecting(false);
-              setConnectError(true);
-              return;
+              const existingRoom = getRoom(code);
+              if (decideBomberJoinFailed(existingRoom) === "fail") {
+                setConnecting(false);
+                setConnectError(true);
+                return;
+              }
+              room = await claimStaleShardRoom(
+                existingRoom ?? ({ code, gameSlug: "bomber", maxPlayers: 8, matchMode: "public" } as GameRoom),
+                nickname
+              );
+              reclaimedShard = true;
+            } else {
+              room = entry.room;
+              reclaimedShard = entry.reclaimed;
             }
 
-            let room: GameRoom = entry.room;
-            let reclaimedShard = entry.reclaimed;
-
-            if (entry.role === "guest" && isGhostBomberHost(room)) {
+            if (!reclaimedShard && room.hostId !== deviceId && isGhostBomberHost(room)) {
               room = await claimStaleShardRoom(room, nickname);
               reclaimedShard = true;
             }
 
             let hostNow =
               qaLocalProbeRef.current ||
-              entry.role === "host" ||
               reclaimedShard ||
               room.hostId === deviceId;
 
@@ -1018,34 +1031,22 @@ export function BomberGame() {
               if (isListedHostPresent(room)) {
                 await waitForFreshShardState(code, 4000);
               }
-              const acked = await waitForHostStateAck(code, nextMapId, 5000);
-              if (acked) {
+              const wait = await waitForHostStateAck(code, nextMapId, 5000);
+              if (wait.acked) {
                 setConnecting(false);
                 return;
               }
               const liveRoom = getRoom(code) ?? room;
-              if (isLiveBomberHost(liveRoom)) {
+              if (decideBomberGuestTimeout(wait) === "fail") {
                 setConnecting(false);
                 setConnectError(true);
                 setStarted(false);
                 setStateAckReady(false);
                 return;
               }
-              if (isGhostBomberHost(liveRoom)) {
-                room = await claimStaleShardRoom(liveRoom, nickname);
-                reclaimedShard = true;
-                hostNow = true;
-              } else if (isListedHostPresent(liveRoom)) {
-                setConnecting(false);
-                setConnectError(true);
-                setStarted(false);
-                setStateAckReady(false);
-                return;
-              } else {
-                room = await claimStaleShardRoom(liveRoom, nickname);
-                reclaimedShard = true;
-                hostNow = true;
-              }
+              room = await claimStaleShardRoom(liveRoom, nickname);
+              reclaimedShard = true;
+              hostNow = true;
             }
 
             setHostAuthority(hostNow);
