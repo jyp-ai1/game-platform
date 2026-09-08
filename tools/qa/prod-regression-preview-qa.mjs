@@ -24,9 +24,9 @@ const GUEST_NICK = `PVG${RUN.slice(-4)}`;
 const OFFICIAL = ["snake", "agar", "bomber", "re-front"];
 
 const report = {
-  gate: "prod-regression-preview",
+  gate: "prod-regression-preview-final",
   baseUrl: BASE,
-  commit: "a1d0c74",
+  commit: process.env.QA_COMMIT || "",
   vercelProject: "game29",
   productionDeployed: false,
   startedAt: new Date().toISOString(),
@@ -68,9 +68,11 @@ async function detailChecks(page, slug) {
     new RegExp(s === "re-front" ? "Re:Front" : s, "i").test(moreText)
   );
   const arcadeLeak = /Breakout|Maze Runner|Galaxy Defender|Tic Tac Toe/i.test(moreText);
-  const thumbOk = await page.evaluate((s) => {
-    const imgs = [...document.images];
-    return imgs.some((img) => img.src.includes(`/images/games/${s}`) && img.naturalWidth > 40);
+  const thumb = await page.evaluate((s) => {
+    const imgs = [...document.images].filter((img) => img.src.includes(`/images/games/${s}`));
+    const hero = imgs.find((img) => img.naturalWidth > 40) || imgs[0];
+    if (!hero) return { ok: false, w: 0, h: 0, src: null };
+    return { ok: hero.naturalWidth >= 320 && hero.naturalHeight >= 180, w: hero.naturalWidth, h: hero.naturalHeight, src: hero.src };
   }, slug);
   const href = await page.getByRole("link", { name: /ENTER WORLD/i }).getAttribute("href").catch(() => null);
   return {
@@ -79,7 +81,8 @@ async function detailChecks(page, slug) {
     noSolo: !/\bPLAY SOLO\b/i.test(text) && !/\bPRACTICE\b/i.test(text) && !(href || "").includes("fallback=1"),
     moreOfficial: officialInMore,
     arcadeLeak,
-    thumbOk,
+    thumbOk: thumb.ok,
+    thumb,
     ctaHref: href,
     moreText: moreText.slice(0, 400),
   };
@@ -124,25 +127,30 @@ async function noFallback(page) {
   );
 }
 
-async function enterSnake(page) {
+async function enterSnake(page, { entryShot } = {}) {
   await page.goto(`${BASE}/games/snake/play?room=WORLD`, { waitUntil: "load", timeout: 90_000 });
   await page.waitForTimeout(1500);
   if (!/play/.test(page.url())) {
     await page.goto(`${BASE}/flagship/snake-io/play?room=WORLD`, { waitUntil: "load", timeout: 90_000 });
   }
-  const enterChar = page.getByRole("button", { name: /^ENTER$/i });
-  const startLegacy = page.getByRole("button", { name: /^START$/i });
-  if (await enterChar.isVisible({ timeout: 12_000 }).catch(() => false)) await enterChar.click();
-  else if (await startLegacy.isVisible({ timeout: 2000 }).catch(() => false)) await startLegacy.click();
+  await page.getByTestId("mp-entry-lobby").waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+  const lobbyText = await page.evaluate(() => document.body.innerText);
+  const colorStep = /\bColor\b/.test(lobbyText);
+  const characterStep = /\bCharacter\b/.test(lobbyText);
+  if (entryShot) await page.screenshot({ path: entryShot });
+  const colorBtn = page.getByRole("button", { name: /Color #/i }).nth(2);
+  if (await colorBtn.isVisible().catch(() => false)) await colorBtn.click();
+  const clicked = await clickEnter(page);
   await page.waitForTimeout(600);
   const worldBtn = page.getByRole("button", { name: /ENTER WORLD/i });
-  if (await worldBtn.isVisible({ timeout: 12_000 }).catch(() => false)) await worldBtn.click();
+  if (await worldBtn.isVisible({ timeout: 2_000 }).catch(() => false)) await worldBtn.click();
   await page
     .waitForFunction(() => /TOP 10|Length|WORLD/i.test(document.body.innerText), { timeout: 40_000 })
     .catch(() => {});
   await page.waitForTimeout(2500);
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(800);
+  return { colorStep, characterStep, clicked };
 }
 
 async function qaSnake(browser) {
@@ -156,8 +164,9 @@ async function qaSnake(browser) {
   const guest = await ctxB.newPage();
   const detail = await detailChecks(host, "snake");
   await host.screenshot({ path: join(dir, "01-detail.png"), fullPage: true });
+  let entry = { colorStep: false, characterStep: false, clicked: null };
   try {
-    await enterSnake(host);
+    entry = await enterSnake(host, { entryShot: join(dir, "01b-entry.png") });
   } catch (e) {
     await host.screenshot({ path: join(dir, "02-host-world.png") });
     throw e;
@@ -172,38 +181,38 @@ async function qaSnake(browser) {
     return {
       bots: bots ? Number(bots[1]) : null,
       pingMs: ping ? Number(ping[1]) : null,
+      pingDash: /Ping\s+[—–-]/.test(t),
       minimap: /MINIMAP/i.test(t),
       exit: /나가기|Exit/i.test(t),
       connectFailed: /Connection failed/i.test(t),
       path: location.pathname,
     };
   });
-  const pingOk = hud.pingMs == null || (hud.pingMs >= 0 && hud.pingMs < 10_000);
+  const pingOk = typeof hud.pingMs === "number" && hud.pingMs >= 1 && hud.pingMs < 10_000 && !hud.pingDash;
   const exitBtn = host.getByRole("button", { name: /나가기|Exit/i }).first();
   let exitToDetail = false;
+  let exitPath = null;
   if (await exitBtn.isVisible().catch(() => false)) {
     await exitBtn.click();
-    await host.waitForTimeout(2000);
-    exitToDetail = /\/games\/snake\/?$/.test(new URL(host.url()).pathname) || host.url().includes("/games/snake");
-    if (!exitToDetail && /flagship/.test(host.url())) {
-      await host.goto(`${BASE}/games/snake`, { waitUntil: "domcontentloaded" });
-    }
+    await host.waitForTimeout(2500);
+    exitPath = new URL(host.url()).pathname;
+    exitToDetail = /\/games\/snake\/?$/.test(exitPath);
   }
   await host.screenshot({ path: join(dir, "04-after-exit.png"), fullPage: true });
   const fallbackFree = (await noFallback(host)) && (await noFallback(guest));
   await ctxA.close();
   await ctxB.close();
+  const commonEntry = entry.characterStep && entry.colorStep && entry.clicked && pingOk && hud.minimap && exitToDetail;
   const pass =
     detail.enterWorld &&
     detail.noSolo &&
     !detail.arcadeLeak &&
     hud.path.includes("snake") &&
     !hud.connectFailed &&
-    pingOk &&
-    hud.minimap &&
+    commonEntry &&
     fallbackFree &&
     (hud.bots == null || hud.bots >= 0);
-  return { pass, detail, hud, pingOk, exitToDetail, fallbackFree };
+  return { pass, detail, hud, pingOk, exitToDetail, exitPath, commonEntry, entry, fallbackFree };
 }
 
 async function enterMp(page, slug, room) {
@@ -318,10 +327,58 @@ async function qaBomber(browser) {
   };
 }
 
+async function rfSnapshot(page) {
+  return page.evaluate(() => {
+    const qa = window.__RF_QA__?.();
+    const text = document.body.innerText;
+    return {
+      pct: qa?.me?.territoryPct ?? null,
+      role: qa?.mpRole ?? null,
+      humans: (qa?.hudHumans || []).map((h) => ({ nick: h.nickname, pct: h.territoryPct })),
+      youWin: /YOU WIN/i.test(text),
+      resultVisible: !!document.querySelector('[data-testid="rf-rematch-btn"]'),
+      rematch: !!document.querySelector('[data-testid="rf-rematch-btn"]'),
+      another: !!document.querySelector('[data-testid="mp-death-play-another"]'),
+      practice: /연습모드|PRACTICE|fallback=1/i.test(text),
+    };
+  });
+}
+
+async function holdExpandTo70(page, playMs) {
+  const started = Date.now();
+  let lastPct = -1;
+  let stallAt = Date.now();
+  const btn = page.getByTestId("rf-expand-btn");
+  if (await btn.isVisible().catch(() => false)) await btn.click().catch(() => {});
+  await page.evaluate(() => window.focus());
+  await page.keyboard.down("Space");
+  try {
+    while (Date.now() - started < playMs) {
+      const snap = await rfSnapshot(page);
+      if (snap.youWin || snap.resultVisible) return { ...snap, playMs: Date.now() - started };
+      if (typeof snap.pct === "number" && snap.pct > lastPct + 0.01) {
+        lastPct = snap.pct;
+        stallAt = Date.now();
+      }
+      if (Date.now() - stallAt > 6_000) {
+        await page.keyboard.up("Space");
+        if (await btn.isVisible().catch(() => false)) await btn.click().catch(() => {});
+        await page.keyboard.down("Space");
+        stallAt = Date.now();
+      }
+      await page.waitForTimeout(280);
+    }
+  } finally {
+    await page.keyboard.up("Space").catch(() => {});
+  }
+  return { ...(await rfSnapshot(page)), playMs: Date.now() - started };
+}
+
 async function qaReFront(browser) {
   const dir = join(EVID, "re-front");
   mkdirSync(dir, { recursive: true });
   const room = `RF-PV-${RUN.slice(-6)}`;
+  const playMs = Number(process.env.RF_COMPLETE_PLAY_MS || 8 * 60 * 1000);
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const ctxB = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   await seed(ctxA, `pv-rf-h-${RUN}`, HOST_NICK);
@@ -347,14 +404,57 @@ async function qaReFront(browser) {
   }
   const after = await host.evaluate(() => window.__RF_QA__?.()).catch(() => null);
   const practice = await host.evaluate(() => /연습모드|PRACTICE|fallback=1/i.test(document.body.innerText));
-  await host.getByRole("button", { name: /나가기/i }).click().catch(() => {});
-  await host.waitForTimeout(1500);
-  const exitToDetail = host.url().includes("/games/re-front") && !host.url().includes("/play");
+
+  const victory = await holdExpandTo70(host, playMs);
+  await host.screenshot({ path: join(dir, "06-real-victory.png") });
+  await host.screenshot({ path: join(dir, "07-result.png") });
+  const result70 =
+    !!victory.youWin &&
+    !!victory.resultVisible &&
+    (victory.pct ?? 0) >= 70 &&
+    !!victory.rematch &&
+    !!victory.another;
+  let rematchOk = false;
+  let anotherOk = false;
+  let resultExitOk = false;
+  if (result70) {
+    await host.getByTestId("rf-rematch-btn").click();
+    rematchOk = await host.getByTestId("rf-game-shell").waitFor({ state: "visible", timeout: 15_000 }).then(() => true).catch(() => false);
+    await host.screenshot({ path: join(dir, "08-rematch.png") });
+    const win2 = await holdExpandTo70(host, playMs);
+    await host.screenshot({ path: join(dir, "09-another-game.png") });
+    if (win2.youWin && win2.resultVisible) {
+      await host.getByTestId("mp-death-play-another").click();
+      await host.waitForTimeout(2000);
+      anotherOk = /\/games\/?$/.test(new URL(host.url()).pathname);
+    }
+  }
+  if (!anotherOk) {
+    await host.goto(`${BASE}/games/re-front/play?room=${encodeURIComponent(room + "X")}`, {
+      waitUntil: "load",
+      timeout: 90_000,
+    });
+    await clickEnter(host);
+    await host.getByTestId("rf-game-shell").waitFor({ timeout: 25_000 }).catch(() => {});
+  }
+  const win3 = anotherOk ? { youWin: false } : await holdExpandTo70(host, result70 ? 90_000 : playMs);
+  if (win3.youWin && win3.resultVisible) {
+    await host.getByRole("button", { name: "EXIT", exact: true }).click();
+    await host.waitForTimeout(1500);
+    resultExitOk = host.url().includes("/games/re-front") && !host.url().includes("/play");
+    await host.screenshot({ path: join(dir, "10-exit.png") });
+  } else if (!resultExitOk) {
+    await host.getByRole("button", { name: /나가기/i }).click().catch(() => {});
+    await host.waitForTimeout(1500);
+    resultExitOk = host.url().includes("/games/re-front") && !host.url().includes("/play");
+    await host.screenshot({ path: join(dir, "10-exit.png") });
+  }
   await ctxA.close();
   await ctxB.close();
   const world = hostEntry.ok && guestEntry.ok && !!hostQa && !!guestQa;
+  const thumbIdentifiable = !!detail.thumbOk && (detail.thumb?.w || 0) >= 320;
   return {
-    pass: world && detail.enterWorld && detail.thumbOk && !practice && detail.noSolo,
+    pass: world && detail.enterWorld && thumbIdentifiable && !practice && detail.noSolo && result70 && rematchOk,
     room,
     detail,
     hostEntry,
@@ -366,8 +466,13 @@ async function qaReFront(browser) {
     humansHost: (hostQa?.hudHumans || []).length,
     humansGuest: (guestQa?.hudHumans || []).length,
     practice,
-    exitToDetail,
-    note: "70% Result/Rematch/Another locked on Complete Sprint; this Preview confirms World + expand + no fallback.",
+    result70,
+    rematchOk,
+    anotherOk,
+    resultExitOk,
+    victory,
+    helperUsed: false,
+    note: "70% via EXPAND/Space only. No __RF_QA_END_ROUND__. Complete Sprint folder not overwritten.",
   };
 }
 

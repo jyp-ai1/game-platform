@@ -57,6 +57,21 @@ export const SNAKE_HEAD_CHARACTERS: Record<SnakeHeadId, SnakeHeadCharacter> = {
 };
 
 const STORAGE_KEY = "replay:snake-head-character";
+const COLOR_STORAGE_KEY = "replay:snake-body-color";
+const SNAKE_BODY_COLORS = [
+  "#22d3ee",
+  "#a78bfa",
+  "#f472b6",
+  "#fbbf24",
+  "#34d399",
+  "#60a5fa",
+  "#fb7185",
+  "#f97316",
+  "#4ade80",
+  "#eab308",
+] as const;
+
+export const DEFAULT_SNAKE_BODY_COLOR = SNAKE_BODY_COLORS[0];
 
 export interface SnakeBodyAppearance {
   headCharacter?: string;
@@ -81,6 +96,21 @@ export function saveSnakeHeadCharacter(id: SnakeHeadId): void {
   window.localStorage.setItem(STORAGE_KEY, id);
 }
 
+function isSnakeBodyColor(v: string): boolean {
+  return (SNAKE_BODY_COLORS as readonly string[]).some((c) => c.toLowerCase() === v.toLowerCase());
+}
+
+export function loadSnakeBodyColor(): string {
+  if (typeof window === "undefined") return DEFAULT_SNAKE_BODY_COLOR;
+  const raw = window.localStorage.getItem(COLOR_STORAGE_KEY);
+  return raw && isSnakeBodyColor(raw) ? raw : DEFAULT_SNAKE_BODY_COLOR;
+}
+
+export function saveSnakeBodyColor(color: string): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(COLOR_STORAGE_KEY, color);
+}
+
 export function randomSnakeHeadId(seed: number): SnakeHeadId {
   return SNAKE_HEAD_IDS[Math.abs(seed) % SNAKE_HEAD_IDS.length]!;
 }
@@ -90,10 +120,21 @@ export function resolveHeadEmoji(headId?: string): string {
   return "🐍";
 }
 
-/** Apply head + body appearance from character selection */
-export function applyCharacterToSnake(snake: SnakeBodyAppearance, headId: SnakeHeadId): void {
+/** Apply head + optional Color-step body. Bots omit bodyColor and keep character defaults. */
+export function applyCharacterToSnake(
+  snake: SnakeBodyAppearance,
+  headId: SnakeHeadId,
+  bodyColor?: string
+): void {
   const c = SNAKE_HEAD_CHARACTERS[headId];
   snake.headCharacter = headId;
+  if (bodyColor) {
+    snake.bodyColor = bodyColor;
+    snake.bodyColorAlt = undefined;
+    snake.bodyPattern = "normal";
+    snake.color = bodyColor;
+    return;
+  }
   snake.bodyColor = c.bodyColor;
   snake.bodyColorAlt = c.bodyColorAlt;
   snake.bodyPattern = c.bodyPattern;

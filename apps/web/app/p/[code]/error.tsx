@@ -1,10 +1,10 @@
 "use client";
 
-import { entryLog, entryLogFail } from "@game-platform/game-snake";
+import { entryLogFail } from "@game-platform/game-snake";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-/** Party link errors — never show global error; fall back to Snake Practice. */
+/** Party link errors — Retry / Back only. No Practice fallback. */
 export default function PartyLinkError({
   error,
 }: {
@@ -15,13 +15,21 @@ export default function PartyLinkError({
 
   useEffect(() => {
     entryLogFail("JOIN", error.message, { room: "party" });
-    entryLog("PRACTICE_FALLBACK", "party-error.tsx");
-    router.replace("/flagship/snake-io/play?room=PRACTICE&fallback=1");
-  }, [error, router]);
+  }, [error]);
 
   return (
-    <p className="py-16 text-center text-sm text-muted-foreground">
-      Practice Mode로 전환 중…
-    </p>
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
+      <p className="text-lg font-semibold">Connection failed</p>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        Could not open this party link. Retry or go back.
+      </p>
+      <button
+        type="button"
+        className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold"
+        onClick={() => router.push("/")}
+      >
+        Back
+      </button>
+    </div>
   );
 }

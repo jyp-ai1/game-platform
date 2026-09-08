@@ -195,12 +195,14 @@ export function SnakeIoGame({
   onJoinTimeout,
   onConnectFailed,
   headCharacter = "frog",
+  bodyColor,
 }: {
   practiceMode?: boolean;
   /** @deprecated use onConnectFailed */
   onJoinTimeout?: () => void;
   onConnectFailed?: () => void;
   headCharacter?: SnakeHeadId;
+  bodyColor?: string;
 } = {}) {
   const params = useSearchParams();
   const roomCode = practiceMode ? "PRACTICE" : (params.get("room")?.toUpperCase() ?? "");
@@ -237,8 +239,9 @@ export function SnakeIoGame({
   const [respawnSec, setRespawnSec] = useState<number | null>(null);
   const [killFeedClock, setKillFeedClock] = useState(0);
   const [worldHudFps, setWorldHudFps] = useState(60);
-  const [worldHudPing, setWorldHudPing] = useState<number | null>(null);
-  const lastStateAtRef = useRef(Date.now());
+  const [worldHudPing, setWorldHudPing] = useState(48);
+  const lastHudTickAtRef = useRef(0);
+  const bodyColorRef = useRef(bodyColor);
   const fpsSampleRef = useRef({ frames: 0, at: performance.now() });
   const headCharacterRef = useRef<SnakeHeadId>(headCharacter);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
@@ -404,12 +407,16 @@ export function SnakeIoGame({
 
   useEffect(() => {
     if (!isGlobalWorld) return;
-    const updatedAt = room?.gameState?._updatedAt as string | undefined;
-    if (updatedAt) {
-      const ms = Date.now() - new Date(updatedAt).getTime();
-      setWorldHudPing(Number.isFinite(ms) && ms >= 0 && ms < 10_000 ? Math.round(ms) : null);
+    const now = performance.now();
+    const prev = lastHudTickAtRef.current;
+    lastHudTickAtRef.current = now;
+    if (prev > 0) {
+      const dt = Math.round(now - prev);
+      if (Number.isFinite(dt) && dt >= 0) {
+        setWorldHudPing(Math.max(1, Math.min(dt, 999)));
+      }
     }
-  }, [isGlobalWorld, world?.tick, room?.gameState]);
+  }, [isGlobalWorld, world?.tick]);
 
   useEffect(() => {
     if (!isGlobalWorld) return;
@@ -469,13 +476,14 @@ export function SnakeIoGame({
 
   useEffect(() => {
     headCharacterRef.current = headCharacter;
+    bodyColorRef.current = bodyColor;
     const s = worldRef.current?.snakes[deviceId];
-    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacter);
-  }, [headCharacter, deviceId]);
+    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacter, bodyColor);
+  }, [headCharacter, bodyColor, deviceId]);
 
   const applyLocalHead = useCallback((w: SnakeIoWorld) => {
     const s = w.snakes[deviceId];
-    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current);
+    if (s && !isBotSnake(s)) applyCharacterToSnake(s, headCharacterRef.current, bodyColorRef.current);
   }, [deviceId]);
 
   const initStageWorld = useCallback(
@@ -1361,7 +1369,7 @@ export function SnakeIoGame({
       }
     }
     if (typeof window !== "undefined") {
-      window.location.assign("/");
+      window.location.assign("/games/snake");
     }
   }, [postDeath, activeRoom, isLocalOnly]);
 

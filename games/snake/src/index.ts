@@ -12,8 +12,11 @@ export { SnakeCharacterSelect } from "./SnakeCharacterSelect";
 export {
   SNAKE_HEAD_CHARACTERS,
   SNAKE_HEAD_IDS,
+  DEFAULT_SNAKE_BODY_COLOR,
   loadSnakeHeadCharacter,
   saveSnakeHeadCharacter,
+  loadSnakeBodyColor,
+  saveSnakeBodyColor,
   resolveHeadEmoji,
   type SnakeHeadId,
 } from "./snake-characters";
