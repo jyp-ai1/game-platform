@@ -1,10 +1,13 @@
 # WO 73184 — Multiplayer Game Experience & Product Shell
 
 ```text
-Sprint: OPEN — waiting CPO Product QA
+Sprint: 🟢 CLOSED
 CTO Final QA: PASS
-CPO Product QA: pending (read this path, not chat)
+CPO Product QA: PASS
+Production: game29 9fbb728
 ```
+
+Do not reopen without a new Work Order. Do not ask CEO to re-test.
 
 ## Deployment Target
 
@@ -27,20 +30,26 @@ game29-1n6uoufqw / dpl_3EvB4r1pfV1v4rT5XigkRSyZQqc3
 
 Legacy project
 game-platform (Vercel Project) : Removed / Do not use
+
+Retired baseline
+4319eb2
 ```
 
 ## Pipeline
 
 | Gate | Status |
 | --- | --- |
-| Implementation | done |
+| Implementation | 🟢 PASS |
 | Local typecheck | PASS (web / game-sdk / snake / bomber / agar) |
-| Local browser E2E | PASS — `local-browser.json` |
-| Preview Full E2E | PASS — `preview-e2e.json` |
+| Local browser E2E | 🟢 PASS — `local-browser.json` |
+| Preview Full E2E | 🟢 PASS — `preview-e2e.json` |
 | Production promote | done after Preview Full E2E |
-| Production Full E2E | PASS — `production-e2e.json` (24 checks) |
-| CTO Final QA | PASS |
-| CPO Product QA | **pending** |
+| Production Full E2E | 🟢 24/24 PASS — `production-e2e.json` |
+| CTO Final QA | 🟢 PASS |
+| CPO Product QA | 🟢 PASS |
+| Sprint | 🟢 CLOSED |
+
+CLOSE record: `final-close.json`
 
 ## What shipped vs baseline `4319eb2`
 
@@ -57,9 +66,7 @@ game-platform (Vercel Project) : Removed / Do not use
 
 ## Production E2E (game29)
 
-24/24 recorded PASS. Evidence: `evidence/production/`.
-
-Confirmed on Production:
+24/24 PASS. Evidence: `evidence/production/`.
 
 - `/play` = official 4 only
 - `/games` remains Discover
@@ -70,12 +77,8 @@ Confirmed on Production:
 - Re:Front leaves Character lobby after ENTER
 - Mobile catalog 390
 
-Host/Guest: first joiner after ghost/join-fail becomes Host (Preview + Production browser). Dual clients share `GL-AGAR` roster. If a live host already exists, new clients stay Guest — that is the contract, not Solo fallback.
+Host/Guest: first joiner after ghost/join-fail becomes Host. Dual clients share `GL-AGAR`. If a live host already exists, new clients stay Guest.
 
 ## Forbidden (Product CTA)
 
 PRACTICE · fallback=1 · BOMBER-SOLO · silent Solo · infinite Connecting · Another Game → `/games` · Exit → Home
-
-## CPO next
-
-Product QA once from this path. Sprint stays OPEN until CPO closes it. Do not ask CEO to mid-test.

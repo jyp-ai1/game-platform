@@ -3,9 +3,9 @@ description: Project Phoenix vNext — Browser Game Ecosystem Complete Edition
 alwaysApply: true
 ---
 
-> **Current CTO operating context (2026-09-07):** follow `.cursor/rules/cto-handover.mdc`.
+> **Current CTO operating context (2026-09-09):** follow `.cursor/rules/cto-handover.mdc`.
 > Stale gates below (Playtest code freeze, Puzzle 15 lock, Stage 1 Home Recovery) are historical.
-> Current Gate: 4/4 MP Product CLOSED · Production HOLD. Do not reopen PASS games.
+> Current Gate: WO 73184 CLOSED · Production game29 `9fbb728`. Do not reopen without a new Work Order.
 
 # Project Phoenix Master Task vNext
 
