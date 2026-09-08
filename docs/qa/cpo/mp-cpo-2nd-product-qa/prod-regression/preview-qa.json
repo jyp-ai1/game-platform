@@ -1,0 +1,152 @@
+{
+  "gate": "prod-regression-preview",
+  "baseUrl": "https://game29-b24dwz7lu-jyp-ai1s-projects.vercel.app",
+  "commit": "163aba7",
+  "vercelProject": "game29",
+  "productionDeployed": false,
+  "startedAt": "2026-09-08T02:09:39.127Z",
+  "games": {
+    "snake": {
+      "pass": true,
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "moreOfficial": [
+          "agar",
+          "bomber",
+          "re-front"
+        ],
+        "arcadeLeak": false,
+        "thumbOk": true,
+        "ctaHref": "/games/snake/play?room=WORLD",
+        "moreText": "MORE GAMES\n\nAgar\n\n세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요.\n\nPLAY\n\nBomber\n\n폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.\n\nPLAY\n\nRe:Front\n\n영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.\n\nPLAY"
+      },
+      "hud": {
+        "bots": 29,
+        "pingMs": null,
+        "minimap": true,
+        "exit": true,
+        "connectFailed": false,
+        "path": "/flagship/snake-io/play"
+      },
+      "pingOk": true,
+      "exitToDetail": false,
+      "fallbackFree": true
+    },
+    "agar": {
+      "pass": true,
+      "room": "AGAR-PV-S17H2V",
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "moreOfficial": [
+          "snake",
+          "bomber",
+          "re-front"
+        ],
+        "arcadeLeak": false,
+        "thumbOk": true,
+        "ctaHref": "/games/agar/play?room=GL-AGAR",
+        "moreText": "MORE GAMES\n\nSnake\n\n다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요.\n\nPLAY\n\nBomber\n\n폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.\n\nPLAY\n\nRe:Front\n\n영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.\n\nPLAY"
+      },
+      "hostEntry": {
+        "clicked": "mp-enter-world",
+        "ok": true,
+        "reason": "ready"
+      },
+      "guestEntry": {
+        "clicked": "mp-enter-world",
+        "ok": true,
+        "reason": "ready"
+      },
+      "world": true,
+      "hostRole": "host",
+      "guestRole": "guest",
+      "exitToDetail": true,
+      "fallbackFree": true
+    },
+    "bomber": {
+      "pass": true,
+      "room": "BOMBER-PV-7H2V",
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "moreOfficial": [
+          "snake",
+          "agar",
+          "re-front"
+        ],
+        "arcadeLeak": false,
+        "thumbOk": true,
+        "ctaHref": "/games/bomber/play?room=BOMBER-A",
+        "moreText": "MORE GAMES\n\nSnake\n\n다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요.\n\nPLAY\n\nAgar\n\n세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요.\n\nPLAY\n\nRe:Front\n\n영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.\n\nPLAY"
+      },
+      "hostEntry": {
+        "clicked": "mp-enter-world",
+        "ok": true,
+        "reason": "ready"
+      },
+      "guestEntry": {
+        "clicked": "mp-enter-world",
+        "ok": true,
+        "reason": "ready"
+      },
+      "map": {
+        "tiles": 196,
+        "w": 672,
+        "h": 672
+      },
+      "mapVisible": true,
+      "moved": true,
+      "exitToDetail": true
+    },
+    "re-front": {
+      "pass": true,
+      "room": "RF-PV-S17H2V",
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "moreOfficial": [
+          "snake",
+          "agar",
+          "bomber"
+        ],
+        "arcadeLeak": false,
+        "thumbOk": true,
+        "ctaHref": "/games/re-front/play?room=RF-LOBBY",
+        "moreText": "MORE GAMES\n\nSnake\n\n다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요.\n\nPLAY\n\nAgar\n\n세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요.\n\nPLAY\n\nBomber\n\n폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.\n\nPLAY"
+      },
+      "hostEntry": {
+        "clicked": "mp-enter-world",
+        "ok": true,
+        "reason": "ready"
+      },
+      "guestEntry": {
+        "clicked": "mp-enter-world",
+        "ok": true,
+        "reason": "ready"
+      },
+      "hostRole": "host",
+      "guestRole": "guest",
+      "hostPct": 0.88,
+      "afterPct": 3.22,
+      "humansHost": 2,
+      "humansGuest": 2,
+      "practice": false,
+      "exitToDetail": false,
+      "note": "70% Result/Rematch/Another locked on Complete Sprint; this Preview confirms World + expand + no fallback."
+    }
+  },
+  "projectCheck": {
+    "host": "game29-b24dwz7lu-jyp-ai1s-projects.vercel.app",
+    "isGame29": true,
+    "isLegacy": false,
+    "isProd": false
+  },
+  "verdict": "PASS",
+  "finishedAt": "2026-09-08T02:11:19.084Z"
+}

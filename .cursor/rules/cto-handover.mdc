@@ -164,9 +164,9 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
 ## Next CTO work (priority)
 
-1. Targeted Production regression fixes are in progress — not a rollback.
-2. Official path: `docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md`
-3. Preview Host/Guest on 4 games, then CPO Production approve. Do not revert a7ae3aa / Re:Front.
+1. Preview QA is in `docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md`.
+2. Wait for CPO Production approval. Do not promote game29 until then.
+3. Do not revert a7ae3aa / Re:Front.
 
 ## CTO chat status (keep short)
 
