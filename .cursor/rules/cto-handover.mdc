@@ -1,5 +1,5 @@
 ---
-description: Re:Play CTO current operating context — WO 73184 Long Sprint OPEN, Production baseline game29 4319eb2
+description: Re:Play CTO current operating context — WO 73184 OPEN, CTO Final QA PASS, Production game29 9fbb728
 alwaysApply: true
 ---
 
@@ -11,16 +11,18 @@ This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Pl
 
 ```text
 WO 73184  Multiplayer Game Experience & Product Shell  🟡 OPEN
-Baseline Production                                    game29 4319eb2
+CTO Final QA                                           🟢 PASS
+CPO Product QA                                         pending
 ----------------------------
 4/4 MP Product Gate              🟢 CLOSED (do not reopen)
 Targeted Fix Finalization        🟢 CPO CLOSED
 Multiplayer Productization       🟢 CLOSED
-Production                       🟢 PASS  game29 4319eb2  (baseline — do not promote until 73184 Preview Full E2E)
+Production                       🟢 game29 9fbb728
 ```
 
-- **Production baseline:** https://game29.vercel.app @ `4319eb2`
-- **Deploy:** `game29-152liulhl` / `dpl_w22PPaF1sPLac3HTuMYBV5Fms6YU`
+- **Production:** https://game29.vercel.app @ `9fbb728`
+- **Deploy:** `game29-1n6uoufqw` / `dpl_3EvB4r1pfV1v4rT5XigkRSyZQqc3`
+- **Preview Visit:** `https://game29-8d9mothrt-jyp-ai1s-projects.vercel.app`
 - **This Sprint evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-experience-73184/`
 - **Prior CLOSE:** `docs/qa/cpo/mp-cpo-2nd-product-qa/multiplayer-productization/`
 - **Territory War:** Deprecated / Deleted
@@ -93,7 +95,7 @@ The common shell epic is **CPO Product CLOSED**. WO **73184** is the new Long Sp
 | Targeted Fix Finalization | **CLOSED** |
 | Multiplayer Productization | **CLOSED** |
 | WO 73184 Experience Long Sprint | **OPEN** |
-| Production | **PASS baseline** — game29 `4319eb2` (promote only after 73184 Preview Full E2E) |
+| Production | **game29 `9fbb728`** — 73184 promoted after Preview Full E2E |
 | Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED — preserve engine; apply common shell only |
 
 CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
@@ -114,8 +116,8 @@ Do not overwrite CLOSED `multiplayer-productization/` or `prod-regression/`. CPO
 ## Latest deploy
 
 - **Production:** `https://game29.vercel.app`
-- **Commit:** `4319eb2`
-- **Deploy:** `game29-152liulhl` / `dpl_w22PPaF1sPLac3HTuMYBV5Fms6YU`
+- **Commit:** `9fbb728`
+- **Deploy:** `game29-1n6uoufqw` / `dpl_3EvB4r1pfV1v4rT5XigkRSyZQqc3`
 - **Branch:** `promote/product-catalog`
 
 ## Operating principles
@@ -124,7 +126,7 @@ Do not overwrite CLOSED `multiplayer-productization/` or `prod-regression/`. CPO
 2. Keep CTO Technical PASS and CPO Product PASS separate.
 3. Manage QA evidence in the official repo path.
 4. CTO writes the report in repo. CPO judges from that path.
-5. Production is live at game29 `4319eb2`. WO 73184 may promote only after Preview Full E2E PASS.
+5. Production is live at game29 `9fbb728` (WO 73184). CPO Product QA is still pending.
 6. Do not reopen CLOSED Productization / 4/4 MP Gate as FAIL. Fix only 73184 play-loop and shell gaps.
 7. New change → minimum Work Order → Technical QA → CPO QA → deploy approval.
 
@@ -166,7 +168,7 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
 ## Next CTO work (priority)
 
-1. Execute WO **73184** to CTO Final QA + repo evidence. No CEO mid-test. No CPO drip fixes.
+1. WO **73184** CTO Final QA is in `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-experience-73184/`. Wait for CPO Product QA. No CEO mid-test.
 2. Do not rewrite Re:Front engine. Do not touch STEP4. Do not reconnect Territory War.
 3. Official evidence: `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-experience-73184/`
 4. Production promote of 73184 only after Preview Full E2E PASS.
@@ -186,4 +188,4 @@ Production: game29 <SHA>
 
 ## Remember
 
-1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Multiplayer Productization is CPO CLOSED. 13. WO 73184 is OPEN. 14. Production baseline is game29 `4319eb2`. 15. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.
+1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Multiplayer Productization is CPO CLOSED. 13. WO 73184 is OPEN pending CPO Product QA. 14. Production is game29 `9fbb728`. 15. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.
