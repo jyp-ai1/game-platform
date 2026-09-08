@@ -185,7 +185,7 @@ export function MultiplayerPlayShell({
           onFocus={focusBoard}
           onBlur={onBoardBlur}
           className={cn(
-            "relative aspect-square min-w-0 w-full flex-1 overflow-hidden rounded-xl border border-white/10 bg-black touch-none select-none outline-none focus:outline-none",
+            "relative aspect-square w-full max-w-[36rem] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black touch-none select-none outline-none focus:outline-none",
             isGameFullscreen && "max-h-[min(100dvh,100dvw)] max-w-[min(100dvh,100dvw)]",
             boardClassName
           )}
