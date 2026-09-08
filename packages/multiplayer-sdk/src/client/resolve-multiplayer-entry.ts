@@ -43,7 +43,7 @@ export type MultiplayerEntryResult = MultiplayerEntrySuccess | MultiplayerEntryF
 /** Canonical default WORLD/shard codes — keep in sync with apps/web/lib/game-catalog.ts */
 export const DEFAULT_ROOM_BY_SLUG: Record<MultiplayerFlagshipSlug, string> = {
   snake: "WORLD",
-  agar: "WORLD",
+  agar: "GL-AGAR",
   bomber: "BOMBER-A",
   "re-front": "RF-LOBBY",
 };
@@ -63,7 +63,12 @@ export function resolveRoomCodeFromLocation(
   const params = search ?? new URLSearchParams(window.location.search);
   const raw = params.get("room") ?? params.get("invite");
   const code = raw?.trim().toUpperCase();
-  return code && code.length > 0 ? code : resolveDefaultRoomCode(gameSlug);
+  if (!code) return resolveDefaultRoomCode(gameSlug);
+  // WORLD is Snake's global shard. Other games must not join it.
+  if (code === "WORLD" && gameSlug !== "snake") {
+    return resolveDefaultRoomCode(gameSlug);
+  }
+  return code;
 }
 
 /** Age of last room gameState update — Infinity when missing. */

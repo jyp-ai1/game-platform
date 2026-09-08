@@ -457,7 +457,7 @@ export function AgarGame() {
             className="flex aspect-square w-full max-w-xl flex-col items-center justify-center gap-3 rounded-xl border border-white/15 bg-card/60 p-8"
           >
             <p className="text-lg font-semibold">Connecting…</p>
-            <p className="text-sm text-muted-foreground">Joining WORLD room</p>
+            <p className="text-sm text-muted-foreground">Joining {roomCode}</p>
           </div>
         ) : connectError ? (
           <div

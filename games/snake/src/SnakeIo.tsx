@@ -406,7 +406,8 @@ export function SnakeIoGame({
     if (!isGlobalWorld) return;
     const updatedAt = room?.gameState?._updatedAt as string | undefined;
     if (updatedAt) {
-      setWorldHudPing(Math.max(0, Math.round(Date.now() - new Date(updatedAt).getTime())));
+      const ms = Date.now() - new Date(updatedAt).getTime();
+      setWorldHudPing(Number.isFinite(ms) && ms >= 0 && ms < 10_000 ? Math.round(ms) : null);
     }
   }, [isGlobalWorld, world?.tick, room?.gameState]);
 

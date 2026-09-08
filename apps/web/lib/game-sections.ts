@@ -1,5 +1,7 @@
 import type { Game } from "@game-platform/shared";
 
+import { isProductFlagshipSlug, PRODUCT_FLAGSHIP_SLUGS } from "@/lib/product-catalog-sync";
+
 const NEW_WINDOW_DAYS = 14;
 
 export function isRecentlyCreated(createdAt: string): boolean {
@@ -120,11 +122,16 @@ export function selectBySlugs(games: Game[], slugs: string[], limit = 8): Game[]
     .slice(0, limit);
 }
 
-/** Detail / game-over picks — related first, flagship fallback (real catalog only). */
+/** Detail MORE GAMES — official 4 stay together; other slugs use tag related. */
 export function selectMoreGames(games: Game[], current: Game, limit = 3): Game[] {
+  if (isProductFlagshipSlug(current.slug)) {
+    return selectBySlugs(games, [...PRODUCT_FLAGSHIP_SLUGS], limit + 1)
+      .filter((g) => g.slug !== current.slug)
+      .slice(0, limit);
+  }
   const related = selectRelated(games, current, limit);
   if (related.length >= 2) return related;
-  return selectBySlugs(games, ["snake", "agar", "bomber", "re-front"], limit + 1)
+  return selectBySlugs(games, [...PRODUCT_FLAGSHIP_SLUGS], limit + 1)
     .filter((g) => g.slug !== current.slug)
     .slice(0, limit);
 }

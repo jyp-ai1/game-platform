@@ -56,7 +56,7 @@ export function SnakeCharacterSelect({
           className="h-14 min-w-[220px] text-base font-bold bg-violet-600 hover:bg-violet-500"
           onClick={onConfirm}
         >
-          START
+          ENTER
         </Button>
         <p className="text-xs text-muted-foreground">Press Start</p>
       </div>

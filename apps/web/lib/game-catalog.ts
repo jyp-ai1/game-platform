@@ -60,8 +60,8 @@ export const REPLAY_DETAIL_SOLO_CTA = "ENTER WORLD";
 
 export function playHrefForCatalogSlug(slug: string): string {
   // Detail CTA → Character/Color entry (flagship Snake or /games/{slug}/play).
-  if (slug === "snake") return "/flagship/snake-io/play?room=WORLD";
-  if (slug === "agar") return "/games/agar/play?room=WORLD";
+  if (slug === "snake") return "/games/snake/play?room=WORLD";
+  if (slug === "agar") return "/games/agar/play?room=GL-AGAR";
   if (slug === "bomber") return "/games/bomber/play?room=BOMBER-A";
   if (slug === "re-front") return "/games/re-front/play?room=RF-LOBBY";
   return `/games/${slug}/play`;

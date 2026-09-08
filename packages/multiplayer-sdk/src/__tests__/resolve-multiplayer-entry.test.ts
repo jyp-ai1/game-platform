@@ -48,7 +48,7 @@ describe("resolve-multiplayer-entry", () => {
     assert.equal(resolveDefaultRoomCode("snake"), "WORLD");
     assert.equal(resolveDefaultRoomCode("bomber"), "BOMBER-A");
     assert.equal(resolveDefaultRoomCode("re-front"), "RF-LOBBY");
-    assert.equal(DEFAULT_ROOM_BY_SLUG.agar, "WORLD");
+    assert.equal(DEFAULT_ROOM_BY_SLUG.agar, "GL-AGAR");
   });
 
   it("resolveRoomCodeFromLocation — query param or default", () => {
@@ -56,6 +56,15 @@ describe("resolve-multiplayer-entry", () => {
     assert.equal(resolveRoomCodeFromLocation("bomber"), "BOMBER-B");
     mockWindow("");
     assert.equal(resolveRoomCodeFromLocation("bomber"), "BOMBER-A");
+  });
+
+  it("resolveRoomCodeFromLocation — Agar WORLD remaps off Snake shard", () => {
+    mockWindow("?room=WORLD");
+    assert.equal(resolveRoomCodeFromLocation("agar"), "GL-AGAR");
+    mockWindow("?room=WORLD");
+    assert.equal(resolveRoomCodeFromLocation("snake"), "WORLD");
+    mockWindow("?room=AGAR-FORENSIC-1");
+    assert.equal(resolveRoomCodeFromLocation("agar"), "AGAR-FORENSIC-1");
   });
 
   it("isListedHostPresent — host in roster", () => {

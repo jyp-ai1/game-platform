@@ -26,13 +26,13 @@ const MODE_BY_SLUG: Record<ProductFlagshipSlug, ProductGameModes> = {
     solo: true,
     multiplayer: true,
     soloHref: "/flagship/snake-io/play?room=PRACTICE&fallback=1",
-    multiplayerHref: "/flagship/snake-io/play?room=WORLD",
+    multiplayerHref: "/games/snake/play?room=WORLD",
   },
   agar: {
     solo: true,
     multiplayer: true,
     soloHref: "/games/agar/play?room=PRACTICE",
-    multiplayerHref: "/games/agar/play?room=WORLD",
+    multiplayerHref: "/games/agar/play?room=GL-AGAR",
   },
   bomber: {
     solo: true,
