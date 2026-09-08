@@ -5,9 +5,8 @@
 ```text
 4/4 MP Product Gate   🟢 CLOSED (a7ae3aa)
 Snake / Bomber / Agar not re-QA’d
-Re:Front Complete     CTO PASS
-CPO Product QA        pending
-Production            🔒 HOLD
+Re:Front Complete     🟢 CPO PRODUCT PASS
+Production            🟢 PASS
 ```
 
 ## Product
@@ -62,8 +61,27 @@ Room: `RF-FIN-MTRGX66T`. Browser A = Host `RFHostFIN`. Browser B = Guest `RFGues
 ### Commits
 
 - Game: `b66422a`
-- Preview: https://game29-k8rrave69-jyp-ai1s-projects.vercel.app
-- Production: NOT DEPLOYED
+- Evidence / deploy SHA: `e2b21bb`
+- Preview (CPO QA): https://game29-k8rrave69-jyp-ai1s-projects.vercel.app
+- Production: https://game29.vercel.app
+
+## Production
+
+Vercel Project: **game29**. Legacy `game-platform` Production was not used.
+
+| Item | Result |
+| --- | --- |
+| Promote | PASS — `game29-7hi88u5jo` → Production |
+| Git | `main` fast-forwarded to `e2b21bb` |
+| GitHub | Production – game29 `6317910625` success |
+| Detail | PASS |
+| ENTER WORLD / Character / Color / ENTER | PASS |
+| Host + Guest World | PASS — room `RF-FIN-MTRXYHWZ` |
+| Host ↔ Guest sync | PASS — 0.88% → 1.07% / 1.37% |
+| Gameplay + real 70.02% win | PASS — no end-round helper, no Practice fallback |
+| Result / REMATCH / ANOTHER GAME / EXIT | PASS |
+
+Smoke evidence is the current `evidence/01–10.png` captured on `https://game29.vercel.app`.
 
 ## Evidence
 

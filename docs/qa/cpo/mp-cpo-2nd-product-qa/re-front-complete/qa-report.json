@@ -1,10 +1,10 @@
 {
   "gate": "re-front-complete-final",
-  "baseUrl": "https://game29-k8rrave69-jyp-ai1s-projects.vercel.app",
-  "room": "RF-FIN-MTRGX66T",
+  "baseUrl": "https://game29.vercel.app",
+  "room": "RF-FIN-MTRXYHWZ",
   "expandHookUsed": false,
   "endRoundHelperUsed": false,
-  "startedAt": "2026-09-07T16:41:46.134Z",
+  "startedAt": "2026-09-08T00:38:41.460Z",
   "detailEnterWorld": true,
   "entryLobby": true,
   "mp": {
@@ -48,7 +48,7 @@
   },
   "gameplay": {
     "pct": 1.07,
-    "troops": 221.14839999999998,
+    "troops": 225.81640000000002,
     "role": "host",
     "nick": "RFHostFIN",
     "humans": [
@@ -71,7 +71,7 @@
   },
   "victory": {
     "pct": 70.02,
-    "troops": 7996,
+    "troops": 7968,
     "role": "host",
     "nick": "RFHostFIN",
     "humans": [
@@ -91,7 +91,7 @@
     "bodyHasHost": true,
     "bodyHasGuest": true,
     "botsVisible": true,
-    "playMs": 140539
+    "playMs": 140788
   },
   "rematch": {
     "backInWorld": true,
@@ -99,7 +99,7 @@
   },
   "victory2": {
     "pct": 70.02,
-    "troops": 7988,
+    "troops": 7992,
     "role": "host",
     "nick": "RFHostFIN",
     "humans": [
@@ -119,15 +119,15 @@
     "bodyHasHost": true,
     "bodyHasGuest": true,
     "botsVisible": true,
-    "playMs": 141173
+    "playMs": 140936
   },
   "anotherGame": {
-    "url": "https://game29-k8rrave69-jyp-ai1s-projects.vercel.app/games",
+    "url": "https://game29.vercel.app/games",
     "ok": true
   },
   "victory3": {
     "pct": 70.02,
-    "troops": 7996,
+    "troops": 7992,
     "role": "host",
     "nick": "RFHostFIN",
     "humans": [
@@ -143,13 +143,13 @@
     "bodyHasHost": true,
     "bodyHasGuest": false,
     "botsVisible": true,
-    "playMs": 141019
+    "playMs": 141015
   },
   "exit": {
-    "url": "https://game29-k8rrave69-jyp-ai1s-projects.vercel.app/games/re-front",
+    "url": "https://game29.vercel.app/games/re-front",
     "ok": true
   },
   "pass": true,
   "verdict": "PASS",
-  "finishedAt": "2026-09-07T16:49:02.609Z"
+  "finishedAt": "2026-09-08T00:46:05.329Z"
 }

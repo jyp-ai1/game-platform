@@ -13,16 +13,17 @@ This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Pl
 Snake      🟢 PASS
 Bomber     🟢 PASS
 Agar       🟢 PASS
-Re:Front   🟢 PASS
+Re:Front   🟢 PASS · Complete LOCKED
 ----------------------------
 4/4 MP Product Gate   🟢 CLOSED
-Production            🔒 HOLD
+Re:Front Complete     🟢 CPO PRODUCT PASS
+Production            🟢 PASS  game29 e2b21bb
 ```
 
 - **Re:Front Preview (gate build):** `8fd85d5`
 - **Clean-room:** `RF-CPO-VIS-MTR1CHT1`
 - **Re:Front MP extra fix / re-QA:** none
-- **Production deploy:** forbidden until a separate CPO approval
+- **Production:** https://game29.vercel.app @ `e2b21bb`
 - **Territory War:** Deprecated / Deleted
 
 Do **not** start new features or Production deploy without a new CPO Work Order.
@@ -88,8 +89,8 @@ This epic is **CPO Product CLOSED**. Do not reopen PASS games for extra polish o
 | Preview 4/4 Matrix | PASS |
 | CPO 2nd Product QA | **CLOSED** |
 | 4/4 MP Product Gate | **CLOSED** |
-| Production | **HOLD** |
-| Re:Front Long Sprint | CTO PASS — waiting CPO Product QA |
+| Production | **PASS** — game29 `e2b21bb` |
+| Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED |
 
 CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
 
@@ -111,10 +112,9 @@ Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 
 ## Latest deploy
 
-- **Preview (Re:Front Complete):** `https://game29-k8rrave69-jyp-ai1s-projects.vercel.app`
-- **Game commit:** `b66422a`
-- **Branch:** `promote/product-catalog`
-- **Production:** do not change.
+- **Production:** `https://game29.vercel.app`
+- **Commit:** `e2b21bb` (game `b66422a`)
+- **Branch:** `main` (FF from `promote/product-catalog`)
 
 ## Operating principles
 
@@ -122,7 +122,7 @@ Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 2. Keep CTO Technical PASS and CPO Product PASS separate.
 3. Manage QA evidence in the official repo path.
 4. CTO writes the report in repo. CPO judges from that path.
-5. Production stays HOLD until a separate CPO approval.
+5. Production is live at game29 `e2b21bb`. New Production deploys need a new CPO approval.
 6. Do not issue extra fix/re-QA on PASS/CLOSED games.
 7. New change → minimum Work Order → Technical QA → CPO QA → deploy approval.
 
@@ -151,16 +151,12 @@ CPO Product QA happens **once**, after CTO Final QA PASS. HOLD stays inside the 
 
 Do not reopen Snake / Bomber / Agar. Do not reopen the 4/4 MP Product Gate.
 
-## Re:Front Long Sprint (current)
+## Re:Front Long Sprint (LOCKED)
 
-Target: finish Re:Front as a complete product on Baseline `a7ae3aa`.
+Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
-- Honest **70%** territory win by real play (no end-round helper)
-- Playable map (`RF_GRID` 32) so 70% is reachable in ~10–15 minutes
-- EXPAND stays available after the first-session tutorial
-- Result + REMATCH / ANOTHER GAME / EXIT
 - Official path: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
-- Production: HOLD
+- Do not reopen unless a new Work Order names a real FAIL.
 
 ## Comments / Real Player
 
@@ -168,9 +164,9 @@ Target: finish Re:Front as a complete product on Baseline `a7ae3aa`.
 
 ## Next CTO work (priority)
 
-1. CPO Product QA for Re:Front Long Sprint (`re-front-complete/`). Do not reopen 4/4 MP QA.
-2. No Production deploy until a separate CPO approval.
-3. After CPO PASS: lock Re:Front, then the next named game Sprint.
+1. Wait for the next named-game Long Sprint Work Order.
+2. Do not reopen Snake / Bomber / Agar / Re:Front.
+3. New Production deploys need a new CPO approval.
 
 ## CTO chat status (keep short)
 
@@ -187,4 +183,4 @@ Production: NOT DEPLOYED
 
 ## Remember
 
-1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Production is HOLD.
+1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Production is live on game29 `e2b21bb`.
