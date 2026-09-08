@@ -1,0 +1,35 @@
+{
+  "gate": "bomber-shared-shard",
+  "label": "preview",
+  "baseUrl": "https://game29-mqv62lr7k-jyp-ai1s-projects.vercel.app",
+  "commit": "43f6270",
+  "deployment": "game29-mqv62lr7k",
+  "vercelProject": "game29",
+  "startedAt": "2026-09-08T06:27:33.023Z",
+  "detail": {
+    "enterWorld": true,
+    "multiplayer": true,
+    "noSolo": true,
+    "href": "/games/bomber/play?room=BOMBER-A"
+  },
+  "host": {
+    "tiles": 196,
+    "w": 672,
+    "h": 672,
+    "you": true,
+    "fail": false,
+    "connecting": false,
+    "noFallback": true
+  },
+  "guest": {
+    "tiles": 202,
+    "w": 672,
+    "h": 672,
+    "you": true,
+    "fail": false,
+    "connecting": false,
+    "noFallback": true
+  },
+  "verdict": "PASS",
+  "finishedAt": "2026-09-08T06:27:50.858Z"
+}

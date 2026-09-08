@@ -2,7 +2,7 @@
 
 ```text
 Sprint                 Targeted Fix Finalization
-Production             game29 · 91e3a16 · game29-qxkm6nssp
+Production             game29 · 43f6270 · game29-g4u6m9dur
 Vercel                 game29
 Legacy game-platform   not used
 ```
@@ -101,7 +101,7 @@ Path: docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md
 Commit: 91e3a16
 Preview: https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app
 CTO Verdict: PASS
-Production: game29 · 91e3a16 · smoke 3/4 World · Bomber World FAIL
+Production: game29 · 43f6270 · Bomber shared-shard re-verify PASS
 ```
 
 ## Production
@@ -150,11 +150,27 @@ game-platform (Vercel Project) : Removed / Do not use
 
 Same commit `91e3a16` already showed Bomber Host 672×672 on Preview. Production World miss is shared-shard occupancy (live-looking host, no state ack), not a new game-src change.
 
+### Bomber targeted fix (CPO Work Order)
+
+Root cause: BOMBER-A..D keep a leftover host roster. Postgres often omits the sim blob. Guest waited for ack, then treated the leftover row as a live host → Connection failed. No Solo fallback.
+
+Fix (`games/bomber/src/` only): after join-fail or ack timeout, reclaim the shard as Multiplayer Host. Snake / Agar / Re:Front not touched.
+
+| Step | Result |
+| --- | --- |
+| Preview | https://game29-mqv62lr7k-jyp-ai1s-projects.vercel.app · `43f6270` · Host/Guest `BOMBER-A` 672×672 · no Solo |
+| Production | https://game29.vercel.app · `game29-g4u6m9dur` / `dpl_HeAmjt7c5iWdXvwC8wv2SkcZJxv2` · Host 196 tiles 672×672 · Guest 201 tiles 672×672 · no Connection failed · no Solo / Practice / `fallback=1` / `BOMBER-SOLO` |
+
+`bomber-fix-preview.json` · `bomber-fix-production.json` · `evidence/bomber-fix-preview/` · `evidence/bomber-fix-production/`
+
+Snake / Agar / Re:Front were not re-modified. Prior Production smoke PASS for those games still stands.
+
 ### Sprint
 
 ```text
 CPO Product PASS → CTO Production Promote → Production Smoke
-Promote: DONE · game29 · 91e3a16
-Smoke: 3/4 World PASS · Bomber World FAIL · fail path PASS
-Targeted Fix Sprint: OPEN until CPO accepts this smoke or names a Bomber Work Order
+Bomber blocker: FIX DEPLOYED · game29 · 43f6270
+Preview shared-shard Host/Guest: PASS
+Production shared-shard Host/Guest: PASS
+Sprint: OPEN — CPO CLOSE 판정 대기
 ```
