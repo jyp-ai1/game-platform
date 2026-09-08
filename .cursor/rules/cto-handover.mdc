@@ -1,9 +1,9 @@
 ---
-description: Re:Play CTO current operating context — 4/4 MP Product Gate CLOSED, Production HOLD
+description: Re:Play CTO current operating context — Targeted Fix CLOSED, Production PASS game29 43f6270
 alwaysApply: true
 ---
 
-# Re:Play — CTO Operating Context (2026-09-07)
+# Re:Play — CTO Operating Context (2026-09-08)
 
 This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Playtest code freeze, Puzzle 15, Stage 1 Home Recovery) for current work.
 
@@ -15,18 +15,19 @@ Bomber     🟢 PASS
 Agar       🟢 PASS
 Re:Front   🟢 PASS · Complete LOCKED
 ----------------------------
-4/4 MP Product Gate   🟢 CLOSED
-Re:Front Complete     🟢 CPO PRODUCT PASS
-Production            🟢 PASS  game29 e2b21bb
+4/4 MP Product Gate              🟢 CLOSED
+Targeted Fix Finalization        🟢 CPO CLOSED
+Production                       🟢 PASS  game29 43f6270
 ```
 
-- **Re:Front Preview (gate build):** `8fd85d5`
-- **Clean-room:** `RF-CPO-VIS-MTR1CHT1`
-- **Re:Front MP extra fix / re-QA:** none
-- **Production:** https://game29.vercel.app @ `e2b21bb`
+- **Production:** https://game29.vercel.app @ `43f6270`
+- **Deploy:** `game29-g4u6m9dur` / `dpl_HeAmjt7c5iWdXvwC8wv2SkcZJxv2`
+- **Close evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md` (`159c823`)
 - **Territory War:** Deprecated / Deleted
 
 Do **not** start new features or Production deploy without a new CPO Work Order.
+
+Evidence channel: **CTO → Repository official path → CPO direct verify → 판정**. Do not use CEO as messenger.
 
 ## Role
 
@@ -89,7 +90,8 @@ This epic is **CPO Product CLOSED**. Do not reopen PASS games for extra polish o
 | Preview 4/4 Matrix | PASS |
 | CPO 2nd Product QA | **CLOSED** |
 | 4/4 MP Product Gate | **CLOSED** |
-| Production | **PASS** — game29 `e2b21bb` |
+| Targeted Fix Finalization | **CLOSED** |
+| Production | **PASS** — game29 `43f6270` |
 | Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED |
 
 CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
@@ -113,8 +115,9 @@ Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 ## Latest deploy
 
 - **Production:** `https://game29.vercel.app`
-- **Commit:** `e2b21bb` (game `b66422a`)
-- **Branch:** `main` (FF from `promote/product-catalog`)
+- **Commit:** `43f6270`
+- **Deploy:** `game29-g4u6m9dur`
+- **Branch:** `promote/product-catalog`
 
 ## Operating principles
 
@@ -122,7 +125,7 @@ Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 2. Keep CTO Technical PASS and CPO Product PASS separate.
 3. Manage QA evidence in the official repo path.
 4. CTO writes the report in repo. CPO judges from that path.
-5. Production is live at game29 `e2b21bb`. New Production deploys need a new CPO approval.
+5. Production is live at game29 `43f6270`. New Production deploys need a new CPO approval.
 6. Do not issue extra fix/re-QA on PASS/CLOSED games.
 7. New change → minimum Work Order → Technical QA → CPO QA → deploy approval.
 
@@ -164,9 +167,9 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
 ## Next CTO work (priority)
 
-1. Preview QA is in `docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md`.
-2. Wait for CPO Production approval. Do not promote game29 until then.
-3. Do not revert a7ae3aa / Re:Front.
+1. Do not reopen Snake / Agar / Bomber / Re:Front unless a new CPO Work Order names a real FAIL.
+2. Do not Production-deploy without a new CPO Work Order.
+3. Official evidence path: `docs/qa/cpo/mp-cpo-2nd-product-qa/` — CPO reads the repo, not CEO chat.
 
 ## CTO chat status (keep short)
 
@@ -178,9 +181,9 @@ Path: docs/qa/cpo/mp-cpo-2nd-product-qa/<game-sprint>/qa-report.md
 Commit:
 Preview:
 CTO Verdict: PASS
-Production: NOT DEPLOYED
+Production: game29 <SHA>
 ```
 
 ## Remember
 
-1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Production is live on game29 `e2b21bb`.
+1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Production is live on game29 `43f6270`. 13. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.

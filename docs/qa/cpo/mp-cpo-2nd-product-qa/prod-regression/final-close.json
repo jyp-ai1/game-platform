@@ -15,12 +15,15 @@
     "noSoloPracticeFallback": true,
     "snakeAgarReFrontMaintained": true,
     "ctoFinalQa": "PASS",
-    "sprint": "READY FOR CPO CLOSE"
+    "sprint": "CLOSED",
+    "cpoProductClose": "CLOSED"
   },
   "notes": {
     "bomberHostGuest": "BOMBER-A Host HOST + Guest SYNC, 672x672",
     "retryBack": "Retry/Back captured on Production evidence/production/bomber-03-fail-retry.png. 43f6270 Host/Guest enter did not hit Connection failed.",
     "otherGames": "Snake/Agar/Re:Front src not changed in 43f6270. Prior Production smoke PASS stands."
   },
-  "ctoVerdict": "PASS"
+  "ctoVerdict": "PASS",
+  "cpoProductClose": "CLOSED",
+  "sprint": "CLOSED"
 }
