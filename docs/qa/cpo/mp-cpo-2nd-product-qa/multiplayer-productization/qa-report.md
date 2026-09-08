@@ -1,18 +1,17 @@
-# Multiplayer Productization — CTO Technical QA
+# Multiplayer Productization — CTO / CPO Evidence
 
 CPO reads this path. CEO handoff is not used.
 
 ```text
 Sprint                 Multiplayer Productization
-Local Implementation   🟢
 Local Browser QA       🟢
 Local E2E              🟢 12/12
-Preview                🟢 game29 4319eb2
 Preview E2E            🟢 12/12
 CTO Technical QA       🟢 PASS
-CPO Product PASS       ⏸ CPO judges from this path
-Production             🟢 43f6270 유지 · 배포 안 함
-Sprint                 🟡 OPEN
+CPO Product QA         🟢 PASS
+Production             🟢 PASS  game29 4319eb2
+Production smoke       🟢 12/12
+Sprint                 🟢 CPO 승인 · Production promote 완료
 ```
 
 Deployment Target
@@ -23,45 +22,52 @@ Branch : promote/product-catalog
 
 Production
 https://game29.vercel.app
-Commit `43f6270` — not changed
-
-Preview (Deployment Visit)
-https://game29-iraqm7z2g-jyp-ai1s-projects.vercel.app
 Commit `4319eb2`
-Deploy `game29-iraqm7z2g` / `dpl_FzjpndmfkzQSzMmwXmnrQwdp4f6E`
+Deploy `game29-152liulhl` / `dpl_w22PPaF1sPLac3HTuMYBV5Fms6YU`
+
+Preview (source of promote)
+https://game29-iraqm7z2g-jyp-ai1s-projects.vercel.app
+`dpl_FzjpndmfkzQSzMmwXmnrQwdp4f6E`
 
 Legacy Vercel `game-platform` : ignore / do not use
 
-## What changed
+## Product flow
 
-- ANOTHER GAME → `/play` official 4-game catalog (not Discover `/games`)
-- Bomber Product Catalog: Character → Color → ENTER → Connecting → World (no Map Select)
-- Shared Result trio: REMATCH / ANOTHER GAME / EXIT
-- EXIT → that game’s Detail
+```text
+Official 4-Game Catalog (/play)
+        ↓
+Game Detail
+        ↓
+ENTER WORLD
+        ↓
+Character → Color → ENTER
+        ↓
+Connecting
+        ↓
+Multiplayer World
+        ↓
+Result
+REMATCH / ANOTHER GAME → /play / EXIT → Game Detail
+```
 
-## Local browser (CTO)
+## Production smoke (`production-smoke.json`)
 
 | Check | Result |
 | --- | --- |
 | `/play` official 4 only | PASS |
 | `/games` still Discover | PASS |
-| Snake death Result trio | PASS |
-| Snake ANOTHER GAME → `/play` | PASS |
-| Snake EXIT → `/games/snake` | PASS |
-| Bomber ENTER → World, no Map Select | PASS |
-| Bomber EXIT → `/games/bomber` | PASS |
-| Agar / Re:Front Character → Color → ENTER | PASS |
-| PRACTICE / fallback=1 / BOMBER-SOLO on Product CTA | not reached |
+| Snake / Agar / Bomber / Re:Front Detail ENTER WORLD | PASS |
+| 4-game Character → Color → ENTER | PASS |
+| Bomber no Map Select | PASS |
+| Bomber WORLD HUD | PASS |
+| PRACTICE / fallback=1 / BOMBER-SOLO | not reached |
 
-## Automated E2E
+Evidence: `evidence/production/`
 
-`tools/qa/mp-productization-e2e.mjs` — 12 checks
+## Prior Preview
 
-- Local : PASS (`e2e-report.json` first run on localhost)
-- Preview : PASS (`e2e-report.json` + `preview-e2e.json` on Visit URL)
+Visit URL `game29-iraqm7z2g` @ `4319eb2` · Preview E2E 12/12 · CPO Product PASS 2026-09-08.
 
-Evidence screenshots: `evidence/`
+## Production identity
 
-## Production
-
-Not promoted. Hold `43f6270`.
+GitHub environment `Production – game29` @ `4319eb2` (2026-09-08). Alias `https://game29.vercel.app` → `game29-152liulhl`.

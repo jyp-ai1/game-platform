@@ -1,5 +1,5 @@
 ---
-description: Re:Play CTO current operating context — Targeted Fix CLOSED, Production PASS game29 43f6270
+description: Re:Play CTO current operating context — Multiplayer Productization CPO PASS, Production game29 4319eb2
 alwaysApply: true
 ---
 
@@ -17,12 +17,14 @@ Re:Front   🟢 PASS · Complete LOCKED
 ----------------------------
 4/4 MP Product Gate              🟢 CLOSED
 Targeted Fix Finalization        🟢 CPO CLOSED
-Production                       🟢 PASS  game29 43f6270
+Multiplayer Productization       🟢 CPO PRODUCT PASS
+Production                       🟢 PASS  game29 4319eb2
 ```
 
-- **Production:** https://game29.vercel.app @ `43f6270`
-- **Deploy:** `game29-g4u6m9dur` / `dpl_HeAmjt7c5iWdXvwC8wv2SkcZJxv2`
-- **Close evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md` (`159c823`)
+- **Production:** https://game29.vercel.app @ `4319eb2`
+- **Deploy:** `game29-152liulhl` / `dpl_w22PPaF1sPLac3HTuMYBV5Fms6YU`
+- **Productization evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/multiplayer-productization/qa-report.md`
+- **Prior close evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md` (`159c823`)
 - **Territory War:** Deprecated / Deleted
 
 Do **not** start new features or Production deploy without a new CPO Work Order.
@@ -91,7 +93,8 @@ This epic is **CPO Product CLOSED**. Do not reopen PASS games for extra polish o
 | CPO 2nd Product QA | **CLOSED** |
 | 4/4 MP Product Gate | **CLOSED** |
 | Targeted Fix Finalization | **CLOSED** |
-| Production | **PASS** — game29 `43f6270` |
+| Multiplayer Productization | **CPO PRODUCT PASS** |
+| Production | **PASS** — game29 `4319eb2` |
 | Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED |
 
 CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
@@ -115,8 +118,8 @@ Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 ## Latest deploy
 
 - **Production:** `https://game29.vercel.app`
-- **Commit:** `43f6270`
-- **Deploy:** `game29-g4u6m9dur`
+- **Commit:** `4319eb2`
+- **Deploy:** `game29-152liulhl` / `dpl_w22PPaF1sPLac3HTuMYBV5Fms6YU`
 - **Branch:** `promote/product-catalog`
 
 ## Operating principles
@@ -125,7 +128,7 @@ Re:Front Long Sprint: `docs/qa/cpo/mp-cpo-2nd-product-qa/re-front-complete/`
 2. Keep CTO Technical PASS and CPO Product PASS separate.
 3. Manage QA evidence in the official repo path.
 4. CTO writes the report in repo. CPO judges from that path.
-5. Production is live at game29 `43f6270`. New Production deploys need a new CPO approval.
+5. Production is live at game29 `4319eb2`. New Production deploys need a new CPO approval.
 6. Do not issue extra fix/re-QA on PASS/CLOSED games.
 7. New change → minimum Work Order → Technical QA → CPO QA → deploy approval.
 
@@ -186,4 +189,4 @@ Production: game29 <SHA>
 
 ## Remember
 
-1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Production is live on game29 `43f6270`. 13. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.
+1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Production is live on game29 `4319eb2`. 13. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.
