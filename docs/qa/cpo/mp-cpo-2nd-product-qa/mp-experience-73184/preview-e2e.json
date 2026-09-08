@@ -1,0 +1,123 @@
+{
+  "gate": "mp-experience-73184-e2e",
+  "wo": "73184",
+  "baseUrl": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app",
+  "vercelProject": "game29",
+  "startedAt": "2026-09-08T12:35:56.225Z",
+  "projectCheck": {
+    "host": "game29-m31ozjvqm-jyp-ai1s-projects.vercel.app",
+    "isLocal": false,
+    "isGame29Preview": true,
+    "isProd": false,
+    "isLegacy": false
+  },
+  "checks": {
+    "flagship-catalog": {
+      "pass": true,
+      "detail": "4 official games + ENTER WORLD"
+    },
+    "discover-separate": {
+      "pass": true,
+      "detail": "/games remains Discover"
+    },
+    "detail-snake": {
+      "pass": true,
+      "detail": {
+        "href": "/games/snake/play?room=WORLD",
+        "features": true
+      }
+    },
+    "detail-agar": {
+      "pass": true,
+      "detail": {
+        "href": "/games/agar/play?room=GL-AGAR",
+        "features": true
+      }
+    },
+    "detail-bomber": {
+      "pass": true,
+      "detail": {
+        "href": "/games/bomber/play?room=BOMBER-A",
+        "features": true
+      }
+    },
+    "detail-re-front": {
+      "pass": true,
+      "detail": {
+        "href": "/games/re-front/play?room=RF-LOBBY",
+        "features": true
+      }
+    },
+    "snake-practice-block": {
+      "pass": true,
+      "detail": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD"
+    },
+    "entry-snake": {
+      "pass": true,
+      "detail": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app/flagship/snake-io/play?room=WORLD"
+    },
+    "snake-back-chrome": {
+      "pass": true,
+      "detail": "← Snake present"
+    },
+    "snake-after-enter": {
+      "pass": true,
+      "detail": "world-or-hud"
+    },
+    "entry-agar": {
+      "pass": true,
+      "detail": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app/games/agar/play?room=GL-AGAR"
+    },
+    "agar-world": {
+      "pass": true,
+      "detail": "connecting"
+    },
+    "entry-bomber": {
+      "pass": true,
+      "detail": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app/games/bomber/play?room=BOMBER-A"
+    },
+    "bomber-no-map": {
+      "pass": true,
+      "detail": {
+        "joinUi": true,
+        "bomberConn": true,
+        "bomberHud": false,
+        "bomberErr": false
+      }
+    },
+    "bomber-world": {
+      "pass": true,
+      "detail": "HUD"
+    },
+    "bomber-result": {
+      "pass": true,
+      "detail": "Result immediately after death"
+    },
+    "bomber-exit-detail": {
+      "pass": true,
+      "detail": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app/games/bomber"
+    },
+    "entry-re-front": {
+      "pass": true,
+      "detail": "https://game29-m31ozjvqm-jyp-ai1s-projects.vercel.app/games/re-front/play?room=RF-LOBBY"
+    },
+    "rf-enter": {
+      "pass": true,
+      "detail": "left lobby"
+    },
+    "agar-host-guest": {
+      "pass": true,
+      "detail": {
+        "hostQa": false,
+        "guestQa": false,
+        "note": "one side still connecting — recorded"
+      }
+    },
+    "mobile-catalog": {
+      "pass": true,
+      "detail": "390 viewport"
+    }
+  },
+  "endedAt": "2026-09-08T12:36:36.944Z",
+  "verdict": "PASS"
+}

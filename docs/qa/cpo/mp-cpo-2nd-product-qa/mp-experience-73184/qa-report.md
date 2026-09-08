@@ -14,8 +14,8 @@ Repo: jyp-ai1/game-platform
 | Implementation | done (shell + catalog + play-loop gaps) |
 | Local typecheck | PASS (web / game-sdk / snake / bomber) |
 | Local browser E2E | PASS — `local-browser.json` |
-| Preview Full E2E | pending |
-| Production promote | blocked until Preview Full E2E |
+| Preview Full E2E | PASS on `game29-m31ozjvqm` then Agar Host reclaim follow-up |
+| Production promote | blocked until Agar join-fail → Host reclaim is on Preview |
 | CTO Final QA | pending Preview |
 | CPO Product QA | after CTO Final QA + this path |
 
@@ -34,6 +34,7 @@ Do not overwrite CLOSED `multiplayer-productization/` or `prod-regression/`.
 - Bomber death → Result immediately (not spectate-until-match-over)
 - Bomber Rematch on `BOMBER-A/B/C/D` re-enters the shared shard (no local Solo restart)
 - Snake `game-profile` `solo: false` matches Product catalog
+- Agar join_failed / ghost shard → reclaim as Multiplayer Host (same contract as Bomber; Retry/Back still shown if reclaim also fails)
 
 ## Forbidden (Product CTA)
 

@@ -15,9 +15,11 @@ import {
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import {
+  createRoom,
   getRoom,
   isListedHostPresent,
   leaveRoom,
+  reclaimStaleMultiplayerRoomAsync,
   resolveMultiplayerEntry,
   resolveRoomCodeFromLocation,
   roomGameStateAgeMs,
@@ -153,6 +155,30 @@ function isLiveAgarHost(room: GameRoom): boolean {
   if (!isListedHostPresent(room)) return false;
   if (!room.gameState?.["agar:state"]) return false;
   return roomGameStateAgeMs(room) < AGAR_HOST_STALE_MS;
+}
+
+async function claimAgarHostSeat(roomCode: string, nickname: string): Promise<GameRoom | null> {
+  const existing = getRoom(roomCode);
+  try {
+    if (existing) {
+      return await reclaimStaleMultiplayerRoomAsync(existing, nickname, "agar");
+    }
+    return createRoom({
+      code: roomCode,
+      gameSlug: "agar",
+      maxPlayers: AGAR_MAX_PLAYERS,
+      matchMode: "public",
+      hostNickname: nickname,
+    });
+  } catch {
+    return createRoom({
+      code: roomCode,
+      gameSlug: "agar",
+      maxPlayers: AGAR_MAX_PLAYERS,
+      matchMode: "public",
+      hostNickname: nickname,
+    });
+  }
 }
 
 export function AgarGame() {
@@ -334,15 +360,22 @@ export function AgarGame() {
       isLiveHost: isLiveAgarHost,
     });
 
+    let role: "host" | "guest" = "guest";
     if (!entry.ok) {
-      setConnecting(false);
-      setConnectError(true);
-      return;
+      const claimed = await claimAgarHostSeat(roomCode, liveNick);
+      if (!claimed) {
+        setConnecting(false);
+        setConnectError(true);
+        return;
+      }
+      role = "host";
+    } else {
+      role = entry.role;
     }
 
-    mpRoleRef.current = entry.role;
-    isHostRef.current = entry.role === "host";
-    setIsHost(entry.role === "host");
+    mpRoleRef.current = role;
+    isHostRef.current = role === "host";
+    setIsHost(role === "host");
 
     knownHumansRef.current = new Map();
     rememberHuman(knownHumansRef.current, { id: deviceId, nickname: liveNick, color });
