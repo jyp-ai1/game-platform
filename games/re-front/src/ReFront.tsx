@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
   FLAGSHIP_CATALOG_HREF,
+  MP_CONNECT_BACK_CLASS,
+  MP_CONNECT_RETRY_CLASS,
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
@@ -1010,7 +1012,16 @@ export function ReFrontGame() {
     };
   }, [roomCode]);
 
+  const resultBusyRef = useRef(false);
+  const [resultBusyKind, setResultBusyKind] = useState<"retry" | "another" | "exit" | null>(null);
   const onRematch = useCallback(() => {
+    if (resultBusyRef.current) return;
+    resultBusyRef.current = true;
+    setResultBusyKind("retry");
+    window.setTimeout(() => {
+      resultBusyRef.current = false;
+      setResultBusyKind(null);
+    }, 900);
     send(roomCode, "rf:rematch", { at: Date.now() });
     if (mpRoleRef.current === "host") {
       const humans = collectHumans(
@@ -1034,11 +1045,17 @@ export function ReFrontGame() {
   }, [centerOnPlayer, color, deviceId, nickname, roomCode]);
 
   const onExit = useCallback(() => {
+    if (resultBusyRef.current) return;
+    resultBusyRef.current = true;
+    setResultBusyKind("exit");
     leaveRoom(roomCode);
     window.location.href = "/games/re-front";
   }, [roomCode]);
 
   const onAnotherGame = useCallback(() => {
+    if (resultBusyRef.current) return;
+    resultBusyRef.current = true;
+    setResultBusyKind("another");
     leaveRoom(roomCode);
     window.location.href = FLAGSHIP_CATALOG_HREF;
   }, [roomCode]);
@@ -1167,7 +1184,7 @@ export function ReFrontGame() {
                   setConnectError(false);
                   void startGame();
                 }}
-                className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-black"
+                className={MP_CONNECT_RETRY_CLASS}
               >
                 Retry
               </button>
@@ -1177,7 +1194,7 @@ export function ReFrontGame() {
                 onClick={() => {
                   window.location.href = "/games/re-front";
                 }}
-                className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white"
+                className={MP_CONNECT_BACK_CLASS}
               >
                 Back to game
               </button>
@@ -1423,13 +1440,31 @@ export function ReFrontGame() {
             <p className="mt-2 text-lg font-semibold text-emerald-300">{won ? "YOU WIN" : lost ? "DEFEAT" : "STALEMATE"}</p>
             <p className="mt-2 text-slate-300">Territory {me?.territoryPct?.toFixed(1) ?? 0}% / {victoryPct}%</p>
             <div className="mt-4 flex flex-col gap-2">
-              <button type="button" onClick={onRematch} className="rounded-lg bg-white py-2 font-bold text-black" data-testid="rf-rematch-btn">
-                REMATCH
+              <button
+                type="button"
+                onClick={onRematch}
+                disabled={resultBusyKind !== null}
+                className="h-11 rounded-xl bg-white text-sm font-bold text-black disabled:opacity-60"
+                data-testid="rf-rematch-btn"
+              >
+                {resultBusyKind === "retry" ? "REMATCHING…" : "REMATCH"}
               </button>
-              <button type="button" onClick={onAnotherGame} className="rounded-lg border border-slate-500 py-2" data-testid="mp-death-play-another">
+              <button
+                type="button"
+                onClick={onAnotherGame}
+                disabled={resultBusyKind !== null}
+                className="h-11 rounded-xl border border-slate-500 text-sm disabled:opacity-60"
+                data-testid="mp-death-play-another"
+              >
                 ANOTHER GAME
               </button>
-              <button type="button" onClick={onExit} className="rounded-lg border border-slate-600 py-2 text-slate-300">
+              <button
+                type="button"
+                onClick={onExit}
+                disabled={resultBusyKind !== null}
+                className="h-11 rounded-xl border border-slate-600 text-sm text-slate-300 disabled:opacity-60"
+                data-testid="mp-death-exit"
+              >
                 EXIT
               </button>
             </div>

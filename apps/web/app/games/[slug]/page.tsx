@@ -70,9 +70,13 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
     isFeatureEnabled("ranking"),
   ]);
   const allGames = mergeCatalogGames(rawGames);
-  const game = dbGame
+  let game = dbGame
     ? getGameOrLocalMvp([dbGame], slug)
     : getGameOrLocalMvp(allGames, slug) ?? getCreatorGameOrNull(slug);
+
+  if (isProductFlagshipSlug(slug) && (!game || game.status === "HIDDEN")) {
+    game = buildLocalMvpGame(slug);
+  }
 
   if (!game || game.status === "HIDDEN") {
     notFound();

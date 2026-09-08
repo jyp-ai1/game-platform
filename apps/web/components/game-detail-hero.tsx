@@ -30,7 +30,11 @@ export function GameDetailHero({
             alt=""
             fill
             unoptimized={game.thumbnailUrl.startsWith("/images/")}
-            className="object-cover opacity-90"
+            className={
+              game.slug === "bomber"
+                ? "scale-125 object-cover object-[center_72%] opacity-90"
+                : "object-cover opacity-90"
+            }
             priority
           />
         ) : null}

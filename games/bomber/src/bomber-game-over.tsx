@@ -15,7 +15,8 @@ export function BomberGameOver({
   onRetry,
   onPlayAnother,
   onExit,
-  title = "Game Over",
+  title = "RESULT",
+  place,
 }: {
   finalScore: number;
   blocksDestroyed: number;
@@ -27,10 +28,19 @@ export function BomberGameOver({
   onPlayAnother: () => void;
   onExit: () => void;
   title?: string;
+  place?: number;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [busy, setBusy] = useState<"retry" | "another" | "exit" | null>(null);
   useEffect(() => setMounted(true), []);
   if (!mounted || typeof document === "undefined") return null;
+
+  function runOnce(kind: "retry" | "another" | "exit", fn: () => void) {
+    if (busy) return;
+    setBusy(kind);
+    fn();
+    if (kind === "retry") window.setTimeout(() => setBusy(null), 900);
+  }
 
   const beatScore = finalScore >= bestRecord.bestScore && bestRecord.bestScore > 0;
   const beatChain = bestChain >= bestRecord.bestChain && bestRecord.bestChain > 0;
@@ -50,8 +60,14 @@ export function BomberGameOver({
         aria-label={title}
       >
         <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-white/60">
+          RESULT
+        </p>
+        <p data-testid="mp-death-outcome" className="text-center text-lg font-bold text-white">
           {title}
         </p>
+        {place != null ? (
+          <p className="text-center text-xs text-white/55">Place #{place}</p>
+        ) : null}
 
         <div className="grid grid-cols-2 gap-2 text-center text-sm">
           <div className="rounded-lg bg-white/5 px-2 py-2">
@@ -104,24 +120,27 @@ export function BomberGameOver({
           <button
             type="button"
             data-testid="mp-death-retry"
-            className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
-            onClick={onRetry}
+            disabled={busy !== null}
+            className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-60"
+            onClick={() => runOnce("retry", onRetry)}
           >
-            REMATCH
+            {busy === "retry" ? "REMATCHING…" : "REMATCH"}
           </button>
           <button
             type="button"
             data-testid="mp-death-play-another"
-            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
-            onClick={onPlayAnother}
+            disabled={busy !== null}
+            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60"
+            onClick={() => runOnce("another", onPlayAnother)}
           >
             ANOTHER GAME
           </button>
           <button
             type="button"
             data-testid="mp-death-exit"
-            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
-            onClick={onExit}
+            disabled={busy !== null}
+            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60"
+            onClick={() => runOnce("exit", onExit)}
           >
             EXIT
           </button>

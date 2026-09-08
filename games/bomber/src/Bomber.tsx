@@ -6,6 +6,8 @@ import {
   getDeviceId,
   getLastNickname,
   FLAGSHIP_CATALOG_HREF,
+  MP_CONNECT_BACK_CLASS,
+  MP_CONNECT_RETRY_CLASS,
   MobileControlPad,
   MP_PLAYER_COLORS,
   MultiplayerEntrySelect,
@@ -380,6 +382,15 @@ export function BomberGame() {
   const kills = me?.kills ?? 0;
   const score = me?.score ?? 0;
   const rank = localRank(world, deviceId);
+  const deathShakeRef = useRef(false);
+  useEffect(() => {
+    if (!started) return;
+    if (!alive && !deathShakeRef.current) {
+      deathShakeRef.current = true;
+      setShakeUntil(Date.now() + 340);
+    }
+    if (alive) deathShakeRef.current = false;
+  }, [alive, started]);
   const liveMissions = useMemo(() => {
     const stats = sessionStatsRef.current;
     stats.enemiesDefeated = Math.max(stats.enemiesDefeated, kills);
@@ -1275,7 +1286,13 @@ export function BomberGame() {
       run,
       missions: buildMissionList(stats),
       bestRecord,
-      title: world.matchOver ? resultLabel : "Game Over",
+      title: world.matchOver
+        ? resultLabel === "WIN"
+          ? "YOU WIN"
+          : resultLabel === "DRAW"
+            ? "DRAW"
+            : "DEFEAT"
+        : "YOU DIED",
     });
   }, [showDeath, world.matchOver, score, kills, resultLabel]);
 
@@ -1324,7 +1341,7 @@ export function BomberGame() {
                   setConnectError(false);
                   enterMapMatch(mapId);
                 }}
-                className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black"
+                className={MP_CONNECT_RETRY_CLASS}
               >
                 Retry
               </button>
@@ -1334,7 +1351,7 @@ export function BomberGame() {
                 onClick={() => {
                   window.location.href = "/games/bomber";
                 }}
-                className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white"
+                className={MP_CONNECT_BACK_CLASS}
               >
                 Back to game
               </button>
@@ -1443,7 +1460,7 @@ export function BomberGame() {
                   className="touch-none select-none rounded-md bg-black/45 px-2 py-1 text-[11px] text-white/70"
                   style={{ WebkitUserSelect: "none", userSelect: "none" }}
                 >
-                  {stateAck ? (alive ? "❤️" : "🖤") : "⏳"} · {isHost ? "HOST" : "SYNC"}
+                  {stateAck ? (alive ? "❤️" : "🖤") : "⏳"} · {isHost ? "HOST" : "GUEST"} · #{rank}
                 </span>
               </>
             }
@@ -1658,6 +1675,7 @@ export function BomberGame() {
           missions={deathSummary.missions}
           bestRecord={deathSummary.bestRecord}
           title={deathSummary.title}
+          place={rank}
           onRetry={handleRetry}
           onPlayAnother={() => {
             if (typeof window !== "undefined") {

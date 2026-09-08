@@ -28,8 +28,29 @@ export function GamePlayClient({
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    if (slug !== "snake") return;
+    const q = new URLSearchParams(window.location.search);
+    const requested = (q.get("room") || q.get("invite") || "WORLD").toUpperCase();
+    const room = requested === "PRACTICE" || requested === "STAGE" ? "WORLD" : requested;
+    const fromInvite = !!q.get("invite") || q.get("source")?.toLowerCase() === "invite";
+    const debug = q.get("debug") === "1" ? "&debug=1" : "";
+    const source = fromInvite ? "&source=invite" : "";
+    window.location.replace(
+      `/flagship/snake-io/play?room=${encodeURIComponent(room)}${source}${debug}`
+    );
+  }, [slug]);
+
   // Agar/Bomber exit is lobby-local; ignore replay:game-exit navigation to detail/home.
   // (Legacy listeners previously router.push(`/games/${slug}`) and broke Exit→Lobby.)
+
+  if (slug === "snake") {
+    return (
+      <div className="flex h-full items-center justify-center text-sm text-white/60">
+        Entering WORLD…
+      </div>
+    );
+  }
 
   return (
     <div ref={rootRef} tabIndex={-1} className="flex h-full min-h-0 flex-col outline-none">

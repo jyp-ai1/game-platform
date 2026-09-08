@@ -205,7 +205,7 @@ export function MultiplayerEntrySelect({
                   type="button"
                   onClick={() => onColorChange(c)}
                   className={cn(
-                    "size-8 rounded-full border-2 transition sm:size-9",
+                    "size-11 rounded-full border-2 transition",
                     active ? "scale-110 border-white ring-2 ring-white/50" : "border-white/20 hover:border-white/50"
                   )}
                   style={{ backgroundColor: c }}

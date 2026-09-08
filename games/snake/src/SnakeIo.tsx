@@ -2407,8 +2407,10 @@ export function SnakeIoGame({
       {!isStageMode && mySnake && !mySnake.alive ? (
         <div data-testid={isGlobalWorld ? "death-ux-countdown" : "death-ux-gameover"}>
           <MultiplayerDeathOverlay
-            title="YOU DIED"
+            title="RESULT"
+            outcome="YOU DIED"
             score={Math.round(mySnake.score ?? 0)}
+            metric={`Rank #${myRank} · L${myLength}`}
             onRetry={handleRetry}
             onAnotherGame={handleAnotherGame}
             onExit={handleQuitGame}

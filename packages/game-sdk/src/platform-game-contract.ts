@@ -59,6 +59,12 @@ export const PLATFORM_FLAGSHIP_MP_SLUGS = ["snake", "agar", "bomber", "re-front"
 /** Official 4-game Product Catalog (not Discover `/games`). ANOTHER GAME lands here. */
 export const FLAGSHIP_CATALOG_HREF = "/play";
 
+/** Shared connect-fail actions — 44px tap target, one accent. */
+export const MP_CONNECT_RETRY_CLASS =
+  "inline-flex h-11 min-w-[7.5rem] items-center justify-center rounded-lg bg-cyan-400 px-4 text-sm font-semibold text-black";
+export const MP_CONNECT_BACK_CLASS =
+  "inline-flex h-11 min-w-[7.5rem] items-center justify-center rounded-lg border border-white/20 px-4 text-sm font-semibold text-white";
+
 export function resolveEntryMode(slug: string): PlatformEntryMode {
   return isMultiplayerGameSlug(slug) ? "multiplayer" : "solo";
 }

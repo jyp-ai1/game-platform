@@ -6,7 +6,13 @@ import { ViralLoopResultPanel } from "@/components/viral-loop-result";
 import { GameResultModal } from "@/components/game-result-modal";
 import { getGameFramework } from "@/lib/game-framework";
 import type { UniversalRewardBundle } from "@/lib/reward-engine";
-import { GameSDKProvider, emitEngagementEvent, subscribePlatformAnalyticsEvents } from "@game-platform/game-sdk";
+import {
+  GameSDKProvider,
+  emitEngagementEvent,
+  subscribePlatformAnalyticsEvents,
+  MP_CONNECT_BACK_CLASS,
+  MP_CONNECT_RETRY_CLASS,
+} from "@game-platform/game-sdk";
 import { rematchTogether, type ViralLoopResult } from "@game-platform/replay-engine/social";
 import { entryLog, entryLogFail, entryTrace, resetEntryStatus, resetEngineSession } from "@game-platform/game-snake";
 import { EntryCrashLog } from "@game-platform/multiplayer-sdk";
@@ -74,7 +80,7 @@ function SnakeConnectError({
           type="button"
           data-testid="snake-connect-retry"
           onClick={onRetry}
-          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-black"
+          className={MP_CONNECT_RETRY_CLASS}
         >
           Retry
         </button>
@@ -82,7 +88,7 @@ function SnakeConnectError({
           type="button"
           data-testid="snake-connect-back"
           onClick={onBack}
-          className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white"
+          className={MP_CONNECT_BACK_CLASS}
         >
           Back to game
         </button>

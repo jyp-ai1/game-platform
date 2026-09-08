@@ -407,17 +407,34 @@ export function MultiplayerDeathOverlay({
   onExit,
   onAnotherGame,
   title = "RESULT",
+  outcome,
+  scoreLabel = "Score",
 }: {
   score: number;
-  /** Game-specific line, e.g. "L:128" or "Wins 2" */
+  /** Game-specific line, e.g. "Rank #4 · L128" */
   metric?: string;
   onRetry: () => void;
   onExit: () => void;
   onAnotherGame?: () => void;
   title?: string;
+  /** Win / lose / end — shown above the score. */
+  outcome?: string;
+  scoreLabel?: string;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [busy, setBusy] = useState<"retry" | "another" | "exit" | null>(null);
+
   useEffect(() => setMounted(true), []);
+
+  function runOnce(kind: "retry" | "another" | "exit", fn: () => void) {
+    if (busy) return;
+    setBusy(kind);
+    fn();
+    if (kind === "retry") {
+      window.setTimeout(() => setBusy(null), 900);
+    }
+  }
+
   if (!mounted || typeof document === "undefined") return null;
 
   return createPortal(
@@ -433,6 +450,12 @@ export function MultiplayerDeathOverlay({
         aria-label={title}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">{title}</p>
+        {outcome ? (
+          <p data-testid="mp-death-outcome" className="text-lg font-bold text-white">
+            {outcome}
+          </p>
+        ) : null}
+        <p className="text-[11px] uppercase tracking-wide text-white/45">{scoreLabel}</p>
         <p className="text-3xl font-bold tabular-nums text-white">{score.toLocaleString()}</p>
         {metric ? <p className="text-sm font-medium text-white/70">{metric}</p> : null}
         <div className="mt-1 flex w-full flex-col gap-2">
@@ -440,17 +463,19 @@ export function MultiplayerDeathOverlay({
             type="button"
             data-testid="mp-death-retry"
             data-death-ux="retry"
-            className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
-            onClick={onRetry}
+            disabled={busy !== null}
+            className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-60"
+            onClick={() => runOnce("retry", onRetry)}
           >
-            REMATCH
+            {busy === "retry" ? "REMATCHING…" : "REMATCH"}
           </button>
           {onAnotherGame ? (
             <button
               type="button"
               data-testid="mp-death-play-another"
-              className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
-              onClick={onAnotherGame}
+              disabled={busy !== null}
+              className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60"
+              onClick={() => runOnce("another", onAnotherGame)}
             >
               ANOTHER GAME
             </button>
@@ -459,8 +484,9 @@ export function MultiplayerDeathOverlay({
             type="button"
             data-testid="mp-death-exit"
             data-death-ux="exit"
-            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
-            onClick={onExit}
+            disabled={busy !== null}
+            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60"
+            onClick={() => runOnce("exit", onExit)}
           >
             EXIT
           </button>

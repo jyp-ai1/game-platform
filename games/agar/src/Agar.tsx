@@ -11,6 +11,8 @@ import {
   MultiplayerEntrySelect,
   MultiplayerPlayShell,
   FLAGSHIP_CATALOG_HREF,
+  MP_CONNECT_BACK_CLASS,
+  MP_CONNECT_RETRY_CLASS,
   useGameSDK,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
@@ -505,7 +507,7 @@ export function AgarGame() {
                 type="button"
                 data-testid="agar-connect-retry"
                 onClick={() => void handleStart()}
-                className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-black"
+                className={MP_CONNECT_RETRY_CLASS}
               >
                 Retry
               </button>
@@ -515,7 +517,7 @@ export function AgarGame() {
                 onClick={() => {
                   window.location.href = "/games/agar";
                 }}
-                className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold"
+                className={MP_CONNECT_BACK_CLASS}
               >
                 Back to game
               </button>
@@ -546,7 +548,7 @@ export function AgarGame() {
             <div className="mb-2 flex w-full flex-wrap items-center justify-between gap-2 px-1 text-xs text-muted-foreground">
               <span>Mass {mass}</span>
               <span data-testid="agar-food-count">Food {world.food.length}</span>
-              <span data-testid="agar-mp-role">{isHost ? "HOST" : "SYNC"}</span>
+              <span data-testid="agar-mp-role">{isHost ? "HOST" : "GUEST"}</span>
             </div>
             <div
               ref={boardRef}
@@ -675,8 +677,10 @@ export function AgarGame() {
             {!alive ? (
               <div data-testid="agar-game-over">
                 <MultiplayerDeathOverlay
-                  title="YOU DIED"
+                  title="RESULT"
+                  outcome="YOU DIED"
                   score={Math.max(mass, me?.score ?? 0)}
+                  metric={`Mass ${mass}${world.rankings.findIndex((r) => r.id === deviceId) >= 0 ? ` · #${world.rankings.findIndex((r) => r.id === deviceId) + 1}` : ""}`}
                   onRetry={handleRetry}
                   onAnotherGame={() => {
                     leaveRoom(roomCode);
