@@ -1,4 +1,4 @@
-# Multiplayer Productization — Local Browser QA
+# Multiplayer Productization — CTO Technical QA
 
 CPO reads this path. CEO handoff is not used.
 
@@ -6,10 +6,13 @@ CPO reads this path. CEO handoff is not used.
 Sprint                 Multiplayer Productization
 Local Implementation   🟢
 Local Browser QA       🟢
-Local E2E              🟢 `e2e-report.json` verdict PASS (12 checks)
-Preview E2E            ⏸ after game29 Preview URL (not Production)
-CPO Product PASS       ⏸
+Local E2E              🟢 12/12
+Preview                🟢 game29 4319eb2
+Preview E2E            🟢 12/12
+CTO Technical QA       🟢 PASS
+CPO Product PASS       ⏸ CPO judges from this path
 Production             🟢 43f6270 유지 · 배포 안 함
+Sprint                 🟡 OPEN
 ```
 
 Deployment Target
@@ -17,35 +20,48 @@ Deployment Target
 Vercel Project : game29
 GitHub Repository : jyp-ai1/game-platform
 Branch : promote/product-catalog
-Production : https://game29.vercel.app @ `43f6270` (unchanged)
 
-Local Next : `http://localhost:3000`
+Production
+https://game29.vercel.app
+Commit `43f6270` — not changed
 
-## Contract checked in local browser
+Preview (Deployment Visit)
+https://game29-iraqm7z2g-jyp-ai1s-projects.vercel.app
+Commit `4319eb2`
+Deploy `game29-iraqm7z2g` / `dpl_FzjpndmfkzQSzMmwXmnrQwdp4f6E`
+
+Legacy Vercel `game-platform` : ignore / do not use
+
+## What changed
+
+- ANOTHER GAME → `/play` official 4-game catalog (not Discover `/games`)
+- Bomber Product Catalog: Character → Color → ENTER → Connecting → World (no Map Select)
+- Shared Result trio: REMATCH / ANOTHER GAME / EXIT
+- EXIT → that game’s Detail
+
+## Local browser (CTO)
 
 | Check | Result |
 | --- | --- |
-| `/play` official 4-game catalog only | PASS — Snake · Agar · Bomber · Re:Front |
-| `/games` Discover (not ANOTHER GAME) | PASS — Puzzle/Sports packs still listed |
-| ANOTHER GAME (Snake Result) → `/play` | PASS |
-| Snake death → Result REMATCH / ANOTHER GAME / EXIT | PASS |
-| Snake EXIT → `/games/snake` Detail | PASS |
-| Bomber Character → Color → ENTER → Connecting → World | PASS — no Map Select |
-| Bomber EXIT (나가기) → `/games/bomber` Detail | PASS |
+| `/play` official 4 only | PASS |
+| `/games` still Discover | PASS |
+| Snake death Result trio | PASS |
+| Snake ANOTHER GAME → `/play` | PASS |
+| Snake EXIT → `/games/snake` | PASS |
+| Bomber ENTER → World, no Map Select | PASS |
+| Bomber EXIT → `/games/bomber` | PASS |
 | Agar / Re:Front Character → Color → ENTER | PASS |
-| Official play URLs contain PRACTICE / fallback=1 / BOMBER-SOLO | PASS — not reached |
+| PRACTICE / fallback=1 / BOMBER-SOLO on Product CTA | not reached |
 
-## Product CTA rooms
+## Automated E2E
 
-- Snake → `WORLD` (play route may rewrite to `/flagship/snake-io/play?room=WORLD`)
-- Agar → `GL-AGAR`
-- Bomber → `BOMBER-A`
-- Re:Front → `RF-LOBBY`
+`tools/qa/mp-productization-e2e.mjs` — 12 checks
 
-## Known local-dev noise (not Product FAIL)
+- Local : PASS (`e2e-report.json` first run on localhost)
+- Preview : PASS (`e2e-report.json` + `preview-e2e.json` on Visit URL)
 
-Next.js hydration overlay on `components/footer.tsx` can intercept the first Detail `ENTER WORLD` click in `next dev`. Production/Preview compile does not show that overlay. Direct play URLs and a second click work.
+Evidence screenshots: `evidence/`
 
 ## Production
 
-Not deployed. Hold `43f6270`.
+Not promoted. Hold `43f6270`.

@@ -1,0 +1,12 @@
+{
+  "gate": "multiplayer-productization-preview-e2e",
+  "commit": "4319eb2",
+  "baseUrl": "https://game29-iraqm7z2g-jyp-ai1s-projects.vercel.app",
+  "deployId": "dpl_FzjpndmfkzQSzMmwXmnrQwdp4f6E",
+  "vercelProject": "game29",
+  "target": "preview",
+  "productionDeployed": false,
+  "productionShaHeld": "43f6270",
+  "verdict": "PASS",
+  "checks": 12
+}
