@@ -164,9 +164,9 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
 ## Next CTO work (priority)
 
-1. Wait for the next named-game Long Sprint Work Order.
-2. Do not reopen Snake / Bomber / Agar / Re:Front.
-3. New Production deploys need a new CPO approval.
+1. Git Forensic is recorded. Do not revert / reset / Vercel rollback.
+2. Wait for CPO to read `docs/qa/cpo/mp-cpo-2nd-product-qa/git-forensic/qa-report.md`.
+3. Selective restore only after a new Work Order names the surface. Do not reopen 4/4 src.
 
 ## CTO chat status (keep short)
 
