@@ -2,8 +2,8 @@
 
 ```text
 Sprint                 Targeted Fix Finalization
-Production             HOLD · NOT DEPLOYED
-Vercel                 game29 Preview only
+Production             game29 · 91e3a16 · game29-qxkm6nssp
+Vercel                 game29
 Legacy game-platform   not used
 ```
 
@@ -18,7 +18,7 @@ CPO reads this path.
 | Commit | `91e3a16` |
 | Branch | `promote/product-catalog` |
 | Environment | Preview – game29 |
-| Production | **not** promoted |
+| Production | promoted · see Production section |
 
 `preview-qa.json` + `evidence/{snake,agar,bomber,re-front}/`
 
@@ -101,9 +101,60 @@ Path: docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md
 Commit: 91e3a16
 Preview: https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app
 CTO Verdict: PASS
-Production: NOT DEPLOYED · HOLD
+Production: game29 · 91e3a16 · smoke 3/4 World · Bomber World FAIL
 ```
 
 ## Production
 
-HOLD. CPO Product PASS is required before any promote.
+Promoted after CPO Product PASS.
+
+```text
+Deployment Target
+
+Vercel Project : game29
+GitHub Repository : jyp-ai1/game-platform
+Branch : main (FF from promote/product-catalog)
+
+Production
+https://game29.vercel.app
+
+Commit
+91e3a16
+
+Evidence
+efac7e8
+
+Deployment
+game29-qxkm6nssp / dpl_B31A2BY8pKsKrDkUxFR1tzgTjdgy
+prior promote: game29-h6xf5vq4a
+
+Legacy project
+game-platform (Vercel Project) : Removed / Do not use
+```
+
+### Production Smoke
+
+`production-smoke.json` + `evidence/production/`
+
+| Check | Result |
+| --- | --- |
+| URL is `game29.vercel.app` | PASS |
+| Catalog Snake / Agar / Bomber / Re:Front | PASS |
+| Snake Character + Color + ENTER + WORLD + Ping + Exit → `/games/snake` | PASS — Ping 78ms · Bots 27 · Minimap · no `—` |
+| Agar Host/Guest World | PASS — Playwright `host`/`guest` on unique room · browser `GL-AGAR` Host World |
+| Re:Front Detail Hero + Host/Guest World | PASS — thumb 1536×1024 `?v=3` · 2 humans · no Practice |
+| Bomber Detail + Common Entry | PASS — MULTIPLAYER · ENTER WORLD · no Solo |
+| Bomber World + map visibility | **FAIL** — shared shards A–D returned Connection failed. Board 0×0 |
+| Bomber fail path | PASS — Connection failed → Retry / Back · no Solo / Practice / `fallback=1` / `BOMBER-SOLO` |
+| Solo / Practice / fallback | none on Catalog / Snake / Agar / Bomber / Re:Front |
+
+Same commit `91e3a16` already showed Bomber Host 672×672 on Preview. Production World miss is shared-shard occupancy (live-looking host, no state ack), not a new game-src change.
+
+### Sprint
+
+```text
+CPO Product PASS → CTO Production Promote → Production Smoke
+Promote: DONE · game29 · 91e3a16
+Smoke: 3/4 World PASS · Bomber World FAIL · fail path PASS
+Targeted Fix Sprint: OPEN until CPO accepts this smoke or names a Bomber Work Order
+```

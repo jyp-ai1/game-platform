@@ -1,0 +1,123 @@
+{
+  "gate": "production-smoke",
+  "baseUrl": "https://game29.vercel.app",
+  "approvedCommit": "91e3a16",
+  "evidenceCommit": "efac7e8",
+  "vercelProject": "game29",
+  "production": {
+    "url": "https://game29.vercel.app",
+    "deployment": "game29-qxkm6nssp",
+    "deploymentId": "dpl_B31A2BY8pKsKrDkUxFR1tzgTjdgy",
+    "priorPromote": "game29-h6xf5vq4a",
+    "githubProductionGame29": "91e3a1671fad05963a9dd303816fc7515beefadd",
+    "legacyVercelProject": "not used"
+  },
+  "startedAt": "2026-09-08T04:37:54.056Z",
+  "projectCheck": {
+    "host": "game29.vercel.app",
+    "isGame29": true,
+    "isLegacy": false,
+    "isProd": true
+  },
+  "games": {
+    "snake": {
+      "pass": true,
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "thumb": {
+          "ok": true,
+          "w": 1024,
+          "h": 576,
+          "src": "https://game29.vercel.app/images/games/snake.png?v=2"
+        },
+        "href": "/games/snake/play?room=WORLD"
+      },
+      "hud": {
+        "pingMs": 78,
+        "pingDash": false,
+        "minimap": true,
+        "bots": "27",
+        "connectFailed": false,
+        "path": "/flagship/snake-io/play"
+      },
+      "colorStep": true,
+      "exitToDetail": true
+    },
+    "agar": {
+      "pass": true,
+      "room": "AGAR-PS-S6EIGC",
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "thumb": {
+          "ok": true,
+          "w": 1024,
+          "h": 1024,
+          "src": "https://game29.vercel.app/images/games/agar.png?v=2"
+        },
+        "href": "/games/agar/play?room=GL-AGAR"
+      },
+      "hostRole": "host",
+      "guestRole": "guest"
+    },
+    "bomber": {
+      "pass": false,
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "thumb": {
+          "ok": true,
+          "w": 1280,
+          "h": 800,
+          "src": "https://game29.vercel.app/images/games/bomber.png?v=2"
+        },
+        "href": "/games/bomber/play?room=BOMBER-A"
+      },
+      "map": {
+        "tiles": 0,
+        "w": 0,
+        "h": 0
+      },
+      "failPath": {
+        "connectionFailed": true,
+        "retryBack": true,
+        "noSolo": true,
+        "shardsTried": ["D", "C", "B", "A"],
+        "note": "Shared shards returned Connection failed. Preview 91e3a16 had Host 672x672."
+      }
+    },
+    "re-front": {
+      "pass": true,
+      "detail": {
+        "enterWorld": true,
+        "multiplayer": true,
+        "noSolo": true,
+        "thumb": {
+          "ok": true,
+          "w": 1536,
+          "h": 1024,
+          "src": "https://game29.vercel.app/images/games/re-front.png?v=3"
+        },
+        "href": "/games/re-front/play?room=RF-LOBBY"
+      },
+      "hostRole": "host",
+      "guestRole": "guest",
+      "hostPct": 0.88,
+      "humans": 2
+    }
+  },
+  "catalog": {
+    "url": "https://game29.vercel.app/",
+    "hostOk": true,
+    "hasSnake": true,
+    "hasAgar": true,
+    "hasBomber": true,
+    "hasReFront": true
+  },
+  "verdict": "FAIL",
+  "finishedAt": "2026-09-08T04:39:17.431Z"
+}
