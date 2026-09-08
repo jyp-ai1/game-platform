@@ -1,0 +1,18 @@
+{
+  "wo": "84216",
+  "sprint": "Product Polish & Retention",
+  "ctoVerdict": "PASS",
+  "cpo": "pending",
+  "sprintStatus": "OPEN",
+  "vercelProject": "game29",
+  "repo": "jyp-ai1/game-platform",
+  "commit": "a0ce9b1",
+  "production": "https://game29.vercel.app",
+  "deploy": "game29-e728ieipo",
+  "deploymentId": "dpl_2DJrx43CNG2aYCWxCovT6djvXEvZ",
+  "preview": "https://game29-1ytib5mz0-jyp-ai1s-projects.vercel.app",
+  "baseline": "9fbb728",
+  "localE2E": "PASS",
+  "previewE2E": "PASS",
+  "productionE2E": "PASS"
+}
