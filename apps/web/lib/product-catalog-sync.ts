@@ -17,27 +17,25 @@ export type ProductPlayMode = "solo" | "multiplayer";
 export type ProductGameModes = {
   solo: boolean;
   multiplayer: boolean;
-  soloHref?: string;
   multiplayerHref?: string;
 };
 
+export { FLAGSHIP_CATALOG_HREF } from "@game-platform/game-sdk";
+
 const MODE_BY_SLUG: Record<ProductFlagshipSlug, ProductGameModes> = {
   snake: {
-    solo: true,
+    solo: false,
     multiplayer: true,
-    soloHref: "/flagship/snake-io/play?room=PRACTICE&fallback=1",
     multiplayerHref: "/games/snake/play?room=WORLD",
   },
   agar: {
-    solo: true,
+    solo: false,
     multiplayer: true,
-    soloHref: "/games/agar/play?room=PRACTICE",
     multiplayerHref: "/games/agar/play?room=GL-AGAR",
   },
   bomber: {
-    solo: true,
+    solo: false,
     multiplayer: true,
-    soloHref: "/games/bomber/play?room=BOMBER-SOLO",
     multiplayerHref: "/games/bomber/play?room=BOMBER-A",
   },
   "re-front": {
@@ -71,6 +69,14 @@ export function productModeLabel(slug: string): string | null {
 /** Strip deprecated games from any catalog list. */
 export function filterProductCatalogGames(games: Game[]): Game[] {
   return games.filter((g) => !isDeprecatedProductSlug(g.slug));
+}
+
+/** Official Product Catalog only — Snake · Agar · Bomber · Re:Front. */
+export function selectOfficialProductGames(games: Game[]): Game[] {
+  const order = new Map<string, number>(PRODUCT_FLAGSHIP_SLUGS.map((slug, i) => [slug, i]));
+  return games
+    .filter((g) => isProductFlagshipSlug(g.slug) && g.status === "ACTIVE")
+    .sort((a, b) => (order.get(a.slug) ?? 99) - (order.get(b.slug) ?? 99));
 }
 
 /** Ensure flagship MVP rows exist in catalog merge. */

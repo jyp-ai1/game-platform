@@ -7,9 +7,10 @@ import {
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
+  MultiplayerDeathOverlay,
   MultiplayerEntrySelect,
   MultiplayerPlayShell,
-  StandardGameOverOverlay,
+  FLAGSHIP_CATALOG_HREF,
   useGameSDK,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
@@ -639,28 +640,17 @@ export function AgarGame() {
             </div>
 
             {!alive ? (
-              <div
-                data-testid="agar-game-over"
-                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-xl bg-background/95 p-6"
-              >
-                <StandardGameOverOverlay
-                  gameSlug="agar"
+              <div data-testid="agar-game-over">
+                <MultiplayerDeathOverlay
+                  title="YOU DIED"
                   score={Math.max(mass, me?.score ?? 0)}
-                  onRestart={handleRetry}
                   onRetry={handleRetry}
+                  onAnotherGame={() => {
+                    leaveRoom(roomCode);
+                    window.location.href = FLAGSHIP_CATALOG_HREF;
+                  }}
                   onExit={exitToDetail}
                 />
-                <button
-                  type="button"
-                  data-testid="mp-death-play-another"
-                  onClick={() => {
-                    leaveRoom(roomCode);
-                    window.location.href = "/games";
-                  }}
-                  className="relative z-30 w-full max-w-sm rounded-xl border border-white/25 bg-white/5 py-3 text-sm font-semibold"
-                >
-                  PLAY ANOTHER GAME
-                </button>
               </div>
             ) : null}
           </div>

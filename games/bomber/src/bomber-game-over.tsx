@@ -14,6 +14,7 @@ export function BomberGameOver({
   bestRecord,
   onRetry,
   onPlayAnother,
+  onExit,
   title = "Game Over",
 }: {
   finalScore: number;
@@ -24,6 +25,7 @@ export function BomberGameOver({
   bestRecord: BomberBestRecord;
   onRetry: () => void;
   onPlayAnother: () => void;
+  onExit: () => void;
   title?: string;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -105,7 +107,7 @@ export function BomberGameOver({
             className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
             onClick={onRetry}
           >
-            RETRY
+            REMATCH
           </button>
           <button
             type="button"
@@ -113,7 +115,15 @@ export function BomberGameOver({
             className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
             onClick={onPlayAnother}
           >
-            PLAY ANOTHER GAME
+            ANOTHER GAME
+          </button>
+          <button
+            type="button"
+            data-testid="mp-death-exit"
+            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
+            onClick={onExit}
+          >
+            EXIT
           </button>
         </div>
       </div>

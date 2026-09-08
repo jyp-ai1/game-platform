@@ -1,0 +1,21 @@
+{
+  "gate": "multiplayer-productization-local-browser",
+  "baseUrl": "http://localhost:3000",
+  "vercelProject": "game29",
+  "productionShaHeld": "43f6270",
+  "productionDeployed": false,
+  "checkedAt": "2026-09-08T10:40:00.000Z",
+  "results": {
+    "flagshipCatalog": "PASS",
+    "discoverSeparate": "PASS",
+    "snakeResultTrio": "PASS",
+    "snakeAnotherGameToPlay": "PASS",
+    "snakeExitToDetail": "PASS",
+    "bomberNoMapSelect": "PASS",
+    "bomberEnterToWorld": "PASS",
+    "bomberExitToDetail": "PASS",
+    "agarEntry": "PASS",
+    "reFrontEntry": "PASS",
+    "legacyPracticeOnProductCta": "PASS_NOT_REACHED"
+  }
+}

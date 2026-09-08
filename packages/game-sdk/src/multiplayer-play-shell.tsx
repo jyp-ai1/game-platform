@@ -405,13 +405,15 @@ export function MultiplayerDeathOverlay({
   metric,
   onRetry,
   onExit,
-  title = "Death",
+  onAnotherGame,
+  title = "RESULT",
 }: {
   score: number;
   /** Game-specific line, e.g. "L:128" or "Wins 2" */
   metric?: string;
   onRetry: () => void;
   onExit: () => void;
+  onAnotherGame?: () => void;
   title?: string;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -433,21 +435,31 @@ export function MultiplayerDeathOverlay({
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">{title}</p>
         <p className="text-3xl font-bold tabular-nums text-white">{score.toLocaleString()}</p>
         {metric ? <p className="text-sm font-medium text-white/70">{metric}</p> : null}
-        <div className="mt-1 flex w-full gap-2">
+        <div className="mt-1 flex w-full flex-col gap-2">
           <button
             type="button"
             data-testid="mp-death-retry"
             data-death-ux="retry"
-            className="h-11 flex-1 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
+            className="h-11 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
             onClick={onRetry}
           >
-            RETRY
+            REMATCH
           </button>
+          {onAnotherGame ? (
+            <button
+              type="button"
+              data-testid="mp-death-play-another"
+              className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
+              onClick={onAnotherGame}
+            >
+              ANOTHER GAME
+            </button>
+          ) : null}
           <button
             type="button"
             data-testid="mp-death-exit"
             data-death-ux="exit"
-            className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
+            className="h-11 w-full rounded-xl border border-white/25 bg-white/5 text-sm font-medium text-white hover:bg-white/10"
             onClick={onExit}
           >
             EXIT

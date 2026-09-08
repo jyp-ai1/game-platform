@@ -19,7 +19,7 @@ export function GameDetailHero({
       <div
         className={
           compact
-            ? "relative aspect-[2.4/1] min-h-[88px] bg-muted sm:min-h-[100px]"
+            ? "relative aspect-[16/9] min-h-[168px] bg-muted sm:min-h-[220px]"
             : "relative aspect-[21/9] min-h-[120px] bg-muted sm:min-h-[140px]"
         }
       >

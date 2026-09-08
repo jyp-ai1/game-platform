@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getDeviceId,
   getLastNickname,
+  FLAGSHIP_CATALOG_HREF,
   MobileControlPad,
   MP_PLAYER_COLORS,
   MultiplayerEntrySelect,
@@ -92,7 +93,7 @@ const BOMBER_STYLES: MpStyleOption[] = [
   { id: "ghost", label: "Ghost", emoji: "👻", color: MP_PLAYER_COLORS[4] },
 ];
 
-type LobbyPhase = "entry" | "map";
+type LobbyPhase = "entry" | "join";
 
 type BomberInput = {
   deviceId: string;
@@ -206,6 +207,14 @@ function isSoloSession(code: string, deviceId: string): boolean {
   return !room || !roomHasOtherHumans(room, deviceId);
 }
 
+function catalogShardMapIndex(code: string): number | null {
+  const u = code.toUpperCase();
+  if (!u.startsWith("BOMBER-")) return null;
+  const letter = u.slice("BOMBER-".length);
+  const idx = MAP_LETTERS.indexOf(letter as (typeof MAP_LETTERS)[number]);
+  return idx >= 0 ? idx : null;
+}
+
 type BomberPopup = {
   id: number;
   sx: number;
@@ -266,52 +275,6 @@ async function waitForFreshShardState(code: string, timeoutMs = 3500): Promise<b
       if (Date.now() > deadline) finish(false);
     }, 100);
   });
-}
-
-function MiniMapPreview({ mapId }: { mapId: number }) {
-  const slots = rosterForMap(mapId);
-  const preview = useMemo(
-    () => createBomberWorld("preview", "P", { playerSlots: slots, mapId }),
-    [mapId, slots]
-  );
-  const scale = 8;
-  return (
-    <div
-      data-testid="bomber-map-preview"
-      className="relative mx-auto overflow-hidden rounded border border-white/20 bg-slate-900"
-      style={{ width: preview.cols * scale, height: preview.rows * scale }}
-    >
-      {preview.grid.map((row, y) =>
-        row.map((cell, x) => (
-          <div
-            key={`${x}-${y}`}
-            className="absolute"
-            style={{
-              left: x * scale,
-              top: y * scale,
-              width: scale - 0.5,
-              height: scale - 0.5,
-              background:
-                cell === "hard" ? "#475569" : cell === "soft" ? "#a8a29e" : "#1e293b",
-            }}
-          />
-        ))
-      )}
-      {Object.values(preview.players).map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-sm"
-          style={{
-            left: p.x * scale + 1,
-            top: p.y * scale + 1,
-            width: scale - 2,
-            height: scale - 2,
-            background: p.color,
-          }}
-        />
-      ))}
-    </div>
-  );
 }
 
 export function BomberGame() {
@@ -1221,16 +1184,14 @@ export function BomberGame() {
   );
 
   const handleEntryDone = useCallback(() => {
-    setLobbyPhase("map");
-    if (typeof window === "undefined") return;
-    const q = new URLSearchParams(window.location.search).get("room")?.toUpperCase();
-    if (!q?.startsWith("BOMBER-")) return;
-    const letter = q.slice("BOMBER-".length);
-    const idx = MAP_LETTERS.indexOf(letter as (typeof MAP_LETTERS)[number]);
-    if (idx >= 0 && !started) {
-      window.setTimeout(() => enterMapMatch(idx), 0);
-    }
-  }, [enterMapMatch, started]);
+    const q =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("room")?.toUpperCase()
+        : null;
+    const idx = catalogShardMapIndex(q ?? activeRoom) ?? 0;
+    setLobbyPhase("join");
+    if (!started) enterMapMatch(idx);
+  }, [activeRoom, enterMapMatch, started]);
 
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
@@ -1257,8 +1218,11 @@ export function BomberGame() {
     setStarted(false);
     setConnecting(false);
     setConnectError(false);
-    setLobbyPhase("map");
-  }, [deviceId, nickname, color, started, setStateAckReady]);
+    setDeathSummary(null);
+    const idx = catalogShardMapIndex(code) ?? 0;
+    setLobbyPhase("join");
+    enterMapMatch(idx);
+  }, [deviceId, nickname, color, started, setStateAckReady, enterMapMatch]);
 
   const exitToDetail = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -1344,24 +1308,16 @@ export function BomberGame() {
     );
   }
 
-  if (lobbyPhase === "map" && !started) {
+  if (lobbyPhase === "join" && !started) {
     return (
       <div
-        data-testid="bomber-map-select"
+        data-testid="bomber-join"
+        data-connecting={connecting ? "1" : "0"}
         className="flex min-h-[70vh] touch-none select-none flex-col items-center justify-center gap-5 bg-slate-950 px-4 text-white"
         style={{ WebkitUserSelect: "none", userSelect: "none", touchAction: "none" }}
       >
-        <h1 className="text-2xl font-bold">Map Select</h1>
-        <p className="text-sm text-white/60">Same map = same room · AI fills empty seats</p>
-        {connecting ? (
-          <div
-            data-testid="bomber-connecting"
-            className="flex flex-col items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-8 py-6"
-          >
-            <p className="text-lg font-semibold">Connecting…</p>
-            <p className="text-sm text-white/60">Waiting for room · seat · spawn</p>
-          </div>
-        ) : connectError ? (
+        <h1 className="text-2xl font-bold">{connectError ? "Bomber" : "ENTER WORLD"}</h1>
+        {connectError ? (
           <div
             data-testid="bomber-connect-error"
             className="flex flex-col items-center gap-3 rounded-xl border border-red-500/40 bg-red-950/40 px-8 py-6"
@@ -1393,27 +1349,13 @@ export function BomberGame() {
             </div>
           </div>
         ) : (
-          <>
-            <div className="flex flex-wrap justify-center gap-3">
-              {MAP_NAMES.map((name, i) => (
-                <button
-                  key={name}
-                  type="button"
-                  data-testid={`bomber-map-${MAP_LETTERS[i]}`}
-                  onClick={() => enterMapMatch(i)}
-                  className={`rounded-xl px-4 py-3 text-sm font-semibold ${
-                    mapId === i ? "bg-amber-400 text-black" : "bg-white/10"
-                  }`}
-                >
-                  {MAP_LETTERS[i]} · {name} · {rosterForMap(i)}P
-                </button>
-              ))}
-            </div>
-            <MiniMapPreview mapId={mapId} />
-            <p className="text-xs text-white/50">
-              Tap a map to enter · Fire start {BOMBER_FIRE_START} · Items Bomb/Fire/Speed
-            </p>
-          </>
+          <div
+            data-testid="bomber-connecting"
+            className="flex flex-col items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-8 py-6"
+          >
+            <p className="text-lg font-semibold">Connecting…</p>
+            <p className="text-sm text-white/60">Waiting for room · seat · spawn</p>
+          </div>
         )}
       </div>
     );
@@ -1727,9 +1669,10 @@ export function BomberGame() {
           onRetry={handleRetry}
           onPlayAnother={() => {
             if (typeof window !== "undefined") {
-              window.location.href = "/games";
+              window.location.href = FLAGSHIP_CATALOG_HREF;
             }
           }}
+          onExit={exitToDetail}
         />
       ) : null}
     </>

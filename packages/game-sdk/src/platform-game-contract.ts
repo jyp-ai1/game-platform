@@ -51,11 +51,13 @@ export type PlatformGameContractMeta = {
   deathOverlay: boolean;
   /** Detail CTA copy key. */
   detailCta: "WORLD_PLAY" | "PLAY";
-  /** Known HOLD deviations (document only — do not “fix” Bomber map lobby here). */
   knownDeviations: string[];
 };
 
 export const PLATFORM_FLAGSHIP_MP_SLUGS = ["snake", "agar", "bomber", "re-front"] as const;
+
+/** Official 4-game Product Catalog (not Discover `/games`). ANOTHER GAME lands here. */
+export const FLAGSHIP_CATALOG_HREF = "/play";
 
 export function resolveEntryMode(slug: string): PlatformEntryMode {
   return isMultiplayerGameSlug(slug) ? "multiplayer" : "solo";
@@ -99,10 +101,6 @@ export function buildPlatformGameContract(slug: string): PlatformGameContractMet
   const entryMode = resolveEntryMode(slug);
   const mp = entryMode === "multiplayer";
   const knownDeviations: string[] = [];
-  // Bomber keeps an optional map-select after ENTER (HOLD — do not deepen).
-  if (slug === "bomber") {
-    knownDeviations.push("bomber:map-select-after-enter (HOLD)");
-  }
   return {
     slug,
     gameType: mp ? "multiplayer" : "singleplayer",

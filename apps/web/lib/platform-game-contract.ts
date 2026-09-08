@@ -50,7 +50,7 @@ export function sprint18ContractEvidence() {
       bomber: buildPlatformGameContract("bomber"),
       "2048": buildPlatformGameContract("2048"),
     },
-    bomberHold: "Bomber gameplay/online untouched; map-select after enter documented as HOLD deviation",
+    bomberHold: "Bomber Product Catalog: Character → Color → ENTER → Connecting → World (no Map Select)",
     agarFrozen: "Agar game logic untouched",
     pass: smoke.ok && checklistOk,
   };

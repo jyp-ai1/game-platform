@@ -117,6 +117,7 @@ export {
   type SessionDifficulty,
 } from "./game-metadata";
 export {
+  FLAGSHIP_CATALOG_HREF,
   PLATFORM_CONTRACT_CHECKLIST_KEYS,
   PLATFORM_FLAGSHIP_MP_SLUGS,
   PLATFORM_JOURNEY,

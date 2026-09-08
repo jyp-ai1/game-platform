@@ -1,6 +1,6 @@
 "use client";
 
-import { getDeviceId, getLastNickname, useGameSDK, emitGameExit, emitGameRetry } from "@game-platform/game-sdk";
+import { getDeviceId, getLastNickname, useGameSDK, emitGameExit, emitGameRetry, MultiplayerDeathOverlay, FLAGSHIP_CATALOG_HREF } from "@game-platform/game-sdk";
 import { ExperienceEngine } from "@game-platform/replay-engine/experience";
 import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
@@ -960,7 +960,9 @@ export function SnakeIoGame({
     if (!world) return;
     const countdownDomVisible =
       typeof document !== "undefined" &&
-      !!document.querySelector('[data-testid="death-ux-countdown"]');
+      !!document.querySelector(
+        '[data-testid="mp-death-overlay"], [data-testid="death-ux-countdown"]'
+      );
     const gameOverDomVisible =
       typeof document !== "undefined" &&
       !!document.querySelector('[data-testid="death-ux-gameover"]');
@@ -1357,10 +1359,7 @@ export function SnakeIoGame({
     });
   }, [isStageMode, stageIndex, runScore, stageOverlay, world?.tick]);
 
-  const handleQuitGame = useCallback(() => {
-    setIsPaused(false);
-    emitGameExit("snake");
-    postDeath("exit");
+  const leaveSnakeRoom = useCallback(() => {
     if (activeRoom && !isLocalOnly) {
       try {
         leaveRoom(activeRoom);
@@ -1368,10 +1367,27 @@ export function SnakeIoGame({
         /* room may already be gone */
       }
     }
+  }, [activeRoom, isLocalOnly]);
+
+  const handleQuitGame = useCallback(() => {
+    setIsPaused(false);
+    emitGameExit("snake");
+    postDeath("exit");
+    leaveSnakeRoom();
     if (typeof window !== "undefined") {
       window.location.assign("/games/snake");
     }
-  }, [postDeath, activeRoom, isLocalOnly]);
+  }, [postDeath, leaveSnakeRoom]);
+
+  const handleAnotherGame = useCallback(() => {
+    setIsPaused(false);
+    emitGameExit("snake");
+    postDeath("exit");
+    leaveSnakeRoom();
+    if (typeof window !== "undefined") {
+      window.location.assign(FLAGSHIP_CATALOG_HREF);
+    }
+  }, [postDeath, leaveSnakeRoom]);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -2383,43 +2399,15 @@ export function SnakeIoGame({
         </div>
       ) : null}
 
-      {!isStageMode && isGlobalWorld && mySnake && !mySnake.alive && respawnSec != null && respawnSec > 0 ? (
-        <div
-          data-testid="death-ux-countdown"
-          className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40"
-        >
-          <p className="text-7xl font-black tabular-nums text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.5)]">
-            {respawnSec}
-          </p>
-          <p className="mt-2 text-sm font-semibold tracking-widest text-white/80">RESPAWN</p>
-        </div>
-      ) : null}
-
-      {!isStageMode && mySnake && !mySnake.alive && !isGlobalWorld ? (
-        <div
-          data-testid="death-ux-gameover"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
-        >
-          <div className="relative h-[min(100%,28rem)] w-full max-w-sm rounded-xl">
-            <GameOverOverlay
-              variant="game-over"
-              score={Math.round(mySnake.score ?? 0)}
-              gameSlug="snake"
-              onRestart={() => {}}
-              onRetry={handleRetry}
-              onExit={() => {
-                emitGameExit("snake");
-                postDeath("exit");
-                if (activeRoom && !isLocalOnly) {
-                  try {
-                    leaveRoom(activeRoom);
-                  } catch {
-                    /* ignore */
-                  }
-                }
-              }}
-            />
-          </div>
+      {!isStageMode && mySnake && !mySnake.alive ? (
+        <div data-testid={isGlobalWorld ? "death-ux-countdown" : "death-ux-gameover"}>
+          <MultiplayerDeathOverlay
+            title="YOU DIED"
+            score={Math.round(mySnake.score ?? 0)}
+            onRetry={handleRetry}
+            onAnotherGame={handleAnotherGame}
+            onExit={handleQuitGame}
+          />
         </div>
       ) : null}
 

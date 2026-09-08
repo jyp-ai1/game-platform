@@ -1,7 +1,6 @@
 import type { Game } from "@game-platform/shared";
 import Link from "next/link";
 
-import { playHrefForCatalogSlug } from "@/lib/game-catalog";
 import { gameSummaryDescription } from "@/lib/game-discovery-ui";
 
 /** Compact catalog picks — real games only, no fake metrics. */
@@ -41,11 +40,11 @@ export function MoreGamesPanel({
               </p>
             </div>
             <Link
-              href={playHrefForCatalogSlug(game.slug)}
+              href={`/games/${game.slug}`}
               data-testid={`more-games-play-${game.slug}`}
               className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-xs font-bold text-primary-foreground transition hover:brightness-110"
             >
-              PLAY
+              DETAIL
             </Link>
           </li>
         ))}

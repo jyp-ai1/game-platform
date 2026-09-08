@@ -1,0 +1,72 @@
+{
+  "gate": "multiplayer-productization-e2e",
+  "baseUrl": "http://localhost:3000",
+  "vercelProject": "game29",
+  "productionDeployed": false,
+  "productionShaHeld": "43f6270",
+  "startedAt": "2026-09-08T10:41:28.090Z",
+  "projectCheck": {
+    "host": "localhost",
+    "isLocal": true,
+    "isGame29Preview": false,
+    "isProd": false,
+    "isLegacy": false
+  },
+  "checks": {
+    "flagship-catalog": {
+      "pass": true,
+      "detail": "4 official games only on /play"
+    },
+    "discover-separate": {
+      "pass": true,
+      "detail": "/games remains Discover, not ANOTHER GAME landing"
+    },
+    "detail-snake": {
+      "pass": true,
+      "detail": "/games/snake/play?room=WORLD"
+    },
+    "entry-snake": {
+      "pass": true,
+      "detail": "http://localhost:3000/flagship/snake-io/play?room=WORLD"
+    },
+    "detail-agar": {
+      "pass": true,
+      "detail": "/games/agar/play?room=GL-AGAR"
+    },
+    "entry-agar": {
+      "pass": true,
+      "detail": "http://localhost:3000/games/agar/play?room=GL-AGAR"
+    },
+    "detail-bomber": {
+      "pass": true,
+      "detail": "/games/bomber/play?room=BOMBER-A"
+    },
+    "entry-bomber": {
+      "pass": true,
+      "detail": "http://localhost:3000/games/bomber/play?room=BOMBER-A"
+    },
+    "bomber-no-map": {
+      "pass": true,
+      "detail": {
+        "joinUi": true,
+        "connecting": true,
+        "hud": false,
+        "err": false
+      }
+    },
+    "bomber-world": {
+      "pass": true,
+      "detail": "HUD"
+    },
+    "detail-re-front": {
+      "pass": true,
+      "detail": "/games/re-front/play?room=RF-LOBBY"
+    },
+    "entry-re-front": {
+      "pass": true,
+      "detail": "http://localhost:3000/games/re-front/play?room=RF-LOBBY"
+    }
+  },
+  "endedAt": "2026-09-08T10:41:48.224Z",
+  "verdict": "PASS"
+}

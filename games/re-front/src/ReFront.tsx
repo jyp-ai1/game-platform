@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
+  FLAGSHIP_CATALOG_HREF,
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
@@ -1039,7 +1040,7 @@ export function ReFrontGame() {
 
   const onAnotherGame = useCallback(() => {
     leaveRoom(roomCode);
-    window.location.href = "/games";
+    window.location.href = FLAGSHIP_CATALOG_HREF;
   }, [roomCode]);
 
   useEffect(() => {
