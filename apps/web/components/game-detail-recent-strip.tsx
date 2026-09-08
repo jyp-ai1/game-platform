@@ -4,6 +4,7 @@ import type { Game } from "@game-platform/shared";
 import { useSyncExternalStore } from "react";
 
 import { GameCard } from "@/components/game-card";
+import { isProductFlagshipSlug } from "@/lib/product-catalog-sync";
 import {
   getRecentlyPlayedSnapshot,
   getServerRecentlyPlayedSnapshot,
@@ -17,8 +18,10 @@ export function GameDetailRecentStrip({ games, currentSlug }: { games: Game[]; c
     getServerRecentlyPlayedSnapshot
   );
   const bySlug = new Map(games.map((g) => [g.slug, g]));
+  const officialOnly = isProductFlagshipSlug(currentSlug);
   const recent = slugs
     .filter((s) => s !== currentSlug)
+    .filter((s) => !officialOnly || isProductFlagshipSlug(s))
     .map((s) => bySlug.get(s))
     .filter((g): g is Game => g !== undefined)
     .slice(0, 4);

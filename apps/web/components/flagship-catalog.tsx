@@ -2,7 +2,7 @@ import type { Game } from "@game-platform/shared";
 import Image from "next/image";
 import Link from "next/link";
 
-import { productModeLabel } from "@/lib/product-catalog-sync";
+import { productFlagshipFeatures, productModeLabel } from "@/lib/product-catalog-sync";
 
 /** Official 4-game Product Catalog — ANOTHER GAME landing (not Discover). */
 export function FlagshipCatalog({ games }: { games: Game[] }) {
@@ -22,7 +22,7 @@ export function FlagshipCatalog({ games }: { games: Game[] }) {
                 data-testid={`flagship-catalog-${game.slug}`}
                 className="flex overflow-hidden rounded-2xl border border-white/10 bg-card/40 transition hover:border-white/25 hover:bg-card/70"
               >
-                <div className="relative h-24 w-32 shrink-0 bg-muted sm:h-28 sm:w-40">
+                <div className="relative h-28 w-36 shrink-0 bg-muted sm:h-32 sm:w-44">
                   {game.thumbnailUrl ? (
                     <Image
                       src={game.thumbnailUrl}
@@ -40,7 +40,10 @@ export function FlagshipCatalog({ games }: { games: Game[] }) {
                       {mode}
                     </p>
                   ) : null}
-                  <p className="text-xs text-muted-foreground">DETAIL → ENTER WORLD</p>
+                  <p className="text-xs font-medium text-cyan-200/90">ENTER WORLD</p>
+                  <p className="line-clamp-2 text-[11px] text-muted-foreground">
+                    {productFlagshipFeatures(game.slug)[0] ?? "DETAIL → ENTER WORLD"}
+                  </p>
                 </div>
               </Link>
             </li>

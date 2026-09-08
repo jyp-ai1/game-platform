@@ -16,7 +16,7 @@ const snakeGameProfile: GameProfile = {
   party: true,
   tournament: true,
   playModes: {
-    solo: true,
+    solo: false,
     duo: true,
     party: true,
     tournament: true,

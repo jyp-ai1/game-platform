@@ -70,10 +70,11 @@ export default async function GamePlayPage({ params, searchParams }: GamePlayPag
   if (slug === "snake") {
     const q = await searchParams;
     // invite= maps to the same room join path as room=
-    const room =
+    const requested =
       firstParam(q.room)?.toUpperCase() ||
       firstParam(q.invite)?.toUpperCase() ||
       "WORLD";
+    const room = requested === "PRACTICE" || requested === "STAGE" ? "WORLD" : requested;
     const fromInvite =
       !!firstParam(q.invite) || firstParam(q.source)?.toLowerCase() === "invite";
     const debug = firstParam(q.debug) === "1" ? "&debug=1" : "";

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FavoriteButton } from "@/components/favorite-button";
+import { isProductFlagshipSlug } from "@/lib/product-catalog-sync";
 
 export function GameDetailHero({
   game,
@@ -50,7 +51,7 @@ export function GameDetailHero({
           <FavoriteButton slug={game.slug} />
         </div>
       </div>
-      {game.category ? (
+      {game.category && !isProductFlagshipSlug(game.slug) ? (
         <Link
           href={`/categories/${game.category.slug}`}
           className="absolute right-4 top-4 rounded-full bg-background/60 px-3 py-1 text-xs backdrop-blur sm:right-5 sm:top-5"

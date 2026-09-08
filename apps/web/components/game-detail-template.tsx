@@ -13,7 +13,7 @@ import { InviteDetailPin } from "@/components/invite-detail-pin";
 import { MoreGamesPanel } from "@/components/more-games-panel";
 import { MpWorldPlayLink } from "@/components/snake-world-play-link";
 import { playHrefForCatalogSlug, REPLAY_DETAIL_WORLD_CTA } from "@/lib/game-catalog";
-import { isProductFlagshipSlug, productModeLabel } from "@/lib/product-catalog-sync";
+import { isProductFlagshipSlug, productFlagshipFeatures, productModeLabel } from "@/lib/product-catalog-sync";
 import { creatorDisplayName } from "@/lib/creator/creator-game-catalog";
 import {
   gameCreatorLabel,
@@ -50,6 +50,7 @@ export function GameDetailTemplate({
   const mp = isDiscoveryMultiplayerSlug(slug, game);
   const modeLabel = productModeLabel(slug);
   const flagshipMp = isProductFlagshipSlug(slug) && mp;
+  const features = productFlagshipFeatures(slug);
 
   return (
     <main className="flex flex-1 flex-col" data-testid="game-detail-page">
@@ -116,6 +117,19 @@ export function GameDetailTemplate({
                 )}
                 {mp ? (
                   <p className="text-xs text-muted-foreground">Character → Color → ENTER</p>
+                ) : null}
+                {features.length > 0 ? (
+                  <ul
+                    data-testid="game-detail-features"
+                    className="mt-3 w-full max-w-sm space-y-1 text-left text-xs text-muted-foreground"
+                  >
+                    {features.map((line) => (
+                      <li key={line} className="flex gap-2">
+                        <span aria-hidden className="text-cyan-400">▸</span>
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ul>
                 ) : null}
               </div>
 

@@ -1795,12 +1795,17 @@ export function SnakeIoGame({
   if (!roomCode) return <p className="text-center text-muted-foreground">Room code required</p>;
   if (!connected || !world) {
     return (
-      <div ref={boardRef} className="flex w-full max-w-3xl flex-col items-center gap-3 px-2">
-        <p className="text-center text-muted-foreground">Connecting… {ux.label} · {playerCount}P</p>
-        <div
-          className="w-full animate-pulse rounded-xl border border-white/10 bg-white/5"
-          style={{ aspectRatio: "1", maxHeight: SNAKE_FEEL.maxViewportPx }}
-        />
+      <div
+        ref={boardRef}
+        data-testid="snake-connecting"
+        className="flex min-h-[70vh] w-full flex-col items-center justify-center gap-3 px-6 text-center"
+      >
+        <div className="flex aspect-square w-full max-w-xl flex-col items-center justify-center gap-3 rounded-xl border border-white/15 bg-card/60 p-8">
+          <p className="text-lg font-semibold">Connecting…</p>
+          <p className="text-sm text-muted-foreground">
+            Joining {ux.label} · {playerCount}P
+          </p>
+        </div>
       </div>
     );
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, cn } from "@game-platform/ui";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   DEFAULT_MP_AI_DIFFICULTY,
@@ -119,6 +119,21 @@ export function MultiplayerEntrySelect({
   }, [showColorStep, embeddedColor, color, onColorChange]);
 
   const displayColor = showColorStep ? color : embeddedColor;
+  const [enterLocked, setEnterLocked] = useState(false);
+  const enterUnlockRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (enterUnlockRef.current != null) window.clearTimeout(enterUnlockRef.current);
+    };
+  }, []);
+
+  function handleEnter() {
+    if (enterLocked) return;
+    setEnterLocked(true);
+    onPlay();
+    enterUnlockRef.current = window.setTimeout(() => setEnterLocked(false), 900);
+  }
 
   return (
     <div
@@ -244,11 +259,13 @@ export function MultiplayerEntrySelect({
         </div>
         <Button
           size="lg"
-          className="h-14 min-h-12 min-w-[220px] text-base font-bold bg-cyan-600 hover:bg-cyan-500"
-          onClick={onPlay}
+          className="h-14 min-h-12 min-w-[220px] text-base font-bold bg-cyan-600 hover:bg-cyan-500 disabled:opacity-70"
+          onClick={handleEnter}
+          disabled={enterLocked}
+          aria-busy={enterLocked}
           data-testid="mp-enter-world"
         >
-          {playLabel}
+          {enterLocked ? "ENTERING…" : playLabel}
         </Button>
       </div>
     </div>

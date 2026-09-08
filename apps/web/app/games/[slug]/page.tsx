@@ -15,7 +15,7 @@ import {
 } from "@/lib/creator/creator-game-catalog";
 import { isCreatorPlayableSlug } from "@/lib/creator/creator-play-resolver";
 import { isPlayableSlug } from "@/lib/playable-games";
-import { isDeprecatedProductSlug } from "@/lib/product-catalog-sync";
+import { isDeprecatedProductSlug, isProductFlagshipSlug } from "@/lib/product-catalog-sync";
 import {
   breadcrumbJsonLd,
   buildGameMetadata,
@@ -91,11 +91,19 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
           gameJsonLd(game),
           softwareApplicationJsonLd(game),
           gameFaqJsonLd(game),
-          breadcrumbJsonLd([
-            { name: "홈", path: "/" },
-            { name: "게임", path: "/games" },
-            { name: game.title, path: `/games/${game.slug}` },
-          ]),
+          breadcrumbJsonLd(
+            isProductFlagshipSlug(slug)
+              ? [
+                  { name: "홈", path: "/" },
+                  { name: "Catalog", path: "/play" },
+                  { name: game.title, path: `/games/${game.slug}` },
+                ]
+              : [
+                  { name: "홈", path: "/" },
+                  { name: "게임", path: "/games" },
+                  { name: game.title, path: `/games/${game.slug}` },
+                ]
+          ),
         ]}
       />
       <GameDetailTemplate

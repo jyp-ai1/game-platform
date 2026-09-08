@@ -137,7 +137,11 @@ function SnakeIoPlayInner({
   const params = useSearchParams();
   const router = useRouter();
   const room = params.get("room");
-  const isStageMode = room?.toUpperCase() === "STAGE";
+  const blockedLocalRoom =
+    room?.toUpperCase() === "PRACTICE" ||
+    room?.toUpperCase() === "STAGE" ||
+    params.get("mode") === "stage";
+  const isStageMode = false;
   const [loop, setLoop] = useState<ViralLoopResult | null>(null);
   const [headCharacter, setHeadCharacter] = useState<SnakeHeadId>(() => loadSnakeHeadCharacter());
   const [bodyColor, setBodyColor] = useState(() => loadSnakeBodyColor());
@@ -153,6 +157,11 @@ function SnakeIoPlayInner({
     () => ({ current: null as { score: number; rewards: UniversalRewardBundle } | null }),
     []
   );
+
+  useEffect(() => {
+    if (!blockedLocalRoom) return;
+    router.replace("/flagship/snake-io/play?room=WORLD");
+  }, [blockedLocalRoom, router]);
 
   useEffect(() => {
     resetEntryStatus();
@@ -232,6 +241,25 @@ function SnakeIoPlayInner({
     router.push("/games/snake");
   }, [router]);
 
+  const playBackHeader = (
+    <header className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-black/80 px-3 py-2">
+      <button
+        type="button"
+        data-testid="mp-play-back-detail"
+        onClick={() => {
+          if (typeof window !== "undefined" && window.history.length > 1) {
+            router.back();
+            return;
+          }
+          router.replace("/games/snake");
+        }}
+        className="text-xs font-medium text-white/70 transition hover:text-white"
+      >
+        ← Snake
+      </button>
+    </header>
+  );
+
   const handleRematch = useCallback(async () => {
     if (!loop) return;
     if (loop.partyId) {
@@ -271,22 +299,29 @@ function SnakeIoPlayInner({
 
   if (!characterReady) {
     return (
-      <SnakeCharacterSelect
-        value={headCharacter}
-        color={bodyColor}
-        onChange={setHeadCharacter}
-        onColorChange={setBodyColor}
-        onConfirm={() => {
-          saveSnakeHeadCharacter(headCharacter);
-          saveSnakeBodyColor(bodyColor);
-          setCharacterReady(true);
-        }}
-      />
+      <div className="flex h-full min-h-0 flex-col">
+        {playBackHeader}
+        <div className="min-h-0 flex-1 overflow-auto">
+          <SnakeCharacterSelect
+            value={headCharacter}
+            color={bodyColor}
+            onChange={setHeadCharacter}
+            onColorChange={setBodyColor}
+            onConfirm={() => {
+              saveSnakeHeadCharacter(headCharacter);
+              saveSnakeBodyColor(bodyColor);
+              setCharacterReady(true);
+            }}
+          />
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="flex h-full min-h-0 flex-col">
+      {playBackHeader}
+      <div className="min-h-0 flex-1 overflow-hidden">
       {debugMode ? <SnakeDebugOverlay /> : null}
       <SnakePlayErrorBoundary onConnectFailed={handleConnectFailed}>
         <SnakeIoGame
@@ -312,7 +347,8 @@ function SnakeIoPlayInner({
           }}
         />
       ) : null}
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -325,7 +361,7 @@ export function SnakeIoPlayClient({
   gameMeta?: Game;
 } = {}) {
   const params = useSearchParams();
-  const practiceMode = params.get("room")?.toUpperCase() === "PRACTICE";
+  const practiceMode = false;
   const debugMode = params.get("debug") === "1";
   const sdk = useMemo(() => ({ submitScore }), []);
 

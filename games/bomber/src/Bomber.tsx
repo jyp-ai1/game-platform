@@ -380,11 +380,6 @@ export function BomberGame() {
   const kills = me?.kills ?? 0;
   const score = me?.score ?? 0;
   const rank = localRank(world, deviceId);
-  const soloSession = isSoloSession(activeRoom, deviceId);
-  const onlyLocalHuman = !Object.values(world.players).some(
-    (p) => !p.isBot && p.id !== deviceId
-  );
-
   const liveMissions = useMemo(() => {
     const stats = sessionStatsRef.current;
     stats.enemiesDefeated = Math.max(stats.enemiesDefeated, kills);
@@ -1196,10 +1191,12 @@ export function BomberGame() {
   const handleRetry = useCallback(() => {
     reportedRef.current = false;
     const code = roomRef.current;
+    const catalogIdx = catalogShardMapIndex(code);
     const soloRetry =
-      isSoloSession(code, deviceId) ||
-      qaLocalProbeRef.current ||
-      !Object.values(worldRef.current.players).some((p) => !p.isBot && p.id !== deviceId);
+      catalogIdx == null &&
+      (qaLocalProbeRef.current ||
+        isSoloSession(code, deviceId) ||
+        !Object.values(worldRef.current.players).some((p) => !p.isBot && p.id !== deviceId));
     if (soloRetry && started) {
       setPopups([]);
       sessionStatsRef.current = createSessionStats();
@@ -1248,12 +1245,7 @@ export function BomberGame() {
   const height = world.rows * CELL;
   const timeLeft = remainingTimeSec(world, nowTick);
   const dangerCells = getBombDangerCells(world, nowTick);
-  const showDeath =
-    world.matchOver ||
-    (!alive &&
-      started &&
-      stateAck &&
-      (soloSession || qaLocalProbeRef.current || onlyLocalHuman));
+  const showDeath = world.matchOver || (!alive && started && (stateAck || qaLocalProbeRef.current));
   const resultLabel = world.isDraw
     ? "DRAW"
     : world.winnerId === deviceId
@@ -1634,7 +1626,7 @@ export function BomberGame() {
               {pop.text}
             </div>
           ))}
-          {!alive && !world.matchOver && !soloSession ? (
+          {!alive && !world.matchOver && !showDeath ? (
             <div className="absolute inset-x-0 bottom-4 z-20 text-center text-xs text-white/70">
               Spectating · last survivor wins
             </div>

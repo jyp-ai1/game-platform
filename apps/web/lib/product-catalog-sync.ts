@@ -66,6 +66,19 @@ export function productModeLabel(slug: string): string | null {
   return null;
 }
 
+/** Short product facts on official Detail / Catalog — not Discover copy. */
+export const PRODUCT_FLAGSHIP_FEATURES: Record<ProductFlagshipSlug, readonly string[]> = {
+  snake: ["Eat and boost in a living WORLD", "Death → Result → Rematch same world", "EXIT returns to Snake Detail"],
+  agar: ["Split, eat, and grow with others", "Host / Guest share one world", "Death → Result → Rematch / Another / Exit"],
+  bomber: ["Plant bombs on a shared shard", "Character → Color → ENTER (no Map Select)", "Fail = Retry / Back, never Solo"],
+  "re-front": ["Host / Guest territory combat", "Hold 70% to win", "Result → Rematch / Another / Exit"],
+};
+
+export function productFlagshipFeatures(slug: string): readonly string[] {
+  if (!isProductFlagshipSlug(slug)) return [];
+  return PRODUCT_FLAGSHIP_FEATURES[slug];
+}
+
 /** Strip deprecated games from any catalog list. */
 export function filterProductCatalogGames(games: Game[]): Game[] {
   return games.filter((g) => !isDeprecatedProductSlug(g.slug));
