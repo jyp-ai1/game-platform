@@ -1,0 +1,24 @@
+{
+  "gate": "cpo-final-close",
+  "sprint": "Multiplayer Productization",
+  "vercelProject": "game29",
+  "productionUrl": "https://game29.vercel.app",
+  "productionSha": "4319eb2",
+  "deployment": "game29-152liulhl",
+  "deploymentId": "dpl_w22PPaF1sPLac3HTuMYBV5Fms6YU",
+  "legacyVercelProject": "not used",
+  "retiredBaseline": "43f6270",
+  "midInspectFailure": "powershell-npm-warn-while-building",
+  "midInspectIsProductFail": false,
+  "ceoRetestRequested": false,
+  "checks": {
+    "ctoTechnicalQa": "PASS",
+    "cpoProductQa": "PASS",
+    "previewE2e": "12/12",
+    "productionReady": true,
+    "productionSmoke": "12/12"
+  },
+  "ctoVerdict": "PASS",
+  "cpoProductClose": "CLOSED",
+  "sprintStatus": "CLOSED"
+}
