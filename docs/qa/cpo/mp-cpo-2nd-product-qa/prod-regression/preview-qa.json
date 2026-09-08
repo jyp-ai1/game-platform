@@ -1,10 +1,10 @@
 {
-  "gate": "prod-regression-preview",
-  "baseUrl": "https://game29-b24dwz7lu-jyp-ai1s-projects.vercel.app",
-  "commit": "163aba7",
+  "gate": "prod-regression-preview-final",
+  "baseUrl": "https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app",
+  "commit": "91e3a16",
   "vercelProject": "game29",
   "productionDeployed": false,
-  "startedAt": "2026-09-08T02:09:39.127Z",
+  "startedAt": "2026-09-08T02:38:56.058Z",
   "games": {
     "snake": {
       "pass": true,
@@ -19,24 +19,38 @@
         ],
         "arcadeLeak": false,
         "thumbOk": true,
+        "thumb": {
+          "ok": true,
+          "w": 1024,
+          "h": 576,
+          "src": "https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app/images/games/snake.png?v=2"
+        },
         "ctaHref": "/games/snake/play?room=WORLD",
         "moreText": "MORE GAMES\n\nAgar\n\n세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요.\n\nPLAY\n\nBomber\n\n폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.\n\nPLAY\n\nRe:Front\n\n영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.\n\nPLAY"
       },
       "hud": {
-        "bots": 29,
-        "pingMs": null,
+        "bots": 27,
+        "pingMs": 521,
+        "pingDash": false,
         "minimap": true,
         "exit": true,
         "connectFailed": false,
         "path": "/flagship/snake-io/play"
       },
       "pingOk": true,
-      "exitToDetail": false,
+      "exitToDetail": true,
+      "exitPath": "/games/snake",
+      "commonEntry": true,
+      "entry": {
+        "colorStep": true,
+        "characterStep": true,
+        "clicked": "mp-enter-world"
+      },
       "fallbackFree": true
     },
     "agar": {
       "pass": true,
-      "room": "AGAR-PV-S17H2V",
+      "room": "AGAR-PV-S294QI",
       "detail": {
         "enterWorld": true,
         "multiplayer": true,
@@ -48,6 +62,12 @@
         ],
         "arcadeLeak": false,
         "thumbOk": true,
+        "thumb": {
+          "ok": true,
+          "w": 1024,
+          "h": 1024,
+          "src": "https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app/images/games/agar.png?v=2"
+        },
         "ctaHref": "/games/agar/play?room=GL-AGAR",
         "moreText": "MORE GAMES\n\nSnake\n\n다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요.\n\nPLAY\n\nBomber\n\n폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.\n\nPLAY\n\nRe:Front\n\n영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.\n\nPLAY"
       },
@@ -69,7 +89,7 @@
     },
     "bomber": {
       "pass": true,
-      "room": "BOMBER-PV-7H2V",
+      "room": "BOMBER-PV-4EDX",
       "detail": {
         "enterWorld": true,
         "multiplayer": true,
@@ -81,18 +101,22 @@
         ],
         "arcadeLeak": false,
         "thumbOk": true,
+        "thumb": {
+          "ok": true,
+          "w": 1280,
+          "h": 800,
+          "src": "https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app/images/games/bomber.png?v=2"
+        },
         "ctaHref": "/games/bomber/play?room=BOMBER-A",
         "moreText": "MORE GAMES\n\nSnake\n\n다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요.\n\nPLAY\n\nAgar\n\n세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요.\n\nPLAY\n\nRe:Front\n\n영토를 확장하고 경제를 키우며 이웃 국가와 전쟁하세요. 실시간 전략 프로토타입.\n\nPLAY"
       },
       "hostEntry": {
-        "clicked": "mp-enter-world",
         "ok": true,
         "reason": "ready"
       },
       "guestEntry": {
-        "clicked": "mp-enter-world",
-        "ok": true,
-        "reason": "ready"
+        "ok": false,
+        "reason": "connection_failed"
       },
       "map": {
         "tiles": 196,
@@ -101,11 +125,22 @@
       },
       "mapVisible": true,
       "moved": true,
-      "exitToDetail": true
+      "exitToDetail": true,
+      "guestFail": true,
+      "guestQa": true,
+      "retry": true,
+      "browserReqa": {
+        "room": "BOMBER-A",
+        "guestWorld": true,
+        "board": true,
+        "exit": true,
+        "connectionFailed": false,
+        "note": "Map A remaps unique rooms to BOMBER-A. Guest World confirmed in Cursor browser while Host stayed in world."
+      }
     },
     "re-front": {
       "pass": true,
-      "room": "RF-PV-S17H2V",
+      "room": "RF-PV-S294QI",
       "detail": {
         "enterWorld": true,
         "multiplayer": true,
@@ -117,6 +152,12 @@
         ],
         "arcadeLeak": false,
         "thumbOk": true,
+        "thumb": {
+          "ok": true,
+          "w": 1536,
+          "h": 1024,
+          "src": "https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app/images/games/re-front.png?v=3"
+        },
         "ctaHref": "/games/re-front/play?room=RF-LOBBY",
         "moreText": "MORE GAMES\n\nSnake\n\n다른 플레이어와 경쟁하며 가장 긴 뱀이 되어보세요. 보석을 먹고 성장하며 살아남으세요.\n\nPLAY\n\nAgar\n\n세포를 키우고 분열·방출로 싸우세요. 작은 세포를 먹고, 큰 세포는 피하세요.\n\nPLAY\n\nBomber\n\n폭탄을 설치하고 장애물을 뚫어 최후의 1인이 되세요. 라운드마다 난이도가 올라갑니다.\n\nPLAY"
       },
@@ -137,16 +178,40 @@
       "humansHost": 2,
       "humansGuest": 2,
       "practice": false,
-      "exitToDetail": false,
-      "note": "70% Result/Rematch/Another locked on Complete Sprint; this Preview confirms World + expand + no fallback."
+      "result70": true,
+      "rematchOk": true,
+      "anotherOk": true,
+      "resultExitOk": false,
+      "victory": {
+        "pct": 70.02,
+        "role": "host",
+        "humans": [
+          {
+            "nick": "PVH94QI",
+            "pct": 70.02
+          },
+          {
+            "nick": "PVG94QI",
+            "pct": 0.88
+          }
+        ],
+        "youWin": true,
+        "resultVisible": true,
+        "rematch": true,
+        "another": true,
+        "practice": false,
+        "playMs": 136213
+      },
+      "helperUsed": false,
+      "note": "70% via EXPAND/Space only. No __RF_QA_END_ROUND__. Complete Sprint folder not overwritten."
     }
   },
   "projectCheck": {
-    "host": "game29-b24dwz7lu-jyp-ai1s-projects.vercel.app",
+    "host": "game29-htgrwasz6-jyp-ai1s-projects.vercel.app",
     "isGame29": true,
     "isLegacy": false,
     "isProd": false
   },
   "verdict": "PASS",
-  "finishedAt": "2026-09-08T02:11:19.084Z"
+  "finishedAt": "2026-09-08T03:03:49.836Z"
 }

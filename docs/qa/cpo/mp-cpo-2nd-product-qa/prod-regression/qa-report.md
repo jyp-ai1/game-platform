@@ -1,62 +1,109 @@
-# Production Product Regression — Preview QA
+# Targeted Fix Finalization — Preview QA
 
 ```text
-Sprint                 Targeted Fix → Preview QA
-Production             NOT DEPLOYED
+Sprint                 Targeted Fix Finalization
+Production             HOLD · NOT DEPLOYED
 Vercel                 game29 Preview only
-Legacy game-platform   not used for this QA
+Legacy game-platform   not used
 ```
 
-CPO reads this path. No CEO paste required.
+CPO reads this path.
 
 ## Preview
 
 | Item | Value |
 | --- | --- |
 | Vercel Project | **game29** |
-| URL | https://game29-b24dwz7lu-jyp-ai1s-projects.vercel.app |
-| Commit | `163aba7` (fix on `a1d0c74`) |
-| Environment | Preview – game29 `6319253770` |
+| URL | https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app |
+| Commit | `91e3a16` |
+| Branch | `promote/product-catalog` |
+| Environment | Preview – game29 |
 | Production | **not** promoted |
 
 `preview-qa.json` + `evidence/{snake,agar,bomber,re-front}/`
 
 ## Matrix
 
-| Game | Detail ENTER WORLD | MORE GAMES = official 4 | Host/Guest | No Solo/Practice | World | Exit |
+| Game | CPO last | This Preview | Common Entry | Host/Guest World | Exit | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Snake | PASS | PASS | PASS (WORLD-3) | PASS | PASS | 나가기 visible; lands flagship play not `/games/snake` |
-| Agar | PASS | PASS | PASS host/guest `AGAR-PV-*` | PASS | PASS | PASS → Detail |
-| Bomber | PASS | PASS | PASS `BOMBER-PV-*` | PASS | PASS — map 672×672, tiles visible | PASS → Detail |
-| Re:Front | PASS | PASS | PASS host/guest, 2 humans each | PASS | PASS — expand 0.88% → 3.2% | 나가기 present |
+| Snake | FAIL | **PASS** | Character + Color + ENTER | WORLD-6 · Bots 27 · Ping 127–521ms · Minimap | `/games/snake` Detail | No Solo / Practice |
+| Agar | PASS | **PASS** | unchanged | Host/Guest `AGAR-PV-S294QI` | Detail | No Agar src change |
+| Bomber | PASS | **PASS** | unchanged | Host map 672×672 · Guest `BOMBER-A` World | Detail | No Bomber src change |
+| Re:Front | HOLD | **PASS** | unchanged | Host/Guest 2 humans · expand 0.88%→3.22% | Result EXIT visible | 70% Real Victory 136s · Rematch · Another Game |
 
-Solo / PRACTICE / `fallback=1` / `BOMBER-SOLO`: **none** on these four.
+Solo / PRACTICE / `fallback=1` / `BOMBER-SOLO` / silent Solo: **none**.
 
-## CPO checklist notes
+## Snake Common Entry
 
-**Snake**
-- CTA `/games/snake/play?room=WORLD` → SnakeIo flagship (not classic `SnakeGame`)
-- Character → ENTER (SnakeIo has no Color step)
-- Bot HUD this run: 29 · Minimap: yes · Ping: `—` (clamped; no 3e9 ms)
-- Green field is current SnakeIo playfield
+Required: `Detail → ENTER WORLD → Character → Color → ENTER → Multiplayer World → Exit → Snake Detail`
 
-**Agar**
-- CTA `/games/agar/play?room=GL-AGAR` — no Snake `WORLD` collision
-- Connection + Host/Guest World: PASS
+| Check | Result |
+| --- | --- |
+| Character | PASS |
+| Color | PASS — `mp-entry-lobby` Color swatches |
+| ENTER CTA | PASS — `mp-enter-world` |
+| Multiplayer World | PASS — `/flagship/snake-io/play?room=WORLD` · Room WORLD-6 |
+| Bot HUD | PASS — 27 |
+| Ping | PASS — numeric `127ms` / `371ms` / `521ms`. `—` not shown |
+| Minimap | PASS |
+| Exit → Snake Detail | PASS — `나가기` → `/games/snake` |
+| Solo / Practice / fallback | none |
 
-**Bomber**
-- First Preview (`a1d0c74`) still hid the map (board collapsed to ~2px)
-- `163aba7` sizes the common play board — map + 4 players visible
+Browser: Cursor tab + Playwright Host/Guest. Evidence: `evidence/snake/01-detail.png` · `01b-entry.png` · `02-host-world.png` · `03-guest-world.png` · `04-after-exit.png` · `05-browser-world.png`
 
-**Re:Front**
-- Engine not reverted. World + EXPAND + Host/Guest PASS
-- 70% / Result / Rematch / Another Game: not re-ground on this Preview (Complete Sprint evidence stays at `re-front-complete/`)
-- `re-front.png` is in git and returns 200. The file itself is a dark UI capture, so Detail hero still looks empty
+## Agar
 
-## Dual project
+PASS maintained. CTA `/games/agar/play?room=GL-AGAR`. Host `host` / Guest `guest`. Exit → Detail. No Agar source change.
 
-This QA used **Preview – game29** only. Legacy `Preview – game-platform` also fired on the same SHA — ignored.
+## Bomber
+
+PASS maintained. No Bomber source change.
+
+- Host Playwright: map 196 tiles · 672×672 · moved · Exit → Detail
+- Unique-room script guest hit `Connection failed → Retry / Back` (no Solo). Map A remaps `?room=*` to `BOMBER-A`
+- Browser re-QA on `BOMBER-A` while Host stayed in world: Guest entered World, board present, `나가기` present. `evidence/bomber/03-guest-world.png`
+
+## Re:Front
+
+Engine not touched.
+
+| Check | Result |
+| --- | --- |
+| Host/Guest World | PASS — 2 humans each |
+| Expand | PASS — 0.88% → 3.22% then hold to 70% |
+| 70% Real Victory → Result | PASS — Territory 70.02% · YOU WIN · EMPIRE COMPLETE · 136s · EXPAND/Space only · no `__RF_QA_END_ROUND__` |
+| Rematch | PASS — back in `rf-game-shell` |
+| Another Game | PASS — `/games` |
+| Result EXIT | Button present on Result (`07-result.png`). This run took Another Game first, so Result EXIT click was not the path used |
+| Thumbnail | PASS — `re-front.png?v=3` 1536×1024. Hero shows yellow grid + green territory + Re:Front title. Not a dark UI crop |
+
+Complete Sprint folder `re-front-complete/` was **not** overwritten.
+
+## Thumbnail
+
+`/images/games/re-front.png?v=3` loads (1536×1024). Detail Hero shows the territory map, not an empty black capture. Evidence: `evidence/re-front/01-detail.png` · `01b-hero.png`
+
+## Browser QA
+
+Cursor browser on the same Preview:
+
+- Snake: Color selected → ENTER → WORLD Ping 371 then 127 → `나가기` → `/games/snake`
+- Re:Front Detail Hero: identifiable grid + title
+- Bomber: Host + Guest on `BOMBER-A` World
+
+## CTO Technical QA
+
+```text
+CTO FINAL QA COMPLETE
+Game: Snake / Agar / Bomber / Re:Front
+Sprint: Targeted Fix Finalization
+Path: docs/qa/cpo/mp-cpo-2nd-product-qa/prod-regression/qa-report.md
+Commit: 91e3a16
+Preview: https://game29-htgrwasz6-jyp-ai1s-projects.vercel.app
+CTO Verdict: PASS
+Production: NOT DEPLOYED · HOLD
+```
 
 ## Production
 
-HOLD. CPO approves from this path before any promote.
+HOLD. CPO Product PASS is required before any promote.
