@@ -39,19 +39,17 @@ export function isLiveBomberHost(room: GameRoom): boolean {
 }
 
 /**
- * After guest state-ack wait: no host broadcast → reclaim as MP host.
- * Live host playing this map but no seat → Connection failed (no Solo).
+ * Shared shards must stay enterable. Ack timeout → reclaim as MP host.
+ * A leftover sim blob or zombie ticker is not a live World.
+ * Connection failed stays only when reclaim cannot run (caller catch).
  */
 export function decideBomberGuestTimeout(wait: BomberHostAckWait): BomberShardAction {
   if (wait.acked) return "fail";
-  if (wait.sawHostState) return "fail";
   return "reclaim";
 }
 
-/** Join failed on a shared shard — reclaim unless a live host is confirmed. */
-export function decideBomberJoinFailed(room: GameRoom | null | undefined): BomberShardAction {
-  if (!room) return "reclaim";
-  if (isLiveBomberHost(room)) return "fail";
+/** Join failed on BOMBER-A..D — wipe the ghost roster and become MP host. */
+export function decideBomberJoinFailed(_room: GameRoom | null | undefined): BomberShardAction {
   return "reclaim";
 }
 

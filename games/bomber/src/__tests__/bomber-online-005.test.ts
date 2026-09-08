@@ -58,7 +58,7 @@ test("ONLINE-005: missing room join-fail reclaims as MP host", () => {
   assert.equal(decideBomberJoinFailed(null), "reclaim");
 });
 
-test("ONLINE-005: live host join-fail stays Connection failed", () => {
+test("ONLINE-005: live-looking leftover join-fail still reclaims shard", () => {
   const live = room({
     hostId: "host-1",
     players: [{ deviceId: "host-1", nickname: "Host", ready: true }],
@@ -69,15 +69,12 @@ test("ONLINE-005: live host join-fail stays Connection failed", () => {
     },
   });
   assert.equal(isLiveBomberHost(live), true);
-  assert.equal(decideBomberJoinFailed(live), "fail");
+  assert.equal(decideBomberJoinFailed(live), "reclaim");
 });
 
-test("ONLINE-005: guest ack timeout with no host broadcast reclaims", () => {
+test("ONLINE-005: guest ack timeout reclaims even if leftover state exists", () => {
   assert.equal(decideBomberGuestTimeout({ acked: false, sawHostState: false }), "reclaim");
-});
-
-test("ONLINE-005: live host broadcast without seat is Connection failed", () => {
-  assert.equal(decideBomberGuestTimeout({ acked: false, sawHostState: true }), "fail");
+  assert.equal(decideBomberGuestTimeout({ acked: false, sawHostState: true }), "reclaim");
 });
 
 test("ONLINE-005: noteBomberHostState requires matching live map", () => {

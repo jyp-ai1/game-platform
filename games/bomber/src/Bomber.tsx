@@ -217,7 +217,17 @@ type BomberPopup = {
 
 /** Reset stale map shard so the entering device becomes authoritative host (no ghost host). */
 async function claimStaleShardRoom(room: GameRoom, nickname: string): Promise<GameRoom> {
-  return reclaimStaleMultiplayerRoomAsync(room, nickname, "bomber");
+  try {
+    return await reclaimStaleMultiplayerRoomAsync(room, nickname, "bomber");
+  } catch {
+    return createRoom({
+      code: room.code,
+      gameSlug: "bomber",
+      maxPlayers: room.maxPlayers ?? 8,
+      matchMode: room.matchMode ?? "public",
+      hostNickname: nickname,
+    });
+  }
 }
 
 function shardStateAgeMs(room: GameRoom | null | undefined): number {
