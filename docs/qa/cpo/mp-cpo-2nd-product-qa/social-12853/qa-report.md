@@ -2,16 +2,16 @@
 
 ```text
 QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
-선행: 84216 CLOSE → 95631 CLOSE → 10742 CLOSE
+선행: 84216 CLOSE → 95631 CPO CLOSE → 10742 CPO CLOSE
 구현 없음 · Preview 없음 · Production 작업 없음
-Execution: 84216 CLOSE → 95631 → 10742 완료 후 OPEN
+Execution: 10742 CPO Product QA PASS → CLOSE 후 OPEN
 Target: game29 Production 최종 SHA (10742 이후)
 Expected session: ~3h+ independent Long Sprint
 Vercel: game29
 Repo: jyp-ai1/game-platform
 ```
 
-**Now: QUEUED.** Same 3H+ Long Sprint protocol as 95631. Fire **EXECUTE NOW** only after 10742 CLOSE. No micro-split. Final report once.
+**Now: QUEUED.** Fire **EXECUTE NOW** only after 10742 CPO CLOSE. 10742 is the full Growth + Progression Long Sprint, not a feature slice. No micro-split. Final report once.
 
 ## Official path (when OPEN)
 
