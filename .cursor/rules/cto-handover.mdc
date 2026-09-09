@@ -11,7 +11,7 @@ This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Pl
 
 ```text
 WO 84216  Product Polish & Retention                    🟡 OPEN · CPO Product QA pending
-WO 95631  Re:Play Live Service Foundation               ⏸ QUEUED — no implementation
+WO 95631  Re:Play Live Service Foundation               ⏸ QUEUED — waiting WO, not execution
 Production                                             game29 / a0ce9b1
 ----------------------------
 WO 73184 Experience Long Sprint  🟢 CLOSED
