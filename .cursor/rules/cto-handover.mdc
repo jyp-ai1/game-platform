@@ -75,7 +75,8 @@ QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
 ```
 
 **Now:** 84216 = CPO Product QA only. 95631 / 10742 / 12853 = **QUEUED**.  
-Armed spec: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`
+Armed execute-ready spec (do not run until 84216 CLOSE):
+`docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`
 
 ## Role
 
