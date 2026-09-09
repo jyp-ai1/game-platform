@@ -15,6 +15,7 @@ WO 95631  Live Service Foundation                       ⏸ QUEUED — after 842
 WO 10742  Growth & Player Progression                   ⏸ QUEUED — after 95631 complete
 WO 12853  Social & Service Experience                   ⏸ QUEUED — after 10742 CLOSE
 Production                                             game29 / a0ce9b1
+Queue locked. Do not add more WOs after 12853. 95631→10742→12853 = one service-completion sequence.
 ----------------------------
 WO 73184 Experience Long Sprint  🟢 CLOSED
 4/4 MP Product Gate              🟢 CLOSED (do not reopen)
@@ -31,7 +32,7 @@ Multiplayer Productization       🟢 CLOSED
 
 WO 84216 authorizes the full pipeline (local → Preview → Production promote) **after Preview Full E2E PASS**. Do not ask CEO to mid-test. CPO Product QA once after CTO Final QA + repo evidence. Do not reopen WO 73184.
 
-Evidence channel: **CTO → Repository official path → CPO direct verify → 판정**. Do not use CEO as messenger.
+Evidence channel: **CTO → Repository official path → CPO direct verify → 판정**. Do not use CEO as messenger. Do not ask CEO to mid-test. One Work Order = one completed product experience (Long Sprint), not a feature slice.
 
 ## Role
 
