@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import type { GameRoom } from "@game-platform/shared";
 
 import {
+  buildSnakeWorldActiveCandidates,
   classifySnakeWorldHost,
   hasSnakeWorldAuthorityState,
   isSnakeWorldReclaimWinner,
@@ -46,18 +47,64 @@ describe("snake-world-host-lifecycle", () => {
     );
   });
 
-  it("classify — self-host", () => {
+  it("buildSnakeWorldActiveCandidates excludes roster ghosts without presence", () => {
+    const r = room({
+      hostId: "ghost-host",
+      players: [
+        { deviceId: "ghost-host", nickname: "H", ready: true },
+        { deviceId: "ghost-a", nickname: "A", ready: true },
+        { deviceId: "ghost-b", nickname: "B", ready: true },
+        { deviceId: "live-guest", nickname: "G", ready: true },
+      ],
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "live-guest", ["live-guest"]);
+    assert.deepEqual(active, ["live-guest"]);
+    assert.equal(isSnakeWorldReclaimWinner(r, "ghost-a", active), false);
+    assert.equal(isSnakeWorldReclaimWinner(r, "live-guest", active), true);
+  });
+
+  it("buildSnakeWorldActiveCandidates — two live guests, lex winner", () => {
+    const r = room({
+      hostId: "ghost-host",
+      players: [
+        { deviceId: "ghost-host", nickname: "H", ready: true },
+        { deviceId: "guest-b", nickname: "B", ready: true },
+        { deviceId: "guest-a", nickname: "A", ready: true },
+      ],
+    });
+    const live = ["guest-a", "guest-b"];
+    const active = buildSnakeWorldActiveCandidates(r, "guest-b", live);
+    assert.deepEqual(active, ["guest-a", "guest-b"]);
+    assert.equal(snakeWorldReclaimWinnerId(r, active), "guest-a");
+    assert.equal(isSnakeWorldReclaimWinner(r, "guest-a", active), true);
+    assert.equal(isSnakeWorldReclaimWinner(r, "guest-b", active), false);
+  });
+
+  it("ghost-only roster — self still active if connected", () => {
+    const r = room({
+      hostId: "zzz-ghost",
+      players: Array.from({ length: 26 }, (_, i) => ({
+        deviceId: `ghost-${i}`,
+        nickname: `G${i}`,
+        ready: true,
+      })),
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "real-joiner", []);
+    assert.deepEqual(active, ["real-joiner"]);
+    assert.equal(snakeWorldReclaimWinnerId(r, active), "real-joiner");
+  });
+
+  it("zero active when self is listed host", () => {
     const r = room({
       hostId: "me",
       players: [{ deviceId: "me", nickname: "Me", ready: true }],
     });
-    assert.equal(
-      classifySnakeWorldHost({ room: r, deviceId: "me", connectedAtMs: Date.now() }).kind,
-      "self-host"
-    );
+    const active = buildSnakeWorldActiveCandidates(r, "me", ["me"]);
+    assert.deepEqual(active, []);
+    assert.equal(snakeWorldReclaimWinnerId(r, active), null);
   });
 
-  it("classify — booting within grace when no state", () => {
+  it("classify — host fresh presence keeps booting (no premature reclaim)", () => {
     const t0 = 1_000_000;
     const r = room({
       hostId: "host",
@@ -70,26 +117,27 @@ describe("snake-world-host-lifecycle", () => {
       room: r,
       deviceId: "guest",
       connectedAtMs: t0,
-      nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS - 1,
+      nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 500,
+      hostPresenceLive: true,
     });
     assert.equal(h.kind, "booting-host");
   });
 
-  it("classify — stale after grace with no state", () => {
+  it("classify — stale after grace when host presence dead", () => {
     const t0 = 1_000_000;
     const r = room({
       hostId: "ghost",
       players: [
-        { deviceId: "ghost", nickname: "Ghost", ready: true },
-        { deviceId: "a", nickname: "A", ready: true },
-        { deviceId: "b", nickname: "B", ready: true },
+        { deviceId: "ghost", nickname: "G", ready: true },
+        { deviceId: "guest", nickname: "V", ready: true },
       ],
     });
     const h = classifySnakeWorldHost({
       room: r,
-      deviceId: "a",
+      deviceId: "guest",
       connectedAtMs: t0,
       nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 1,
+      hostPresenceLive: false,
     });
     assert.equal(h.kind, "stale-host");
   });
@@ -117,35 +165,7 @@ describe("snake-world-host-lifecycle", () => {
     if (h.kind === "live-host") assert.ok(h.ageMs <= SNAKE_WORLD_LIVE_STATE_MS);
   });
 
-  it("reclaim winner is lexicographic min excluding listed host", () => {
-    const r = room({
-      hostId: "zzz-ghost",
-      players: [
-        { deviceId: "zzz-ghost", nickname: "G", ready: true },
-        { deviceId: "ddd", nickname: "D", ready: true },
-        { deviceId: "aaa", nickname: "A", ready: true },
-        { deviceId: "mmm", nickname: "M", ready: true },
-      ],
-    });
-    assert.equal(snakeWorldReclaimWinnerId(r), "aaa");
-    assert.equal(isSnakeWorldReclaimWinner(r, "aaa"), true);
-    assert.equal(isSnakeWorldReclaimWinner(r, "ddd"), false);
-    assert.equal(isSnakeWorldReclaimWinner(r, "zzz-ghost"), false);
-  });
-
-  it("two guests — only one deterministic winner", () => {
-    const r = room({
-      hostId: "host",
-      players: [
-        { deviceId: "host", nickname: "H", ready: true },
-        { deviceId: "guest-b", nickname: "B", ready: true },
-        { deviceId: "guest-a", nickname: "A", ready: true },
-      ],
-    });
-    assert.equal(snakeWorldReclaimWinnerId(r), "guest-a");
-  });
-
-  it("shouldFail only after follow deadline while stale", () => {
+  it("shouldFail waits when zero active candidates before deadline", () => {
     const t0 = 5_000_000;
     const health = { kind: "stale-host" as const, reason: "no-state-after-grace" };
     assert.equal(
@@ -153,7 +173,8 @@ describe("snake-world-host-lifecycle", () => {
         health,
         connectedAtMs: t0,
         nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 100,
-        reclaimAttempted: true,
+        reclaimAttempted: false,
+        activeCandidateCount: 0,
       }),
       false
     );
@@ -162,7 +183,8 @@ describe("snake-world-host-lifecycle", () => {
         health,
         connectedAtMs: t0,
         nowMs: snakeWorldGuestDeadlineMs(t0),
-        reclaimAttempted: true,
+        reclaimAttempted: false,
+        activeCandidateCount: 0,
       }),
       true
     );

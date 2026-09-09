@@ -26,7 +26,9 @@ import {
   type NetworkScheduler,
 } from "@game-platform/multiplayer-sdk";
 import {
+  buildSnakeWorldActiveCandidates,
   classifySnakeWorldHost,
+  fetchRoomPresenceLiveIds,
   isSnakeWorldReclaimWinner,
   shouldFailSnakeWorldSpawn,
   SNAKE_WORLD_BOOT_GRACE_MS,
@@ -734,92 +736,123 @@ export function SnakeIoGame({
       };
 
       const tickWatch = (): void => {
-        if (!active) return;
-        if (worldRef.current) return;
+        void (async () => {
+          if (!active) return;
+          if (worldRef.current) return;
 
-        const roomNow = getRoom(code);
-        const health = classifySnakeWorldHost({
-          room: roomNow,
-          deviceId,
-          connectedAtMs,
-        });
-
-        if (health.kind === "self-host" && roomNow) {
-          // We are listed host — bootstrap if applyRoom has not yet (e.g. race).
-          if (Date.now() - connectedAtMs >= Math.min(800, SNAKE_WORLD_BOOT_GRACE_MS)) {
-            bootstrapAuthorityWorld(roomNow, code);
-          }
-          if (!worldRef.current) {
-            spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
-          }
-          return;
-        }
-
-        if (health.kind === "live-host" || health.kind === "booting-host") {
-          spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
-          return;
-        }
-
-        // stale-host — non-winner: rejoin so we attach to reclaim winner's fresh room + wait for state
-        if (health.kind === "stale-host" && roomNow && !isSnakeWorldReclaimWinner(roomNow, deviceId)) {
-          void joinRoomAsync(code, {
-            gameSlug: "snake",
-            maxPlayers: 50,
-            nickname,
-          }).catch(() => {});
-        }
-
-        if (
-          health.kind === "stale-host" &&
-          roomNow &&
-          !reclaimAttempted &&
-          isSnakeWorldReclaimWinner(roomNow, deviceId)
-        ) {
-          reclaimAttempted = true;
-          entryTrace("CONNECT", "START", `stale-reclaim ${code} ${health.reason}`);
-          void reclaimStaleMultiplayerRoomAsync(roomNow, nickname, "snake")
-            .then((reclaimed) => {
-              if (!active || worldRef.current) return;
-              setSessionRoom(reclaimed.code);
-              start(reclaimed.code);
-              bootstrapAuthorityWorld(reclaimed, reclaimed.code);
-              entryTrace("CONNECT", "PASS", `reclaimed-host ${reclaimed.code}`);
-            })
-            .catch((err) => {
-              entryLogFail(
-                "CONNECT",
-                err instanceof Error ? err.message : String(err),
-                { room: code, recordCrash: true }
-              );
-              if (
-                shouldFailSnakeWorldSpawn({
-                  health,
-                  connectedAtMs,
-                  reclaimAttempted: true,
-                })
-              ) {
-                onConnectFailedRef.current?.();
-              } else {
-                spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
-              }
-            });
-          spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
-          return;
-        }
-
-        if (
-          shouldFailSnakeWorldSpawn({
-            health,
+          const roomNow = getRoom(code);
+          const livePresenceIds = await fetchRoomPresenceLiveIds(code);
+          const hostPresenceLive = roomNow ? livePresenceIds.includes(roomNow.hostId) : false;
+          const health = classifySnakeWorldHost({
+            room: roomNow,
+            deviceId,
             connectedAtMs,
-            reclaimAttempted,
-          })
-        ) {
-          entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
-          onConnectFailedRef.current?.();
-          return;
-        }
+            hostPresenceLive,
+          });
 
-        spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+          if (health.kind === "self-host" && roomNow) {
+            if (Date.now() - connectedAtMs >= Math.min(800, SNAKE_WORLD_BOOT_GRACE_MS)) {
+              bootstrapAuthorityWorld(roomNow, code);
+            }
+            if (!worldRef.current) {
+              spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+            }
+            return;
+          }
+
+          if (health.kind === "live-host" || health.kind === "booting-host") {
+            spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+            return;
+          }
+
+          const activeCandidates = roomNow
+            ? buildSnakeWorldActiveCandidates(roomNow, deviceId, livePresenceIds)
+            : [];
+
+          if (health.kind === "stale-host" && roomNow && activeCandidates.length === 0) {
+            if (
+              shouldFailSnakeWorldSpawn({
+                health,
+                connectedAtMs,
+                reclaimAttempted,
+                activeCandidateCount: 0,
+              })
+            ) {
+              entryLogFail("SPAWN", `no-active-candidates ${code}`, { room: code });
+              onConnectFailedRef.current?.();
+              return;
+            }
+            spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
+            return;
+          }
+
+          if (
+            health.kind === "stale-host" &&
+            roomNow &&
+            !reclaimAttempted &&
+            isSnakeWorldReclaimWinner(roomNow, deviceId, activeCandidates)
+          ) {
+            reclaimAttempted = true;
+            entryTrace("CONNECT", "START", `stale-reclaim ${code} ${health.reason}`);
+            void reclaimStaleMultiplayerRoomAsync(roomNow, nickname, "snake")
+              .then((reclaimed) => {
+                if (!active || worldRef.current) return;
+                setSessionRoom(reclaimed.code);
+                start(reclaimed.code);
+                bootstrapAuthorityWorld(reclaimed, reclaimed.code);
+                entryTrace("CONNECT", "PASS", `reclaimed-host ${reclaimed.code}`);
+              })
+              .catch((err) => {
+                entryLogFail(
+                  "CONNECT",
+                  err instanceof Error ? err.message : String(err),
+                  { room: code, recordCrash: true }
+                );
+                if (
+                  shouldFailSnakeWorldSpawn({
+                    health,
+                    connectedAtMs,
+                    reclaimAttempted: true,
+                    activeCandidateCount: activeCandidates.length,
+                  })
+                ) {
+                  onConnectFailedRef.current?.();
+                } else {
+                  spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
+                }
+              });
+            spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
+            return;
+          }
+
+          if (
+            health.kind === "stale-host" &&
+            roomNow &&
+            activeCandidates.length > 0 &&
+            !isSnakeWorldReclaimWinner(roomNow, deviceId, activeCandidates)
+          ) {
+            void joinRoomAsync(code, {
+              gameSlug: "snake",
+              maxPlayers: 50,
+              nickname,
+            }).catch(() => {});
+          }
+
+          if (
+            shouldFailSnakeWorldSpawn({
+              health,
+              connectedAtMs,
+              reclaimAttempted,
+              activeCandidateCount: activeCandidates.length,
+            })
+          ) {
+            entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
+            onConnectFailedRef.current?.();
+            return;
+          }
+
+          spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+        })();
       };
 
       spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
