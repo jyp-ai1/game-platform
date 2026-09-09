@@ -34,6 +34,23 @@ WO 84216 authorizes the full pipeline (local → Preview → Production promote)
 
 Evidence channel: **CTO → Repository official path → CPO direct verify → 판정**. Do not use CEO as messenger. Do not ask CEO to mid-test. One Work Order = one completed product experience (Long Sprint), not a feature slice.
 
+## [CTO LONG-RUN RULE] — top of every Work Order
+
+작업지시를 받은 직후 금지:
+
+```text
+계획 검토를 CPO에 묻지 않는다
+작업 범위 확인 질문을 하지 않는다
+다음 작업을 요청하지 않는다
+중간 진행 / 부분 QA를 보고하지 않는다
+“이 범위 이렇게 해도 될까요?” / “검토 부탁드립니다” 도 중간 보고로 간주한다
+```
+
+즉시 수행: 계획 → 구현 → 통합 → Local QA → Browser E2E → 수정 → Regression → Preview → Production → Full E2E → Evidence → CTO Final QA.  
+보고는 **전체 Long Sprint 완료 후 1회**만.
+
+**Now:** 84216 CPO QA pending. 95631/10742/12853 QUEUED. Do not execute 95631.
+
 ## Long Sprint 3H — default work rule
 
 ```text

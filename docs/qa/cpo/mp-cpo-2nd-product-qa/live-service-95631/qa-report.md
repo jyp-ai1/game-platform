@@ -10,7 +10,9 @@ Vercel: game29
 Repo: jyp-ai1/game-platform
 ```
 
-**Now: QUEUED.** Do not execute. When 84216 CLOSES, treat the block below as the only start order.
+**Now: QUEUED.** Do not execute.
+
+[CTO LONG-RUN RULE] 검토 요청·범위 확인·다음 작업 질문은 중간 보고이며 금지. 실행 시 끝까지 수행 후 결과 1회.
 
 ## Armed — fire only after 84216 CLOSE
 
