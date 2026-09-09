@@ -17,6 +17,7 @@ import {
   leaveRoom,
   replay,
   resolveMultiplayerEntry,
+  reclaimStaleMultiplayerRoomAsync,
   joinGlobalWorld,
   send,
   spectator,
@@ -24,6 +25,12 @@ import {
   subscribeRoom,
   type NetworkScheduler,
 } from "@game-platform/multiplayer-sdk";
+import {
+  classifySnakeWorldHost,
+  isSnakeWorldReclaimWinner,
+  shouldFailSnakeWorldSpawn,
+  SNAKE_WORLD_BOOT_GRACE_MS,
+} from "./snake-world-host-lifecycle";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
 import { cn, GameOverOverlay, Button } from "@game-platform/ui";
 import Link from "next/link";
@@ -663,8 +670,10 @@ export function SnakeIoGame({
       start(code);
       entryTrace("CONNECT", "PASS", code);
       entryTrace("JOIN", "PASS", `${r.players.length} players`);
-      const pop = isGlobalWorld ? SNAKE_WORLD_TARGET : Math.max(1, r.players.length);
-      startSnakeTelemetry(code, { isGlobalWorld, quickPlay: isGlobalWorld });
+      const pop = isGlobalWorldRoom(code, "snake")
+        ? SNAKE_WORLD_TARGET
+        : Math.max(1, r.players.length);
+      startSnakeTelemetry(code, { isGlobalWorld: isGlobalWorldRoom(code, "snake"), quickPlay: isGlobalWorldRoom(code, "snake") });
       refreshWorldTuningFromTelemetry();
       Replay.multiplayer.analytics.start(code, "snake", r.players.length);
       Replay.multiplayer.team.create(
@@ -673,11 +682,147 @@ export function SnakeIoGame({
         r.players.map((p) => p.deviceId)
       );
       setConnected(true);
-      spawnTimeoutRef.current = window.setTimeout(() => {
-        if (!active || worldRef.current) return;
-        entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
-        onConnectFailedRef.current?.();
-      }, 12_000);
+
+      // WORLD: staged stale-host watch (not a blind 12s fail). Private rooms keep simple timeout.
+      if (spawnTimeoutRef.current) window.clearTimeout(spawnTimeoutRef.current);
+      if (!isGlobalWorldRoom(code, "snake")) {
+        spawnTimeoutRef.current = window.setTimeout(() => {
+          if (!active || worldRef.current) return;
+          entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
+          onConnectFailedRef.current?.();
+        }, 12_000);
+        return;
+      }
+
+      const connectedAtMs = Date.now();
+      let reclaimAttempted = false;
+      const nickname = getLastNickname() || "Player";
+
+      const bootstrapAuthorityWorld = (roomNow: GameRoom, roomCodeNow: string): void => {
+        if (worldRef.current) return;
+        const cfg = Replay.multiplayer.balance("snake", SNAKE_WORLD_TARGET);
+        const obj = Replay.multiplayer.objectives.create(
+          Replay.multiplayer.objectives.pick(SNAKE_WORLD_TARGET)
+        );
+        const humans = roomNow.players.map((p) => ({
+          deviceId: p.deviceId,
+          nickname: p.nickname,
+        }));
+        if (!humans.some((h) => h.deviceId === deviceId)) {
+          humans.push({ deviceId, nickname });
+        }
+        const persisted = loadPersistedGlobalWorld(roomCodeNow);
+        let initial = persisted ?? createInitialWorld(humans, cfg);
+        syncSnakePopulation(initial, humans, SNAKE_WORLD_TARGET, deviceId);
+        rehydrateWorldSnakes(initial);
+        if (!initial.snakes[deviceId]) {
+          const idx = humans.findIndex((h) => h.deviceId === deviceId);
+          ensureLocalSnake(initial, deviceId, nickname, Math.max(0, idx));
+        }
+        applyLocalHead(initial);
+        if (!persisted) warmGlobalWorld(initial);
+        initial.objective = obj;
+        initLivingWorld(initial, resolveSnakeMatchRule(SNAKE_WORLD_TARGET));
+        applyMatchIdentity(initial);
+        sessionMomentsRef.current = [];
+        worldRef.current = initial;
+        setWorld(initial);
+        setJoinBrief(buildJoinBrief(initial));
+        window.setTimeout(() => setJoinBrief(null), 4500);
+        send(roomCodeNow, "state", initial);
+        entryTrace("SPAWN", "PASS", `host-bootstrap ${roomCodeNow}`);
+      };
+
+      const tickWatch = (): void => {
+        if (!active) return;
+        if (worldRef.current) return;
+
+        const roomNow = getRoom(code);
+        const health = classifySnakeWorldHost({
+          room: roomNow,
+          deviceId,
+          connectedAtMs,
+        });
+
+        if (health.kind === "self-host" && roomNow) {
+          // We are listed host — bootstrap if applyRoom has not yet (e.g. race).
+          if (Date.now() - connectedAtMs >= Math.min(800, SNAKE_WORLD_BOOT_GRACE_MS)) {
+            bootstrapAuthorityWorld(roomNow, code);
+          }
+          if (!worldRef.current) {
+            spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+          }
+          return;
+        }
+
+        if (health.kind === "live-host" || health.kind === "booting-host") {
+          spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+          return;
+        }
+
+        // stale-host — non-winner: rejoin so we attach to reclaim winner's fresh room + wait for state
+        if (health.kind === "stale-host" && roomNow && !isSnakeWorldReclaimWinner(roomNow, deviceId)) {
+          void joinRoomAsync(code, {
+            gameSlug: "snake",
+            maxPlayers: 50,
+            nickname,
+          }).catch(() => {});
+        }
+
+        if (
+          health.kind === "stale-host" &&
+          roomNow &&
+          !reclaimAttempted &&
+          isSnakeWorldReclaimWinner(roomNow, deviceId)
+        ) {
+          reclaimAttempted = true;
+          entryTrace("CONNECT", "START", `stale-reclaim ${code} ${health.reason}`);
+          void reclaimStaleMultiplayerRoomAsync(roomNow, nickname, "snake")
+            .then((reclaimed) => {
+              if (!active || worldRef.current) return;
+              setSessionRoom(reclaimed.code);
+              start(reclaimed.code);
+              bootstrapAuthorityWorld(reclaimed, reclaimed.code);
+              entryTrace("CONNECT", "PASS", `reclaimed-host ${reclaimed.code}`);
+            })
+            .catch((err) => {
+              entryLogFail(
+                "CONNECT",
+                err instanceof Error ? err.message : String(err),
+                { room: code, recordCrash: true }
+              );
+              if (
+                shouldFailSnakeWorldSpawn({
+                  health,
+                  connectedAtMs,
+                  reclaimAttempted: true,
+                })
+              ) {
+                onConnectFailedRef.current?.();
+              } else {
+                spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
+              }
+            });
+          spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
+          return;
+        }
+
+        if (
+          shouldFailSnakeWorldSpawn({
+            health,
+            connectedAtMs,
+            reclaimAttempted,
+          })
+        ) {
+          entryLogFail("SPAWN", `world not ready ${code}`, { room: code });
+          onConnectFailedRef.current?.();
+          return;
+        }
+
+        spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+      };
+
+      spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
     };
 
     const attemptConnect = async (): Promise<void> => {
