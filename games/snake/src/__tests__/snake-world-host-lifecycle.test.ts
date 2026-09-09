@@ -1,5 +1,5 @@
 /**
- * Snake WORLD host lifecycle unit tests
+ * Snake WORLD host ownership safety — unit tests (CPO A–G scenarios)
  * Run: npx tsx --test games/snake/src/__tests__/snake-world-host-lifecycle.test.ts
  */
 import assert from "node:assert/strict";
@@ -8,6 +8,7 @@ import type { GameRoom } from "@game-platform/shared";
 
 import {
   buildSnakeWorldActiveCandidates,
+  canBootstrapAfterReclaim,
   classifySnakeWorldHost,
   hasSnakeWorldAuthorityState,
   isSnakeWorldReclaimWinner,
@@ -32,83 +33,8 @@ function room(partial: Partial<GameRoom> & Pick<GameRoom, "hostId" | "players">)
   };
 }
 
-describe("snake-world-host-lifecycle", () => {
-  it("hasSnakeWorldAuthorityState requires gameState.state", () => {
-    assert.equal(hasSnakeWorldAuthorityState(room({ hostId: "h", players: [] })), false);
-    assert.equal(
-      hasSnakeWorldAuthorityState(
-        room({
-          hostId: "h",
-          players: [],
-          gameState: { state: { tick: 1 }, _updatedAt: new Date().toISOString() },
-        })
-      ),
-      true
-    );
-  });
-
-  it("buildSnakeWorldActiveCandidates excludes roster ghosts without presence", () => {
-    const r = room({
-      hostId: "ghost-host",
-      players: [
-        { deviceId: "ghost-host", nickname: "H", ready: true },
-        { deviceId: "ghost-a", nickname: "A", ready: true },
-        { deviceId: "ghost-b", nickname: "B", ready: true },
-        { deviceId: "live-guest", nickname: "G", ready: true },
-      ],
-    });
-    const active = buildSnakeWorldActiveCandidates(r, "live-guest", ["live-guest"]);
-    assert.deepEqual(active, ["live-guest"]);
-    assert.equal(isSnakeWorldReclaimWinner(r, "ghost-a", active), false);
-    assert.equal(isSnakeWorldReclaimWinner(r, "live-guest", active), true);
-  });
-
-  it("buildSnakeWorldActiveCandidates — two live guests, lex winner", () => {
-    const r = room({
-      hostId: "ghost-host",
-      players: [
-        { deviceId: "ghost-host", nickname: "H", ready: true },
-        { deviceId: "guest-b", nickname: "B", ready: true },
-        { deviceId: "guest-a", nickname: "A", ready: true },
-      ],
-    });
-    const live = ["guest-a", "guest-b"];
-    const active = buildSnakeWorldActiveCandidates(r, "guest-b", live);
-    assert.deepEqual(active, ["guest-a", "guest-b"]);
-    assert.equal(snakeWorldReclaimWinnerId(r, active), "guest-a");
-    assert.equal(isSnakeWorldReclaimWinner(r, "guest-a", active), true);
-    assert.equal(isSnakeWorldReclaimWinner(r, "guest-b", active), false);
-  });
-
-  it("ghost-heavy WORLD roster — only self is reclaim candidate", () => {
-    const r = room({
-      hostId: "zzz-ghost",
-      players: Array.from({ length: 26 }, (_, i) => ({
-        deviceId: `ghost-${i}`,
-        nickname: `G${i}`,
-        ready: true,
-      })),
-    });
-    const active = buildSnakeWorldActiveCandidates(r, "real-joiner", [
-      "ghost-0",
-      "ghost-1",
-      "real-joiner",
-    ]);
-    assert.deepEqual(active, ["real-joiner"]);
-    assert.equal(snakeWorldReclaimWinnerId(r, active), "real-joiner");
-  });
-
-  it("zero active when self is listed host", () => {
-    const r = room({
-      hostId: "me",
-      players: [{ deviceId: "me", nickname: "Me", ready: true }],
-    });
-    const active = buildSnakeWorldActiveCandidates(r, "me", ["me"]);
-    assert.deepEqual(active, []);
-    assert.equal(snakeWorldReclaimWinnerId(r, active), null);
-  });
-
-  it("classify — after grace, stale without state even if host presence exists in DB", () => {
+describe("snake-world-host-lifecycle safety", () => {
+  it("A / G: live host presence → waiting, never stale from missing state", () => {
     const t0 = 1_000_000;
     const r = room({
       hostId: "host",
@@ -117,34 +43,27 @@ describe("snake-world-host-lifecycle", () => {
         { deviceId: "guest", nickname: "G", ready: true },
       ],
     });
-    const h = classifySnakeWorldHost({
+    const afterGrace = classifySnakeWorldHost({
       room: r,
       deviceId: "guest",
       connectedAtMs: t0,
-      nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 500,
+      nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 5_000,
+      hostPresenceLive: true,
     });
-    assert.equal(h.kind, "stale-host");
+    assert.equal(afterGrace.kind, "waiting-live-host");
+    assert.equal(
+      shouldFailSnakeWorldSpawn({
+        health: afterGrace,
+        connectedAtMs: t0,
+        nowMs: snakeWorldGuestDeadlineMs(t0) + 1,
+        reclaimAttempted: false,
+        activeCandidateCount: 1,
+      }),
+      false
+    );
   });
 
-  it("classify — stale after grace when host presence dead", () => {
-    const t0 = 1_000_000;
-    const r = room({
-      hostId: "ghost",
-      players: [
-        { deviceId: "ghost", nickname: "G", ready: true },
-        { deviceId: "guest", nickname: "V", ready: true },
-      ],
-    });
-    const h = classifySnakeWorldHost({
-      room: r,
-      deviceId: "guest",
-      connectedAtMs: t0,
-      nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 1,
-    });
-    assert.equal(h.kind, "stale-host");
-  });
-
-  it("classify — live host when fresh state", () => {
+  it("A: fresh state → live-host", () => {
     const now = Date.now();
     const r = room({
       hostId: "host",
@@ -162,33 +81,147 @@ describe("snake-world-host-lifecycle", () => {
       deviceId: "guest",
       connectedAtMs: now - 1000,
       nowMs: now,
+      hostPresenceLive: false,
     });
     assert.equal(h.kind, "live-host");
     if (h.kind === "live-host") assert.ok(h.ageMs <= SNAKE_WORLD_LIVE_STATE_MS);
   });
 
-  it("shouldFail waits when zero active candidates before deadline", () => {
-    const t0 = 5_000_000;
-    const health = { kind: "stale-host" as const, reason: "no-state-after-grace" };
-    assert.equal(
-      shouldFailSnakeWorldSpawn({
-        health,
-        connectedAtMs: t0,
-        nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 100,
-        reclaimAttempted: false,
-        activeCandidateCount: 0,
-      }),
-      false
+  it("B: stale host + 1 active guest → single winner", () => {
+    const r = room({
+      hostId: "ghost",
+      players: [
+        { deviceId: "ghost", nickname: "G", ready: true },
+        { deviceId: "guest-a", nickname: "A", ready: true },
+      ],
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "guest-a", ["guest-a"]);
+    assert.deepEqual(active, ["guest-a"]);
+    assert.equal(isSnakeWorldReclaimWinner(r, "guest-a", active), true);
+  });
+
+  it("C: stale + 2 active guests → lex winner only", () => {
+    const r = room({
+      hostId: "ghost",
+      players: [
+        { deviceId: "ghost", nickname: "G", ready: true },
+        { deviceId: "guest-b", nickname: "B", ready: true },
+        { deviceId: "guest-a", nickname: "A", ready: true },
+      ],
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "guest-b", ["guest-a", "guest-b"]);
+    assert.deepEqual(active, ["guest-a", "guest-b"]);
+    assert.equal(snakeWorldReclaimWinnerId(r, active), "guest-a");
+    assert.equal(isSnakeWorldReclaimWinner(r, "guest-a", active), true);
+    assert.equal(isSnakeWorldReclaimWinner(r, "guest-b", active), false);
+  });
+
+  it("D: ghost-heavy MUST NOT self-only — both live guests remain candidates", () => {
+    const players = Array.from({ length: 26 }, (_, i) => ({
+      deviceId: `ghost-${i}`,
+      nickname: `G${i}`,
+      ready: true,
+    }));
+    players.push(
+      { deviceId: "guest-a", nickname: "A", ready: true },
+      { deviceId: "guest-b", nickname: "B", ready: true }
     );
-    assert.equal(
-      shouldFailSnakeWorldSpawn({
-        health,
-        connectedAtMs: t0,
-        nowMs: snakeWorldGuestDeadlineMs(t0),
-        reclaimAttempted: false,
-        activeCandidateCount: 0,
-      }),
-      true
-    );
+    const r = room({ hostId: "ghost-0", players });
+    assert.equal(hasSnakeWorldAuthorityState(r), false);
+    assert.ok(r.players.length >= 10);
+    const fromA = buildSnakeWorldActiveCandidates(r, "guest-a", ["guest-a", "guest-b"]);
+    const fromB = buildSnakeWorldActiveCandidates(r, "guest-b", ["guest-a", "guest-b"]);
+    assert.deepEqual(fromA, ["guest-a", "guest-b"]);
+    assert.deepEqual(fromB, ["guest-a", "guest-b"]);
+    assert.equal(snakeWorldReclaimWinnerId(r, fromA), "guest-a");
+    assert.equal(isSnakeWorldReclaimWinner(r, "guest-b", fromB), false);
+  });
+
+  it("E: ghost-heavy + 1 active guest → unique candidate", () => {
+    const players = Array.from({ length: 20 }, (_, i) => ({
+      deviceId: `ghost-${i}`,
+      nickname: `G${i}`,
+      ready: true,
+    }));
+    players.push({ deviceId: "solo", nickname: "S", ready: true });
+    const r = room({ hostId: "ghost-0", players });
+    const active = buildSnakeWorldActiveCandidates(r, "solo", ["solo"]);
+    assert.deepEqual(active, ["solo"]);
+  });
+
+  it("F: ghost-only → zero candidates without includeSelf", () => {
+    const r = room({
+      hostId: "ghost",
+      players: Array.from({ length: 15 }, (_, i) => ({
+        deviceId: `ghost-${i}`,
+        nickname: `G${i}`,
+        ready: true,
+      })),
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "joiner", []);
+    assert.deepEqual(active, []);
+    assert.equal(snakeWorldReclaimWinnerId(r, active), null);
+  });
+
+  it("F: includeSelfIfConnected only after stale path — still single self", () => {
+    const r = room({
+      hostId: "ghost",
+      players: [{ deviceId: "ghost", nickname: "G", ready: true }],
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "joiner", [], {
+      includeSelfIfConnected: true,
+    });
+    assert.deepEqual(active, ["joiner"]);
+  });
+
+  it("stale requires dead host presence after grace", () => {
+    const t0 = 2_000_000;
+    const r = room({
+      hostId: "ghost",
+      players: [
+        { deviceId: "ghost", nickname: "G", ready: true },
+        { deviceId: "guest", nickname: "V", ready: true },
+      ],
+    });
+    const booting = classifySnakeWorldHost({
+      room: r,
+      deviceId: "guest",
+      connectedAtMs: t0,
+      nowMs: t0 + 100,
+      hostPresenceLive: false,
+    });
+    assert.equal(booting.kind, "booting-host");
+    const stale = classifySnakeWorldHost({
+      room: r,
+      deviceId: "guest",
+      connectedAtMs: t0,
+      nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 1,
+      hostPresenceLive: false,
+    });
+    assert.equal(stale.kind, "stale-host");
+  });
+
+  it("canBootstrapAfterReclaim requires hostId match", () => {
+    const r = room({
+      hostId: "winner",
+      players: [{ deviceId: "winner", nickname: "W", ready: true }],
+    });
+    assert.equal(canBootstrapAfterReclaim(r, "winner"), true);
+    assert.equal(canBootstrapAfterReclaim(r, "loser"), false);
+    assert.equal(canBootstrapAfterReclaim(null, "winner"), false);
+  });
+
+  it("roster ghosts without presence never become candidates", () => {
+    const r = room({
+      hostId: "h",
+      players: [
+        { deviceId: "h", nickname: "H", ready: true },
+        { deviceId: "ghost-a", nickname: "A", ready: true },
+        { deviceId: "live", nickname: "L", ready: true },
+      ],
+    });
+    const active = buildSnakeWorldActiveCandidates(r, "live", ["live"]);
+    assert.deepEqual(active, ["live"]);
+    assert.equal(isSnakeWorldReclaimWinner(r, "ghost-a", active), false);
   });
 });

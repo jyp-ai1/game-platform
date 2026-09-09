@@ -1,27 +1,37 @@
 /**
- * Snake WORLD host ownership — stale/ghost detection + liveness-filtered reclaim.
+ * Snake WORLD host ownership — presence-gated reclaim (no self-only / no state-only stale).
  *
- * Liveness: existing `mp_presence.last_heartbeat` (same table as SDK join/heartbeat).
- * Ghost roster rows without fresh presence are never reclaim candidates.
+ * CPO rules:
+ * - Never self-only reclaim on ghost-heavy roster
+ * - Host presence fresh ⇒ reclaim forbidden (state delay ≠ dead host)
+ * - Stale = host presence dead/missing AND authority state missing/stale
+ * - Reclaim winner = active presence ∩ roster (excl. host), lex min; claim before bootstrap
  */
 import type { GameRoom } from "@game-platform/shared";
 import { getMultiplayerSupabase, roomGameStateAgeMs } from "@game-platform/multiplayer-sdk";
 
-/** Wait for a normal host to finish first bootstrap before calling stale. */
+/** Spawn wait before treating missing state as possibly stale (not host-death proof alone). */
 export const SNAKE_WORLD_BOOT_GRACE_MS = 4_000;
 
-/** Fresh Broadcast `_updatedAt` / state age under this = live host. */
+/** Fresh Broadcast `_updatedAt` / state age under this = live sim. */
 export const SNAKE_WORLD_LIVE_STATE_MS = 6_000;
 
-/** Non-winners wait this long after boot grace for the reclaim winner's state. */
-export const SNAKE_WORLD_RECLAIM_FOLLOW_MS = 8_000;
+/** Wait after grace for winner state / reclaim follow. */
+export const SNAKE_WORLD_RECLAIM_FOLLOW_MS = 10_000;
 
-/** Align with mp_presence heartbeat cadence (~15s) — 3 missed beats ≈ stale. */
+/** Align with mp_presence heartbeat (~15s). */
 export const SNAKE_WORLD_PRESENCE_LIVE_MS = 45_000;
+
+/** After stale, wait so peers' presence upserts are visible before picking winner. */
+export const SNAKE_WORLD_RECLAIM_COORD_MS = 700;
+
+/** Confirm claim still holds before delete/create. */
+export const SNAKE_WORLD_CLAIM_CONFIRM_MS = 350;
 
 export type SnakeWorldHostHealth =
   | { kind: "self-host" }
   | { kind: "live-host"; ageMs: number }
+  | { kind: "waiting-live-host"; reason: string }
   | { kind: "booting-host"; waitedMs: number }
   | { kind: "stale-host"; reason: string };
 
@@ -30,7 +40,6 @@ export function hasSnakeWorldAuthorityState(room: GameRoom | null | undefined): 
   return !!state && typeof state === "object";
 }
 
-/** Room-scoped presence query — existing mp_presence signal, no new polling loop. */
 export async function fetchRoomPresenceLiveIds(
   roomCode: string,
   maxAgeMs = SNAKE_WORLD_PRESENCE_LIVE_MS
@@ -44,50 +53,78 @@ export async function fetchRoomPresenceLiveIds(
     .eq("room_code", roomCode.toUpperCase())
     .gt("last_heartbeat", since);
   if (error || !data) return [];
-  return data.map((row) => String(row.device_id));
+  return [...new Set(data.map((row) => String(row.device_id)))];
+}
+
+/** Ensure local client has fresh presence so peers can see us as a candidate. */
+export async function touchSnakeWorldPresence(
+  roomCode: string,
+  deviceId: string,
+  nickname: string
+): Promise<void> {
+  const supabase = getMultiplayerSupabase();
+  if (!supabase) return;
+  await supabase.from("mp_presence").upsert({
+    device_id: deviceId,
+    nickname,
+    status: "playing",
+    game_slug: "snake",
+    room_code: roomCode.toUpperCase(),
+    since: new Date().toISOString(),
+    spectatable: true,
+    last_heartbeat: new Date().toISOString(),
+  });
 }
 
 /**
- * Active reclaim candidates — never roster-only ghosts.
- * - self always included (known connected client)
- * - others require fresh mp_presence for this room + roster membership
+ * Active reclaim candidates from presence ∩ roster only.
+ * Self is included only when present in livePresenceIds (or explicitly passed as known-live).
+ * No ghost-heavy self-only shortcut.
  */
 export function buildSnakeWorldActiveCandidates(
   room: GameRoom,
   selfDeviceId: string,
-  livePresenceIds: string[]
+  livePresenceIds: string[],
+  opts?: { includeSelfIfConnected?: boolean }
 ): string[] {
   const hostId = room.hostId;
-  if (!selfDeviceId || selfDeviceId === hostId) return [];
-
   const rosterIds = new Set(room.players.map((p) => p.deviceId));
   const liveSet = new Set(livePresenceIds);
+  const active = new Set<string>();
 
-  // Ghost-heavy WORLD shards (metadata roster >> live sim): only self is provably connected.
-  const ghostHeavyWorld =
-    room.players.length >= 10 && !hasSnakeWorldAuthorityState(room);
-  if (ghostHeavyWorld) {
-    return [selfDeviceId];
+  for (const id of liveSet) {
+    if (!id || id === hostId) continue;
+    if (!rosterIds.has(id) && id !== selfDeviceId) continue;
+    // Self may have just joined and not yet in roster snapshot — still allow if live.
+    if (id === selfDeviceId || rosterIds.has(id)) active.add(id);
   }
 
-  const active = new Set<string>([selfDeviceId]);
-  for (const id of liveSet) {
-    if (!id || id === hostId || id === selfDeviceId) continue;
-    if (!rosterIds.has(id)) continue;
-    active.add(id);
+  // Known-connected local client: include after touchSnakeWorldPresence; before first
+  // presence round-trip, includeSelfIfConnected avoids zero-candidate flicker only when
+  // host is already confirmed stale (caller sets true).
+  if (
+    opts?.includeSelfIfConnected &&
+    selfDeviceId &&
+    selfDeviceId !== hostId &&
+    !active.has(selfDeviceId)
+  ) {
+    active.add(selfDeviceId);
   }
 
   return [...active].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /**
- * Classify host health for a connected Snake WORLD client.
+ * Host health — presence-aware.
+ * Fresh host presence ⇒ never stale from missing/delayed state alone.
  */
 export function classifySnakeWorldHost(opts: {
   room: GameRoom | null | undefined;
   deviceId: string;
   connectedAtMs: number;
   nowMs?: number;
+  /** Listed host has fresh mp_presence for this room_code. */
+  hostPresenceLive: boolean;
 }): SnakeWorldHostHealth {
   const now = opts.nowMs ?? Date.now();
   const waitedMs = Math.max(0, now - opts.connectedAtMs);
@@ -108,19 +145,26 @@ export function classifySnakeWorldHost(opts: {
     if (ageMs <= SNAKE_WORLD_LIVE_STATE_MS) {
       return { kind: "live-host", ageMs };
     }
+    // Stale blob but host still heartbeating — wait, do not reclaim.
+    if (opts.hostPresenceLive) {
+      return { kind: "waiting-live-host", reason: `state-stale-host-live:${Math.round(ageMs)}ms` };
+    }
     return { kind: "stale-host", reason: `state-stale:${Math.round(ageMs)}ms` };
+  }
+
+  // No authority state.
+  if (opts.hostPresenceLive) {
+    return { kind: "waiting-live-host", reason: "host-presence-fresh-await-state" };
   }
 
   if (waitedMs < SNAKE_WORLD_BOOT_GRACE_MS) {
     return { kind: "booting-host", waitedMs };
   }
 
-  return { kind: "stale-host", reason: "no-state-after-grace" };
+  // Host presence dead/missing AND no state → stale (grace only gates how soon we decide).
+  return { kind: "stale-host", reason: "host-presence-dead-no-state" };
 }
 
-/**
- * Deterministic reclaim winner among **active** candidates only (never roster ghosts).
- */
 export function snakeWorldReclaimWinnerId(
   room: GameRoom,
   activeCandidateIds: string[]
@@ -153,9 +197,55 @@ export function shouldFailSnakeWorldSpawn(opts: {
 }): boolean {
   const now = opts.nowMs ?? Date.now();
   if (opts.health.kind === "live-host" || opts.health.kind === "self-host") return false;
+  // Live host present — keep waiting (do not fail on spawn deadline alone).
+  if (opts.health.kind === "waiting-live-host") return false;
   if (opts.health.kind === "booting-host") return false;
   if (opts.activeCandidateCount === 0 && now < snakeWorldGuestDeadlineMs(opts.connectedAtMs)) {
     return false;
   }
   return now >= snakeWorldGuestDeadlineMs(opts.connectedAtMs);
+}
+
+/**
+ * Cross-client claim: touch presence, coord wait, re-fetch, confirm lex-min winner.
+ * Losers must not call reclaim/bootstrap.
+ */
+export async function tryClaimSnakeWorldReclaim(opts: {
+  room: GameRoom;
+  deviceId: string;
+  nickname: string;
+}): Promise<{ ok: true; candidates: string[] } | { ok: false; reason: string; candidates: string[] }> {
+  const code = opts.room.code.toUpperCase();
+  await touchSnakeWorldPresence(code, opts.deviceId, opts.nickname);
+  await sleep(SNAKE_WORLD_RECLAIM_COORD_MS);
+
+  let live = await fetchRoomPresenceLiveIds(code);
+  let candidates = buildSnakeWorldActiveCandidates(opts.room, opts.deviceId, live, {
+    includeSelfIfConnected: true,
+  });
+
+  if (!isSnakeWorldReclaimWinner(opts.room, opts.deviceId, candidates)) {
+    return { ok: false, reason: "not-lex-winner", candidates };
+  }
+
+  await sleep(SNAKE_WORLD_CLAIM_CONFIRM_MS);
+  live = await fetchRoomPresenceLiveIds(code);
+  candidates = buildSnakeWorldActiveCandidates(opts.room, opts.deviceId, live, {
+    includeSelfIfConnected: true,
+  });
+
+  if (!isSnakeWorldReclaimWinner(opts.room, opts.deviceId, candidates)) {
+    return { ok: false, reason: "lost-claim-confirm", candidates };
+  }
+
+  return { ok: true, candidates };
+}
+
+/** After reclaim, only bootstrap if we own hostId. */
+export function canBootstrapAfterReclaim(room: GameRoom | null | undefined, deviceId: string): boolean {
+  return !!room && room.hostId === deviceId;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
