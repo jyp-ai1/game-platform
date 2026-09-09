@@ -222,7 +222,7 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
 1. Wait for CPO to CLOSE WO **84216** from `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-polish-84216/` (read HEAD — not draft at `a0ce9b1`).
 2. After CLOSE: confirm baseline `a0ce9b1`, then **EXECUTE NOW WO 95631** as one ~3h Long Sprint. Spec: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`. No mid-ask.
-3. Do **not** start WO **10742** until 95631 CPO Product QA CLOSE. Then execute the full Growth + Progression Long Sprint (~3–5h) from `docs/qa/cpo/mp-cpo-2nd-product-qa/growth-10742/`. Not a feature slice.
+3. Do **not** start WO **10742** until 95631 CPO Product QA CLOSE. Then **EXECUTE NOW** the already-locked spec at `docs/qa/cpo/mp-cpo-2nd-product-qa/growth-10742/` (~3–5h). Do not re-ask scope. Do not request confirmation. Final report once. Confirmation of 10742 is CLOSED (`5bfeb2d`).
 4. Do **not** start WO **12853** until 10742 CPO CLOSE. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/social-12853/`.
 5. Do not rewrite Re:Front engine. Do not touch STEP4. Do not reopen WO 73184. No CEO mid-test.
 

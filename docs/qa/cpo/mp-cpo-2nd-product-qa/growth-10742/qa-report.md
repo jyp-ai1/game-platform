@@ -319,12 +319,15 @@ WO 12853 OPEN
 
 ## Armed — fire only after 95631 CPO CLOSE
 
+확인 종료 (`5bfeb2d`). CLOSE 후 범위 재질문 · 확인 요청 금지.
+
 ```text
 EXECUTE NOW / DO NOT ASK FOR NEXT TASK
 
 95631 Production SHA 확인
 → WO 10742 OPEN
 → 약 3~5시간 Growth + Progression 전체 자율 실행
-→ Preview → Production → Evidence → CTO Final QA
+→ 구현 → 통합 → Local QA → E2E → 수정 → Regression
+→ Preview → Production → Full E2E → Evidence → CTO Final QA
 → 최종 보고 1회
 ```
