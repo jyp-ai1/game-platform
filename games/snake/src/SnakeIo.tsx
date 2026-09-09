@@ -742,12 +742,10 @@ export function SnakeIoGame({
 
           const roomNow = getRoom(code);
           const livePresenceIds = await fetchRoomPresenceLiveIds(code);
-          const hostPresenceLive = roomNow ? livePresenceIds.includes(roomNow.hostId) : false;
           const health = classifySnakeWorldHost({
             room: roomNow,
             deviceId,
             connectedAtMs,
-            hostPresenceLive,
           });
 
           if (health.kind === "self-host" && roomNow) {

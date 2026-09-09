@@ -104,7 +104,7 @@ describe("snake-world-host-lifecycle", () => {
     assert.equal(snakeWorldReclaimWinnerId(r, active), null);
   });
 
-  it("classify — host fresh presence keeps booting (no premature reclaim)", () => {
+  it("classify — after grace, stale without state even if host presence exists in DB", () => {
     const t0 = 1_000_000;
     const r = room({
       hostId: "host",
@@ -118,9 +118,8 @@ describe("snake-world-host-lifecycle", () => {
       deviceId: "guest",
       connectedAtMs: t0,
       nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 500,
-      hostPresenceLive: true,
     });
-    assert.equal(h.kind, "booting-host");
+    assert.equal(h.kind, "stale-host");
   });
 
   it("classify — stale after grace when host presence dead", () => {
@@ -137,7 +136,6 @@ describe("snake-world-host-lifecycle", () => {
       deviceId: "guest",
       connectedAtMs: t0,
       nowMs: t0 + SNAKE_WORLD_BOOT_GRACE_MS + 1,
-      hostPresenceLive: false,
     });
     assert.equal(h.kind, "stale-host");
   });

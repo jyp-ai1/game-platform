@@ -83,8 +83,6 @@ export function classifySnakeWorldHost(opts: {
   deviceId: string;
   connectedAtMs: number;
   nowMs?: number;
-  /** Listed host has fresh mp_presence for this room — may still be booting. */
-  hostPresenceLive?: boolean;
 }): SnakeWorldHostHealth {
   const now = opts.nowMs ?? Date.now();
   const waitedMs = Math.max(0, now - opts.connectedAtMs);
@@ -109,11 +107,6 @@ export function classifySnakeWorldHost(opts: {
   }
 
   if (waitedMs < SNAKE_WORLD_BOOT_GRACE_MS) {
-    return { kind: "booting-host", waitedMs };
-  }
-
-  // Avoid reclaim while listed host still has fresh presence (slow bootstrap, not ghost).
-  if (opts.hostPresenceLive && room.hostId !== opts.deviceId) {
     return { kind: "booting-host", waitedMs };
   }
 
