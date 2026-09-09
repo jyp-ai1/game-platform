@@ -17,6 +17,7 @@ import {
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import {
+  createNetworkScheduler,
   createRoom,
   getRoom,
   isListedHostPresent,
@@ -28,11 +29,13 @@ import {
   send,
   subscribeRoom,
   sync,
+  type NetworkScheduler,
 } from "@game-platform/multiplayer-sdk";
 import type { GameRoom } from "@game-platform/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  AGAR_NETWORK_TICK_MS,
   AGAR_TICK_MS,
   AGAR_WORLD,
   applyAgarState,
@@ -205,6 +208,7 @@ export function AgarGame() {
   const startedAtRef = useRef(0);
   const unsubRef = useRef<(() => void) | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const netSchedRef = useRef<NetworkScheduler | null>(null);
   const knownHumansRef = useRef<Map<string, HumanSeat>>(new Map());
   const helloTimersRef = useRef<number[]>([]);
   /** Guest aim coalescing — keep latest only; flush once per animation frame (not every pointermove). */
@@ -229,6 +233,12 @@ export function AgarGame() {
 
   useEffect(() => {
     if (!started) return;
+    const net = createNetworkScheduler({
+      intervalMs: AGAR_NETWORK_TICK_MS,
+      label: "agar",
+    });
+    netSchedRef.current = net;
+
     tickRef.current = setInterval(() => {
       if (mpRoleRef.current !== "host") return;
       isHostRef.current = true;
@@ -243,13 +253,15 @@ export function AgarGame() {
       tickAgarWorld(next);
       worldRef.current = next;
       setWorld(next);
-      // Broadcast only — transport no longer persists game frames to DB.
-      send(roomCode, "agar:state", serializeAgarState(next));
+      // Sim tick ≠ network: coalesce latest authoritative state onto scheduler.
+      net.schedule(roomCode, "agar:state", serializeAgarState(next), "agar:state");
       lastHostStateAtRef.current = Date.now();
     }, AGAR_TICK_MS);
 
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
+      net.stop();
+      if (netSchedRef.current === net) netSchedRef.current = null;
     };
   }, [applyAimsFromRoom, color, deviceId, nickname, roomCode, started]);
 
@@ -353,6 +365,8 @@ export function AgarGame() {
   useEffect(() => {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
+      netSchedRef.current?.stop();
+      netSchedRef.current = null;
       if (aimFlushRafRef.current != null) {
         window.cancelAnimationFrame(aimFlushRafRef.current);
         aimFlushRafRef.current = null;
@@ -414,7 +428,7 @@ export function AgarGame() {
     lastHostStateAtRef.current = 0;
 
     if (mpRoleRef.current === "host") {
-      send(roomCode, "agar:state", serializeAgarState(next));
+      (netSchedRef.current ?? { sendNow: send }).sendNow(roomCode, "agar:state", serializeAgarState(next));
       lastHostStateAtRef.current = Date.now();
     }
 
@@ -463,7 +477,11 @@ export function AgarGame() {
           last === "agar:hello" ||
           humansAfter > humansBefore;
         if (needsImmediate) {
-          send(roomCode, "agar:state", serializeAgarState(local));
+          (netSchedRef.current ?? { sendNow: send }).sendNow(
+            roomCode,
+            "agar:state",
+            serializeAgarState(local)
+          );
           lastHostStateAtRef.current = Date.now();
         }
         return;
@@ -504,7 +522,11 @@ export function AgarGame() {
       respawnPlayer(w, deviceId, nickname);
       worldRef.current = w;
       setWorld(w);
-      send(roomCode, "agar:state", serializeAgarState(w));
+      (netSchedRef.current ?? { sendNow: send }).sendNow(
+        roomCode,
+        "agar:state",
+        serializeAgarState(w)
+      );
     } else {
       send(roomCode, `agar:respawn:${deviceId}`, { at: Date.now() });
     }

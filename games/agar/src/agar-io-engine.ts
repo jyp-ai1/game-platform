@@ -9,6 +9,8 @@ export const AGAR_BOT_COUNT = 18;
 export const AGAR_START_MASS = 12;
 export const AGAR_MIN_SPLIT_MASS = 36;
 export const AGAR_TICK_MS = 33;
+/** Network Broadcast interval — equals sim tick for now; scheduler still coalesces bursts. */
+export const AGAR_NETWORK_TICK_MS = AGAR_TICK_MS;
 
 const COLORS = [
   "#22d3ee", "#a78bfa", "#f472b6", "#fbbf24", "#34d399",

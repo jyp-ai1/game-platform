@@ -20,6 +20,13 @@ export {
   initMultiplayerTransport,
 } from "./client/room-client";
 
+export {
+  createNetworkScheduler,
+  networkIntervalFromPhysicsMs,
+  type NetworkScheduler,
+  type NetworkSchedulerStats,
+} from "./client/network-scheduler";
+
 // Matchmaking
 export {
   quickMatch,

@@ -32,6 +32,7 @@ import {
   type BomberRunSummary,
 } from "./bomber-retention";
 import {
+  createNetworkScheduler,
   createRoom,
   ensureRoom,
   getRoom,
@@ -45,6 +46,7 @@ import {
   leaveRoom,
   send,
   subscribeRoom,
+  type NetworkScheduler,
 } from "@game-platform/multiplayer-sdk";
 import type { GameRoom } from "@game-platform/shared";
 
@@ -338,6 +340,7 @@ export function BomberGame() {
   const lastStateSent = useRef(0);
   const lastHostStateAt = useRef(0);
   const matchLocalStartAt = useRef(0);
+  const netSchedRef = useRef<NetworkScheduler | null>(null);
   /** Host that started this match — survives erroneous hostId churn from stale shard reclaim. */
   const matchHostIdRef = useRef<string | null>(null);
   const rosterKeyRef = useRef("");
@@ -470,6 +473,11 @@ export function BomberGame() {
   // Authoritative tick: host, or takeover if host state goes stale (fixes frozen AI/bombs)
   useEffect(() => {
     if (!started) return;
+    const net = createNetworkScheduler({
+      intervalMs: BOMBER_TICK_MS,
+      label: "bomber",
+    });
+    netSchedRef.current = net;
     const id = window.setInterval(() => {
       const code = roomRef.current;
       const room = getRoom(code);
@@ -499,7 +507,7 @@ export function BomberGame() {
           const next = restartInviteMatch(w, deviceId, nickname, color, hostId, humans);
           worldRef.current = next;
           setWorld(next);
-          send(code, "state", serializeBomberState(next));
+          net.sendNow(code, "state", serializeBomberState(next));
           return;
         }
         reconcileHumans(w, humans, { hostId: matchHostIdRef.current ?? deviceId });
@@ -512,7 +520,7 @@ export function BomberGame() {
           if (inp.dx || inp.dy) tryMove(w, inp.deviceId, inp.dx ?? 0, inp.dy ?? 0);
           if (inp.plant) {
             const bomb = plantBomb(w, inp.deviceId, inp.at ?? Date.now());
-            if (bomb) send(code, "bomber:bomb", bomb);
+            if (bomb) net.sendNow(code, "bomber:bomb", bomb);
           }
         };
 
@@ -530,11 +538,11 @@ export function BomberGame() {
         worldRef.current = next;
         setWorld(next);
         setNowTick(Date.now());
-        // Broadcast every authoritative tick so guest sees movement/death without 80ms lag.
         lastStateSent.current = Date.now();
-        send(code, "state", serializeBomberState(next));
+        // Coalesce authoritative snapshots — inputs/bombs stay sendNow.
+        net.schedule(code, "state", serializeBomberState(next), "state");
         if (next.matchOver) {
-          send(code, "bomber:over", {
+          net.sendNow(code, "bomber:over", {
             winnerId: next.winnerId ?? null,
             isDraw: !!next.isDraw,
             placements: next.placements,
@@ -544,7 +552,11 @@ export function BomberGame() {
         setNowTick(Date.now());
       }
     }, BOMBER_TICK_MS);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+      net.stop();
+      if (netSchedRef.current === net) netSchedRef.current = null;
+    };
   }, [started, deviceId, nickname, color]);
 
   // Room event subscription — guest state + host inputs + bomb visibility

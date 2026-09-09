@@ -12,6 +12,7 @@ import {
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import {
+  createNetworkScheduler,
   getRoom,
   resolveMultiplayerEntry,
   resolveRoomCodeFromLocation,
@@ -19,6 +20,7 @@ import {
   send,
   subscribeRoom,
   sync,
+  type NetworkScheduler,
 } from "@game-platform/multiplayer-sdk";
 
 import {
@@ -298,6 +300,7 @@ export function ReFrontGame() {
   const lastHostStateAtRef = useRef(0);
   const mpRoleRef = useRef<"host" | "guest">("host");
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const netSchedRef = useRef<NetworkScheduler | null>(null);
   const rfSyncTrackerRef = useRef<ReturnType<typeof createRfSyncTracker> | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
   const knownHumansRef = useRef<Map<string, HumanSeat>>(new Map());
@@ -632,13 +635,18 @@ export function ReFrontGame() {
 
   const broadcastRfSync = useCallback(
     (w: RfWorld, forceSnapshot = false) => {
+      const net = netSchedRef.current;
       if (forceSnapshot || w.tick % RF_SNAPSHOT_TICK_INTERVAL === 0) {
-        send(roomCode, "rf:snapshot", serializeRfState(w));
+        const payload = serializeRfState(w);
+        if (net) net.sendNow(roomCode, "rf:snapshot", payload);
+        else send(roomCode, "rf:snapshot", payload);
         rfSyncTrackerRef.current = createRfSyncTracker(w);
         return;
       }
       if (!rfSyncTrackerRef.current) rfSyncTrackerRef.current = createRfSyncTracker(w);
-      send(roomCode, "rf:delta", buildRfSyncDelta(rfSyncTrackerRef.current, w));
+      const delta = buildRfSyncDelta(rfSyncTrackerRef.current, w);
+      if (net) net.schedule(roomCode, "rf:delta", delta, "rf:sync");
+      else send(roomCode, "rf:delta", delta);
     },
     [roomCode]
   );
@@ -878,6 +886,12 @@ export function ReFrontGame() {
     window.setTimeout(() => pullGuestCamToHumans(), 500);
     window.setTimeout(() => pullGuestCamToHumans(), 1200);
 
+    netSchedRef.current?.stop();
+    netSchedRef.current = createNetworkScheduler({
+      intervalMs: RF_TICK_MS,
+      label: "re-front",
+    });
+
     if (mpRoleRef.current === "host") broadcastRfSync(w, true);
 
     unsubRef.current?.();
@@ -1005,6 +1019,8 @@ export function ReFrontGame() {
   useEffect(() => {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
+      netSchedRef.current?.stop();
+      netSchedRef.current = null;
       unsubRef.current?.();
       helloTimersRef.current.forEach((id) => window.clearTimeout(id));
       leaveRoom(roomCode);

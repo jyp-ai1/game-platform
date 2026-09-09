@@ -6,6 +6,7 @@ import { EnvironmentEngine } from "@game-platform/replay-engine/balance";
 import { Replay } from "@game-platform/replay-sdk";
 import {
   buildMultiplayerResult,
+  createNetworkScheduler,
   ensureRoom,
   finish,
   getMultiplayerTransport,
@@ -21,6 +22,7 @@ import {
   spectator,
   start,
   subscribeRoom,
+  type NetworkScheduler,
 } from "@game-platform/multiplayer-sdk";
 import { completeMultiplayerMatch, getFriends } from "@game-platform/replay-engine/social";
 import { cn, GameOverOverlay, Button } from "@game-platform/ui";
@@ -267,6 +269,7 @@ export function SnakeIoGame({
   const localSpawnBoundRef = useRef(false);
   const connectDoneRef = useRef(false);
   const tickEpochRef = useRef(0);
+  const netSchedRef = useRef<NetworkScheduler | null>(null);
   const [tickEpoch, setTickEpoch] = useState(0);
   /** Stage mode — current stage index (0-based), cumulative run score, overlay gate. */
   const [stageIndex, setStageIndex] = useState(0);
@@ -1092,6 +1095,11 @@ export function SnakeIoGame({
     }
     const epoch = tickEpoch;
     const tickMs = balance.physicsTickMs;
+    const net = createNetworkScheduler({
+      intervalMs: balance.networkTickMs,
+      label: "snake",
+    });
+    netSchedRef.current = net;
     diagTickMounted(tickMs);
     const id = setInterval(() => {
       try {
@@ -1284,14 +1292,18 @@ export function SnakeIoGame({
           ...sessionMomentsRef.current.filter((m) => !next.moments.some((n) => n.id === m.id)),
         ].slice(0, 20);
       }
-      if (isHost) send(activeRoom, "state", next);
+      if (isHost) net.schedule(activeRoom, "state", next, "state");
       setWorld(next);
       } catch (err) {
         diagTickError(err);
       }
     }, tickMs);
-    return () => clearInterval(id);
-  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, ux.events, deviceId, tickEpoch]);
+    return () => {
+      clearInterval(id);
+      net.stop();
+      if (netSchedRef.current === net) netSchedRef.current = null;
+    };
+  }, [activeRoom, shouldTickWorld, connected, isGlobalWorld, isHost, balance.physicsTickMs, balance.networkTickMs, ux.events, deviceId, tickEpoch]);
 
   useEffect(() => {
     if (!mySnake) return;
