@@ -5,7 +5,7 @@ alwaysApply: true
 
 > **Current CTO operating context (2026-09-09):** follow `.cursor/rules/cto-handover.mdc`.
 > Stale gates below (Playtest code freeze, Puzzle 15 lock, Stage 1 Home Recovery) are historical.
-> Current Gate: WO 84216 OPEN (CPO QA only) · 95631/10742/12853 **QUEUED — DO NOT EXECUTE**. When OPEN: **EXECUTE NOW / DO NOT ASK FOR NEXT TASK**. Production game29 `a0ce9b1`.
+> Current Gate: WO 84216 CPO QA only · 95631/10742/12853 QUEUED. Default rule: **1 WO = ~3h Long Sprint → 최종 보고 1회**. No CEO messenger. Production game29 `a0ce9b1`.
 
 # Project Phoenix Master Task vNext
 

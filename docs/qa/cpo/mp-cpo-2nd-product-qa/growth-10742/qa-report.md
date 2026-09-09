@@ -10,7 +10,7 @@ Vercel: game29
 Repo: jyp-ai1/game-platform
 ```
 
-84216 CLOSE와 95631 완료 전에는 이 Sprint를 OPEN하지 않습니다.
+**Now: QUEUED.** Same 3H protocol as 95631. Fire **EXECUTE NOW** only after 95631 CLOSE.
 
 ## Official path (when OPEN)
 

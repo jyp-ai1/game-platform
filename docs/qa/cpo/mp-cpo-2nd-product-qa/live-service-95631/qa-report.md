@@ -10,7 +10,31 @@ Vercel: game29
 Repo: jyp-ai1/game-platform
 ```
 
-84216 CLOSE 전에는 이 Sprint를 OPEN하지 않습니다.
+**Now: QUEUED.** Do not execute. When 84216 CLOSES, treat the block below as the only start order.
+
+## Armed — fire only after 84216 CLOSE
+
+```text
+EXECUTE NOW / DO NOT ASK FOR NEXT TASK
+
+WO 95631 = 약 3시간+ Long Sprint.
+범위를 쪼개어 중간 확인받지 말 것.
+기존 evidence → Production baseline → Player Session Foundation 전체.
+구현 → 통합 → Local QA → Full Browser E2E → 수정 → Regression
+→ Preview → Preview E2E → Production → Production E2E → Evidence → CTO Final QA
+한 사이클로 끝낸다. PASS 영역 재구현 금지. 영향분만 검증.
+Snake / Agar / Bomber / Re:Front 필요 범위 연결.
+Refresh / Back / Double-click / stale room / join failure / reconnect / cleanup
+/ Rematch / Another Game / Exit 검증.
+NO Solo / PRACTICE / fallback=1 / BOMBER-SOLO / silent Solo / infinite Connecting
+/ Exit→Home / Another→Discover / Bomber Map Select / STEP4.
+중간 보고 금지. 다음 작업 요청 금지.
+최종 보고 1회: SHA · deploy · impl · Local · Preview E2E · Production E2E
+· 4-game · Desktop · Mobile · edge · evidence path · CTO Final QA · known issues
+그 후 CPO Product QA 요청.
+```
+
+10742 / 12853 use the same 3H protocol when their predecessors CLOSE.
 
 ## Official path (when OPEN)
 

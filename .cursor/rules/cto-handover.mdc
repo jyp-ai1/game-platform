@@ -34,39 +34,27 @@ WO 84216 authorizes the full pipeline (local → Preview → Production promote)
 
 Evidence channel: **CTO → Repository official path → CPO direct verify → 판정**. Do not use CEO as messenger. Do not ask CEO to mid-test. One Work Order = one completed product experience (Long Sprint), not a feature slice.
 
-## Long Sprint execution protocol (mandatory)
+## Long Sprint 3H — default work rule
 
-Every Work Order header must be one of:
+```text
+1회 작업지시 = 약 3시간 분량
+분석 → 구현 → 연결 → Local QA → Browser E2E → 수정 → Regression
+→ Preview / Production → Evidence → CTO Final QA → 최종 보고 1회
+```
+
+Forbidden: 10–30분 CPO 확인 · “다음 작업 주세요” · 기능/테스트마다 보고 · CEO 중간 테스트 · CEO를 CPO↔CTO 메신저로 쓰기.
+
+Stop only if: P0 · Product Contract 변경 · 불가역 Architecture · 명시적 제품 정책.
+
+Every WO header is exactly one of:
 
 ```text
 EXECUTE NOW / DO NOT ASK FOR NEXT TASK
 QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
 ```
 
-**Now:** all of 95631 / 10742 / 12853 are **QUEUED — DO NOT EXECUTE**. 84216 is CPO Product QA only (no new implementation). Asking “다음 30분 작업?” is forbidden. Waiting for 84216 CLOSE is correct.
-
-When a Long Sprint is **EXECUTE NOW**:
-
-```text
-START CONDITION
-- 선행 WO CLOSE 확인
-- Production SHA 확인
-
-AUTONOMOUS EXECUTION
-- 별도 승인 / 다음 지시 요청 금지
-- micro sprint로 분리 금지
-- 전체 범위를 한 세션(~3h+)에 수행
-
-STOP ONLY IF
-- P0 blocker
-- Product Contract 변경 필요
-- 불가역 Architecture / 명시적 제품 정책 결정
-
-OTHERWISE
-→ 자체 판단으로 계속
-→ Local QA → Preview → Production → Full E2E → Evidence → CTO Final QA
-→ 최종 보고 1회 → CPO Product QA
-```
+**Now:** 84216 = CPO Product QA only. 95631 / 10742 / 12853 = **QUEUED — DO NOT EXECUTE**.  
+When 84216 CLOSES, the next message to CTO is the armed **EXECUTE NOW** block in `live-service-95631/qa-report.md` — not a new WO, not a 30-minute slice.
 
 ## Role
 

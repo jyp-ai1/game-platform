@@ -11,7 +11,7 @@ Vercel: game29
 Repo: jyp-ai1/game-platform
 ```
 
-Micro Task 금지. 중간 CEO/CPO 확인 금지 (P0 · 정책 · 계약 변경만 escalation).
+**Now: QUEUED.** Same 3H+ Long Sprint protocol as 95631. Fire **EXECUTE NOW** only after 10742 CLOSE. No micro-split. Final report once.
 
 ## Official path (when OPEN)
 
