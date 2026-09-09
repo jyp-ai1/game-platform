@@ -6,6 +6,8 @@
   "sprintStatus": "OPEN",
   "vercelProject": "game29",
   "repo": "jyp-ai1/game-platform",
+  "productCommit": "a0ce9b1",
+  "evidenceNote": "Read this folder at branch HEAD. Do not use qa-report.md at a0ce9b1 (draft Status table).",
   "commit": "a0ce9b1",
   "production": "https://game29.vercel.app",
   "deploy": "game29-e728ieipo",
