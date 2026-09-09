@@ -2,6 +2,7 @@
 
 ```text
 Sprint: 🟡 OPEN · CPO Product QA pending
+CTO: DO NOT EXECUTE next WOs. DO NOT ASK FOR NEXT TASK.
 CTO Final QA: PASS (technical)
 CPO Product QA: pending — CPO reads this folder at Evidence SHA, not a0ce9b1
 WO 95631: ⏸ QUEUED — no implementation until this Sprint is CPO CLOSED

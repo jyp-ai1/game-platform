@@ -1,7 +1,8 @@
 # WO 12853 — Re:Play Service Experience Completion · Long Sprint
 
 ```text
-Status: ⏸ QUEUED — waiting order, not execution
+QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
+선행: 84216 CLOSE → 95631 CLOSE → 10742 CLOSE
 구현 없음 · Preview 없음 · Production 작업 없음
 Execution: 84216 CLOSE → 95631 → 10742 완료 후 OPEN
 Target: game29 Production 최종 SHA (10742 이후)

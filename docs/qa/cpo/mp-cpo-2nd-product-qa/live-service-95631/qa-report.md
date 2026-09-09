@@ -1,7 +1,8 @@
 # WO 95631 — Re:Play Live Service Foundation
 
 ```text
-Status: ⏸ QUEUED — not an execution order
+QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
+선행: WO 84216 CPO Product PASS → CLOSE
 구현 없음 · Preview 없음 · Production 작업 없음
 선행 Gate: WO 84216 CPO Product PASS → CLOSE
 Baseline 예정: game29 a0ce9b1
