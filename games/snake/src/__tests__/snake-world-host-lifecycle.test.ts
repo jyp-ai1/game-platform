@@ -80,7 +80,7 @@ describe("snake-world-host-lifecycle", () => {
     assert.equal(isSnakeWorldReclaimWinner(r, "guest-b", active), false);
   });
 
-  it("ghost-only roster — self still active if connected", () => {
+  it("ghost-heavy WORLD roster — only self is reclaim candidate", () => {
     const r = room({
       hostId: "zzz-ghost",
       players: Array.from({ length: 26 }, (_, i) => ({
@@ -89,7 +89,11 @@ describe("snake-world-host-lifecycle", () => {
         ready: true,
       })),
     });
-    const active = buildSnakeWorldActiveCandidates(r, "real-joiner", []);
+    const active = buildSnakeWorldActiveCandidates(r, "real-joiner", [
+      "ghost-0",
+      "ghost-1",
+      "real-joiner",
+    ]);
     assert.deepEqual(active, ["real-joiner"]);
     assert.equal(snakeWorldReclaimWinnerId(r, active), "real-joiner");
   });

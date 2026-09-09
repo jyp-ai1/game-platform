@@ -58,16 +58,21 @@ export function buildSnakeWorldActiveCandidates(
   livePresenceIds: string[]
 ): string[] {
   const hostId = room.hostId;
+  if (!selfDeviceId || selfDeviceId === hostId) return [];
+
   const rosterIds = new Set(room.players.map((p) => p.deviceId));
   const liveSet = new Set(livePresenceIds);
-  const active = new Set<string>();
 
-  if (selfDeviceId && selfDeviceId !== hostId) {
-    active.add(selfDeviceId);
+  // Ghost-heavy WORLD shards (metadata roster >> live sim): only self is provably connected.
+  const ghostHeavyWorld =
+    room.players.length >= 10 && !hasSnakeWorldAuthorityState(room);
+  if (ghostHeavyWorld) {
+    return [selfDeviceId];
   }
 
+  const active = new Set<string>([selfDeviceId]);
   for (const id of liveSet) {
-    if (!id || id === hostId) continue;
+    if (!id || id === hostId || id === selfDeviceId) continue;
     if (!rosterIds.has(id)) continue;
     active.add(id);
   }
