@@ -34,6 +34,19 @@ WO 84216 authorizes the full pipeline (local → Preview → Production promote)
 
 Evidence channel: **CTO → Repository official path → CPO direct verify → 판정**. Do not use CEO as messenger. Do not ask CEO to mid-test. One Work Order = one completed product experience (Long Sprint), not a feature slice.
 
+## Fixed operating criteria (모든 WO)
+
+1. 작업 단위 = 약 3시간
+2. 중간 검토 요청 금지
+3. 중간 진행보고 금지
+4. “다음 작업 주세요” 금지
+5. CEO 테스트 요청 금지
+6. 기존 QA 증거를 먼저 읽고 재사용
+7. 영향 없는 코드는 재검증하지 않음
+8. 구현 → 통합 → Local QA → Browser E2E → 수정 → Regression → Preview → Preview E2E → Production → Production E2E → Evidence → CTO Final QA를 **한 번에 완료**
+9. 중간 중단은 P0 / Product Contract 파괴 / 비가역 아키텍처 / 정책 결정 / 신규 게임 / STEP4 변경일 때만
+10. 최종 보고는 전체 종료 후 1회
+
 ## [CTO LONG-RUN RULE] — top of every Work Order
 
 작업지시를 받은 직후 금지:
@@ -44,34 +57,25 @@ Evidence channel: **CTO → Repository official path → CPO direct verify → �
 다음 작업을 요청하지 않는다
 중간 진행 / 부분 QA를 보고하지 않는다
 “이 범위 이렇게 해도 될까요?” / “검토 부탁드립니다” 도 중간 보고로 간주한다
+CEO에게 중간 테스트를 요청하지 않는다
 ```
 
-즉시 수행: 계획 → 구현 → 통합 → Local QA → Browser E2E → 수정 → Regression → Preview → Production → Full E2E → Evidence → CTO Final QA.  
+즉시 수행: 기존 증거 → 영향 분석 → 구현 → 통합 → Local QA → Browser E2E → 수정 → Regression → Preview → Preview E2E → Production → Production E2E → Evidence → CTO Final QA.  
 보고는 **전체 Long Sprint 완료 후 1회**만.
 
-**Now:** 84216 CPO QA pending. 95631/10742/12853 QUEUED. Do not execute 95631.
+**Now:** 84216 CPO QA pending. 95631 Armed but QUEUED. 10742/12853 QUEUED. Do not execute 95631.
 
 ## Long Sprint 3H — default work rule
 
-```text
-1회 작업지시 = 약 3시간 분량
-분석 → 구현 → 연결 → Local QA → Browser E2E → 수정 → Regression
-→ Preview / Production → Evidence → CTO Final QA → 최종 보고 1회
-```
-
-Forbidden: 10–30분 CPO 확인 · “다음 작업 주세요” · 기능/테스트마다 보고 · CEO 중간 테스트 · CEO를 CPO↔CTO 메신저로 쓰기.
-
-Stop only if: P0 · Product Contract 변경 · 불가역 Architecture · 명시적 제품 정책.
-
-Every WO header is exactly one of:
+다음 구현 단위는 **WO 95631 하나만** 약 3시간 자율 실행한다. 84216 CLOSE 후 즉시.
 
 ```text
 EXECUTE NOW / DO NOT ASK FOR NEXT TASK
 QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
 ```
 
-**Now:** 84216 = CPO Product QA only. 95631 / 10742 / 12853 = **QUEUED — DO NOT EXECUTE**.  
-When 84216 CLOSES, the next message to CTO is the armed **EXECUTE NOW** block in `live-service-95631/qa-report.md` — not a new WO, not a 30-minute slice.
+**Now:** 84216 = CPO Product QA only. 95631 / 10742 / 12853 = **QUEUED**.  
+Armed spec: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`
 
 ## Role
 
@@ -215,12 +219,11 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 
 ## Next CTO work (priority)
 
-1. Wait for CPO to CLOSE WO **84216** from `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-polish-84216/` (read HEAD / `main` `d44239f` / `promote/product-catalog` `e0196bd` — not draft at `a0ce9b1`).
-2. Do **not** start WO **95631** until 84216 CPO CLOSE. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/`.
-2b. Do **not** start WO **10742** until 95631 complete. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/growth-10742/`.
-2c. Do **not** start WO **12853** until 10742 CLOSE. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/social-12853/`.
-3. Do not rewrite Re:Front engine. Do not touch STEP4. Do not reopen WO 73184.
-4. No CEO mid-test.
+1. Wait for CPO to CLOSE WO **84216** from `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-polish-84216/` (read HEAD — not draft at `a0ce9b1`).
+2. After CLOSE: confirm baseline `a0ce9b1`, then **EXECUTE NOW WO 95631** as one ~3h Long Sprint. Spec: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`. No mid-ask.
+3. Do **not** start WO **10742** until 95631 CPO Product QA. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/growth-10742/`.
+4. Do **not** start WO **12853** until 10742 CLOSE. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/social-12853/`.
+5. Do not rewrite Re:Front engine. Do not touch STEP4. Do not reopen WO 73184. No CEO mid-test.
 
 ## CTO chat status (keep short)
 

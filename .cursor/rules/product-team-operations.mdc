@@ -5,7 +5,7 @@ alwaysApply: true
 
 > **Current CTO operating context (2026-09-09):** follow `.cursor/rules/cto-handover.mdc`.
 > Stale gates below (Playtest code freeze, Puzzle 15 lock, Stage 1 Home Recovery) are historical.
-> Current Gate: WO 84216 CPO QA only · 95631/10742/12853 QUEUED. **LONG-RUN: no review-ask, no scope-ask, no mid-report. Execute to Final QA then report once.** Production game29 `a0ce9b1`.
+> Current Gate: WO 84216 CPO QA only · next impl unit = **95631 only** (Armed, wait for CLOSE). 10742 after 95631 CPO QA. **LONG-RUN: no review-ask / mid-report / next-task. ~3h to Final QA, report once.** Production game29 `a0ce9b1`.
 
 # Project Phoenix Master Task vNext
 

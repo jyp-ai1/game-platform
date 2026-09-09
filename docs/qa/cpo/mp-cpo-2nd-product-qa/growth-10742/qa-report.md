@@ -2,15 +2,15 @@
 
 ```text
 QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
-선행: 84216 CLOSE → 95631 CLOSE
+선행: 84216 CLOSE → 95631 CPO Product QA
 구현 없음 · Preview 없음 · Production 작업 없음
-선행: WO 84216 CPO CLOSE → WO 95631 완료
+선행: WO 84216 CPO CLOSE → WO 95631 CPO Product QA
 예정 Baseline: 95631 Production 최종 SHA
 Vercel: game29
 Repo: jyp-ai1/game-platform
 ```
 
-**Now: QUEUED.** Same 3H protocol as 95631. Fire **EXECUTE NOW** only after 95631 CLOSE.
+**Now: QUEUED.** Same 3H protocol as 95631. Fire **EXECUTE NOW** only after 95631 CPO Product QA. Do not start during 95631.
 
 ## Official path (when OPEN)
 
