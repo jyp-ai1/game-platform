@@ -1,9 +1,10 @@
 # WO 84216 — Re:Play Product Polish & Retention
 
 ```text
-Sprint: 🟡 OPEN — CPO Product QA pending
-CTO Final QA: PASS
-CPO Product QA: HOLD until this file is read at Evidence SHA (not a0ce9b1)
+Sprint: 🟡 OPEN · CPO Product QA pending
+CTO Final QA: PASS (technical)
+CPO Product QA: pending — CPO reads this folder at Evidence SHA, not a0ce9b1
+WO 95631: ⏸ QUEUED — no implementation until this Sprint is CPO CLOSED
 ```
 
 **CPO: do not judge from Production product SHA `a0ce9b1`.**  

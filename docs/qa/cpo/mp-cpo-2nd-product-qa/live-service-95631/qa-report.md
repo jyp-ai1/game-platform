@@ -1,9 +1,8 @@
 # WO 95631 — Re:Play Live Service Foundation
 
 ```text
-Sprint: ⏸ QUEUED
-Do not start Production work
-Gate: WO 84216 CPO CLOSE first
+Sprint: ⏸ QUEUED — no implementation
+Gate: 84216 CPO Product QA → PASS → CLOSE → then OPEN this Sprint
 Baseline after 84216 CLOSE: game29 a0ce9b1
 Vercel: game29
 Repo: jyp-ai1/game-platform

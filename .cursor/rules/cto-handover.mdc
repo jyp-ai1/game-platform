@@ -10,9 +10,9 @@ This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Pl
 ## Start here
 
 ```text
-WO 84216  Re:Play Product Polish & Retention            🟡 OPEN (CTO Final QA PASS · CPO pending)
-WO 95631  Live Service Foundation                       ⏸ QUEUED — start only after 84216 CPO CLOSE
-Production                                             🟢 game29 a0ce9b1
+WO 84216  Product Polish & Retention                    🟡 OPEN · CPO Product QA pending
+WO 95631  Re:Play Live Service Foundation               ⏸ QUEUED — no implementation
+Production                                             game29 / a0ce9b1
 ----------------------------
 WO 73184 Experience Long Sprint  🟢 CLOSED
 4/4 MP Product Gate              🟢 CLOSED (do not reopen)
@@ -95,7 +95,8 @@ The common shell epic and WO **73184** are **CPO CLOSED**. WO **84216** polishes
 | Targeted Fix Finalization | **CLOSED** |
 | Multiplayer Productization | **CLOSED** |
 | WO 73184 Experience Long Sprint | **CLOSED** |
-| WO 84216 Polish & Retention | **OPEN** |
+| WO 84216 Polish & Retention | **OPEN · CPO Product QA pending** |
+| WO 95631 Live Service Foundation | **QUEUED** — do not implement until 84216 CPO CLOSE |
 | Production | **game29 `a0ce9b1`** — 84216 promoted after Preview Full E2E |
 | Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED — preserve engine; apply common shell only |
 
