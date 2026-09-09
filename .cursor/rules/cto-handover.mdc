@@ -13,6 +13,7 @@ This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Pl
 WO 84216  Product Polish & Retention                    🟡 OPEN · CPO Product QA pending
 WO 95631  Live Service Foundation                       ⏸ QUEUED — after 84216 CLOSE
 WO 10742  Growth & Player Progression                   ⏸ QUEUED — after 95631 complete
+WO 12853  Social & Service Experience                   ⏸ QUEUED — after 10742 CLOSE
 Production                                             game29 / a0ce9b1
 ----------------------------
 WO 73184 Experience Long Sprint  🟢 CLOSED
@@ -99,6 +100,7 @@ The common shell epic and WO **73184** are **CPO CLOSED**. WO **84216** polishes
 | WO 84216 Polish & Retention | **OPEN · CPO Product QA pending** |
 | WO 95631 Live Service Foundation | **QUEUED** — after 84216 CPO CLOSE |
 | WO 10742 Growth & Progression | **QUEUED** — after 95631 complete |
+| WO 12853 Social & Service | **QUEUED** — after 10742 CLOSE |
 | Production | **game29 `a0ce9b1`** — 84216 promoted after Preview Full E2E |
 | Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED — preserve engine; apply common shell only |
 
@@ -176,6 +178,7 @@ Re:Front Complete is CPO PRODUCT PASS and Production PASS.
 1. Wait for CPO to CLOSE WO **84216** from `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-polish-84216/` (read HEAD / `main` `d44239f` / `promote/product-catalog` `e0196bd` — not draft at `a0ce9b1`).
 2. Do **not** start WO **95631** until 84216 CPO CLOSE. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/`.
 2b. Do **not** start WO **10742** until 95631 complete. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/growth-10742/`.
+2c. Do **not** start WO **12853** until 10742 CLOSE. Path: `docs/qa/cpo/mp-cpo-2nd-product-qa/social-12853/`.
 3. Do not rewrite Re:Front engine. Do not touch STEP4. Do not reopen WO 73184.
 4. No CEO mid-test.
 
@@ -194,4 +197,4 @@ Production: game29 <SHA>
 
 ## Remember
 
-1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Multiplayer Productization is CPO CLOSED. 13. WO 73184 is CPO CLOSED. 14. WO 84216 is OPEN until CPO CLOSE. 15. WO 95631 is QUEUED. 16. WO 10742 is QUEUED after 95631. 17. Production is game29 `a0ce9b1`. 18. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.
+1. Product is Re:Play. 2. Repo `jyp-ai1/game-platform`. 3. Vercel `game29`. 4. Games: Agar / Snake / Bomber / Re:Front. 5. Territory War is deleted from Product. 6. No auto Solo/Practice fallback. 7. Connection failed → Retry/Back is correct. 8. STEP4 is frozen. 9. Technical PASS ≠ Product PASS. 10. 4/4 MP Product Gate is CLOSED. 11. Targeted Fix Sprint is CPO CLOSED. 12. Multiplayer Productization is CPO CLOSED. 13. WO 73184 is CPO CLOSED. 14. WO 84216 is OPEN until CPO CLOSE. 15. WO 95631 is QUEUED. 16. WO 10742 is QUEUED after 95631. 17. WO 12853 is QUEUED after 10742. 18. Production is game29 `a0ce9b1`. 19. Evidence: CTO writes in repo · CPO judges from repo · no CEO messenger.
