@@ -207,16 +207,23 @@ export function shouldFailSnakeWorldSpawn(opts: {
 }
 
 /**
- * Cross-client claim: touch presence, coord wait, re-fetch, confirm lex-min winner.
- * Losers must not call reclaim/bootstrap.
+ * Cross-client claim via Broadcast intents + presence coord.
+ * Each client writes snake:reclaim-claim:<deviceId>; lex-min claimer alone may reclaim.
  */
 export async function tryClaimSnakeWorldReclaim(opts: {
   room: GameRoom;
   deviceId: string;
   nickname: string;
+  sendClaim: (roomCode: string, event: string, payload: unknown) => void;
+  readRoom: (roomCode: string) => GameRoom | null;
 }): Promise<{ ok: true; candidates: string[] } | { ok: false; reason: string; candidates: string[] }> {
   const code = opts.room.code.toUpperCase();
   await touchSnakeWorldPresence(code, opts.deviceId, opts.nickname);
+  opts.sendClaim(code, `snake:reclaim-claim:${opts.deviceId}`, {
+    deviceId: opts.deviceId,
+    at: Date.now(),
+  });
+
   await sleep(SNAKE_WORLD_RECLAIM_COORD_MS);
 
   let live = await fetchRoomPresenceLiveIds(code);
@@ -224,21 +231,48 @@ export async function tryClaimSnakeWorldReclaim(opts: {
     includeSelfIfConnected: true,
   });
 
-  if (!isSnakeWorldReclaimWinner(opts.room, opts.deviceId, candidates)) {
-    return { ok: false, reason: "not-lex-winner", candidates };
+  const claimIds = collectReclaimClaimIds(opts.readRoom(code), candidates).filter(
+    (id) => candidates.includes(id) || id === opts.deviceId
+  );
+  const winner = claimIds[0] ?? snakeWorldReclaimWinnerId(opts.room, candidates);
+
+  if (!winner || winner !== opts.deviceId) {
+    return { ok: false, reason: "not-lex-winner", candidates: claimIds.length ? claimIds : candidates };
   }
 
   await sleep(SNAKE_WORLD_CLAIM_CONFIRM_MS);
+
   live = await fetchRoomPresenceLiveIds(code);
   candidates = buildSnakeWorldActiveCandidates(opts.room, opts.deviceId, live, {
     includeSelfIfConnected: true,
   });
+  const claimIds2 = collectReclaimClaimIds(opts.readRoom(code), candidates).filter(
+    (id) => candidates.includes(id) || id === opts.deviceId
+  );
+  const winner2 = claimIds2[0] ?? snakeWorldReclaimWinnerId(opts.room, candidates);
 
-  if (!isSnakeWorldReclaimWinner(opts.room, opts.deviceId, candidates)) {
-    return { ok: false, reason: "lost-claim-confirm", candidates };
+  if (!winner2 || winner2 !== opts.deviceId) {
+    return { ok: false, reason: "lost-claim-confirm", candidates: claimIds2.length ? claimIds2 : candidates };
   }
 
-  return { ok: true, candidates };
+  return { ok: true, candidates: claimIds2.length ? claimIds2 : candidates };
+}
+
+/** Collect reclaim claim deviceIds from Broadcast gameState keys. */
+export function collectReclaimClaimIds(
+  room: GameRoom | null | undefined,
+  fallbackCandidates: string[]
+): string[] {
+  const gs = room?.gameState ?? {};
+  const fromClaims: string[] = [];
+  for (const key of Object.keys(gs)) {
+    if (!key.startsWith("snake:reclaim-claim:")) continue;
+    const payload = gs[key] as { deviceId?: string } | undefined;
+    const id = payload?.deviceId ?? key.slice("snake:reclaim-claim:".length);
+    if (id) fromClaims.push(id);
+  }
+  const merged = fromClaims.length > 0 ? fromClaims : fallbackCandidates;
+  return [...new Set(merged)].filter(Boolean).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /** After reclaim, only bootstrap if we own hostId. */

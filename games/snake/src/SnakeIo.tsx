@@ -672,13 +672,21 @@ export function SnakeIoGame({
 
     const finishConnect = (r: GameRoom, code: string): void => {
       if (code !== sessionRoom) setSessionRoom(code);
-      start(code);
+      const worldRoom = isGlobalWorldRoom(code, "snake");
+      const amHost = r.hostId === deviceId;
+      // WORLD guests must NOT call start() — transport start() upserts presence for
+      // every roster member and resurrects ghost host heartbeats (false live-host).
+      if (!worldRoom || amHost) {
+        start(code);
+      } else {
+        void touchSnakeWorldPresence(code, deviceId, getLastNickname() || "Player");
+      }
       entryTrace("CONNECT", "PASS", code);
       entryTrace("JOIN", "PASS", `${r.players.length} players`);
-      const pop = isGlobalWorldRoom(code, "snake")
+      const pop = worldRoom
         ? SNAKE_WORLD_TARGET
         : Math.max(1, r.players.length);
-      startSnakeTelemetry(code, { isGlobalWorld: isGlobalWorldRoom(code, "snake"), quickPlay: isGlobalWorldRoom(code, "snake") });
+      startSnakeTelemetry(code, { isGlobalWorld: worldRoom, quickPlay: worldRoom });
       refreshWorldTuningFromTelemetry();
       Replay.multiplayer.analytics.start(code, "snake", r.players.length);
       Replay.multiplayer.team.create(
@@ -810,6 +818,10 @@ export function SnakeIoGame({
                   room: roomNow,
                   deviceId,
                   nickname,
+                  sendClaim: (roomCode, event, payload) => {
+                    send(roomCode, event, payload);
+                  },
+                  readRoom: getRoom,
                 });
                 if (!claim.ok) {
                   entryTrace("CONNECT", "FAIL", `claim-lost ${claim.reason}`);

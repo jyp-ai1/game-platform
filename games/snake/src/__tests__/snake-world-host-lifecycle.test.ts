@@ -10,6 +10,7 @@ import {
   buildSnakeWorldActiveCandidates,
   canBootstrapAfterReclaim,
   classifySnakeWorldHost,
+  collectReclaimClaimIds,
   hasSnakeWorldAuthorityState,
   isSnakeWorldReclaimWinner,
   shouldFailSnakeWorldSpawn,
@@ -209,6 +210,24 @@ describe("snake-world-host-lifecycle safety", () => {
     assert.equal(canBootstrapAfterReclaim(r, "winner"), true);
     assert.equal(canBootstrapAfterReclaim(r, "loser"), false);
     assert.equal(canBootstrapAfterReclaim(null, "winner"), false);
+  });
+
+  it("collectReclaimClaimIds prefers Broadcast claims over fallback", () => {
+    const r = room({
+      hostId: "ghost",
+      players: [
+        { deviceId: "ghost", nickname: "G", ready: true },
+        { deviceId: "zzz", nickname: "Z", ready: true },
+        { deviceId: "aaa", nickname: "A", ready: true },
+      ],
+      gameState: {
+        "snake:reclaim-claim:zzz": { deviceId: "zzz", at: 1 },
+        "snake:reclaim-claim:aaa": { deviceId: "aaa", at: 2 },
+      },
+    });
+    const ids = collectReclaimClaimIds(r, ["zzz"]);
+    assert.deepEqual(ids, ["aaa", "zzz"]);
+    assert.equal(ids[0], "aaa");
   });
 
   it("roster ghosts without presence never become candidates", () => {
