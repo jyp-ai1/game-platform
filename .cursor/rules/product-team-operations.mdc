@@ -5,7 +5,7 @@ alwaysApply: true
 
 > **Current CTO operating context (2026-09-09):** follow `.cursor/rules/cto-handover.mdc`.
 > Stale gates below (Playtest code freeze, Puzzle 15 lock, Stage 1 Home Recovery) are historical.
-> Current Gate: WO 84216 OPEN (CPO pending) · 95631 → 10742 → 12853 QUEUED (locked, no extra WOs) · Production game29 `a0ce9b1`. Long Sprint: one WO = one completed product experience. No CEO mid-test / ping-pong.
+> Current Gate: WO 84216 OPEN (CPO pending) · 95631 → 10742 → 12853 QUEUED (locked). 12853 = Service Experience Completion Long Sprint (~3h+), not a small Social slice. Production game29 `a0ce9b1`.
 
 # Project Phoenix Master Task vNext
 
