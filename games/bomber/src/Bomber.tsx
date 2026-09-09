@@ -45,7 +45,6 @@ import {
   leaveRoom,
   send,
   subscribeRoom,
-  sync,
 } from "@game-platform/multiplayer-sdk";
 import type { GameRoom } from "@game-platform/shared";
 
@@ -272,7 +271,6 @@ async function waitForFreshShardState(code: string, timeoutMs = 3500): Promise<b
       if (shardHasFreshState(code)) finish(true);
     });
     const poll = window.setInterval(() => {
-      sync(code);
       if (shardHasFreshState(code)) finish(true);
       if (Date.now() > deadline) finish(false);
     }, 100);
@@ -485,7 +483,6 @@ export function BomberGame() {
       setIsHost(hostNow);
 
       if (hostNow) {
-        sync(code);
         let humans = collectHumans(code, deviceId, nickname, color);
         if (!humans.some((h) => h.id === deviceId)) {
           humans = [{ id: deviceId, nickname, color }, ...humans];
@@ -599,7 +596,6 @@ export function BomberGame() {
         worldRef.current = next;
         setWorld(next);
         send(code, "state", serializeBomberState(next));
-        sync(code);
       }
 
       if (last === "state" && gs.state) {
@@ -750,7 +746,7 @@ export function BomberGame() {
             finish(false);
             return;
           }
-          sync(code);
+          // State arrives via Broadcast subscribe — do not poll Postgres game_state.
           const r = getRoom(code);
           markLiveBroadcast(r, r?.gameState?._lastEvent === "state");
           const st = r?.gameState?.state as BomberSyncState | undefined;
@@ -782,9 +778,8 @@ export function BomberGame() {
         matchHostIdRef.current === deviceId ||
         room?.hostId === deviceId;
 
-      send(code, `input:${deviceId}`, payload);
-
       if (hostNow) {
+        // Host-authoritative: apply locally; tick Broadcasts state (no per-key state/DB).
         const w = worldRef.current;
         const at = payload.at ?? 0;
         if (at > (lastGuestInputAt.current[deviceId] ?? 0)) {
@@ -798,12 +793,11 @@ export function BomberGame() {
         const next = snap(w);
         worldRef.current = next;
         setWorld(next);
-        send(code, "state", serializeBomberState(next));
-        sync(code);
         return;
       }
 
-      sync(code);
+      // Guest: Broadcast input only — Host applies on next tick.
+      send(code, `input:${deviceId}`, payload);
     },
     [deviceId]
   );

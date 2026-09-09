@@ -968,7 +968,6 @@ export function ReFrontGame() {
       const gen = worldGenRef.current;
       const local = snapWorld(worldRef.current);
       if (local.roundOver) return;
-      sync(roomCode);
       const live = readLiveNickname(nickname);
       const humans = collectHumans(
         roomCode,
@@ -976,7 +975,7 @@ export function ReFrontGame() {
         live,
         color,
         knownHumansRef.current,
-        (sync(roomCode) ?? getRoom(roomCode))?.players
+        getRoom(roomCode)?.players
       );
       for (const h of humans) rememberHuman(knownHumansRef.current, h);
       const before = Object.values(local.nations).filter((n) => !n.isBot).length;

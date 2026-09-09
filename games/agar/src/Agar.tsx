@@ -207,6 +207,9 @@ export function AgarGame() {
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const knownHumansRef = useRef<Map<string, HumanSeat>>(new Map());
   const helloTimersRef = useRef<number[]>([]);
+  /** Guest aim coalescing — keep latest only; flush once per animation frame (not every pointermove). */
+  const pendingAimRef = useRef<{ x: number; y: number } | null>(null);
+  const aimFlushRafRef = useRef<number | null>(null);
 
   const me = world.players[deviceId];
   const alive = !!me?.alive;
@@ -214,7 +217,7 @@ export function AgarGame() {
   const cam = cameraFocus(me);
 
   const applyAimsFromRoom = useCallback((roomCode: string, w: AgarWorld) => {
-    const room = sync(roomCode) ?? getRoom(roomCode);
+    const room = getRoom(roomCode);
     const gs = room?.gameState ?? {};
     for (const p of room?.players ?? []) {
       const aim = gs[`agar:aim:${p.deviceId}`] as { x?: number; y?: number } | undefined;
@@ -231,7 +234,6 @@ export function AgarGame() {
       isHostRef.current = true;
       setIsHost(true);
 
-      sync(roomCode);
       const liveNick = readLiveNickname(nickname);
       const next = structuredClone(worldRef.current);
       const humans = collectHumans(roomCode, deviceId, liveNick, color, knownHumansRef.current);
@@ -241,6 +243,7 @@ export function AgarGame() {
       tickAgarWorld(next);
       worldRef.current = next;
       setWorld(next);
+      // Broadcast only — transport no longer persists game frames to DB.
       send(roomCode, "agar:state", serializeAgarState(next));
       lastHostStateAtRef.current = Date.now();
     }, AGAR_TICK_MS);
@@ -248,13 +251,21 @@ export function AgarGame() {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
     };
-  }, [applyAimsFromRoom, deviceId, roomCode, started]);
+  }, [applyAimsFromRoom, color, deviceId, nickname, roomCode, started]);
 
   useEffect(() => {
     if (!started || alive || reportedRef.current) return;
     reportedRef.current = true;
     void reportScore("agar", Math.max(mass, me?.score ?? 0));
   }, [started, alive, mass, me?.score, reportScore]);
+
+  const flushGuestAim = useCallback(() => {
+    aimFlushRafRef.current = null;
+    const aim = pendingAimRef.current;
+    if (!aim || isHostRef.current) return;
+    pendingAimRef.current = null;
+    send(roomCode, `agar:aim:${deviceId}`, aim);
+  }, [deviceId, roomCode]);
 
   const onPointer = useCallback(
     (clientX: number, clientY: number) => {
@@ -268,10 +279,14 @@ export function AgarGame() {
       if (isHostRef.current) {
         setPlayerAim(worldRef.current, deviceId, worldX, worldY);
       } else {
-        send(roomCode, `agar:aim:${deviceId}`, { x: worldX, y: worldY });
+        // Coalesce: browser may fire many pointermoves; network sees at most 1/frame.
+        pendingAimRef.current = { x: worldX, y: worldY };
+        if (aimFlushRafRef.current == null) {
+          aimFlushRafRef.current = window.requestAnimationFrame(flushGuestAim);
+        }
       }
     },
-    [cam.x, cam.y, deviceId, roomCode]
+    [cam.x, cam.y, deviceId, flushGuestAim]
   );
 
   useEffect(() => {
@@ -338,6 +353,11 @@ export function AgarGame() {
   useEffect(() => {
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
+      if (aimFlushRafRef.current != null) {
+        window.cancelAnimationFrame(aimFlushRafRef.current);
+        aimFlushRafRef.current = null;
+      }
+      pendingAimRef.current = null;
       helloTimersRef.current.forEach((id) => window.clearTimeout(id));
       helloTimersRef.current = [];
       unsubRef.current?.();
@@ -412,8 +432,11 @@ export function AgarGame() {
       }
 
       if (mpRoleRef.current === "host") {
+        // Aim is applied on the next host tick via applyAimsFromRoom — do NOT
+        // echo full world on every guest pointer event (was O(N²) egress).
+        if (last.startsWith("agar:aim:")) return;
+
         const local = structuredClone(worldRef.current);
-        sync(roomCode);
         const humansBefore = Object.values(local.players).filter((p) => !p.isBot).length;
         const humans = collectHumans(
           roomCode,
@@ -433,7 +456,13 @@ export function AgarGame() {
         worldRef.current = local;
         setWorld(local);
         const humansAfter = Object.values(local.players).filter((p) => !p.isBot).length;
-        if (last !== "agar:state" || humansAfter > humansBefore) {
+        // Immediate state only for discrete events (join / split / respawn), not aim.
+        const needsImmediate =
+          last.startsWith("agar:split:") ||
+          last.startsWith("agar:respawn:") ||
+          last === "agar:hello" ||
+          humansAfter > humansBefore;
+        if (needsImmediate) {
           send(roomCode, "agar:state", serializeAgarState(local));
           lastHostStateAtRef.current = Date.now();
         }

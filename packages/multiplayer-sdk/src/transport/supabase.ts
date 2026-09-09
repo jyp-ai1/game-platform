@@ -1,6 +1,10 @@
 /**
  * Supabase Realtime transport — cross-device multiplayer (L2 Engine P0).
- * Postgres persistence + Realtime broadcast for low-latency sync.
+ *
+ * Separation of concerns (egress / realtime optimization):
+ * - Game play frames  → Realtime Broadcast only (never mp_rooms.game_state)
+ * - Room metadata     → PostgreSQL (members / host / status / countdown)
+ * - Game results      → finish() + score RPCs (unchanged elsewhere)
  */
 import { getDeviceId, getLastNickname } from "@game-platform/game-sdk";
 import type { GameRoom, MatchResult, RoomPlayer } from "@game-platform/shared";
@@ -43,11 +47,13 @@ function rowToRoom(row: MpRoomRow): GameRoom {
     createdAt: row.created_at,
     startedAt: row.started_at ?? undefined,
     finishedAt: row.finished_at ?? undefined,
-    gameState: row.game_state ?? undefined,
+    // Ephemeral play state lives in client cache / Broadcast — not DB.
+    gameState: undefined,
   };
 }
 
-function roomToRow(room: GameRoom): MpRoomRow {
+/** Persist room metadata only — never write ephemeral game_state to Postgres. */
+function roomMetaToRow(room: GameRoom): Omit<MpRoomRow, "game_state"> & { game_state: null } {
   return {
     code: room.code.toUpperCase(),
     game_slug: room.gameSlug,
@@ -58,23 +64,33 @@ function roomToRow(room: GameRoom): MpRoomRow {
     status: room.status,
     countdown: room.countdown,
     match_mode: room.matchMode,
-    game_state: room.gameState ?? null,
+    game_state: null,
     created_at: room.createdAt,
     started_at: room.startedAt ?? null,
     finished_at: room.finishedAt ?? null,
   };
 }
 
-async function persistRoom(room: GameRoom): Promise<void> {
+async function persistRoomMeta(room: GameRoom): Promise<void> {
   const supabase = getMultiplayerSupabase();
   if (!supabase) return;
-  const row = roomToRow(room);
+  const row = roomMetaToRow(room);
   await supabase.from("mp_rooms").upsert({ ...row, updated_at: new Date().toISOString() });
+}
+
+function releaseChannel(code: string): void {
+  const key = code.toUpperCase();
+  const channel = channels.get(key);
+  if (!channel) return;
+  channels.delete(key);
+  const supabase = getMultiplayerSupabase();
+  if (supabase) void supabase.removeChannel(channel);
 }
 
 /** Remove stale shard row before explicit reclaim (ghost host cleanup). */
 export async function deleteMultiplayerRoom(code: string): Promise<void> {
   const key = code.toUpperCase();
+  releaseChannel(key);
   cacheRemove(key);
   const supabase = getMultiplayerSupabase();
   if (!supabase) return;
@@ -95,11 +111,15 @@ export async function fetchRoomFromSupabase(code: string): Promise<GameRoom | nu
     if (!supabase) return null;
     const { data, error } = await supabase
       .from("mp_rooms")
-      .select("*")
+      .select(
+        "code, game_slug, host_id, max_players, players, spectators, status, countdown, match_mode, created_at, started_at, finished_at"
+      )
       .eq("code", key)
       .maybeSingle();
     if (error || !data) return null;
-    const room = rowToRoom(data as MpRoomRow);
+    const room = rowToRoom({ ...(data as MpRoomRow), game_state: null });
+    const existing = cacheGet(key);
+    if (existing?.gameState) room.gameState = existing.gameState;
     cacheSet(room);
     ensureChannel(room.code);
     return room;
@@ -111,6 +131,16 @@ export async function fetchRoomFromSupabase(code: string): Promise<GameRoom | nu
   } finally {
     fetchPromises.delete(key);
   }
+}
+
+/**
+ * Merge Postgres metadata into cache without wiping ephemeral Broadcast gameState.
+ */
+function applyRoomMetaFromDb(key: string, row: MpRoomRow): void {
+  const prev = cacheGet(key);
+  const meta = rowToRoom(row);
+  if (prev?.gameState) meta.gameState = prev.gameState;
+  cacheSet(meta);
 }
 
 function ensureChannel(code: string): RealtimeChannel | null {
@@ -127,27 +157,21 @@ function ensureChannel(code: string): RealtimeChannel | null {
       { event: "*", schema: "public", table: "mp_rooms", filter: `code=eq.${key}` },
       (payload) => {
         const row = payload.new as MpRoomRow | undefined;
-        if (row?.code) {
-          const room = rowToRoom(row);
-          cacheSet(room);
-        }
+        if (row?.code) applyRoomMetaFromDb(key, row);
       }
     )
     .on("broadcast", { event: "game-event" }, ({ payload }) => {
-      const p = payload as { room?: GameRoom; event?: string; data?: unknown };
-      if (p.room) cacheSet(p.room);
-      else if (p.event && p.data) {
-        const room = cacheGet(key);
-        if (room) {
-          room.gameState = {
-            ...(room.gameState ?? {}),
-            [p.event]: p.data,
-            _lastEvent: p.event,
-            _updatedAt: new Date().toISOString(),
-          };
-          cacheSet(room);
-        }
-      }
+      const p = payload as { event?: string; data?: unknown };
+      if (!p.event) return;
+      const room = cacheGet(key);
+      if (!room) return;
+      room.gameState = {
+        ...(room.gameState ?? {}),
+        [p.event]: p.data,
+        _lastEvent: p.event,
+        _updatedAt: new Date().toISOString(),
+      };
+      cacheSet(room);
     })
     .subscribe();
 
@@ -155,10 +179,11 @@ function ensureChannel(code: string): RealtimeChannel | null {
   return channel;
 }
 
-function broadcastEvent(code: string, event: string, data: unknown, room?: GameRoom): void {
+/** One Broadcast per game event — minimal payload, no full room JSON. */
+function broadcastGameEvent(code: string, event: string, data: unknown): void {
   const channel = ensureChannel(code);
   if (!channel) return;
-  void channel.httpSend("game-event", { event, data, room });
+  void channel.httpSend("game-event", { event, data });
 }
 
 async function upsertPresence(
@@ -181,14 +206,14 @@ async function upsertPresence(
   });
 }
 
-function applyAndPersist(code: string, mutator: (room: GameRoom) => GameRoom | null): GameRoom | null {
+/** Room metadata mutation → Postgres only (no game-frame Broadcast). */
+function applyAndPersistMeta(code: string, mutator: (room: GameRoom) => GameRoom | null): GameRoom | null {
   const room = cacheGet(code);
   if (!room) return null;
   const next = mutator(room);
   if (!next) return null;
   cacheSet(next);
-  void persistRoom(next);
-  broadcastEvent(code, "room-update", next, next);
+  void persistRoomMeta(next);
   return next;
 }
 
@@ -216,7 +241,7 @@ export const supabaseTransport: MultiplayerTransport = {
     };
     cacheSet(room);
     ensureChannel(room.code);
-    void persistRoom(room);
+    void persistRoomMeta(room);
     void upsertPresence(room, deviceId, nickname);
     return room;
   },
@@ -235,8 +260,9 @@ export const supabaseTransport: MultiplayerTransport = {
       if (room.spectators.includes(deviceId)) {
         room = { ...room, spectators: room.spectators.filter((id) => id !== deviceId) };
         cacheSet(room);
-        void persistRoom(room);
+        void persistRoomMeta(room);
       }
+      ensureChannel(key);
       return room;
     }
     if (room.players.length >= room.maxPlayers) return null;
@@ -246,20 +272,29 @@ export const supabaseTransport: MultiplayerTransport = {
       players: [...room.players, { deviceId, nickname, ready: false, isGuest: options?.isGuest, reconnectToken: deviceId.slice(0, 8) }],
     };
     cacheSet(room);
-    void persistRoom(room);
+    void persistRoomMeta(room);
     void upsertPresence(room, deviceId, nickname);
+    ensureChannel(key);
     return room;
   },
 
   leaveRoom(code: string): void {
-    const room = cacheGet(code);
-    if (!room) return;
+    const key = code.toUpperCase();
+    const room = cacheGet(key);
     const deviceId = getDeviceId();
+    releaseChannel(key);
+
+    if (!room) {
+      const supabase = getMultiplayerSupabase();
+      if (supabase) void supabase.from("mp_presence").delete().eq("device_id", deviceId);
+      return;
+    }
+
     const nextPlayers = room.players.filter((p) => p.deviceId !== deviceId);
     const nextSpectators = room.spectators.filter((id) => id !== deviceId);
     if (nextPlayers.length === 0) {
-      cacheRemove(code);
-      void deleteMultiplayerRoom(code);
+      cacheRemove(key);
+      void deleteMultiplayerRoom(key);
     } else {
       const next: GameRoom = {
         ...room,
@@ -268,7 +303,7 @@ export const supabaseTransport: MultiplayerTransport = {
         hostId: room.hostId === deviceId ? nextPlayers[0]!.deviceId : room.hostId,
       };
       cacheSet(next);
-      void persistRoom(next);
+      void persistRoomMeta(next);
     }
     const supabase = getMultiplayerSupabase();
     if (supabase) void supabase.from("mp_presence").delete().eq("device_id", deviceId);
@@ -279,7 +314,7 @@ export const supabaseTransport: MultiplayerTransport = {
   },
 
   setPlayerReady(code: string, ready: boolean): GameRoom | null {
-    return applyAndPersist(code, (room) => {
+    return applyAndPersistMeta(code, (room) => {
       const deviceId = getDeviceId();
       const players = room.players.map((p) => (p.deviceId === deviceId ? { ...p, ready } : p));
       let status = room.status;
@@ -292,27 +327,35 @@ export const supabaseTransport: MultiplayerTransport = {
     });
   },
 
+  /**
+   * Game-frame path: local cache + single Broadcast.
+   * Never persists to mp_rooms / never dual-broadcasts full room.
+   */
   send(code: string, event: string, payload: unknown): GameRoom | null {
-    const room = applyAndPersist(code, (r) => ({
-      ...r,
+    const room = cacheGet(code);
+    if (!room) return null;
+    const next: GameRoom = {
+      ...room,
       gameState: {
-        ...(r.gameState ?? {}),
+        ...(room.gameState ?? {}),
         [event]: payload,
         _lastEvent: event,
         _updatedAt: new Date().toISOString(),
       },
-    }));
-    if (room) broadcastEvent(code, event, payload, room);
-    return room;
+    };
+    cacheSet(next);
+    broadcastGameEvent(code, event, payload);
+    return next;
   },
 
   sync(code: string): GameRoom | null {
+    // Metadata refresh only — do not pull ephemeral game_state from DB.
     void fetchRoomFromSupabase(code);
     return cacheGet(code);
   },
 
   start(code: string): GameRoom | null {
-    const room = applyAndPersist(code, (r) => ({
+    const room = applyAndPersistMeta(code, (r) => ({
       ...r,
       status: "playing" as const,
       startedAt: new Date().toISOString(),
@@ -323,16 +366,18 @@ export const supabaseTransport: MultiplayerTransport = {
   },
 
   finish(code: string, result: MatchResult): GameRoom | null {
-    return applyAndPersist(code, (r) => ({
+    return applyAndPersistMeta(code, (r) => ({
       ...r,
       status: "finished" as const,
       finishedAt: result.finishedAt,
       players: r.players.map((p) => ({ ...p, score: result.scores[p.deviceId] ?? p.score })),
+      // Drop ephemeral play blob from cache after match end.
+      gameState: undefined,
     }));
   },
 
   joinAsSpectator(code: string): GameRoom | null {
-    return applyAndPersist(code, (room) => {
+    return applyAndPersistMeta(code, (room) => {
       const deviceId = getDeviceId();
       if (room.spectators.includes(deviceId)) return room;
       return { ...room, spectators: [...room.spectators, deviceId] };
@@ -347,7 +392,7 @@ export const supabaseTransport: MultiplayerTransport = {
   },
 
   tickCountdown(code: string): GameRoom | null {
-    return applyAndPersist(code, (room) => {
+    return applyAndPersistMeta(code, (room) => {
       if (room.status !== "ready" || room.countdown <= 0) return room;
       const countdown = room.countdown - 1;
       if (countdown === 0) {
