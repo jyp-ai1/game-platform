@@ -709,10 +709,14 @@ export function SnakeIoGame({
 
       const connectedAtMs = Date.now();
       let reclaimAttempted = false;
+      /** Only initial WORLD host or successful reclaim winner may bootstrap. */
+      let authorityGranted = getRoom(code)?.hostId === deviceId;
       const nickname = getLastNickname() || "Player";
 
       const bootstrapAuthorityWorld = (roomNow: GameRoom, roomCodeNow: string): void => {
         if (worldRef.current) return;
+        if (!authorityGranted && roomNow.hostId !== deviceId) return;
+        authorityGranted = true;
         const cfg = Replay.multiplayer.balance("snake", SNAKE_WORLD_TARGET);
         const obj = Replay.multiplayer.objectives.create(
           Replay.multiplayer.objectives.pick(SNAKE_WORLD_TARGET)
@@ -763,6 +767,11 @@ export function SnakeIoGame({
           });
 
           if (health.kind === "self-host" && roomNow) {
+            // Accidental createRoom after peer delete must not grant authority.
+            if (!authorityGranted) {
+              spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
+              return;
+            }
             if (Date.now() - connectedAtMs >= Math.min(800, SNAKE_WORLD_BOOT_GRACE_MS)) {
               bootstrapAuthorityWorld(roomNow, code);
             }
@@ -825,7 +834,7 @@ export function SnakeIoGame({
                 });
                 if (!claim.ok) {
                   entryTrace("CONNECT", "FAIL", `claim-lost ${claim.reason}`);
-                  reclaimAttempted = false;
+                  // Keep reclaimAttempted=true — never createRoom via retry/join bootstrap.
                   spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
                   return;
                 }
@@ -833,19 +842,15 @@ export function SnakeIoGame({
                 const liveAgain = await fetchRoomPresenceLiveIds(code);
                 if (roomNow.hostId && liveAgain.includes(roomNow.hostId)) {
                   entryTrace("CONNECT", "FAIL", "abort-reclaim-host-live");
-                  reclaimAttempted = false;
                   spawnTimeoutRef.current = window.setTimeout(tickWatch, 250);
                   return;
                 }
+                authorityGranted = true;
                 const reclaimed = await reclaimStaleMultiplayerRoomAsync(roomNow, nickname, "snake");
                 if (!active || worldRef.current) return;
                 if (!canBootstrapAfterReclaim(reclaimed, deviceId)) {
                   entryTrace("CONNECT", "FAIL", `reclaim-host-mismatch ${reclaimed.hostId}`);
-                  void joinRoomAsync(code, {
-                    gameSlug: "snake",
-                    maxPlayers: 50,
-                    nickname,
-                  }).catch(() => {});
+                  authorityGranted = false;
                   spawnTimeoutRef.current = window.setTimeout(tickWatch, 400);
                   return;
                 }
@@ -883,11 +888,8 @@ export function SnakeIoGame({
             activeCandidates.length > 0 &&
             !isSnakeWorldReclaimWinner(roomNow, deviceId, activeCandidates)
           ) {
-            void joinRoomAsync(code, {
-              gameSlug: "snake",
-              maxPlayers: 50,
-              nickname,
-            }).catch(() => {});
+            // Wait for winner Broadcast — do not joinRoomAsync (may createRoom → false host).
+            void ensureRoom(code).catch(() => {});
           }
 
           if (
