@@ -207,8 +207,40 @@ export function shouldFailSnakeWorldSpawn(opts: {
 }
 
 /**
- * Cross-client claim via Broadcast intents + presence coord.
- * Each client writes snake:reclaim-claim:<deviceId>; lex-min claimer alone may reclaim.
+ * Atomic reclaim claim: conditional UPDATE host_id while still stale host.
+ * Only one client wins the Postgres row update — losers must not bootstrap.
+ */
+export async function tryAtomicSnakeWorldHostClaim(opts: {
+  roomCode: string;
+  staleHostId: string;
+  deviceId: string;
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const supabase = getMultiplayerSupabase();
+  if (!supabase) {
+    return { ok: true };
+  }
+  const code = opts.roomCode.toUpperCase();
+  const { data, error } = await supabase
+    .from("mp_rooms")
+    .update({
+      host_id: opts.deviceId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("code", code)
+    .eq("host_id", opts.staleHostId)
+    .select("code, host_id");
+
+  if (error) {
+    return { ok: false, reason: `claim-error:${error.message}` };
+  }
+  if (!data?.length || data[0]?.host_id !== opts.deviceId) {
+    return { ok: false, reason: "claim-lost-atomic" };
+  }
+  return { ok: true };
+}
+
+/**
+ * Soft lex coord + hard atomic host_id claim. Losers must not reclaim/bootstrap.
  */
 export async function tryClaimSnakeWorldReclaim(opts: {
   room: GameRoom;
@@ -218,6 +250,7 @@ export async function tryClaimSnakeWorldReclaim(opts: {
   readRoom: (roomCode: string) => GameRoom | null;
 }): Promise<{ ok: true; candidates: string[] } | { ok: false; reason: string; candidates: string[] }> {
   const code = opts.room.code.toUpperCase();
+  const staleHostId = opts.room.hostId;
   await touchSnakeWorldPresence(code, opts.deviceId, opts.nickname);
   opts.sendClaim(code, `snake:reclaim-claim:${opts.deviceId}`, {
     deviceId: opts.deviceId,
@@ -234,10 +267,14 @@ export async function tryClaimSnakeWorldReclaim(opts: {
   const claimIds = collectReclaimClaimIds(opts.readRoom(code), candidates).filter(
     (id) => candidates.includes(id) || id === opts.deviceId
   );
-  const winner = claimIds[0] ?? snakeWorldReclaimWinnerId(opts.room, candidates);
+  const softWinner = claimIds[0] ?? snakeWorldReclaimWinnerId(opts.room, candidates);
 
-  if (!winner || winner !== opts.deviceId) {
-    return { ok: false, reason: "not-lex-winner", candidates: claimIds.length ? claimIds : candidates };
+  if (!softWinner || softWinner !== opts.deviceId) {
+    return {
+      ok: false,
+      reason: "not-lex-winner",
+      candidates: claimIds.length ? claimIds : candidates,
+    };
   }
 
   await sleep(SNAKE_WORLD_CLAIM_CONFIRM_MS);
@@ -249,10 +286,26 @@ export async function tryClaimSnakeWorldReclaim(opts: {
   const claimIds2 = collectReclaimClaimIds(opts.readRoom(code), candidates).filter(
     (id) => candidates.includes(id) || id === opts.deviceId
   );
-  const winner2 = claimIds2[0] ?? snakeWorldReclaimWinnerId(opts.room, candidates);
+  const softWinner2 = claimIds2[0] ?? snakeWorldReclaimWinnerId(opts.room, candidates);
+  if (!softWinner2 || softWinner2 !== opts.deviceId) {
+    return {
+      ok: false,
+      reason: "lost-claim-confirm",
+      candidates: claimIds2.length ? claimIds2 : candidates,
+    };
+  }
 
-  if (!winner2 || winner2 !== opts.deviceId) {
-    return { ok: false, reason: "lost-claim-confirm", candidates: claimIds2.length ? claimIds2 : candidates };
+  const atomic = await tryAtomicSnakeWorldHostClaim({
+    roomCode: code,
+    staleHostId,
+    deviceId: opts.deviceId,
+  });
+  if (!atomic.ok) {
+    return {
+      ok: false,
+      reason: atomic.reason,
+      candidates: claimIds2.length ? claimIds2 : candidates,
+    };
   }
 
   return { ok: true, candidates: claimIds2.length ? claimIds2 : candidates };
