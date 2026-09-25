@@ -2,6 +2,7 @@ import type { Game } from "@game-platform/shared";
 import Image from "next/image";
 import Link from "next/link";
 
+import { LivePlayBadge } from "@/components/live-play-badge";
 import { gameSummaryDescription } from "@/lib/game-discovery-ui";
 import { productFlagshipFeatures, productModeLabel } from "@/lib/product-catalog-sync";
 
@@ -54,6 +55,7 @@ export function FlagshipCatalog({ games }: { games: Game[] }) {
                   {features[0] ? (
                     <p className="line-clamp-1 text-[11px] text-muted-foreground/80">{features[0]}</p>
                   ) : null}
+                  <LivePlayBadge slug={game.slug} />
                 </div>
               </Link>
             </li>

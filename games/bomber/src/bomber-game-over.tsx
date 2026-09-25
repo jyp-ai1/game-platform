@@ -2,6 +2,12 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
+import {
+  beginLivePlaySession,
+  clearLivePlaySession,
+  formatLiveProgressLine,
+  recordLiveResult,
+} from "@game-platform/game-sdk";
 
 import type { BomberBestRecord, BomberMissionProgress } from "./bomber-retention";
 
@@ -32,12 +38,19 @@ export function BomberGameOver({
 }) {
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState<"retry" | "another" | "exit" | null>(null);
+  const [progressLine, setProgressLine] = useState<string | null>(null);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    recordLiveResult("bomber", { outcome: title, score: finalScore });
+    setProgressLine(formatLiveProgressLine("bomber"));
+  }, [title, finalScore]);
   if (!mounted || typeof document === "undefined") return null;
 
   function runOnce(kind: "retry" | "another" | "exit", fn: () => void) {
     if (busy) return;
     setBusy(kind);
+    if (kind === "retry") beginLivePlaySession("bomber");
+    if (kind === "exit" || kind === "another") clearLivePlaySession("bomber");
     fn();
     if (kind === "retry") window.setTimeout(() => setBusy(null), 900);
   }
@@ -67,6 +80,11 @@ export function BomberGameOver({
         </p>
         {place != null ? (
           <p className="text-center text-xs text-white/55">Place #{place}</p>
+        ) : null}
+        {progressLine ? (
+          <p data-testid="mp-live-progress" className="text-center text-xs font-medium text-cyan-200/90">
+            {progressLine}
+          </p>
         ) : null}
 
         <div className="grid grid-cols-2 gap-2 text-center text-sm">

@@ -5,10 +5,14 @@ import {
   FLAGSHIP_CATALOG_HREF,
   MP_CONNECT_BACK_CLASS,
   MP_CONNECT_RETRY_CLASS,
+  beginLivePlaySession,
+  clearLivePlaySession,
+  formatLiveProgressLine,
   getDeviceId,
   getLastNickname,
   MP_PLAYER_COLORS,
   MultiplayerEntrySelect,
+  recordLiveResult,
   type MpStyleOption,
 } from "@game-platform/game-sdk";
 import {
@@ -88,6 +92,28 @@ const RF_STYLES: MpStyleOption[] = [
   { id: "pink", label: "Pink", emoji: "🩷", color: MP_PLAYER_COLORS[1]! },
   { id: "gold", label: "Gold", emoji: "🟡", color: MP_PLAYER_COLORS[2]! },
 ];
+
+function ReFrontLiveResult({
+  outcome,
+  score,
+  metric,
+}: {
+  outcome: string;
+  score: number;
+  metric: string;
+}) {
+  const [line, setLine] = useState<string | null>(null);
+  useEffect(() => {
+    recordLiveResult("re-front", { outcome, score, metric });
+    setLine(formatLiveProgressLine("re-front"));
+  }, [outcome, score, metric]);
+  if (!line) return null;
+  return (
+    <p data-testid="mp-live-progress" className="mt-2 text-xs font-medium text-cyan-200/90">
+      {line}
+    </p>
+  );
+}
 
 type RewardFlash = {
   gold: number;
@@ -1037,6 +1063,7 @@ export function ReFrontGame() {
       resultBusyRef.current = false;
       setResultBusyKind(null);
     }, 900);
+    beginLivePlaySession("re-front", roomCode);
     send(roomCode, "rf:rematch", { at: Date.now() });
     if (mpRoleRef.current === "host") {
       const humans = collectHumans(
@@ -1063,6 +1090,7 @@ export function ReFrontGame() {
     if (resultBusyRef.current) return;
     resultBusyRef.current = true;
     setResultBusyKind("exit");
+    clearLivePlaySession("re-front");
     leaveRoom(roomCode);
     window.location.href = "/games/re-front";
   }, [roomCode]);
@@ -1071,6 +1099,7 @@ export function ReFrontGame() {
     if (resultBusyRef.current) return;
     resultBusyRef.current = true;
     setResultBusyKind("another");
+    clearLivePlaySession("re-front");
     leaveRoom(roomCode);
     window.location.href = FLAGSHIP_CATALOG_HREF;
   }, [roomCode]);
@@ -1454,6 +1483,11 @@ export function ReFrontGame() {
             </h2>
             <p className="mt-2 text-lg font-semibold text-emerald-300">{won ? "YOU WIN" : lost ? "DEFEAT" : "STALEMATE"}</p>
             <p className="mt-2 text-slate-300">Territory {me?.territoryPct?.toFixed(1) ?? 0}% / {victoryPct}%</p>
+            <ReFrontLiveResult
+              outcome={won ? "YOU WIN" : lost ? "DEFEAT" : "DRAW"}
+              score={Math.round(me?.territoryPct ?? 0)}
+              metric={`Territory ${me?.territoryPct?.toFixed(1) ?? 0}%`}
+            />
             <div className="mt-4 flex flex-col gap-2">
               <button
                 type="button"

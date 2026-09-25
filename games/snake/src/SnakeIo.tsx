@@ -2651,6 +2651,7 @@ export function SnakeIoGame({
       {!isStageMode && mySnake && !mySnake.alive ? (
         <div data-testid={isGlobalWorld ? "death-ux-countdown" : "death-ux-gameover"}>
           <MultiplayerDeathOverlay
+            slug="snake"
             title="RESULT"
             outcome="YOU DIED"
             score={Math.round(mySnake.score ?? 0)}

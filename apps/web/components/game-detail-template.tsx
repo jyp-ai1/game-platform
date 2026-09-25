@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GameDetailComments, GameDetailShare } from "@/components/game-detail-extras";
 import { GameDetailFriendRecord } from "@/components/game-detail-friend-record";
 import { GameDetailHero } from "@/components/game-detail-hero";
+import { GameDetailLiveProgress } from "@/components/game-detail-live-progress";
 import { GameDetailRecentStrip } from "@/components/game-detail-recent-strip";
 import { GameDetailGlobalRanking } from "@/components/game-detail-global-ranking";
 import { GameDetailPatchNotes } from "@/components/game-detail-patch-notes";
@@ -118,6 +119,7 @@ export function GameDetailTemplate({
                 {mp ? (
                   <p className="text-xs text-muted-foreground">Character → Color → ENTER</p>
                 ) : null}
+                <GameDetailLiveProgress slug={slug} />
                 {features.length > 0 ? (
                   <ul
                     data-testid="game-detail-features"

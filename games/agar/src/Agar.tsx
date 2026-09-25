@@ -728,6 +728,7 @@ export function AgarGame() {
             {!alive ? (
               <div data-testid="agar-game-over">
                 <MultiplayerDeathOverlay
+                  slug="agar"
                   title="RESULT"
                   outcome="YOU DIED"
                   score={Math.max(mass, me?.score ?? 0)}

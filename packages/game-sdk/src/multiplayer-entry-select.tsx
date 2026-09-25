@@ -67,6 +67,7 @@ export function MultiplayerEntrySelect({
   playLabel = "ENTER",
   showColorStep = true,
   entryMode = "multiplayer",
+  lockedStyleIds = [],
 }: {
   title: string;
   subtitle?: string;
@@ -91,6 +92,8 @@ export function MultiplayerEntrySelect({
   showColorStep?: boolean;
   /** Sprint 18 contract — multiplayer hides Difficulty; solo shows when handler set. */
   entryMode?: PlatformEntryMode;
+  /** Extension point — locked characters stay unselectable. Default none. */
+  lockedStyleIds?: readonly string[];
 }) {
   const selected = styles.find((s) => s.id === styleId) ?? styles[0];
   const embeddedColor = colorForStyle(styles, styleId, colors);
@@ -160,20 +163,28 @@ export function MultiplayerEntrySelect({
         <div className="grid w-full grid-cols-5 gap-2 sm:gap-3">
           {styles.map((s, i) => {
             const active = s.id === styleId;
+            const locked = lockedStyleIds.includes(s.id);
             const swatch = s.color ?? colors[i % colors.length]!;
             return (
               <button
                 key={s.id}
                 type="button"
-                onClick={() => onStyleChange(s.id)}
+                disabled={locked}
+                onClick={() => {
+                  if (!locked) onStyleChange(s.id);
+                }}
                 className={cn(
                   "flex flex-col items-center gap-1 rounded-xl border-2 p-2 transition sm:p-3",
-                  active
-                    ? "bg-cyan-500/20 ring-2 ring-cyan-400/60"
-                    : "border-white/10 bg-muted/30 hover:border-white/25"
+                  locked
+                    ? "cursor-not-allowed border-white/10 bg-muted/20 opacity-40"
+                    : active
+                      ? "bg-cyan-500/20 ring-2 ring-cyan-400/60"
+                      : "border-white/10 bg-muted/30 hover:border-white/25"
                 )}
-                style={active ? { borderColor: swatch } : undefined}
+                style={active && !locked ? { borderColor: swatch } : undefined}
                 aria-pressed={active}
+                aria-disabled={locked}
+                data-character-state={locked ? "locked" : "unlocked"}
               >
                 <span
                   className="flex size-9 items-center justify-center rounded-full text-2xl sm:size-10 sm:text-3xl"

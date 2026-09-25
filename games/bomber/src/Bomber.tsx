@@ -1684,11 +1684,23 @@ export function BomberGame() {
           place={rank}
           onRetry={handleRetry}
           onPlayAnother={() => {
+            try {
+              leaveRoom(roomRef.current);
+            } catch {
+              /* already left */
+            }
             if (typeof window !== "undefined") {
               window.location.href = FLAGSHIP_CATALOG_HREF;
             }
           }}
-          onExit={exitToDetail}
+          onExit={() => {
+            try {
+              leaveRoom(roomRef.current);
+            } catch {
+              /* already left */
+            }
+            exitToDetail();
+          }}
         />
       ) : null}
     </>

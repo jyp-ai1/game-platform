@@ -11,6 +11,13 @@ import {
 import { createPortal } from "react-dom";
 
 import {
+  beginLivePlaySession,
+  clearLivePlaySession,
+  formatLiveProgressLine,
+  recordLiveResult,
+  type LiveServiceSlug,
+} from "./live-service";
+import {
   enterViewportFullscreen,
   exitViewportFullscreen,
   getActiveFullscreenElement,
@@ -409,6 +416,7 @@ export function MultiplayerDeathOverlay({
   title = "RESULT",
   outcome,
   scoreLabel = "Score",
+  slug,
 }: {
   score: number;
   /** Game-specific line, e.g. "Rank #4 · L128" */
@@ -420,15 +428,26 @@ export function MultiplayerDeathOverlay({
   /** Win / lose / end — shown above the score. */
   outcome?: string;
   scoreLabel?: string;
+  /** Official game slug — records progression once per play session. */
+  slug?: LiveServiceSlug;
 }) {
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState<"retry" | "another" | "exit" | null>(null);
+  const [progressLine, setProgressLine] = useState<string | null>(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!slug) return;
+    recordLiveResult(slug, { outcome, score, metric });
+    setProgressLine(formatLiveProgressLine(slug));
+  }, [slug, outcome, score, metric]);
 
   function runOnce(kind: "retry" | "another" | "exit", fn: () => void) {
     if (busy) return;
     setBusy(kind);
+    if (slug && kind === "retry") beginLivePlaySession(slug);
+    if (slug && (kind === "exit" || kind === "another")) clearLivePlaySession(slug);
     fn();
     if (kind === "retry") {
       window.setTimeout(() => setBusy(null), 900);
@@ -458,6 +477,11 @@ export function MultiplayerDeathOverlay({
         <p className="text-[11px] uppercase tracking-wide text-white/45">{scoreLabel}</p>
         <p className="text-3xl font-bold tabular-nums text-white">{score.toLocaleString()}</p>
         {metric ? <p className="text-sm font-medium text-white/70">{metric}</p> : null}
+        {progressLine ? (
+          <p data-testid="mp-live-progress" className="text-xs font-medium text-cyan-200/90">
+            {progressLine}
+          </p>
+        ) : null}
         <div className="mt-1 flex w-full flex-col gap-2">
           <button
             type="button"
