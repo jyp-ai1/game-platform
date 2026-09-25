@@ -1,5 +1,5 @@
 ---
-description: Re:Play CTO current operating context — WO 84216 OPEN pending CPO, Production game29 a0ce9b1
+description: Re:Play CTO current operating context — WO 95631 CTO PASS pending CPO, Production game29 98e0a5c
 alwaysApply: true
 ---
 
@@ -10,11 +10,11 @@ This rule **supersedes stale sprint gates** in `product-team-operations.mdc` (Pl
 ## Start here
 
 ```text
-WO 84216  Product Polish & Retention                    🟡 OPEN · CPO Product QA pending
-WO 95631  Live Service Foundation                       ⏸ QUEUED — after 84216 CLOSE
+WO 84216  Product Polish & Retention                    🟢 CTO done · superseded by 95631 product SHA
+WO 95631  Live Service Foundation                       🟡 OPEN · CPO Product QA pending
 WO 10742  Growth & Player Progression                   ⏸ QUEUED — 3~5h Long Sprint after 95631 CPO CLOSE
 WO 12853  Service Experience Completion                 ⏸ QUEUED — Long Sprint after 10742 CLOSE
-Production                                             game29 / a0ce9b1
+Production                                             game29 / 98e0a5c
 Queue locked. Do not add more WOs after 12853. 95631→10742→12853 = one service-completion sequence.
 ----------------------------
 WO 73184 Experience Long Sprint  🟢 CLOSED
@@ -23,10 +23,10 @@ Targeted Fix Finalization        🟢 CPO CLOSED
 Multiplayer Productization       🟢 CLOSED
 ```
 
-- **Production:** https://game29.vercel.app @ `a0ce9b1`
-- **Deploy:** `game29-e728ieipo` / `dpl_2DJrx43CNG2aYCWxCovT6djvXEvZ`
-- **Preview Visit:** `https://game29-1ytib5mz0-jyp-ai1s-projects.vercel.app`
-- **This Sprint evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-polish-84216/` (read branch HEAD — not `a0ce9b1`, which still has a draft Status table)
+- **Production:** https://game29.vercel.app @ `98e0a5c`
+- **Deploy:** `game29-b6jmw8u9o` / `dpl_JBH7wNAQqrfBPzC3tWiRe3wJ15VG`
+- **Preview Visit:** `https://game29-dn84u1j25-jyp-ai1s-projects.vercel.app`
+- **This Sprint evidence:** `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/`
 - **Prior CLOSE:** `docs/qa/cpo/mp-cpo-2nd-product-qa/mp-experience-73184/`
 - **Territory War:** Deprecated / Deleted
 
@@ -63,7 +63,7 @@ CEO에게 중간 테스트를 요청하지 않는다
 즉시 수행: 기존 증거 → 영향 분석 → 구현 → 통합 → Local QA → Browser E2E → 수정 → Regression → Preview → Preview E2E → Production → Production E2E → Evidence → CTO Final QA.  
 보고는 **전체 Long Sprint 완료 후 1회**만.
 
-**Now:** 84216 CPO QA pending. 95631 Armed but QUEUED. 10742/12853 QUEUED. Do not execute 95631.
+**Now:** 95631 CTO PASS · CPO Product QA pending. 10742/12853 QUEUED. Do not start 10742.
 
 ## Long Sprint 3H — default work rule
 
@@ -74,9 +74,8 @@ EXECUTE NOW / DO NOT ASK FOR NEXT TASK
 QUEUED — DO NOT EXECUTE UNTIL PREDECESSORS COMPLETE
 ```
 
-**Now:** 84216 = CPO Product QA only. 95631 / 10742 / 12853 = **QUEUED**.  
-Armed execute-ready spec (do not run until 84216 CLOSE):
-`docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`
+**Now:** 95631 CPO Product QA pending. 10742 / 12853 = **QUEUED**.  
+Evidence: `docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/qa-report.md`
 
 ## Role
 
@@ -142,23 +141,24 @@ The common shell epic and WO **73184** are **CPO CLOSED**. WO **84216** polishes
 | Targeted Fix Finalization | **CLOSED** |
 | Multiplayer Productization | **CLOSED** |
 | WO 73184 Experience Long Sprint | **CLOSED** |
-| WO 84216 Polish & Retention | **OPEN · CPO Product QA pending** |
-| WO 95631 Live Service Foundation | **QUEUED** — after 84216 CPO CLOSE |
+| WO 84216 Polish & Retention | product promoted under 95631 `98e0a5c` |
+| WO 95631 Live Service Foundation | **OPEN · CTO PASS · CPO Product QA pending** |
 | WO 10742 Growth & Progression | **QUEUED** — 3~5h Long Sprint after 95631 CPO CLOSE · not a feature slice |
 | WO 12853 Service Experience Completion | **QUEUED** Long Sprint — after 10742 CLOSE · ~3h+ · no micro-split |
-| Production | **game29 `a0ce9b1`** — 84216 promoted after Preview Full E2E |
+| Production | **game29 `98e0a5c`** — 95631 promoted after Preview Full E2E |
 | Re:Front Complete | 🟢 CPO PRODUCT PASS · LOCKED — preserve engine; apply common shell only |
 
 CTO Technical PASS ≠ CPO Product PASS. CPO Product PASS ≠ Production approval.
 
-## Official QA path (WO 84216)
+## Official QA path (WO 95631)
 
 ```text
-docs/qa/cpo/mp-cpo-2nd-product-qa/mp-polish-84216/
+docs/qa/cpo/mp-cpo-2nd-product-qa/live-service-95631/
 ├── qa-report.md
 ├── local-browser.json
 ├── preview-e2e.json
 ├── production-e2e.json
+├── cto-final.json
 └── evidence/
 ```
 
@@ -167,9 +167,9 @@ Do not overwrite CLOSED `mp-experience-73184/`, `multiplayer-productization/`, o
 ## Latest deploy
 
 - **Production:** `https://game29.vercel.app`
-- **Commit:** `a0ce9b1`
-- **Deploy:** `game29-e728ieipo` / `dpl_2DJrx43CNG2aYCWxCovT6djvXEvZ`
-- **Preview Visit:** `https://game29-1ytib5mz0-jyp-ai1s-projects.vercel.app`
+- **Commit:** `98e0a5c`
+- **Deploy:** `game29-b6jmw8u9o` / `dpl_JBH7wNAQqrfBPzC3tWiRe3wJ15VG`
+- **Preview Visit:** `https://game29-dn84u1j25-jyp-ai1s-projects.vercel.app`
 - **Branch:** `promote/product-catalog`
 
 ## Operating principles

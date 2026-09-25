@@ -1,0 +1,18 @@
+{
+  "wo": "95631",
+  "sprint": "Live Service Foundation",
+  "verdict": "PASS",
+  "vercelProject": "game29",
+  "repo": "jyp-ai1/game-platform",
+  "branch": "promote/product-catalog",
+  "commit": "98e0a5c",
+  "production": "https://game29.vercel.app",
+  "productionDeploy": "game29-b6jmw8u9o / dpl_JBH7wNAQqrfBPzC3tWiRe3wJ15VG",
+  "preview": "https://game29-dn84u1j25-jyp-ai1s-projects.vercel.app",
+  "previewDeploy": "game29-dn84u1j25 / dpl_9jrBXX1gPR3a9DaDc94i74fP5ftc",
+  "localE2E": "PASS",
+  "previewE2E": "PASS",
+  "productionE2E": "PASS",
+  "checks": 24,
+  "legacyProject": "Removed / Do not use"
+}
